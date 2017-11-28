@@ -26,7 +26,6 @@ define(function(require) {
 	var _ = require("underscore"),
         $ = require("jquery"),
 		i18n = require("bundle!all"),
-        RepositoryResourceModel = require("common/model/RepositoryResourceModel"),
 		resourceLocator = require("resource.locate"),
 		mongoJdbcFileSourceTypes = require("dataSource/enum/mongoJdbcFileSourceTypes"),
 		CustomDataSourceView = require("dataSource/view/CustomDataSourceView"),
@@ -71,6 +70,7 @@ define(function(require) {
 
 			this.renderMongoDbSpecificSection();
 			this.renderFileLocationSection();
+            this.renderTestConnectionSection();
 
 			this.$el.find("[name=serverAddress]").focus();
 

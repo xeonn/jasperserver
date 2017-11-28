@@ -25,32 +25,26 @@ define(function(require){
 
     var ColorPicker = require("common/component/colorPicker/SimpleColorPicker"),
         ClickComponent = require("common/component/base/ClickComponent"),
-        _ = require("underscore"),
         $ = require("jquery"),
         colors = require("./enum/colors"),
         template = require("text!common/component/colorPicker/template/simpleColorPickerTemplate.htm");
 
-    return ColorPicker.extend(ClickComponent.extend(
-        /** @lends SimpleAttachableColorPicker.prototype */
-        {
-
+    return ColorPicker.extend(ClickComponent.extend(/** @lends SimpleAttachableColorPicker.prototype */{
         /**
          * @constructor SimpleAttachableColorPicker
+         * @class SimpleAttachableColorPicker
          * @classdesc SimpleAttachableColorPicker component.
          * @extends ColorPicker
-         * @param {object} attachTo - HTML DOM or jQuery object
+         * @extends ClickComponent
+         * @param {jQuery|string|HTMLElement} attachTo - HTML DOM element, selector or jQuery object to attach colorpicker to.
          * @param {object} [padding={top: 5, left: 5}] - attachable component padding
-         * @param options
-         * @throws {Error} AttachableComponent should be attached to an element if attachTo is missing.
+         * @param {object} options Options for {@link SimpleColorPicker}
          */
         constructor: function(attachTo, padding, options){
             ClickComponent.call(this, attachTo, padding);
             ColorPicker.call(this, options);
         },
 
-        /**
-         * @description initializes attachable color picker component
-         */
         initialize: function(){
             ColorPicker.prototype.initialize.apply(this);
             this.hide();
@@ -58,7 +52,7 @@ define(function(require){
         },
 
         /**
-         * @description selects color and hides attachable color picker
+         * @description Select color and hides attachable color picker
          * @access protected
          * @fires SimpleColorPicker#color:selected
          */
@@ -68,7 +62,7 @@ define(function(require){
         },
 
         /**
-         * @description removes attachable color picker
+         * @description Remove attachable color picker from DOM
          */
         remove: function() {
             ClickComponent.prototype.remove.apply(this, arguments);

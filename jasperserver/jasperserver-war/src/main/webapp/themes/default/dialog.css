@@ -111,3 +111,11 @@
 .dialog.confirmationDialog {
     width: 350px;
 }
+
+.panel.dialog.overlay.ui-resizable .subcontainer .treeBox > .content > .body {
+	height: 100%;
+	box-sizing: border-box;
+}
+.panel.dialog.overlay.ui-resizable .subcontainer .treeBox > .content {
+	height: 100%;
+}

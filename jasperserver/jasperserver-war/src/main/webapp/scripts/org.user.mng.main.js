@@ -21,10 +21,10 @@
 
 
 /**
- * @version: $Id: org.user.mng.main.js 8900 2015-05-06 20:57:14Z yplakosh $
+ * @version: $Id: org.user.mng.main.js 9490 2015-10-05 16:46:54Z obobruyk $
  */
 
-/* global orgModule, webHelpModule, layoutModule, isProVersion, invokeClientAction, localContext */
+/* global orgModule, _, webHelpModule, layoutModule, isProVersion, invokeClientAction, localContext, require */
 
 function invokeUserAction(actionName, options) {
     var action = orgModule.userActionFactory[actionName](options);
@@ -46,8 +46,8 @@ function isLoggedInUserSelected() {
 }
 
 function canAddUser() {
-    if (orgModule.tree) {
-        return orgModule.manager.tree.getOrganization() != null;
+    if (orgModule.manager.tenantsTree) {
+        return orgModule.manager.tenantsTree.getTenant() != null;
     } else {
         return true;
     }
@@ -62,134 +62,134 @@ function canDisableAll() {
 }
 
 function canDeleteAll() {
-    return orgModule.entityList.getSelectedEntities().length > 0 && !isLoggedInUserSelected();    
+    return orgModule.entityList.getSelectedEntities().length > 0 && !isLoggedInUserSelected();
 }
 
 function canDeleteUser() {
     return orgModule.entityList.getSelectedEntities().length > 0;
 }
 
-orgModule.userManager = {
+    orgModule.userManager = {
 //    EMAIL_REG_EXP: XRegExp("^[\\p{L}\\p{M}\\p{N}._%'-\\@\\,\\;\\s]+$"),
 
-    Event: {
-        USERS_ENABLED: 'users:enabled',
-        USERS_DISABLED: 'users:disabled'
-    },
+        Event: {
+            USERS_ENABLED: 'users:enabled',
+            USERS_DISABLED: 'users:disabled'
+        },
 
-    Action: {
-        ENABLE_ALL: 'enableAll',
-        DISABLE_ALL: 'disableAll'
-    },
+        Action: {
+            ENABLE_ALL: 'enableAll',
+            DISABLE_ALL: 'disableAll'
+        },
 
-    initialize: function(opt) {
-        webHelpModule.setCurrentContext("admin");
+        initialize: function(opt) {
+            webHelpModule.setCurrentContext("admin");
 
-        layoutModule.resizeOnClient('folders', 'users', 'properties');
+            layoutModule.resizeOnClient('folders', 'users', 'properties');
 
-        var options = opt._.extend({}, opt, localContext.userMngInitOptions);
-        orgModule.userManager.options = options;
+            var options = _.extend({}, opt, localContext.userMngInitOptions, {removeContextMenuTreePlugin: true});
+            orgModule.userManager.options = options;
 
-        // Manager customization.
-        orgModule.manager.initialize(options);
-        orgModule.manager.entityJsonToObject = function(json) {
-            return new orgModule.User(json);
-        };
-        orgModule.manager.relatedEntityJsonToObject = function(json) {
-            return new orgModule.Role(json);
-        };
+            // Manager customization.
+            orgModule.manager.initialize(options);
+            orgModule.manager.entityJsonToObject = function(json) {
+                return new orgModule.User(json);
+            };
+            orgModule.manager.relatedEntityJsonToObject = function(json) {
+                return new orgModule.Role(json);
+            };
 
-        this.userList.initialize({
-            toolbarModel: this.actionModel,
-            text: orgModule.manager.state.text
-        });
+            this.userList.initialize({
+                toolbarModel: this.actionModel,
+                text: orgModule.manager.state.text
+            });
 
-        // Dialogs customization.
-        orgModule.addDialog.show = function(org) {
-            this.addDialog.show(org);
-        }.bind(this);
-        // Dialogs customization.
-        orgModule.addDialog.hide = function(org) {
-            this.addDialog.hide(org);
-        }.bind(this);
+            // Dialogs customization.
+            orgModule.addDialog.show = function(org) {
+                this.addDialog.show(org);
+            }.bind(this);
+            // Dialogs customization.
+            orgModule.addDialog.hide = function(org) {
+                this.addDialog.hide(org);
+            }.bind(this);
 
-        this.properties.initialize(options);
-        this.addDialog.initialize();
+            this.properties.initialize(options);
+            this.addDialog.initialize();
 
-        function enabledOrDisabledHandler(event) {
-            var users = event.memo.inputData.users;
+            function enabledOrDisabledHandler(event) {
+                var users = event.memo.inputData.users;
 
-            if (orgModule.properties.isEditMode) {
-                orgModule.properties.changeMode(false);
+                if (orgModule.properties.isEditMode) {
+                    orgModule.properties.changeMode(false);
+                }
+
+                users.length == 1 && orgModule.entityList.selectEntity(users[0].getNameWithTenant());
             }
 
-            users.length == 1 && orgModule.entityList.selectEntity(users[0].getNameWithTenant());
-        }
+            orgModule.observe("users:enabled", enabledOrDisabledHandler.bindAsEventListener(this));
+            orgModule.observe("users:disabled", enabledOrDisabledHandler.bindAsEventListener(this));
+            orgModule.observe("entity:deleted", function() {
+                orgModule.properties.hide();
+            });
 
-        orgModule.observe("users:enabled", enabledOrDisabledHandler.bindAsEventListener(this));
-        orgModule.observe("users:disabled", enabledOrDisabledHandler.bindAsEventListener(this));
-        orgModule.observe("entity:deleted", function(){
-            orgModule.properties.hide();
-        });
+            orgModule.observe("entities:deleted", function() {
+                orgModule.properties.hide();
+            });
 
-        orgModule.observe("entities:deleted", function(){
-            orgModule.properties.hide();
-        });
+            orgModule.observe("server:unavailable", function(event) {
+                var tree = orgModule.manager.tenantsTree;
 
-        orgModule.observe("server:unavailable", function(event) {
-            var tree = orgModule.manager.tree;
+                var id = tree ? tree.getOrganization().id : null;
+                new orgModule.User({userName: "", tenantId: id}).navigateToManager();
+            }.bindAsEventListener(this));
 
-            var id = tree ? tree.getOrganization().id : null;
-            new orgModule.User({userName: "", tenantId: id}).navigateToManager();
-        }.bindAsEventListener(this));
-        
-        if(!isProVersion()) {
-            orgModule.manager.reloadEntities();
-        }
-    },
-
-    actionModel: {
-        ADD: {
-            buttonId: "addNewUserBtn",
-            action: invokeClientAction,
-            actionArgs: "create",
-            test: canAddUser
+            if (!isProVersion()) {
+                orgModule.manager.reloadEntities();
+            }
         },
 
-        ENABLE: {
-            buttonId: "enableAllUsersBtn",
-            action: invokeUserManagerAction,
-            actionArgs: "enableAllUsers",
-            test: canEnableAll
+        actionModel: {
+            ADD: {
+                buttonId: "addNewUserBtn",
+                action: invokeClientAction,
+                actionArgs: "create",
+                test: canAddUser
+            },
+
+            ENABLE: {
+                buttonId: "enableAllUsersBtn",
+                action: invokeUserManagerAction,
+                actionArgs: "enableAllUsers",
+                test: canEnableAll
+            },
+
+            DISABLE: {
+                buttonId: "disableAllUsersBtn",
+                action: invokeUserManagerAction,
+                actionArgs: "disableAllUsers",
+                test: canDisableAll
+            },
+
+            DELETE: {
+                buttonId: "deleteAllUsersBtn",
+                action: invokeClientAction,
+                actionArgs: "deleteAll",
+                test: canDeleteAll
+            }
         },
 
-        DISABLE: {
-            buttonId: "disableAllUsersBtn",
-            action: invokeUserManagerAction,
-            actionArgs: "disableAllUsers",
-            test: canDisableAll
-        },
-
-        DELETE: {
-            buttonId: "deleteAllUsersBtn",
-            action: invokeClientAction,
-            actionArgs: "deleteAll",
-            test: canDeleteAll
+        validators: {
         }
-    },
+    };
 
-    validators: {
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    if (typeof require === "undefined") {
+        // prevent conflict with domReady plugin in RequireJS environment
+        document.observe('dom:loaded', orgModule.userManager.initialize.bind(orgModule.userManager));
     }
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-if (typeof require === "undefined") {
-    // prevent conflict with domReady plugin in RequireJS environment
-    document.observe('dom:loaded', orgModule.userManager.initialize.bind(orgModule.userManager));
-}

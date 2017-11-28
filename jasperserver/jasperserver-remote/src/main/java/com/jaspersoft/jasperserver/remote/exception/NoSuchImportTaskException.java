@@ -20,22 +20,21 @@
 */
 package com.jaspersoft.jasperserver.remote.exception;
 
-import com.jaspersoft.jasperserver.remote.exception.xml.ErrorDescriptor;
+import com.jaspersoft.jasperserver.dto.common.ErrorDescriptor;
 
 /**
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: NoSuchImportTaskException.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: NoSuchImportTaskException.java 57603 2015-09-15 17:20:48Z psavushc $
  */
 public class NoSuchImportTaskException extends RemoteException {
     public static final String ERROR_CODE_NO_SUCH_IMPORT_PROCESS = "no.such.import.process";
 
     public NoSuchImportTaskException(String taskId) {
-        super(new ErrorDescriptor.Builder()
+        super(new ErrorDescriptor()
                 .setErrorCode(ERROR_CODE_NO_SUCH_IMPORT_PROCESS)
                 .setMessage("No export task with id " + taskId)
-                .setParameters(taskId)
-                .getErrorDescriptor());
+                .setParameters(taskId));
     }
 }

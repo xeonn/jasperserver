@@ -7,5 +7,4 @@
     <bean id="springPropertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
         <property name="location" value="../js.spring.properties" />
     </bean>
-
 </beans>

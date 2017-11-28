@@ -20,8 +20,6 @@
  */
 package com.jaspersoft.jasperserver.dto.reports.inputcontrols;
 
-import com.jaspersoft.jasperserver.dto.authority.ClientUserAttribute;
-
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -32,7 +30,7 @@ import java.util.List;
 /**
  * InputControlState
  * @author akasych
- * @version $Id: InputControlState.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: InputControlState.java 58870 2015-10-27 22:30:55Z esytnik $
  * Simple class to transfer Input Control value.
  */
 
@@ -56,10 +54,10 @@ public class InputControlState implements Serializable {
         this.value = other.getValue();
         this.error = other.getError();
 
-        final List<InputControlOption> clientUserAttributes = other.getOptions();
-        if(clientUserAttributes != null){
+        final List<InputControlOption> clientAttributes = other.getOptions();
+        if(clientAttributes != null){
             options = new ArrayList<InputControlOption>(other.getOptions().size());
-            for(InputControlOption attribute : clientUserAttributes){
+            for(InputControlOption attribute : clientAttributes){
                 options.add(new InputControlOption(attribute));
             }
         }

@@ -21,6 +21,7 @@
 package com.jaspersoft.jasperserver.remote.resources.converters;
 
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Folder;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConversionOptions;
 import com.jaspersoft.jasperserver.dto.resources.ClientFolder;
 import com.jaspersoft.jasperserver.remote.exception.IllegalParameterValueException;
 import org.springframework.stereotype.Service;
@@ -29,7 +30,7 @@ import org.springframework.stereotype.Service;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: FolderResourceConverter.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: FolderResourceConverter.java 58870 2015-10-27 22:30:55Z esytnik $
  */
 @Service
 public class FolderResourceConverter extends ResourceConverterImpl<Folder, ClientFolder> {

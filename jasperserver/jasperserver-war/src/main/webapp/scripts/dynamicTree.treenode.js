@@ -21,12 +21,12 @@
 
 
 /**
- * @version: $Id: dynamicTree.treenode.js 8904 2015-05-07 13:50:05Z agodovan $
+ * @version: $Id: dynamicTree.treenode.js 9400 2015-09-23 21:10:46Z inestere $
  */
 
 /* global dynamicTree, isArray, layoutModule, cancelEventBubbling, isIPad */
 
-/**
+/*
  * The TreeNode Object
  *
  * @param options {JSON Object} - Set of configuration options for tree node :

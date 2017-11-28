@@ -7,7 +7,7 @@
 
 /**
  * @author: Olesya Bobruyko
- * @version: $Id: ConfirmationDialog.js 1154 2015-04-25 17:52:53Z ktsaregr $
+ * @version: $Id: ConfirmationDialog.js 1712 2015-10-13 13:37:57Z dgorbenk $
  */
 
 define(function (require) {
@@ -16,10 +16,19 @@ define(function (require) {
     var _ = require('underscore'),
         Dialog = require("./Dialog"),
         confirmDialogTemplate = require("text!./template/confirmDialogTemplate.htm"),
-        i18n = require('bundle!CommonBundle');
+        i18n = require('bundle!js-sdk/CommonBundle');
 
-    return Dialog.extend({
-
+    return Dialog.extend(/** @lends ConfirmationDialog.prototype */{
+        /**
+         * @constructor ConfirmationDialog
+         * @extends Dialog
+         * @classdesc ConfirmationDialog component.
+         * @param {object} options
+         * @param {string} options.text Message for dialog
+         * @param {string} options.title Title for dialog
+         * @fires ConfirmationDialog#button:yes
+         * @fires ConfirmationDialog#button:no
+         */
         constructor: function(options) {
             options || (options = {});
 
@@ -27,7 +36,7 @@ define(function (require) {
 
             Dialog.prototype.constructor.call(this, {
                 modal: true,
-                additionalCssClasses: "confirmationDialog",
+                additionalCssClasses: options.additionalCssClasses || "confirmationDialog",
                 title: options.title || i18n["dialog.confirm.title"],
                 content: this.confirmDialogTemplate({ text: options.text }),
                 buttons: [
@@ -40,6 +49,12 @@ define(function (require) {
         initialize: function() {
             Dialog.prototype.initialize.apply(this, arguments);
 
+            /**
+             * @event ConfirmationDialog#button:no
+             */
+            /**
+             * @event ConfirmationDialog#button:yes
+             */
             this.on("button:yes", this.close);
             this.on("button:no", this.close);
         },

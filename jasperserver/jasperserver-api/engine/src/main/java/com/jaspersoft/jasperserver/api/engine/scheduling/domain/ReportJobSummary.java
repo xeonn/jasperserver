@@ -37,7 +37,7 @@ import java.io.Serializable;
  * </p>
  * 
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ReportJobSummary.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: ReportJobSummary.java 58542 2015-10-13 16:16:55Z dgorbenk $
  * @see ReportSchedulingService#getScheduledJobs(com.jaspersoft.jasperserver.api.common.domain.ExecutionContext, String)
  * @see ReportSchedulingService#getScheduledJobs(com.jaspersoft.jasperserver.api.common.domain.ExecutionContext)
  * @see ReportJobRuntimeInformation
@@ -54,7 +54,9 @@ public class ReportJobSummary implements Serializable {
 	private String reportUnitURI;
 	private String username;
 	private String label;
-	
+	private String description;
+	private String reportLabel;
+
 	private ReportJobRuntimeInformation runtimeInformation;
 
 	/**
@@ -177,6 +179,37 @@ public class ReportJobSummary implements Serializable {
 	 */
 	public void setReportUnitURI(String reportUnitURI) {
 		this.reportUnitURI = reportUnitURI;
+	}
+
+	/**
+	 * Returns the job description.
+	 *
+	 * @return the job description
+	 * @see ReportJob#getDescription()
+	 */
+	public String getDescription() {
+		return description;
+	}
+
+   /**
+	 * get the label of the scheduled report (as opposed to the job itself)
+	 * @return
+	 */
+	public String getReportLabel() {
+		return reportLabel;
+	}
+
+	/**
+	 * Sets the job description.
+	 *
+	 * @param description the description of the job
+	 */
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public void setReportLabel(String reportLabel) {
+		this.reportLabel = reportLabel;
 	}
 
 }

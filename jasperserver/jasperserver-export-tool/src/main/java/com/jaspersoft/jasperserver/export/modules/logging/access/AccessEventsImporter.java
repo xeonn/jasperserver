@@ -20,15 +20,14 @@
  */
 package com.jaspersoft.jasperserver.export.modules.logging.access;
 
+import com.jaspersoft.jasperserver.api.logging.access.domain.AccessEvent;
+import com.jaspersoft.jasperserver.api.metadata.common.service.ResourceFactory;
 import com.jaspersoft.jasperserver.export.modules.BaseImporterModule;
 import com.jaspersoft.jasperserver.export.modules.logging.access.beans.AccessEventBean;
-import com.jaspersoft.jasperserver.api.metadata.common.service.ResourceFactory;
-import com.jaspersoft.jasperserver.api.logging.access.domain.AccessEvent;
+import org.dom4j.Element;
 
 import java.util.Iterator;
 import java.util.List;
-
-import org.dom4j.Element;
 
 /**
  * @author Sergey Prilukin
@@ -110,7 +109,7 @@ public class AccessEventsImporter extends BaseImporterModule {
                         getAccessEventFileName(accessEventId),
                         accessModuleConfiguration.getSerializer());
         AccessEvent accessEvent = (AccessEvent)clientClassFactory.newObject(AccessEvent.class);
-        accessEventBean.copyTo(accessEvent, accessEventsImportHandler);
+        accessEventBean.copyTo(accessEvent, accessEventsImportHandler, importContext);
         if (accessEvent.getUser() != null && accessEvent.getResource() != null) {
             accessModuleConfiguration.getAccessService().saveEvent(accessEvent);
             return true;

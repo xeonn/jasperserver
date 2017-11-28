@@ -33,10 +33,10 @@ define(function (require) {
 
         /**
          * @constructor AttachableComponent
-         * @classdesc AttachableComponent
-         * @params {object} attachTo - element to attach to
-         * @params {object} [padding={top: 5, left: 5}] - attachable component padding
-         * @throws {Error} AttachableComponent should be attached to an element if attachTo is missing
+         * @classdesc Component that can be attached to any DOM elemenet
+         * @param {(HTMLElement|jQuery)} attachTo - DOM element to attach to
+         * @param {object} [padding={top: 5, left: 5}] Padding for component
+         * @throw {Error} AttachableComponent should be attached to an element
          */
         constructor: function(attachTo, padding){
 
@@ -80,6 +80,8 @@ define(function (require) {
             this.$el.css({ top: this.top, left: this.left });
 
             this.$el.show();
+
+            this.trigger("show", this);
         },
 
         /**

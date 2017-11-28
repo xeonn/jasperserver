@@ -20,11 +20,11 @@
 */
 package com.jaspersoft.jasperserver.remote.exception;
 
-import com.jaspersoft.jasperserver.remote.exception.xml.ErrorDescriptor;
+import com.jaspersoft.jasperserver.dto.common.ErrorDescriptor;
 
 /**
  * @author Yaroslav.Kovalchyk
- * @version $Id: MandatoryParameterNotFoundException.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: MandatoryParameterNotFoundException.java 57603 2015-09-15 17:20:48Z psavushc $
  */
 public class MandatoryParameterNotFoundException extends RemoteException {
     public final static String MANDATORY_PARAMETER_ERROR = "mandatory.parameter.error";
@@ -35,6 +35,6 @@ public class MandatoryParameterNotFoundException extends RemoteException {
 
     public MandatoryParameterNotFoundException(String message, String... parameters){
         super();
-        setErrorDescriptor(new ErrorDescriptor.Builder().setMessage(message).setErrorCode(MANDATORY_PARAMETER_ERROR).setParameters(parameters).getErrorDescriptor());
+        setErrorDescriptor(new ErrorDescriptor().setMessage(message).setErrorCode(MANDATORY_PARAMETER_ERROR).setParameters(parameters));
     }
 }

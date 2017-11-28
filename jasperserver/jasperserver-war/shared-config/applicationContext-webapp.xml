@@ -366,20 +366,32 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
               </entry>
           </util:map>
       </entry>
-      <!-- entry key="mongodb">
-          <util:map>
-              <entry key="label" value="MongoDB"/>
-              <entry key="jdbcUrl" value="jdbc:tibcosoftware:mongodb://$[dbHost]:$[dbPort];SchemaDefinition=[schemaDefinition]"/>
-              <entry key="jdbcDriverClass" value="tibcosoftware.jdbc.mongodb.MongoDBDriver"/>
-              <entry key="defaultValues">
-                  <util:map>
-                      <entry key="dbHost" value="localhost"/>
-                      <entry key="dbPort" value="27017"/>
-                      <entry key="schemaDefinition" value=""/>
-                  </util:map>
-              </entry>
-          </util:map>
-      </entry -->
+        <entry key="sparksql">
+            <util:map>
+                <entry key="label" value="SparkSQL"/>
+                <entry key="jdbcUrl" value="jdbc:tibcosoftware:sparksql://$[dbHost]:$[dbPort];TransactionMode=ignore"/>
+                <entry key="jdbcDriverClass" value="tibcosoftware.jdbc.sparksql.SparkSQLDriver"/>
+                <entry key="defaultValues">
+                    <util:map>
+                        <entry key="dbHost" value="localhost"/>
+                        <entry key="dbPort" value="10000"/>
+                    </util:map>
+                </entry>
+            </util:map>
+        </entry>
+        <!-- entry key="salesforce">
+            <util:map>
+                <entry key="label" value="Salesforce"/>
+                <entry key="jdbcUrl" value="jdbc:tibcosoftware://$[dbHost]:SecurityToken=$[securityToken];TransactionMode=ignore"/>
+                <entry key="jdbcDriverClass" value="tibcosoftware.jdbc.salesforce.SalesforceDriver"/>
+                <entry key="defaultValues">
+                    <util:map>
+                        <entry key="dbHost" value="my.salesforce.com"/>
+                        <entry key="securityToken" value="Token"/>
+                    </util:map>
+                </entry>
+            </util:map>
+        </entry -->
       <entry key="redshift">
           <util:map>
               <entry key="label" value="Redshift"/>

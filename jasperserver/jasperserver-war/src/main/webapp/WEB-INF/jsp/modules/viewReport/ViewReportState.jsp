@@ -77,6 +77,9 @@
         '<spring:message code="ADH_1214_ICHARTS_NO_DATA_HEAT_MAP_NON_OLAP" javaScriptEscape="true"/>',
         '<spring:message code="ADH_1214_ICHARTS_NO_DATA_HEAT_MAP_OLAP" javaScriptEscape="true"/>',
         '<spring:message code="ADH_1214_ICHARTS_NO_DATA_TIME_SERIES_HEAT_MAP" javaScriptEscape="true"/>',
+        '<spring:message code="ADH_1214_ICHARTS_NO_DATA_DUAL_MEASURE_TREE_MAP" javaScriptEscape="true"/>',
+        '<spring:message code="ADH_1214_ICHARTS_NO_DATA_TREE_MAP" javaScriptEscape="true"/>',
+        '<spring:message code="ADH_1214_ICHARTS_NO_DATA_ONE_PARENT_TREE_MAP" javaScriptEscape="true"/>',
         '<spring:message code="ADH_1214_ICHARTS_NO_DATA_SPEEDOMETER" javaScriptEscape="true"/>',
         '<spring:message code="ADH_1214_ICHARTS_NO_DATA_GAUGE" javaScriptEscape="true"/>'
     ];

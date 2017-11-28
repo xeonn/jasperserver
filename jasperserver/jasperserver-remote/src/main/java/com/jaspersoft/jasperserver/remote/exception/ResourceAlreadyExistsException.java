@@ -20,11 +20,11 @@
 */
 package com.jaspersoft.jasperserver.remote.exception;
 
-import com.jaspersoft.jasperserver.remote.exception.xml.ErrorDescriptor;
+import com.jaspersoft.jasperserver.dto.common.ErrorDescriptor;
 
 /**
  * @author Yaroslav.Kovalchyk
- * @version $Id: ResourceAlreadyExistsException.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: ResourceAlreadyExistsException.java 57603 2015-09-15 17:20:48Z psavushc $
  */
 public class ResourceAlreadyExistsException extends RemoteException{
     public ResourceAlreadyExistsException(String resourceName){
@@ -32,7 +32,7 @@ public class ResourceAlreadyExistsException extends RemoteException{
     }
     
     public ResourceAlreadyExistsException(String message, String ... parameters){
-        super(new ErrorDescriptor.Builder().setMessage(message).setErrorCode("resource.already.exists").setParameters(parameters).getErrorDescriptor());
+        super(new ErrorDescriptor().setMessage(message).setErrorCode("resource.already.exists").setParameters(parameters));
     }
 
     public ResourceAlreadyExistsException(ErrorDescriptor errorDescriptor){

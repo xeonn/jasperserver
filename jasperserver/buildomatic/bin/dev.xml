@@ -160,6 +160,7 @@
                 <jvmarg value="-Xmx1024m"/>
                 <jvmarg value="-XX:PermSize=32m"/>
                 <jvmarg value="-XX:MaxPermSize=256m"/>
+                <sysproperty key="maven.multiModuleProjectDirectory" value="@{dir}"/>
                 <sysproperty key="classworlds.conf" value="${maven.home}/bin/m2.conf"/>
                 <sysproperty key="maven.home" value="${maven.home}"/>
                 <sysproperty key="maven.surefire.debug" value="${remoteDebugArg}"/>
@@ -202,15 +203,31 @@
     <target name="add-jdbc-driver"
             depends="init-source-paths"
             description="install jdbc driver to mvn local repository">
-        <runmaven dir="${basedir}">
-            <arg value="install:install-file"/>
-            <arg value="-DgroupId=${maven.jdbc.groupId}"/>
-            <arg value="-DartifactId=${maven.jdbc.artifactId}"/>
-            <arg value="-Dversion=${maven.jdbc.version}"/>
-            <arg value="-Dpackaging=jar"/>
-            <arg value="-Dfile=${currentDbDir}/jdbc/${jdbcJar}"/>
-            <!-- <arg value="-o"/> --> <!-- OFFLINE MODE -->
-        </runmaven>
+        <if>
+            <equals arg1="${maven.jdbc.groupId}" arg2="tibcosoftwareinc.jdbc" />
+            <then>
+                <runmaven dir="${basedir}">
+                    <arg value="install:install-file"/>
+                    <arg value="-DgroupId=${maven.jdbc.groupId}"/>
+                    <arg value="-DartifactId=${maven.jdbc.artifactId}"/>
+                    <arg value="-Dversion=${maven.jdbc.version}"/>
+                    <arg value="-Dpackaging=jar"/>
+                    <arg value="-Dfile=${currentDbDir}/jdbc/${maven.jdbc.artifactId}-${maven.jdbc.version}.jar"/>
+                    <!-- <arg value="-o"/> --> <!-- OFFLINE MODE -->
+                </runmaven>
+            </then>
+            <else>
+                <runmaven dir="${basedir}">
+                    <arg value="install:install-file"/>
+                    <arg value="-DgroupId=${maven.jdbc.groupId}"/>
+                    <arg value="-DartifactId=${maven.jdbc.artifactId}"/>
+                    <arg value="-Dversion=${maven.jdbc.version}"/>
+                    <arg value="-Dpackaging=jar"/>
+                    <arg value="-Dfile=${currentDbDir}/jdbc/${jdbcJar}"/>
+                    <!-- <arg value="-o"/> --> <!-- OFFLINE MODE -->
+                </runmaven>
+            </else>
+        </if>
     </target>
 
 
@@ -582,6 +599,8 @@
             depends="init-source-paths, install-jdbc-dep"
             description="build and run the pro integration tests">
 
+        <property name="OFFLINE_ARG" value="-V"/>
+
         <!-- to use your own xml file from the command line:              -->
         <!--   run-integration-tests-pro -DtestXmlFile=myTestngFile.xml   -->
         <property name="testXmlFile" value="testng-production-tests-pro.xml"/>
@@ -598,18 +617,22 @@
         </if>
         <echo></echo>
 
-        <echo>Running tests: testDashboardXmlFile=${testDashboardXmlFile}</echo>
+        <echo>Running integration tests</echo>
+
         <if>
             <equals arg1="${dbType}" arg2="postgresql" />
             <then>
-                <runmaven dir="${js-pro-path}/production-tests">
+                <runtarget target="re-init-js-db-it-pro"/>
+
+                <runmaven dir="${js-pro-path}/integration-tests">
                     <arg value="clean"/>
                     <arg value="install"/>
-                    <!--<arg value="-o"/>-->
-                    <arg value="-DtestNgXmlFile=${testDashboardXmlFile}"/>
+                    <arg value="-Ddatabase=${dbType}"/>
+                    <arg value="${OFFLINE_ARG}"/>
                 </runmaven>
             </then>
         </if>
+
 
         <echo>Running tests: testXmlFile=${testXmlFile}</echo>
         <runmaven dir="${js-pro-path}/production-tests">
@@ -1019,6 +1042,53 @@
             <arg value="${OFFLINE_ARG}"/>
             <arg value="${THREAD_ARG}"/>
         </runmaven>
+    </target>
+
+    <target name="drop-js-db-it"
+            description="drop jasperserver repository db for IT">
+        <echo message="Dropping database. js.it.dbName = ${js.it.dbName}"/>
+        <runSQL jdbcUrl="${admin.jdbcUrl}" print="true" onerror="continue">
+            ${js.it.drop}
+        </runSQL>
+    </target>
+
+    <target name="create-js-db-it"
+            description="create jasperserver repository db for IT">
+        <echo message="Creating database, js.it.dbName = ${js.it.dbName}, ${js.it.create}"/>
+        <runSQL jdbcUrl="${admin.jdbcUrl}" print="true" onerror="abort">
+            ${js.it.create}
+        </runSQL>
+    </target>
+
+    <target name="init-js-db-it-pro"
+            description="run ddl on pro jasperserver db for integration testing">
+        <if>
+            <isset property="stopIfError" />
+            <then>
+                <var name="runSqlOnError" value="abort" />
+            </then>
+            <else>
+                <var name="runSqlOnError" value="${runSqlDefaultOnError}" />
+            </else>
+        </if>
+
+        <echo message="Connecting to ${js.it.dbName} ..."/>
+        <runSQL jdbcUrl="${js.it.jdbcUrl}" print="true" onerror="${runSqlOnError}">
+            <fileset dir="${currentSqlDir}">
+                <include name="js-pro-create.ddl"/>
+                <include name="quartz.ddl"/>
+            </fileset>
+        </runSQL>
+    </target>
+
+    <target name="re-create-js-db-it-pro"
+            depends="drop-js-db-it,create-js-db-it"
+            description="Prepares IT database">
+    </target>
+
+    <target name="re-init-js-db-it-pro"
+            depends="re-create-js-db-it-pro,init-js-db-it-pro"
+            description="Prepares IT database">
     </target>
 
 </project>

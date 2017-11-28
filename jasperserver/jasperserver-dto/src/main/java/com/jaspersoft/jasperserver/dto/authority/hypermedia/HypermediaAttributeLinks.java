@@ -39,8 +39,9 @@ public class HypermediaAttributeLinks {
         return permission;
     }
 
-    public void setPermission(Link permission) {
+    public HypermediaAttributeLinks setPermission(Link permission) {
         this.permission = permission;
+        return this;
     }
 
 }

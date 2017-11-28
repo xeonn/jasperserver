@@ -79,7 +79,9 @@ public class MongoDbJDBCReportDataSourceServiceFactory extends JdbcReportDataSou
 		DataSource dataSource = getPoolDataSource(jdbcReportDataSource.getDriverClass(), jdbcReportDataSource.getConnectionUrl(),
                 jdbcReportDataSource.getUsername(), jdbcReportDataSource.getPassword());
 
-		return new JdbcDataSourceService(dataSource, getTimeZoneByDataSourceTimeZone(null));
+        String timeZone = ((String) ((CustomReportDataSource) reportDataSource).getPropertyMap().get("timeZone"));
+        return new JdbcDataSourceService(dataSource, getTimeZoneByDataSourceTimeZone(timeZone));
+
 	}
 
 
@@ -131,7 +133,8 @@ public class MongoDbJDBCReportDataSourceServiceFactory extends JdbcReportDataSou
                 File outputLocation = new File(schemaDefinitionDirectory, schemaPrefix + "config");
                 schemaDefinition = outputLocation.getAbsolutePath();
                 debug("New schema definition location = " + schemaDefinition);
-                uploadSchemaToRepo = true;
+                // bug 44062, upload the mapping file only if it's datasource already in the repo
+                uploadSchemaToRepo = isDatasourceInRepo(customReportDataSource);
             }
         }
         debug("Schema Definition on disk = " + schemaDefinition);
@@ -154,6 +157,13 @@ public class MongoDbJDBCReportDataSourceServiceFactory extends JdbcReportDataSou
 
 		return jdbcReportDataSource;
 	}
+
+	/**
+	 * Tests if the datasource exists in the repo.
+	 */
+    private boolean isDatasourceInRepo(CustomReportDataSource customReportDataSource) {
+        return customReportDataSource.getCreationDate() != null;
+    }
 
     private void createAndUploadSchemaToRepo(CustomReportDataSource customReportDataSource, JdbcReportDataSourceImpl jdbcReportDataSource) {
         try {

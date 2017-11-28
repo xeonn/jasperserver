@@ -35,12 +35,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Date;
+import java.util.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
 
 /**
  * The servlet serves HTTP agents and provides theme resource content.
@@ -56,6 +53,10 @@ public class ThemeResolverServlet extends HttpServlet {
 
     public static final String DATE_FORMAT_PATTERN = "EEE, d MMM yyyy HH:mm:ss z";
     public static final String EXPIRES_AFTER_ACCESS_IN_SECS = "expiresAfterAccessInSecs";
+
+    // All HTTP date/time stamps MUST be represented in Greenwich Mean Time (GMT), without exception.
+    // See: http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.3.1
+    private static final TimeZone GMT_ZONE = TimeZone.getTimeZone("GMT");
 
     protected static final Log log = LogFactory.getLog(ThemeResolverServlet.class);
 
@@ -97,7 +98,8 @@ public class ThemeResolverServlet extends HttpServlet {
         lastModified.setTime(lastModified.getTime() / 1000 * 1000);        
 
         // Set cache controlling HTTP Response Headers
-        DateFormat df = getFormat(req.getLocale());
+        DateFormat df = getFormat(Locale.ENGLISH);
+
         resp.setHeader("Cache-Control", "max-age=" + expiresInSecs + ", public");
         resp.setHeader("Pragma", "");
         resp.setHeader("Last-Modified", df.format(lastModified));
@@ -131,6 +133,8 @@ public class ThemeResolverServlet extends HttpServlet {
         DateFormat dateFormat = map.get(locale);
         if (dateFormat == null) {
             dateFormat = new SimpleDateFormat(DATE_FORMAT_PATTERN, locale);
+            dateFormat.setTimeZone(GMT_ZONE);
+
             map.put(locale, dateFormat);
         }
         return dateFormat;

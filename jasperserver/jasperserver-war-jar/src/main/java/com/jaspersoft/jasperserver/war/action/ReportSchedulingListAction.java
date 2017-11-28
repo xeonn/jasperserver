@@ -22,6 +22,7 @@ package com.jaspersoft.jasperserver.war.action;
 
 import com.jaspersoft.jasperserver.api.JSException;
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
+import com.jaspersoft.jasperserver.api.common.error.handling.SecureExceptionHandler;
 import com.jaspersoft.jasperserver.api.engine.scheduling.service.ReportSchedulingService;
 import com.jaspersoft.jasperserver.war.common.JasperServerUtil;
 import org.json.JSONObject;
@@ -36,7 +37,7 @@ import java.util.List;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ReportSchedulingListAction.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: ReportSchedulingListAction.java 57603 2015-09-15 17:20:48Z psavushc $
  */
 public class ReportSchedulingListAction extends MultiAction {
 
@@ -51,6 +52,9 @@ public class ReportSchedulingListAction extends MultiAction {
 
     @Resource(name="messageSource")
     protected MessageSource messages;
+
+    @Resource
+    protected SecureExceptionHandler secureExceptionHandler;
 
     public ReportSchedulingListAction() {
 	}
@@ -112,7 +116,7 @@ public class ReportSchedulingListAction extends MultiAction {
             ExecutionContext ctx = getExecutionContext(context);
             formattedMsg = messages.getMessage(e.getMessage(), ((JSException)e).getArgs(), ctx.getLocale());
         } else {
-            formattedMsg = e.getMessage();
+            formattedMsg = secureExceptionHandler.handleException(e).getMessage();
         }
         context.getRequestScope().put("errorPopupMessage", formattedMsg);
         return success();

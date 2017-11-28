@@ -23,7 +23,7 @@ package com.jaspersoft.jasperserver.api;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: JSException.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: JSException.java 58870 2015-10-27 22:30:55Z esytnik $
  */
 @JasperServerAPI
 public class JSException extends RuntimeException {
@@ -77,4 +77,17 @@ public class JSException extends RuntimeException {
 	public void setWrapperObject(boolean wrapperObject) {
 		this.wrapperObject = wrapperObject;
 	}
+	
+	public String toString(){
+		StringBuilder builder = new StringBuilder(super.toString());
+		builder.append("\nArguments: ");
+		if(args!=null){
+			for(Object arg:args){
+				builder.append(arg);
+				builder.append(',');
+			}
+		}
+		return builder.toString();
+	}
+	
 }

@@ -303,6 +303,14 @@
         <servlet-name>jasperserver</servlet-name>
         <url-pattern>/client/visualize.js</url-pattern>
     </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>jasperserver</servlet-name>
+        <url-pattern>/themeMinimalCss.css</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>jasperserver</servlet-name>
+        <url-pattern>/commonMinimalCss.css</url-pattern>
+    </servlet-mapping>
 <!--
     &lt;!&ndash; DWR support &ndash;&gt;
     <servlet>

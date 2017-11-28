@@ -21,12 +21,29 @@
 
 package com.jaspersoft.jasperserver.remote.services.async;
 
+import com.jaspersoft.jasperserver.api.common.util.TimeZoneContextHolder;
+import com.jaspersoft.jasperserver.dto.importexport.State;
+import com.jaspersoft.jasperserver.export.service.ImportExportService;
 import com.jaspersoft.jasperserver.remote.exception.NoResultException;
 import com.jaspersoft.jasperserver.remote.exception.NotReadyResultException;
+import com.jaspersoft.jasperserver.remote.exception.RemoteException;
+import com.jaspersoft.jasperserver.dto.common.ErrorDescriptor;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.io.File;
+import java.util.Locale;
+import java.util.TimeZone;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 
 /*
 *  @author inesterenko
@@ -36,12 +53,12 @@ public class ImportExportTask<T> implements Task {
     protected final static Log log = LogFactory.getLog(Task.class);
 
     protected String uuid;
-    protected BaseImportExportTaskRunnable<T> taskRunner;
-    protected Thread thread;
+    protected final BaseImportExportTaskRunnable<T> taskRunner;
+    //protected Thread thread;
+    private Future<?> future;
 
     public ImportExportTask(BaseImportExportTaskRunnable<T> taskRunner) {
         this.taskRunner = taskRunner;
-        this.thread = new Thread(taskRunner);
     }
 
     @Override
@@ -55,7 +72,7 @@ public class ImportExportTask<T> implements Task {
     }
 
     @Override
-    public StateDto getState() {
+    public State getState() {
         return taskRunner.getState();
     }
 
@@ -65,19 +82,94 @@ public class ImportExportTask<T> implements Task {
     }
 
     @Override
-    public void start() {
+    public synchronized void start(ExecutorService executor) {
         taskRunner.prepare();
-        thread.start();
+        if (isAlive()) {
+            ErrorDescriptor errorDescriptor = new ErrorDescriptor();
+            errorDescriptor.setMessage("Attempt to restart alive task");
+            errorDescriptor.setErrorCode(ImportExportService.ERROR_CODE_RESTART_ALIVE_TASK);
+            errorDescriptor.setParameters(getState().getId());
+
+            throw new RemoteException(errorDescriptor);
+        } else {
+            final Locale locale = LocaleContextHolder.getLocale();
+            final TimeZone timeZone = TimeZoneContextHolder.getTimeZone();
+            final SecurityContext context = SecurityContextHolder.getContext();
+
+            future = executor.submit(new Runnable() {
+                @Override
+                public void run() {
+                    LocaleContextHolder.setLocale(locale);
+                    TimeZoneContextHolder.setTimeZone(timeZone);
+                    SecurityContextHolder.setContext(context);
+                    taskRunner.run();
+                }
+            });
+        }
     }
 
     @Override
-    public void stop() {
-        if(!thread.isInterrupted()){
-            thread.interrupt();
+    public synchronized void stop() {
+        if(isAlive()){
+            future.cancel(true);
         }
         if (!taskRunner.getState().getPhase().equals(INPROGRESS)) {
             new Remover(taskRunner.getFile()).start();
         }
+    }
+
+    @Override
+    public String getOrganizationId() {
+        return taskRunner.getOrganizationId();
+    }
+
+    @Override
+    public String getBrokenDependenciesStrategy() {
+        return taskRunner.getBrokenDependenciesStrategy();
+    }
+
+    @Override
+    public Map<String, Boolean> getParameters() {
+        return taskRunner.getParameters();
+    }
+
+    @Override
+    public Date getTaskCompletionDate() {
+        return taskRunner.getTaskCompletionDate();
+    }
+
+    @Override
+    public void updateTask(List parameters, String organizationId, String brokenDependenciesStrategy) {
+        State state = getState();
+        if (Task.PENDING.equals(state.getPhase())) {
+
+            Map<String, Boolean> parametersMap = new HashMap<String, Boolean>();
+            if (parameters != null) {
+                for (Object obj : parameters) {
+                    if (obj instanceof String) {
+                        String name = (String) obj;
+                        if (StringUtils.isNotBlank(name)) {
+                            parametersMap.put(name, true);
+                        }
+                    }
+                }
+            }
+
+            taskRunner.setParameters(parametersMap.isEmpty() ? null : parametersMap);
+            taskRunner.setOrganizationId(organizationId);
+            taskRunner.setBrokenDependenciesStrategy(brokenDependenciesStrategy);
+        } else {
+            ErrorDescriptor errorDescriptor = new ErrorDescriptor();
+            errorDescriptor.setMessage("Attempt to update task in non-pending phase");
+            errorDescriptor.setErrorCode(ImportExportService.ERROR_CODE_UPDATE_NOT_PENDING_PHASE);
+            errorDescriptor.setParameters(getState().getId());
+
+            throw new RemoteException(errorDescriptor);
+        }
+    }
+
+    private boolean isAlive() {
+        return future != null && !future.isCancelled() && !future.isDone();
     }
 
     protected class Remover extends Thread {

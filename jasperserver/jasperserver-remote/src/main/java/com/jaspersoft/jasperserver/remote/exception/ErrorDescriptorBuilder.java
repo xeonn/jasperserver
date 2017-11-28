@@ -20,13 +20,13 @@
 */
 package com.jaspersoft.jasperserver.remote.exception;
 
-import com.jaspersoft.jasperserver.remote.exception.xml.ErrorDescriptor;
+import com.jaspersoft.jasperserver.dto.common.ErrorDescriptor;
 
 /**
  * <p></p>
  *
  * @author yaroslav.kovalchyk
- * @version $Id: ErrorDescriptorBuilder.java 50801 2014-10-29 00:20:56Z inesterenko $
+ * @version $Id: ErrorDescriptorBuilder.java 57603 2015-09-15 17:20:48Z psavushc $
  */
 public interface ErrorDescriptorBuilder<E extends Throwable> {
     ErrorDescriptor build(E e);

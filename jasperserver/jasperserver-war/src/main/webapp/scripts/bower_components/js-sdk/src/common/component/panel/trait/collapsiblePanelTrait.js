@@ -22,7 +22,7 @@
 
 /**
  * @author: Zakhar Tomchenko, Kostiantyn Tsaregradskyi
- * @version: $Id: collapsiblePanelTrait.js 399 2014-11-12 12:02:18Z ktsaregradskyi $
+ * @version: $Id: collapsiblePanelTrait.js 1658 2015-10-05 16:13:24Z obobruyk $
  */
 
 define(function(require){
@@ -32,8 +32,8 @@ define(function(require){
         $ = require("jquery"),
         abstractPanelTrait = require("./abstractPanelTrait");
 
-    function collapseControlPressed(evt) {
-        evt.stopPropagation();
+    function collapseControlPressed(evt, allowPropagation) {
+        !allowPropagation && evt.stopPropagation();
         this.onCollapseControlPressed ? this.onCollapseControlPressed(evt) : this.toggleCollapsedState();
     }
 
@@ -43,21 +43,45 @@ define(function(require){
         this.$el && this.$el.find(this.expandOnDblClickSelector).off("dblclick");
     }
 
+    /**
+     * @mixin collapsiblePanelTrait
+     * @extends abstractPanelTrait
+     * @description Extend panel with additional collapse/expand button.
+     */
     return _.extend({}, abstractPanelTrait, {
+        /**
+         * @description Initialize additional Panel options.
+         * @memberof! collapsiblePanelTrait
+         * @param {object} [options]
+         * @param {string} [options.collapserClass="buttonIconToggle"] CSS class for expand/collapse button.
+         * @param {string} [options.collapserSelector=".buttonIconToggle"] CSS selector for expand/collapse button.
+         * @param {string} [options.collapsiblePanelClass="collapsiblePanel"] Additional CSS class for Panel.
+         * @param {string} [options.expandOnDblClickSelector="> p:first"] CSS selector for double-click event to expand panel.
+         * @param {function} [options.onCollapseControlPressed] Callback to call when collapse/expand button is pressed. Replaces default collapse/expand functionality.
+         */
         onConstructor: function(options) {
             this.collapserClass = options.collapserClass || "buttonIconToggle";
             this.collapserSelector = options.collapserSelector || ".buttonIconToggle";
             this.collapsiblePanelClass = options.collapsiblePanelClass || "collapsiblePanel";
             this.expandOnDblClickSelector = options.expandOnDblClickSelector || "> p:first";
+            this.allowEventPropagation = !!options.allowMouseDownEventPropagation;
 
             this.onCollapseControlPressed = options.onCollapseControlPressed;
         },
 
-        beforeSetElement: function(el){
+        /**
+         * @description Unbind event listener before Panel element is set.
+         * @memberof! collapsiblePanelTrait
+         */
+        beforeSetElement: function(){
             stopListeningToCollapser.call(this);
         },
 
-        afterSetElement: function(el){
+        /**
+         * @description Insert expand/collapse button and attach events to it.
+         * @memberof! collapsiblePanelTrait
+         */
+        afterSetElement: function(){
             this.$el.addClass(this.collapsiblePanelClass);
 
             this.$collapser = this.$(this.collapserSelector);
@@ -67,11 +91,15 @@ define(function(require){
                 this.$("> .header").prepend(this.$collapser);
             }
 
-            this.$collapser.on("mousedown", _.bind(collapseControlPressed, this));
+            this.$collapser.on("mousedown", _.bind(collapseControlPressed, this, this.allowEventPropagation));
 
             this.$el.find(this.expandOnDblClickSelector).on("dblclick", _.bind(collapseControlPressed, this));
         },
 
+        /**
+         * @description Unbind event listener when Panel is removed.
+         * @memberof! collapsiblePanelTrait
+         */
         onRemove: function() {
             stopListeningToCollapser.call(this);
         }

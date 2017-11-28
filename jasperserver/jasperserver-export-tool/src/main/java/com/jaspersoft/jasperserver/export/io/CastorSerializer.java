@@ -21,15 +21,9 @@
 
 package com.jaspersoft.jasperserver.export.io;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Reader;
-import java.io.UnsupportedEncodingException;
-import java.io.Writer;
-
+import com.jaspersoft.jasperserver.api.JSExceptionWrapper;
+import com.jaspersoft.jasperserver.export.modules.ExporterModuleContext;
+import com.jaspersoft.jasperserver.export.modules.ImporterModuleContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.exolab.castor.mapping.Mapping;
@@ -40,13 +34,18 @@ import org.exolab.castor.xml.XMLException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.Resource;
 
-import com.jaspersoft.jasperserver.api.JSExceptionWrapper;
-import com.jaspersoft.jasperserver.export.modules.ExporterModuleContext;
-import com.jaspersoft.jasperserver.export.modules.ImporterModuleContext;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Reader;
+import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: CastorSerializer.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: CastorSerializer.java 58265 2015-10-05 16:13:56Z vzavadsk $
  */
 public class CastorSerializer implements ObjectSerializer, InitializingBean {
 
@@ -123,5 +122,4 @@ public class CastorSerializer implements ObjectSerializer, InitializingBean {
 			throw new JSExceptionWrapper(e);
 		}
 	}
-
 }

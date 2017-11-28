@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: report.viewer.main.js 8900 2015-05-06 20:57:14Z yplakosh $
+ * @version: $Id: report.viewer.main.js 9490 2015-10-05 16:46:54Z obobruyk $
  */
 
 /* global Hash, __jrsConfigs__ */
@@ -39,7 +39,6 @@ define(function (require) {
         Report = require("report.view");
 
     require("components.toolbar");
-    require("components.ajaxdownloader");
     require("controls.report");
     require("json2");
     require("jquery.ui.mouse.touch");

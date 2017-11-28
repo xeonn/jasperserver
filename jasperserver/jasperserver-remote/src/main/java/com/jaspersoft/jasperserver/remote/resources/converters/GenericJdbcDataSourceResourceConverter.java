@@ -20,6 +20,7 @@
 */
 package com.jaspersoft.jasperserver.remote.resources.converters;
 
+import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConversionOptions;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.JdbcReportDataSource;
 import com.jaspersoft.jasperserver.dto.resources.AbstractClientJdbcDataSource;
 import com.jaspersoft.jasperserver.remote.exception.IllegalParameterValueException;
@@ -28,7 +29,7 @@ import com.jaspersoft.jasperserver.remote.exception.IllegalParameterValueExcepti
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: GenericJdbcDataSourceResourceConverter.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: GenericJdbcDataSourceResourceConverter.java 58870 2015-10-27 22:30:55Z esytnik $
  */
 public class GenericJdbcDataSourceResourceConverter<JdbcDataSourceType extends JdbcReportDataSource, ClientJdbcDataSourceType extends AbstractClientJdbcDataSource<ClientJdbcDataSourceType>> extends ResourceConverterImpl<JdbcDataSourceType, ClientJdbcDataSourceType> {
     @Override

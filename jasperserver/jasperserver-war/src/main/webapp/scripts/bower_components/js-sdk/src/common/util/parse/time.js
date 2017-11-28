@@ -6,13 +6,13 @@
 
 
 /**
- * @version: $Id: time.js 270 2014-10-13 19:58:03Z agodovanets $
+ * @version: $Id: time.js 1605 2015-09-23 17:55:32Z inestere $
  */
 
 define(function (require) {
     "use strict";
 
-    var jrsConfigs = require("jrs.configs"),
+    var localeSettings = require("settings/localeSettings").localeSettings,
         _ = require("underscore"),
         RelativeTime = require("common/util/datetime/RelativeTime"),
         Time = require("common/util/datetime/Time");
@@ -24,7 +24,7 @@ define(function (require) {
     }
 
     function isTime(value, timeFormat) {
-        var time = Time.parse(value, timeFormat != null ? timeFormat : jrsConfigs.localeSettings.timeFormat);
+        var time = Time.parse(value, timeFormat != null ? timeFormat : localeSettings.timeFormat);
         return typeof time !== "undefined" && time.isValid();
     }
 
@@ -33,8 +33,8 @@ define(function (require) {
     }
 
     function compareTimes(value1, value2, timeFormat) {
-        var time1 = value1 instanceof Time ? value1 : Time.parse(value1, timeFormat != null ? timeFormat : jrsConfigs.localeSettings.timeFormat),
-            time2 = value2 instanceof Time ? value2 : Time.parse(value2, timeFormat != null ? timeFormat : jrsConfigs.localeSettings.timeFormat);
+        var time1 = value1 instanceof Time ? value1 : Time.parse(value1, timeFormat != null ? timeFormat : localeSettings.timeFormat),
+            time2 = value2 instanceof Time ? value2 : Time.parse(value2, timeFormat != null ? timeFormat : localeSettings.timeFormat);
 
         if (typeof time1 === "undefined" || typeof time2 === "undefined") {
             return;

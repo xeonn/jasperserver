@@ -21,6 +21,7 @@
 package com.jaspersoft.jasperserver.remote.resources.converters;
 
 import com.jaspersoft.jasperserver.api.metadata.common.domain.DataType;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConversionOptions;
 import com.jaspersoft.jasperserver.dto.resources.ClientDataType;
 import com.jaspersoft.jasperserver.remote.exception.IllegalParameterValueException;
 import com.jaspersoft.jasperserver.war.cascade.InputControlValidationException;
@@ -33,7 +34,7 @@ import javax.annotation.Resource;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: DataTypeResourceConverter.java 51947 2014-12-11 14:38:38Z ogavavka $
+ * @version $Id: DataTypeResourceConverter.java 58870 2015-10-27 22:30:55Z esytnik $
  */
 @Service
 public class DataTypeResourceConverter extends ResourceConverterImpl<DataType, ClientDataType> {

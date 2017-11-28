@@ -23,7 +23,7 @@ package com.jaspersoft.jasperserver.jaxrs.authority;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.Tenant;
 import com.jaspersoft.jasperserver.api.metadata.user.service.AttributesSearchCriteria;
 import com.jaspersoft.jasperserver.api.metadata.user.service.TenantService;
-import com.jaspersoft.jasperserver.dto.authority.hypermedia.HypermediaAttribute;
+import com.jaspersoft.jasperserver.dto.authority.ClientAttribute;
 import com.jaspersoft.jasperserver.dto.authority.hypermedia.HypermediaAttributesListWrapper;
 import com.jaspersoft.jasperserver.jaxrs.common.RestConstants;
 import com.jaspersoft.jasperserver.remote.exception.RemoteException;
@@ -49,7 +49,7 @@ import java.util.Set;
 
 /**
  * @author Volodya Sabadosh
- * @version $Id: ServerAttributesJaxrsService.java 54590 2015-04-22 17:55:42Z vzavadsk $
+ * @version $Id: ServerAttributesJaxrsService.java 58870 2015-10-27 22:30:55Z esytnik $
  */
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -125,7 +125,7 @@ public class ServerAttributesJaxrsService {
     @Path("/{attrName}")
     @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON, "application/hal+json", "application/hal+xml"})
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON, "application/hal+json", "application/hal+xml"})
-    public Response putAttribute(HypermediaAttribute attr,
+    public Response putAttribute(ClientAttribute attr,
                                  @PathParam("attrName") String attrName,
                                  @HeaderParam(HttpHeaders.ACCEPT) String accept,
                                  @HeaderParam(HttpHeaders.CONTENT_TYPE) String mediaType,

@@ -1,1 +1,1 @@
-define(["require","jrs.configs"],function(e){var r=e("jrs.configs"),c=r.userLocale.replace(/_/g,"-");return{headers:{"X-Suppress-Basic":"true","Accept-Language":c,"Cache-Control":"no-cache, no-store",Pragma:"no-cache"}}});
+define(["require"],function(e){return{headers:{"X-Suppress-Basic":"true","Cache-Control":"no-cache, no-store",Pragma:"no-cache"}}});

@@ -30,7 +30,6 @@ import com.jaspersoft.jasperserver.api.engine.scheduling.service.ReportJobsPersi
 import com.jaspersoft.jasperserver.api.logging.context.LoggingContextProvider;
 import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportUnit;
-
 import org.junit.Test;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
@@ -44,14 +43,14 @@ import org.unitils.mock.Mock;
 
 /**
  * Tests for {@link ReportExecutionJob}
- * 
+ *
  * @author Sergey Prilukin
- * @version $Id: ReportExecutionJobTest.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: ReportExecutionJobTest.java 57603 2015-09-15 17:20:48Z psavushc $
  */
 public class ReportExecutionJobTest extends UnitilsJUnit4 {
 
-	private static final String REPORT_UNIT_URI = "/report";
-	
+    private static final String REPORT_UNIT_URI = "/report";
+
     @TestedObject
     private ReportExecutionJob reportExecutionJob;
 

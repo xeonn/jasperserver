@@ -21,29 +21,26 @@
 
 package com.jaspersoft.jasperserver.remote.exporters;
 
-import java.io.OutputStream;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.annotation.Resource;
-
-import net.sf.jasperreports.engine.JRExporter;
-import net.sf.jasperreports.engine.JRExporterParameter;
-import net.sf.jasperreports.engine.JasperPrint;
-import net.sf.jasperreports.engine.export.JRXlsExporterParameter;
-
-import org.springframework.context.MessageSource;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Service;
-
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
 import com.jaspersoft.jasperserver.api.engine.common.service.EngineService;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.common.XlsExportParametersBean;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.util.ExportUtil;
+import net.sf.jasperreports.engine.JRExporter;
+import net.sf.jasperreports.engine.JRExporterParameter;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.export.JRXlsExporterParameter;
+import org.springframework.context.MessageSource;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Service;
+
+import javax.annotation.Resource;
+import java.io.OutputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Giulio Toffoli (original sanda zaharia (shertage@users.sourceforge.net))
- * @version $Id: XlsExporter.java 54728 2015-04-24 15:28:20Z tdanciu $
+ * @version $Id: XlsExporter.java 57603 2015-09-15 17:20:48Z psavushc $
  */
 @Service("remoteXlsExporter")
 @Scope("prototype")

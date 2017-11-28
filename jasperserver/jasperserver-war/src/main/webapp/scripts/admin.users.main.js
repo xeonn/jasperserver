@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: admin.users.main.js 8790 2015-04-22 21:28:09Z obobruyk $
+ * @version: $Id: admin.users.main.js 9490 2015-10-05 16:46:54Z obobruyk $
  */
 
 define(function(require){
@@ -33,12 +33,12 @@ define(function(require){
         jrsConfigs = require("jrs.configs"),
         i18n = require("bundle!AttributesBundle"),
         i18n2 = require("bundle!CommonBundle"),
-        treeFactory = require("common/component/tree/treeFactory"),
         attributesTypesEnum = require("attributes/enum/attributesTypesEnum"),
         ConfirmationDialog = require("common/component/dialog/ConfirmationDialog"),
         attributesViewOptionsFactory = require("attributes/factory/attributesViewOptionsFactory"),
         scrollEventTrait = require("attributes/trait/attributesViewScrollEventTrait"),
-        AttributesViewFacade = require("attributes/AttributesViewFacade");
+        AttributesViewFacade = require("attributes/AttributesViewFacade"),
+        TenantsTreeView = require("tenantImportExport/view/TenantsTreeView");
 
     require("mng.common.actions");
     require("xregexp");
@@ -48,6 +48,8 @@ define(function(require){
     require("common/util/encrypter");
     require("utils.common");
     require("csrf.guard");
+
+    require("css!manageTenants.css");
 
     domReady(function() {
         if (typeof orgModule.messages === "undefined") {
@@ -66,12 +68,12 @@ define(function(require){
             _: _,
             i18n: i18n,
             i18n2: i18n2,
-            treeFactory: treeFactory,
             attributesViewOptionsFactory: attributesViewOptionsFactory,
             AttributesViewFacade: AttributesViewFacade,
             scrollEventTrait: scrollEventTrait,
             attributesTypesEnum: attributesTypesEnum,
-            ConfirmationDialog: ConfirmationDialog
+            ConfirmationDialog: ConfirmationDialog,
+            TenantsTreeView: TenantsTreeView
         });
     });
 });

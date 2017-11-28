@@ -32,9 +32,6 @@
 
 define(function (require) {
 
-    var configs = require("jrs.configs"),
-        locale = configs.userLocale.replace(/_/g, "-");
-
     return {
 
         headers: {
@@ -49,8 +46,6 @@ define(function (require) {
             /**
              * Overwrite locale of browser, use locale of current user
              */
-
-            "Accept-Language": locale,
 
             "Cache-Control": "no-cache, no-store",
 

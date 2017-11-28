@@ -23,6 +23,7 @@ define(function(require) {
     "use strict";
 
     var _ = require("underscore"),
+        AlertDialog = require("common/component/dialog/AlertDialog"),
         JdbcDataSourceView = require("dataSource/view/JdbcDataSourceView"),
         BaseDataSourceView = require("dataSource/view/BaseDataSourceView"),
         AwsDataSourceModel = require("dataSource/model/AwsDataSourceModel"),
@@ -199,6 +200,28 @@ define(function(require) {
                 };
 
             this.awsDataSourceTree = dynamicTree.createRepositoryTree("awsDataSourceTree", treeOptions);
+            this.awsDataSourceTree.httpErrorHandler = function(ajaxAgent) {
+
+	            // some requests came with 500 error code, some with 200, so let's just check error test
+	            var alertDialog, error = false;
+
+                if (ajaxAgent.responseText.indexOf("AWS Access Key is invalid") !== -1) {
+	                error = i18n["error.aws.key.is.invalid"];
+                }
+                if (ajaxAgent.responseText.indexOf("The security token included in the request is invalid") !== -1) {
+	                error = i18n["error.security.token.is.invalid"];
+                }
+
+	            if (error) {
+		            alertDialog = new AlertDialog({ modal: true });
+		            alertDialog.setMessage(error);
+		            alertDialog.open();
+		            // return 'true' means don't let the parent's handler to handle this error
+		            return true;
+	            }
+
+                return false;
+            };
 
             // Initialize tree events: auto-fill connection setting from tree leaf
             this.awsDataSourceTree.observe('leaf:selected', function (ev) {

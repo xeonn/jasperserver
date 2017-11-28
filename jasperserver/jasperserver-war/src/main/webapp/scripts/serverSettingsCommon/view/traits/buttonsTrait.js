@@ -21,13 +21,13 @@
 
 /**
  * @author: Olesya Bobruyko
- * @version: $Id: buttonsTrait.js 8888 2015-05-05 13:39:37Z obobruyk $
+ * @version: $Id: buttonsTrait.js 9400 2015-09-23 21:10:46Z inestere $
  */
 
 define(function(require) {
 
     var _ = require("underscore"),
-        OptionContainer = require("common/component/option/OptionContainer"),
+        OptionContainer = require("common/component/base/OptionContainer"),
         confirmDialogTypesEnum = require("serverSettingsCommon/enum/confirmDialogTypesEnum"),
         buttonTemplate = require("text!serverSettingsCommon/templates/buttonTemplate.htm");
 

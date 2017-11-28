@@ -28,6 +28,7 @@ import com.jaspersoft.jasperserver.api.metadata.common.domain.client.DataTypeImp
 import com.jaspersoft.jasperserver.api.metadata.common.domain.client.InputControlImpl;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.client.ListOfValuesImpl;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.client.QueryImpl;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConversionOptions;
 import com.jaspersoft.jasperserver.api.metadata.common.service.ResourceFactory;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.ObjectPermission;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.client.ObjectPermissionImpl;
@@ -61,7 +62,7 @@ import static org.testng.Assert.assertEquals;
  * <p></p>
  *
  * @author Zakhar.Tomchenco
- * @version $Id: InputControlResourceConverterTest.java 51947 2014-12-11 14:38:38Z ogavavka $
+ * @version $Id: InputControlResourceConverterTest.java 58870 2015-10-27 22:30:55Z esytnik $
  */
 public class InputControlResourceConverterTest {
     @InjectMocks

@@ -23,6 +23,7 @@ package com.jaspersoft.jasperserver.api.engine.scheduling.quartz;
 import com.jaspersoft.jasperserver.api.JSExceptionWrapper;
 import com.jaspersoft.jasperserver.api.engine.scheduling.domain.ReportJob;
 import com.jaspersoft.jasperserver.api.engine.scheduling.domain.ReportJobAlert;
+import com.jaspersoft.jasperserver.dto.common.ErrorDescriptor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.quartz.Job;
@@ -35,20 +36,19 @@ import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-import java.util.Iterator;
 import java.util.List;
 
 /**
  * @author Ivan Chan (ichan@jaspersoft.com)
- * @version $Id: ReportExecutionJobAlertImpl.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: ReportExecutionJobAlertImpl.java 57603 2015-09-15 17:20:48Z psavushc $
  */
 public class ReportExecutionJobAlertImpl implements ReportExecutionJobAlert {
 
     private static final Log log = LogFactory.getLog(ReportExecutionJobAlertImpl.class);
 
-    public void sendAlertMail(Job job, ReportJob jobDetails, List<ExceptionInfo> exceptions, JavaMailSender mailSender, String fromAddress,
-            String[] toAddresses, String characterEncoding)  throws JobExecutionException {
-		ReportJobAlert alert = jobDetails.getAlert();
+    public void sendAlertMail(Job job, ReportJob jobDetails, List<ErrorDescriptor> exceptions, JavaMailSender mailSender, String fromAddress,
+                              String[] toAddresses, String characterEncoding) throws JobExecutionException {
+        ReportJobAlert alert = jobDetails.getAlert();
         boolean isSucceed = exceptions.isEmpty();
         switch (alert.getJobState()) {
             case FAIL_ONLY:
@@ -60,65 +60,61 @@ public class ReportExecutionJobAlertImpl implements ReportExecutionJobAlert {
             case NONE:
                 return;
         }
-		if (alert != null) {
-			try {
-				MimeMessage message = mailSender.createMimeMessage();
-				MimeMessageHelper messageHelper = new MimeMessageHelper(message, true, characterEncoding);
-				messageHelper.setFrom(fromAddress);
-                String subject = alert.getSubject();
-                if ((subject == null) && (job instanceof ReportExecutionJob)) subject = ((ReportExecutionJob)job).getMessage("report.scheduling.job.default.alert.subject", null);
-				messageHelper.setSubject(subject);
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper messageHelper = new MimeMessageHelper(message, true, characterEncoding);
+            messageHelper.setFrom(fromAddress);
+            String subject = alert.getSubject();
+            if ((subject == null) && (job instanceof ReportExecutionJob))
+                subject = ((ReportExecutionJob) job).getMessage("report.scheduling.job.default.alert.subject", null);
+            messageHelper.setSubject(subject);
 
-				StringBuffer messageText = new StringBuffer();
+            StringBuffer messageText = new StringBuffer();
 
-				String text = (isSucceed ? alert.getMessageText() : alert.getMessageTextWhenJobFails());
-				if (text != null) {
-					messageText.append(text);
-				}
-                messageHelper.setTo(toAddresses);
+            String text = (isSucceed ? alert.getMessageText() : alert.getMessageTextWhenJobFails());
+            if (text != null) {
+                messageText.append(text);
+            }
+            messageHelper.setTo(toAddresses);
 
-                if (alert.isIncludingReportJobInfo()) {
+            if (alert.isIncludingReportJobInfo()) {
+                messageText.append("\n");
+                messageText.append("ReportJob Info:").append("\n");
+                messageText.append("Label = ").append(jobDetails.getLabel()).append("\n");
+                messageText.append("ID = ").append(jobDetails.getId()).append("\n");
+                messageText.append("Description = ").append(jobDetails.getDescription()).append("\n");
+                messageText.append("Status = ").append(exceptions.isEmpty() ? "PASS" : "FAIL").append("\n");
+            }
+
+            if (alert.isIncludingStackTrace()) {
+                for (ErrorDescriptor ed : exceptions) {
                     messageText.append("\n");
-                    messageText.append("ReportJob Info:").append("\n");
-                    messageText.append("Label = ").append(jobDetails.getLabel()).append("\n");
-                    messageText.append("ID = ").append(jobDetails.getId()).append("\n");
-                    messageText.append("Description = ").append(jobDetails.getDescription()).append("\n");
-                    messageText.append("Status = ").append(exceptions.isEmpty() ? "PASS" : "FAIL").append("\n");
+                    messageText.append(ed.getMessage());
+                    attachException(messageHelper, ed);
                 }
+            }
+            messageHelper.setText(messageText.toString());
+            mailSender.send(message);
+        } catch (MessagingException e) {
+            log.error("Error while sending report job alert notification", e);
+            throw new JSExceptionWrapper(e);
+        }
+    }
 
-				if (alert.isIncludingStackTrace()) {
-                    if (!exceptions.isEmpty()) {
-                        for (Iterator it = exceptions.iterator(); it.hasNext();) {
-                            ExceptionInfo exception = (ExceptionInfo) it.next();
+    protected static void attachException(MimeMessageHelper messageHelper, ErrorDescriptor errorDescriptor) throws MessagingException {
+        String[] stackTrace = errorDescriptor.getParameters();
+        Throwable exception = errorDescriptor.getException();
+        if (stackTrace == null || stackTrace.length == 0) {
+            return;
+        }
 
-                            messageText.append("\n");
-                            messageText.append(exception.getMessage());
+        ByteArrayOutputStream bufOut = new ByteArrayOutputStream();
+        PrintStream printOut = new PrintStream(bufOut);
+        for (String stack : stackTrace)
+            printOut.append(stack);
+        printOut.flush();
 
-                            attachException(messageHelper, exception);
-                        }
-                    }
-                }
-				messageHelper.setText(messageText.toString());
-				mailSender.send(message);
-			} catch (MessagingException e) {
-				log.error("Error while sending report job alert notification", e);
-				throw new JSExceptionWrapper(e);
-			}
-		}
-	}
-
-    protected static void attachException(MimeMessageHelper messageHelper, ExceptionInfo exceptionInfo) throws MessagingException {
-		Throwable exception = exceptionInfo.getException();
-		if (exception == null) {
-			return;
-		}
-
-		ByteArrayOutputStream bufOut = new ByteArrayOutputStream();
-		PrintStream printOut = new PrintStream(bufOut);
-		exception.printStackTrace(printOut);
-		printOut.flush();
-
-		String attachmentName = "exception_" + System.identityHashCode(exception) + ".txt";
-		messageHelper.addAttachment(attachmentName, new ByteArrayResource(bufOut.toByteArray()));
-	}
+        String attachmentName = "exception_" + System.identityHashCode(exception) + ".txt";
+        messageHelper.addAttachment(attachmentName, new ByteArrayResource(bufOut.toByteArray()));
+    }
 }

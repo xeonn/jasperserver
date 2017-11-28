@@ -24,6 +24,7 @@ package com.jaspersoft.jasperserver.export;
 import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
@@ -33,7 +34,7 @@ import com.jaspersoft.jasperserver.export.util.CommandUtils;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: CommandHelpImpl.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: CommandHelpImpl.java 58265 2015-10-05 16:13:56Z vzavadsk $
  */
 public class CommandHelpImpl implements CommandHelp {
 
@@ -45,6 +46,7 @@ public class CommandHelpImpl implements CommandHelp {
 	private String argDescriptionMessagePrefix;
 	private String argLinePrefix;
 	private String argLineSeparator;
+	private Set<String> resourceTypes;
 
 	protected int computeMaxArgNameLength(CommandMetadata commandMeta) {
 		int maxArgNameLength = 0;
@@ -77,10 +79,16 @@ public class CommandHelpImpl implements CommandHelp {
 		
 		int maxArgNameLength = computeMaxArgNameLength(commandMeta);
 		String descContPrefix = computeDescContPrefix(maxArgNameLength);
-		
+
 		for (Iterator iter = commandMeta.getArgumentNames().iterator(); iter.hasNext();) {
 			String argName = (String) iter.next();
-			String argDescription = messageSource.getMessage(getArgDescriptionMessagePrefix() + argName, null, getLocale());
+			String argDescription;
+			if (argName.equals("resource-types")) {
+				String[] typesArg = new String[] {resourceTypes.toString()};
+				argDescription = messageSource.getMessage(getArgDescriptionMessagePrefix() + argName, typesArg, getLocale());
+			} else {
+				argDescription = messageSource.getMessage(getArgDescriptionMessagePrefix() + argName, null, getLocale());
+			}
 			printArgumentHelp(out, argName, argDescription, maxArgNameLength, descContPrefix);
 		}
 		
@@ -154,4 +162,7 @@ public class CommandHelpImpl implements CommandHelp {
 		this.startMessage = startMessage;
 	}
 
+	public void setResourceTypes(Set<String> resourceTypes) {
+		this.resourceTypes = resourceTypes;
+	}
 }

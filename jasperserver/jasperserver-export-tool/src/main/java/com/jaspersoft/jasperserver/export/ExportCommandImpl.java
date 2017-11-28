@@ -21,8 +21,11 @@
 
 package com.jaspersoft.jasperserver.export;
 
+import java.util.ArrayList;
 import java.util.Locale;
 
+import com.jaspersoft.jasperserver.dto.common.WarningDescriptor;
+import com.jaspersoft.jasperserver.export.modules.common.ExportImportWarningCode;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -32,14 +35,22 @@ import com.jaspersoft.jasperserver.api.common.domain.impl.ExecutionContextImpl;
 import com.jaspersoft.jasperserver.export.io.ExportImportIOFactory;
 import com.jaspersoft.jasperserver.export.io.ExportOutput;
 import com.jaspersoft.jasperserver.export.util.CommandOut;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
+
+import javax.annotation.Resource;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ExportCommandImpl.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: ExportCommandImpl.java 58265 2015-10-05 16:13:56Z vzavadsk $
  */
 public class ExportCommandImpl implements CommandBean, ApplicationContextAware {
 	
 	private static final CommandOut commandOut = CommandOut.getInstance();
+	private static final String EXPORT_WARNING_MESSAGE_CODE = "ji.export.broken-dependencies";
+
+	@Resource(name = "exportImportMessageSource")
+	private MessageSource messageSource;
 
 	private ApplicationContext ctx;
 	
@@ -55,6 +66,18 @@ public class ExportCommandImpl implements CommandBean, ApplicationContextAware {
 		Exporter exporter = createPrototypeExporter(parameters);
 		exporter.setTask(task);
 		exporter.performExport();
+
+		if (!task.getWarnings().isEmpty()) {
+			String message = messageSource.getMessage(EXPORT_WARNING_MESSAGE_CODE, null,
+					EXPORT_WARNING_MESSAGE_CODE, LocaleContextHolder.getLocale());
+			commandOut.info("\n\n" + message);
+
+			for (WarningDescriptor warning : task.getWarnings()) {
+				if (warning.getCode().equals(ExportImportWarningCode.EXPORT_BROKEN_DEPENDENCY.toString())) {
+					commandOut.warn("  " + warning.getParameters()[0]);
+				}
+			}
+		}
 	}
 
 	protected ExportTask createTask(Parameters parameters) {
@@ -62,6 +85,7 @@ public class ExportCommandImpl implements CommandBean, ApplicationContextAware {
 		task.setParameters(parameters);
 		task.setExecutionContext(getExecutionContext(parameters));
 		task.setOutput(getExportOutput(parameters));
+		task.setWarnings(new ArrayList<WarningDescriptor>());
 		return task;
 	}
 
@@ -106,5 +130,4 @@ public class ExportCommandImpl implements CommandBean, ApplicationContextAware {
 	public void setExportImportIOFactory(ExportImportIOFactory ioFactory) {
 		this.exportImportIOFactory = ioFactory;
 	}
-
 }

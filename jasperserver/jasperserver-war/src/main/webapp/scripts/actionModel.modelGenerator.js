@@ -22,7 +22,7 @@
 
 /**
  * @author Angus Croll, Papanii Okai
- * @version: $Id: actionModel.modelGenerator.js 9256 2015-08-27 20:35:41Z yplakosh $
+ * @version: $Id: actionModel.modelGenerator.js 9400 2015-09-23 21:10:46Z inestere $
  */
 
 /* global localContext, isProVersion, designerBase, isIE, isIE7, setWidthStyleByReflection, isNotNullORUndefined,
@@ -89,7 +89,7 @@ actionModel.MOUSE_OUT_PATTERNS = [
 ////////////////////////////////////////////////////////////////////
 
 
-/**
+/*
  * Used to present the context menu to the user.
  * @param menuContext
  * @param event the event tied to the menu.
@@ -141,7 +141,7 @@ actionModel.closeHandler = function (event) {
     }
 };
 
-/**
+/*
  * Hide any menus created by the action model.
  * This means removing all child nodes and setting it back to default state.
  */
@@ -173,7 +173,7 @@ actionModel.updateTemplateId = function(templateId){
 };
 
 
-/**
+/*
  * Method used to update the menu's css className
  * @param className
  */
@@ -183,7 +183,7 @@ actionModel.updateCSSClass = function(className){
     }
 };
 
-/**
+/*
  *  Determine position of menu based on mouse position..
  * @param event
  */
@@ -243,7 +243,7 @@ actionModel.adjustMenuPosition = function(menu, left, top, width, height){
     }
 };
 
-/**
+/*
  * construct the menu dynamically based on the client side action model
  * @param menuContext
  * @param event
@@ -264,7 +264,7 @@ actionModel.assembleMenuFromActionModel = function(menuContext, event, contentPa
     actionModel.removeTrailingSeparator();
 };
 
-/**
+/*
  * Initialize Action Model data with the JSON evaluated from the given element or directly from object.
  *
  * @param scriptTag Script holder identifier or simple object representing data.
@@ -277,7 +277,7 @@ actionModel.initActionModelData = function(scriptTag) {
     }
 };
 
-/**
+/*
  * Helper method used in the construction of the menu
  * @param thisAction
  * @param event
@@ -297,7 +297,7 @@ actionModel.appendToMenu = function(thisAction, event, contentParent) {
     actionModel.appendDesiredRowType(thisAction, event, mouseUpFunction, contentParent);
 };
 
-/**
+/*
  * Append desired row type to menu
  * @param thisAction
  * @param mouseUpFunction
@@ -330,7 +330,7 @@ actionModel.appendDesiredRowType = function(thisAction, event, mouseUpFunction, 
 };
 
 
-/**
+/*
  * Add a simple action row to the menu
  * @param thisAction
  * @param mouseUpFunction
@@ -362,7 +362,7 @@ actionModel.addSimpleActionRow = function(thisAction, mouseUpFunction, contentPa
 };
 
 
-/**
+/*
  * Add a separator row to the menu
  * @param thisAction
  * @param contentParent
@@ -381,7 +381,7 @@ actionModel.addSeparatorRows = function(thisAction, contentParent){
     actionModel.insertMenuRow(contentParent, separator, true, thisAction.isDisabled, null, cssOverride);
 };
 
-/**
+/*
  * Used to add a option
  * @param thisAction
  * @param mouseUpFunction
@@ -420,7 +420,7 @@ actionModel.addOption = function(thisAction, mouseUpFunction, contentParent){
     actionModel.insertMenuRow(contentParent, newOptionRow, false, thisAction.isDisabled, thisAction.id, cssOverride);
 };
 
-/**
+/*
  * Creates selector row and all sub menus related to that row
  * @param thisAction
  * @param contentParent
@@ -469,7 +469,7 @@ actionModel.addSelector = function(thisAction, contentParent, event) {
     }
 };
 
-/**
+/*
  * This method gets the left value for a submenu. It calculates if by getting the with of the parents content and adds
  * the parents left value to it since all menu objects are absolute.
  * @param selectorObj
@@ -485,7 +485,7 @@ actionModel.getSubMenuTop = function(selectorObj){
     return Math.abs(parseInt($(selectorObj).offsetTop)); //offset
 };
 
-/**
+/*
  * Used to position the submenu with respect to its parent.
  * @param parent
  */
@@ -561,7 +561,7 @@ actionModel.showChildSubmenu = function(parent){
     actionModel.openedSubMenus.push(pid);
 };
 
-/**
+/*
  * Used to hide submenu
  * @param parent
  */
@@ -573,7 +573,7 @@ actionModel.hideChildSubmenu = function(parent){
     actionModel.makeMenuInVisible($(submenu));
 };
 
-/**
+/*
  * Used to change the css display value to make it visible.
  * @param menu object we changing the display style for.
  */
@@ -586,7 +586,7 @@ actionModel.makeMenuVisible = function(menu){
     }
 };
 
-/**
+/*
  * Used to change the css display value to make it invisible
  * @param menu object we changing the display style for.
  */
@@ -594,7 +594,7 @@ actionModel.makeMenuInVisible = function(menu){
     menu.addClassName("hidden");
 };
 
-/**
+/*
  * Used to build a the logical structure for a flyout menu
  * @param thisAction
  * @param parentId
@@ -611,7 +611,7 @@ actionModel.isMenuShowing = function(){
     return !($("menu").getStyle("display") == "none" || $('menu').hasClassName("hidden"));
 };
 
-/**
+/*
  * Helper method to update row object
  * @param domObject
  * @param actionText
@@ -633,7 +633,7 @@ actionModel.launchNewMenu = function(){
     alert("action not implemented...");
 };
 
-/**
+/*
  * Helper to insert row in to menu
  * @param container
  * @param newMenuRow
@@ -667,7 +667,7 @@ actionModel.disableMenuOption = function(menuOption){
     _.isEmpty(menuOption.childNodes) && buttonManager.disable(menuOption.childNodes[0]);
 };
 
-/**
+/*
  * Checking success of test.
  * @param action
  */
@@ -696,7 +696,7 @@ actionModel.passesClientTest = function(action) {
     return result;
 };
 
-/**
+/***
  * If last row is a separator, remove it
  */
 actionModel.removeTrailingSeparator = function(){
@@ -753,7 +753,7 @@ actionModel.focusMenu = function() {
 };
 
 
-/**
+/*
  * Used to display fine positioned menu relative to the object
  *
  * @param event Initial event
@@ -845,7 +845,7 @@ actionModel.hideMenu = function(){
     }
 };
 
-/**
+/*
  * Utility method which helps to create menu element
  * @param type type of menu element, one of ["simpleAction", "selectAction", "optionAction"]
  *  this is the only mandatory parameter to create manu item.

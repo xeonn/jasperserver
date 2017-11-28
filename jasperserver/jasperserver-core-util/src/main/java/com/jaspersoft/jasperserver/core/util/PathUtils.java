@@ -21,12 +21,15 @@
 
 package com.jaspersoft.jasperserver.core.util;
 
+import com.jaspersoft.jasperserver.api.JSException;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.Folder;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: PathUtils.java 51495 2014-11-17 15:55:08Z agodovanets $
+ * @version $Id: PathUtils.java 59102 2015-11-13 12:46:42Z vspachyn $
  */
 public class PathUtils {
 
@@ -73,6 +76,31 @@ public class PathUtils {
 		return splUri;
 	}
 
+	/**
+	 * Split path to folder and name, name can be folder or resource. <br>
+	 *
+	 * For example:<br>
+	 *     uri: /folder/resource -> parent: /folder, name: resource <br>
+	 *     uri: /folder -> parent: /, name: folder <br>
+	 *     uri: / -> parent: /, name: null
+	 *
+	 * @param uri path to splitting
+	 * @return SplittedPath which never equals <tt>null</tt>
+	 **/
+	public static SplittedPath splitPathToFolderAndName(String uri) {
+		if (uri.equals(Folder.SEPARATOR)) new SplittedPath(Folder.SEPARATOR, null);
+
+		SplittedPath splittedPath = splitPath(uri);
+		if (splittedPath == null) {
+			String message = "Path: " + uri + " is not correct.";
+			throw new JSException(message.toString());
+		}
+		if (splittedPath.parentPath == null) {
+			return new SplittedPath(Folder.SEPARATOR, splittedPath.name);
+		}
+		return splittedPath;
+	}
+
 	public static String concatPaths(String path1, String path2) {
 		if (path1 == null) {
 			if (path2 == null) {
@@ -87,6 +115,27 @@ public class PathUtils {
 		
 		return normalizePath(path1 + FILE_SEPARATOR + path2);
 	}
+
+	/**
+	 * Concat three or more path
+	 *
+	 * For example:<br>
+	 *     parent: /folder, child: folder2, name: folder3 -> result: /folder/folder2/folder3 <br>
+	 *
+	 * @param parentPath the parent path
+	 * @param childPath the child path
+	 * @param otherPaths list of children paths
+	 *
+	 * @return concated path
+	 **/
+	public static String concatPaths(String parentPath, String childPath, String ... otherPaths) {
+		String result = concatPaths(parentPath, childPath);
+		for (String p : otherPaths) {
+			result = concatPaths(result, p);
+		}
+		return result;
+	}
+
 
 	public static String normalizePath(String path) {
 		if (path == null) {

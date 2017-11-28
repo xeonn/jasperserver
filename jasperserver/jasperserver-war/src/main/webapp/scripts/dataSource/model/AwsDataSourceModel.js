@@ -22,7 +22,7 @@
 
 /**
  * @author: Dima Gorbenko
- * @version: $Id: AwsDataSourceModel.js 9218 2015-08-20 19:56:16Z yplakosh $
+ * @version: $Id: AwsDataSourceModel.js 9400 2015-09-23 21:10:46Z inestere $
  */
 
 /* global XRegExp */
@@ -35,7 +35,7 @@ define(function (require) {
         JdbcDriverCollection = require("dataSource/collection/JdbcDriverCollection"),
         dataSourcePatterns = require("settings!dataSourcePatterns"),
         connectionTypes = require("dataSource/enum/connectionTypes"),
-        repositoryResourceTypes = require("common/enum/repositoryResourceTypes"),
+        repositoryResourceTypes = require("bi/repo/enum/repositoryResourceTypes"),
         _ = require("underscore"),
         $ = require("jquery"),
         i18n = require("bundle!jasperserver_messages"),

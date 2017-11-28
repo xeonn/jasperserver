@@ -21,15 +21,17 @@
 
 package com.jaspersoft.jasperserver.export;
 
+import com.jaspersoft.jasperserver.export.service.ImportFailedException;
+
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: Importer.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: Importer.java 58265 2015-10-05 16:13:56Z vzavadsk $
  */
 
 public interface Importer {
 
 	void setTask(ImportTask task);
 	
-	void performImport();
+	void performImport() throws ImportFailedException;
 
 }

@@ -26,6 +26,13 @@
     float: left;
 }
 
+.dashboardToolbar .toolbar.previewMode{
+    clear:none;
+    background-image: none;
+    background-color: transparent;
+    border: 0;
+}
+
 .dashboardToolbar > .content > .header > .buttons {
     float: right;
     margin-left: 10px;
@@ -64,6 +71,16 @@
     background-position: -67px 3px;
 }
 
+/* filterPopup */
+.dashboardToolbar .toolbar #filterPopup .icon {
+    background-position: 4px -195px;
+}
+
+.dashboardToolbar .toolbar #filterPopup.over .icon,
+.dashboardToolbar .toolbar #filterPopup.pressed .icon {
+    background-position: -63px -194px;
+}
+
 /* save */
 .dashboardToolbar .toolbar #save .icon {
     background-position: 3px -37px;
@@ -74,6 +91,19 @@
 }
 .dashboardToolbar .toolbar #save.over .indicator, 
 .dashboardToolbar .toolbar #save.pressed .indicator {
+    background-position: -2px -80px;
+}
+
+/* export */
+.dashboardToolbar .toolbar #export .icon {
+    background-position: 3px -302px;
+}
+.dashboardToolbar .toolbar #export.over .icon,
+.dashboardToolbar .toolbar #export.pressed .icon {
+    background-position: -72px -302px;
+}
+.dashboardToolbar .toolbar #export.over .indicator,
+.dashboardToolbar .toolbar #export.pressed .indicator {
     background-position: -2px -80px;
 }
 
@@ -106,11 +136,11 @@
 
 /* filter manager */
 .dashboardToolbar .toolbar #filterManager .icon {
-    background-position: 4px -195px;
+    background-position: 3px -340px;
 }
 .dashboardToolbar .toolbar #filterManager.over .icon, 
 .dashboardToolbar .toolbar #filterManager.pressed .icon {
-    background-position: -63px -194px;
+    background-position: -67px -340px;
 }
 
 /* properties */
@@ -161,7 +191,7 @@
 }
 
 .dashboardToolbar .toolbar .disabledButton#filterManager .icon {
-    background-position: -30px -195px;
+    background-position: -31px -340px;
 }
 
 .dashboardToolbar .toolbar .disabledButton#properties .icon {

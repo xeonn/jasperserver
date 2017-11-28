@@ -101,31 +101,31 @@ public class FileResourceAction extends FormAction {
     public Event initAction(RequestContext context) throws Exception {
 		FileResourceWrapper wrapper = (FileResourceWrapper) getFormObject(context);
 		if (wrapper.isSubflowMode()) {
-			FilterCriteria criteria = FilterCriteria
-					.createFilter(FileResource.class);
-			if (wrapper.getFileResource().getFileType() != null
-					&& wrapper.getFileResource().getFileType().trim().length() != 0) {
-				criteria.addFilterElement(FilterCriteria
-						.createPropertyEqualsFilter("fileType", wrapper
-								.getFileResource().getFileType()));
-			} else if (isMasterFlowReportUnit(context)) {
-				FilterElementDisjunction olapTypesFilter = new FilterElementDisjunction();
-				olapTypesFilter.addFilterElement(FilterCriteria.createPropertyEqualsFilter("fileType",
-						ResourceDescriptor.TYPE_MONDRIAN_SCHEMA));
-				olapTypesFilter.addFilterElement(FilterCriteria.createPropertyEqualsFilter("fileType",
-						ResourceDescriptor.TYPE_ACCESS_GRANT_SCHEMA));
-				criteria.addNegatedFilterElement(olapTypesFilter);
-			}
-			ResourceLookup[] lookups = repository.findResource(JasperServerUtil.getExecutionContext(context), criteria);
-			List allResources = null;
-			if (lookups != null && lookups.length != 0) {
-				allResources = new ArrayList();
-				log("Found lookups size=" + lookups.length);
-				for (int i = 0; i < lookups.length; i++) {
-					allResources.add(lookups[i].getURIString());
-				}
-			}
-			wrapper.setAllResources(allResources);
+//			FilterCriteria criteria = FilterCriteria
+//					.createFilter(FileResource.class);
+//			if (wrapper.getFileResource().getFileType() != null
+//					&& wrapper.getFileResource().getFileType().trim().length() != 0) {
+//				criteria.addFilterElement(FilterCriteria
+//						.createPropertyEqualsFilter("fileType", wrapper
+//								.getFileResource().getFileType()));
+//			} else if (isMasterFlowReportUnit(context)) {
+//				FilterElementDisjunction olapTypesFilter = new FilterElementDisjunction();
+//				olapTypesFilter.addFilterElement(FilterCriteria.createPropertyEqualsFilter("fileType",
+//						ResourceDescriptor.TYPE_MONDRIAN_SCHEMA));
+//				olapTypesFilter.addFilterElement(FilterCriteria.createPropertyEqualsFilter("fileType",
+//						ResourceDescriptor.TYPE_ACCESS_GRANT_SCHEMA));
+//				criteria.addNegatedFilterElement(olapTypesFilter);
+//			}
+//			ResourceLookup[] lookups = repository.findResource(JasperServerUtil.getExecutionContext(context), criteria);
+//			List allResources = null;
+//			if (lookups != null && lookups.length != 0) {
+//				allResources = new ArrayList();
+//				log("Found lookups size=" + lookups.length);
+//				for (int i = 0; i < lookups.length; i++) {
+//					allResources.add(lookups[i].getURIString());
+//				}
+//			}
+//			wrapper.setAllResources(allResources);
 		}
 		/**
 		 * TODO(stas): Remove next block. I didn't find any usage of getExistingResources
@@ -158,7 +158,7 @@ public class FileResourceAction extends FormAction {
 //		}
 
 		if (wrapper.isSubflowMode()) {
-			getAllFolders(wrapper); // TODO get this from main flow
+//			getAllFolders(wrapper); // TODO get this from main flow
 			String folderURI = (String) context.getFlowScope().get(PARENT_FOLDER_ATTR);
 			if (folderURI == null) {
 				folderURI = (String)context.getRequestParameters().get("ParentFolderUri");
@@ -206,6 +206,7 @@ public class FileResourceAction extends FormAction {
 		return success();
 	}
 
+	@Deprecated
 	protected void getAllFolders(FileResourceWrapper wrapper)
 	{
 		List allFolders = repository.getAllFolders(null);

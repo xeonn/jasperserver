@@ -20,7 +20,11 @@
 
     <view-state id="ajaxError" view="ajax/ajaxerror"/>
 
-    <view-state id="errorPage" view="modules/system/errorPage"/>
+    <view-state id="errorPage" view="modules/system/errorPage">
+        <on-entry>
+            <evaluate expression="errorPageHandlerAction"/>
+        </on-entry>
+    </view-state>
 
     <global-transitions>
         <transition on-exception="java.lang.Throwable" to="errorPage"/>

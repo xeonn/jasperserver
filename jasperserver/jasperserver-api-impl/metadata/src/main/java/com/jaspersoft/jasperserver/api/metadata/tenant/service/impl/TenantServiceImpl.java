@@ -45,11 +45,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
-import org.hibernate.criterion.DetachedCriteria;
-import org.hibernate.criterion.Disjunction;
-import org.hibernate.criterion.MatchMode;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
+import org.hibernate.criterion.*;
 import org.springframework.orm.hibernate3.HibernateCallback;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -302,7 +298,7 @@ public class TenantServiceImpl extends HibernateDaoImpl
         RepoTenant parent = getRepoTenant(parentTenantId, false);
 
         if (parent != null) {
-            DetachedCriteria criteria = createSubTenantsCriteria(parent, null, -1);
+            DetachedCriteria criteria = createSubTenantsCriteria(parent, null, -1, null);
             criteria.getExecutableCriteria(getSession()).setCacheable(true);
             criteria.setProjection(Projections.property("tenantId"));
             subTenantIdList.addAll(getHibernateTemplate().findByCriteria(criteria));
@@ -311,7 +307,7 @@ public class TenantServiceImpl extends HibernateDaoImpl
         return subTenantIdList;
     }
 
-    private DetachedCriteria createSubTenantsCriteria(RepoTenant parentTenant, String text, int depth) {
+    private DetachedCriteria createSubTenantsCriteria(RepoTenant parentTenant, String text, int depth, String sortBy) {
         DetachedCriteria criteria = DetachedCriteria.forClass(persistentTenantClass());
         String value = "/%";
 
@@ -323,6 +319,16 @@ public class TenantServiceImpl extends HibernateDaoImpl
         }
 
         criteria.add(Restrictions.like("tenantUri", value));
+
+        if (sortBy != null){
+            if (sortBy.equals("id")){
+                criteria.addOrder(Order.asc("tenantId"));
+            } else if (sortBy.equals("name")){
+                criteria.addOrder(Order.asc("tenantName"));
+            } else if (sortBy.equals("alias")) {
+                criteria.addOrder(Order.asc("tenantAlias"));
+            }
+        }
 
         if (depth > 0){
             StringBuilder boundary = new StringBuilder(value);
@@ -711,13 +717,18 @@ public class TenantServiceImpl extends HibernateDaoImpl
 
     @Transactional(propagation = Propagation.REQUIRED)
     public List<Tenant> getAllSubTenantList(ExecutionContext context, String parentTenantId, String text, int depth) {
+        return  getAllSubTenantList(context, parentTenantId, text, depth, null);
+    }
+
+    @Override
+    public List<Tenant> getAllSubTenantList(ExecutionContext context, String parentTenantId, String text, int depth, String sortBy) {
         List subTenantList = new ArrayList();
 
         /* Retrieving parent tenant. */
         RepoTenant parent = getRepoTenant(parentTenantId, false);
 
         if (parent != null) {
-            DetachedCriteria criteria = createSubTenantsCriteria(parent, text, depth);
+            DetachedCriteria criteria = createSubTenantsCriteria(parent, text, depth, sortBy);
             criteria.getExecutableCriteria(getSession()).setCacheable(true); // .setCacheMode(CacheMode.REFRESH);
             subTenantList.addAll(getHibernateTemplate().findByCriteria(criteria));
         }

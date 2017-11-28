@@ -22,15 +22,11 @@
 
 /**
  * @author: Sergey Prilukin
- * @version: $Id: ListWithSelection.js 1178 2015-05-06 20:40:12Z yplakosh $
+ * @version: $Id: ListWithSelection.js 1760 2015-10-27 18:45:31Z yplakosh $
  */
 
 /**
- * List component which extends ScalableList component
- * and supports single and multi selection.
- *
- * Usage:
- *
+ * @example
  *    var list = new jaspersoft.components.ListWithSelection({
  *        el:               @see ScalableList,
  *        * getData:        @see ScalableList,
@@ -54,7 +50,8 @@
  *
  *    * - required items
  *
- * ListWithSelection API:
+ * @description List component which extends ScalableList component and supports single and multi selection.
+ *  ListWithSelection API:
  *      on("selection:change",
  *          function(selection) {}) - "selection:change" event occurred then selection was changed
  *      render                      - @see ScalableList
@@ -196,7 +193,18 @@ define(function (require) {
         //Add selected attributes to model
         postProcessChunkModelItem: function(item, i) {
             ScalableList.prototype.postProcessChunkModelItem.call(this, item, i);
-            item.selected = this.model.selectionContains && this.model.selectionContains(item.value, item.index);
+
+            if (item.addToSelection) {
+                item.selected = true;
+
+                this.model.selectionContains
+                && !this.model.selectionContains(item.value, item.index, item)
+                && this.model.addValueToSelection(item.value, item.index, item);
+
+                delete item.addToSelection;
+            } else {
+                item.selected = this.model.selectionContains && this.model.selectionContains(item.value, item.index, item);
+            }
         },
 
         /*-------------------------
@@ -453,7 +461,7 @@ define(function (require) {
             }
             index = parseInt(index, 10);
 
-            var item = this.model.get("items")[index - this.model.get("bufferStartIndex")];
+            item = this.model.get("items")[index - this.model.get("bufferStartIndex")];
 
             return {
                 item: item,

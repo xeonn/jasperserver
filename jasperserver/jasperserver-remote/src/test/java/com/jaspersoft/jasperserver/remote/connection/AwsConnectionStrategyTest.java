@@ -20,10 +20,12 @@
 */
 package com.jaspersoft.jasperserver.remote.connection;
 
+import com.jaspersoft.jasperserver.api.common.error.handling.SecureExceptionHandler;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl.AwsDataSourceService;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl.AwsReportDataSourceServiceFactory;
 import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.client.AwsReportDataSourceImpl;
+import com.jaspersoft.jasperserver.dto.common.ErrorDescriptor;
 import com.jaspersoft.jasperserver.dto.resources.ClientAwsDataSource;
 import com.jaspersoft.jasperserver.remote.resources.converters.AwsDataSourceResourceConverter;
 import com.jaspersoft.jasperserver.remote.resources.converters.ToServerConversionOptions;
@@ -39,6 +41,7 @@ import java.util.Locale;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.isA;
 import static org.mockito.Matchers.isNull;
 import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.doReturn;
@@ -53,7 +56,7 @@ import static org.testng.Assert.assertSame;
  * <p></p>
  *
  * @author yaroslav.kovalchyk
- * @version $Id: AwsConnectionStrategyTest.java 56967 2015-08-20 23:20:53Z esytnik $
+ * @version $Id: AwsConnectionStrategyTest.java 57603 2015-09-15 17:20:48Z psavushc $
  */
 public class AwsConnectionStrategyTest {
     private static ClientAwsDataSource AWS_DATA_SOURCE_TEMPLATE = new ClientAwsDataSource()
@@ -71,6 +74,8 @@ public class AwsConnectionStrategyTest {
     private AwsDataSourceResourceConverter awsDataSourceResourceConverter;
     @Mock
     private AwsDataSourceService awsDataSourceService;
+    @Mock
+    private SecureExceptionHandler secureExceptionHandlerMock;
 
     private ClientAwsDataSource awsDataSource;
     private AwsReportDataSourceImpl awsReportDataSource;
@@ -92,6 +97,7 @@ public class AwsConnectionStrategyTest {
         doReturn(awsReportDataSource).when(awsDataSourceResourceConverter)
                 .toServer(same(awsDataSource), eq(ToServerConversionOptions.getDefault().setSuppressValidation(true)));
         doReturn(awsDataSourceService).when(awsDataSourceFactory).createService(awsReportDataSource);
+        when(secureExceptionHandlerMock.handleException(isA(Throwable.class), isA(ErrorDescriptor.class))).thenReturn(new ErrorDescriptor().setMessage("test"));
     }
 
     @Test

@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: utils.common.js 9218 2015-08-20 19:56:16Z yplakosh $
+ * @version: $Id: utils.common.js 9400 2015-09-23 21:10:46Z inestere $
  */
 
 /**
@@ -3071,7 +3071,7 @@ var tracer = {
 // Validation module
 ////////////////////////////////
 var ValidationModule = {
-    /**
+    /*
      * Main entry point into validation system. You should call this method to validate your input elements.
      *
      * @param validationEntries array of validation entries or single validation entry. See validateEntry for format.
@@ -3090,7 +3090,7 @@ var ValidationModule = {
         return valid;
     },
 
-    /**
+    /*
      * Performs validation specified by validationEntry
      *
      * @param validationEntry. Expected format:
@@ -3394,14 +3394,19 @@ var ValidationModule = {
      */
     showError: function(element, errorMessage, detailsMessage) {
         this._showMessage(element, errorMessage, layoutModule.ERROR_CLASS, layoutModule.MESSAGE_WARNING_PATTERN);
+        var msgContainer = element.validatorMessageContainer || element.parentNode;
         if (detailsMessage) {
-            var msgContainer = element.validatorMessageContainer || element.parentNode;
             var detailsBtn = $(msgContainer).select(layoutModule.DETAILS_PATTERN)[0];
             if (detailsBtn) {
                 detailsBtn.stopObserving('click').observe('click', function() {
                     dialogs.errorPopup.show(detailsMessage, true);
                 }.bindAsEventListener(this));
             }
+        }
+        else {   //hide Show Details link if there are no details
+            var showDetails = $(msgContainer).select(layoutModule.MESSAGE_WARNING_DETAILS_PATTERN)[0];
+            if (showDetails)
+                $(showDetails).hide();
         }
     },
 

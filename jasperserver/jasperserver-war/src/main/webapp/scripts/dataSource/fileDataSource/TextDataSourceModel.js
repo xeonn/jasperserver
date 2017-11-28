@@ -22,7 +22,7 @@
 
 /**
  * @author: Dima Gorbenko
- * @version: $Id: TextDataSourceModel.js 8179 2015-01-27 12:34:21Z psavushchik $
+ * @version: $Id: TextDataSourceModel.js 9400 2015-09-23 21:10:46Z inestere $
  */
 
 define(function (require) {
@@ -31,7 +31,7 @@ define(function (require) {
     var _ = require("underscore"),
         i18n = require("bundle!jasperserver_messages"),
         jrsConfigs = require('jrs.configs'),
-        request = require("common/transport/request"),
+        request = require("request"),
         characterEncodings = require("dataSource/fileDataSource/enum/characterEncodings"),
         delimitersTextDataSource = require("dataSource/fileDataSource/enum/delimitersTextDataSource"),
         FileDataSourceModel = require("dataSource/fileDataSource/FileDataSourceModel");

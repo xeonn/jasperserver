@@ -24,32 +24,27 @@
  * Pagination component.
  *
  * @author: Taras Bidyuk
- * @version: $Id: Pagination.js 812 2015-01-27 11:01:30Z psavushchik $
+ * @version: $Id: Pagination.js 1605 2015-09-23 17:55:32Z inestere $
  */
 
 define(function (require) {
     "use strict";
 
     var Backbone = require("backbone"),
-        $ = require("jquery"),
-        template = require("text!common/component/pagination/template/paginationContentTemplate.htm"),
-        containerTemplate = require("text!common/component/pagination/template/paginationContainerTemplate.htm"),
+        template = require("text!./template/paginationContentTemplate.htm"),
+        containerTemplate = require("text!./template/paginationContainerTemplate.htm"),
         PaginationModel = require("./model/PaginationModel"),
-        i18n = require("bundle!CommonBundle"),
+        i18n = require("bundle!js-sdk/CommonBundle"),
         _ = require("underscore");
 
-    require("css!pagination.css");
+    require("css!pagination");
 
     var DEFAULT_SET_OPTIONS = {
         silent: false,
         validate: true
     };
 
-    return Backbone.View.extend(
-        /** @lends Pagination.prototype */
-        {
-
-
+    return Backbone.View.extend(/** @lends Pagination.prototype */{
         template: _.template(template),
 
         el: containerTemplate,
@@ -64,10 +59,16 @@ define(function (require) {
 
         /**
          * @constructor Pagination
+         * @class Pagination
          * @classdesc Pagination component.
+         * @extends Backbone.View
          * @param {object} options
          * @param {boolean} [options.silent=false] - turn on/off events
          * @param {boolean} [options.validate=true] - turn on/off validation
+         * @param {number} [options.step=1] - step in pages when pressing next/previous buttons
+         * @param {number} [options.current=1] - current page
+         * @param {number} [options.total=1] - number of total pages
+         * @fires Pagination#pagination:error
          */
         constructor: function(options){
             var options = options || {};
@@ -88,6 +89,8 @@ define(function (require) {
          */
         firstPage: function(){
             this.model.set("current", 1, this.options);
+
+            /** @event Pagination#pagination:change */
             this.trigger("pagination:change", this.model.get("current"));
         },
 
@@ -136,9 +139,10 @@ define(function (require) {
          * @description Triggered on error.
          * @param {object} model - Pagination model
          * @param {object} error - Error object
-         * @fires Pagination#pagination:error
+         * @private
          */
         onError: function(model, error){
+            /** @event Pagination#pagination:error */
             this.trigger("pagination:error", error);
         },
 
@@ -157,20 +161,29 @@ define(function (require) {
         },
 
         /**
-         * @description Triggered on error.
-         * @fires Pagination#pagination:error
+         * @description Reset pagination validate and silent options.
+         * @param {object} options
+         * @param {boolean} [options.silent=false] - turn on/off events
+         * @param {boolean} [options.validate=true] - turn on/off validation
          */
         resetSetOptions: function(options){
             this.options = options ? _.extend({}, DEFAULT_SET_OPTIONS, _.pick(options, ["silent", "validate"])) : DEFAULT_SET_OPTIONS;
         },
 
         /**
-         * @description Renders pagination.
+         * @description Render pagination.
          * @returns {Pagination}
          */
         render: function(){
             this.$el.html(this.template(_.extend({i18n: i18n}, this.model.toJSON())));
             return this;
+        },
+
+        /**
+         * @description Remove pagination from DOM.
+         */
+        remove: function() {
+            Backbone.View.prototype.remove.apply(this, arguments);
         }
     });
 });

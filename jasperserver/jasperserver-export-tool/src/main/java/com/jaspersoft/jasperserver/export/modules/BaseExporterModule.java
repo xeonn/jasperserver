@@ -24,18 +24,14 @@ package com.jaspersoft.jasperserver.export.modules;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
-import com.jaspersoft.jasperserver.api.JSException;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.InternalURI;
-import com.jaspersoft.jasperserver.api.metadata.user.domain.ObjectPermission;
-import com.jaspersoft.jasperserver.api.metadata.user.domain.ProfileAttribute;
-import com.jaspersoft.jasperserver.api.metadata.user.domain.Role;
-import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
-import com.jaspersoft.jasperserver.api.metadata.user.service.ObjectPermissionService;
+import com.jaspersoft.jasperserver.api.metadata.user.domain.*;
+import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributeGroup;
+import com.jaspersoft.jasperserver.api.metadata.user.service.TenantService;
 import com.jaspersoft.jasperserver.export.modules.common.ProfileAttributeBean;
-import com.jaspersoft.jasperserver.export.modules.repository.beans.PermissionRecipient;
+import com.jaspersoft.jasperserver.export.modules.repository.RepositoryExportFilter;
 import com.jaspersoft.jasperserver.export.modules.repository.beans.RepositoryObjectPermissionBean;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -51,9 +47,9 @@ import com.jaspersoft.jasperserver.export.util.CommandOut;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: BaseExporterModule.java 54590 2015-04-22 17:55:42Z vzavadsk $
+ * @version $Id: BaseExporterModule.java 58265 2015-10-05 16:13:56Z vzavadsk $
  */
-public abstract class BaseExporterModule implements ExporterModule {
+public abstract class BaseExporterModule extends BasicExporterImporterModule implements ExporterModule {
 
 	private static final Log log = LogFactory.getLog(BaseExporterModule.class);
 	
@@ -69,10 +65,21 @@ public abstract class BaseExporterModule implements ExporterModule {
 	protected ExecutionContext executionContext;
 	protected boolean exportEverything;
 
-	private ObjectPermissionService permissionService;
-	private String permissionRecipientRole;
-	private String permissionRecipientUser;
-	
+	protected String includeAttributes;
+	protected String skipAttributeValues;
+
+	protected TenantService tenantService;
+
+	/**
+	* Export works on behalf of the <tt>rootTenant</tt>. <tt>rootTenant</tt> equals <tt>null</tt>
+	* when superuser is doing export
+	*/
+	protected Tenant rootTenant;
+
+	//export filter; nothing is filtered by default
+	protected RepositoryExportFilter exportFilter;
+	protected String includeSettingsArg;
+
 	public void setId(String id) {
 		this.id = id;
 	}
@@ -88,6 +95,8 @@ public abstract class BaseExporterModule implements ExporterModule {
 		this.output = moduleContext.getExportTask().getOutput();
 		this.executionContext = moduleContext.getExportTask().getExecutionContext();
 		this.exportEverything = isExportEverything();
+
+		rootTenant = exportContext.getExportTask().getRootTenant();
 	}
 
 	protected boolean isExportEverything() {
@@ -199,30 +208,6 @@ public abstract class BaseExporterModule implements ExporterModule {
 		return executionContext;
 	}
 
-	public ObjectPermissionService getPermissionService() {
-		return permissionService;
-	}
-
-	public void setPermissionService(ObjectPermissionService permissionService) {
-		this.permissionService = permissionService;
-	}
-
-	public String getPermissionRecipientRole() {
-		return permissionRecipientRole;
-	}
-
-	public void setPermissionRecipientRole(String permissionRecipientRole) {
-		this.permissionRecipientRole = permissionRecipientRole;
-	}
-
-	public String getPermissionRecipientUser() {
-		return permissionRecipientUser;
-	}
-
-	public void setPermissionRecipientUser(String permissionRecipientUser) {
-		this.permissionRecipientUser = permissionRecipientUser;
-	}
-
 	public RepositoryObjectPermissionBean[] handlePermissions(InternalURI object) {
 		List permissions = permissionService.getObjectPermissionsForObject(executionContext, object);
 		RepositoryObjectPermissionBean[] permissionBeans;
@@ -245,47 +230,59 @@ public abstract class BaseExporterModule implements ExporterModule {
 	protected RepositoryObjectPermissionBean toPermissionBean(ObjectPermission permission) {
 		RepositoryObjectPermissionBean permissionBean = new RepositoryObjectPermissionBean();
 
-		Object permissionRecipient = permission.getPermissionRecipient();
-		if (permissionRecipient instanceof Role) {
-			Role role = (Role) permissionRecipient;
-			permissionBean.setRecipient(
-					new PermissionRecipient(getPermissionRecipientRole(),
-							role.getTenantId(), role.getRoleName()));
-		} else if (permissionRecipient instanceof User) {
-			User user = (User) permissionRecipient;
-			permissionBean.setRecipient(
-					new PermissionRecipient(getPermissionRecipientUser(),
-							user.getTenantId(), user.getUsername()));
-		} else {
-			// Adding non localized message cause import-export tool does not support localization.
-			StringBuilder message = new StringBuilder("Permission recipient type ");
-			message.append(permissionRecipient.getClass().getName());
-			message.append(" is not recognized.");
-			throw new JSException(message.toString());
-		}
-
+		permissionBean.setRecipient(toPermissionRecipient(permission.getPermissionRecipient()));
 		permissionBean.setPermissionMask(permission.getPermissionMask());
 
 		return permissionBean;
 	}
 
 	public ProfileAttributeBean[] prepareAttributesBeans(List userAttributes) {
-		ProfileAttributeBean[] attributes;
-
 		if (userAttributes == null || userAttributes.isEmpty()) {
-			attributes = null;
-		} else {
-			attributes = new ProfileAttributeBean[userAttributes.size()];
-			int idx = 0;
-			for (Iterator it = userAttributes.iterator(); it
-					.hasNext(); ++idx) {
-				ProfileAttribute attr = (ProfileAttribute) it.next();
-				attributes[idx] = new ProfileAttributeBean();
-				attributes[idx].copyFrom(attr);
-				attributes[idx].setPermissions(handlePermissions(attr));
-			}
+			return null;
 		}
+		ArrayList<ProfileAttributeBean> beans = new ArrayList<ProfileAttributeBean>();
+		Iterator it = userAttributes.iterator();
+		while (it.hasNext()) {
+			ProfileAttribute attr = (ProfileAttribute) it.next();
+			ProfileAttributeBean bean = new ProfileAttributeBean();
+			bean.copyFrom(attr);
+			if (attr.getGroup().equals(ProfileAttributeGroup.CUSTOM.toString())) {
+				if (!exportEverything && !hasParameter(includeAttributes)) continue;
 
-		return attributes;
+				if (hasParameter(skipAttributeValues)) {
+					bean.setValue("");
+				}
+			} else {
+				if (!exportEverything && !hasParameter(includeSettingsArg)) continue;
+			}
+			bean.setPermissions(handlePermissions(attr));
+			beans.add(bean);
+		}
+		ProfileAttributeBean[] attributes = new ProfileAttributeBean[beans.size()];
+		return beans.toArray(attributes);
+	}
+
+	public void setIncludeAttributes(String includeAttributes) {
+		this.includeAttributes = includeAttributes;
+	}
+
+	public void setSkipAttributeValues(String skipAttributeValues) {
+		this.skipAttributeValues = skipAttributeValues;
+	}
+
+	public TenantService getTenantService() {
+		return tenantService;
+	}
+
+	public void setTenantService(TenantService tenantService) {
+		this.tenantService = tenantService;
+	}
+
+	public void setExportFilter(RepositoryExportFilter exportFilter) {
+		this.exportFilter = exportFilter;
+	}
+
+	public void setIncludeSettingsArg(String includeSettingsArg) {
+		this.includeSettingsArg = includeSettingsArg;
 	}
 }

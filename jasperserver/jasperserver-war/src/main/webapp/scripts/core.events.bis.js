@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: core.events.bis.js 9192 2015-08-12 19:52:08Z yplakosh $
+ * @version: $Id: core.events.bis.js 9551 2015-10-13 14:09:03Z dgorbenk $
  */
 
 /* global isSupportsTouch, matchMeOrUp, layoutModule, isIPad, isRightClick, isIE, hasDisabledAttributeSet,
@@ -191,7 +191,7 @@ document.observe('dom:loaded', function(event) {
     });
 
     jQuery('#frame').on('touchend mouseup',layoutModule.TABSET_TAB_PATTERN,function(evt){
-        if(!hasDisabledAttributeSet(this)){
+        if(!hasDisabledAttributeSet(this) && jQuery(this.parentNode).attr("disableCoreEvents") !== "true") {
             jQuery(this).siblings().removeClass(layoutModule.SELECTED_CLASS).each(function(index,element){
                 jQuery(jQuery(this).attr("tabId")).addClass("hidden");
             });

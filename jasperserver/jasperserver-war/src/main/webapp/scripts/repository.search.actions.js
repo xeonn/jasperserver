@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: repository.search.actions.js 8900 2015-05-06 20:57:14Z yplakosh $
+ * @version: $Id: repository.search.actions.js 9551 2015-10-13 14:09:03Z dgorbenk $
  */
 
 /* global repositorySearch, SearchBox, toolbarButtonModule, toFunction, getAsFunction, localContext, isArray, JSCookie,
@@ -187,12 +187,18 @@ repositorySearch.folderActionFactory = {
 
     "Export":function (folder) {
         return new repositorySearch.Action(function () {
-            if (JRS.Export){
-                JRS.Export.App.showDialogFor(folder);
-            }
+            repositorySearch.exportDialog.openRepoDialog(folder);
         });
     }
 };
+
+function parseRepoData(data){
+    if (_.isArray(data)){
+        return _.pluck(data, "URIString");
+    } else{
+        return  [data.URIString];
+    }
+}
 
 repositorySearch.resourceActionFactory = {
     "Copy": function(resource) {
@@ -216,9 +222,7 @@ repositorySearch.resourceActionFactory = {
 
     "Export": function (resource, options) {
         return new repositorySearch.Action(function () {
-            if (JRS.Export){
-                JRS.Export.App.showDialogFor(resource);
-            }
+            repositorySearch.exportDialog.openRepoDialog(resource);
         });
     },
 
@@ -359,9 +363,7 @@ repositorySearch.bulkActionFactory = {
 
     "Export": function (resources) {
            return new repositorySearch.Action(function () {
-               if (JRS.Export){
-                   JRS.Export.App.showDialogFor(resources);
-               }
+               repositorySearch.exportDialog.openRepoDialog(resources);
            });
     }
 };
@@ -451,7 +453,7 @@ repositorySearch.ServerAction.addMethod('onSuccess', doNothing);
  */
 repositorySearch.ServerAction.addMethod('onError', doNothing);
 
-/**
+/*
  * Creates server action instance for repository search actions.
  *
  * @param actionName the name of the search action.
@@ -488,7 +490,7 @@ repositorySearch.ServerAction.createSearchAction = function(actionName, options)
     return action;
 };
 
-/**
+/*
  * Creates server action instance for folder actions.
  *
  * @param actionName the name of the folder action.
@@ -594,7 +596,7 @@ repositorySearch.ServerAction.createFolderAction = function(actionName, options)
     return action;
 };
 
-/**
+/*
  * Creates server action instance for folder actions.
  *
  * @param actionName the name of the folder action.
@@ -724,7 +726,7 @@ repositorySearch.ServerAction.createResourceAction = function(actionName, option
     return action;
 };
 
-/**
+/*
  * Creates server action instance for permissions actions.
  *
  * @param actionName the name of the permission action.
@@ -755,7 +757,7 @@ repositorySearch.ServerAction.createPermissionAction = function(actionName, opti
     return action;
 };
 
-/**
+/*
  * Creates server action instance for permissions actions.
  *
  * @param actionName the name of the permission action.
@@ -1376,7 +1378,7 @@ repositorySearch.RedirectAction.createRunInBackgroundResourceAction = function()
                 'reportUnitURI': resource.URIString,
                 'parentReportUnitURI': resource.parentResource ? resource.parentResource.URIString : ""
             },
-            hash: 'create' + resource.URIString + '$fast' + reportUnitParentURI,
+            hash: "runInBackground@" + resource.URIString + reportUnitParentURI,
             encode: true
 		});
     }
@@ -1407,7 +1409,7 @@ repositorySearch.RedirectAction.createScheduleAction = function() {
                 'reportUnitURI': resource.URIString,
                 'parentReportUnitURI': resource.parentResource ? resource.parentResource.URIString : ""
             },
-            hash: 'list' + resource.URIString + reportUnitParentURI,
+            hash: resource.URIString + reportUnitParentURI,
             encode: true
 		});
     }

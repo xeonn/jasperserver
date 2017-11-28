@@ -20,7 +20,7 @@
  */
 package com.jaspersoft.jasperserver.jaxrs.common;
 
-import com.jaspersoft.jasperserver.remote.exception.xml.ErrorDescriptor;
+import com.jaspersoft.jasperserver.dto.common.ErrorDescriptor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
@@ -36,9 +36,9 @@ import javax.ws.rs.ext.Provider;
 public class SpringSecurityAccessDeniedExceptionMapper implements ExceptionMapper<AccessDeniedException> {
 
     public Response toResponse(AccessDeniedException exception) {
-        ErrorDescriptor descriptor = new ErrorDescriptor.Builder()
+        ErrorDescriptor descriptor = new ErrorDescriptor()
                 .setErrorCode(com.jaspersoft.jasperserver.remote.exception.AccessDeniedException.ERROR_CODE_ACCESS_DENIED)
-                .setMessage(exception.getLocalizedMessage()).getErrorDescriptor();
+                .setMessage(exception.getLocalizedMessage());
 
         return Response.status(Response.Status.FORBIDDEN).entity(descriptor).build();
     }

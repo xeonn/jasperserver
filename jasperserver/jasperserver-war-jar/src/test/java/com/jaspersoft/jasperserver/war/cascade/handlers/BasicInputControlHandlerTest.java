@@ -26,12 +26,16 @@ import com.jaspersoft.jasperserver.api.metadata.common.domain.InputControl;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceReference;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.client.DataTypeImpl;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.client.InputControlImpl;
-import com.jaspersoft.jasperserver.war.cascade.CachedRepositoryService;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConversionOptions;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConverter;
 import com.jaspersoft.jasperserver.dto.common.validations.DateTimeFormatValidationRule;
-import com.jaspersoft.jasperserver.dto.reports.inputcontrols.InputControlState;
 import com.jaspersoft.jasperserver.dto.common.validations.MandatoryValidationRule;
-import com.jaspersoft.jasperserver.dto.reports.inputcontrols.ReportInputControl;
 import com.jaspersoft.jasperserver.dto.common.validations.ValidationRule;
+import com.jaspersoft.jasperserver.dto.reports.inputcontrols.InputControlState;
+import com.jaspersoft.jasperserver.dto.reports.inputcontrols.ReportInputControl;
+import com.jaspersoft.jasperserver.dto.resources.ClientDataType;
+import com.jaspersoft.jasperserver.war.cascade.CachedRepositoryService;
+import com.jaspersoft.jasperserver.war.cascade.CascadeResourceNotFoundException;
 import com.jaspersoft.jasperserver.war.util.CalendarFormatProvider;
 import org.junit.Assert;
 import org.junit.Before;
@@ -47,6 +51,11 @@ import org.unitils.mock.proxy.ProxyInvocation;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.unitils.mock.ArgumentMatchers.eq;
+import static org.unitils.mock.ArgumentMatchers.same;
 
 /**
  * <p></p>
@@ -69,6 +78,9 @@ public class BasicInputControlHandlerTest  extends InputControlHandlerBaseTest {
     @InjectInto(property = "calendarFormatProvider")
     private Mock<CalendarFormatProvider> calendarFormatProviderMock;
 
+    @InjectInto(property = "dataTypeResourceConverter")
+    private Mock<ToClientConverter> dataTypeResourceConverter;
+
     @Before
     public void init() throws Exception{
         messageSourceMock.performs(new MockBehavior() {
@@ -78,6 +90,44 @@ public class BasicInputControlHandlerTest  extends InputControlHandlerBaseTest {
                 return proxyInvocation.getArguments().get(0);
             }
         }).getMessage(null, null, null);
+        cachedRepositoryServiceMock.resetBehavior();
+        dataTypeResourceConverter.resetBehavior();
+    }
+
+    @Test
+    public void buildReportInputControl_localDataType() throws CascadeResourceNotFoundException {
+        final InputControlImpl inputControl = new InputControlImpl();
+        final DataTypeImpl dataType = new DataTypeImpl();
+        inputControl.setDataType(dataType);
+        final ClientDataType clientDataType = new ClientDataType().setMaxValue("100").setMinValue("10")
+                .setStrictMax(true).setStrictMin(true);
+        dataTypeResourceConverter.returns(clientDataType).toClient(dataType, ToClientConversionOptions.getDefault());
+        final ReportInputControl result = handler.buildReportInputControl(inputControl, null, null);
+        assertNotNull(result);
+        assertEquals(clientDataType, result.getDataType());
+    }
+
+    @Test
+    public void buildReportInputControl_referenceDataType() throws CascadeResourceNotFoundException {
+        final InputControlImpl inputControl = new InputControlImpl();
+        final DataTypeImpl dataType = new DataTypeImpl();
+        final String referenceUri = "/test/resource/reference";
+        inputControl.setDataTypeReference(referenceUri);
+        final ClientDataType clientDataType = new ClientDataType().setMaxValue("100").setMinValue("10")
+                .setStrictMax(true).setStrictMin(true);
+        // usage of ArgumentMatcher here somehow conflicts with mockito. I have no idea why, but the only way to fix it
+        // was to specify behaviour in a way below avoiding argument matchers
+        dataTypeResourceConverter.performs(new MockBehavior() {
+            @Override
+            public Object execute(ProxyInvocation proxyInvocation) throws Throwable {
+                final List<Object> arguments = proxyInvocation.getArguments();
+                return arguments.get(0) == dataType ? clientDataType : null;
+            }
+        }).toClient(dataType, ToClientConversionOptions.getDefault());
+        cachedRepositoryServiceMock.returns(dataType).getResource(same(DataType.class), eq(referenceUri));
+        final ReportInputControl result = handler.buildReportInputControl(inputControl, null, null);
+        assertNotNull(result);
+        assertEquals(clientDataType, result.getDataType());
     }
 
     @Test
@@ -85,10 +135,10 @@ public class BasicInputControlHandlerTest  extends InputControlHandlerBaseTest {
         InputControl inputControl = new InputControlImpl();
         inputControl.setMandatory(true);
         List<ValidationRule> validationRules = handler.getValidationRules(inputControl);
-        Assert.assertNotNull(validationRules);
+        assertNotNull(validationRules);
         Assert.assertFalse(validationRules.isEmpty());
         MandatoryValidationRule mandatoryValidationRule = getValidationRule(validationRules, MandatoryValidationRule.class);
-        Assert.assertNotNull(mandatoryValidationRule);
+        assertNotNull(mandatoryValidationRule);
         // mocked message source returns error code as result message
         Assert.assertEquals(MandatoryValidationRule.ERROR_KEY, mandatoryValidationRule.getErrorMessage());
         // check case for nonmandatory
@@ -139,30 +189,30 @@ public class BasicInputControlHandlerTest  extends InputControlHandlerBaseTest {
         dataType.setDataTypeType(DataType.TYPE_DATE);
         List<ValidationRule> validationRules = handler.getValidationRules(inputControl);
         List<DateTimeFormatValidationRule> rules = getValidationRules(validationRules, DateTimeFormatValidationRule.class);
-        Assert.assertNotNull(rules);
+        assertNotNull(rules);
         Assert.assertTrue(rules.size() == 1);
         DateTimeFormatValidationRule rule = rules.get(0);
-        Assert.assertNotNull(rule);
+        assertNotNull(rule);
         Assert.assertEquals(DateTimeFormatValidationRule.INVALID_DATE, rule.getErrorMessage());
         Assert.assertEquals(expectedDatePattern, rule.getFormat());
         // case with type datetime
         dataType.setDataTypeType(DataType.TYPE_DATE_TIME);
         validationRules = handler.getValidationRules(inputControl);
         rules = getValidationRules(validationRules, DateTimeFormatValidationRule.class);
-        Assert.assertNotNull(rules);
+        assertNotNull(rules);
         Assert.assertTrue(rules.size() == 1);
         rule = rules.get(0);
-        Assert.assertNotNull(rule);
+        assertNotNull(rule);
         Assert.assertEquals(DateTimeFormatValidationRule.INVALID_DATE_TIME, rule.getErrorMessage());
         Assert.assertEquals(expectedDateTimePattern, rule.getFormat());
         // case with type time
         dataType.setDataTypeType(DataType.TYPE_TIME);
         validationRules = handler.getValidationRules(inputControl);
         rules = getValidationRules(validationRules, DateTimeFormatValidationRule.class);
-        Assert.assertNotNull(rules);
+        assertNotNull(rules);
         Assert.assertTrue(rules.size() == 1);
         rule = rules.get(0);
-        Assert.assertNotNull(rule);
+        assertNotNull(rule);
         Assert.assertEquals(DateTimeFormatValidationRule.INVALID_TIME, rule.getErrorMessage());
         Assert.assertEquals(expectedTimePattern, rule.getFormat());
     }
@@ -178,7 +228,7 @@ public class BasicInputControlHandlerTest  extends InputControlHandlerBaseTest {
         handlerPartialMock.returns(expectedType).getType(inputControl, uiType);
         handlerPartialMock.returns(validationRules).getValidationRules(inputControl);
         final ReportInputControl reportInputControl = handlerPartialMock.getMock().buildReportInputControl(inputControl, uiType, null);
-        Assert.assertNotNull(reportInputControl);
+        assertNotNull(reportInputControl);
         Assert.assertSame(validationRules, reportInputControl.getValidationRules());
         Assert.assertEquals(expectedType, reportInputControl.getType());
         Assert.assertEquals(inputControl.getURI(), reportInputControl.getUri());

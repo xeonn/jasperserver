@@ -22,21 +22,93 @@
 
 /**
  * @author: Zakhar Tomchenko, Kostiantyn Tsaregradskyi
- * @version: $Id: abstractPanelTrait.js 270 2014-10-13 19:58:03Z agodovanets $
+ * @version: $Id: abstractPanelTrait.js 1605 2015-09-23 17:55:32Z inestere $
  */
 
 define(function() {
-    return {
+    "use strict";
+
+    /**
+     * @mixin abstractPanelTrait
+     * @description Abstract trait for Panel. Should be extended with concrete implementation.
+     */
+    var abstractPanelTrait = {
+        /**
+         * @abstract
+         * @memberof! abstractPanelTrait
+         * @description Additional methods to expose through Panel's API.
+         */
         extension: {},
+
+        /**
+         * @abstract
+         * @memberof! abstractPanelTrait
+         * @description Method to call inside Panel's constructor.
+         */
         onConstructor: function() {},
+
+        /**
+         * @abstract
+         * @memberof! abstractPanelTrait
+         * @description Method to call before Panel initialization.
+         */
         beforeInitialize: function() {},
+
+        /**
+         * @abstract
+         * @description Method to call after Panel initialization.
+         */
         afterInitialize: function() {},
+
+        /**
+         * @abstract
+         * @memberof! abstractPanelTrait
+         * @description Method to call before Panel element is set.
+         */
         beforeSetElement: function() {},
+
+        /**
+         * @abstract
+         * @memberof! abstractPanelTrait
+         * @description Method to call after Panel element is set.
+         */
         afterSetElement: function() {},
+
+        /**
+         * @abstract
+         * @memberof! abstractPanelTrait
+         * @description Method to call before Panel is opened.
+         */
         beforeOpen: function() {},
+
+        /**
+         * @abstract
+         * @memberof! abstractPanelTrait
+         * @description Method to call after Panel is opened.
+         */
         afterOpen: function() {},
+
+        /**
+         * @abstract
+         * @memberof! abstractPanelTrait
+         * @description Method to call before Panel is closed.
+         */
         beforeClose: function() {},
+
+        /**
+         * @abstract
+         * @memberof! abstractPanelTrait
+         * @description Method to call after Panel is closed.
+         */
         afterClose: function() {},
+
+        /**
+         * @abstract
+         * @memberof! abstractPanelTrait
+         * @description Method to call when Panel is removed.
+         */
         onRemove: function() {}
-    }
+    };
+
+    return abstractPanelTrait;
 });

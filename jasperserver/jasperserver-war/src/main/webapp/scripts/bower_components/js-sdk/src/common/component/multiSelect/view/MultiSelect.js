@@ -42,10 +42,11 @@ define(function (require) {
         AvailableItemsList = require("common/component/multiSelect/view/AvailableItemsList"),
         SelectedItemsList = require("common/component/multiSelect/view/SelectedItemsList"),
         SelectedItemsDataProvider = require("common/component/multiSelect/dataprovider/SelectedItemsDataProvider"),
-        NumberUtil = require("common/util/parse/number"),
+        NumberUtils = require("common/util/parse/NumberUtils"),
+        numberUtils = new NumberUtils(),
         browserDetection = require("common/util/browserDetection"),
         multiSelectTemplate = require("text!common/component/multiSelect/templates/multiSelectTemplate.htm"),
-        i18n = require("bundle!ScalableInputControlsBundle"),
+        i18n = require("bundle!js-sdk/ScalableInputControlsBundle"),
         xssUtil = require("common/util/xssUtil"),
         doCalcOnVisibleNodeClone = require("common/component/list/util/domAndCssUtil").doCalcOnVisibleNodeClone;
 
@@ -284,7 +285,7 @@ define(function (require) {
 
             // sets label appropriately on tabs
         _setToggleLabel: function (target, count, text) {
-            var labelCount = NumberUtil.formatNumber(count),
+            var labelCount = numberUtils.formatNumber(count),
                 $labelEl = this.$el.find(target + ' .m-Multiselect-toggleLabel'),
                 labelText = text + ': ' +  labelCount;
 

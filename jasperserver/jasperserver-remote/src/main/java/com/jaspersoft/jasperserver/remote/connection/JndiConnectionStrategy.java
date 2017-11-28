@@ -20,6 +20,7 @@
 */
 package com.jaspersoft.jasperserver.remote.connection;
 
+import com.jaspersoft.jasperserver.api.common.error.handling.SecureExceptionHandler;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl.BaseJdbcDataSource;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.JndiJdbcReportDataSource;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.service.ReportDataSourceServiceFactory;
@@ -38,7 +39,7 @@ import java.util.Map;
  * <p></p>
  *
  * @author yaroslav.kovalchyk
- * @version $Id: JndiConnectionStrategy.java 50011 2014-10-09 16:57:26Z vzavadskii $
+ * @version $Id: JndiConnectionStrategy.java 57603 2015-09-15 17:20:48Z psavushc $
  */
 @Service
 public class JndiConnectionStrategy implements ConnectionManagementStrategy<ClientJndiJdbcDataSource> {
@@ -47,6 +48,8 @@ public class JndiConnectionStrategy implements ConnectionManagementStrategy<Clie
     private ReportDataSourceServiceFactory dataSourceFactory;
     @Resource
     private JndiJdbcDataSourceResourceConverter dataSourceResourceConverter;
+    @Resource
+    private SecureExceptionHandler secureExceptionHandler;
 
     @Override
     public ClientJndiJdbcDataSource createConnection(ClientJndiJdbcDataSource connectionDescription, Map<String, Object> data) throws IllegalParameterValueException {
@@ -65,7 +68,7 @@ public class JndiConnectionStrategy implements ConnectionManagementStrategy<Clie
         }
         if(!passed){
             throw new ConnectionFailedException(connectionDescription.getJndiName(), "jndiName", "Invalid JNDI name: "
-                    + connectionDescription.getJndiName(), exception);
+                    + connectionDescription.getJndiName(), exception, secureExceptionHandler);
         }
         return connectionDescription;
     }

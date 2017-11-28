@@ -22,7 +22,7 @@
 
 /**
  * @author: Dima Gorbenko
- * @version: $Id: DataSourceController.js 9093 2015-07-27 10:20:35Z dgorbenk $
+ * @version: $Id: DataSourceController.js 9614 2015-11-09 16:51:06Z dgorbenk $
  */
 
 /* global dialogs, redirectToUrl */
@@ -37,7 +37,7 @@ define(function (require) {
         BaseDataSourceModel = require("dataSource/model/BaseDataSourceModel"),
 		TouchController = require("touchcontroller"),
         featureDetection = require("common/util/featureDetection"),
-		history = require("common/util/historyHelper"),
+		history = require("util/historyHelper"),
         dataSourceViewFactory = require("dataSource/factory/dataSourceViewFactory"),
         dataSourceResourceTypes = require("dataSource/enum/dataSourceResourceTypes"),
         saveDialogViewFactory = require("dataSource/factory/saveDialogViewFactory"),
@@ -272,48 +272,68 @@ define(function (require) {
 		},
 
 		_onSaveFail: function(model, xhr) {
-			var response = false, msg;
-			try { response = JSON.parse(xhr.responseText); } catch(e) {}
 
-			// check if we faced Conflict issue, it's when we are trying to save DS under existing resourceID
-			if (response.errorCode === "version.not.match") {
-				this.dataSourceView.fieldIsInvalid(
-					this.dataSourceView,
-					"name",
-					i18n["resource.dataSource.resource.exists"],
-					"name"
-				);
-				return;
-			}
-			if (response.errorCode === "folder.not.found") {
-				this.dataSourceView.fieldIsInvalid(
-					this.dataSourceView,
-					"parentFolderUri",
-					i18n["ReportDataSourceValidator.error.folder.not.found"].replace("{0}", response.parameters[0]),
-					"name"
-				);
-				return;
-			}
-			if (response.errorCode === "access.denied") {
-				this.dataSourceView.fieldIsInvalid(
-					this.dataSourceView,
-					"parentFolderUri",
-					i18n["jsp.accessDenied.errorMsg"],
-					"name"
-				);
-				return;
+			if (this.saveDialog) {
+				this.saveDialog.close();
+				this.saveDialog.remove();
 			}
 
-			// otherwise, proceed with common error handling
+			var self = this, errors = false, msg;
+			var handled = false;
+			try { errors = JSON.parse(xhr.responseText); } catch(e) {}
 
-			msg = "Failed to save data source.";
+			if (!_.isArray(errors)) {
+				errors = [errors];
+			}
 
-			if (response[0] && response[0].errorCode) msg += "<br/>The reason is: " + response[0].errorCode;
-			else if (response.message) msg += "<br/>The reason is: " + response.message;
+			_.each(errors, function(error){
 
-			msg += "<br/><br/>The full response from the server is: " + xhr.responseText;
+				var field = false, msg = false;
 
-			dialogs.errorPopup.show(msg);
+				if (!error) {
+					return;
+				}
+
+				if (error.errorCode === "mandatory.parameter.error") {
+					if (error.parameters && error.parameters[0]) {
+						msg = i18n["resource.datasource.saveDialog.parameterIsMissing"];
+						field = error.parameters[0].substr(error.parameters[0].indexOf(".") + 1);
+					}
+				}
+
+				else if (error.errorCode === "illegal.parameter.value.error") {
+					if (error.parameters && error.parameters[0]) {
+						field = error.parameters[0].substr(error.parameters[0].indexOf(".") + 1);
+						msg = i18n["resource.datasource.saveDialog.parameterIsWrong"];
+					}
+				}
+
+				// converting field names
+				if (field === "ConnectionUrl") {
+					field = "connectionUrl";
+				}
+
+				if (msg && field) {
+					self.dataSourceView.invalidField(
+						"[name=" + field + "]",
+						msg
+					);
+					handled = true;
+				}
+			});
+
+			if (handled === false) {
+				// otherwise, proceed with common error handling
+
+				msg = "Failed to save data source.";
+
+				if (errors[0] && errors[0].errorCode) msg += "<br/>The reason is: " + errors[0].errorCode;
+				else if (errors.message) msg += "<br/>The reason is: " + errors.message;
+
+				msg += "<br/><br/>The full response from the server is: " + xhr.responseText;
+
+				dialogs.errorPopup.show(msg);
+			}
 		},
 
 		onCancelClick: function() {

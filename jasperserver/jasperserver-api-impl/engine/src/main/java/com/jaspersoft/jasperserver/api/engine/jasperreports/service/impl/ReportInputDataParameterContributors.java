@@ -21,13 +21,8 @@
 package com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import net.sf.jasperreports.engine.JasperReport;
-import net.sf.jasperreports.engine.util.Pair;
-import net.sf.jasperreports.types.date.DateRange;
 
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.domain.impl.ReportUnitRequestBase;
@@ -36,19 +31,23 @@ import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceReference;
 import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.util.RepositoryUtils;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportUnit;
 
+import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.util.Pair;
+import net.sf.jasperreports.types.date.DateRange;
+
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ReportInputDataParameterContributors.java 55164 2015-05-06 20:54:37Z mchan $
+ * @version $Id: ReportInputDataParameterContributors.java 58870 2015-10-27 22:30:55Z esytnik $
  */
 public class ReportInputDataParameterContributors implements ReportDataParameterContributor {
 	
 	private ReportLoadingService reportLoadingService;
 
 	@Override
-	public Map<String, Object> getDataParameters(ExecutionContext context, 
-			ReportUnitRequestBase request, ReportUnit reportUnit, JasperReport report) {
+	public void addDataParameters(ExecutionContext context, 
+			ReportUnitRequestBase request, ReportUnit reportUnit, JasperReport report,
+			ReportDataParameters parameters) {
 		// input control values are used as data parameters
-		Map<String, Object> inputParams = new HashMap<String, Object>();
 		Map<String, Object> params = request.getReportParameters();
 		List<ResourceReference> inputControls = getReportLoadingService().getInputControlReferences(context, reportUnit);
 		if (inputControls != null) {
@@ -57,11 +56,10 @@ public class ReportInputDataParameterContributors implements ReportDataParameter
 				if (paramName != null) {
 					Object value = params == null ? null : params.get(paramName);
 					Object dataValue = toDataValue(value);
-					inputParams.put(paramName, dataValue);
+					parameters.addDataParameter(paramName, dataValue);
 				}
 			}
 		}
-		return inputParams;
 	}
 	
 	protected Object toDataValue(Object value) {

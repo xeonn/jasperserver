@@ -20,6 +20,8 @@
 */
 package com.jaspersoft.jasperserver.dto.resources;
 
+import java.io.Serializable;
+
 /**
  * <p></p>
  *
@@ -29,9 +31,9 @@ package com.jaspersoft.jasperserver.dto.resources;
  *                     Even superclass' setters returns correct type of resource.
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: ClientResource.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: ClientResource.java 58870 2015-10-27 22:30:55Z esytnik $
  */
-public abstract class ClientResource<BuilderType extends ClientResource<BuilderType>> implements ClientUriHolder {
+public abstract class ClientResource<BuilderType extends ClientResource<BuilderType>> implements ClientUriHolder, Serializable {
     private Integer version;
     private Integer permissionMask;
     private String creationDate;

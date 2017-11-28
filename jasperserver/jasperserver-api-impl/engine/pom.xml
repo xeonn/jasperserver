@@ -10,7 +10,7 @@
     <parent>
         <groupId>com.jaspersoft.jasperserver</groupId>
         <artifactId>jasperserver-api-impl</artifactId>
-        <version>6.1.1</version>
+        <version>6.2.0</version>
     </parent>
     <dependencies>
         <dependency>
@@ -21,27 +21,27 @@
 	    <dependency>
             <groupId>org.jboss.teiid</groupId>
             <artifactId>teiid-api</artifactId>
-            <version>8.10.0.Final</version>
+            <version>8.11.1</version>
         </dependency>
         <dependency>
             <groupId>org.jboss.teiid</groupId>
             <artifactId>teiid-client</artifactId>
-            <version>8.10.0.Final</version>
+            <version>8.11.1</version>
         </dependency>
         <dependency>
             <groupId>org.jboss.teiid</groupId>
             <artifactId>teiid-common-core</artifactId>
-            <version>8.10.0.Final</version>
+            <version>8.11.1</version>
         </dependency>
         <dependency>
             <groupId>org.jboss.teiid</groupId>
             <artifactId>teiid-metadata</artifactId>
-            <version>8.10.0.Final</version>
+            <version>8.11.1</version>
         </dependency>
         <dependency>
             <groupId>org.jboss.teiid</groupId>
             <artifactId>teiid-engine</artifactId>
-            <version>8.10.0.Final</version>
+            <version>8.11.1</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.jboss.as</groupId>
@@ -68,7 +68,7 @@
         <dependency>
             <groupId>org.jboss.teiid</groupId>
             <artifactId>teiid-runtime</artifactId>
-            <version>8.10.0.Final</version>
+            <version>8.11.1</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.rhq.helpers</groupId>
@@ -95,16 +95,16 @@
         <dependency>
             <groupId>org.jboss.teiid.connectors</groupId>
             <artifactId>translator-jdbc</artifactId>
-            <version>8.10.0.Final</version>
+            <version>8.11.1</version>
         </dependency>
         <dependency>
             <groupId>org.jboss.teiid.connectors</groupId>
             <artifactId>connector-file</artifactId>
             <classifier>lib</classifier>
-            <version>8.10.0.Final</version>
+            <version>8.11.1</version>
         </dependency>
         <!--  MONGODB DEPENDENCIES  -->
-        <dependency>
+        <!--  dependency>
           <groupId>org.mongodb</groupId>
           <artifactId>mongo-java-driver</artifactId>
           <version>2.12.3</version>
@@ -112,19 +112,19 @@
         <dependency>
             <groupId>org.jboss.teiid.connectors</groupId>
             <artifactId>mongodb-api</artifactId>
-            <version>8.10.0.Final</version>
+            <version>8.11.1</version>
         </dependency>
         <dependency>
             <groupId>org.jboss.teiid.connectors</groupId>
             <artifactId>connector-mongodb</artifactId>
             <classifier>lib</classifier>
-            <version>8.10.0.Final</version>
+            <version>8.11.1</version>
         </dependency>
         <dependency>
             <groupId>org.jboss.teiid.connectors</groupId>
             <artifactId>translator-mongodb</artifactId>
-            <version>8.10.0.Final</version>
-        </dependency>
+            <version>8.11.1</version>
+        </dependency -->
         <!--  CASSANDRA DEPENDENCIES  -->
         <!-- dependency>
             <groupId>org.apache.cassandra</groupId>
@@ -224,7 +224,7 @@
         <dependency>
             <groupId>org.jboss.teiid.connectors</groupId>
             <artifactId>translator-cassandra</artifactId>
-            <version>8.10.0.Final</version>
+            <version>8.11.1</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.datastax.cassandra</groupId>
@@ -236,20 +236,20 @@
             <groupId>org.jboss.teiid.connectors</groupId>
             <artifactId>connector-cassandra</artifactId>
             <classifier>lib</classifier>
-            <version>8.10.0.Final</version>
+            <version>8.11.1</version>
         </dependency>
         <!-- HIVE CONNECTOR  -->
         <dependency>
             <groupId>org.jboss.teiid.connectors</groupId>
             <artifactId>translator-hive</artifactId>
-            <version>8.10.0.Final</version>
+            <version>8.11.1</version>
         </dependency>
-        <!-- OTHER CONNECTOR -->
+        <!-- OTHER CONNECTOR>
         <dependency>
             <groupId>org.jboss.teiid.connectors</groupId>
             <artifactId>translator-file</artifactId>
-            <version>8.10.0.Final</version>
-        </dependency>
+            <version>8.11.1</version>
+        </dependency -->
 		<!-- TEIID DEPENDENCIES  -->
         <dependency>
             <groupId>javax.resource</groupId>
@@ -343,14 +343,10 @@
         <dependency>
             <groupId>commons-logging</groupId>
             <artifactId>commons-logging</artifactId>
-            <version>1.0.4</version>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>commons-dbcp</groupId>
             <artifactId>commons-dbcp</artifactId>
-            <version>1.2.1</version>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>log4j</groupId>
@@ -397,7 +393,7 @@
         <dependency>
             <groupId>commons-net</groupId>
             <artifactId>commons-net</artifactId>
-            <version>3.1</version>
+            <version>3.3</version>
         </dependency>
         <!-- <dependency>
          <groupId>junit</groupId>

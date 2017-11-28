@@ -37,11 +37,11 @@ import javax.ws.rs.ext.Provider;
 public class AccessDeniedExceptionMapper implements ExceptionMapper<AccessDeniedException> {
 
     @Resource(name= "localizedErrorDescriptorBuilder")
-    private LocalizedErrorDescriptorBuilder builder;
+    private LocalizedErrorDescriptorBuilder localizedErrorDescriptorBuilder;
 
     public Response toResponse(AccessDeniedException exception) {
         return Response.status(Response.Status.FORBIDDEN)
-                       .entity(builder.localizeDescriptor(exception.getErrorDescriptor()))
+                       .entity(localizedErrorDescriptorBuilder.localizeDescriptor(exception.getErrorDescriptor()))
                        .build();
     }
 }

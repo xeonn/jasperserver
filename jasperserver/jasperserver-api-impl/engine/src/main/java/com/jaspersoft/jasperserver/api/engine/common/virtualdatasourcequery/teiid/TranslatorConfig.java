@@ -24,11 +24,13 @@ import com.jaspersoft.jasperserver.api.common.virtualdatasourcequery.teiid.Trans
 import com.jaspersoft.jasperserver.api.engine.common.virtualdatasourcequery.impl.TeiidVirtualDataSourceQueryServiceImpl;
 import org.teiid.translator.ExecutionFactory;
 import org.teiid.translator.TranslatorException;
+import org.teiid.translator.jdbc.JDBCExecutionFactory;
+
 import java.lang.reflect.InvocationTargetException;
 
 /**
  * @author Ivan Chan (ichan@jaspersoft.com)
- * @version $Id: TranslatorConfig.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: TranslatorConfig.java 58827 2015-10-23 23:47:48Z mchan $
  */
 public class TranslatorConfig implements TranslatorConfiguration {
 
@@ -37,6 +39,19 @@ public class TranslatorConfig implements TranslatorConfiguration {
     private String translatorName;
     private String translatorFactoryClass;
     private ExecutionFactory translatorFactory;
+
+    public TranslatorConfig() {
+        super();
+    }
+
+    public TranslatorConfig(TranslatorConfig config) {
+        this();
+        productName = config.productName;
+        productVersion = config.productVersion;
+        translatorName = config.translatorName;
+        translatorFactoryClass = config.translatorFactoryClass;
+        translatorFactory = config.translatorFactory;
+    }
 
     public String getProductVersion() {
         return productVersion;
@@ -82,6 +97,9 @@ public class TranslatorConfig implements TranslatorConfiguration {
             IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         if (translatorFactory != null) return;
         translatorFactory = (ExecutionFactory) Class.forName(translatorFactoryClass).getConstructor().newInstance();
+        if (translatorFactory instanceof JDBCExecutionFactory) {
+            if ((getProductVersion() != null)) ((JDBCExecutionFactory)translatorFactory).setDatabaseVersion(getProductVersion());
+        }
         TeiidVirtualDataSourceQueryServiceImpl.getServer().addTranslator(translatorFactory);
         translatorFactory.start();
     }

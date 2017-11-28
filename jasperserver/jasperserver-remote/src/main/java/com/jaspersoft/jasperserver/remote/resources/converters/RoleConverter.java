@@ -20,6 +20,8 @@
  */
 package com.jaspersoft.jasperserver.remote.resources.converters;
 
+import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConversionOptions;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConverter;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.Role;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.client.RoleImpl;
 import com.jaspersoft.jasperserver.dto.authority.ClientRole;

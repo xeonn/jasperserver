@@ -6,6 +6,9 @@
         {{ if (showTransparentInput) { }}
         <div class="color transparent">{{- i18n["color.picker.transparent"]}}</div>
         {{ } }}
+        {{ if (showNoneInput) { }}
+        <div class="color none">{{- i18n["color.picker.none"]}}</div>
+        {{ } }}
         {{ _.each(colors, function(color, index){ }}
         <div class="colorWrapper" data-index="{{- index}}">
             <div class="color" title="{{- color}}" style="background-color: {{- color}}"></div>

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2014 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2015 Jaspersoft Corporation. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -22,7 +22,7 @@
 
 /**
  * @author: Stas Chubar
- * @version: $Id: identityUtil.js 36 2014-06-26 14:36:17Z inesterenko $
+ * @version: $Id: identityUtil.js 1605 2015-09-23 17:55:32Z inestere $
  */
 
 define(function (require) {

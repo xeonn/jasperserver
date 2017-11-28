@@ -29,7 +29,47 @@ package com.jaspersoft.jasperserver.export.service;/*
 */
 public class ImportFailedException extends Exception {
 
+    private String errorCode;
+    private String[] parameters;
+
     public ImportFailedException(String message) {
         super(message);
+
+        errorCode = message;
+    }
+
+    public ImportFailedException(String message, String errorCode, String[] parameters) {
+        super(message);
+
+        this.errorCode = errorCode;
+        this.parameters = parameters;
+    }
+
+    public ImportFailedException(String errorCode, String[] parameters) {
+        super(errorCode);
+
+        this.errorCode = errorCode;
+        this.parameters = parameters;
+    }
+
+    @Override
+    public String getMessage() {
+        return super.getMessage() == null ? errorCode : super.getMessage();
+    }
+
+    public String getErrorCode() {
+        return errorCode == null ? super.getMessage() : errorCode;
+    }
+
+    public void setErrorCode(String errorCode) {
+        this.errorCode = errorCode;
+    }
+
+    public String[] getParameters() {
+        return parameters;
+    }
+
+    public void setParameters(String[] parameters) {
+        this.parameters = parameters;
     }
 }

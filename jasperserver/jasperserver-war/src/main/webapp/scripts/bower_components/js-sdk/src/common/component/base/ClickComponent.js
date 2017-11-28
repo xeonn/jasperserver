@@ -34,10 +34,9 @@ define(function (require) {
 
         /**
          * @constructor ClickComponent
-         * @classdesc ClickComponent
+         * @classdesc Component that is show when element is clicked
          * @extends AttachableComponent
-         * @param {object} attachTo - HTML DOM or jQuery object
-         * @throws {Error} AttachableComponent should be attached to an element if attachTo is missing.
+         * @param {HTMLElement|jQuery} attachTo HTML DOM or jQuery object
          */
         constructor: function(attachTo){
             AttachableComponent.apply(this, arguments);
@@ -57,7 +56,7 @@ define(function (require) {
         },
 
         /**
-         * @description on dicument mouse down handler. Hides component.
+         * @description on document mouse down handler. Hides component.
          * @access protected
          */
         _onDocumentMousedown: function(e) {

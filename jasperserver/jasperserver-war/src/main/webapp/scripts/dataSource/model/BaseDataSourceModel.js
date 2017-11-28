@@ -22,7 +22,7 @@
 
 /**
  * @author: Dima Gorbenko
- * @version: $Id: BaseDataSourceModel.js 8790 2015-04-22 21:28:09Z obobruyk $
+ * @version: $Id: BaseDataSourceModel.js 9599 2015-10-27 19:38:56Z yplakosh $
  */
 
 /* global ajax, dialogs, AjaxRequester */
@@ -31,7 +31,7 @@ define(function (require) {
     "use strict";
 
     var
-		ResourceModel = require("common/model/RepositoryResourceModel"),
+		ResourceModel = require("bi/repo/model/RepositoryResourceModel"),
         _ = require("underscore"),
         $ = require("jquery"),
         Backbone = require("backbone"),
@@ -68,7 +68,7 @@ define(function (require) {
 
 			ResourceModel.prototype.initialize.apply(this, arguments);
         },
-
+        
 		testConnection: function() {
 			this.validate();
 			if (!this._isValid) return;

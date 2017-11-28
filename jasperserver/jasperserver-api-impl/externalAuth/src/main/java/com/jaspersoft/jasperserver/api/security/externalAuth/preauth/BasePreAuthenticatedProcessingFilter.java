@@ -25,8 +25,13 @@ import com.jaspersoft.jasperserver.api.common.crypto.PlainTextNonCipher;
 import com.jaspersoft.jasperserver.api.security.externalAuth.ExternalDataSynchronizer;
 import org.apache.log4j.Logger;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
 
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -88,7 +93,18 @@ public class BasePreAuthenticatedProcessingFilter extends AbstractPreAuthenticat
 		return tokenDecryptor.decrypt(principal);
 	}
 
-	/**
+    @Override
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+            throws IOException, ServletException {
+        if(isJsonResponseRequested((HttpServletRequest) request)){
+            // it's visualize authentication. Correct JSON success response is required here.
+            // The only way to get correct redirect is to authenticate again. So, let's clear security context.
+            SecurityContextHolder.clearContext();
+        }
+        super.doFilter(request, response, chain);
+    }
+
+    /**
 	 * Override to extract the credentials (if applicable) from the current request. Some implementations
 	 * may return a dummy value.
 	 */
@@ -96,27 +112,6 @@ public class BasePreAuthenticatedProcessingFilter extends AbstractPreAuthenticat
 	protected Object getPreAuthenticatedCredentials(HttpServletRequest request) {
 		return "N/A";
 	}
-
-	/**
-	 * Return the order value of this object, with a
-	 * higher value meaning greater in terms of sorting.
-	 * <p>Normally starting with 0, with <code>Integer.MAX_VALUE</code>
-	 * indicating the greatest value. Same order values will result
-	 * in arbitrary positions for the affected objects.
-	 * <p>Higher values can be interpreted as lower priority. As a
-	 * consequence, the object with the lowest value has highest priority
-	 * (somewhat analogous to Servlet "load-on-startup" values).
-	 *
-	 * @return the order value
-	 */
-    // TODO Spring Security Upgrade: clarify getOrder() and FilterChainOrder.PRE_AUTH_FILTER
-/*
-	@Override
-	public int getOrder() {
-		return FilterChainOrder.PRE_AUTH_FILTER;
-	}
-*/
-
 
 	/**
 	 *
@@ -166,11 +161,8 @@ public class BasePreAuthenticatedProcessingFilter extends AbstractPreAuthenticat
 	protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, Authentication authResult) {
 		super.successfulAuthentication(request, response, authResult);
 		externalDataSynchronizer.synchronize();
-        final String accept = request.getHeader("Accept");
-        final String requestURI = request.getRequestURI();
         final String contextPath = request.getContextPath();
-        if (accept != null && accept.toLowerCase().contains("application/json")
-                && (requestURI.equals(contextPath) || requestURI.equals(contextPath + "/"))) {
+        if (isJsonResponseRequested(request)) {
             // authentication JSON response is requested, let's redirect to configured URL
             // this is used by visualize.js authentication
             final String redirectUrl = contextPath + jsonRedirectUrl;
@@ -181,4 +173,13 @@ public class BasePreAuthenticatedProcessingFilter extends AbstractPreAuthenticat
             }
         }
 	}
+
+    protected boolean isJsonResponseRequested(HttpServletRequest request){
+        final String accept = request.getHeader("Accept");
+        final String requestURI = request.getRequestURI();
+        final String contextPath = request.getContextPath();
+        return accept != null && accept.toLowerCase().contains("application/json")
+                && (requestURI.equals(contextPath) || requestURI.equals(contextPath + "/"));
+
+    }
 }

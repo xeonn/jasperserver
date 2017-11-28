@@ -21,6 +21,8 @@
 package com.jaspersoft.jasperserver.remote.resources.converters;
 
 import com.jaspersoft.jasperserver.api.metadata.common.domain.client.ResourceLookupImpl;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConversionOptions;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConverter;
 import com.jaspersoft.jasperserver.dto.resources.ClientResourceLookup;
 import com.jaspersoft.jasperserver.war.cascade.handlers.GenericTypeProcessorRegistry;
 import org.mockito.InjectMocks;
@@ -37,7 +39,7 @@ import static org.testng.Assert.*;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: LookupResourceConverterTest.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: LookupResourceConverterTest.java 58870 2015-10-27 22:30:55Z esytnik $
  */
 public class LookupResourceConverterTest {
     @InjectMocks

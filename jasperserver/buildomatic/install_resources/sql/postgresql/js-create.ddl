@@ -184,7 +184,7 @@
 
     create table JIObjectPermission (
         id int8 not null,
-        uri varchar(250) not null,
+        uri varchar(1000) not null,
         recipientobjectclass varchar(250),
         recipientobjectid int8,
         permissionMask int4 not null,
@@ -238,6 +238,7 @@
         description varchar(2000),
         creation_date timestamp,
         report_unit_uri varchar(250) not null,
+        scheduledResource int8 not null,
         job_trigger int8 not null,
         base_output_name varchar(100) not null,
         output_locale varchar(20),
@@ -642,8 +643,6 @@
         foreign key (mondrianConnection) 
         references JIMondrianConnection;
 
-    create index uri_index on JIObjectPermission (uri);
-
     alter table JIOlapClientConnection 
         add constraint FK3CA3B7D4A8BF376D 
         foreign key (id) 
@@ -693,6 +692,11 @@
         add constraint FK156F5F6A74D2696E 
         foreign key (job_trigger) 
         references JIReportJobTrigger;
+
+    alter table JIReportJob 
+        add constraint FK156F5F6AFF0F459F 
+        foreign key (scheduledResource) 
+        references JIResource;
 
     alter table JIReportJob 
         add constraint FK156F5F6A4141263C 
@@ -877,6 +881,8 @@
 
     create index idx36_resource_id_idx on JIVirtualDataSourceUriMap (resource_id);
 
+    create index uri_index on JIObjectPermission (uri);
+
     create index idx21_recipientobjclass_idx on JIObjectPermission (recipientobjectclass);
 
     create index idx22_recipientobjid_idx on JIObjectPermission (recipientobjectid);
@@ -891,13 +897,25 @@
 
     create index JIUser_tenantId_index on JIUser (tenantId);
 
+    create index idx20_mondrianConnection_idx on JIMondrianXMLADefinition (mondrianConnection);
+
+    create index JIInputControl_data_type_index on JIInputControl (data_type);
+
+    create index JIInputCtrl_list_of_values_idx on JIInputControl (list_of_values);
+
+    create index JIInputControl_list_query_idx on JIInputControl (list_query);
+
+    create index idx15_input_ctrl_id_idx on JIInputControlQueryColumn (input_control_id);
+
+    create index JIQuery_dataSource_index on JIQuery (dataSource);
+
     create index idxA1_resource_id_idx on JICustomDatasourceResource (resource_id);
 
     create index idx16_mondrianSchema_idx on JIMondrianConnection (mondrianSchema);
 
     create index idx17_reportDataSource_idx on JIMondrianConnection (reportDataSource);
 
-    create index idx23_olapClientConnection_idx on JIOlapUnit (olapClientConnection);
+    create index JIFileResource_reference_index on JIFileResource (reference);
 
     create index JIReportUnit_mainReport_index on JIReportUnit (mainReport);
 
@@ -913,16 +931,4 @@
 
     create index idx33_resource_id_idx on JIReportUnitResource (resource_id);
 
-    create index JIQuery_dataSource_index on JIQuery (dataSource);
-
-    create index idx20_mondrianConnection_idx on JIMondrianXMLADefinition (mondrianConnection);
-
-    create index JIFileResource_reference_index on JIFileResource (reference);
-
-    create index JIInputControl_data_type_index on JIInputControl (data_type);
-
-    create index JIInputCtrl_list_of_values_idx on JIInputControl (list_of_values);
-
-    create index JIInputControl_list_query_idx on JIInputControl (list_query);
-
-    create index idx15_input_ctrl_id_idx on JIInputControlQueryColumn (input_control_id);
+    create index idx23_olapClientConnection_idx on JIOlapUnit (olapClientConnection);

@@ -26,15 +26,15 @@ import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceLookup;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.client.FolderImpl;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.client.ResourceLookupImpl;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConversionOptions;
 import com.jaspersoft.jasperserver.api.metadata.common.service.ResourceFactory;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.ObjectPermission;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.client.ObjectPermissionImpl;
-import com.jaspersoft.jasperserver.dto.resources.ClientAdhocDataView;
 import com.jaspersoft.jasperserver.dto.resources.ClientFolder;
 import com.jaspersoft.jasperserver.dto.resources.ClientResource;
 import com.jaspersoft.jasperserver.remote.exception.IllegalParameterValueException;
 import com.jaspersoft.jasperserver.remote.exception.MandatoryParameterNotFoundException;
-import com.jaspersoft.jasperserver.remote.exception.xml.ErrorDescriptor;
+import com.jaspersoft.jasperserver.dto.common.ErrorDescriptor;
 import com.jaspersoft.jasperserver.remote.resources.attachments.AttachmentsProcessor;
 import com.jaspersoft.jasperserver.remote.resources.validation.ResourceValidator;
 import com.jaspersoft.jasperserver.remote.services.PermissionsService;
@@ -64,7 +64,7 @@ import static org.testng.Assert.*;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: ResourceConverterImplTest.java 51947 2014-12-11 14:38:38Z ogavavka $
+ * @version $Id: ResourceConverterImplTest.java 58870 2015-10-27 22:30:55Z esytnik $
  */
 public class ResourceConverterImplTest {
     private static final String TEST_CLIENT_OBJECT_NAME = "testClientObjectName";

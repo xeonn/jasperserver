@@ -22,7 +22,7 @@
 
 /**
  * @author: Dima Gorbenko
- * @version: $Id: DomainSaveDialogView.js 8179 2015-01-27 12:34:21Z psavushchik $
+ * @version: $Id: DomainSaveDialogView.js 9400 2015-09-23 21:10:46Z inestere $
  */
 
 /* global dialogs */
@@ -34,8 +34,8 @@ define(function (require){
     var _ = require('underscore'),
         $ = require("jquery"),
         i18n = require('bundle!all'),
-        request = require("common/transport/request"),
-        ResourceModel = require('common/model/RepositoryResourceModel'),
+        request = require("request"),
+        ResourceModel = require("bi/repo/model/RepositoryResourceModel"),
         BaseSaveDialogView = require("dataSource/saveDialog/BaseSaveDialogView"),
         standardConfirmTemplate = require("text!common/templates/standardConfirm.htm"),
         domainSaveDialogTemplate = require('text!dataSource/saveDialog/template/domainSaveDialogTemplate.htm');
@@ -85,7 +85,7 @@ define(function (require){
                         msg: i18n["resource.datasource.saveDomainDialog.validation.not.empty.label"]
                     },
                     {
-                        maxLength: ResourceModel.LABEL_MAX_LENGTH,
+                        maxLength: ResourceModel.settings.LABEL_MAX_LENGTH,
                         msg: i18n["resource.datasource.saveDomainDialog.validation.too.long.label"]
                     }
                 ],
@@ -95,11 +95,11 @@ define(function (require){
                         msg: i18n["resource.datasource.saveDomainDialog.validation.not.empty.name"]
                     },
                     {
-                        maxLength: ResourceModel.NAME_MAX_LENGTH,
+                        maxLength: ResourceModel.settings.NAME_MAX_LENGTH,
                         msg: i18n["resource.datasource.saveDomainDialog.validation.too.long.name"]
                     },
                     {
-                        doesNotContainCharacters: ResourceModel.NAME_NOT_SUPPORTED_SYMBOLS,
+                        doesNotContainCharacters: ResourceModel.settings.NAME_NOT_SUPPORTED_SYMBOLS,
                         msg: i18n["resource.datasource.saveDomainDialog.validation.invalid.chars.name"]
                     }
                 ],
@@ -108,7 +108,7 @@ define(function (require){
                         required: false
                     },
                     {
-                        maxLength: ResourceModel.DESCRIPTION_MAX_LENGTH,
+                        maxLength: ResourceModel.settings.DESCRIPTION_MAX_LENGTH,
                         msg: i18n["resource.datasource.saveDomainDialog.validation.too.long.description"]
                     }
                 ],

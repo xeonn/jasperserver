@@ -25,6 +25,7 @@ import com.jaspersoft.jasperserver.dto.common.validations.MandatoryValidationRul
 import com.jaspersoft.jasperserver.dto.common.validations.RangeValidationRule;
 import com.jaspersoft.jasperserver.dto.common.validations.RegexpValidationRule;
 import com.jaspersoft.jasperserver.dto.common.validations.ValidationRule;
+import com.jaspersoft.jasperserver.dto.resources.ClientDataType;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
@@ -35,7 +36,7 @@ import java.util.List;
 
 /**
  * @author akasych
- * @version $Id: ReportInputControl.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: ReportInputControl.java 58870 2015-10-27 22:30:55Z esytnik $
  */
 @XmlRootElement
 public class ReportInputControl {
@@ -51,6 +52,7 @@ public class ReportInputControl {
     private List<String> slaveDependencies = new ArrayList<String>();
     private List<ValidationRule> validationRules;
     private InputControlState state;
+    private ClientDataType dataType;
 
     public ReportInputControl(ReportInputControl other) {
         this.id = other.getId();
@@ -64,10 +66,10 @@ public class ReportInputControl {
         this.masterDependencies = new ArrayList<String>(other.getMasterDependencies());
         this.slaveDependencies = new ArrayList<String>(other.getSlaveDependencies());
 
-        final List<ValidationRule> clientUserAttributes = other.getValidationRules();
-        if(clientUserAttributes != null){
+        final List<ValidationRule> clientAttributes = other.getValidationRules();
+        if(clientAttributes != null){
             validationRules = new ArrayList<ValidationRule>(other.getValidationRules().size());
-            for(ValidationRule item : clientUserAttributes){
+            for(ValidationRule item : clientAttributes){
                 ValidationRule validationRule = null;
                 if (item instanceof DateTimeFormatValidationRule){
                     validationRule = new DateTimeFormatValidationRule((DateTimeFormatValidationRule) item);
@@ -83,11 +85,26 @@ public class ReportInputControl {
                 }
             }
         }
-
+        final ClientDataType otherDataType = other.getDataType();
+        if(otherDataType != null){
+            setDataType(otherDataType);
+        }
         this.state = new InputControlState(other.getState());
     }
 
     public ReportInputControl() {
+    }
+
+    public ClientDataType getDataType() {
+        return dataType;
+    }
+
+    public ReportInputControl setDataType(ClientDataType dataType) {
+        // reset generic resource fields
+        this.dataType = dataType == null ? null : new ClientDataType(dataType).setCreationDate(null)
+                .setDescription(null).setLabel(null).setPermissionMask(null).setUpdateDate(null).setUri(null)
+                .setVersion(null);
+        return this;
     }
 
     public InputControlState getState() {

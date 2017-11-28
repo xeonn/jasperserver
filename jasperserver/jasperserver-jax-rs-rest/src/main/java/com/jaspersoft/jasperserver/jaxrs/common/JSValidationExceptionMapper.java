@@ -22,7 +22,7 @@ package com.jaspersoft.jasperserver.jaxrs.common;
 
 import com.jaspersoft.jasperserver.api.JSValidationException;
 import com.jaspersoft.jasperserver.api.common.domain.ValidationError;
-import com.jaspersoft.jasperserver.remote.exception.xml.ErrorDescriptor;
+import com.jaspersoft.jasperserver.dto.common.ErrorDescriptor;
 import org.springframework.stereotype.Component;
 
 import javax.ws.rs.core.GenericEntity;
@@ -37,7 +37,7 @@ import java.util.List;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: JSValidationExceptionMapper.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: JSValidationExceptionMapper.java 57603 2015-09-15 17:20:48Z psavushc $
  */
 @Provider
 @Component
@@ -56,11 +56,10 @@ public class JSValidationExceptionMapper implements ExceptionMapper<JSValidation
             if (error.getField() != null) {
                 errorArgumentsList.add(0, error.getField());
             }
-            errorDescriptors.add(new ErrorDescriptor.Builder()
+            errorDescriptors.add(new ErrorDescriptor()
                     .setErrorCode(error.getErrorCode())
                     .setMessage(error.getDefaultMessage())
-                    .setParameters(errorArgumentsList.toArray())
-                    .getErrorDescriptor());
+                    .setParameters(errorArgumentsList.toArray()));
         }
         return Response.status(Response.Status.BAD_REQUEST).entity(new GenericEntity< List<ErrorDescriptor>>(errorDescriptors){}).build();
     }

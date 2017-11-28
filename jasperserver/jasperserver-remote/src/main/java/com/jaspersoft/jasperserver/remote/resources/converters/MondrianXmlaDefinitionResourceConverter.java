@@ -20,6 +20,7 @@
 */
 package com.jaspersoft.jasperserver.remote.resources.converters;
 
+import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConversionOptions;
 import com.jaspersoft.jasperserver.api.metadata.olap.domain.MondrianXMLADefinition;
 import com.jaspersoft.jasperserver.dto.resources.ClientMondrianXmlaDefinition;
 import com.jaspersoft.jasperserver.dto.resources.ClientReferenceableMondrianConnection;
@@ -33,7 +34,7 @@ import javax.annotation.Resource;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: MondrianXmlaDefinitionResourceConverter.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: MondrianXmlaDefinitionResourceConverter.java 58870 2015-10-27 22:30:55Z esytnik $
  */
 @Service
 public class MondrianXmlaDefinitionResourceConverter extends ResourceConverterImpl<MondrianXMLADefinition, ClientMondrianXmlaDefinition> {

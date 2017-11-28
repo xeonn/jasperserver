@@ -22,12 +22,12 @@
 
 /**
  * @author: Yuriy Plakosh
- * @version: $Id: components.searchBox.js 8179 2015-01-27 12:34:21Z psavushchik $
+ * @version: $Id: components.searchBox.js 9400 2015-09-23 21:10:46Z inestere $
  */
 
 /* global layoutModule, buttonManager */
 
-/**
+/*
  * Search box class.
  *
  * @param options {JSON Object} - Set of options for search box:

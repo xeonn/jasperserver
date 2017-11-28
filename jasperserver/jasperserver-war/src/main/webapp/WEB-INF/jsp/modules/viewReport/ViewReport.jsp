@@ -210,7 +210,7 @@
 
                     <!-- ========== LEFT BUTTON SET =========== -->
                     <ul class="list buttonSet">
-                        <c:if test="${param.decorate != \"no\"}">
+                        <c:if test="${param.decorate != 'no'}">
                             <ul class="list buttonSet">
                                 <li class="leaf" role="application"><button id="back" class="button capsule text up"><span class="wrap"><spring:message code="button.back"/><span class="icon"></span></span></button></li>
                             </ul>

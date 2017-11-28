@@ -20,156 +20,118 @@
  */
 package com.jaspersoft.jasperserver.export.modules.mt;
 
-import java.util.LinkedList;
-import java.util.Queue;
-
+import com.jaspersoft.jasperserver.api.metadata.user.domain.ProfileAttribute;
+import com.jaspersoft.jasperserver.api.metadata.user.domain.Tenant;
+import com.jaspersoft.jasperserver.api.metadata.user.service.AttributesSearchCriteria;
+import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributeGroup;
+import com.jaspersoft.jasperserver.export.modules.BaseExporterModule;
+import com.jaspersoft.jasperserver.export.modules.ExporterModuleContext;
 import com.jaspersoft.jasperserver.export.modules.mt.beans.TenantBean;
+import com.jaspersoft.jasperserver.export.service.impl.ImportExportServiceImpl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dom4j.Element;
 
-import com.jaspersoft.jasperserver.api.metadata.user.domain.Tenant;
-import com.jaspersoft.jasperserver.api.metadata.user.service.TenantService;
-import com.jaspersoft.jasperserver.export.modules.BaseExporterModule;
-import com.jaspersoft.jasperserver.export.modules.ExporterModuleContext;
-//import com.jaspersoft.jasperserver.multipleTenancy.MultiTenancyConfiguration;
+import java.util.*;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
  * @version $Id: TenantExporter.java 15533 2009-01-14 18:34:04Z lucian $
  */
-public class TenantExporter extends BaseExporterModule
-{
-	
+public class TenantExporter extends BaseExporterModule {
 	private static final Log log = LogFactory.getLog(TenantExporter.class);
-	
-	private TenantModuleConfiguration moduleConfiguration;
-	
-	private boolean exportTenants;
-	
-	protected Queue<String> tenantIdQueue;
 
-    public void init(ExporterModuleContext moduleContext)
-	{
+	protected boolean exportTenants;
+
+	protected Queue<String> tenantIdQueue;
+	protected TenantModuleConfiguration moduleConfiguration;
+
+	public void init(ExporterModuleContext moduleContext) {
 		super.init(moduleContext);
 		
-		exportTenants = exportEverything || hasParameter(moduleConfiguration.getTenantsArgument());
+		exportTenants = exportEverything ||
+				hasParameter(moduleConfiguration.getTenantsArgument()) ||
+				hasParameter(ImportExportServiceImpl.ORGANIZATION);
+
 		
-		if (log.isDebugEnabled())
-		{
+		if (log.isDebugEnabled()) {
 			log.debug("Exporting tenants: " + exportTenants);
 		}
 		
 		tenantIdQueue = new LinkedList<String>();
 	}
 
-/*
-	protected String getRootTenantId()
-	{
-		return getMultiTenancyConfiguration().getRootTenantId();
-	}
-
-*/
-/*
-	protected DefaultTenantExportConfiguration getMultiTenancyConfiguration()
-	{
-		return moduleConfiguration.getTenantExportConfiguration();
-	}
-	
-*/
-	protected TenantService getTenantService()
-	{
-		return moduleConfiguration.getTenantService();
-	}
-	
 	@Override
-	protected boolean isToProcess()
-	{
-		return exportTenants;
+	protected boolean isToProcess()	{
+		return exportTenants ||
+				hasParameter(includeSettingsArg) ||
+				hasParameter(includeAttributes);
 	}
 
-	public void process()
-	{
+	public void process() {
 		mkdir(moduleConfiguration.getTenantsDirectory());
 	
 		String rootTenantId = moduleConfiguration.getTenantExportConfiguration().getRootTenantId();
 		Tenant rootTenant = getTenantService().getTenant(executionContext, rootTenantId);
-		if (rootTenant == null)
-		{
+		if (rootTenant == null) {
 			commandOut.info("Root tenant \"" + rootTenantId + "\" not found, skipping tenants");
-		}
-		else
-		{
-			process(rootTenant);
-			
-/* asd
-			// process subtenants
-			while(!tenantIdQueue.isEmpty())
-			{
-				String tenantId = tenantIdQueue.poll();
-				processSubTenants(tenantId);
-			}
-*/
+		} else {
+			processTenant(rootTenant);
 		}
 	}
 
-	protected void process(Tenant tenant)
-	{
-		commandOut.info("Exporting tenant " + tenant.getId() 
+	protected void processTenant(Tenant tenant) {
+		commandOut.info("Exporting tenant " + tenant.getId()
 				+ " (" + tenant.getTenantUri() + ")");
 
-        tenant = getTenantService().getTenant(executionContext, tenant.getId());
-        TenantBean tenantBean = new TenantBean();
-        tenantBean.copyFrom(tenant);
-		tenantBean.setAttributes(prepareAttributesBeans(tenant.getAttributes()));
+		TenantBean tenantBean = new TenantBean();
+		tenantBean.copyFrom(tenant);
+		tenantBean.setAttributes(prepareAttributesBeans(getProfileAttributes(tenant)));
 
 		// serialize the tenant to XML
 		serialize(tenantBean,
 				moduleConfiguration.getTenantsDirectory(),
-				getTenantFileName(tenant), 
+				getTenantFileName(tenant),
 				moduleConfiguration.getTenantSerializer());
-		
+
 		// add an entry to the export index.xml
 		addTenantIndexEntry(tenant);
-		
+
 		// add the tenant to the queue to process subtenants
 		tenantIdQueue.add(tenant.getId());
 	}
 
-	protected String getTenantFileName(Tenant tenant)
-	{
+	protected String getTenantFileName(Tenant tenant) {
 		return tenant.getId() + ".xml";
 	}
 
-	protected void addTenantIndexEntry(Tenant tenant)
-	{
+	protected void addTenantIndexEntry(Tenant tenant) {
 		Element indexElement = getIndexElement();
 		Element tenantElement = indexElement.addElement(
 				moduleConfiguration.getTenantIndexElement());
 		tenantElement.addText(tenant.getId());
 	}
-	
-/* asd
-	protected void processSubTenants(String tenantId)
-	{
-		List subTenants = getModuleConfiguration().getTenantService().getSubTenantList(
-				executionContext, tenantId);
-		for (Iterator it = subTenants.iterator(); it.hasNext();)
-		{
-			Tenant subTenant = (Tenant) it.next();
-			process(subTenant);
-		}
-	}
 
-*/
-	public TenantModuleConfiguration getModuleConfiguration()
-	{
+	public TenantModuleConfiguration getModuleConfiguration() {
 		return moduleConfiguration;
 	}
 
-	public void setModuleConfiguration(TenantModuleConfiguration moduleConfiguration)
-	{
+	public void setModuleConfiguration(TenantModuleConfiguration moduleConfiguration) {
 		this.moduleConfiguration = moduleConfiguration;
 	}
 
+	private List<ProfileAttribute> getProfileAttributes(Tenant tenant) {
+		AttributesSearchCriteria searchCriteria = new AttributesSearchCriteria.Builder()
+				.build();
+		Set<String> groups = new HashSet<String>();
+
+		groups.add(ProfileAttributeGroup.CUSTOM.toString());
+		if (exportEverything || hasParameter(includeSettingsArg)) {
+			groups.add(ProfileAttributeGroup.CUSTOM_SERVER_SETTINGS.toString());
+		}
+
+		searchCriteria.setGroups(groups);
+		return moduleConfiguration.getAttributeService()
+				.getProfileAttributesForPrincipal(executionContext, tenant, searchCriteria).getList();
+	}
 }

@@ -105,12 +105,19 @@
                 <!-- System error pages -->
                 <prop key="/404.html">systemErrorController</prop>
                 <prop key="/500.html">systemErrorController</prop>
-			</props>
+
+                <prop key="/themeMinimalCss.css">urlViewController</prop>
+                <prop key="/commonMinimalCss.css">urlViewController</prop>
+            </props>
         </property>
     </bean>
 
     <bean id="renderViewExceptionInterceptor" class="com.jaspersoft.jasperserver.war.control.interceptor.RenderViewExceptionInterceptor">
         <property name="messageSource" ref="messageSource"/>
+    </bean>
+
+    <bean id="urlViewController"
+          class="org.springframework.web.servlet.mvc.UrlFilenameViewController">
     </bean>
 
     <!-- View Resolver object which picks up the destination Page -->
@@ -272,7 +279,7 @@
                 <prop key="/olap/busy.html">modules/olap/busy</prop>
                 <prop key="/olap/flush.html">modules/olap/flush</prop>
                 <prop key="/olap/properties.html">modules/olap/properties</prop>
-                <prop key="/olap/error.html">modules/system/errorPage</prop>
+                <prop key="/olap/error.html">modules/system/prepErrorPage</prop>
                 <prop key="/404.html">handle404</prop>
                 <prop key="/500.html">handle500</prop>
                 <prop key="/encrypt.html">encryptionPage</prop>
@@ -371,7 +378,7 @@
             <props>
                 <prop key="org.springframework.security.access.AccessDeniedException">modules/system/AccessDeniedPage</prop>
                 <prop key="org.springframework.webflow.execution.repository.NoSuchFlowExecutionException">modules/system/sessionExpiredErrorPage</prop>
-                <prop key="java.lang.Exception">modules/system/errorPage</prop>
+                <prop key="java.lang.Exception">modules/system/prepErrorPage</prop>
             </props>
         </property>
     </bean>

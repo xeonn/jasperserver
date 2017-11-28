@@ -222,7 +222,7 @@
     </bean>
 
     <bean name="fileResourceTreeDataProvider" class="com.jaspersoft.jasperserver.war.model.impl.TypedTreeDataProvider">
-        <property name="repositoryService" ref="${bean.repositoryService}"/>
+        <property name="repositoryService" ref="${fileResourceTreeDataProvider.repositoryService}"/>
         <property name="supportedClasses">
             <list>
                 <value>com.jaspersoft.jasperserver.api.metadata.common.domain.FileResource</value>

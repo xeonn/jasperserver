@@ -27,8 +27,8 @@ define(function (require) {
     var domReady = require("!domReady"),
         $ = require("jquery"),
         jrsConfigs = require("jrs.configs"),
-        RepositoryResourceModel = require("common/model/RepositoryResourceModel"),
-        repositoryResourceTypes = require("common/enum/repositoryResourceTypes"),
+        RepositoryResourceModel = require("bi/repo/model/RepositoryResourceModel"),
+        repositoryResourceTypes = require("bi/repo/enum/repositoryResourceTypes"),
         DataSourceController = require("dataSource/DataSourceController");
 
     domReady(function () {

@@ -20,12 +20,9 @@
  */
 package com.jaspersoft.jasperserver.api.engine.scheduling;
 
-import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
-import com.jaspersoft.jasperserver.api.engine.scheduling.domain.ReportJob;
-
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ReportJobsInternalService.java 51947 2014-12-11 14:38:38Z ogavavka $
+ * @version $Id: ReportJobsInternalService.java 58265 2015-10-05 16:13:56Z vzavadsk $
  */
 public interface ReportJobsInternalService {
 	
@@ -38,7 +35,5 @@ public interface ReportJobsInternalService {
 	long[] deleteReportUnitJobs(String reportUnitURI);
 
 	long[] updateReportUnitURI(String oldURI, String newURI);
-	
-	ReportJob saveJob(ExecutionContext context, ReportJob job, boolean setContextUsername);
 
 }

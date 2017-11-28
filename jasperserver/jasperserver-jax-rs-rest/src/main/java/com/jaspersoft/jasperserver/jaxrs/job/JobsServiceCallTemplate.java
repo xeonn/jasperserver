@@ -20,15 +20,13 @@
 */
 package com.jaspersoft.jasperserver.jaxrs.job;
 
-import com.jaspersoft.jasperserver.api.JSException;
 import com.jaspersoft.jasperserver.api.JSValidationException;
 import com.jaspersoft.jasperserver.api.engine.scheduling.service.ReportJobNotFoundException;
 import com.jaspersoft.jasperserver.remote.common.RemoteServiceCallTemplate;
 import com.jaspersoft.jasperserver.remote.common.RemoteServiceInTemplateCaller;
 import com.jaspersoft.jasperserver.remote.exception.RemoteException;
-import com.jaspersoft.jasperserver.remote.exception.ResourceAlreadyExistsException;
 import com.jaspersoft.jasperserver.remote.exception.ResourceNotFoundException;
-import com.jaspersoft.jasperserver.remote.exception.xml.ErrorDescriptor;
+import com.jaspersoft.jasperserver.dto.common.ErrorDescriptor;
 import com.jaspersoft.jasperserver.remote.services.JobsService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -39,7 +37,7 @@ import javax.ws.rs.core.Response;
 
 /**
  * @author Yaroslav.Kovalchyk
- * @version $Id: JobsServiceCallTemplate.java 51947 2014-12-11 14:38:38Z ogavavka $
+ * @version $Id: JobsServiceCallTemplate.java 57603 2015-09-15 17:20:48Z psavushc $
  */
 public class JobsServiceCallTemplate implements RemoteServiceCallTemplate<JobsService> {
     private static final Log log = LogFactory.getLog(JobsServiceCallTemplate.class);
@@ -58,7 +56,7 @@ public class JobsServiceCallTemplate implements RemoteServiceCallTemplate<JobsSe
             entity = new ResourceNotFoundException("" + e.getJobId()).getErrorDescriptor();
         } catch (AccessDeniedException e) {
             status = Response.Status.FORBIDDEN;
-            entity = new ErrorDescriptor.Builder().setErrorCode("access.denied").setMessage(e.getMessage()).getErrorDescriptor();
+            entity = new ErrorDescriptor().setErrorCode("access.denied").setMessage(e.getMessage());
         } catch (JSValidationException e) {
             entity = e.getErrors();
         } catch (RemoteException e) {
@@ -68,8 +66,8 @@ public class JobsServiceCallTemplate implements RemoteServiceCallTemplate<JobsSe
                 status = Response.Status.INTERNAL_SERVER_ERROR;
             }
         } catch (Exception e) {
-            ErrorDescriptor errorDescriptor = new ErrorDescriptor.Builder().setErrorCode(ErrorDescriptor.ERROR_CODE_UNEXPECTED_ERROR)
-                    .setParameters(e.getClass().getName()).getErrorDescriptor();
+            ErrorDescriptor errorDescriptor = new ErrorDescriptor().setErrorCode(ErrorDescriptor.ERROR_CODE_UNEXPECTED_ERROR)
+                    .setParameters(e.getClass().getName());
             if(e.getMessage() != null)
                 errorDescriptor.setMessage(e.getMessage());
             entity = errorDescriptor;

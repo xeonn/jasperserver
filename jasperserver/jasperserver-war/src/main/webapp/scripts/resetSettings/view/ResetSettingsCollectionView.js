@@ -21,7 +21,7 @@
 
 /**
  * @author: Olesya Bobruyko
- * @version: $Id: ResetSettingsCollectionView.js 8895 2015-05-06 13:20:27Z obobruyk $
+ * @version: $Id: ResetSettingsCollectionView.js 9400 2015-09-23 21:10:46Z inestere $
  */
 
 define(function(require) {
@@ -31,7 +31,7 @@ define(function(require) {
         i18n = require("bundle!EditSettingsBundle"),
         BaseTable = require("common/component/baseTable/BaseTable"),
         collectionViewTemplate = require("text!resetSettings/templates/collectionViewTemplate.htm"),
-        OptionContainer = require("common/component/option/OptionContainer"),
+        OptionContainer = require("common/component/base/OptionContainer"),
         AlertDialog = require("common/component/dialog/AlertDialog"),
         Notification = require("common/component/notification/Notification"),
         confirmDialogTypesEnum = require("serverSettingsCommon/enum/confirmDialogTypesEnum"),

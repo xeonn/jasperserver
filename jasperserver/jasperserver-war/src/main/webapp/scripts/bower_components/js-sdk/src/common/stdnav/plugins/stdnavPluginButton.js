@@ -96,10 +96,10 @@ define(function (require, exports, module) {
             var newSubfocus;
             var $el = $(element);
 
-            if ($el.is('BUTTON')) {
+            if ($el.is("BUTTON,[role='button']")) {
                 newSubfocus = $el;
             } else {
-                newSubfocus = $(element).closest('BUTTON');
+                newSubfocus = $(element).closest("BUTTON,[role='button']");
                 if (newSubfocus === undefined) {
                     // Safety
                     return undefined;
@@ -159,7 +159,7 @@ define(function (require, exports, module) {
         _onEnterOrEntered: function (element) {
             // Activate the link.
             var $el = $(element);
-            if ($el.is('BUTTON')) {
+            if ($el.is("BUTTON,[role='button']")) {
                 eventAutomation.simulateClickSequence(element);
             }
             return element;

@@ -22,7 +22,7 @@ package com.jaspersoft.jasperserver.jaxrs.authority;
 
 import com.jaspersoft.jasperserver.api.metadata.user.service.AttributesSearchCriteria;
 import com.jaspersoft.jasperserver.api.metadata.user.service.AttributesSearchResult;
-import com.jaspersoft.jasperserver.dto.authority.ClientUserAttribute;
+import com.jaspersoft.jasperserver.dto.authority.ClientAttribute;
 import com.jaspersoft.jasperserver.dto.authority.hypermedia.HypermediaAttribute;
 import com.jaspersoft.jasperserver.dto.authority.hypermedia.HypermediaAttributesListWrapper;
 import com.jaspersoft.jasperserver.dto.authority.hypermedia.Relation;
@@ -46,7 +46,7 @@ import java.util.regex.Pattern;
 
 /**
  * @author Volodya Sabadosh
- * @version $Id: AttributesJaxrsService.java 54590 2015-04-22 17:55:42Z vzavadsk $
+ * @version $Id: AttributesJaxrsService.java 58870 2015-10-27 22:30:55Z esytnik $
  */
 @Component("attributesJaxrsService")
 public class AttributesJaxrsService {
@@ -57,7 +57,7 @@ public class AttributesJaxrsService {
     protected AttributesService attributesService;
 
     public Response getAttributes(AttributesSearchCriteria searchCriteria, HypermediaOptions hypermediaOptions) throws RemoteException {
-        AttributesSearchResult<ClientUserAttribute> result = attributesService.getAttributes(searchCriteria, includePermissions(hypermediaOptions));
+        AttributesSearchResult<ClientAttribute> result = attributesService.getAttributes(searchCriteria, includePermissions(hypermediaOptions));
 
         if (result.getList().size() > 0) {
             return Response.ok()
@@ -76,7 +76,7 @@ public class AttributesJaxrsService {
     }
 
     public Response getAttributesOfRecipient(RecipientIdentity recipientIdentity, Set<String> names, HypermediaOptions hypermediaOptions) throws RemoteException {
-        List<ClientUserAttribute> result = attributesService.getAttributes(recipientIdentity, names, includePermissions(hypermediaOptions));
+        List<ClientAttribute> result = attributesService.getAttributes(recipientIdentity, names, includePermissions(hypermediaOptions));
 
         if (result.size() > 0) {
             return Response.ok().entity(new HypermediaAttributesListWrapper(result)).build();
@@ -90,22 +90,22 @@ public class AttributesJaxrsService {
         if (!mediaType.contains(HAL_FORMAT)) {
             for (HypermediaAttribute hypermediaAttribute : newCollection) {
                 hypermediaAttribute.setEmbedded(null);
+                }
             }
-        }
 
-        List<ClientUserAttribute> result = attributesService.putAttributes(recipientIdentity,
+        List<ClientAttribute> result = attributesService.putAttributes(recipientIdentity,
                 newCollection, attrNames, includePermissions(hypermediaOptions));
 
         return Response.ok().entity(new HypermediaAttributesListWrapper(result)).build();
     }
 
-    public Response putAttribute(HypermediaAttribute client, RecipientIdentity recipientIdentity, String attrName,
+    public  Response putAttribute(ClientAttribute client, RecipientIdentity recipientIdentity, String attrName,
                                  HypermediaOptions hypermediaOptions, String mediaType) throws RemoteException {
-        if (!mediaType.contains(HAL_FORMAT)) {
-            client.setEmbedded(null);
+        if (!mediaType.contains(HAL_FORMAT) && client instanceof HypermediaAttribute) {
+            ((HypermediaAttribute)client).setEmbedded(null);
         }
 
-        List<ClientUserAttribute> existingAttributes = attributesService.getAttributes(recipientIdentity, Collections.singleton(attrName), false);
+        List<ClientAttribute> existingAttributes = attributesService.getAttributes(recipientIdentity, Collections.singleton(attrName), false);
 
         if (client.getName() == null) {
             client.setName(attrName);
@@ -113,7 +113,7 @@ public class AttributesJaxrsService {
             throw new IllegalParameterValueException("name", "<empty>");
         }
 
-        ClientUserAttribute existingAttr = null;
+        ClientAttribute existingAttr = null;
         if (existingAttributes.size() > 0) {
             existingAttr = existingAttributes.get(0);
         }
@@ -133,14 +133,14 @@ public class AttributesJaxrsService {
             effectedAttrNames.add(client.getName());
         }
 
-        List<ClientUserAttribute> result = attributesService.putAttributes(recipientIdentity,
+        List<ClientAttribute> result = attributesService.putAttributes(recipientIdentity,
                 Arrays.asList(client), effectedAttrNames, includePermissions(hypermediaOptions));
 
         return Response.status(status).entity(result.get(0)).build();
     }
 
     public Response deleteAttribute(RecipientIdentity recipientIdentity, String attrName) throws RemoteException {
-        List<ClientUserAttribute> existingAttributes = attributesService.getAttributes(recipientIdentity,
+        List<ClientAttribute> existingAttributes = attributesService.getAttributes(recipientIdentity,
                 Collections.singleton(attrName), false);
         if (existingAttributes == null || existingAttributes.size() == 0) {
             throw new ResourceNotFoundException(attrName);
@@ -161,7 +161,7 @@ public class AttributesJaxrsService {
     public Response getSpecificAttributeOfRecipient(RecipientIdentity recipientIdentity,
                                                     String attrName,
                                                     HypermediaOptions hypermediaOptions) throws RemoteException {
-        List<ClientUserAttribute> existingAttributes = attributesService.getAttributes(recipientIdentity,
+        List<ClientAttribute> existingAttributes = attributesService.getAttributes(recipientIdentity,
                 Collections.singleton(attrName), includePermissions(hypermediaOptions));
 
         if (existingAttributes.size() == 0) {

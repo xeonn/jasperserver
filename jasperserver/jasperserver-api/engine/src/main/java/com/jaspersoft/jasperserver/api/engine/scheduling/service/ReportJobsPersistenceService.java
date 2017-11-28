@@ -20,14 +20,14 @@
  */
 package com.jaspersoft.jasperserver.api.engine.scheduling.service;
 
-import java.util.List;
-
 import com.jaspersoft.jasperserver.api.JasperServerAPI;
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
-import com.jaspersoft.jasperserver.api.engine.scheduling.domain.reportjobmodel.ReportJobModel;
 import com.jaspersoft.jasperserver.api.engine.scheduling.domain.ReportJob;
 import com.jaspersoft.jasperserver.api.engine.scheduling.domain.ReportJobIdHolder;
 import com.jaspersoft.jasperserver.api.engine.scheduling.domain.ReportJobSummary;
+import com.jaspersoft.jasperserver.api.engine.scheduling.domain.reportjobmodel.ReportJobModel;
+
+import java.util.List;
 
 /**
  * A service that persists report job details.
@@ -39,7 +39,7 @@ import com.jaspersoft.jasperserver.api.engine.scheduling.domain.ReportJobSummary
  * </p>
  * 
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ReportJobsPersistenceService.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: ReportJobsPersistenceService.java 58265 2015-10-05 16:13:56Z vzavadsk $
  * @since 1.0
  * @see ReportSchedulingService
  * @see ReportJobsScheduler
@@ -61,6 +61,16 @@ public interface ReportJobsPersistenceService {
 	 * @see ReportSchedulingService#scheduleJob(ExecutionContext, ReportJob)
 	 */
 	ReportJob saveJob(ExecutionContext context, ReportJob job);
+
+	/**
+	 * Saves the details of a report job. With boolean setContextUsername parameter
+	 *
+	 * @param context the caller execution context
+	 * @param job the job details to save
+	 * @param setContextUsername defines where user will be taken from
+	 * @return the job details as saved
+	 */
+	ReportJob saveJob(ExecutionContext context, ReportJob job, boolean setContextUsername);
 
 	/**
 	 * Updates the details of an existing report job.

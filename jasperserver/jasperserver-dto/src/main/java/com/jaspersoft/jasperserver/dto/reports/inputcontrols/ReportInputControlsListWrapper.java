@@ -20,8 +20,6 @@
 */
 package com.jaspersoft.jasperserver.dto.reports.inputcontrols;
 
-import com.jaspersoft.jasperserver.dto.authority.ClientUserAttribute;
-
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.ArrayList;
@@ -29,7 +27,7 @@ import java.util.List;
 
 /**
  * @author Yaroslav.Kovalchyk
- * @version $Id: ReportInputControlsListWrapper.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: ReportInputControlsListWrapper.java 58870 2015-10-27 22:30:55Z esytnik $
  */
 @XmlRootElement(name = "inputControls")
 public class ReportInputControlsListWrapper {

@@ -20,11 +20,11 @@
  */
 package com.jaspersoft.jasperserver.remote.exception;
 
-import com.jaspersoft.jasperserver.remote.exception.xml.ErrorDescriptor;
+import com.jaspersoft.jasperserver.dto.common.ErrorDescriptor;
 
 /**
  * @author Anton Fomin
- * @version $Id: AccessDeniedException.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: AccessDeniedException.java 57603 2015-09-15 17:20:48Z psavushc $
  */
 public class AccessDeniedException extends RemoteException {
 
@@ -42,6 +42,6 @@ public class AccessDeniedException extends RemoteException {
 
     public AccessDeniedException(String message, String... parameters) {
         super(message);
-        setErrorDescriptor(new ErrorDescriptor.Builder().setMessage(message).setErrorCode(ERROR_CODE_ACCESS_DENIED).setParameters(parameters).getErrorDescriptor());
+        setErrorDescriptor(new ErrorDescriptor().setMessage(message).setErrorCode(ERROR_CODE_ACCESS_DENIED).setParameters(parameters));
     }
 }

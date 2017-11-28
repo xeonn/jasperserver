@@ -22,6 +22,7 @@ package com.jaspersoft.jasperserver.remote.resources.converters;
 
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceReference;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConversionOptions;
 import com.jaspersoft.jasperserver.dto.resources.AbstractClientDataSourceHolder;
 import com.jaspersoft.jasperserver.dto.resources.ClientReferenceableDataSource;
 import com.jaspersoft.jasperserver.remote.exception.IllegalParameterValueException;
@@ -31,7 +32,7 @@ import com.jaspersoft.jasperserver.remote.exception.MandatoryParameterNotFoundEx
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: DataSourceHolderResourceConverter.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: DataSourceHolderResourceConverter.java 58870 2015-10-27 22:30:55Z esytnik $
  */
 public abstract class DataSourceHolderResourceConverter<ResourceType extends Resource, ClientType extends AbstractClientDataSourceHolder<ClientType>>
         extends ResourceConverterImpl<ResourceType, ClientType> {

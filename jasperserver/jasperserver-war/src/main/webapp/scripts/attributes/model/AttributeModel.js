@@ -21,16 +21,16 @@
 
 
 /**
- * @version: $Id: AttributeModel.js 8924 2015-05-21 17:16:54Z obobruyk $
+ * @version: $Id: AttributeModel.js 9599 2015-10-27 19:38:56Z yplakosh $
  */
 
 define(function(require) {
     var _ = require("underscore"),
         $ = require("jquery"),
         BackboneValidation = require("backbone.validation"),
-        ValidationError = require("common/validation/ValidationErrorMessage"),
-    // TODO change to backbone.epoxy
-        Epoxy = require("common/extension/epoxyExtension"),
+        i18n = require("bundle!AttributeBundle"),
+        i18nMessage = require("common/util/i18nMessage").extend({bundle: i18n}),
+        Epoxy = require("backbone.epoxy"),
         permissionMasksEnum = require("attributes/enum/permissionMasksEnum");
 
 
@@ -81,8 +81,7 @@ define(function(require) {
          */
         url: function() {
             // duplicated on purpose - overrides some strange behaviour of FF
-            var safeId = encodeURIComponent(this.id).replace("'", "%27");
-            safeId = safeId.replace("'", "%27");
+            var safeId = encodeURIComponent(this.id).replace(/'/g, "%27");
             return this.collection.url(this.isNew() ? "" : safeId);
         },
 
@@ -90,15 +89,15 @@ define(function(require) {
             name: [
                 {
                     required: true,
-                    msg: new ValidationError("attributes.error.attribute.name.empty")
+                    msg: new i18nMessage("attributes.error.attribute.name.empty")
                 },
                 {
                     maxLength: MAX_LENGTH,
-                    msg: new ValidationError("attributes.error.attribute.name.too.long", MAX_LENGTH)
+                    msg: new i18nMessage("attributes.error.attribute.name.too.long", MAX_LENGTH)
                 },
                 {
                     doesNotContainSymbols: "\\\\/",
-                    msg: new ValidationError("attributes.error.attribute.name.invalid")
+                    msg: new i18nMessage("attributes.error.attribute.name.invalid")
                 },
                 {
                     fn: function() {
@@ -132,14 +131,14 @@ define(function(require) {
                             this.attr = null;
                             this.holder = null;
 
-                            return msg && new ValidationError(msg);
+                            return msg && new i18nMessage(msg);
                         }
                     }
                 },
                 {
                     fn: function() {
                         if (this.validateIfSecure) {
-                            return new ValidationError("attributes.error.attribute.secure.renaming.not.allowed");
+                            return new i18nMessage("attributes.error.attribute.secure.renaming.not.allowed");
                         }
                     }
                 }
@@ -147,7 +146,7 @@ define(function(require) {
             value: [
                 {
                     maxLength: MAX_VALUE_LENGTH,
-                    msg: new ValidationError("attributes.error.attribute.value.too.long", MAX_VALUE_LENGTH)
+                    msg: new i18nMessage("attributes.error.attribute.value.too.long", MAX_VALUE_LENGTH)
                 },
                 {
                     fn: function() {
@@ -162,7 +161,7 @@ define(function(require) {
             description: [
                 {
                     maxLength: MAX_LENGTH,
-                    msg: new ValidationError("attributes.error.attribute.description.too.long", MAX_LENGTH)
+                    msg: new i18nMessage("attributes.error.attribute.description.too.long", MAX_LENGTH)
                 }
             ]
         },

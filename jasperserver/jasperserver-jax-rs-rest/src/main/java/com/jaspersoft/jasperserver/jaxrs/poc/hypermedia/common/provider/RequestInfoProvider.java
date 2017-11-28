@@ -32,7 +32,7 @@ import java.text.MessageFormat;
 
 /**
  * @author Igor.Nesterenko
- * @version $Id: RequestInfoProvider.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: RequestInfoProvider.java 58076 2015-09-29 16:08:54Z ztomchen $
  */
 
 @Component
@@ -64,6 +64,14 @@ public class RequestInfoProvider {
         }
 
         return result;
+    }
+
+    public int getLocalPort(){
+        return request.getLocalPort();
+    }
+
+    public String getContextPath(){
+        return request.getContextPath();
     }
 
     public boolean isSupportedDevice() {

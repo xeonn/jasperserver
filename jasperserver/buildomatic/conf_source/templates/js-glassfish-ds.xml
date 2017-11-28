@@ -38,7 +38,6 @@
         <property name="portNumber" value="${dbPort}"/>
         <property name="currentSchema" value="${sugarcrm.dbName}"/>
 		 <property name="JDBC30DataSource" value="true"/>
-        <property name="AlernateId" value="${sugarcrm.dbName}"/>
     </jdbc-connection-pool>
 
     <jdbc-resource enabled="true" jndi-name="${sugarcrm.jndi}" object-type="user" pool-name="sugarcrm_pool"/>
@@ -57,7 +56,6 @@
         <property name="portNumber" value="${dbPort}"/>
         <property name="currentSchema" value="${foodmart.dbName}"/>
 		<property name="JDBC30DataSource" value="true"/>
-        <property name="AlernateId" value="${foodmart.dbName}"/>
     </jdbc-connection-pool>
 
     <jdbc-resource enabled="true" jndi-name="${foodmart.jndi}" object-type="user" pool-name="foodmart_pool"/>

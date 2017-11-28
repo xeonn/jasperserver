@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: admin.roles.main.js 7762 2014-09-19 10:16:02Z sergey.prilukin $
+ * @version: $Id: admin.roles.main.js 9490 2015-10-05 16:46:54Z obobruyk $
  */
 
 define(function(require){
@@ -30,11 +30,14 @@ define(function(require){
     var domReady = require("!domReady"),
         _ = require("underscore"),
         orgModule = require("org.role.mng.components"),
-        jrsConfigs = require("jrs.configs");
+        jrsConfigs = require("jrs.configs"),
+        TenantsTreeView = require("tenantImportExport/view/TenantsTreeView");
 
     require("mng.common.actions");
     require("org.role.mng.actions");
     require("csrf.guard");
+
+    require("css!manageTenants.css");
 
     domReady(function() {
         if (typeof orgModule.messages === "undefined") {
@@ -49,6 +52,8 @@ define(function(require){
         _.extend(orgModule.messages, jrsConfigs.roleManagement.orgModule.messages);
         _.extend(orgModule.Configuration, jrsConfigs.roleManagement.orgModule.Configuration);
 
-        orgModule.roleManager.initialize();
+        orgModule.roleManager.initialize({
+            TenantsTreeView: TenantsTreeView
+        });
     });
 });

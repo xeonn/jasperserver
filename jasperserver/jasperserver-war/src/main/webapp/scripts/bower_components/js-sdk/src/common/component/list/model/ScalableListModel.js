@@ -22,7 +22,7 @@
 
 /**
  * @author: Sergey Prilukin
- * @version: $Id: ScalableListModel.js 417 2014-11-18 19:47:47Z sergey.prilukin $
+ * @version: $Id: ScalableListModel.js 1760 2015-10-27 18:45:31Z yplakosh $
  */
 
 /**
@@ -91,13 +91,16 @@ define(function (require) {
             //we have to correct bufferEndIndex if we recieved
             //less data than we queried
             this.attributes.bufferEndIndex =
-                Math.max(0, Math.min(this.attributes.bufferEndIndex, this.attributes.bufferStartIndex + values.data.length - 1));
+                Math.max(0, Math.min(this.attributes.bufferStartIndex + this.bufferSize - 1,
+                    this.attributes.bufferStartIndex + values.data.length - 1));
             if (this.attributes.bufferEndIndex < this.attributes.bufferStartIndex + this.bufferSize - 1) {
                 //we should not trust given total values from data provider
                 this.attributes.total = Math.min(values.total, this.attributes.bufferEndIndex + 1);
             }
 
             this.afterFetchComplete && this.afterFetchComplete(values.data, this.attributes.total);
+
+            this.trigger("change", this);
         },
 
         _isBufferReloadNecessary: function(topVisibleItem, bottomVisibleItem) {
@@ -128,8 +131,8 @@ define(function (require) {
 
         /* Methods which supposed to be overridden */
 
-        afterFetchComplete:function(items, total) {
-            this.trigger("change", this);
+        afterFetchComplete: function(items, total) {
+
         },
 
         fetchFailed: function(responseStatus, error) {
@@ -171,7 +174,10 @@ define(function (require) {
                     limit: this.get("bufferEndIndex") - this.get("bufferStartIndex") + 1
                 }).done(this._fetchComplete).fail(this.fetchFailed);
             } else {
-                this.afterFetchComplete && this.afterFetchComplete(this.get("items"), this.get("total"));
+                this._fetchComplete({
+                    data: this.get("items"),
+                    total: this.get("total")
+                });
             }
         },
 

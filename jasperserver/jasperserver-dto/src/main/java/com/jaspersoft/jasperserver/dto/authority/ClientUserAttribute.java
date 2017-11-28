@@ -28,8 +28,9 @@ import javax.xml.bind.annotation.XmlRootElement;
  *
  * @author Zakhar.Tomchenco
  * @author Volodya Sabadosh
- * @version $Id $
+ * @version $Id: Id$
  */
+@Deprecated
 @XmlRootElement(name = "attribute")
 public class ClientUserAttribute {
     private String name;

@@ -21,42 +21,47 @@
 
 package com.jaspersoft.jasperserver.export.modules;
 
+import com.jaspersoft.jasperserver.api.JSExceptionWrapper;
+import com.jaspersoft.jasperserver.api.common.domain.AttributedObject;
+import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.InternalURI;
+import com.jaspersoft.jasperserver.api.metadata.user.domain.ObjectPermission;
+import com.jaspersoft.jasperserver.api.metadata.user.domain.ProfileAttribute;
+import com.jaspersoft.jasperserver.api.metadata.user.domain.Role;
+import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
+import com.jaspersoft.jasperserver.api.metadata.user.service.ObjectPermissionService;
+import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributeService;
+import com.jaspersoft.jasperserver.api.metadata.user.service.UserAuthorityService;
+import com.jaspersoft.jasperserver.export.Parameters;
+import com.jaspersoft.jasperserver.export.io.ImportInput;
+import com.jaspersoft.jasperserver.export.io.ObjectSerializer;
+import com.jaspersoft.jasperserver.export.modules.common.ProfileAttributeBean;
+import com.jaspersoft.jasperserver.export.modules.common.TenantQualifiedName;
+import com.jaspersoft.jasperserver.export.modules.common.TenantStrHolderPattern;
+import com.jaspersoft.jasperserver.export.modules.repository.beans.PermissionRecipient;
+import com.jaspersoft.jasperserver.export.modules.repository.beans.RepositoryObjectPermissionBean;
+import com.jaspersoft.jasperserver.export.util.CommandOut;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.dom4j.Element;
+import org.springframework.security.access.AccessDeniedException;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.jaspersoft.jasperserver.api.metadata.common.domain.InternalURI;
-import com.jaspersoft.jasperserver.api.metadata.user.domain.ObjectPermission;
-import com.jaspersoft.jasperserver.api.metadata.user.domain.Role;
-import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
-import com.jaspersoft.jasperserver.api.metadata.user.service.ObjectPermissionService;
-import com.jaspersoft.jasperserver.api.metadata.user.service.UserAuthorityService;
-import com.jaspersoft.jasperserver.export.modules.common.TenantQualifiedName;
-import com.jaspersoft.jasperserver.export.modules.repository.beans.PermissionRecipient;
-import com.jaspersoft.jasperserver.export.modules.repository.beans.RepositoryObjectPermissionBean;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.dom4j.Element;
-
-import com.jaspersoft.jasperserver.api.JSExceptionWrapper;
-import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
-import com.jaspersoft.jasperserver.export.Parameters;
-import com.jaspersoft.jasperserver.export.io.ImportInput;
-import com.jaspersoft.jasperserver.export.io.ObjectSerializer;
-import com.jaspersoft.jasperserver.export.util.CommandOut;
-
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: BaseImporterModule.java 54590 2015-04-22 17:55:42Z vzavadsk $
+ * @version $Id: BaseImporterModule.java 58265 2015-10-05 16:13:56Z vzavadsk $
  */
-public abstract class BaseImporterModule implements ImporterModule {
+public abstract class BaseImporterModule extends BasicExporterImporterModule implements ImporterModule {
 
 	private static final Log log = LogFactory.getLog(BaseImporterModule.class);
 	
 	protected static final CommandOut commandOut = CommandOut.getInstance();
-	
+
 	private String id;
 	
 	protected ImporterModuleContext importContext;
@@ -65,10 +70,7 @@ public abstract class BaseImporterModule implements ImporterModule {
 	protected ImportInput input;
 	protected Element indexElement;
 
-	private ObjectPermissionService permissionService;
 	private UserAuthorityService authorityService;
-	private String permissionRecipientRole;
-	private String permissionRecipientUser;
 
 	private Map roles = new HashMap();
 	private Map users = new HashMap();
@@ -174,36 +176,12 @@ public abstract class BaseImporterModule implements ImporterModule {
 		return executionContext;
 	}
 
-	public ObjectPermissionService getPermissionService() {
-		return permissionService;
-	}
-
-	public void setPermissionService(ObjectPermissionService permissionService) {
-		this.permissionService = permissionService;
-	}
-
 	public UserAuthorityService getAuthorityService() {
 		return authorityService;
 	}
 
 	public void setAuthorityService(UserAuthorityService authorityService) {
 		this.authorityService = authorityService;
-	}
-
-	public String getPermissionRecipientRole() {
-		return permissionRecipientRole;
-	}
-
-	public void setPermissionRecipientRole(String permissionRecipientRole) {
-		this.permissionRecipientRole = permissionRecipientRole;
-	}
-
-	public String getPermissionRecipientUser() {
-		return permissionRecipientUser;
-	}
-
-	public void setPermissionRecipientUser(String permissionRecipientUser) {
-		this.permissionRecipientUser = permissionRecipientUser;
 	}
 
 	protected void setPermissions(InternalURI object, RepositoryObjectPermissionBean[] permissions, boolean checkExisting) {
@@ -215,47 +193,60 @@ public abstract class BaseImporterModule implements ImporterModule {
 	}
 
 	protected void setPermission(InternalURI object, RepositoryObjectPermissionBean permissionBean, boolean checkExisting) {
-		ObjectPermissionService permissionsService = getPermissionService();
 
-		PermissionRecipient permissionRecipient = permissionBean.getRecipient();
-		Object recipient;
-		String recipientType = permissionRecipient.getRecipientType();
-		if (recipientType.equals(getPermissionRecipientRole())) {
-			recipient = getRole(permissionRecipient);
-			if (recipient == null) {
-				commandOut.warn("Role " + permissionRecipient + " not found, skipping permission of " + object.getURI());
-			}
-		} else if (recipientType.equals(getPermissionRecipientUser())) {
-			recipient = getUser(permissionRecipient);
-			if (recipient == null) {
-				commandOut.warn("User " + permissionRecipient + " not found, skipping permission of " + object.getURI());
-			}
-		} else {
-			recipient = null;
-			commandOut.warn("Unknown object permission recipient type " + recipientType + ", skipping permission of " + object.getURI());
+		try {
+			ObjectPermissionService permissionsService = getPermissionService();
+
+			PermissionRecipient permissionRecipient = handleNewTenantIds(permissionBean.getRecipient());
+			Object recipient;
+			String recipientType = permissionRecipient.getRecipientType();
+			if (recipientType.equals(getPermissionRecipientRole())) {
+                recipient = getRole(permissionRecipient);
+                if (recipient == null) {
+                    commandOut.warn("Role " + permissionRecipient + " not found, skipping permission of " + object.getURI());
+                }
+            } else if (recipientType.equals(getPermissionRecipientUser())) {
+                recipient = getUser(permissionRecipient);
+                if (recipient == null) {
+                    commandOut.warn("User " + permissionRecipient + " not found, skipping permission of " + object.getURI());
+                }
+            } else {
+                recipient = null;
+                commandOut.warn("Unknown object permission recipient type " + recipientType + ", skipping permission of " + object.getURI());
+            }
+
+			if (recipient != null) {
+                boolean existing;
+                if (checkExisting) {
+                    List permissions = permissionsService.getObjectPermissionsForObjectAndRecipient(executionContext, object, recipient);
+                    existing = permissions != null && !permissions.isEmpty();
+                } else {
+                    existing = false;
+                }
+                if (existing) {
+                    if (log.isInfoEnabled()) {
+                        log.info("Permission on " + object.getURI() + " for " + permissionRecipient + " already exists, skipping.");
+                    }
+                } else {
+                    ObjectPermission permission = permissionsService.newObjectPermission(executionContext);
+                    permission.setURI(object.getURI());
+                    permission.setPermissionMask(permissionBean.getPermissionMask());
+                    permission.setPermissionRecipient(recipient);
+
+                    permissionsService.putObjectPermission(executionContext, permission);
+                }
+            }
+		} catch (AccessDeniedException e) {
+			commandOut.warn("Access denied. Cannot put permission for resource " +
+					object.getURI() + " with " +
+					permissionBean.getRecipient().getRecipientType() + " " +
+					makeRecipientId(permissionBean.getRecipient()));
 		}
 
-		if (recipient != null) {
-			boolean existing;
-			if (checkExisting) {
-				List permissions = permissionsService.getObjectPermissionsForObjectAndRecipient(executionContext, object, recipient);
-				existing = permissions != null && !permissions.isEmpty();
-			} else {
-				existing = false;
-			}
-			if (existing) {
-				if (log.isInfoEnabled()) {
-					log.info("Permission on " + object.getURI() + " for " + permissionRecipient + " already exists, skipping.");
-				}
-			} else {
-				ObjectPermission permission = permissionsService.newObjectPermission(executionContext);
-				permission.setURI(object.getURI());
-				permission.setPermissionMask(permissionBean.getPermissionMask());
-				permission.setPermissionRecipient(recipient);
+	}
 
-				permissionsService.putObjectPermission(executionContext, permission);
-			}
-		}
+	protected String makeRecipientId(TenantQualifiedName tenantQualifiedName) {
+		return tenantQualifiedName.getName();
 	}
 
 	protected Role getRole(TenantQualifiedName roleName) {
@@ -286,5 +277,45 @@ public abstract class BaseImporterModule implements ImporterModule {
 
 	protected User loadUser(TenantQualifiedName username) {
 		return getAuthorityService().getUser(executionContext, username.getName());
+	}
+
+	protected void saveProfileAttributes(ProfileAttributeService attributeService,
+										 AttributedObject principal, ProfileAttributeBean[] attributes) {
+		if (attributes != null && attributes.length > 0) {
+			for (ProfileAttributeBean profileAttributeBean : attributes) {
+				saveProfileAttribute(attributeService, principal, profileAttributeBean);
+			}
+		}
+	}
+
+	private void saveProfileAttribute(ProfileAttributeService attributeService,
+									   AttributedObject principal, ProfileAttributeBean attributeBean) {
+		ProfileAttribute attribute = attributeService.newProfileAttribute(executionContext);
+		attribute.setPrincipal(principal);
+		attributeBean.copyTo(attribute);
+		String holderUri = attributeService.generateAttributeHolderUri(attribute.getPrincipal());
+		attribute.setUri(attribute.getAttrName(), holderUri == null ? "" : holderUri);
+
+		boolean saved = false;
+		try {
+			attributeService.putProfileAttribute(executionContext, attribute);
+			saved = true;
+			setPermissions(attribute, attributeBean.getPermissions(), false);
+		} catch (AccessDeniedException e) {
+			commandOut.warn("Access denied for profile attribute " + attributeBean.getName());
+			if (saved) {
+				throw new RuntimeException("Could not set permissions for created profile attribute "
+						+ attributeBean.getName());
+			}
+		}
+	}
+
+	private PermissionRecipient handleNewTenantIds(PermissionRecipient permissionRecipient) {
+		if (!importContext.getNewGeneratedTenantIds().isEmpty()) {
+			permissionRecipient.setTenantId(TenantStrHolderPattern.TENANT_ID.replaceWithNewTenantIds(
+					importContext.getNewGeneratedTenantIds(), permissionRecipient.getTenantId()));
+		}
+
+		return permissionRecipient;
 	}
 }

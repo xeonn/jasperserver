@@ -164,7 +164,7 @@
         <property name="jsonRedirectUrl" ref="authSuccessJsonRedirectUrl"/>
     </bean>
     <bean id="authSuccessJsonRedirectUrl" class="java.lang.String">
-        <constructor-arg type="java.lang.String" value="/scripts/bower_components/js-sdk/src/common/auth/loginSuccess.json"/>
+        <constructor-arg type="java.lang.String" value="/scripts/auth/loginSuccess.json"/>
     </bean>
     <bean id="failureHandler" class="org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler" >
         <property name="defaultFailureUrl" value="/login.html?error=1" />
@@ -223,8 +223,6 @@
         <property name="messages" ref="messageSource"/>
         <property name="redirectUrl" value="/error.html"/>
         <property name="localeResolver" ref="filterLocaleResolver"/>
-        <!-- to forbid showing of stacktraces in UI, set value="false" -->
-        <property name="showStacktraceMessage" value="true"/>
     </bean>
 
     <bean id="textOnlyResponseWebAppSecurityFilter" class="com.jaspersoft.jasperserver.api.security.TextOnlyResponseWebAppSecurityFilter" parent="webAppSecurityFilter"/>

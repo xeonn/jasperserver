@@ -20,11 +20,12 @@
  */
 package com.jaspersoft.jasperserver.remote.exception;
 
-import com.jaspersoft.jasperserver.remote.exception.xml.ErrorDescriptor;
+import com.jaspersoft.jasperserver.api.common.error.handling.SecureExceptionHandler;
+import com.jaspersoft.jasperserver.dto.common.ErrorDescriptor;
 
 /**
  * @author Yaroslav.Kovalchyk
- * @version $Id: RemoteException.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: RemoteException.java 57603 2015-09-15 17:20:48Z psavushc $
  */
 public class RemoteException extends RuntimeException {
 
@@ -32,22 +33,22 @@ public class RemoteException extends RuntimeException {
 
     public RemoteException() {
         super();
-        this.errorDescriptor = new ErrorDescriptor.Builder().getErrorDescriptor();
+        this.errorDescriptor = new ErrorDescriptor();
     }
 
     public RemoteException(String message) {
         super(message);
-        this.errorDescriptor = new ErrorDescriptor.Builder().setMessage(message).getErrorDescriptor();
+        this.errorDescriptor = new ErrorDescriptor().setMessage(message);
     }
 
     public RemoteException(String message, Throwable cause) {
         super(message, cause);
-        this.errorDescriptor = new ErrorDescriptor.Builder().setMessage(message).getErrorDescriptor();
+        this.errorDescriptor = new ErrorDescriptor().setMessage(message);
     }
 
-    public RemoteException(Throwable cause) {
+    public RemoteException(Throwable cause, SecureExceptionHandler exceptionHandler) {
         super(cause);
-        this.errorDescriptor = new ErrorDescriptor(cause);
+        this.errorDescriptor = exceptionHandler.handleException(cause);
     }
 
     public RemoteException(ErrorDescriptor errorDescriptor){

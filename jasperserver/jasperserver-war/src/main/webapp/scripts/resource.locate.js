@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: resource.locate.js 8179 2015-01-27 12:34:21Z psavushchik $
+ * @version: $Id: resource.locate.js 9400 2015-09-23 21:10:46Z inestere $
  */
 
 /* global _, resource, picker*/
@@ -44,7 +44,7 @@ var resourceLocator = {
         "docx", "doc", "ppt", "pptx", "xls", "xlsx", "ods", "odt", "odp", "pdf", "rtf", "html" //contentResource
     ],
 
-    /**
+    /*
      * Initializes Resource Locator common logic.
      * @param options Object with following properties:
      *     options = {

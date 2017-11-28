@@ -34,11 +34,6 @@
 
         <%@ include file="../common/jsEdition.jsp" %>
 
-        <t:insertTemplate template="/WEB-INF/jsp/templates/importControls.jsp">
-            <t:putAttribute name="containerID" value="#settings"/>
-            <t:putAttribute name="typeID" value="ExtendedFormView"/>
-        </t:insertTemplate>
-
     </t:putAttribute>
     <t:putAttribute name="bodyContent">
 		<t:insertTemplate template="/WEB-INF/jsp/templates/container.jsp">
@@ -51,14 +46,12 @@
 
 		    </t:putAttribute>
 		    <t:putAttribute name="footerContent">
-		    	<%-- RAW HTML FROM ANNA --%>
-		    	<%--<fieldset id="wizardNav">--%>
-		    		<%--<button id="importButton" class="button action primary up">--%>
-		    			<%--<span class="wrap">Import</span>--%>
-						<%--<span class="icon"></span>--%>
-		    		<%--</button> --%>
-		    	<%--</fieldset>--%>
-		    	<%-- END RAW HTML --%>
+                <fieldset id="controlButtons">
+                    <button id="importButton" class="button action primary up" disabled="disabled">
+                        <span class="wrap"><spring:message code="import.import"/></span>
+                        <span class="icon"></span>
+                    </button>
+                </fieldset>
 		    </t:putAttribute>
 		</t:insertTemplate>
 
@@ -100,10 +93,6 @@
                     <li class="leaf" disabled="disabled"><p class="wrap separator" href="#"><b class="icon"></b></p></li>
 				</ul>
 		    </t:putAttribute>
-<%--
-		    <t:putAttribute name="footerContent">
-		    </t:putAttribute>
---%>
 		</t:insertTemplate>
 	</t:putAttribute>
 </t:insertTemplate>

@@ -24,7 +24,7 @@ define(function (require) {
 
     var _ = require('underscore'),
         $ = require('jquery'),
-        i18n = require('bundle!CommonBundle'),
+        i18n = require('bundle!js-sdk/CommonBundle'),
         TreePlugin = require("./TreePlugin"),
 
         noResourcesFoundMessageTemplate = require('text!../template/noResourcesFoundMessageTemplate.htm'),

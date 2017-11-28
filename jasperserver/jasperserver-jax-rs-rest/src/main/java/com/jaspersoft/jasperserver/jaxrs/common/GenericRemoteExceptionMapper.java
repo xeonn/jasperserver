@@ -41,7 +41,7 @@ public class GenericRemoteExceptionMapper implements ExceptionMapper<RemoteExcep
     private static final Log log = LogFactory.getLog(GenericRemoteExceptionMapper.class);
 
     @Resource(name= "localizedErrorDescriptorBuilder")
-    private LocalizedErrorDescriptorBuilder builder;
+    private LocalizedErrorDescriptorBuilder errorDescriptor;
 
     public Response toResponse(RemoteException exception) {
         Response.Status status = Response.Status.BAD_REQUEST;
@@ -52,7 +52,7 @@ public class GenericRemoteExceptionMapper implements ExceptionMapper<RemoteExcep
         }
 
         return Response.status(status)
-                       .entity(builder.localizeDescriptor(exception.getErrorDescriptor()))
+                       .entity(errorDescriptor.localizeDescriptor(exception.getErrorDescriptor()))
                        .build();
     }
 }

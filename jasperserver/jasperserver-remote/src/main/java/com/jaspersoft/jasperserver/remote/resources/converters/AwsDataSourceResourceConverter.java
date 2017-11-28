@@ -20,6 +20,7 @@
 */
 package com.jaspersoft.jasperserver.remote.resources.converters;
 
+import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConversionOptions;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.AwsReportDataSource;
 import com.jaspersoft.jasperserver.dto.resources.ClientAwsDataSource;
 import com.jaspersoft.jasperserver.remote.exception.IllegalParameterValueException;
@@ -29,7 +30,7 @@ import org.springframework.stereotype.Service;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: AwsDataSourceResourceConverter.java 51542 2014-11-19 19:16:56Z vsabadosh $
+ * @version $Id: AwsDataSourceResourceConverter.java 58870 2015-10-27 22:30:55Z esytnik $
  */
 @Service
 public class AwsDataSourceResourceConverter extends GenericJdbcDataSourceResourceConverter<AwsReportDataSource, ClientAwsDataSource> {

@@ -21,8 +21,11 @@
 
 package com.jaspersoft.jasperserver.remote.services.async;
 
+import com.jaspersoft.jasperserver.dto.importexport.State;
 import com.jaspersoft.jasperserver.remote.exception.NoResultException;
 import com.jaspersoft.jasperserver.remote.exception.NotReadyResultException;
+
+import java.util.Map;
 
 /**
  *
@@ -31,8 +34,19 @@ import com.jaspersoft.jasperserver.remote.exception.NotReadyResultException;
 
 public interface TaskRunnable<T> extends Runnable{
 
-    StateDto getState();
+    State getState();
 
     T getResult() throws NotReadyResultException, NoResultException;
 
+    String getOrganizationId();
+
+    void setOrganizationId(String organizationId);
+
+    String getBrokenDependenciesStrategy();
+
+    void setBrokenDependenciesStrategy(String value);
+
+    Map<String, Boolean> getParameters();
+
+    void setParameters(Map<String, Boolean> parameters);
 }

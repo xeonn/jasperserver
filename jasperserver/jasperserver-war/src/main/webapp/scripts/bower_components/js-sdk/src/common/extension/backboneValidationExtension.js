@@ -22,7 +22,7 @@
 
 /**
  * @author: Kostiantyn Tsaregradskyi
- * @version: $Id: backboneValidationExtension.js 380 2014-11-09 15:04:25Z ktsaregradskyi $
+ * @version: $Id: backboneValidationExtension.js 1605 2015-09-23 17:55:32Z inestere $
  */
 
 define(function (require) {
@@ -30,7 +30,8 @@ define(function (require) {
 
     var Validation = require("backbone.validation.original"),
         _ = require("underscore"),
-        numberUtils = require("common/util/parse/number");
+        NumberUtils = require("common/util/parse/NumberUtils"),
+        numberUtils = new NumberUtils();
 
     var originalValidate = Validation.mixin.validate;
 
@@ -48,15 +49,19 @@ define(function (require) {
             }, options)
         );
     };
+
+    /**
+     * @extends Backbone.Validation.validators
+     */
     _.extend(Validation.validators, {
         /**
-         * @function doesNotContainSymbols
          * @description Check that value does not contain forbidden symbols.
+         * @static
          * @param {string} value Value to be checked.
          * @param {string} attr Name of the model's attribute to which validator belongs to.
          * @param {string} forbiddenSymbols String containing forbidden symbols, they should be properly escaped,
          *      e.g. "~!#\\$%^|\\s`@&*()\\-+={}\\[\\]:;\"\"\\<\\>,?\/\\|\\\\"
-         * @returns {undefined|string} Undefined if value does not have forbidden symbols, error message otherwise.
+         * @returns {(undefined|string)} Undefined if value does not have forbidden symbols, error message otherwise.
          */
         doesNotContainSymbols: function(value, attr, forbiddenSymbols) {
             if (new RegExp("[" + forbiddenSymbols + "]", "g").test(value)){
@@ -65,10 +70,10 @@ define(function (require) {
         },
 
         /**
-         * @function integerNumber
          * @description Check that value is an integer number. Will return error for decimals, NaN, positive and negative infinities.
-         * @param value Value to be checked.
-         * @returns {undefined|string} Undefined if value is an integer number, error message otherwise.
+         * @param {*} value Value to be checked.
+         * @static
+         * @returns {(undefined|string)} Undefined if value is an integer number, error message otherwise.
          */
         integerNumber: function(value) {
             if (!numberUtils.isNumberInt(value)) {

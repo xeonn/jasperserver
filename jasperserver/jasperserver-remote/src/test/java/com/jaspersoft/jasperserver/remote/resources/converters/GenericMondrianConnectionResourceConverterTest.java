@@ -21,6 +21,7 @@
 package com.jaspersoft.jasperserver.remote.resources.converters;
 
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceReference;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConversionOptions;
 import com.jaspersoft.jasperserver.api.metadata.olap.domain.MondrianConnection;
 import com.jaspersoft.jasperserver.api.metadata.olap.domain.client.MondrianConnectionImpl;
 import com.jaspersoft.jasperserver.dto.resources.AbstractClientMondrianConnection;
@@ -47,7 +48,7 @@ import static org.testng.Assert.*;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: GenericMondrianConnectionResourceConverterTest.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: GenericMondrianConnectionResourceConverterTest.java 58870 2015-10-27 22:30:55Z esytnik $
  */
 public class GenericMondrianConnectionResourceConverterTest {
     @InjectMocks

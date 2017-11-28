@@ -27,7 +27,7 @@ import net.sf.jasperreports.engine.ReportContext;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: ReportExecutionOptions.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: ReportExecutionOptions.java 58870 2015-10-27 22:30:55Z esytnik $
  */
 public class ReportExecutionOptions {
 
@@ -35,6 +35,7 @@ public class ReportExecutionOptions {
     private Boolean saveDataSnapshot = false;
     private Boolean interactive = false;
     private Boolean ignorePagination;
+    private Boolean defaultIgnorePagination;
     private Boolean async = false;
     private String transformerKey;
     private String contextPath;
@@ -56,6 +57,7 @@ public class ReportExecutionOptions {
         requestId = source.getRequestId();
         reportContext = source.getReportContext();
         jasperReportsContext = source.getJasperReportsContext();
+        defaultIgnorePagination = source.getDefaultIgnorePagination();
     }
 
     public JasperReportsContext getJasperReportsContext() {
@@ -64,6 +66,23 @@ public class ReportExecutionOptions {
 
     public ReportExecutionOptions setJasperReportsContext(JasperReportsContext jasperReportsContext) {
         this.jasperReportsContext = jasperReportsContext;
+        return this;
+    }
+
+    public Boolean getDefaultIgnorePagination() {
+        return defaultIgnorePagination;
+    }
+
+    /**
+     * Setter for defaultIgnorePagination flag. It's required to hold ignorePagination flag value if it's not specified
+     * in initial report execution options. In this case we can know it only after reportUnitResult is available
+     * (reportUnitResult.isPaginated()). This value will be used as ignorePagination value
+     * for all feather export without ignorePagination value.
+     * @param defaultIgnorePagination
+     * @return
+     */
+    public ReportExecutionOptions setDefaultIgnorePagination(Boolean defaultIgnorePagination) {
+        this.defaultIgnorePagination = defaultIgnorePagination;
         return this;
     }
 

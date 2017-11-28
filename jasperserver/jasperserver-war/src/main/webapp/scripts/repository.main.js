@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: repository.main.js 7762 2014-09-19 10:16:02Z sergey.prilukin $
+ * @version: $Id: repository.main.js 9490 2015-10-05 16:46:54Z obobruyk $
  */
 
 define(function(require){
@@ -29,7 +29,6 @@ define(function(require){
 
     var domReady = require("!domReady"),
         jaspersoft = require("namespace"),
-        jrsExport = require("export"),
         repositorySearch = require("component.repository.search"),
         jrsConfigs = require("jrs.configs"),
         dynamicList = require("components.list"),
@@ -44,18 +43,11 @@ define(function(require){
     require("components.tooltip");
     require("tools.infiniteScroll");
     require("mng.common");
-    require("export.app");
-    require("import.extendedformview");
-    require("export.extendedformview");
-    require("export.shortformview");
 
     domReady(function(){
         _.extend(repositorySearch.messages, jrsConfigs.repositorySearch.i18n);
         _.extend(dynamicList.messages, jrsConfigs.dynamicList.i18n);
         _.extend(localContext, jrsConfigs.repositorySearch.localContext);
-        _.extend(jaspersoft.i18n, jrsConfigs.Export.i18n);
-
-        jrsExport.App.initialize(jrsConfigs.Export.initParams);
 
         repositorySearch.initialize(localContext);
     });

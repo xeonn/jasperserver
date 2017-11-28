@@ -21,6 +21,8 @@
 
 package com.jaspersoft.jasperserver.search.filter;
 
+import com.jaspersoft.jasperserver.api.engine.scheduling.domain.ReportJobSummary;
+import com.jaspersoft.jasperserver.api.engine.scheduling.service.ReportJobsPersistenceService;
 import com.jaspersoft.jasperserver.api.search.SearchCriteria;
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
@@ -28,13 +30,21 @@ import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.pe
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Folder;
 import com.jaspersoft.jasperserver.api.engine.scheduling.hibernate.PersistentReportJob;
 import com.jaspersoft.jasperserver.search.common.SearchAttributes;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.PredicateUtils;
+import org.apache.commons.collections.Transformer;
+import org.apache.commons.collections.TransformerUtils;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Disjunction;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
+
+import static org.apache.commons.collections.CollectionUtils.transformedCollection;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 /**
  * Scheduler filter.
@@ -43,6 +53,8 @@ import java.util.List;
  * @version $Id$
  */
 public class ScheduleFilter extends BaseSearchFilter implements Serializable {
+
+    protected ReportJobsPersistenceService jobsService;
 
     public void applyRestrictions(String type, ExecutionContext context, SearchCriteria criteria) {
         SearchAttributes searchAttributes = getSearchAttributes(context);
@@ -71,19 +83,16 @@ public class ScheduleFilter extends BaseSearchFilter implements Serializable {
     }
 
     private void createCriteria(SearchCriteria criteria, User user, boolean scheduled, boolean scheduledByUser) {
-        SearchCriteria uriCriteria = SearchCriteria.forClass(PersistentReportJob.class);
-        if (scheduledByUser) {
-            addOwnerCriteria(uriCriteria, user);
-        }
-        uriCriteria.addProjection(Projections.property("source.reportUnitURI"));
-        List uriList  = getHibernateTemplate().findByCriteria(uriCriteria);
+        List<ReportJobSummary> jobSummaries = jobsService.listJobs(null);
 
-        if (!uriList.isEmpty()) {
+        if (!jobSummaries.isEmpty()) {
             SearchCriteria idCriteria = SearchCriteria.forClass(RepoResource.class);
+
             Disjunction disjunction = Restrictions.disjunction();
             String alias = idCriteria.getAlias("parent", "p");
-            for (Object o : uriList) {
-                String uri = (String)o;
+
+            for (ReportJobSummary job : jobSummaries) {
+                String uri = job.getReportUnitURI();
 
                 disjunction.add(getResourceCriterion(alias, uri));
             }
@@ -100,7 +109,13 @@ public class ScheduleFilter extends BaseSearchFilter implements Serializable {
                     criteria.add(Restrictions.not(Restrictions.in("id", idList)));
                 }
             } else {
-                throw new RuntimeException("No resources found for URI list " + uriList);
+                throw new RuntimeException("No resources found for URI list " +
+                        transformedCollection(jobSummaries, new Transformer() {
+                            @Override
+                            public Object transform(Object o) {
+                                return ((ReportJobSummary) o).getReportUnitURI();
+                            }
+                        }));
             }
         } else {
              if (scheduled || scheduledByUser) {
@@ -109,6 +124,17 @@ public class ScheduleFilter extends BaseSearchFilter implements Serializable {
         }
     }
 
+    /**
+     * Deprecated because we replaced our custom logic with existing service
+     * {@link ReportJobsPersistenceService#listJobs(com.jaspersoft.jasperserver.api.common.domain.ExecutionContext)}.
+     * Which has ACL check enabled.
+     *
+     * {@see http://bugzilla.jaspersoft.com/show_bug.cgi?id=41783}
+     *
+     * @param criteria
+     * @param user
+     */
+    @Deprecated
     protected void addOwnerCriteria(SearchCriteria criteria, User user) {
         String alias = criteria.getAlias("owner", "o");
         criteria.add(Restrictions.eq(alias + ".username", user.getUsername()));
@@ -125,5 +151,9 @@ public class ScheduleFilter extends BaseSearchFilter implements Serializable {
         }
 
         return Restrictions.and(Restrictions.eq("name", resourceName), Restrictions.eq(alias + ".URI", folderUri));
+    }
+
+    public void setJobsService(ReportJobsPersistenceService jobsService) {
+        this.jobsService = jobsService;
     }
 }

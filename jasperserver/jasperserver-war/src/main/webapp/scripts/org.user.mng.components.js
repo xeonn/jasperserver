@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: org.user.mng.components.js 8900 2015-05-06 20:57:14Z yplakosh $
+ * @version: $Id: org.user.mng.components.js 9490 2015-10-05 16:46:54Z obobruyk $
  */
 
 /* global  orgModule, isProVersion, layoutModule, buttonManager, invokeClientAction, invokeUserManagerAction,
@@ -236,7 +236,7 @@ define(["require", "jquery", "org.user.mng.main", "mng.common.actions", "common/
 						this.getAssignedEntities().length > 0 || this.getUnassignedEntities().length > 0);
 			};
 
-			orgModule.properties.save = function(callbackFunc) {
+			orgModule.properties.save = function() {
 				var umProperties = orgModule.userManager.properties;
 
 				var orgModuleProps = this;
@@ -258,7 +258,7 @@ define(["require", "jquery", "org.user.mng.main", "mng.common.actions", "common/
 							unassigned: orgModuleProps.getUnassignedEntities()
 						});
 
-						callbackFunc(); //return
+                        orgModule.properties.changeMode(false);
 					}
 				);
 			};

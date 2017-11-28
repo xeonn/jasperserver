@@ -20,6 +20,7 @@
 */
 package com.jaspersoft.jasperserver.remote.connection;
 
+import com.jaspersoft.jasperserver.api.common.error.handling.SecureExceptionHandler;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl.BaseJdbcDataSource;
 import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.JdbcReportDataSource;
@@ -39,7 +40,7 @@ import java.util.Map;
  * <p></p>
  *
  * @author yaroslav.kovalchyk
- * @version $Id: JdbcConnectionStrategy.java 50011 2014-10-09 16:57:26Z vzavadskii $
+ * @version $Id: JdbcConnectionStrategy.java 57603 2015-09-15 17:20:48Z psavushc $
  */
 @Service
 public class JdbcConnectionStrategy implements ConnectionManagementStrategy<ClientJdbcDataSource> {
@@ -51,6 +52,8 @@ public class JdbcConnectionStrategy implements ConnectionManagementStrategy<Clie
     private ReportDataSourceServiceFactory jdbcDataSourceFactory;
     @Resource
     private JdbcDataSourceResourceConverter jdbcDataSourceResourceConverter;
+    @Resource
+    private SecureExceptionHandler secureExceptionHandler;
 
     @Override
     public ClientJdbcDataSource createConnection(ClientJdbcDataSource connectionDescription, Map<String, Object> data) throws IllegalParameterValueException {
@@ -75,7 +78,7 @@ public class JdbcConnectionStrategy implements ConnectionManagementStrategy<Clie
             exception = e;
         }
         if (!passed) {
-            throw new ConnectionFailedException(connectionDescription, exception);
+            throw new ConnectionFailedException(connectionDescription, exception, secureExceptionHandler);
         }
         return connectionDescription;
     }

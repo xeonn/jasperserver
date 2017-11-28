@@ -57,6 +57,7 @@ For options try:  js-ant @{type}-help-@{edition}
         <attribute name="archive"/>
         <attribute name="edition"/> <!-- ce or pro -->
         <attribute name="checkDBMSConnection"/> <!-- true or false -->
+        <attribute name="useConsoleInput" default="false"/> <!-- true or false -->
         <element name="args" implicit="yes" optional="true"/>
         <sequential>
             <!-- set config dir based on edition, then make sure it's there -->
@@ -145,54 +146,100 @@ Make sure you have compiled the jasperserver source code.
                </then>
            </if>
 
-            <!--
-              JVM forked by Ant tries to read from input stream by default.
-              If one of the <input>s with be executed after this call then
-              user will be prompted for input at least one more time
-              (pending input for forked JVM).
-              inputstring="" is added explicitly to ensure that input will not be captured
-              and <input>s will work as expected.
+            <if>
+                <equals arg1="@{useConsoleInput}" arg2="true" />
+                <then>
+                    <java classname="${class}" fork="true" failonerror="true">
+                        <arg value="--@{type}"/>
+                        <arg value="${archiveArg}"/>
+                        <args/>
+                        <!-- add arg that tells oracle JDBC driver to use utf-8 types; won't hurt anyone else -->
+                        <jvmarg value="-Doracle.jdbc.defaultNChar=true"/>
+                        <!-- add this to handle properly import catalogs with utf-8 names -->
+                        <jvmarg value="-Dfile.encoding=UTF-8"/>
+                        <!-- disable ehcache -->
+                        <jvmarg value="-Dnet.sf.ehcache.disabled=true"/>
+                        <!-- set this var to avoid certain network exceptions in OS X -->
+                        <jvmarg value="-Djava.net.preferIPv4Stack=true"/>
+                        <jvmarg value="-Xms512m"/>
+                        <jvmarg value="-Xmx2048m"/>
+                        <jvmarg value="-XX:PermSize=64m"/>
+                        <jvmarg value="-XX:MaxPermSize=128m"/>
 
-              TODO This is a known bug https://issues.apache.org/bugzilla/show_bug.cgi?id=49119. Fixed in Ant 1.8.2
-             -->
-            <java classname="${class}" fork="true" failonerror="true" inputstring="">
-                <arg value="--@{type}"/>
-                <arg value="${archiveArg}"/>
-                <args/>
-                <!-- add arg that tells oracle JDBC driver to use utf-8 types; won't hurt anyone else -->
-                <jvmarg value="-Doracle.jdbc.defaultNChar=true"/>
-                <!-- add this to handle properly import catalogs with utf-8 names -->
-                <jvmarg value="-Dfile.encoding=UTF-8"/>
-		<!-- disable ehcache -->
-            	<jvmarg value="-Dnet.sf.ehcache.disabled=true"/>
-				<!-- set this var to avoid certain network exceptions in OS X -->
-            	<jvmarg value="-Djava.net.preferIPv4Stack=true"/>
-                <jvmarg value="-Xms512m"/>
-                <jvmarg value="-Xmx2048m"/>
-                <jvmarg value="-XX:PermSize=64m"/>
-                <jvmarg value="-XX:MaxPermSize=128m"/>
+                        <!-- Uncomment to debug remotely     -->
+                        <!--<jvmarg value="-Xdebug"/>
+                        <jvmarg value="-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=9009"/>-->
 
-                <!-- Uncomment to debug remotely     -->
-                <!--<jvmarg value="-Xdebug"/>
-                <jvmarg value="-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=9009"/>-->
-
-                <classpath>
+                        <classpath>
+                            <!--
+                                TODO
+                                we should put currentConf first so it can pick up the files generated based on
+                                db settings, etc., but if you do that, beans don't get recognized because
+                                the Spring context loader uses a pattern of "applicationContext*.xml", which
+                                is sensitive to the order of the classpath.
+                                We should use one of the args such as -configResources to pass a pattern
+                                that is more explicit for Spring, doing something like this:
+                                -configResources=file:blah/import-export/dir/applicationContext*.xml
+                              -->
+                            <pathelement location="${importExportConfig}"/>
+                            <fileset dir="${importExportLibDir}" includes="*.jar"/>
+                            <fileset dir="${currentDbDir}/jdbc" includes="${jdbcJar}"/>
+                            <pathelement location="${currentConf}"/>
+                        </classpath>
+                    </java>
+                </then>
+                <else>
                     <!--
-                        TODO
-                        we should put currentConf first so it can pick up the files generated based on
-                        db settings, etc., but if you do that, beans don't get recognized because
-                        the Spring context loader uses a pattern of "applicationContext*.xml", which
-                        is sensitive to the order of the classpath.
-                        We should use one of the args such as -configResources to pass a pattern
-                        that is more explicit for Spring, doing something like this:
-                        -configResources=file:blah/import-export/dir/applicationContext*.xml
-                      -->
-                    <pathelement location="${importExportConfig}"/>
-                    <fileset dir="${importExportLibDir}" includes="*.jar"/>
-                    <fileset dir="${currentDbDir}/jdbc" includes="${jdbcJar}"/>
-                    <pathelement location="${currentConf}"/>
-                </classpath>
-            </java>
+                      JVM forked by Ant tries to read from input stream by default.
+                      If one of the <input>s with be executed after this call then
+                      user will be prompted for input at least one more time
+                      (pending input for forked JVM).
+                      inputstring="" is added explicitly to ensure that input will not be captured
+                      and <input>s will work as expected.
+
+                      TODO This is a known bug https://issues.apache.org/bugzilla/show_bug.cgi?id=49119. Fixed in Ant 1.8.2
+                     -->
+
+                    <java classname="${class}" fork="true" failonerror="true" inputstring="">
+                        <arg value="--@{type}"/>
+                        <arg value="${archiveArg}"/>
+                        <args/>
+                        <!-- add arg that tells oracle JDBC driver to use utf-8 types; won't hurt anyone else -->
+                        <jvmarg value="-Doracle.jdbc.defaultNChar=true"/>
+                        <!-- add this to handle properly import catalogs with utf-8 names -->
+                        <jvmarg value="-Dfile.encoding=UTF-8"/>
+                        <!-- disable ehcache -->
+                        <jvmarg value="-Dnet.sf.ehcache.disabled=true"/>
+                        <!-- set this var to avoid certain network exceptions in OS X -->
+                        <jvmarg value="-Djava.net.preferIPv4Stack=true"/>
+                        <jvmarg value="-Xms512m"/>
+                        <jvmarg value="-Xmx2048m"/>
+                        <jvmarg value="-XX:PermSize=64m"/>
+                        <jvmarg value="-XX:MaxPermSize=128m"/>
+
+                        <!-- Uncomment to debug remotely     -->
+                        <!--<jvmarg value="-Xdebug"/>
+                        <jvmarg value="-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=9009"/>-->
+
+                        <classpath>
+                            <!--
+                                TODO
+                                we should put currentConf first so it can pick up the files generated based on
+                                db settings, etc., but if you do that, beans don't get recognized because
+                                the Spring context loader uses a pattern of "applicationContext*.xml", which
+                                is sensitive to the order of the classpath.
+                                We should use one of the args such as -configResources to pass a pattern
+                                that is more explicit for Spring, doing something like this:
+                                -configResources=file:blah/import-export/dir/applicationContext*.xml
+                              -->
+                            <pathelement location="${importExportConfig}"/>
+                            <fileset dir="${importExportLibDir}" includes="*.jar"/>
+                            <fileset dir="${currentDbDir}/jdbc" includes="${jdbcJar}"/>
+                            <pathelement location="${currentConf}"/>
+                        </classpath>
+                    </java>
+                </else>
+            </if>
         </sequential>
     </macrodef>
 
@@ -236,7 +283,8 @@ Make sure you have compiled the jasperserver source code.
         <if>
             <isset property="importArgs"/>
             <then>
-                <run-import-export type="import" archive="${importFile}" edition="pro" checkDBMSConnection="true">
+                <run-import-export type="import" archive="${importFile}"
+                                   edition="pro" checkDBMSConnection="true" useConsoleInput="true">
                     <arg line="${importArgs}" />
                 </run-import-export>
             </then>
@@ -547,6 +595,9 @@ Windows Example:
                 -DexportArgs="--uris /organizations/organization_1/reports
                 --users jasperadmin|organization_1,joeuser|organization_1"
 
+  js-ant export -DexportFile=js-organization-1.zip -DexportArgs="--everything
+                --organization organization_1"
+
 Linux Example:
 
   ./js-ant export -DexportFile=my-reports-and-users.zip
@@ -556,6 +607,9 @@ Linux Example:
   ./js-ant export -DexportFile=my-reports-and-users.zip
                   -DexportArgs=\"--uris /organizations/organization_1/reports
                   --users 'jasperadmin\|organization_1,joeuser\|organization_1'\"
+
+  ./js-ant export -DexportFile=js-organization-1.zip -DexportArgs=\"--everything
+                  --organization organization_1\"
 
                 (linux: note escape backslash on | and " characters and use of ' character)
 </echo>

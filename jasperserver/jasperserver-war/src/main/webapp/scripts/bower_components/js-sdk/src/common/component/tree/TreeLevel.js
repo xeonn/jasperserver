@@ -22,7 +22,7 @@
 
 /**
  * @author: Zakhar Tomchenko
- * @version: $Id: TreeLevel.js 1178 2015-05-06 20:40:12Z yplakosh $
+ * @version: $Id: TreeLevel.js 1760 2015-10-27 18:45:31Z yplakosh $
  */
 
 define(function (require) {
@@ -32,6 +32,8 @@ define(function (require) {
         Panel = require('common/component/panel/Panel'),
         collapsiblePanelTrait = require('common/component/panel/trait/collapsiblePanelTrait'),
         List = require("common/component/list/view/ListWithSelection"),
+        addToSelectionModelTrait = require("common/component/tree/trait/addToSelectionModelTrait"),
+        ListWithSelectionModel = require("common/component/list/model/ListWithSelectionModel").extend(addToSelectionModelTrait),
         TooltipPlugin = require("common/component/tree/plugin/TooltipPlugin"),
         DataProviderWithSearchCache = require("common/component/singleSelect/dataprovider/DataProviderNew");
 
@@ -49,7 +51,8 @@ define(function (require) {
         initialize: function(options) {
             options || (options = {});
 
-            this.id = options.id;
+            this.item = options.item || {};
+            this.id = this.item.id;
             this.owner = options.owner;
             this.parent = options.parent;
 
@@ -58,9 +61,10 @@ define(function (require) {
             this.levelHeight = options.levelHeight;
             this.lazyLoad =  !!options.lazyLoad;
             this.selection = options.selection || {allowed: false, multiple: false};
-            this.resource = options.resource;
+            this.resource = this.item.value;
             this.bufferSize = options.bufferSize;
             this.cache = typeof options.cache != "undefined" ? options.cache : false;
+            this.allowMouseDownEventPropagation = options.allowMouseDownEventPropagation;
 
             this.items = {};
             this.plugins = [];
@@ -79,16 +83,21 @@ define(function (require) {
         },
 
         render: function() {
+            var model = new ListWithSelectionModel({
+                bufferSize: this.bufferSize,
+                getData: this._getDataProvider(this.cache)
+            });
+
             this.list = new List({
                 markerClass: "." + this.cid,
                 eventListenerPattern: "." + this.cid + ":not(.readonly) > p",
                 el: this.$contentContainer,
                 itemsTemplate: this.itemsTemplate,
                 listItemHeight: this.listItemHeight,
-                lazy:true,
+                lazy: true,
                 selection: this.selection,
-                bufferSize: this.bufferSize,
-                getData: this._getDataProvider(this.cache)
+                allowMouseDownEventPropagation: this.allowMouseDownEventPropagation,
+                model: model
             });
 
             this.list.on("render:data", _.bind(listRendered, this));
@@ -189,6 +198,7 @@ define(function (require) {
             } else {
                 this.list.model.set("bufferStartIndex", undefined, {silent: true});
                 this.list.model.set("bufferEndIndex", undefined, {silent: true});
+                this.list.model.set("total", undefined, {silent: true});
 
                 itemsIterator(this, this.refresh, options);
             }
@@ -248,6 +258,7 @@ define(function (require) {
 
                     if (index > -1) {
                         dataLayer.predefinedData[parentLevelId].splice(index, 1);
+                        delete dataLayer.predefinedData[this.id];
                     }
                 }
 

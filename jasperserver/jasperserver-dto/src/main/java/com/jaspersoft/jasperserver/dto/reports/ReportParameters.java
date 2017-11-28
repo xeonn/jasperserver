@@ -20,8 +20,6 @@
 */
 package com.jaspersoft.jasperserver.dto.reports;
 
-import com.jaspersoft.jasperserver.dto.authority.ClientUserAttribute;
-
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.ArrayList;
@@ -33,7 +31,7 @@ import java.util.Map;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: ReportParameters.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: ReportParameters.java 58870 2015-10-27 22:30:55Z esytnik $
  */
 @XmlRootElement
 public class ReportParameters {

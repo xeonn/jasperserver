@@ -75,10 +75,6 @@
             <%= SearchActionModelSupport.getInstance((String) request.getAttribute("mode")).getClientActionModelDocument(request) %>
         </script>
 
-        <t:insertTemplate template="/WEB-INF/jsp/templates/exportControls.jsp">
-            <t:putAttribute name="typeID" value="ShortFormView"/>
-        </t:insertTemplate>
-
     </t:putAttribute>
     <t:putAttribute name="bodyContent">
         <t:insertTemplate template="/WEB-INF/jsp/templates/container.jsp">

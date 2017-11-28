@@ -32,9 +32,10 @@ import org.apache.commons.logging.LogFactory;
 import com.jaspersoft.jasperserver.api.JSException;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.util.JRTimezoneJdbcQueryExecuterFactory;
 
+
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: JdbcDataSourceService.java 50011 2014-10-09 16:57:26Z vzavadskii $
+ * @version $Id: JdbcDataSourceService.java 58870 2015-10-27 22:30:55Z esytnik $
  */
 public class JdbcDataSourceService extends BaseJdbcDataSource {
 
@@ -82,7 +83,7 @@ public class JdbcDataSourceService extends BaseJdbcDataSource {
         Connection conn = null;
         try {
             conn = dataSource.getConnection();
-            return conn != null;
+            return isConnectionValid(conn);
         } finally {
             if (conn != null)
                 try {
@@ -90,6 +91,19 @@ public class JdbcDataSourceService extends BaseJdbcDataSource {
                 } catch (SQLException e) {
                     log.error("Couldn't disconnect JDBC connection", e);
                 }
+        }
+    }
+
+    private boolean isConnectionValid(Connection conn) throws SQLException {
+        if (conn == null) {
+            return false;
+        }
+        try {
+            return conn.isValid(10 /*seconds*/);
+        } catch (IncompatibleClassChangeError e) {
+            log.error("Connection validation is not supported by driver", e);
+            // return true so old drivers can still be used.
+            return true;
         }
     }
 

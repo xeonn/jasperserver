@@ -64,7 +64,7 @@ import java.util.*;
  * Manages attributes for principals - Users, Roles.
  *
  * @author sbirney
- * @version $Id: ProfileAttributeServiceImpl.java 56967 2015-08-20 23:20:53Z esytnik $
+ * @version $Id: ProfileAttributeServiceImpl.java 58265 2015-10-05 16:13:56Z vzavadsk $
  */
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 public class ProfileAttributeServiceImpl extends HibernateDaoImpl
@@ -853,6 +853,14 @@ public class ProfileAttributeServiceImpl extends HibernateDaoImpl
 
                 if (searchCriteria.isSkipServerSettings() &&
                         !attrGroup.equals(ProfileAttributeGroup.CUSTOM.toString())) {
+                    continue;
+                }
+
+                //skip system JDBC attributes
+                if (searchCriteria.getGroups() != null
+                        && searchCriteria.getGroups().contains(ProfileAttributeGroup.CUSTOM_SERVER_SETTINGS.toString())
+                        && attrGroup.equals(ProfileAttributeGroup.JDBC.toString())
+                        && profileAttribute.getAttrValue().equals("[SYSTEM]")) {
                     continue;
                 }
 

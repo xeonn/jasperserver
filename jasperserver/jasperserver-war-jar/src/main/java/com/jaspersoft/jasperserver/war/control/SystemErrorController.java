@@ -20,16 +20,18 @@
  */
 package com.jaspersoft.jasperserver.war.control;
 
+import com.jaspersoft.jasperserver.api.common.error.handling.SecureExceptionHandler;
+import com.jaspersoft.jasperserver.dto.common.ErrorDescriptor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -40,6 +42,9 @@ import java.util.List;
 public class SystemErrorController extends JRBaseMultiActionController {
 
     public static final String DELETE = "DELETE";
+
+	@Resource
+	private SecureExceptionHandler secureExceptionHandler;
 
     public SystemErrorController(){
         final List<String> supportedMethodsList = new ArrayList<String>(Arrays.asList(getSupportedMethods()));
@@ -79,8 +84,10 @@ public class SystemErrorController extends JRBaseMultiActionController {
 
         if (e != null && e instanceof Throwable) {
             logger.error("Internal server error", (Throwable)e);
-			if (systemErrorDetails == null || systemErrorDetails.length() == 0)
-				systemErrorDetails = ((Throwable) e).getMessage();
+			if (systemErrorDetails == null || systemErrorDetails.length() == 0) {
+				ErrorDescriptor ed = secureExceptionHandler.handleException((Throwable) e);
+				systemErrorDetails = ed.getMessage();
+			}
         }
 
         mav.addObject("systemErrorDetails", systemErrorDetails);

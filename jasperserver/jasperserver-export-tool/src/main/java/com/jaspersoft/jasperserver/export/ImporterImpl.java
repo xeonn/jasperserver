@@ -21,16 +21,19 @@
 
 package com.jaspersoft.jasperserver.export;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Properties;
-
+import com.jaspersoft.jasperserver.api.JSException;
+import com.jaspersoft.jasperserver.api.JSExceptionWrapper;
 import com.jaspersoft.jasperserver.api.common.util.ImportRunMonitor;
 import com.jaspersoft.jasperserver.api.common.util.diagnostic.DiagnosticSnapshotPropertyHelper;
-
+import com.jaspersoft.jasperserver.export.io.ImportInput;
+import com.jaspersoft.jasperserver.export.modules.Attributes;
+import com.jaspersoft.jasperserver.export.modules.ImporterModule;
+import com.jaspersoft.jasperserver.export.modules.ImporterModuleContext;
+import com.jaspersoft.jasperserver.export.modules.MapAttributes;
+import com.jaspersoft.jasperserver.export.service.ImportExportService;
+import com.jaspersoft.jasperserver.export.service.ImportFailedException;
+import com.jaspersoft.jasperserver.export.service.impl.ImportExportServiceImpl;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dom4j.Attribute;
@@ -38,19 +41,21 @@ import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
+import org.springframework.util.Assert;
 
-import com.jaspersoft.jasperserver.api.JSException;
-import com.jaspersoft.jasperserver.api.JSExceptionWrapper;
-import com.jaspersoft.jasperserver.export.io.ImportInput;
-import com.jaspersoft.jasperserver.export.modules.Attributes;
-import com.jaspersoft.jasperserver.export.modules.ImporterModule;
-import com.jaspersoft.jasperserver.export.modules.ImporterModuleContext;
-import com.jaspersoft.jasperserver.export.modules.MapAttributes;
-import com.jaspersoft.jasperserver.export.modules.repository.ResourceImporter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ImporterImpl.java 54483 2015-04-21 03:18:31Z ytymoshe $
+ * @version $Id: ImporterImpl.java 58265 2015-10-05 16:13:56Z vzavadsk $
  */
 public class ImporterImpl extends BaseExporterImporter implements Importer {
 	
@@ -82,7 +87,11 @@ public class ImporterImpl extends BaseExporterImporter implements Importer {
 		public Attributes getAttributes() {
 			return attributes;
 		}
-		
+
+		@Override
+		public Map<String, String> getNewGeneratedTenantIds() {
+			return BaseExporterImporter.getNewGeneratedTenantIds(attributes);
+		}
 	}
 	
 	protected ImportTask task;
@@ -90,15 +99,42 @@ public class ImporterImpl extends BaseExporterImporter implements Importer {
 
 	public void setTask(ImportTask task) {
 		this.task = task;
-		this.input = task == null ? null : task.getInput();
+		Assert.notNull(task);
+		this.input = task.getInput();
+
+		boolean close = false;
+		try {
+			input.open();
+			close = true;
+
+			task.setInputMetadata(getImportInputMetadata());
+		} catch (IOException e) {
+			log.error(e);
+			throw new JSExceptionWrapper(e);
+		} finally {
+			if (close) {
+				try {
+					input.close();
+				} catch (IOException ioe) {
+					log.info("Error while closing input", ioe);
+				}
+			}
+		}
+
+		//Tenant id we import into
+		String destinationTenantId = task.getParameters().getParameterValue(ImportExportServiceImpl.ORGANIZATION);
+		if (StringUtils.isBlank(destinationTenantId)) {
+			destinationTenantId = getAuthenticatedTenantId();
+			task.getParameters().setParameterValue(ImportExportServiceImpl.ORGANIZATION, destinationTenantId);
+		}
 	}
 
-	public void performImport() {
+	public void performImport() throws ImportFailedException {
 		try {
 			input.open();
 			boolean close = true;
 			try {
-				process();
+				process(createContextAttributes());
 				
 				close = false;
 				input.close();
@@ -117,8 +153,22 @@ public class ImporterImpl extends BaseExporterImporter implements Importer {
 		}
 	}
 
-	protected void process() {
-		Document indexDocument = readIndexDocument();
+	protected void process(Attributes contextAttributes) throws ImportFailedException {
+
+		//Root Tenant from import input
+		String sourceTenantId = task.getInputMetadata().getProperty(ImportExportService.ROOT_TENANT_ID);
+
+		//Tenant id we import into
+		String destinationTenantId = task.getParameters().getParameterValue(ImportExportServiceImpl.ORGANIZATION);
+
+		if (sourceTenantId != null
+				&& !StringUtils.equals(sourceTenantId, destinationTenantId)
+				&& StringUtils.isNotBlank(destinationTenantId)) {
+
+			BaseExporterImporter.getNewGeneratedTenantIds(contextAttributes).put(sourceTenantId, destinationTenantId);
+		}
+
+		Document indexDocument = readDocument(getIndexFilename());
 		Element indexRoot = indexDocument.getRootElement();
 		
 		Properties properties = new Properties();
@@ -130,8 +180,7 @@ public class ImporterImpl extends BaseExporterImporter implements Importer {
 			properties.setProperty(propKey, value);
 		}
 		input.propertiesRead(properties);
-		
-		Attributes contextAttributes = createContextAttributes();
+
         contextAttributes.setAttribute("sourceJsVersion",properties.getProperty(VERSION_ATTR));
         contextAttributes.setAttribute("targetJsVersion",super.getJsVersion());
         
@@ -179,17 +228,17 @@ public class ImporterImpl extends BaseExporterImporter implements Importer {
 		return contextAttributes;
 	}
 
-	protected Document readIndexDocument() {
-		InputStream indexInput = getIndexInput();
+	protected Document readDocument(String fileName) {
+		InputStream indexInput = getInput(fileName);
 		boolean close = true;
 		try {
 			SAXReader reader = new SAXReader();
 			reader.setEncoding(getCharacterEncoding());
 			Document document = reader.read(indexInput);
-			
+
 			close = false;
 			indexInput.close();
-			
+
 			return document;
 		} catch (IOException e) {
 			log.error(e);
@@ -205,16 +254,52 @@ public class ImporterImpl extends BaseExporterImporter implements Importer {
 					log.error(e);
 				}
 			}
-		}		
+		}
 	}
 
-	protected InputStream getIndexInput() {
+	protected InputStream getInput(String fileName) {
 		try {
-			return input.getFileInputStream(getIndexFilename());
+			return input.getFileInputStream(fileName);
 		} catch (IOException e) {
 			log.error(e);
 			throw new JSExceptionWrapper(e);
 		}
 	}
 
+	private ImportInputMetadata getImportInputMetadata() {
+		ImportInputMetadata inputMetadata = new ImportInputMetadata();
+
+		Document indexDocument = readDocument(getIndexFilename());
+		Element indexRoot = indexDocument.getRootElement();
+
+		for (Iterator it = indexRoot.elementIterator(getPropertyElementName()); it.hasNext(); ) {
+			Element propElement = (Element) it.next();
+			String propKey = propElement.attribute(getPropertyNameAttribute()).getValue();
+			Attribute valueAttr = propElement.attribute(getPropertyValueAttribute());
+			String value = valueAttr == null ? null : valueAttr.getValue();
+			inputMetadata.setProperty(propKey, value);
+		}
+
+		// broken dependencies
+		inputMetadata.setBrokenDependencies(getBrokenDependencies());
+
+		return inputMetadata;
+	}
+
+	private Set<String> getBrokenDependencies() {
+		Set<String> result = new HashSet<String>();
+
+		if (input.fileExists(getBrokenDependenceFilename())) {
+			Document document = readDocument(getBrokenDependenceFilename());
+			Element root = document.getRootElement();
+
+			for (Iterator it = root.elementIterator("resource"); it.hasNext(); ) {
+				Element element = (Element) it.next();
+				String text = element.getText();
+				result.add(text);
+			}
+		}
+
+		return result;
+	}
 }

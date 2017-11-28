@@ -81,7 +81,7 @@ import com.jaspersoft.jasperserver.war.util.SessionObjectSerieAccessor;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ReportExecutionController.java 55164 2015-05-06 20:54:37Z mchan $
+ * @version $Id: ReportExecutionController.java 58611 2015-10-15 15:01:08Z psavushc $
  */
 public class ReportExecutionController extends MultiActionController {
 
@@ -267,6 +267,14 @@ public class ReportExecutionController extends MultiActionController {
             } else {
                 Action action = getAction(req, reportContext, currentJasperReportsContext);
                 JSController controller = new JSController(currentJasperReportsContext);
+
+                if (reportContext.getParameterValue("net.sf.jasperreports.web.jasper_print.accessor") == null) {
+                    ReportUnitResult reportUnitResult = reportExecutionAccessor.getReportUnitResult(reportContextId);
+                    if (reportUnitResult != null) {
+                        reportContext.setParameterValue("net.sf.jasperreports.web.jasper_print.accessor", reportUnitResult.getJasperPrintAccessor());
+                    }
+                }
+
                 try {
                     // clear search stuff before performing an action
                     if (action.requiresRefill()) {

@@ -20,21 +20,20 @@
  */
 package com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl;
 
-import java.util.Map;
-
-import net.sf.jasperreports.engine.JasperReport;
-
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.domain.impl.ReportUnitRequestBase;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportUnit;
 
+import net.sf.jasperreports.engine.JasperReport;
+
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ReportDataParameterContributor.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: ReportDataParameterContributor.java 58870 2015-10-27 22:30:55Z esytnik $
  */
 public interface ReportDataParameterContributor {
 
-	Map<String, Object> getDataParameters(ExecutionContext context,
-			ReportUnitRequestBase request, ReportUnit reportUnit, JasperReport report);
+	void addDataParameters(ExecutionContext context,
+			ReportUnitRequestBase request, ReportUnit reportUnit, JasperReport report,
+			ReportDataParameters parameters);
 	
 }

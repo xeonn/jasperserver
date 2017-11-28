@@ -20,6 +20,7 @@
 */
 package com.jaspersoft.jasperserver.war.cascade.handlers.converters;
 
+import com.jaspersoft.jasperserver.api.JSException;
 import com.jaspersoft.jasperserver.api.engine.common.service.ReportInputControlInformation;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.DataType;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.InputControl;
@@ -32,12 +33,13 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.Map;
 
 import static com.jaspersoft.jasperserver.war.cascade.handlers.converters.InputControlValueClassResolver.getValueClass;
 
 /**
  * @author Sergey Prilukin
- * @version $Id: DataConverterServiceImpl.java 51947 2014-12-11 14:38:38Z ogavavka $
+ * @version $Id: DataConverterServiceImpl.java 58870 2015-10-27 22:30:55Z esytnik $
  */
 @Service("dataConverterService")
 public class DataConverterServiceImpl implements DataConverterService {
@@ -48,8 +50,10 @@ public class DataConverterServiceImpl implements DataConverterService {
     private GenericTypeProcessorRegistry genericTypeProcessorRegistry;
     @Resource
     protected MessageSource messageSource;
+    @Resource
+    private Map<Byte, String> globalDefaultValues;
 
-    private DataConverter<?> getDataConverter(Class<?> valueClass) {
+    private <T> DataConverter<T> getDataConverter(Class<T> valueClass) {
         return genericTypeProcessorRegistry.getTypeProcessor(valueClass, DataConverter.class);
     }
 
@@ -63,6 +67,19 @@ public class DataConverterServiceImpl implements DataConverterService {
             throws CascadeResourceNotFoundException {
         final DataType dataType = getDataType(inputControl);
         return formatSingleValue(typedValue, dataType, getValueClass(dataType, info));
+    }
+
+    public Object getDefaultValueForDataType(DataType dataType){
+        String configuredValue = globalDefaultValues.get(dataType != null ? dataType.getDataTypeType() : -1);
+        String nullSubstitutionLessValue = null;
+        try {
+            // use StringDataConverter to process null substitution.
+            // If configured value is InputControlHandler.NULL_SUBSTITUTION_VALUE, then nullSubstitutionLessValue will be null
+            nullSubstitutionLessValue = getDataConverter(String.class).stringToValue(configuredValue);
+        } catch (Exception e) {
+            throw new JSException(e);
+        }
+        return nullSubstitutionLessValue != null ? convertSingleValue(nullSubstitutionLessValue, dataType) : null;
     }
 
     @Override

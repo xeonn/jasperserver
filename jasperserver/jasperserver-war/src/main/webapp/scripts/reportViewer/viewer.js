@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: viewer.js 9192 2015-08-12 19:52:08Z yplakosh $
+ * @version: $Id: viewer.js 9599 2015-10-27 19:38:56Z yplakosh $
  */
 
 /* global dialogs, alert, console, buttonManager, Report */
@@ -237,17 +237,17 @@ define(function(require) {
 
                 // search results are sorted by page number in ascending order
                 for (i = 0, ln = it.search.results.length; i < ln; i++) {
-                    if (currentPage == it.search.results[i].page) {
-                        resultsForPage = it.search.results[i].no;
+                    if (currentPage == it.search.results[i].page - 1) {
+                        resultsForPage = it.search.results[i].hitCount;
                     }
-                    if (currentPage < it.search.results[i].page) {
-                        nextPage = it.search.results[i].page;
+                    if (currentPage < it.search.results[i].page - 1) {
+                        nextPage = it.search.results[i].page - 1;
                         break;
                     }
                 }
 
                 if (nextPage == null) {
-                    nextPage = it.search.results[0].page;
+                    nextPage = it.search.results[0].page - 1;
                 }
 
                 if (it.search.currentIndex < resultsForPage - 1) {
@@ -289,19 +289,19 @@ define(function(require) {
                     resultsForPage = 0, i, elem;
 
                 for (i = it.search.results.length - 1; i >= 0; i--) {
-                    if (currentPage == it.search.results[i].page) {
-                        resultsForPage = it.search.results[i].no;
+                    if (currentPage == it.search.results[i].page - 1) {
+                        resultsForPage = it.search.results[i].hitCount;
                     }
-                    if (currentPage > it.search.results[i].page) {
-                        prevPage = it.search.results[i].page;
-                        prevPageResults = it.search.results[i].no;
+                    if (currentPage > it.search.results[i].page - 1) {
+                        prevPage = it.search.results[i].page - 1;
+                        prevPageResults = it.search.results[i].hitCount;
                         break;
                     }
                 }
 
                 if (prevPage == null) {
-                    prevPage = it.search.results[it.search.results.length - 1].page;
-                    prevPageResults = it.search.results[it.search.results.length - 1].no;
+                    prevPage = it.search.results[it.search.results.length - 1].page - 1;
+                    prevPageResults = it.search.results[it.search.results.length - 1].hitCount;
                 }
 
                 if (it.search.currentIndex > 0) {
@@ -524,7 +524,8 @@ define(function(require) {
                 name = part.name.substring(0, it.tabs.maxLabelLength) + "...";
             }
 
-            return "<div class='reportPart' data-pageindex='" + part.idx + "'><span title='" + part.name +"'>" + name + "</span></div>";
+            return "<div class='reportPart' role='button' tabindex='0' js-navtype='button' data-pageindex='"
+                + part.idx + "'><span aria-label='" + name +"'>" + name + "</span></div>";
         },
         getNextPart: function(tab) {
             var it = this,
@@ -1175,7 +1176,7 @@ define(function(require) {
                 it.isUndoRedo = false;
                 if (data && data.result.actionResult.searchResults && data.result.actionResult.searchResults.length) {
                     var results = data.result.actionResult.searchResults,
-                        searchPage = results[0].page,
+                        searchPage = results[0].page - 1,
                         currentPage = it.reportInstance.currentpage,
                         i, ln;
                     results.sort(function(r1, r2) {
@@ -1186,7 +1187,7 @@ define(function(require) {
 
                     // if we have results for the current page, just refresh it
                     for (i = 0, ln = results.length; i < ln; i++) {
-                        if (currentPage == results[i].page) {
+                        if (currentPage == results[i].page - 1) {
                             searchPage = currentPage;
                             break;
                         }
@@ -1199,7 +1200,7 @@ define(function(require) {
 
                         it.search.currentPage = searchPage;
 
-                        if (results.length > 1 || (results.length == 1 && results[0].no > 1)) {
+                        if (results.length > 1 || (results.length == 1 && results[0].hitCount > 1)) {
                             $('button#search_next').prop('disabled', false);
                             $('button#search_previous').prop('disabled', false);
                         } else {

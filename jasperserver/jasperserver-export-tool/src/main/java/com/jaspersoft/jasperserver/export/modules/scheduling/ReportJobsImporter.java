@@ -31,22 +31,29 @@ import com.jaspersoft.jasperserver.api.metadata.common.domain.Folder;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceLookup;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportUnit;
 import com.jaspersoft.jasperserver.api.metadata.view.domain.FilterCriteria;
+import com.jaspersoft.jasperserver.core.util.PathUtils;
+import com.jaspersoft.jasperserver.core.util.PathUtils.SplittedPath;
 import com.jaspersoft.jasperserver.export.modules.BaseImporterModule;
 import com.jaspersoft.jasperserver.export.modules.ImporterModuleContext;
 import com.jaspersoft.jasperserver.export.modules.repository.ResourceImporter;
 import com.jaspersoft.jasperserver.export.modules.scheduling.beans.ReportJobBean;
 import com.jaspersoft.jasperserver.export.modules.scheduling.beans.ReportUnitJobsIndexBean;
-import com.jaspersoft.jasperserver.core.util.PathUtils;
-import com.jaspersoft.jasperserver.core.util.PathUtils.SplittedPath;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dom4j.Element;
+import org.springframework.security.access.AccessDeniedException;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ReportJobsImporter.java 51495 2014-11-17 15:55:08Z agodovanets $
+ * @version $Id: ReportJobsImporter.java 58265 2015-10-05 16:13:56Z vzavadsk $
  */
 public class ReportJobsImporter extends BaseImporterModule {
 
@@ -108,10 +115,10 @@ public class ReportJobsImporter extends BaseImporterModule {
                     ImportStatus status = null;
                     // look for duplicate from import file.  if duplicate found, add as new job instead
                     if (findDuplicate(reportJobBean, reportJobBeans)) {
-                        status = updateReportJob(newUri, reportJobBean, ImportStatus.ADD);
+                        status = updateJob(newUri, reportJobBean, ImportStatus.ADD);
                         ++imported;
                     } else {
-                        status = updateReportJob(newUri, reportJobBean, ImportStatus.UPDATE);
+                        status = updateJob(newUri, reportJobBean, ImportStatus.UPDATE);
                         ++updated;
                     }
 					if (status == ImportStatus.ADD) ++imported;
@@ -154,7 +161,8 @@ public class ReportJobsImporter extends BaseImporterModule {
     }
 
 	protected boolean checkReportUnit(String uri) {
-		SplittedPath splittedPath = PathUtils.splitPath(uri);
+		SplittedPath splittedPath = PathUtils.splitPathToFolderAndName(uri);
+
 		FilterCriteria filter = FilterCriteria.createFilter(ReportUnit.class);
 		filter.addFilterElement(FilterCriteria.createParentFolderFilter(splittedPath.parentPath));
 		filter.addFilterElement(FilterCriteria.createPropertyEqualsFilter("name", splittedPath.name));
@@ -172,23 +180,15 @@ public class ReportJobsImporter extends BaseImporterModule {
 		boolean imported;
 		String jobFilename = getJobFilename(jobId);
 		ReportJobBean jobBean = (ReportJobBean) deserialize(jobsPath, jobFilename, configuration.getSerializer());
-		if (userExists(jobBean.getUsername())) {
-			imported = importJob(reportUri, jobBean);
+        ReportJob job = new ReportJob();
+        jobBean.copyTo(job, reportUri, getConfiguration(), executionContext, importContext);
+		if (userExists(job.getUsername())) {
+			imported = importJob(reportUri, job, jobBean.isPaused());
 		} else {
-			commandOut.warn("User " + jobBean.getUsername() + " does not exist, skipping job " + jobBean.getId() + " of report " + reportUri);
+			commandOut.warn("User " + job.getUsername() + " does not exist, skipping job " + job.getId() + " of report " + reportUri);
 			imported = false;
 		}
 		return imported;
-	}
-
-    protected ImportStatus updateReportJob(String reportUri, ReportJobBean jobBean, ImportStatus status) {
-		if (userExists(jobBean.getUsername())) {
-			status = updateJob(reportUri, jobBean, status);
-		} else {
-			commandOut.warn("User " + jobBean.getUsername() + " does not exist, skipping job " + jobBean.getId() + " of report " + reportUri);
-			status = ImportStatus.SKIP;
-		}
-		return status;
 	}
 
 	protected String getJobFilename(long jobId) {
@@ -198,15 +198,19 @@ public class ReportJobsImporter extends BaseImporterModule {
 	protected boolean userExists(String username) {
 		Boolean indicator = (Boolean) userIndicator.get(username);
 		if (indicator == null) {
-			indicator = Boolean.valueOf(configuration.getAuthorityService().getUser(executionContext, username) != null);
+            try {
+                indicator = Boolean.valueOf(configuration.getAuthorityService().getUser(executionContext, username) != null);
+            } catch (AccessDeniedException e) {
+                indicator = Boolean.FALSE;
+                commandOut.warn("Access Denied to read user " + username);
+            }
+
 			userIndicator.put(username, indicator);
 		}
 		return indicator.booleanValue();
 	}
 
-	protected boolean importJob(String newUri, ReportJobBean jobBean) {
-		ReportJob job = new ReportJob();
-		jobBean.copyTo(job, newUri, getConfiguration(), executionContext);
+	protected boolean importJob(String newUri, ReportJob job, boolean paused) {
 
         List existingJobs = configuration.getReportScheduler().getScheduledJobSummaries(executionContext, newUri);
         boolean exist = false;
@@ -224,22 +228,22 @@ public class ReportJobsImporter extends BaseImporterModule {
             ReportJob savedJob;
             try {
                 savedJob = configuration.getInternalReportScheduler().saveJob(executionContext, job);
-                if (jobBean.isPaused()){
+                if (paused){
                     configuration.getReportScheduler().pause(Arrays.asList(savedJob), false);
                 }
                 if (log.isDebugEnabled()) {
-                    log.debug("Created job " + savedJob.getId() + " for report " + newUri + " (old id " + jobBean.getId() + ")");
+                    log.debug("Created job " + savedJob.getId() + " for report " + newUri + " (old id " + job.getId() + ")");
                 }
                 return true;
             } catch (JSValidationException e) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Skipped job for report " + newUri + " (old id " + jobBean.getId() + "). " + e.getErrors().toString());
+                    log.debug("Skipped job for report " + newUri + " (old id " + job.getId() + "). " + e.getErrors().toString());
                 }
                 return false;
             }
         } else {
             if (log.isDebugEnabled()) {
-                log.debug("Skipped existing job for report " + newUri + " (old id " + jobBean.getId() + ")");
+                log.debug("Skipped existing job for report " + newUri + " (old id " + job.getId() + ")");
             }
             return false;
         }
@@ -267,28 +271,34 @@ public class ReportJobsImporter extends BaseImporterModule {
                 updateLabelName = true;
             } else {    // 1 to 1 UPDATE
                 ReportJob reportJob = configuration.getReportScheduler().getScheduledJob(executionContext, existingJobs.get(0).getId());
-                jobBean.copyTo(reportJob, newUri, getConfiguration(), executionContext);
+                jobBean.copyTo(reportJob, newUri, getConfiguration(), executionContext, importContext);
+
+                if (!userExists(reportJob.getUsername())) {
+                    commandOut.warn("User " + reportJob.getUsername() + " does not exist, skipping job " + reportJob.getId() + " of report " + newUri);
+                    return ImportStatus.SKIP;
+                }
+
                 try {
                     configuration.getReportScheduler().updateScheduledJob(executionContext, reportJob);
                     if (log.isDebugEnabled()) {
-                        log.debug("Updated job " + reportJob.getId() + " for report " + newUri + " (old id " + jobBean.getId() + ")");
+                        log.debug("Updated job " + reportJob.getId() + " for report " + newUri + " (old id " + reportJob.getId() + ")");
                     }
 
                     ReportJobRuntimeInformation currentState = configuration.getReportScheduler().getJobRuntimeInformation(executionContext, reportJob.getId());
                     if ((currentState.getStateCode().byteValue() == ReportJobRuntimeInformation.STATE_PAUSED) != jobBean.isPaused()){
                         if (jobBean.isPaused()){
                             configuration.getReportScheduler().pause(Arrays.asList(reportJob), false);
-                            log.debug("Paused job " + reportJob.getId() + " for report " + newUri + " (old id " + jobBean.getId() + ")");
+                            log.debug("Paused job " + reportJob.getId() + " for report " + newUri + " (old id " + reportJob.getId() + ")");
                         } else {
                             configuration.getReportScheduler().resume(Arrays.asList(reportJob), false);
-                            log.debug("Resumed job " + reportJob.getId() + " for report " + newUri + " (old id " + jobBean.getId() + ")");
+                            log.debug("Resumed job " + reportJob.getId() + " for report " + newUri + " (old id " + reportJob.getId() + ")");
                         }
                     }
 
                     return status;
                 } catch (JSValidationException e) {
                     if (log.isDebugEnabled()) {
-                        log.debug("Skipped job for report " + newUri + " (old id " + jobBean.getId() + "). " + e.getErrors().toString());
+                        log.debug("Skipped job for report " + newUri + " (old id " + reportJob.getId() + "). " + e.getErrors().toString());
                     }
                     return ImportStatus.SKIP;
                 }
@@ -296,7 +306,13 @@ public class ReportJobsImporter extends BaseImporterModule {
         }
         if (status == ImportStatus.ADD) {
             ReportJob job = new ReportJob();
-            jobBean.copyTo(job, newUri, getConfiguration(), executionContext);
+            jobBean.copyTo(job, newUri, getConfiguration(), executionContext, importContext);
+
+            if (!userExists(job.getUsername())) {
+                commandOut.warn("User " + job.getUsername() + " does not exist, skipping job " + job.getId() + " of report " + newUri);
+                return ImportStatus.SKIP;
+            }
+
             // generate new name for the job
             if (updateLabelName) {
                 job.setLabel(createUniqueLabel(job.getLabel(), newUri));
@@ -307,12 +323,12 @@ public class ReportJobsImporter extends BaseImporterModule {
                     configuration.getReportScheduler().pause(Arrays.asList(job), false);
                 }
                 if (log.isDebugEnabled()) {
-                    log.debug("Created job " + job.getId() + " for report " + newUri + " (old id " + jobBean.getId() + ")");
+                    log.debug("Created job " + job.getId() + " for report " + newUri + " (old id " + job.getId() + ")");
                 }
                 return status;
             } catch (JSValidationException e) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Skipped job for report " + newUri + " (old id " + jobBean.getId() + "). " + e.getErrors().toString());
+                    log.debug("Skipped job for report " + newUri + " (old id " + job.getId() + "). " + e.getErrors().toString());
                 }
                 return ImportStatus.SKIP;
             }

@@ -24,50 +24,52 @@ package com.jaspersoft.jasperserver.export.modules.repository;
 import com.jaspersoft.jasperserver.api.JSException;
 import com.jaspersoft.jasperserver.api.JSExceptionWrapper;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Folder;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.InternalURI;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceLookup;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceReference;
-import com.jaspersoft.jasperserver.api.metadata.user.domain.ObjectPermission;
-import com.jaspersoft.jasperserver.api.metadata.user.domain.Role;
-import com.jaspersoft.jasperserver.api.metadata.user.domain.Tenant;
-import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
-import com.jaspersoft.jasperserver.api.metadata.user.service.TenantService;
 import com.jaspersoft.jasperserver.api.metadata.view.domain.FilterCriteria;
+import com.jaspersoft.jasperserver.core.util.PathUtils;
+import com.jaspersoft.jasperserver.dto.common.WarningDescriptor;
 import com.jaspersoft.jasperserver.export.modules.BaseExporterModule;
 import com.jaspersoft.jasperserver.export.modules.ExporterModuleContext;
+import com.jaspersoft.jasperserver.export.modules.common.ExportImportWarningCode;
 import com.jaspersoft.jasperserver.export.modules.repository.beans.FolderBean;
-import com.jaspersoft.jasperserver.export.modules.repository.beans.PermissionRecipient;
 import com.jaspersoft.jasperserver.export.modules.repository.beans.RepositoryObjectPermissionBean;
 import com.jaspersoft.jasperserver.export.modules.repository.beans.ResourceBean;
 import com.jaspersoft.jasperserver.export.modules.repository.beans.ResourceReferenceBean;
+import com.jaspersoft.jasperserver.export.service.impl.ImportExportServiceImpl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dom4j.Element;
 import org.springframework.context.MessageSource;
+import org.springframework.security.access.AccessDeniedException;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ResourceExporter.java 54590 2015-04-22 17:55:42Z vzavadsk $
+ * @version $Id: ResourceExporter.java 58870 2015-10-27 22:30:55Z esytnik $
  */
 public class ResourceExporter extends BaseExporterModule implements ResourceExportHandler {
-    private TenantService tenantService;
-    private MessageSource messageSource;
-    private String unavailableExportOperationMessage;
+	public static final String DIAGNOSTIC = "diagnostic";
 
+	private static final String FOLDER_RESOURCE_TYPES = "folder";
 	private static final Log log = LogFactory.getLog(ResourceExporter.class);
 
-	public static final String DIAGNOSTIC = "diagnostic";
+	protected Set<String> uris = new HashSet<String>();
+	protected ResourceModuleConfiguration configuration;
+
+	protected Map<String, Set<String>> dependencies = new TreeMap<String, Set<String>>();
+	protected Set<String> notAccessibleResources = new TreeSet<String>();
+	protected String currentResource;
+
+	private MessageSource messageSource;
+	private String unavailableExportOperationMessage;
+
+	private Set<String> exportResourceTypes = new HashSet<String>();
+	private String skipDependentResource;
 
 	protected static class QueuedUri {
 		private final String uri;
@@ -101,84 +103,94 @@ public class ResourceExporter extends BaseExporterModule implements ResourceExpo
 		public QueuedUri pop() {
 			return (QueuedUri) queue.removeFirst();
 		}
+
+		public QueuedUri removeLast() {
+			return (QueuedUri) queue.removeLast();
+		}
+
+		public int size() {
+			return queue.size();
+		}
 	}
 
-	private ResourceModuleConfiguration configuration;
 	private String urisArgument;
 	private String permissionsArgument;
-	private String includeSettingsArg;
 
-	//export filter; nothing is filtered by default
-	private RepositoryExportFilter exportFilter = new UniversalRepositoryExportFilter();
-
-	private String[] uris;
-	private boolean exportPermissions;
-	private UrisQueue urisQueue;
+	protected boolean exportPermissions;
+	protected UrisQueue urisQueue;
 	private Set exportedURIs;
 
 	public void init(ExporterModuleContext moduleContext) {
 		super.init(moduleContext);
-
 		initProcess();
 
-		//TODO: This is the short time solution for bug#http://bugzilla.jaspersoft.com/show_bug.cgi?id=18559.
-        // It will be deleted(from start to end) when export organization will be supported().
-        // And the expression
-        //uris = exportEverything ? new String[]{"/"} : getParameterValues(getUrisArgument());
-        //if (uris == null) uris = new String[0];
-        // will be uncommented.
-        //start
+		String[] resourceTypes = getParameterValues(ImportExportServiceImpl.RESOURCE_TYPES);
+		if (resourceTypes != null) {
+			exportResourceTypes = new HashSet<String>(Arrays.asList(resourceTypes));
+		}
+
         if (exportEverything) {
-            uris = new String[]{"/"};
-        } else {
-            uris =  getParameterValues(getUrisArgument());
-            if (uris != null) {
-                List<Tenant> allRootSubTenantList = tenantService.getAllSubTenantList(executionContext, TenantService.ORGANIZATIONS);
-                List<String> rootSubTenantFolderUris = new ArrayList<String>();
-                for (Tenant tenant : allRootSubTenantList) {
-                    rootSubTenantFolderUris.add(tenant.getTenantFolderUri());
-                }
-                //if clearUris = true then we need clear collection of uris to avoid continuing export process.
-                boolean clearUris = false;
-                for (String uri : uris) {
-                    if (rootSubTenantFolderUris.contains(uri)) {
-                        if (messageSource != null) {
-                            commandOut.info(messageSource.getMessage(unavailableExportOperationMessage, new String[]{uri}, getLocale()));
-                         }
-                        clearUris = true;
-                    }
-                }
-                if (clearUris) {
-                    uris = new String[0];
-                }
-            } else {
-                uris = new String[0];
-            }
-        }
-        //end
+			uris.add("/");
+        } else if (getParameterValues(getUrisArgument()) != null) {
+			uris.addAll(Arrays.asList(getParameterValues(getUrisArgument())));
+        } else if (hasParameter(ImportExportServiceImpl.RESOURCE_TYPES)) {
+			uris.add("/");
+		}
         exportPermissions = exportEverything || hasParameter(getPermissionsArgument());
 	}
 
-    protected boolean isToProcess() {
-		return (uris != null && uris.length > 0);
+	protected boolean isToProcess() {
+		return (uris != null && !uris.isEmpty());
 	}
 
 	public void process() {
         mkdir(configuration.getResourcesDirName());
 
-        for (int i = 0; i < uris.length; i++) {
-            processUri(uris[i], true, false);
+        for (String uri : uris) {
+            processUri(uri, true, false);
         }
+		exportDependencies();
+		handleResourceWithBrokenDependencies();
+	}
 
-        while (!urisQueue.isEmpty()) {
-            QueuedUri queuedUri = urisQueue.pop();
-            processUri(queuedUri.getUri(), false, queuedUri.isIgnoreMissing());
-        }
+	private void exportDependencies() {
+		while (!urisQueue.isEmpty()) {
+			QueuedUri queuedUri = urisQueue.pop();
+			try {
+				processUri(queuedUri.getUri(), false, queuedUri.isIgnoreMissing());
+			} catch (AccessDeniedException e) {
+				notAccessibleResources.add(queuedUri.getUri());
+				markExported(queuedUri.getUri());
+			}
+		}
 	}
 
 	protected void initProcess() {
 		urisQueue = new UrisQueue();
 		exportedURIs = new HashSet();
+	}
+
+	private void handleResourceWithBrokenDependencies() {
+		Set<String> brokenDependencies = new TreeSet<String>();
+		for (String uri : notAccessibleResources) {
+			checkBrokenResource(brokenDependencies, uri);
+		}
+
+		for (String resource : brokenDependencies) {
+			exportContext.getExportTask().getWarnings().
+					add(new WarningDescriptor().setCode(ExportImportWarningCode.EXPORT_BROKEN_DEPENDENCY.toString()).
+							setParameters(new String[]{resource}));
+		}
+	}
+
+	private void checkBrokenResource(Set<String> brokenDependencies, String uri) {
+		Set<String> result = dependencies.get(uri);
+		if (result != null) {
+			for (String resourceUri : result) {
+				checkBrokenResource(brokenDependencies, resourceUri);
+			}
+			brokenDependencies.addAll(result);
+		}
 	}
 
 	public void markExported(String uri) {
@@ -190,11 +202,11 @@ public class ResourceExporter extends BaseExporterModule implements ResourceExpo
 	}
 
 	protected void processUri(String uri, boolean entry, boolean ignoreMissing) {
-		if (alreadyExported(uri)) {
+		if (alreadyExported(uri) || exportFilter.excludeFolder(uri, exportParams)) {
 			return;
 		}
 
-		Resource resource = configuration.getRepository().getResource(executionContext, uri);
+		ResourceLookup resource = getResourceFromRepository(uri);
 		if (resource == null) {
 			Folder folder = configuration.getRepository().getFolder(executionContext, uri);
 			if (folder == null) {
@@ -209,18 +221,39 @@ public class ResourceExporter extends BaseExporterModule implements ResourceExpo
                 message.append(", skipping from export");
 				commandOut.info(message.toString());
 			} else {
-				if (entry) {
-					addFolderIndexElement(folder.getURIString());
+				if (exportFolder(folder)) {
+					if (entry) {
+						addFolderIndexElement(folder.getURIString());
+					}
+					writeIndexesForAllParentFolders(folder.getParentFolder());
 				}
-
-				exportFolder(folder);
 			}
 		} else {
-			if (entry) {
-				addResourceIndexElement(resource.getURIString());
-			}
+			if (!isToExportResource(resource)) return;
 
-			exportResource(resource);
+			if (exportResource(resource)) {
+				if (entry) {
+					addResourceIndexElement(resource.getURIString());
+				}
+				writeIndexesForAllParentFolders(resource.getParentFolder());
+			}
+		}
+	}
+
+	private ResourceLookup getResourceFromRepository(String uri) {
+		if (uri.equals(Folder.SEPARATOR)) return null;
+
+		PathUtils.SplittedPath splittedPath = PathUtils.splitPathToFolderAndName(uri);
+
+		FilterCriteria filter = FilterCriteria.createFilter();
+		filter.addFilterElement(FilterCriteria.createParentFolderFilter(splittedPath.parentPath));
+		filter.addFilterElement(FilterCriteria.createPropertyEqualsFilter("name", splittedPath.name));
+
+		ResourceLookup[] resources = configuration.getRepository().findResource(executionContext, filter);
+		if (resources == null || resources.length == 0) {
+			return null;
+		} else {
+			return resources[0];
 		}
 	}
 
@@ -229,50 +262,92 @@ public class ResourceExporter extends BaseExporterModule implements ResourceExpo
 		folderElement.addText(uri);
 	}
 
-	protected void exportFolder(Folder folder) {
+	protected boolean exportFolder(Folder folder) {
 		String uri = folder.getURIString();
-		if (alreadyExported(uri)) {
-			return;
+		if (alreadyExported(uri) || exportFilter.excludeFolder(folder.getURIString(), exportParams)) {
+			return false;
 		}
 
-		commandOut.debug("Exporting repository folder " + uri);
+		commandOut.info("Exporting repository folder " + uri);
 
-		List subFolders;
-		ResourceLookup[] resources;
+		List<Folder> subFolders = null;
+		ResourceLookup[] resources = null;
 		if (exportFilter.toExportContents(folder)) {
 			subFolders = getSubfolders(uri);
 			resources = getFolderResources(uri);
-		} else {
-			subFolders = null;
-			resources = null;
 		}
+
+		exportFolders(subFolders);
+		resources = exportResources(filterResources(resources));
+
+		subFolders = getExportedFolders(subFolders);
+
+		if (isNotFolderToWrite(subFolders, resources)) return false;
 
 		writeFolder(folder, subFolders, resources);
 		markExported(uri);
+		return true;
+	}
 
-		exportFolders(subFolders);
-		exportResources(resources);
+	private boolean isNotFolderToWrite(List<Folder> subFolders, ResourceLookup[] resources) {
+		return  !exportResourceTypes.isEmpty() &&
+				!exportResourceTypes.contains(FOLDER_RESOURCE_TYPES) &&
+				(subFolders == null || subFolders.isEmpty()) &&
+				(resources == null || resources.length == 0);
+	}
+
+	private List<Folder> getExportedFolders(List<Folder> folders) {
+		List<Folder> result = new ArrayList<Folder>();
+		if (folders == null) return result;
+
+		for (Folder folder : folders) {
+			if (exportedURIs.contains(folder.getURIString())) {
+				result.add(folder);
+			}
+		}
+		return result;
+	}
+
+	private ResourceLookup[] filterResources(ResourceLookup[] resources) {
+		if (resources == null) return null;
+
+		List<ResourceLookup> result = new ArrayList<ResourceLookup>();
+		for (ResourceLookup res : resources) {
+			if (isToExportResource(res)) {
+				result.add(res);
+			}
+		}
+		return result.toArray(new ResourceLookup[result.size()]);
+	}
+
+	private boolean isToExportResource(ResourceLookup res) {
+		if (!exportFilter.isToExportResource(res.getResourceType(), exportResourceTypes)) {
+			if (exportParams.hasParameter(skipDependentResource)) {
+				if (dependencies.containsKey(res.getURIString())) {
+					notAccessibleResources.add(res.getURIString());
+				}
+				return false;
+			} else {
+				if (!dependencies.containsKey(res.getURIString())) {
+					return false;
+				}
+			}
+		}
+		return true;
 	}
 
 	protected List getSubfolders(String uri) {
-		List subFolders = configuration.getRepository().getSubFolders(executionContext, uri);
-		return subFolders;
+		return configuration.getRepository().getSubFolders(executionContext, uri);
 	}
 
 	protected ResourceLookup[] getFolderResources(String uri) {
 		FilterCriteria filter = FilterCriteria.createFilter();
 		filter.addFilterElement(FilterCriteria.createParentFolderFilter(uri));
-		ResourceLookup[] resources = configuration.getRepository().findResource(executionContext, filter);
-		return resources;
+		return configuration.getRepository().findResource(executionContext, filter);
 	}
 
 	protected void writeFolder(Folder folder, List subFolders, ResourceLookup[] resources) {
 		FolderBean bean = createFolderBean(folder, subFolders, resources);
-		if (exportPermissions) {
-			RepositoryObjectPermissionBean[] permissions = handlePermissions(folder);
-			bean.setPermissions(permissions);
-            bean.setExportedWithPermissions(true);
-		}
 
 		String outputFolder = mkdir(configuration.getResourcesDirName(), folder.getURIString());
 		serialize(bean, outputFolder, configuration.getFolderDetailsFileName(), configuration.getSerializer());
@@ -305,6 +380,13 @@ public class ResourceExporter extends BaseExporterModule implements ResourceExpo
 			}
 		}
 		bean.setResources(resourceNames);
+
+		if (exportPermissions) {
+			RepositoryObjectPermissionBean[] permissions = handlePermissions(folder);
+			bean.setPermissions(permissions);
+			bean.setExportedWithPermissions(true);
+		}
+
 		return bean;
 	}
 
@@ -317,13 +399,16 @@ public class ResourceExporter extends BaseExporterModule implements ResourceExpo
 		}
 	}
 
-	protected void exportResources(ResourceLookup[] resources) {
-		if (resources != null && resources.length > 0) {
-			for (int i = 0; i < resources.length; i++) {
-				ResourceLookup resLookup = resources[i];
-				exportResource(resLookup);
+	protected ResourceLookup[] exportResources(ResourceLookup[] resources) {
+		if (resources == null || resources.length == 0) return resources;
+
+		List<ResourceLookup> result = new ArrayList<ResourceLookup>();
+		for (ResourceLookup resLookup : resources) {
+			if (exportResource(resLookup)) {
+				result.add(resLookup);
 			}
 		}
+		return result.toArray(new ResourceLookup[result.size()]);
 	}
 
 	protected void addResourceIndexElement(String uri) {
@@ -331,12 +416,14 @@ public class ResourceExporter extends BaseExporterModule implements ResourceExpo
 		folderElement.addText(uri);
 	}
 
-	protected void exportResource(ResourceLookup lookup) {
+	protected boolean exportResource(ResourceLookup lookup) {
 		String uri = lookup.getURIString();
 		if (!alreadyExported(uri)) {
 			Resource resource = configuration.getRepository().getResource(executionContext, uri);
 			exportResource(resource);
+			return true;
 		}
+		return false;
 	}
 
 	protected void exportResource(Resource resource) {
@@ -352,27 +439,38 @@ public class ResourceExporter extends BaseExporterModule implements ResourceExpo
 	}
 
 	protected void writeResource(Resource resource) {
+		currentResource = resource.getURIString();
+		ResourceBean bean = createResourceBean(resource);
+
+        String parentFolder = bean.getFolder();
+		String folder = mkdir(configuration.getResourcesDirName(), parentFolder);
+
+		serialize(bean, folder, getResourceFileName(resource), configuration.getSerializer());
+	}
+
+	protected ResourceBean createResourceBean(Resource resource){
 		ResourceBean bean = handleResource(resource);
 		if (exportPermissions) {
 			RepositoryObjectPermissionBean[] permissions = handlePermissions(resource);
 			bean.setPermissions(permissions);
             bean.setExportedWithPermissions(true);
 		}
+		return bean;
+	}
 
-        String parentFolder = bean.getFolder();
-		String folder = mkdir(configuration.getResourcesDirName(), parentFolder);
+	// writing indexes for all parent folders to save labels and descriptions
+	protected void writeIndexesForAllParentFolders(String parentFolder) {
+		while (parentFolder != null && !parentFolder.equals("") && !parentFolder.equals("/")) {
+			Folder fld = configuration.getRepository().getFolder(executionContext, parentFolder);
 
-        // writing indexes for all parent folders to save labels and descriptions
-        while (parentFolder != null && !parentFolder.equals("") && !parentFolder.equals("/")) {
-            Folder fld = configuration.getRepository().getFolder(executionContext, parentFolder);
-            if (!alreadyExported(parentFolder)) {
-                writeFolder(fld, null, null);
-                markExported(parentFolder);
-            }
-            parentFolder = fld.getParentFolder();
-        }
+			if (fld == null) return;
 
-		serialize(bean, folder, getResourceFileName(resource), configuration.getSerializer());
+			if (!alreadyExported(fld.getURIString())) {
+				writeFolder(fld, null, null);
+				markExported(fld.getURIString());
+			}
+			parentFolder = fld.getParentFolder();
+		}
 	}
 
 	public ResourceBean handleResource(Resource resource) {
@@ -407,8 +505,19 @@ public class ResourceExporter extends BaseExporterModule implements ResourceExpo
 
 	protected ResourceReferenceBean handleExternalReference(ResourceReference reference) {
 		String uri = reference.getReferenceURI();
+		addResourceToDependenciesMap(uri);
 		queueResource(uri);
 		return new ResourceReferenceBean(uri);
+	}
+
+	protected void addResourceToDependenciesMap(String uri) {
+		if (dependencies.get(uri) == null) {
+			Set<String> set = new TreeSet<String>();
+			set.add(currentResource);
+			dependencies.put(uri, set);
+		} else {
+			dependencies.get(uri).add(currentResource);
+		}
 	}
 
 	public void queueResource(String uri) {
@@ -461,8 +570,6 @@ public class ResourceExporter extends BaseExporterModule implements ResourceExpo
 		writeData(dataIn, folder, outDataFilename);
 	}
 
-
-
 	public String getUrisArgument() {
 		return urisArgument;
 	}
@@ -491,18 +598,6 @@ public class ResourceExporter extends BaseExporterModule implements ResourceExpo
 		this.permissionsArgument = permissionsArgument;
 	}
 
-	public RepositoryExportFilter getExportFilter() {
-		return exportFilter;
-	}
-
-	public void setExportFilter(RepositoryExportFilter exportFilter) {
-		this.exportFilter = exportFilter;
-	}
-
-    public void setTenantService(TenantService tenantService) {
-        this.tenantService = tenantService;
-    }
-
     public void setMessageSource(MessageSource messageSource) {
         this.messageSource = messageSource;
     }
@@ -511,11 +606,7 @@ public class ResourceExporter extends BaseExporterModule implements ResourceExpo
         this.unavailableExportOperationMessage = unavailableExportOperationMessage;
     }
 
-    public String getIncludeSettingsArg() {
-        return includeSettingsArg;
-    }
-
-    public void setIncludeSettingsArg(String includeSettingsArg) {
-        this.includeSettingsArg = includeSettingsArg;
-    }
+	public void setSkipDependentResource(String skipDependentResource) {
+		this.skipDependentResource = skipDependentResource;
+	}
 }

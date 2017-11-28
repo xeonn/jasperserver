@@ -21,8 +21,6 @@
 
 package com.jaspersoft.jasperserver.dto.permissions;
 
-import com.jaspersoft.jasperserver.dto.authority.ClientUserAttribute;
-
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.ArrayList;
@@ -32,7 +30,7 @@ import java.util.List;
  * <p></p>
  *
  * @author Zakhar.Tomchenco
- * @version $Id: RepositoryPermissionListWrapper.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: RepositoryPermissionListWrapper.java 58870 2015-10-27 22:30:55Z esytnik $
  */
 @XmlRootElement(name = "permissions")
 public class RepositoryPermissionListWrapper {

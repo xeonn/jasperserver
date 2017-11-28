@@ -20,27 +20,33 @@
 */
 package com.jaspersoft.jasperserver.remote.exception;
 
-import com.jaspersoft.jasperserver.remote.exception.xml.ErrorDescriptor;
+
+import com.jaspersoft.jasperserver.api.common.error.handling.SecureExceptionHandler;
+import com.jaspersoft.jasperserver.dto.common.ErrorDescriptor;
 import net.sf.jasperreports.crosstabs.fill.calculation.BucketingService;
 import net.sf.jasperreports.engine.JRRuntimeException;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.Resource;
 
 /**
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: JRRuntimeExceptionErrorDescriptorBuilder.java 55164 2015-05-06 20:54:37Z mchan $
+ * @version $Id: JRRuntimeExceptionErrorDescriptorBuilder.java 57603 2015-09-15 17:20:48Z psavushc $
  */
 @Component
 public class JRRuntimeExceptionErrorDescriptorBuilder implements ErrorDescriptorBuilder<JRRuntimeException> {
+
+    @Resource
+    private SecureExceptionHandler secureExceptionHandler;
+
     @Override
     public ErrorDescriptor build(JRRuntimeException e) {
-        ErrorDescriptor descriptor = new ErrorDescriptor(e);
         final String messageKey = e.getMessageKey();
         if(BucketingService.EXCEPTION_MESSAGE_KEY_BUCKET_MEASURE_LIMIT.equals(messageKey)){
-            descriptor = new ErrorDescriptor.Builder().setErrorCode("crosstab.bucket.measure.limit").setMessage(e.getMessage())
-                    .getErrorDescriptor();
+            return new ErrorDescriptor().setErrorCode("crosstab.bucket.measure.limit").setMessage(e.getMessage());
         }
-        return descriptor;
+        return secureExceptionHandler.handleException(e);
     }
 }

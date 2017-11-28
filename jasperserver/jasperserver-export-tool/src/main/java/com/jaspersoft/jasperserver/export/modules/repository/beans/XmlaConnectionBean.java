@@ -22,13 +22,15 @@ package com.jaspersoft.jasperserver.export.modules.repository.beans;
 
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 import com.jaspersoft.jasperserver.api.metadata.olap.domain.XMLAConnection;
-import com.jaspersoft.jasperserver.export.BaseExporterImporter;
+import com.jaspersoft.jasperserver.export.modules.common.TenantStrHolderPattern;
 import com.jaspersoft.jasperserver.export.modules.repository.ResourceExportHandler;
 import com.jaspersoft.jasperserver.export.modules.repository.ResourceImportHandler;
 
+import java.util.Map;
+
 /**
  * @author tkavanagh
- * @version $Id: XmlaConnectionBean.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: XmlaConnectionBean.java 58265 2015-10-05 16:13:56Z vzavadsk $
  */
 
 
@@ -66,6 +68,13 @@ public class XmlaConnectionBean extends ResourceBean {
 		final String pwd = getPassword();
 		xmla.setPassword((pwd != null && pwd.startsWith(ENCRYPTION_PREFIX) && pwd.endsWith(ENCRYPTION_SUFFIX)) ?
 			importExportCipher.decode(pwd.replaceFirst(ENCRYPTION_PREFIX, "").replaceAll(ENCRYPTION_SUFFIX + "$", "")) : pwd);
+	}
+
+	@Override
+	protected void handleNewTenantIds(Resource res, Map<String, String> map) {
+		super.handleNewTenantIds(res, map);
+		((XMLAConnection) res).setUsername(TenantStrHolderPattern.
+				TENANT_QUALIFIED_NAME.replaceWithNewTenantIds(map, ((XMLAConnection) res).getUsername()));
 	}
 
 	public String getCatalog() {

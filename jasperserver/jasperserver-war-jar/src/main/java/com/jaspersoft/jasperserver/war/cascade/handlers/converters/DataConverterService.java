@@ -21,6 +21,7 @@
 package com.jaspersoft.jasperserver.war.cascade.handlers.converters;
 
 import com.jaspersoft.jasperserver.api.engine.common.service.ReportInputControlInformation;
+import com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl.GlobalDefaultValueProvider;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.DataType;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.InputControl;
 import com.jaspersoft.jasperserver.war.cascade.CascadeResourceNotFoundException;
@@ -28,9 +29,9 @@ import com.jaspersoft.jasperserver.war.cascade.InputControlValidationException;
 
 /**
  * @author Yaroslav.Kovalchyk
- * @version $Id: DataConverterService.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: DataConverterService.java 58870 2015-10-27 22:30:55Z esytnik $
  */
-public interface DataConverterService {
+public interface DataConverterService extends GlobalDefaultValueProvider {
 
     String formatSingleValue(Object typedValue, InputControl inputControl, ReportInputControlInformation info)
             throws CascadeResourceNotFoundException;
@@ -44,4 +45,5 @@ public interface DataConverterService {
             throws InputControlValidationException;
 
     Object convertSingleValue(String rawValue, DataType dataType) throws InputControlValidationException;
+
 }

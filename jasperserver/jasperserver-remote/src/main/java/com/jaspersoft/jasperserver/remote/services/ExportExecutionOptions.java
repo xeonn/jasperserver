@@ -39,6 +39,22 @@ public class ExportExecutionOptions {
     private String anchor;
     private boolean allowInlineScripts = true;
     private String markupType;
+    private Boolean ignorePagination;
+
+    public Boolean getIgnorePagination() {
+        return ignorePagination;
+    }
+
+
+    /**
+     * Setter for ignore pagination flag.
+     * @param ignorePagination - if true, then one long page will be generated.
+     * @return
+     */
+    public ExportExecutionOptions setIgnorePagination(Boolean ignorePagination) {
+        this.ignorePagination = ignorePagination;
+        return this;
+    }
 
     public String getAnchor() {
         return anchor;
@@ -107,14 +123,17 @@ public class ExportExecutionOptions {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof ExportExecutionOptions)) return false;
 
         ExportExecutionOptions that = (ExportExecutionOptions) o;
 
         if (allowInlineScripts != that.allowInlineScripts) return false;
+        if (anchor != null ? !anchor.equals(that.anchor) : that.anchor != null) return false;
         if (attachmentsPrefix != null ? !attachmentsPrefix.equals(that.attachmentsPrefix) : that.attachmentsPrefix != null)
             return false;
         if (baseUrl != null ? !baseUrl.equals(that.baseUrl) : that.baseUrl != null) return false;
+        if (ignorePagination != null ? !ignorePagination.equals(that.ignorePagination) : that.ignorePagination != null)
+            return false;
         if (markupType != null ? !markupType.equals(that.markupType) : that.markupType != null) return false;
         if (outputFormat != null ? !outputFormat.equals(that.outputFormat) : that.outputFormat != null) return false;
         if (pages != null ? !pages.equals(that.pages) : that.pages != null) return false;
@@ -128,8 +147,10 @@ public class ExportExecutionOptions {
         result = 31 * result + (attachmentsPrefix != null ? attachmentsPrefix.hashCode() : 0);
         result = 31 * result + (pages != null ? pages.hashCode() : 0);
         result = 31 * result + (baseUrl != null ? baseUrl.hashCode() : 0);
+        result = 31 * result + (anchor != null ? anchor.hashCode() : 0);
         result = 31 * result + (allowInlineScripts ? 1 : 0);
         result = 31 * result + (markupType != null ? markupType.hashCode() : 0);
+        result = 31 * result + (ignorePagination != null ? ignorePagination.hashCode() : 0);
         return result;
     }
 
@@ -140,8 +161,10 @@ public class ExportExecutionOptions {
                 ", attachmentsPrefix='" + attachmentsPrefix + '\'' +
                 ", pages=" + pages +
                 ", baseUrl='" + baseUrl + '\'' +
+                ", anchor='" + anchor + '\'' +
                 ", allowInlineScripts=" + allowInlineScripts +
                 ", markupType='" + markupType + '\'' +
+                ", ignorePagination=" + ignorePagination +
                 '}';
     }
 }

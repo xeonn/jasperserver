@@ -24,32 +24,25 @@
  * Menu attached to an element which can be shown near this element
  *
  * @author: Kostiantyn Tsaregradskyi
- * @version: $Id: AttachableMenu.js 812 2015-01-27 11:01:30Z psavushchik $
+ * @version: $Id: AttachableMenu.js 1605 2015-09-23 17:55:32Z inestere $
  */
 
 define(function (require) {
     "use strict";
 
     var Menu = require("./Menu"),
-        AttachableComponent = require("common/component/base/AttachableComponent"),
-        $ = require("jquery"),
-        _ = require("underscore");
+        AttachableComponent = require("common/component/base/AttachableComponent");
 
-    return Menu.extend(AttachableComponent.extend(
-        /** @lends AttachableMenu.prototype */
-        {
-
+    return Menu.extend(AttachableComponent.extend(/** @lends AttachableMenu.prototype */{
         /**
          * @constructor AttachableMenu
          * @classdesc Menu attached to an element which can be shown near this element.
          * @extends Menu
-         * @param {array} options - Options for menu. @see Menu.
-         * @param {jQuery|HTMLElement|selector} attachTo - Element to attach menu to.
+         * @extends AttachableComponent
+         * @param {object[]} options - Options for menu. See {@link Menu} for more details.
+         * @param {jQuery|HTMLElement|string} attachTo - Element to attach menu to.
          * @param {object} [padding={top: 5, left: 5}] - padding of attachable menu.
-         * @param {object} [additionalSettings] - Additional settings object. @see Menu.
-         * @throws "Menu should have options" error if no menu options were passed to constructor.
-         * @throws "AttachableComponent should be attached to an element" error if attachTo is missing.
-         * @fires option:action events when menu option is selected.
+         * @param {object} [additionalSettings] - Additional settings object. See {@link Menu}.
          * @example
          *  var attachableMenu = new AttachableMenu([ { label: "Save Dashboard", action: "save" } ], "#someElement");
          */

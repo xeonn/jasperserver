@@ -26,12 +26,25 @@ import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
 import com.jaspersoft.jasperserver.api.common.domain.ValidationError;
 import com.jaspersoft.jasperserver.api.common.domain.ValidationErrors;
 import com.jaspersoft.jasperserver.api.common.domain.impl.ValidationErrorImpl;
-import com.jaspersoft.jasperserver.api.engine.scheduling.domain.*;
+import com.jaspersoft.jasperserver.api.engine.scheduling.domain.ReportJob;
+import com.jaspersoft.jasperserver.api.engine.scheduling.domain.ReportJobCalendarTrigger;
+import com.jaspersoft.jasperserver.api.engine.scheduling.domain.ReportJobIdHolder;
+import com.jaspersoft.jasperserver.api.engine.scheduling.domain.ReportJobRuntimeInformation;
+import com.jaspersoft.jasperserver.api.engine.scheduling.domain.ReportJobSimpleTrigger;
+import com.jaspersoft.jasperserver.api.engine.scheduling.domain.ReportJobSummary;
+import com.jaspersoft.jasperserver.api.engine.scheduling.domain.ReportJobTrigger;
 import com.jaspersoft.jasperserver.api.engine.scheduling.domain.reportjobmodel.ReportJobModel;
 import com.jaspersoft.jasperserver.api.engine.scheduling.domain.reportjobmodel.ReportJobRepositoryDestinationModel;
 import com.jaspersoft.jasperserver.api.engine.scheduling.domain.reportjobmodel.ReportJobRuntimeInformationModel;
 import com.jaspersoft.jasperserver.api.engine.scheduling.hibernate.HibernateReportJobsPersistenceService;
-import com.jaspersoft.jasperserver.api.engine.scheduling.service.*;
+import com.jaspersoft.jasperserver.api.engine.scheduling.service.DuplicateOutputLocationException;
+import com.jaspersoft.jasperserver.api.engine.scheduling.service.ReportJobNotFoundException;
+import com.jaspersoft.jasperserver.api.engine.scheduling.service.ReportJobRuntimeInfoException;
+import com.jaspersoft.jasperserver.api.engine.scheduling.service.ReportJobsPersistenceService;
+import com.jaspersoft.jasperserver.api.engine.scheduling.service.ReportJobsScheduler;
+import com.jaspersoft.jasperserver.api.engine.scheduling.service.ReportSchedulerListener;
+import com.jaspersoft.jasperserver.api.engine.scheduling.service.ReportSchedulingService;
+import com.jaspersoft.jasperserver.api.engine.scheduling.service.TriggerTypeMismatchException;
 import com.jaspersoft.jasperserver.api.logging.audit.context.AuditContext;
 import com.jaspersoft.jasperserver.api.logging.audit.domain.AuditEvent;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportUnit;
@@ -42,11 +55,22 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ReportSchedulingFacade.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: ReportSchedulingFacade.java 58265 2015-10-05 16:13:56Z vzavadsk $
  */
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 public class ReportSchedulingFacade
@@ -1057,7 +1081,7 @@ public class ReportSchedulingFacade
     @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
 	public ReportJob saveJob(ExecutionContext context, ReportJob job) {
 		validateSaveJob(context, job);
-		ReportJob savedJob = jobsInternalService.saveJob(context, job, false);
+		ReportJob savedJob = persistenceService.saveJob(context, job, false);
 		scheduler.scheduleJob(context, savedJob);
 		return savedJob;
 	}

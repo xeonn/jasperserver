@@ -35,6 +35,7 @@ import com.jaspersoft.jasperserver.api.logging.access.context.AccessContext;
 import com.jaspersoft.jasperserver.api.logging.access.domain.AccessEvent;
 import com.jaspersoft.jasperserver.api.logging.audit.context.AuditContext;
 import com.jaspersoft.jasperserver.api.logging.audit.domain.AuditEvent;
+import com.jaspersoft.jasperserver.api.logging.audit.domain.AuditEventProperty;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.*;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.impl.IdedRepoObject;
 import com.jaspersoft.jasperserver.api.metadata.common.service.JSResourceNotFoundException;
@@ -54,6 +55,7 @@ import com.jaspersoft.jasperserver.api.metadata.view.domain.FilterCriteria;
 import com.jaspersoft.jasperserver.api.metadata.view.domain.FilterElement;
 import com.jaspersoft.jasperserver.api.search.*;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Criteria;
@@ -83,10 +85,12 @@ import java.util.*;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: HibernateRepositoryServiceImpl.java 56839 2015-08-17 13:58:24Z esytnik $
+ * @version $Id: HibernateRepositoryServiceImpl.java 58878 2015-10-28 20:37:39Z esytnik $
  */
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 public class HibernateRepositoryServiceImpl extends HibernateDaoImpl implements HibernateRepositoryService, ReferenceResolver, RepoManager, ApplicationContextAware {
+
+	public static final String JS_EXCEPTION_FOLDER_TOO_LONG_URI = "jsexception.folder.too.long.uri";
 	
 	private static final Log log = LogFactory.getLog(HibernateRepositoryServiceImpl.class);
 	
@@ -131,6 +135,13 @@ public class HibernateRepositoryServiceImpl extends HibernateDaoImpl implements 
 		tempNameResources = new ThreadLocal();
 	}
 
+	private List findByCriteria(HibernateTemplate template, DetachedCriteria criteria, boolean bCache){
+		// not setting caching options due to problems with duplicate ids in jiresource and jiresourcefolder tables
+		// will change it after we solve problem
+		// template.setCacheQueries(bCache);
+		return template.findByCriteria(criteria);
+	}
+	
     /**
      *
      * @param sessionFactory
@@ -331,12 +342,26 @@ public class HibernateRepositoryServiceImpl extends HibernateDaoImpl implements 
         });
     }
 
+
     private void closeAuditEvent(final String eventType) {
         auditContext.doInAuditContext(eventType, new AuditContext.AuditContextCallbackWithEvent() {
             public void execute(AuditEvent auditEvent) {
+                if (eventType.equals("copyResource")
+                        && auditEvent.getAuditEventProperties().size() > 1) {
+                    String compositeCopy = doCompositeProperty(auditEvent.getAuditEventProperties());
+                    auditContext.addPropertyToAuditEvent("compositeCopy", compositeCopy, auditEvent);
+                }
                 auditContext.closeAuditEvent(auditEvent);
             }
         });
+    }
+
+    private String doCompositeProperty(Set<AuditEventProperty> properties) {
+        String propComposite = StringUtils.EMPTY;
+        for (AuditEventProperty property : properties) {
+            propComposite = propComposite.concat(property.getValue()).concat(" ");
+        }
+        return propComposite;
     }
 
     private void logAccessResource(final RepoResource repoResource, final boolean updating) {
@@ -486,16 +511,16 @@ public class HibernateRepositoryServiceImpl extends HibernateDaoImpl implements 
 		
 		DetachedCriteria criteria = DetachedCriteria.forClass(RepoFolder.class);
 		criteria.add(Restrictions.naturalId().set("URI", workUri));
-        criteria.getExecutableCriteria(getSession()).setCacheable(true);
-        List foldersList = getHibernateTemplate().findByCriteria(criteria);
+        List foldersList = findByCriteria(getHibernateTemplate(),criteria,false);
 		RepoFolder folder;
 		if (foldersList.isEmpty()) {
 			if (required) {
 				String quotedURI = "\"" + uri + "\"";
 				throw new JSResourceNotFoundException("jsexception.folder.not.found.at", new Object[] {quotedURI});
 			}
-
-			log.debug("Folder not found at \"" + uri + "\"");
+			if(log.isDebugEnabled()){
+				log.debug("Folder not found at \"" + uri + "\"");
+			}
 			folder = null;
 		} else {
 			folder = (RepoFolder) foldersList.get(0);
@@ -506,8 +531,7 @@ public class HibernateRepositoryServiceImpl extends HibernateDaoImpl implements 
 	protected RepoFolder getRootFolder() {
 		DetachedCriteria criteria = DetachedCriteria.forClass(RepoFolder.class);
 		criteria.add(Restrictions.naturalId().set("URI", Folder.SEPARATOR));
-        criteria.getExecutableCriteria(getSession()).setCacheable(true);
-        List foldersList = getHibernateTemplate().findByCriteria(criteria);
+        List foldersList = findByCriteria(getHibernateTemplate(),criteria,false);
 		RepoFolder root;
 		if (foldersList.isEmpty()) {
 			root = null;
@@ -702,8 +726,7 @@ public class HibernateRepositoryServiceImpl extends HibernateDaoImpl implements 
 			exists = false;
 		} else {
 			criteria.setProjection(Projections.rowCount());
-            criteria.getExecutableCriteria(getSession()).setCacheable(true);
-			List countList = getHibernateTemplate().findByCriteria(criteria);
+			List countList = findByCriteria(getHibernateTemplate(), criteria, false);
 			int count = ((Integer) countList.get(0)).intValue();
 			exists = count > 0;
 		}
@@ -844,7 +867,7 @@ public class HibernateRepositoryServiceImpl extends HibernateDaoImpl implements 
             DetachedCriteria criteria = searchCriteriaFactory != null ? searchCriteriaFactory.create(ExecutionContextImpl.getRuntimeExecutionContext(), null) : DetachedCriteria.forClass(RepoResource.class);
             criteria.add(Restrictions.in("id", idList));
             criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
-            resourceList = getHibernateTemplate().findByCriteria(criteria);
+            resourceList = findByCriteria(getHibernateTemplate(), criteria, false);
         }
 
         // Reordering is required because the result (resource) list is not in the same order as id list.
@@ -892,8 +915,8 @@ public class HibernateRepositoryServiceImpl extends HibernateDaoImpl implements 
 //                sorter.applyOrder(entry.getKey().getName(), context, criteria);
 //            }
 
-            List resourceList = getHibernateTemplate().findByCriteria(criteria);
-
+            List resourceList = findByCriteria(getHibernateTemplate(), criteria, false);
+            
             ResultTransformer transformer = transformerFactory.createTransformer(filters, sorter);
             if (transformer != null) {
                 result.put(entry.getKey(), transformer.transformToCount(resourceList));
@@ -919,8 +942,10 @@ public class HibernateRepositoryServiceImpl extends HibernateDaoImpl implements 
             typeSpecificFilters.get(type.getName()).applyRestrictions(type.getName(), context, criteria);
         } else {
             String st = (text == null) ? "" : text;
-
-            criteria.add(ResourceCriterionUtils.getTextCriterion(st));
+            Criterion criterion = ResourceCriterionUtils.getTextCriterion(st);
+            if(criterion!=null){
+            	criteria.add(criterion);
+            }
         }
 
         String p = criteria.getAlias("parent", "p");
@@ -1009,9 +1034,9 @@ public class HibernateRepositoryServiceImpl extends HibernateDaoImpl implements 
 		// takes a LONG time at least in the postgres.
 		
 		criteria.setProjection(Projections.distinct(Projections.id()));
-        criteria.getExecutableCriteria(getSession()).setCacheable(true);
 		
-		List repoResources = getHibernateTemplate().findByCriteria(criteria);
+		HibernateTemplate template = getHibernateTemplate();
+		List repoResources = findByCriteria(template, criteria, false);
 		
 		// got list of ids, now lets load each object individually
 		// the code in between comments below is a modified/improved code
@@ -1031,7 +1056,7 @@ public class HibernateRepositoryServiceImpl extends HibernateDaoImpl implements 
 		// load resources one by one.
 		List results = new ArrayList(repoResources.size());
 		for(Object id:repoResources){
-			Object ret = getHibernateTemplate().load(persistentClass, (Serializable) id);
+			Object ret = template.load(persistentClass, (Serializable) id);
 			results.add(ret);
 		}
 		/*******************************/
@@ -1106,12 +1131,16 @@ public class HibernateRepositoryServiceImpl extends HibernateDaoImpl implements 
 		if (sep >= 0) {
 			String name = workUri.substring(sep + Folder.SEPARATOR_LENGTH);
 			String folderName = workUri.substring(0, sep);
-			log.debug("Looking for name: " + name + " in folder: " + folderName);
+			if(log.isDebugEnabled()){
+				log.debug("Looking for name: " + name + " in folder: " + folderName);
+			}
 			RepoFolder folder = getFolder(folderName, false);
 			if (folder != null) {
 				res = findByName(persistentClass, folder, name, required);
 			} else {
-				log.debug("No folder: " + folderName);
+				if(log.isDebugEnabled()){
+					log.debug("No folder: " + folderName);
+				}
 			}
 		}
 		
@@ -1133,8 +1162,7 @@ public class HibernateRepositoryServiceImpl extends HibernateDaoImpl implements 
 
 	protected RepoResource findByName(Class persistentClass, RepoFolder folder, String name, boolean required) {
 		DetachedCriteria criteria = resourceNameCriteria(persistentClass, folder, name);
-        criteria.getExecutableCriteria(getSession()).setCacheable(true);
-		List resourceList = getHibernateTemplate().findByCriteria(criteria);
+		List resourceList = findByCriteria(getHibernateTemplate(),criteria,false);
 		
 		RepoResource res;
 		if (resourceList.isEmpty()) {
@@ -2447,7 +2475,8 @@ public class HibernateRepositoryServiceImpl extends HibernateDaoImpl implements 
             criteria.setProjection(Projections.rowCount());
         }
 
-        List resourceList = getHibernateTemplate().findByCriteria(criteria);
+        // do NOT turn this to true - this is bug #44272
+        List resourceList = findByCriteria(getHibernateTemplate(),criteria,false);
 
         ResultTransformer transformer = transformerFactory.createTransformer(filters, sorter);
         if (transformer != null) {
@@ -2609,7 +2638,7 @@ public class HibernateRepositoryServiceImpl extends HibernateDaoImpl implements 
     @Override
     public List<RepoResource> findRepoResources(ExecutionContext context, FilterCriteria criteria) {
         DetachedCriteria detachedCriteria = translateFilterToCriteria(criteria);
-        return getHibernateTemplate().findByCriteria(detachedCriteria);
+        return findByCriteria(getHibernateTemplate(),detachedCriteria,false);
     }
 
     @Override
@@ -2617,7 +2646,7 @@ public class HibernateRepositoryServiceImpl extends HibernateDaoImpl implements 
         // enforce Folder search
         criteria.setFilterClass(Folder.class);
         DetachedCriteria detachedCriteria = translateFilterToCriteria(criteria);
-        return getHibernateTemplate().findByCriteria(detachedCriteria);
+        return findByCriteria(getHibernateTemplate(),detachedCriteria,false);
     }
 
     @Override

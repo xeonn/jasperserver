@@ -22,23 +22,33 @@
 
 /**
  * @author: Kostiantyn Tsaregradskyi
- * @version: $Id: css.js 270 2014-10-13 19:58:03Z agodovanets $
+ * @version: $Id: css.js 1605 2015-09-23 17:55:32Z inestere $
  */
 
 define(function (require) {
     "use strict";
 
     var originalCssPlugin = require("requirejs.plugin.css"),
-        _ = require("underscore"),
-        jrsConfigs = require("jrs.configs");
+        _ = require("underscore");
 
     var customizedCssPlugin = _.clone(originalCssPlugin);
 
     customizedCssPlugin.load = function(cssId, req, load, config) {
+        if (!config.config.theme) {
+            load();
+            return;
+        }
 
-	    var defaultThemePath = jrsConfigs.currentThemePath || "themes/default";
+        var themeConf = config.config.theme || {},
+            base = themeConf.baseUrl || "/",
+            path = themeConf.path || "themes",
+            themeName = themeConf.name || "default";
 
-        cssId = jrsConfigs.contextPath + "/" + defaultThemePath + "/" + cssId;
+
+        base.slice(-1) !== "/" && (base += "/");
+
+        cssId = base + [path, themeName, cssId].join("/");
+
         originalCssPlugin.load.call(this, cssId, req, load, config);
     };
 

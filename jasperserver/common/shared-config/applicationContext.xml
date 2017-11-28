@@ -20,7 +20,7 @@
     <!-- Enable annotation-based wiring -->
     <context:annotation-config/>
 
-    <context:component-scan base-package="com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl,com.jaspersoft.jasperserver.api.metadata.security"/>
+    <context:component-scan base-package="com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl,com.jaspersoft.jasperserver.api.metadata.security,com.jaspersoft.jasperserver.api.common.error.handling"/>
 
     <alias name="${bean.securityContextProvider}" alias="concreteSecurityContextProvider"/>
     <alias name="${bean.engineService}" alias="concreteEngineService"/>
@@ -39,6 +39,9 @@
     <bean id="contextApplicationContextProvider" class="com.jaspersoft.jasperserver.api.common.util.spring.ApplicationContextProvider"/>
 
     <!-- Service beans -->
+    <util:list id="publicFolders">
+        <value>/public</value>
+    </util:list>
 
     <!-- Hibernate SessionFactory -->
     <bean id="sessionFactory" class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
@@ -65,6 +68,7 @@
                 <value>/com/jaspersoft/jasperserver/api/metadata/common/service/impl/hibernate/persistent/RepoQuery.hbm.xml</value>
                 <value>/com/jaspersoft/jasperserver/api/metadata/common/service/impl/hibernate/persistent/RepoReportUnit.hbm.xml</value>
                 <value>/com/jaspersoft/jasperserver/api/metadata/common/service/impl/hibernate/persistent/RepoResource.hbm.xml</value>
+                <value>/com/jaspersoft/jasperserver/api/metadata/common/service/impl/hibernate/persistent/RepoResourceLight.hbm.xml</value>
                 <value>/com/jaspersoft/jasperserver/api/metadata/common/service/impl/hibernate/persistent/RepoXMLAConnection.hbm.xml</value>
                 <value>/com/jaspersoft/jasperserver/api/metadata/user/domain/impl/hibernate/RepoUser.hbm.xml</value>
                 <value>/com/jaspersoft/jasperserver/api/metadata/user/domain/impl/hibernate/RepoRole.hbm.xml</value>
@@ -111,6 +115,7 @@
          -->
         <property name="entityCacheStrategies">
             <props>
+                <prop key="com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.persistent.RepoResourceLight">read-only,defaultRepoCache</prop>
                 <prop key="com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.persistent.RepoResource">read-write,defaultRepoCache</prop>
                 <prop key="com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.persistent.RepoFolder">read-write,defaultRepoCache</prop>
                 <prop key="com.jaspersoft.jasperserver.api.metadata.user.domain.impl.hibernate.RepoUser">read-write,defaultRepoCache</prop>
@@ -950,6 +955,7 @@
         <property name="sessionFactory" ref="sessionFactory"/>
         <property name="objectMappingFactory" ref="mappingResourceFactory"/>
         <property name="persistentClassFactory" ref="persistentMappings"/>
+        <property name="repositoryAclService" ref="repositoryAclService"/>
         <property name="aclCache" ref="ehCacheBasedJasperServerAclCache"/>
         <property name="sidRetrievalStrategy" ref="sidRetrievalStrategy"/>
     </bean>
@@ -1412,7 +1418,6 @@
         <property name="optimizeJavaScript" value="${javascript.optimize}"/>
         <property name="defaultAddToDomainDependents" value="true"/>
         <property name="defaultDomainDependentsBlockAndUpdate" value="true"/>
-
         <property name="enableAccessibility" value="true"/>
     </bean>
 
@@ -1763,6 +1768,10 @@
             </set>
         </constructor-arg>
     </bean>
+
+    <!-- bean preparing errorPage.jsp in webflows and in prepErrorPage.jsp.
+    Do not rename this bean as it will break flows and prepErrorPage.jsp -->
+    <bean id="errorPageHandlerAction" class="com.jaspersoft.jasperserver.war.action.ErrorPageHandlerAction"/>
 
     <aop:config>
         <aop:aspect ref="profileAttributesResolverAspect">

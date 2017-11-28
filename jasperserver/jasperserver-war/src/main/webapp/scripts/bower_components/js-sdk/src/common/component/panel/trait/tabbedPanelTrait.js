@@ -22,7 +22,7 @@
 
 /**
  * @author: Zakhar Tomchenko, Kostiantyn Tsaregradskyi
- * @version: $Id: tabbedPanelTrait.js 1154 2015-04-25 17:52:53Z ktsaregr $
+ * @version: $Id: tabbedPanelTrait.js 1605 2015-09-23 17:55:32Z inestere $
  */
 
 define(function(require){
@@ -32,9 +32,13 @@ define(function(require){
         $ = require('jquery'),
         Backbone = require("backbone"),
         abstractPanelTrait = require("./abstractPanelTrait"),
-        OptionContainer = require("common/component/option/OptionContainer"),
+        OptionContainer = require("common/component/base/OptionContainer"),
         panelButtonTemplate = require("text!../template/tabbedPanelButtonTemplate.htm");
 
+    /**
+     * @event tabbedPanelTrait#tab:ID
+     * @description This event is fired when tab with corresponding ID is selected.
+     */
     function onTabSelect(tabView, tabModel) {
         var tabAction = tabModel.get("action");
 
@@ -49,8 +53,26 @@ define(function(require){
         this.trigger("tab:" + tabAction, tabView, tabModel);
     }
 
+    /**
+     * @mixin tabbedPanelTrait
+     * @description Extend panel with tabs.
+     * @extends abstractPanelTrait
+     */
     return _.extend({}, abstractPanelTrait, {
+        /**
+         * @description Initialize tab options.
+         * @memberof! tabbedPanelTrait
+         * @param {object} options
+         * @param {array} options.tabs Data for tabs.
+         * @param {string} [options.tabContainerClass="tabContainer"] CSS class for tabs container in DOM.
+         * @param {string} [options.tabHeaderContainerSelector="> .header > .tabHeaderContainer"] CSS selector for tabs header in DOM.
+         * @param {string} [options.tabHeaderContainerClass="tabHeaderContainer"] CSS class for tabs header in DOM.
+         * @param {string} [options.tabbedPanelClass="tabbedPanel"] CSS class for Panel.
+         * @throws {Error} Error if no data for tabs was provided
+         */
         onConstructor: function(options) {
+            options || (options = {});
+
             if (!options.tabs || !_.isArray(options.tabs) || options.tabs.length === 0) {
                 throw new Error("Tabbed panel should have at least one tab");
             }
@@ -68,7 +90,11 @@ define(function(require){
             }, this));
         },
 
-        afterSetElement: function(el) {
+        /**
+         * @description Build DOM for tabs.
+         * @memberof! tabbedPanelTrait
+         */
+        afterSetElement: function() {
             this.$el.addClass(this.tabbedPanelClass);
 
             this.$tabHeaderContainer = this.$(this.tabHeaderContainerSelector);
@@ -92,6 +118,11 @@ define(function(require){
             this.$tabs = this.$('.' + classes[0]);
         },
 
+        /**
+         * @description Initialize tabs.
+         * @memberof! tabbedPanelTrait
+         * @fires tabbedPanelTrait#tab:ID
+         */
         afterInitialize: function(options){
             this.tabHeaderContainer = new OptionContainer({
                 options: options.tabs,
@@ -117,6 +148,10 @@ define(function(require){
             }
         },
 
+        /**
+         * @description Destroy tabs.
+         * @memberof! tabbedPanelTrait
+         */
         onRemove: function(){
             _.each(this.tabs, function(content) {
                 content.remove && content.remove();
@@ -125,7 +160,16 @@ define(function(require){
             this.tabHeaderContainer.remove();
         },
 
+        /**
+         * @description Additional methods to expose through Panel's API.
+         * @memberof! tabbedPanelTrait
+         */
         extension: {
+            /**
+             * @description Open tab by it's ID.
+             * @memberof! tabbedPanelTrait
+             * @param {string} tabId ID of tab to open
+             */
             openTab: function(tabId) {
                 var optionView = this.tabHeaderContainer.getOptionView(tabId);
 

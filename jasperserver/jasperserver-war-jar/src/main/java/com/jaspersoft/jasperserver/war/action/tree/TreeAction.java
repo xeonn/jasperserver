@@ -47,11 +47,11 @@ import java.util.List;
 
 /**
  * Spring Action class for Tree flow.
- * 
+ *
  * @author asokolnikov
  */
 public class TreeAction extends MultiAction {
-	
+
 	public static final String AJAX_REPORT_MODEL = "ajaxResponseModel";
 	public static final String PROVIDER = "provider";
 	public static final String URI = "uri";
@@ -60,7 +60,8 @@ public class TreeAction extends MultiAction {
     public static final String PREFETCH = "prefetch";
     public static final String MESSAGE_ID = "messageId";
     private static final String FORCE_HTML_ESCAPE = "forceHtmlEscape";
-	
+    private static final String QUERY = "query";
+
 	protected final Log log = LogFactory.getLog(this.getClass());
 
 	private TreeDataProviderFactory treeDataProviderFactory;
@@ -79,12 +80,12 @@ public class TreeAction extends MultiAction {
         String defaultMessage = HtmlUtils.htmlEscape(messageId);
         String message = messageSource.getMessage(messageId, null, defaultMessage,
                 LocaleContextHolder.getLocale());
-    	
+
     	context.getRequestScope().put(AJAX_REPORT_MODEL, message);
 
     	return success();
     }
-    
+
 	/**
 	 * Gets the data, builds tree model and returns serialized tree data.
 	 */
@@ -94,6 +95,14 @@ public class TreeAction extends MultiAction {
     	String depth = context.getRequestParameters().get(DEPTH);
         String prefetchNodesList = context.getRequestParameters().get(PREFETCH);
         String forceHtmlEscape = context.getRequestParameters().get(FORCE_HTML_ESCAPE);
+        String query = context.getRequestParameters().get(QUERY);
+
+        //In order to keep TreeDataProvider API unchanged
+        //add search term to uri instead of passing it as a parameter.
+        //Since this is legacy code lets change it as small as possible
+        if (query != null && !query.isEmpty()) {
+            uri += "?q=" + query;
+        }
 
     	int d = 0;
     	if (depth != null && depth.length() > 0) {
@@ -106,14 +115,14 @@ public class TreeAction extends MultiAction {
 	            log.error("Invalid parameter : depth : " + depth, e);
 	        }
     	}
-        
+
         List<String> prefetchList = null;
         if (prefetchNodesList != null && prefetchNodesList.length() > 0) {
             prefetchList = Arrays.asList(prefetchNodesList.split(","));
         }
-    	
+
     	TreeDataProvider treeDataProvider = findProvider(context, providerId);
-    	
+
         TreeNode treeNode;
         if (prefetchList == null) {
             try {
@@ -129,7 +138,7 @@ public class TreeAction extends MultiAction {
                         configurationBean.getPublicFolderUri(), prefetchList, d);
             }
         }
-    	
+
     	String model = "";
     	if (treeNode != null) {
     	    StringBuffer sb = new StringBuffer();
@@ -144,12 +153,12 @@ public class TreeAction extends MultiAction {
     	    sb.append("</div>");
     	    model = sb.toString();
     	}
-    	
+
     	context.getRequestScope().put(AJAX_REPORT_MODEL, model);
-    	
+
     	return success();
     }
-    
+
     /**
      * Gets children for specified tree node.
      *
@@ -160,11 +169,19 @@ public class TreeAction extends MultiAction {
     public Event getChildren(RequestContext context) {
     	String providerId = context.getRequestParameters().get(PROVIDER);
     	String uri = CipherUtil.uriDecode(context.getRequestParameters().get(URI));
-    	
+		String query = context.getRequestParameters().get(QUERY);
+
+        //In order to keep TreeDataProvider API unchanged
+        //add search term to uri instead of passing it as a parameter.
+        //Since this is legacy code lets change it as small as possible
+        if (query != null && !query.isEmpty()) {
+            uri += "?q=" + query;
+        }
+
     	TreeDataProvider treeDataProvider = findProvider(context, providerId);
-    	
+
     	TreeNode treeNode = treeDataProvider.getNode(exContext(context), uri, 1);
-    	
+
     	String model = "";
     	if (treeNode != null) {
     	    StringBuffer sb = new StringBuffer();
@@ -183,12 +200,12 @@ public class TreeAction extends MultiAction {
     	    sb.append("</div>");
     	    model = sb.toString();
     	}
-    	
+
     	context.getRequestScope().put(AJAX_REPORT_MODEL, model);
-    	
+
     	return success();
     }
-    
+
     /**
      * Gets children for specified tree node.
      *
@@ -200,9 +217,9 @@ public class TreeAction extends MultiAction {
     	String providerId = context.getRequestParameters().get(PROVIDER);
     	String uriParam = CipherUtil.uriDecode(context.getRequestParameters().get(URIS));
     	String[] uris = uriParam.split(",");
-    	
+
     	TreeDataProvider treeDataProvider = findProvider(context, providerId);
-    	
+
     	String model = "";
 	    StringBuffer sb = new StringBuffer();
 	    sb.append("<div id='treeNodeText'>");
@@ -236,12 +253,12 @@ public class TreeAction extends MultiAction {
 	    sb.append(']');
 	    sb.append("</div>");
 	    model = sb.toString();
-    	
+
     	context.getRequestScope().put(AJAX_REPORT_MODEL, model);
-    	
+
     	return success();
     }
-    
+
     private TreeDataProvider findProvider(RequestContext context, String providerId) {
     	TreeDataProvider treeDataProvider = null;
     	// First, try to find data provider in session scope
@@ -255,16 +272,16 @@ public class TreeAction extends MultiAction {
 			log.error("Cannot find tree data provider with id : " + providerId);
 			throw new IllegalArgumentException("Cannot find tree data provider with id : " + providerId);
 		}
-		
+
     	return treeDataProvider;
     }
-    
+
 	// Getters and Setters
-	
+
     public TreeDataProviderFactory getTreeDataProviderFactory() {
         return treeDataProviderFactory;
     }
-    
+
     public void setTreeDataProviderFactory(
             TreeDataProviderFactory treeDataProviderFactory) {
         this.treeDataProviderFactory = treeDataProviderFactory;

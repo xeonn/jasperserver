@@ -867,8 +867,8 @@ TODO: SSU - Seems this bean is not needed
             </security:method-security-metadata-source>
         </property>
     </bean>
-
-    <bean id="modifyProfileAttributesAccessDecisionManager" class="org.springframework.security.access.vote.UnanimousBased">
+    
+     <bean id="modifyProfileAttributesAccessDecisionManager" class="org.springframework.security.access.vote.UnanimousBased">
         <constructor-arg name="decisionVoters" type="java.util.List">
             <list>
                 <ref bean="roleVoter"/>
@@ -930,4 +930,27 @@ TODO: SSU - Seems this bean is not needed
         <property name="roleName" ref="roleAdministrator"/>
     </bean>
 
+    <bean name="exceptionOutputManager" class="com.jaspersoft.jasperserver.api.common.error.handling.ExceptionOutputManagerImpl">
+        <property name="outputControlMap">
+            <map>
+                <entry key="ERROR_UID">
+                    <list>
+                        <!--<value>ROLE_USER</value>-->
+                    </list>
+                </entry>
+                <entry key="STACKTRACE">
+                    <list>
+                        <value>ROLE_USER</value>
+                        <value>ROLE_SUPERUSER</value>
+                    </list>
+                </entry>
+                <entry key="MESSAGE">
+                    <list>
+                        <value>ROLE_USER</value>
+                        <value>ROLE_SUPERUSER</value>
+                    </list>
+                </entry>
+            </map>
+        </property>
+    </bean>
 </beans>

@@ -22,7 +22,7 @@
 
 /**
  * @author: Yuriy Plakosh
- * @version: $Id: components.dialogs.js 9192 2015-08-12 19:52:08Z yplakosh $
+ * @version: $Id: components.dialogs.js 9599 2015-10-27 19:38:56Z yplakosh $
  */
 
 /**
@@ -210,6 +210,12 @@ dialogs.popup = {
             if (!elem) {
                 return;
             }
+
+            if ('message' in options) {
+                // Update the displayed message in the dialog.
+                jQuery(elem).find('.body').text(options.message.unescapeHTML());                
+            }
+            
             /*
              * Hack for all 4 sides drop shadow. Applying drop shadow effect directly on dialog.overlay element causes
              * cursor to be shifted out of inner input elements.

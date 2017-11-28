@@ -30,6 +30,7 @@ public class MongoDbJDBCDataSourceDefinition extends JDBCQueryDataSourceDefiniti
         additionalPropertySet.remove("query");
         additionalPropertySet.add("portNumber");
         additionalPropertySet.add("connectionOptions");
+        additionalPropertySet.add("timeZone");
         additionalPropertySet.add(FILE_NAME_PROP);
 
         // define default values for the following properties
@@ -38,6 +39,7 @@ public class MongoDbJDBCDataSourceDefinition extends JDBCQueryDataSourceDefiniti
         propertyDefaultValueMap.put("name", "MongoDbJDBCDataSource");
         propertyDefaultValueMap.put("driver", "tibcosoftware.jdbc.mongodb.MongoDBDriver");
         propertyDefaultValueMap.put("portNumber", "27017");
+        propertyDefaultValueMap.put("timeZone", null);
 
         // hide the following properties from UI
         Set<String> hiddenPropertySet = getHiddenPropertySet();

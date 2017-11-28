@@ -24,7 +24,7 @@ define(function(require) {
 
     var $ = require("jquery"),
         _ = require("underscore"),
-		ResourceModel = require("common/model/RepositoryResourceModel"),
+		ResourceModel = require("bi/repo/model/RepositoryResourceModel"),
         BaseDataSourceModel = require("dataSource/model/BaseDataSourceModel"),
         i18n = require("bundle!jasperserver_messages"),
         timezones = require("settings!userTimeZones"),
@@ -268,7 +268,24 @@ define(function(require) {
             $parentEl.find(".message.warning").text(error);
         },
 
-        remove: function() {
+           // simpler version of 'validField' which works always on the same
+           // context ('view' parameter is absent), and selector does not build from two parameters
+           validField: function(selector) {
+                   var $parentEl = this.$(selector).parent();
+                   $parentEl.removeClass("error");
+                   $parentEl.find(".message.warning").text("");
+           },
+
+           // simpler version of 'fieldIsInvalid' which works always on the same
+           // context ('view' parameter is absent), and selector does not build from two parameters
+           // also, the order of parameters has changed
+           invalidField: function(selector, error) {
+                   var $parentEl = this.$(selector).parent();
+                   $parentEl.addClass("error");
+                   $parentEl.find(".message.warning").text(error.toString());
+           },
+
+           remove: function() {
             // remove all resource locator DOM elements
             // 1 and 2 are the beginning of timestamp
             $("div[id^='selectFromRepository1'], div[id^='selectFromRepository2']").remove();

@@ -24,6 +24,7 @@ import com.jaspersoft.jasperserver.api.metadata.common.domain.Query;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceReference;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.client.QueryImpl;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConversionOptions;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.ObjectPermission;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.client.ObjectPermissionImpl;
 import com.jaspersoft.jasperserver.dto.resources.AbstractClientDataSourceHolder;
@@ -52,7 +53,7 @@ import static org.testng.Assert.*;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: DataSourceHolderResourceConverterTest.java 51947 2014-12-11 14:38:38Z ogavavka $
+ * @version $Id: DataSourceHolderResourceConverterTest.java 58870 2015-10-27 22:30:55Z esytnik $
  */
 public class DataSourceHolderResourceConverterTest {
     private static final String TEST_RESORUCE_URI = "/test/resoruce/uri";

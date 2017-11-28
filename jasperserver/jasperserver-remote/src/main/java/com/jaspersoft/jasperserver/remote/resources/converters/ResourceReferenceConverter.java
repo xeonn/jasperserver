@@ -20,14 +20,12 @@
  */
 package com.jaspersoft.jasperserver.remote.resources.converters;
 
-import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
 import com.jaspersoft.jasperserver.api.common.domain.impl.ExecutionContextImpl;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Folder;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceReference;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.client.ResourceLookupImpl;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConversionOptions;
 import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
-import com.jaspersoft.jasperserver.api.metadata.security.JasperServerPermission;
 import com.jaspersoft.jasperserver.dto.resources.ClientFile;
 import com.jaspersoft.jasperserver.dto.resources.ClientReference;
 import com.jaspersoft.jasperserver.dto.resources.ClientReferenceable;
@@ -39,8 +37,6 @@ import com.jaspersoft.jasperserver.remote.resources.ClientTypeHelper;
 import com.jaspersoft.jasperserver.remote.services.PermissionsService;
 import com.jaspersoft.jasperserver.war.common.ConfigurationBean;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.transaction.UnexpectedRollbackException;
 
 import java.util.ArrayList;
 import java.util.Arrays;

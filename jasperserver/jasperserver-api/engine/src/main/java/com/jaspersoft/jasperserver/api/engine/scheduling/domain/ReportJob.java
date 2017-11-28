@@ -20,20 +20,6 @@
  */
 package com.jaspersoft.jasperserver.api.engine.scheduling.domain;
 
-import com.jaspersoft.jasperserver.api.JSException;
-import com.jaspersoft.jasperserver.api.JasperServerAPI;
-import com.jaspersoft.jasperserver.api.engine.scheduling.domain.jaxb.OutputFormatXmlAdapter;
-import com.jaspersoft.jasperserver.api.engine.scheduling.domain.jaxb.TimestampToStringXmlAdapter;
-import com.jaspersoft.jasperserver.api.engine.scheduling.service.ReportSchedulingService;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.ContentResource;
-import net.sf.jasperreports.engine.JRParameter;
-import org.apache.commons.lang.StringUtils;
-
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElements;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.GregorianCalendar;
@@ -42,6 +28,24 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
+
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElements;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
+import net.sf.jasperreports.engine.JRParameter;
+
+import org.apache.commons.lang.StringUtils;
+
+import com.jaspersoft.jasperserver.api.JSException;
+import com.jaspersoft.jasperserver.api.JasperServerAPI;
+import com.jaspersoft.jasperserver.api.engine.scheduling.domain.jaxb.OutputFormatXmlAdapter;
+import com.jaspersoft.jasperserver.api.engine.scheduling.domain.jaxb.TimestampToStringXmlAdapter;
+import com.jaspersoft.jasperserver.api.engine.scheduling.service.ReportSchedulingService;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.ContentResource;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceReference;
 
 
 /**
@@ -53,7 +57,7 @@ import java.util.TimeZone;
  * </p>
  * 
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ReportJob.java 54934 2015-04-30 19:56:16Z lchirita $
+ * @version $Id: ReportJob.java 58542 2015-10-13 16:16:55Z dgorbenk $
  * @since 1.0
  * @see ReportSchedulingService#scheduleJob(com.jaspersoft.jasperserver.api.common.domain.ExecutionContext, ReportJob)
  */
@@ -183,6 +187,7 @@ public class ReportJob implements Serializable {
     private Timestamp creationDate;
 	private ReportJobTrigger trigger;
 	private ReportJobSource source;
+	private ResourceReference scheduledResource;
 	private String baseOutputFilename;
 	private Set<Byte> outputFormats;
 	private String outputLocale;
@@ -718,46 +723,55 @@ public class ReportJob implements Serializable {
    * @param job
    * @return
    */
-  public ReportJob(ReportJob job) {
+	public ReportJob(ReportJob job) {
 
-    // getId() is deliberately omitted since this will be created upon Persisting the new ReportJob
+		// getId() is deliberately omitted since this will be created upon
+		// Persisting the new ReportJob
 
+		// copying the version seems to be causing a problem
+		// this.setVersion(job.getVersion());
 
-    // copying the version seems to be causing a problem
-    //this.setVersion(job.getVersion());
+		// this clone is first coming to life, so it cannot have been previously
+		// saved
+		// therefore we set the version to VERSION_NEW
+		this.setVersion(VERSION_NEW);
+		this.setSource(new ReportJobSource(job.getSource()));
+		ReportJobTrigger trigger = job.getTrigger();
+		if (trigger != null) {
+			if (trigger instanceof ReportJobCalendarTrigger) {
+				this.setTrigger(new ReportJobCalendarTrigger((ReportJobCalendarTrigger) trigger));
+			}
+			else if (trigger instanceof ReportJobSimpleTrigger) {
+				this.setTrigger(new ReportJobSimpleTrigger((ReportJobSimpleTrigger) trigger));
+			}
+			else {
+				throw new JSException("ERROR !  Unhandled Trigger type '" + trigger.getClass().getName() + "'");
+			}
+		}
 
-    // this clone is first coming to life, so it cannot have been previously saved
-    // therefore we set the version to VERSION_NEW
-    this.setVersion(VERSION_NEW);
-    this.setSource(new ReportJobSource(job.getSource()));
-    ReportJobTrigger trigger = job.getTrigger();
-    if (trigger != null) {
-      if (trigger instanceof ReportJobCalendarTrigger) {
-        this.setTrigger(new ReportJobCalendarTrigger((ReportJobCalendarTrigger)trigger));
-      }
-      else if (trigger instanceof ReportJobSimpleTrigger) {
-        this.setTrigger(new ReportJobSimpleTrigger((ReportJobSimpleTrigger)trigger));
-      }
-      else {
-        throw new JSException("ERROR !  Unhandled Trigger type '"+trigger.getClass().getName()+"'");
-      }
-    }
+		// note that mail notification is optional...
+		if (job.getMailNotification() != null) {
+			this.setMailNotification(new ReportJobMailNotification(job.getMailNotification()));
+		} else {
+			this.setMailNotification(null);
+		}
+		this.setContentRepositoryDestination(new ReportJobRepositoryDestination(job.getContentRepositoryDestination()));
+		this.setDescription(job.getDescription());
+		this.setCreationDate(job.getCreationDate());
+		this.setLabel(job.getLabel());
+		this.setBaseOutputFilename(job.getBaseOutputFilename());
+		this.setOutputFormats(new HashSet(job.getOutputFormats()));
+		this.setOutputFormatsSet(new HashSet(job.getOutputFormatsSet()));
+		this.setUsername(job.getUsername());
+		this.setOutputLocale(job.getOutputLocale());
+	}
 
-    // note that mail notification is optional...
-    if( job.getMailNotification() != null ) {
-        this.setMailNotification(new ReportJobMailNotification(job.getMailNotification()));
-    } else {
-        this.setMailNotification(null);
-    }
-    this.setContentRepositoryDestination(new ReportJobRepositoryDestination(job.getContentRepositoryDestination()));
-    this.setDescription(job.getDescription());
-    this.setCreationDate(job.getCreationDate());
-    this.setLabel(job.getLabel());
-    this.setBaseOutputFilename(job.getBaseOutputFilename());
-    this.setOutputFormats(new HashSet(job.getOutputFormats()));
-    this.setOutputFormatsSet(new HashSet(job.getOutputFormatsSet()));
-    this.setUsername(job.getUsername());
-    this.setOutputLocale(job.getOutputLocale());
-  }
+	@XmlTransient
+	public ResourceReference getScheduledResource() {
+		return scheduledResource;
+	}
 
+	public void setScheduledResource(ResourceReference scheduledResource) {
+		this.scheduledResource = scheduledResource;
+	}
 }

@@ -25,7 +25,7 @@ import com.jaspersoft.jasperserver.export.modules.common.TenantQualifiedName;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: PermissionRecipient.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: PermissionRecipient.java 58265 2015-10-05 16:13:56Z vzavadsk $
  */
 public class PermissionRecipient extends TenantQualifiedName {
 	
@@ -48,5 +48,24 @@ public class PermissionRecipient extends TenantQualifiedName {
 	public void setRecipientType(String recipientType) {
 		this.recipientType = recipientType;
 	}
-	
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (!(o instanceof PermissionRecipient)) return false;
+		if (!super.equals(o)) return false;
+
+		PermissionRecipient that = (PermissionRecipient) o;
+
+		if (!recipientType.equals(that.recipientType)) return false;
+
+		return true;
+	}
+
+	@Override
+	public int hashCode() {
+		int result = super.hashCode();
+		result = 31 * result + recipientType.hashCode();
+		return result;
+	}
 }

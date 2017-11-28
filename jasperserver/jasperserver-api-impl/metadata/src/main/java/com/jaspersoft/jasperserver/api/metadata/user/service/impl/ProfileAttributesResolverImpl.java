@@ -59,7 +59,7 @@ import static org.apache.commons.lang.StringUtils.isNotEmpty;
  *
  * @author Volodya Sabadosh
  * @author Vlad Zavadskii
- * @version $Id: ProfileAttributesResolverImpl.java 54590 2015-04-22 17:55:42Z vzavadsk $
+ * @version $Id: ProfileAttributesResolverImpl.java 58870 2015-10-27 22:30:55Z esytnik $
  */
 public class ProfileAttributesResolverImpl implements ProfileAttributesResolver {
     private static final Log log = LogFactory.getLog(ProfileAttributesResolverImpl.class);
@@ -210,6 +210,7 @@ public class ProfileAttributesResolverImpl implements ProfileAttributesResolver 
                 resultResource = resource;
             }
             revertEscapedBaseResourceFields(baseResourceCopy, resultResource);
+            revertEscapedBaseResourceFields(baseResourceCopy, resource);
 
             return resultResource;
         } catch (IOException e) {

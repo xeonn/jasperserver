@@ -22,7 +22,7 @@
 
 /**
  * @author: Dima Gorbenko
- * @version: $Id: BaseSaveDialogView.js 8900 2015-05-06 20:57:14Z yplakosh $
+ * @version: $Id: BaseSaveDialogView.js 9614 2015-11-09 16:51:06Z dgorbenk $
  */
 
 /* global dialogs, dynamicTree */
@@ -34,9 +34,8 @@ define(function (require){
     var _ = require('underscore'),
         i18n = require('bundle!all'),
 	    browserDetection = require("common/util/browserDetection"),
-        ResourceModel = require('common/model/RepositoryResourceModel'),
+        ResourceModel = require("bi/repo/model/RepositoryResourceModel"),
         DialogWithModelInputValidation = require("common/component/dialog/DialogWithModelInputValidation"),
-        treeFactory = require("common/component/tree/treeFactory"),
 		jrsConfigs = require('jrs.configs'),
 
 		baseSaveDialogTemplate = require('text!dataSource/saveDialog/template/baseSaveDialogTemplate.htm');
@@ -67,8 +66,8 @@ define(function (require){
                 skipLocation: !!options.skipLocation,
                 modal: true,
                 model: model,
-                resizable: true,
-                additionalCssClasses: "dataSourceSaveDialog",
+                resizable: !options.skipLocation,
+                additionalCssClasses: "dataSourceSaveDialog" + (options.skipLocation ? " no-minheight" : ""),
                 title: i18n["resource.datasource.saveDialog.save"],
 
                 content: _.template(this.saveDialogTemplate, {
@@ -120,7 +119,7 @@ define(function (require){
                         msg: i18n["resource.datasource.saveDialog.validation.not.empty.label"]
                     },
                     {
-                        maxLength: ResourceModel.LABEL_MAX_LENGTH,
+                        maxLength: ResourceModel.settings.LABEL_MAX_LENGTH,
                         msg: i18n["resource.datasource.saveDialog.validation.too.long.label"]
                     }
                 ],
@@ -130,11 +129,11 @@ define(function (require){
                         msg: i18n["resource.datasource.saveDialog.validation.not.empty.name"]
                     },
                     {
-                        maxLength: ResourceModel.NAME_MAX_LENGTH,
+                        maxLength: ResourceModel.settings.NAME_MAX_LENGTH,
                         msg: i18n["resource.datasource.saveDialog.validation.too.long.name"]
                     },
                     {
-                        doesNotContainSymbols: ResourceModel.NAME_NOT_SUPPORTED_SYMBOLS,
+                        doesNotContainSymbols: ResourceModel.settings.NAME_NOT_SUPPORTED_SYMBOLS,
                         msg: i18n["resource.datasource.saveDialog.validation.invalid.chars.name"]
                     }
                 ],
@@ -143,7 +142,7 @@ define(function (require){
                         required: false
                     },
                     {
-                        maxLength: ResourceModel.DESCRIPTION_MAX_LENGTH,
+                        maxLength: ResourceModel.settings.DESCRIPTION_MAX_LENGTH,
                         msg: i18n["resource.datasource.saveDialog.validation.too.long.description"]
                     }
                 ],
@@ -280,12 +279,20 @@ define(function (require){
 	     Dirty, ugly hack, but it is what it is.
 	     */
 	    _onDialogResize: function() {
+            var self = this;
+            var shiftHeight = 73;
 		    var dialogSavingArea = this.$contentContainer.find(".control.groupBox.treeBox");
-		    var wholeDialog = this.$contentContainer.parent().parent();
+		    var wholeDialog = this.$contentContainer.parent();
 
-		    var newHeight = wholeDialog.height() - 313;
+            this.$contentContainer
+                .children()
+                .not(".control.groupBox.treeBox")
+                .each(function() {
+                    shiftHeight += self.$(this).outerHeight(true);
+                });
+            shiftHeight += this.$contentContainer.innerHeight() - this.$contentContainer.height();
 
-		    dialogSavingArea.height(newHeight);
+		    dialogSavingArea.height(wholeDialog.outerHeight(true) - shiftHeight);
 	    },
 
 	    _onDataSourceNameChange: function() {
@@ -307,7 +314,7 @@ define(function (require){
 
         _onSaveDialogSaveButtonClick: function() {
             var self = this;
-
+            this._onDialogResize();
 			if (!this.model.isValid(true)) {
 				return;
 			}
@@ -338,78 +345,72 @@ define(function (require){
 
 		_saveErrorCallback: function(model, xhr, options) {
 
-			var response = false, msg;
-			try { response = JSON.parse(xhr.responseText); } catch(e) {}
+			var self = this, errors = false, msg;
+			var handled = false;
 
-			// in case of opened dialog, we can highlight some fields with error
-			if (this.theDialogIsOpen) {
+			try { errors = JSON.parse(xhr.responseText); } catch(e) {}
 
-				var view = this; // the pointer to the view
+			if (!_.isArray(errors)) {
+				errors = [errors];
+			}
 
-				// check if we faced Conflict issue, it's when we are trying to save DS under existing resourceID
-				if (response.errorCode === "version.not.match") {
-					this.fieldIsInvalid(
-						view,
-						"name",
-						i18n["resource.dataSource.resource.exists"],
-						"name"
-					);
+			_.each(errors, function(error) {
+
+				var field = false, msg = false;
+
+				if (!error) {
 					return;
 				}
 
-				else if (response.errorCode === "mandatory.parameter.error") {
+				// in case of opened dialog, we can highlight some fields with error
+				if (self.theDialogIsOpen) {
 
-					if (response.parameters && response.parameters[0]) {
+					// check if we faced Conflict issue, it's when we are trying to save DS under existing resourceID
+					if (error.errorCode === "version.not.match") {
+						field = "name";
+						msg = i18n["resource.dataSource.resource.alreadyInUse"];
+					}
 
-						var missedField = response.parameters[0].substr(response.parameters[0].indexOf(".") + 1);
+					else if (error.errorCode === "mandatory.parameter.error") {
+						if (error.parameters && error.parameters[0]) {
+							msg = i18n["resource.datasource.saveDialog.parameterIsMissing"];
+							field = error.parameters[0].substr(error.parameters[0].indexOf(".") + 1);
+						}
+					}
 
-						this.fieldIsInvalid(
-							view,
-							missedField,
-							i18n["resource.datasource.saveDialog.parameterIsMissing"],
-							"name"
-						);
-						return;
+					else if (error.errorCode === "illegal.parameter.value.error") {
+						if (error.parameters && error.parameters[0]) {
+							field = error.parameters[0].substr(error.parameters[0].indexOf(".") + 1);
+							msg = i18n["resource.datasource.saveDialog.parameterIsWrong"];
+						}
+					}
+
+					else if (error.errorCode === "folder.not.found") {
+						field = "parentFolderUri";
+						msg = i18n["ReportDataSourceValidator.error.folder.not.found"].replace("{0}", error.parameters[0]);
+					}
+
+					else if (error.errorCode === "access.denied") {
+						field = "parentFolderUri";
+						msg = i18n["jsp.accessDenied.errorMsg"];
 					}
 				}
 
-				else if (response.errorCode === "folder.not.found") {
-					this.fieldIsInvalid(
-						view,
-						"parentFolderUri",
-						i18n["ReportDataSourceValidator.error.folder.not.found"].replace("{0}", response.parameters[0]),
-						"name"
+				if (msg && field && ["label", "name", "description", "parentFolderUri"].indexOf(field) !== -1) {
+					self.invalidField(
+						"[name=" + field + "]",
+						msg
 					);
-					return;
+					handled = true;
 				}
+			});
 
-				else if (response.errorCode === "access.denied") {
-					this.fieldIsInvalid(
-						view,
-						"parentFolderUri",
-						i18n["jsp.accessDenied.errorMsg"],
-						"name"
-					);
-					return;
+
+			// otherwise, pass this error to DataSourceController
+			if (handled === false) {
+				if (_.isFunction(this.options.error)) {
+					this.options.error(model, xhr, options);
 				}
-			}
-
-
-			// otherwise, proceed with common error handling
-
-			msg = "Failed to save data source.";
-
-			if (response[0] && response[0].errorCode) msg += "<br/>The reason is: " + response[0].errorCode;
-			else if (response.message) msg += "<br/>The reason is: " + response.message;
-
-			msg += "<br/><br/>The full response from the server is: " + xhr.responseText;
-
-			dialogs.errorPopup.show(msg);
-
-
-			// also, call the callback if it exists
-			if (_.isFunction(this.options.error)) {
-				this.options.error(model, xhr, options);
 			}
         }
     });

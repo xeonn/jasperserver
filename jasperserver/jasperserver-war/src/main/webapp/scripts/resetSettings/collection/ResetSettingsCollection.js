@@ -20,14 +20,14 @@
  */
 
 /**
- * @version: $Id: ResetSettingsCollection.js 8895 2015-05-06 13:20:27Z obobruyk $
+ * @version: $Id: ResetSettingsCollection.js 9400 2015-09-23 21:10:46Z inestere $
  */
 
 define(function(require) {
     var _ = require("underscore"),
         json3 = require("json3"),
         Backbone = require("backbone"),
-        request = require("common/transport/request"),
+        request = require("request"),
         groupsEnum = require("serverSettingsCommon/enum/serverSettingGroupsEnum");
 
 

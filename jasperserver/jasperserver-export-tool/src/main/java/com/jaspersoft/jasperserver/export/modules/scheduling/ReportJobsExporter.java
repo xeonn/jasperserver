@@ -42,7 +42,7 @@ import java.util.Set;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ReportJobsExporter.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: ReportJobsExporter.java 58265 2015-10-05 16:13:56Z vzavadsk $
  */
 public class ReportJobsExporter extends BaseExporterModule {
 
@@ -66,10 +66,13 @@ public class ReportJobsExporter extends BaseExporterModule {
 		String[] reportURIs = exportEverything ? new String[]{"/"} : getParameterValues(reportJobsArg);
 		if (reportURIs == null) {
             reportURIs = getParameterValues(urisArg);
-        }
+			if (reportURIs == null) reportURIs = new String[]{"/"};
+		}
         for (int i = 0; i < reportURIs.length; i++) {
 			String uri = reportURIs[i];
-			processUri(uri);
+			if (!exportFilter.excludeFolder(uri, exportParams)) {
+				processUri(uri);
+			}
 		}
 	}
 
@@ -98,6 +101,8 @@ public class ReportJobsExporter extends BaseExporterModule {
 	}
 
 	protected void processFolder(String uri) {
+		if (exportFilter.excludeFolder(uri, exportParams)) return;
+
 		processFolderResources(uri);
 		
 		List subFolders = configuration.getRepository().getSubFolders(executionContext, uri);

@@ -22,7 +22,7 @@
 
 /**
  * @author: Sergey Prilukin
- * @version: $Id: components.pickers.js 8179 2015-01-27 12:34:21Z psavushchik $
+ * @version: $Id: components.pickers.js 9400 2015-09-23 21:10:46Z inestere $
  */
 
 /* global $F, buttonManager, _, layoutModule, dynamicTree, matchAny, dialogs */
@@ -30,7 +30,7 @@
 var picker = {
 };
 
-/**
+/*
  * File/Folder Selector box.
  *
  * @param options {JSON Object} - Set of options for folder selector:

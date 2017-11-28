@@ -173,7 +173,7 @@ define(function (require, exports, module) {
         //   is why it is named "barrier" and not "filter".
         // - If no candidate is found, the function returns undefined.
         // - This uses a breadth-first search.
-        // NOTE THAT THIS FUNCTION RETURNS A jQuery-WRAPPED ELEMENT. 
+        // NOTE THAT THIS FUNCTION RETURNS A jQuery-WRAPPED ELEMENT.
         closestDescendant: function (start, target, barrier, maxdepth) {
             if ((start === null) || (start === undefined) || (target === null) || (target === undefined)) {
                 // Parameters cannot result in a match.
@@ -453,7 +453,7 @@ define(function (require, exports, module) {
         // such as JSAM (Jaspersoft Accessible Menus).  May be called at any
         // time, but it's probably wise to register all navtypes before
         // calling activate().
-        // 
+        //
         // Parameters:
         // navtype:    A string describing the new navigation type.
         //             (NOTE: navtypes are NOT case-sensitive)
@@ -623,7 +623,7 @@ define(function (require, exports, module) {
                 } else {
                     $initialFocus=$('body').children("[tabindex='0']:first");
                     if ($initialFocus.length<1){
-                        // Give up 
+                        // Give up
                         $initialFocus=$('body');
                     }
                 }
@@ -646,7 +646,7 @@ define(function (require, exports, module) {
         // ===CLEANUP AND SHUTDOWN FUNCTIONS===================================
 
         // Stops dynamic DOM monitoring without unbinding keyboard or mouse
-        // events.  Presently no effect. 
+        // events.  Presently no effect.
         stop: function () {},
 
         // Unbind the keyboard and mouse handlers.
@@ -654,7 +654,7 @@ define(function (require, exports, module) {
             this._unbindTouchEvents();
             this._unbindMouseEvents();
             this._unbindKeyboardEvents();
-            this._unbindFocusEvents();            
+            this._unbindFocusEvents();
         },
 
         // ===DOM EVENT HANDLERS, EVENT BINDING AND UNBINDING==================
@@ -764,7 +764,7 @@ define(function (require, exports, module) {
 
         // Builds the effective navigation behavior hash for the ancestry of the element,
         // NOT including the element itself.
-        // 
+        //
         // Right now, this includes node/element behavior, navtype behavior, and explicit
         // overrides; it may be more appropriate include only explicit overrides.
         //
@@ -773,7 +773,7 @@ define(function (require, exports, module) {
         // - The parent has "inheritable='false'"
         // - The root is reached
         // - The parent is an IFRAME
-        // 
+        //
         // PERFORMANCE / MEMORY NOTE: RECURSIVE SOLUTION
         _buildParentBehaviorOBSOLETE: function (element) {
             // IMPORTANT - DO NOT "OPTIMIZE" THIS BY JUST RETURNING
@@ -796,7 +796,7 @@ define(function (require, exports, module) {
 
             // ALL REMAINING CASES REQUIRE COMPUTATION OF PARENT BEHAVIOR
             // Therefore, we must now determine the parent's immediate behavior, so
-            // we can figure out if we should 1) overlay it, and, 2) go further. 
+            // we can figure out if we should 1) overlay it, and, 2) go further.
             var parentImmediateBehavior = this._buildImmediateBehavior(parentEl);
 
             if (parentImmediateBehavior['inheritable'] === false) {
@@ -844,7 +844,7 @@ define(function (require, exports, module) {
         // will.
         _buildBehavior: function (element) {
             // Make a copy of the default behavior, or you'll corrupt it!  And make
-            // sure it's a DEEP copy, or you won't get the arrays and subobjects! 
+            // sure it's a DEEP copy, or you won't get the arrays and subobjects!
             var behavior = $.extend(true, {}, this.nullBehavior);
             var iter = element;
             var height = 0;
@@ -975,7 +975,7 @@ define(function (require, exports, module) {
             // B. Build the immediate behavior:
             //  3. Overlay node/element type behavior.
             //  4. Overlay explicit navtype behavior, if specified.
-            //  5. Finally, overlay any other explicitly-specified behavior.            
+            //  5. Finally, overlay any other explicitly-specified behavior.
             var immediateBehavior = this._buildImmediateBehavior(el);
             var inheritedBehavior = {};
             if (immediateBehavior['inherit'] === true) {
@@ -1044,7 +1044,7 @@ define(function (require, exports, module) {
         // Note that not all navigable controls can be focused.  For example, a
         // table cell is navigable if the table plugin is loaded, but is not
         // normally focusable (though the table itself will be if the table
-        // element specifies a tabindex). 
+        // element specifies a tabindex).
         isUserFocusable: function (element) {
             if (this.nullOrUndefined(element)) {
                 logger.error("isUserFocusable called on a null or undefined element");
@@ -1135,7 +1135,7 @@ define(function (require, exports, module) {
             }
             $el.removeAttr('js-suspended-tabindex');
         },
-        
+
         // There are various weird ways we can lose focus beyond normal UI
         // actions and JavaScript logic-- ALT-TABbing to another app, etc.
         // For embedded uses, "alert" popups in third-party apps can cause
@@ -1145,7 +1145,7 @@ define(function (require, exports, module) {
         // anything with a suspended-tabindex and restores it, _unless_ it
         // is an ancestor of the element passed-- this avoid breaking
         // SHIFT-TAB, since most containers will auto-promote focus to their
-        // children.   
+        // children.
         ensureFocusabilityBeyond: function(element){
             var $suspendees=$('[suspended-tabindex]');
             $suspendees.each(function(suspendee){
@@ -1276,6 +1276,46 @@ define(function (require, exports, module) {
             }
         },
 
+        // Callback run when an element in the DOM is clicked.
+        _onMouseDown: function (ev) {
+            var element = $(ev.target);
+
+            // Sometimes this happens...
+            if (element.length != 1) {
+                return;
+            }
+
+            // Get the behavior for the clicked element.
+            var behavior = this._buildBehavior(element);
+            if (behavior['mousedown'] != null) {
+                var bubble = this.runAction('mousedown', ev.target);
+                if (bubble === false) {
+                    ev.stopPropagation();
+                    ev.preventDefault();
+                }
+            }
+        },
+
+        // Callback run when an element in the DOM is clicked.
+        _onMouseUp: function (ev) {
+            var element = $(ev.target);
+
+            // Sometimes this happens...
+            if (element.length != 1) {
+                return;
+            }
+
+            // Get the behavior for the clicked element.
+            var behavior = this._buildBehavior(element);
+            if (behavior['mouseup'] != null) {
+                var bubble = this.runAction('mouseup', ev.target);
+                if (bubble === false) {
+                    ev.stopPropagation();
+                    ev.preventDefault();
+                }
+            }
+        },
+
         // Callback run when an element in the DOM has acquired focus.
         _onFocusIn: function (ev) {
             this._currentFocus = ev.target;
@@ -1305,7 +1345,7 @@ define(function (require, exports, module) {
 
             // Figure out what element should actually have focus.  For example,
             // a table may have an initial tabstop, but the cells should actually
-            // get focus, if there are any. 
+            // get focus, if there are any.
             fixedFocus = this.runAction('fixfocus', eventFocus);
             if (fixedFocus === null) {
                 fixedFocus = eventFocus;
@@ -1388,7 +1428,7 @@ define(function (require, exports, module) {
                     // the subfocusin callback for the new subfocus.
                     $(this._currentSubfocus).addClass('subfocus');
                     this.runAction('subfocusin', this._currentSubfocus);
-                    
+
                     // Ensure focus can be moved to other areas in the DOM.
                     // This is a safety, and helps deal with ALT-TAB, alerts,
                     // popups, debuggers, etc.  It does NOT restore the
@@ -1669,9 +1709,10 @@ define(function (require, exports, module) {
 
         // ===DEFAULT BEHAVIOR HANDLERS========================================
 
-        // The default click handler tried to find an appropriate element to
+        // The default click handler tries to find an appropriate element to
         // focus based on what you clicked, but also allows the click event to
-        // bubble to other handlers.
+        // bubble to other handlers.  This behavior may be redundant with basic
+        // mousedown behavior, so consider whether you really want to use both.
         basicClick: function (element, args) {
             var fixedFocus = this.runAction('fixfocus', element);
             if (this.nullOrUndefined(fixedFocus)) {
@@ -1708,7 +1749,7 @@ define(function (require, exports, module) {
         // it returns the element itself, if it is navigable, otherwise the
         // closest navigable ancestor.  If nothing navigable can be identified,
         // superfocus is returned as BODY.
-        // 
+        //
         // If you place a tabindex="0" on an element that contains a form, this
         // will give you the behavior you expect: you can tab between the form
         // elements, but the overall form will be indicated as the active UI
@@ -1764,6 +1805,37 @@ define(function (require, exports, module) {
         basicFocusOut: function (element, args) {
             logger.debug("stdnav.basicFocusOut(" + element.nodeName + "#" + element.id + ")");
             return null;
+        },
+
+        // The default mousedown handler tries to find an appropriate element to
+        // focus based on what you clicked, but also allows the mousedown event to
+        // bubble to other handlers.
+        //
+        // Optional Arguments:
+        //
+        // TODO:
+        // 'onlyfor': An optional jQuery selector whitelist.  Only elements matching
+        //            this selector will have this behavior.  The event will bubble
+        //            up whether the element matches the selector or not, however.
+        basicMouseDown: function (element, args) {
+            var fixedFocus = this.runAction('fixfocus', element);
+            if (this.nullOrUndefined(fixedFocus)) {
+                logger.debug("stdnav.basicClick: " + element.nodeName + "#" + element.id + " has no navigable ancestor, ignoring");
+            } else {
+                logger.debug("stdnav.basicClick(" + element.nodeName + "#" + element.id + ") refocusing to " + fixedFocus.nodeName + '#' + fixedFocus.id);
+                if (!this.nullOrUndefined(fixedFocus)) {
+                    this.forceFocus(fixedFocus);
+                }
+            }
+            // Let the event bubble up.
+            return true;
+        },
+
+        // The default mouseup handler takes no action, but allows the
+        // mouseup event to bubble to other handlers.
+        basicMouseUp: function (element, args) {
+            // Let the event bubble up.
+            return true;
         },
 
         // The default superfocusin handler indicates that focus should be given

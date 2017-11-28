@@ -39,7 +39,7 @@ import com.jaspersoft.jasperserver.remote.ServicesConfiguration;
 import com.jaspersoft.jasperserver.remote.exception.ExportExecutionRejectedException;
 import com.jaspersoft.jasperserver.remote.exception.RemoteException;
 import com.jaspersoft.jasperserver.remote.exception.ResourceNotFoundException;
-import com.jaspersoft.jasperserver.remote.exception.xml.ErrorDescriptor;
+import com.jaspersoft.jasperserver.dto.common.ErrorDescriptor;
 import com.jaspersoft.jasperserver.remote.services.ReportExecutionOptions;
 import com.jaspersoft.jasperserver.remote.services.ReportExecutor;
 import com.jaspersoft.jasperserver.remote.utils.AuditHelper;
@@ -116,10 +116,13 @@ public class ReportExecutorImpl implements ReportExecutor {
         auditHelper.createAuditEvent("runReport");
         RunReportStrategy strategy = getStrategyForReport(report);
         if (strategy == null) {
-            throw new RemoteException(new ErrorDescriptor.Builder()
-                    .setErrorCode("webservices.error.errorExecutingReportUnit").setParameters(report.getURI()).getErrorDescriptor());
+            throw new RemoteException(new ErrorDescriptor()
+                    .setErrorCode("webservices.error.errorExecutingReportUnit").setParameters(report.getURI()));
         }
-        final Boolean ignorePagination = reportExecutionOptions.getIgnorePagination();
+        // if ignorePagination isn't set, then use value from defaultIgnorePagination, which become not null just after
+        // reportUnitResult available.
+        final Boolean ignorePagination = reportExecutionOptions.getIgnorePagination() != null
+                ? reportExecutionOptions.getIgnorePagination() : reportExecutionOptions.getDefaultIgnorePagination();
         if (ignorePagination != null) {
             parameters.put(JRParameter.IS_IGNORE_PAGINATION, ignorePagination);
         }
@@ -128,8 +131,8 @@ public class ReportExecutorImpl implements ReportExecutor {
                 getJasperReportsContext(reportExecutionOptions.isInteractive()), reportExecutionOptions);
 
         if (reportUnitResult == null) {
-            throw new RemoteException(new ErrorDescriptor.Builder()
-                    .setErrorCode("webservices.error.errorExecutingReportUnit").setParameters(report.getURI()).getErrorDescriptor());
+            throw new RemoteException(new ErrorDescriptor()
+                    .setErrorCode("webservices.error.errorExecutingReportUnit").setParameters(report.getURI()));
         }
 
         auditHelper.addPropertyToAuditEvent("runReport", "reportExecutionStartTime", new Date(currentTime));
@@ -183,10 +186,9 @@ public class ReportExecutorImpl implements ReportExecutor {
             		|| JRAbstractExporter.EXCEPTION_MESSAGE_KEY_END_PAGE_INDEX_OUT_OF_RANGE.equals(e.getMessageKey())){
                 final String pages = exportParameters.get(Argument.RUN_OUTPUT_PAGES).toString();
                 final int totalPages = jasperPrint.getPages().size();
-                throw new ExportExecutionRejectedException(new ErrorDescriptor.Builder().setMessage(
+                throw new ExportExecutionRejectedException(new ErrorDescriptor().setMessage(
                         "Pages out of range : " + pages + " of " + totalPages)
-                        .setErrorCode("export.pages.out.of.range").setParameters(pages, "" + totalPages)
-                        .getErrorDescriptor());
+                        .setErrorCode("export.pages.out.of.range").setParameters(pages, "" + totalPages));
             }
             throw new ExportExecutionRejectedException(e.getMessage());
         } catch (Exception e) {

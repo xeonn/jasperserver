@@ -21,7 +21,8 @@
 
 package com.jaspersoft.jasperserver.remote.exception;
 
-import com.jaspersoft.jasperserver.remote.exception.xml.ErrorDescriptor;
+import com.jaspersoft.jasperserver.api.common.error.handling.SecureExceptionHandler;
+import com.jaspersoft.jasperserver.dto.common.ErrorDescriptor;
 
 /**
  * <p></p>
@@ -45,16 +46,16 @@ public class FolderNotFoundException extends ResourceNotFoundException {
         errorDescriptor.setMessage("Folder " + message + " not found or it is not a folder");
     }
 
-    public FolderNotFoundException(String message, Throwable cause) {
-        super(cause);
+    public FolderNotFoundException(String message, Throwable cause, SecureExceptionHandler exceptionHandler) {
+        super(cause, exceptionHandler);
         getErrorDescriptor().setErrorCode(ERROR_CODE_FOLDER_NOT_FOUND);
         ErrorDescriptor errorDescriptor = getErrorDescriptor();
         errorDescriptor.setParameters(message);
         errorDescriptor.setMessage("Folder " + message + " not found or it is not a folder");
     }
 
-    public FolderNotFoundException(Throwable cause) {
-        super(cause);
+    public FolderNotFoundException(Throwable cause, SecureExceptionHandler exceptionHandler) {
+        super(cause, exceptionHandler);
         getErrorDescriptor().setErrorCode(ERROR_CODE_FOLDER_NOT_FOUND);
     }
 

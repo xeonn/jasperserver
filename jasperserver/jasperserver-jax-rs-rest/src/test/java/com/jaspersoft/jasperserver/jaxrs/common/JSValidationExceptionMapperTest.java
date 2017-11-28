@@ -23,7 +23,7 @@ package com.jaspersoft.jasperserver.jaxrs.common;
 import com.jaspersoft.jasperserver.api.JSValidationException;
 import com.jaspersoft.jasperserver.api.common.domain.impl.ValidationErrorImpl;
 import com.jaspersoft.jasperserver.api.common.domain.impl.ValidationErrorsImpl;
-import com.jaspersoft.jasperserver.remote.exception.xml.ErrorDescriptor;
+import com.jaspersoft.jasperserver.dto.common.ErrorDescriptor;
 import org.testng.annotations.Test;
 
 import javax.ws.rs.core.GenericEntity;
@@ -36,7 +36,7 @@ import static org.testng.Assert.*;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: JSValidationExceptionMapperTest.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: JSValidationExceptionMapperTest.java 57603 2015-09-15 17:20:48Z psavushc $
  */
 public class JSValidationExceptionMapperTest {
     private JSValidationExceptionMapper mapper = new JSValidationExceptionMapper();

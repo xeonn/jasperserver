@@ -27,7 +27,8 @@
  */
 
 /**
- * Model extended from ScalableListModel which allows to work with selection.
+ * @class ListWithSelectionAsObjectHashModel
+ * @classdesc Model extended from ScalableListModel which allows to work with selection.
  * It holds selection as an object hash
  *
  * Model API (in addition to ScalableListModel API):
@@ -54,7 +55,9 @@ define(function (require) {
         BaseListWithSelectionModel = require("common/component/list/model/BaseListWithSelectionModel");
 
 
-    var ListWithSelectionAsObjectHashModel = BaseListWithSelectionModel.extend({
+    var ListWithSelectionAsObjectHashModel = BaseListWithSelectionModel.extend(
+        /** @lends ListWithSelectionAsObjectHashModel.prototype */
+        {
 
         /* Methods which supposed to be overridden */
 

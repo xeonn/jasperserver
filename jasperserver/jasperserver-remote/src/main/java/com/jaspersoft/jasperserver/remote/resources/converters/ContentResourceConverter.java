@@ -21,6 +21,7 @@
 package com.jaspersoft.jasperserver.remote.resources.converters;
 
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ContentResource;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConversionOptions;
 import com.jaspersoft.jasperserver.dto.resources.ClientFile;
 import com.jaspersoft.jasperserver.remote.exception.IllegalParameterValueException;
 import org.springframework.stereotype.Service;
@@ -31,7 +32,7 @@ import javax.xml.bind.DatatypeConverter;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: ContentResourceConverter.java 51276 2014-11-09 17:44:57Z ktsaregradskyi $
+ * @version $Id: ContentResourceConverter.java 58870 2015-10-27 22:30:55Z esytnik $
  */
 @Service
 public class ContentResourceConverter extends ResourceConverterImpl<ContentResource, ClientFile>{

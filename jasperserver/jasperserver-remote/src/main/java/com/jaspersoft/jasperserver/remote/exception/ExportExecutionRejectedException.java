@@ -20,13 +20,13 @@
 */
 package com.jaspersoft.jasperserver.remote.exception;
 
-import com.jaspersoft.jasperserver.remote.exception.xml.ErrorDescriptor;
+import com.jaspersoft.jasperserver.dto.common.ErrorDescriptor;
 
 /**
  * <p></p>
  *
  * @author yaroslav.kovalchyk
- * @version $Id: ExportExecutionRejectedException.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: ExportExecutionRejectedException.java 57603 2015-09-15 17:20:48Z psavushc $
  */
 public class ExportExecutionRejectedException extends RemoteException {
     public static final String ERROR_CODE_EXPORT_EXECUTION_REJECTED = "export.execution.rejected";

@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: org.role.mng.components.js 9192 2015-08-12 19:52:08Z yplakosh $
+ * @version: $Id: org.role.mng.components.js 9490 2015-10-05 16:46:54Z obobruyk $
  */
 
 /* global orgModule, layoutModule, webHelpModule, localContext, isProVersion, invokeClientAction,
@@ -164,7 +164,7 @@ orgModule.roleManager.properties = {
                     }.bind(this)
                 });
             }
-        },
+        };
 
         orgModule.properties.isChanged = function() {
             var rmProperties = orgModule.roleManager.properties;

@@ -20,12 +20,14 @@
   --%>
 
 <%@ taglib prefix="c" uri="http://java.sun.com/jstl/core_rt" %>
+<%@ taglib uri="/spring" prefix="spring"%>
 
 <jsp:include page="setScriptOptimizationProps.jsp"/>
 
 <script type="text/javascript" src="${scriptsUri}/bower_components/requirejs/require.js"></script>
 <script type="text/javascript" src="${scriptsUri}/require.config.js"></script>
 <script type="text/javascript">
+
     require.config({
         baseUrl: "${scriptsUri}"
     });

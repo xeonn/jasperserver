@@ -41,11 +41,11 @@ import javax.ws.rs.ext.Provider;
 public class UpdateConflictExceptionMapper implements ExceptionMapper<UpdateConflictException> {
 
     @Resource(name= "localizedErrorDescriptorBuilder")
-    private LocalizedErrorDescriptorBuilder builder;
+    private LocalizedErrorDescriptorBuilder errorDescriptor;
 
     public Response toResponse(UpdateConflictException exception) {
         return Response.status(Response.Status.CONFLICT)
-                .entity(builder.localizeDescriptor(exception.getErrorDescriptor()))
+                .entity(errorDescriptor.localizeDescriptor(exception.getErrorDescriptor()))
                 .build();
     }
 }

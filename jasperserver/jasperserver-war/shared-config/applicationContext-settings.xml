@@ -20,6 +20,8 @@
                 <entry key="auth" value-ref="authSettingsProvider"/>
                 <entry key="request" value-ref="requestSettingsProvider"/>
                 <entry key="inputControls" value-ref="inputControls"/>
+                <entry key="scheduler" value-ref="schedulerSettingsProvider"/>
+                <entry key="exportResourceOptions" value-ref="${bean.exportResourceOptions}"/>
             </map>
         </constructor-arg>
     </bean>
@@ -36,6 +38,9 @@
             <value><![CDATA[^([\p{L}\p{M}\p{N}\s_.,\-}{]|#{ attributePlaceholderPatternUI })+$]]></value>
         </entry>
         <entry key="sName">
+            <value><![CDATA[^([\p{L}\p{M}\p{N}\s_.,\-}{]|#{ attributePlaceholderPatternUI })+$]]></value>
+        </entry>
+        <entry key="securityToken">
             <value><![CDATA[^([\p{L}\p{M}\p{N}\s_.,\-}{]|#{ attributePlaceholderPatternUI })+$]]></value>
         </entry>
         <entry key="driverType">
@@ -61,6 +66,17 @@
             <value><![CDATA[((?:#{ attributePlaceholderPatternUI }|[\p{L}\p{M}\p{N}\s\_.,\-}{])+)]]></value>
         </constructor-arg>
     </bean>
+
+    <util:map id="schedulerSettingsProvider">
+        <entry key="defaultOutputLocation" value="/public/jobOutputs"/>
+        <entry key="defaultOutputFormats">
+            <list>
+                <value>pdf</value>
+                <value>doc</value>
+            </list>
+        </entry>
+    </util:map>
+
 
     <util:map id="clientLogging">
         <entry key="enabled" value="true"/>
@@ -113,4 +129,37 @@
     <util:map id="inputControls">
         <entry key="useUrlParametersOnReset" value="true"/>
     </util:map>
+
+    <util:map id="exportResourceOptionsCe" >
+        <entry key="report">
+            <set>
+                <value>reportUnit</value>
+            </set>
+        </entry>
+        <entry key="dataSource">
+            <set>
+                <value>beanDataSource</value>
+                <value>customDataSource</value>
+                <value>jdbcDataSource</value>
+                <value>jndiJdbcDataSource</value>
+                <value>virtualDataSource</value>
+                <value>mondrianConnection</value>
+                <value>xmlaConnection</value>
+                <value>awsDataSource</value>
+            </set>
+        </entry>
+        <entry key="other">
+            <set>
+                <value>file</value>
+                <value>folder</value>
+                <value>listOfValues</value>
+                <value>inputControl</value>
+                <value>query</value>
+                <value>mondrianXmlaDefinition</value>
+                <value>dataType</value>
+                <value>olapUnit</value>
+            </set>
+        </entry>
+    </util:map>
+
 </beans>

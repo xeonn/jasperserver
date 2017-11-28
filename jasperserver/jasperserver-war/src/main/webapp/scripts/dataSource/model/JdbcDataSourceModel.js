@@ -31,7 +31,7 @@ define(function (require) {
         $ = require("jquery"),
         XRegExp = require("xregexp"),
         i18n = require("bundle!jasperserver_messages"),
-        repositoryResourceTypes = require("common/enum/repositoryResourceTypes"),
+        repositoryResourceTypes = require("bi/repo/enum/repositoryResourceTypes"),
         jasperserverConfig = require("bundle!jasperserver_config");
 
     var BASE_VALIDATION_OBJECT = (function() {

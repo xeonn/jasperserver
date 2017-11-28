@@ -64,7 +64,7 @@ public class OLAPController extends JRBaseMultiActionController {
 
 	public ModelAndView error(HttpServletRequest req, HttpServletResponse res)
 		throws ServletException {
-		return new ModelAndView("/modules/olap/error");
+		return new ModelAndView("/modules/system/prepErrorPage");
 	}
 
     public void setOlapManagementService(OlapManagementService olapManagementService) {

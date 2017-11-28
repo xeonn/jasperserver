@@ -27,6 +27,7 @@ import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
 import com.jaspersoft.jasperserver.export.modules.auth.AuthorityImportHandler;
 import com.jaspersoft.jasperserver.export.modules.common.ProfileAttributeBean;
 import com.jaspersoft.jasperserver.export.modules.common.TenantQualifiedName;
+import com.jaspersoft.jasperserver.export.modules.common.TenantStrHolderPattern;
 import com.jaspersoft.jasperserver.export.util.CommandOut;
 
 import java.util.Date;
@@ -39,7 +40,7 @@ import static com.jaspersoft.jasperserver.export.modules.repository.beans.Resour
 
 /**
  * @author tkavanagh
- * @version $Id: UserBean.java 54590 2015-04-22 17:55:42Z vzavadsk $
+ * @version $Id: UserBean.java 58265 2015-10-05 16:13:56Z vzavadsk $
  */
 public class UserBean {
 
@@ -109,6 +110,11 @@ public class UserBean {
 		user.setPassword((pwd != null && pwd.startsWith(ENCRYPTION_PREFIX) && pwd.endsWith(ENCRYPTION_SUFFIX)) ?
 			importExportCipher.decode(pwd.replaceFirst(ENCRYPTION_PREFIX, "").replaceAll(ENCRYPTION_SUFFIX + "$", "")) : pwd);
 
+		if (!importHandler.getImportContext().getNewGeneratedTenantIds().isEmpty()) {
+			user.setTenantId(TenantStrHolderPattern.TENANT_ID.replaceWithNewTenantIds(
+					importHandler.getImportContext().getNewGeneratedTenantIds(), user.getTenantId()));
+		}
+
 		copyRolesTo(user, importHandler);
 	}
 
@@ -120,6 +126,12 @@ public class UserBean {
 			roles = new HashSet();
 			for (int i = 0; i < roleNames.length; i++) {
 				TenantQualifiedName roleName = roleNames[i];
+
+				if (!importHandler.getImportContext().getNewGeneratedTenantIds().isEmpty()) {
+					roleName.setTenantId(TenantStrHolderPattern.TENANT_ID.replaceWithNewTenantIds(
+							importHandler.getImportContext().getNewGeneratedTenantIds(), roleName.getTenantId()));
+				}
+
 				Role role = importHandler.resolveRole(roleName);
 				if (role == null) {
 					commandOut.warn("Role " + roleName.getName()

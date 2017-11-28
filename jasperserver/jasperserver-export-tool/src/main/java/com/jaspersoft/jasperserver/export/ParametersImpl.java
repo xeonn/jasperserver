@@ -21,17 +21,18 @@
 
 package com.jaspersoft.jasperserver.export;
 
+import com.jaspersoft.jasperserver.api.JSException;
+import org.springframework.util.Assert;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.jaspersoft.jasperserver.api.JSException;
-
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ParametersImpl.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: ParametersImpl.java 58265 2015-10-05 16:13:56Z vzavadsk $
  */
 public class ParametersImpl implements Parameters {
 
@@ -106,7 +107,7 @@ public class ParametersImpl implements Parameters {
 		}
 		return this;
 	}
-	
+
 	public Parameters addParameterValues(String parameterName, String[] parameterValues) {
 		Object value = params.get(parameterName);
 		if (value == null || !(value instanceof List)) {
@@ -127,4 +128,11 @@ public class ParametersImpl implements Parameters {
 		return this;
 	}
 
+	@Override
+	public Parameters setParameterValue(String parameterName, String parameterValue) {
+		Assert.notNull(parameterName);
+		params.put(parameterName, parameterValue);
+
+		return this;
+	}
 }

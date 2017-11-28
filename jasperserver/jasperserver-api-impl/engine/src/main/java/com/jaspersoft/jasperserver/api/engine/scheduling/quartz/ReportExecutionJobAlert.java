@@ -22,19 +22,21 @@
 package com.jaspersoft.jasperserver.api.engine.scheduling.quartz;
 
 
+import com.jaspersoft.jasperserver.api.JasperServerAPI;
 import com.jaspersoft.jasperserver.api.engine.scheduling.domain.ReportJob;
+import com.jaspersoft.jasperserver.dto.common.ErrorDescriptor;
 import org.quartz.Job;
 import org.quartz.JobExecutionException;
 import org.springframework.mail.javamail.JavaMailSender;
+
 import java.util.List;
-import com.jaspersoft.jasperserver.api.JasperServerAPI;
 
 /**
  * user can easily customize sending alert feature by writing custom codes to implement ReportExecutionJobAlert interface
  * then plug it in applicationContext-report-scheduling.xml
  *
  * @author Ivan Chan (ichan@jaspersoft.com)
- * @version $Id: ReportExecutionJobAlert.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: ReportExecutionJobAlert.java 57603 2015-09-15 17:20:48Z psavushc $
  */
 @JasperServerAPI
 public interface ReportExecutionJobAlert {
@@ -42,7 +44,12 @@ public interface ReportExecutionJobAlert {
     /*
      * users can plug in their custom codes to override the alert feature
      */
-    public void sendAlertMail(Job job, ReportJob jobDetails, List<ExceptionInfo> exceptions, JavaMailSender mailSender, String fromAddress,
-            String[] toAddresses, String characterEncoding)  throws JobExecutionException;
+    public void sendAlertMail(Job job,
+                              ReportJob jobDetails,
+                              List<ErrorDescriptor> exceptions,
+                              JavaMailSender mailSender,
+                              String fromAddress,
+                              String[] toAddresses,
+                              String characterEncoding) throws JobExecutionException;
 
 }

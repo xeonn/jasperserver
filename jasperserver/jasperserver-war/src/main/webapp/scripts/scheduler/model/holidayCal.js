@@ -21,10 +21,13 @@
 
 
 /**
- * @version: $Id: holidayCal.js 7748 2014-07-18 09:13:06Z kklein $
+ * @version: $Id: holidayCal.js 9551 2015-10-13 14:09:03Z dgorbenk $
  */
 
-define('scheduler/model/holidayCal', function(require){
+define(function(require){
+
+    "use strict";
+
     var Backbone = require('backbone'),
         config = require('jrs.configs');
 

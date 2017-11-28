@@ -22,7 +22,7 @@
 
 /**
  * @author: inesterenko
- * @version: $Id: components.dialog.js 8179 2015-01-27 12:34:21Z psavushchik $
+ * @version: $Id: components.dialog.js 9400 2015-09-23 21:10:46Z inestere $
  */
 
 /* global jaspersoft, _, Backbone, dialogs */
@@ -81,7 +81,7 @@ jaspersoft.components || (jaspersoft.components = {});
         setContent: function(content) {
             this.$el.find(this.contentSelector).html($(content));
         },
-        /**
+        /*
          * Replace current dialog messages with given ones
          *
          * @param messages Messages array. Each element of the array will be wrapped with <p>
@@ -101,7 +101,7 @@ jaspersoft.components || (jaspersoft.components = {});
 
     });
 
-    /**
+    /*
      * Simple Confirm Dialog, that is created from template (see jsp/templates/standardConfirm.jsp).
      * You could specify message to be displayed at creation time or during show method invocation.
      *
@@ -124,7 +124,7 @@ jaspersoft.components || (jaspersoft.components = {});
                 ok : (function() {})
             }));
         },
-        /**
+        /*
          * Show dialog with the given message and callback for OK action
          *
          * @param options {messages : [""], ok : function(){}};

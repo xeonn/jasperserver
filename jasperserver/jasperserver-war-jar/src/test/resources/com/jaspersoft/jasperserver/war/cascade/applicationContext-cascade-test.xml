@@ -29,6 +29,21 @@
         <entry key="4" value="singleValueDatetime"/>
     </util:map>
 
+    <util:map id="globalDefaultValues" value-type="java.lang.String" key-type="java.lang.Byte">
+        <!-- if DataType isn't defined-->
+        <entry key="-1" value="~NULL~"></entry>
+        <!--TYPE_TEXT = 1-->
+        <entry key="1" value="~NULL~"></entry>
+        <!--TYPE_NUMBER = 2-->
+        <entry key="2" value="~NULL~"></entry>
+        <!--TYPE_DATE = 3-->
+        <entry key="3" value="~NULL~"></entry>
+        <!--TYPE_DATE_TIME = 4-->
+        <entry key="4" value="~NULL~"></entry>
+        <!--TYPE_TIME = 5-->
+        <entry key="5" value="~NULL~"></entry>
+    </util:map>
+
     <util:map id="inputControlTypeNewConfiguration">
         <entry key="1">
             <map>

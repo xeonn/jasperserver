@@ -36,7 +36,7 @@ import static org.testng.Assert.assertTrue;
  * <p></p>
  *
  * @author Zakhar.Tomchenco
- * @version $Id$
+ * @version $Id: ReportParameterTest.java 58870 2015-10-27 22:30:55Z esytnik $
  */
 public class ReportParameterTest {
     private final ReportParameter param1 = new ReportParameter();

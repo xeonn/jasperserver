@@ -48,7 +48,7 @@ import java.util.Locale;
 
 /**
  * @author aztec
- * @version $Id: JSCommonController.java 55164 2015-05-06 20:54:37Z mchan $
+ * @version $Id: JSCommonController.java 57603 2015-09-15 17:20:48Z psavushc $
  */
 public class JSCommonController extends JRBaseMultiActionController {
 	public static final String JSP_REQUEST_HANDLING_PREFIX = "jsp:";
@@ -268,7 +268,7 @@ public class JSCommonController extends JRBaseMultiActionController {
 	public ModelAndView securityError(HttpServletRequest req, HttpServletResponse res)
 		throws ServletException {
 		log.warn("There was a security error");
-		return new ModelAndView("modules/system/errorPage");
+		return new ModelAndView("modules/system/prepErrorPage");
 	}
 
 	/*

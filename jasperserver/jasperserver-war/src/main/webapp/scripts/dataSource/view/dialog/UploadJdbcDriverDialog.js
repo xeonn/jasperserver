@@ -25,9 +25,9 @@ define(function (require) {
     var BaseDialog = require("dataSource/view/dialog/BaseDialog"),
         _ = require("underscore"),
         $ = require("jquery"),
-        AjaxUploader = require("components.ajaxuploader"),
+        AjaxFormSubmitter = require("common/transport/AjaxFormSubmitter"),
         dialogs = require("components.dialogs"),
-        request = require("common/transport/request"),
+        request = require("request"),
         i18n = require("bundle!jasperserver_messages"),
         uploadJdbcDriverDialogTemplate = require("text!dataSource/template/dialog/uploadJdbcDriverDialogTemplate.htm"),
         fileUploadTemplate = require("text!dataSource/template/dialog/fileUploadTemplate.htm");
@@ -121,35 +121,15 @@ define(function (require) {
             this.$(".errorMessageContainer").removeClass("error").find(".message").text("");
             var form = this.$("form"), self = this;
 
-            if(window.FormData){
-                form.submit(function(e){
-                    var data = new FormData(form[0]);
-                    var type = form.attr("method");
-                    var url = form.attr("action");
-
-                    request({
-                        url : url,
-                        type: type,
-                        data : data,
-                        cache: false,
-                        contentType: false,
-                        processData: false,
-                        success: _.bind(self.onSuccessCallback, self),
-                        error: _.bind(self.onErrorCallback, self)
-                    });
-                    e.preventDefault();
-                    form.unbind("submit");
-                });
-            }else{
-                new AjaxUploader(form[0], function (response) {
-                    if (response.errorCode) {
-                       self.onErrorCallback(response);
-                    } else {
-                        self.onSuccessCallback(response);
-                    }
-                }, 1200000);
-            }
-            form.submit();
+            new AjaxFormSubmitter(form[0]).submit().done(function (response) {
+                if (response.errorCode) {
+                    self.onErrorCallback(response);
+                } else {
+                    self.onSuccessCallback(response);
+                }
+            }).fail(function (response) {
+                self.onErrorCallback(response);
+            });
         },
 
         secondaryButtonOnClick: function () {

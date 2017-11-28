@@ -10,13 +10,13 @@
     <parent>
         <groupId>com.jaspersoft.jasperserver</groupId>
         <artifactId>jasperserver-api</artifactId>
-        <version>6.1.1</version>
+        <version>6.2.0</version>
     </parent>
   <dependencies>
       <dependency>
           <groupId>org.jboss.teiid</groupId>
           <artifactId>teiid-engine</artifactId>
-          <version>8.10.0.Final</version>
+          <version>8.11.1</version>
           <exclusions>
            <exclusion>
              <groupId>org.jboss.as</groupId>
@@ -43,7 +43,7 @@
       <dependency>
           <groupId>org.jboss.teiid</groupId>
           <artifactId>teiid-runtime</artifactId>
-          <version>8.10.0.Final</version>
+          <version>8.11.1</version>
           <exclusions>
               <exclusion>
                   <groupId>org.rhq.helpers</groupId>
@@ -74,17 +74,17 @@
         <dependency>
             <groupId>org.jboss.teiid</groupId>
             <artifactId>teiid-admin</artifactId>
-            <version>8.10.0.Final</version>
+            <version>8.11.1</version>
         </dependency>
       <dependency>
           <groupId>org.jboss.teiid</groupId>
           <artifactId>teiid-api</artifactId>
-          <version>8.10.0.Final</version>
+          <version>8.11.1</version>
       </dependency>
       <dependency>
           <groupId>org.jboss.teiid</groupId>
           <artifactId>teiid-common-core</artifactId>
-          <version>8.10.0.Final</version>
+          <version>8.11.1</version>
       </dependency>
       <dependency>
           <groupId>org.infinispan</groupId>
@@ -133,6 +133,10 @@
       <groupId>org.springframework</groupId>
       <artifactId>spring-context</artifactId>
       <version>${spring.security.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.jaspersoft.jasperserver</groupId>
+      <artifactId>jasperserver-dto</artifactId>
     </dependency>
   </dependencies>
 </project>

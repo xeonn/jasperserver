@@ -24,7 +24,7 @@ import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.JdbcReportD
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: JdbcReportDataSourceImpl.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: JdbcReportDataSourceImpl.java 58827 2015-10-23 23:47:48Z mchan $
  */
 public class JdbcReportDataSourceImpl extends ReportDataSourceImpl implements JdbcReportDataSource {
 
@@ -58,9 +58,7 @@ public class JdbcReportDataSourceImpl extends ReportDataSourceImpl implements Jd
 		this.url = url;
 	}
 
-	public String getUsername() {
-		return username;
-	}
+	public String getUsername() { return username; }
 
 	public void setUsername(String username) {
 		this.username = username;

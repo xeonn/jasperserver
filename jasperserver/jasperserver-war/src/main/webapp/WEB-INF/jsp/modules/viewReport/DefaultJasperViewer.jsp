@@ -35,14 +35,12 @@ Default rendering HTML fragment for a JR report called from the JasperViewerTag.
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 <%@ taglib prefix="js" uri="/WEB-INF/jasperserver.tld" %>
 
-<%@ page import="net.sf.jasperreports.engine.export.*" %>
-<%@ page import="net.sf.jasperreports.engine.*" %>
-<%@ page import="net.sf.jasperreports.export.*" %>
-<%@ page import="com.jaspersoft.jasperserver.war.action.ExporterConfigurationBean" %>
-<%@ page import="com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportUnit" %>
+<%@ page import="net.sf.jasperreports.engine.export.JsonExporter" %>
+<%@ page import="net.sf.jasperreports.export.SimpleHtmlExporterOutput" %>
+<%@ page import="net.sf.jasperreports.export.SimpleWriterExporterOutput" %>
+<%@ page import="net.sf.jasperreports.export.* " %>
 <%@ page import="java.io.StringWriter" %>
-<%@ page errorPage="/WEB-INF/jsp/modules/system/errorPage.jsp" %>
-
+<%@ page errorPage="/WEB-INF/jsp/modules/system/prepErrorPage.jsp" %>
 
 
 <div id="reportOutput" class="hidden">

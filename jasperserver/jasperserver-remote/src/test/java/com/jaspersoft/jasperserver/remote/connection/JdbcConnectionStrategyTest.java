@@ -20,11 +20,13 @@
 */
 package com.jaspersoft.jasperserver.remote.connection;
 
+import com.jaspersoft.jasperserver.api.common.error.handling.SecureExceptionHandler;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl.JdbcDataSourceService;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl.JdbcReportDataSourceServiceFactory;
 import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.JdbcReportDataSource;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.client.JdbcReportDataSourceImpl;
+import com.jaspersoft.jasperserver.dto.common.ErrorDescriptor;
 import com.jaspersoft.jasperserver.dto.resources.ClientJdbcDataSource;
 import com.jaspersoft.jasperserver.remote.resources.converters.JdbcDataSourceResourceConverter;
 import com.jaspersoft.jasperserver.remote.resources.converters.ToServerConversionOptions;
@@ -41,6 +43,7 @@ import java.util.Locale;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.isA;
 import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -55,7 +58,7 @@ import static org.testng.Assert.assertSame;
  * <p></p>
  *
  * @author yaroslav.kovalchyk
- * @version $Id: JdbcConnectionStrategyTest.java 50011 2014-10-09 16:57:26Z vzavadskii $
+ * @version $Id: JdbcConnectionStrategyTest.java 57603 2015-09-15 17:20:48Z psavushc $
  */
 public class JdbcConnectionStrategyTest {
     private static ClientJdbcDataSource INITIAL_CONNECTION_DESCRIPTION = new ClientJdbcDataSource()
@@ -73,6 +76,8 @@ public class JdbcConnectionStrategyTest {
     private JdbcDataSourceResourceConverter jdbcDataSourceResourceConverter;
     @Mock
     private JdbcDataSourceService jdbcDataSourceService;
+    @Mock
+    private SecureExceptionHandler secureExceptionHandlerMock;
     private ClientJdbcDataSource testConnectionDescription;
 
 
@@ -94,6 +99,7 @@ public class JdbcConnectionStrategyTest {
                 any(ToServerConversionOptions.class))).thenReturn(serverJdbcReportDataSource);
         when(jdbcDataSourceFactory.createService(serverJdbcReportDataSource)).thenReturn(jdbcDataSourceService);
         when(jdbcDataSourceService.testConnection()).thenReturn(true);
+        when(secureExceptionHandlerMock.handleException(isA(Throwable.class), isA(ErrorDescriptor.class))).thenReturn(new ErrorDescriptor().setMessage("test"));
     }
 
     @Test

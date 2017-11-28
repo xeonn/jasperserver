@@ -23,6 +23,7 @@ package com.jaspersoft.jasperserver.remote.resources.converters;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ListOfValues;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ListOfValuesItem;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.client.ListOfValuesItemImpl;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConversionOptions;
 import com.jaspersoft.jasperserver.crypto.EncryptionEngine;
 import com.jaspersoft.jasperserver.dto.resources.ClientListOfValues;
 import com.jaspersoft.jasperserver.dto.resources.ClientListOfValuesItem;
@@ -36,7 +37,7 @@ import java.util.List;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: ListOfValuesResourceConverter.java 50011 2014-10-09 16:57:26Z vzavadskii $
+ * @version $Id: ListOfValuesResourceConverter.java 58870 2015-10-27 22:30:55Z esytnik $
  */
 @Service
 public class ListOfValuesResourceConverter extends ResourceConverterImpl<ListOfValues, ClientListOfValues> {

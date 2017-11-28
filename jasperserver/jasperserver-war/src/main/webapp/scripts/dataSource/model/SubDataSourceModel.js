@@ -24,7 +24,7 @@ define(function (require) {
 
     var Backbone = require("backbone"),
         _ = require("underscore"),
-		ResourceModel = require("common/model/RepositoryResourceModel"),
+		ResourceModel = require("bi/repo/model/RepositoryResourceModel"),
         i18n = require("bundle!jasperserver_messages");
 
     return Backbone.Model.extend({
@@ -44,7 +44,7 @@ define(function (require) {
                     msg: i18n["ReportDataSourceValidator.error.not.empty.reportDataSource.name"]
                 },
                 {
-                    maxLength: ResourceModel.NAME_MAX_LENGTH,
+                    maxLength: ResourceModel.settings.NAME_MAX_LENGTH,
                     msg: i18n["ReportDataSourceValidator.error.too.long.reportDataSource.name"]
                 },
                 {

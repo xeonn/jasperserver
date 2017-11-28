@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: repository.search.components.js 9231 2015-08-24 22:16:45Z yplakosh $
+ * @version: $Id: repository.search.components.js 9490 2015-10-05 16:46:54Z obobruyk $
  */
 
 /* global repositorySearch, SearchBox, toolbarButtonModule, toFunction, getAsFunction, localContext, isArray, JSCookie,
@@ -2129,4 +2129,13 @@ GenerateResource.addMethod("_hide", function() {
     dialogs.popup.hide(this._dom);
 
     this._dom.stopObserving('click');
+});
+
+///////////////////////////////
+// Export dialog
+///////////////////////////////
+
+window.require(["tenantImportExport/export/view/ExportDialogView", "tenantImportExport/export/enum/exportTypesEnum"], function(ExportDialogView, Type){
+    repositorySearch.exportDialog = new ExportDialogView()
+    repositorySearch.exportDialog.render({type: Type.REPOSITORY});
 });

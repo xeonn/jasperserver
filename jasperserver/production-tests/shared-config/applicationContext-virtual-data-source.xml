@@ -112,14 +112,14 @@
                     <bean class="com.jaspersoft.jasperserver.api.engine.common.virtualdatasourcequery.teiid.impl.CassandraTeiidConnectorImpl">
                     </bean>
                 </entry>
-                <entry key="com.jaspersoft.hadoop.hive.jasperserver.HiveDataSourceService">
+                <!--  entry key="com.jaspersoft.hadoop.hive.jasperserver.HiveDataSourceService">
                     <bean class="com.jaspersoft.jasperserver.api.engine.common.virtualdatasourcequery.teiid.impl.HiveTeiidConnectorImpl">
                     </bean>
                 </entry>
                 <entry key="com.jaspersoft.mongodb.jasperserver.MongoDbDataSourceService">
                     <bean class="com.jaspersoft.jasperserver.api.engine.common.virtualdatasourcequery.teiid.impl.MongoDBTeiidConnectorImpl">
                     </bean>
-                </entry>
+                </entry  -->
             </map>
         </property>
 

@@ -1,1 +1,0 @@
-if(JRS.Import)throw new Error("JRS.Import already exist");JRS.Import=function(){return{Events:{INITIALIZE:"initialize"},configs:{TIMEOUT:12e5,DELAY:3e3}}}();

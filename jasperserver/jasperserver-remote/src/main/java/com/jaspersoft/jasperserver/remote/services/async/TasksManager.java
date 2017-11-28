@@ -21,9 +21,11 @@
 
 package com.jaspersoft.jasperserver.remote.services.async;
 
+import com.jaspersoft.jasperserver.dto.importexport.State;
 import com.jaspersoft.jasperserver.remote.exception.NoSuchTaskException;
 
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
 
 /**
  *
@@ -61,7 +63,17 @@ public interface TasksManager {
      * @return uuid for task
      */
 
-    StateDto startTask(Task task);
+    State startTask(Task task);
+
+    /**
+     * Restarts provided task if it is not alive
+     *
+     *
+     * @param task- contains some time consuming action
+     * @return state of the task
+     */
+
+    State restartTask(Task task);
 
     /**
      * Finish selected task, does clean up of used resources
@@ -81,6 +93,12 @@ public interface TasksManager {
      * @return current state of task
      * @throws com.jaspersoft.jasperserver.remote.exception.NoSuchTaskException
      */
-    StateDto getTaskState(String taskId) throws NoSuchTaskException;
+    State getTaskState(String taskId) throws NoSuchTaskException;
 
+    /**
+     * Gets ExecutorService of this task manager
+     *
+     * @return ExecutorService of this task manager
+     */
+    ExecutorService getExecutor();
 }

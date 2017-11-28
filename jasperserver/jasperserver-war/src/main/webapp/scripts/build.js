@@ -24,6 +24,13 @@
   },
   "modules": [
     {
+      "name": "jasper",
+      "include": [
+        "bower_components/jquery/dist/jquery",
+        "jqueryNoConflict"
+      ]
+    },
+    {
       "name": "commons.main"
     },
     {
@@ -135,7 +142,7 @@
       "name": "messages/list/messageList.page"
     },
     {
-      "name": "scheduler/JobsPage"
+      "name": "scheduler/SchedulerController"
     },
     {
       "name": "encrypt.page"

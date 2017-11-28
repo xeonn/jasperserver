@@ -44,7 +44,7 @@ define(function (require) {
         itemsTemplate = require("text!common/component/multiSelect/templates/selectedItemsListTemplate.htm"),
         listTemplate = require("text!common/component/multiSelect/templates/listTemplate.htm"),
         browserDetection = require("common/util/browserDetection"),
-        i18n = require("bundle!ScalableInputControlsBundle"),
+        i18n = require("bundle!js-sdk/ScalableInputControlsBundle"),
         xssUtil = require("common/util/xssUtil");
 
 

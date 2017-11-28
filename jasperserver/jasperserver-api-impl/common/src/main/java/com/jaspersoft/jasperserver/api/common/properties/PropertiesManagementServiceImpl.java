@@ -25,6 +25,7 @@ import com.jaspersoft.jasperserver.api.metadata.common.service.ResourceFactory;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.ProfileAttribute;
 import com.jaspersoft.jasperserver.api.metadata.user.service.AttributesSearchCriteria;
 import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributeCategory;
+import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributeGroup;
 import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributeService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -33,6 +34,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
 import javax.annotation.PostConstruct;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -142,11 +144,15 @@ implements PropertiesManagementService, ApplicationContextAware {
     public Map<String, String> removeByValue(String value) {
         @SuppressWarnings("unchecked")
         List<ProfileAttribute> profileAttributes = profileAttributeService.getProfileAttributesForPrincipal(null,
-                ProfileAttributeCategory.SERVER.getPrincipal(resourceFactory), searchCriteria).getList();
+                ProfileAttributeCategory.SERVER.getPrincipal(resourceFactory),
+                new AttributesSearchCriteria
+                        .Builder()
+                        .setGroups(Collections.singleton(ProfileAttributeGroup.CUSTOM_SERVER_SETTINGS.toString()))
+                        .build()).getList();
         Map<String, String> removedKeys = new HashMap<String, String>();
 
         for (ProfileAttribute profileAttribute : profileAttributes) {
-            if (profileAttribute.getAttrValue().equals(value)) {
+            if (profileAttribute.getAttrValue() != null && profileAttribute.getAttrValue().equals(value)) {
                 profileAttributeService.deleteProfileAttribute(null, profileAttribute);
                 removedKeys.put(profileAttribute.getAttrName(), profileAttribute.getAttrValue());
             }

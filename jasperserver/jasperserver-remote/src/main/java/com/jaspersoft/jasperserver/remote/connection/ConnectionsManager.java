@@ -32,6 +32,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -42,7 +43,7 @@ import java.util.UUID;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: ConnectionsManager.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: ConnectionsManager.java 58870 2015-10-27 22:30:55Z esytnik $
  */
 @Service
 public class ConnectionsManager implements InitializingBean {
@@ -161,7 +162,7 @@ public class ConnectionsManager implements InitializingBean {
         classToStrategyMapping = Collections.unmodifiableMap(classToStrategyMap);
     }
 
-    private class ConnectionDataPair {
+    private static class ConnectionDataPair implements Serializable {
         private ConnectionDataPair(Object connection, Map<String, Object> data) {
             this.connection = connection;
             this.data = data;

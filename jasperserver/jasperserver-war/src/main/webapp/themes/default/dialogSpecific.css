@@ -316,7 +316,9 @@ FLOATING DIALOGS
 }
 
 .saveAs .groupBox {
+    height: 280px;
 	margin:0;
+	float: none;
 }
 
 .saveAs>.content>.body .groupBox {
@@ -332,8 +334,9 @@ FLOATING DIALOGS
 /*}*/
 
 #saveDataViewAndReport.saveAs {
-	width:510px;
-	height:650px;
+    height: 650px;
+    min-height: 435px;
+	min-width: 510px;
 }
 
 .dualColumnContainer {
@@ -371,10 +374,10 @@ FLOATING DIALOGS
 	position:relative;
 }
 
-.saveAs.forDataView .forDataView.dataViewColumn .groupBox{
-    height: 390px;
+/* .saveAs.forDataView .forDataView.dataViewColumn .groupBox {
+    height: 280px;
     width: 100%;
-}
+} REDUNDANT STYLES, DELETE IF THERE ARE NO ISSUES */
 
 .saveAs.forDataView.forReport .forDataView.dataViewColumn .groupBox,
 .saveAs .forReport.reportColumn .groupBox {
@@ -387,17 +390,21 @@ FLOATING DIALOGS
     min-height: 44px \9; /* IE9 */
 }
 
-.saveAs {
-    height: 680px;
+.saveAs,
+.saveAs.noGenerators {
+    height: 550px;
 }
 
-.saveAs #adHocGeneratorSelect {
+.saveAs.forReport #adHocGeneratorSelect {
+    margin-left: 6px;
+    margin-right: 6px;
+    top: 22px;
+}
+
+.saveAs.forDataView #adHocGeneratorSelect {
     top: 340px;
 }
 
-.saveAs.noGenerators {
-    height: 595px;
-}
 
 /* .saveAs.forDataView.forReport .forReport .groupBox, */
 .saveAs.forDataView .reportColumn .groupBox {
@@ -407,11 +414,6 @@ FLOATING DIALOGS
 
 #adHocGeneratorSelect .saveAs {
     top: 340px;
-}
-
-#adHocGeneratorSelect.groupBox {
-	border: none;
-	margin-top: 12px;
 }
 
 #saveDataViewAndReport #adHocGeneratorSelectReportTemplate {
@@ -498,15 +500,10 @@ textarea[readonly]#viewQueryInput   {
 
 #locationSelector .input,
 #commonGeneratorSelectReportTemplate {
-	width: 97%;
-	width: -moz-calc(100% - 10px);
-	width: -webkit-calc(100% - 10px);
-	width: -o-calc(100% - 10px);
-	width: calc(100% - 10px);
+	width: 100%;
 }
 
 #browseTemplate .control.browser .button.action {
-	margin-right:3px;
 	margin-bottom:-8px;
 }
 
@@ -536,7 +533,7 @@ textarea[readonly]#viewQueryInput   {
 }
 
 #reportGeneratorProperties.withTree.noGenerators {
-    height: 465px;
+    height: 520px;
 }
 
 #reportGeneratorProperties #advTreePanel .control {
@@ -549,7 +546,11 @@ textarea[readonly]#viewQueryInput   {
 }
 
 #reportGeneratorProperties.withTree #commonGeneratorSelect {
-    top: 228px;
+   top: 204px;
+}
+
+#reportGeneratorProperties.withTree #commonGeneratorSelect.control {
+    margin-bottom: 0;
 }
 
 #commonGeneratorSelect .group.locationSelector {
@@ -626,6 +627,41 @@ textarea[readonly]#viewQueryInput   {
 	position:absolute;
 }
 
+
+/* selectFolder */
+
+/* fix for IE8 */
+.selectFolder.newResizeableDialog .m-Dialog-body.subcontainer {
+	height: 320px;
+}
+.newResizeableDialog.jrs .m-Dialog-body.subcontainer {
+	padding-bottom: 5px;
+	min-width: 0;
+	min-height: 0;
+	height: calc(100% - 76px);
+}
+.newResizeableDialog.jrs .m-Dialog-footer {
+	width: 100%;
+	position: absolute;
+	bottom: 0;
+	padding: 0.845em 1.40em;
+}
+.newResizeableDialog.jrs .m-Dialog-footer .button.action {
+	margin-right: 10px;
+}
+
+
+.selectFolder.newResizeableDialog.jrs .m-Dialog-body.subcontainer .control.groupBox.treeBox {
+	width: 100%;
+	height: 286px; /* for IE8 */
+	height: calc(100% - 14px);
+}
+.selectFolder.newResizeableDialog.jrs .m-Dialog-body.subcontainer .control.groupBox.treeBox > .content {
+	height: 100%;
+}
+.selectFolder.newResizeableDialog.jrs .m-Dialog-body.subcontainer .control.groupBox.treeBox > .content .body {
+	height: 100%;
+}
 
 /* #select */
 
@@ -855,6 +891,22 @@ and (max-device-width : 1024px) {
     background-position: 1px -1559px;
 }
 
+#chartTypeSelector div.body > .row > .cell[name="semi_pie"] {
+	background-position: 1px -2079px;
+}
+
+#chartTypeSelector div.body > .row > .cell[name="dual_measure_tree_map"] {
+	background-position: 1px -1949px;
+}
+
+#chartTypeSelector div.body > .row > .cell[name="tree_map"] {
+	background-position: 1px -1884px;
+}
+
+#chartTypeSelector div.body > .row > .cell[name="one_parent_tree_map"] {
+	background-position: 1px -2014px;
+}
+
 #chartTypeSelector div.body > .row > .cell[name="line_time_series"] {
     background-position: 1px -389px;
 }
@@ -1003,6 +1055,18 @@ and (max-device-width : 1024px) {
     background-position: -89px -1819px;
 }
 
+#chartTypeSelector div.body > .row > .cell[name="dual_measure_tree_map"].disabled {
+	background-position: -89px -1949px;
+}
+
+#chartTypeSelector div.body > .row > .cell[name="tree_map"].disabled {
+	background-position: -89px -1884px;
+}
+
+#chartTypeSelector div.body > .row > .cell[name="one_parent_tree_map"].disabled {
+	background-position: -89px -2014px;
+}
+
 #chartTypeSelector div.body > .row > .cell[name="speedometer"].disabled {
     background-position: -89px -1299px;
 }
@@ -1028,7 +1092,7 @@ and (max-device-width : 1024px) {
 /* Chart format dialog. */
 
 #chartFormatDialog {
-    min-width: 270px;
+    min-width: 420px;
     min-height: 250px;
     width: auto;
     *width:auto; /* IE7 */
@@ -1605,3 +1669,19 @@ PANES
 	min-width: 508px !important;
 }
 
+
+
+.confirmationDialog .m-Dialog-body {
+	min-height: 0 !important;
+	width: 350px;
+}
+
+.schedulerJobRemoveDialog .m-Dialog-body.subcontainer.jrs {
+	padding-top: 0;
+	padding-bottom: 0;
+	min-height: 0;
+}
+
+.schedulerJobRemovedAlertDialog .m-Dialog-body.jrs {
+	min-height: 0;
+}

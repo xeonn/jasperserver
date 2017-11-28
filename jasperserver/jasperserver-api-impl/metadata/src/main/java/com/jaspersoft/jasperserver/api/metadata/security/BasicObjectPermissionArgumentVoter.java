@@ -39,7 +39,7 @@ import java.util.List;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: BasicObjectPermissionArgumentVoter.java 51947 2014-12-11 14:38:38Z ogavavka $
+ * @version $Id: BasicObjectPermissionArgumentVoter.java 58265 2015-10-05 16:13:56Z vzavadsk $
  */
 public abstract class BasicObjectPermissionArgumentVoter implements AccessDecisionVoter<Object>, AfterInvocationProvider {
 
@@ -78,12 +78,15 @@ public abstract class BasicObjectPermissionArgumentVoter implements AccessDecisi
             if (returnedObject instanceof Collection) {
                 Collection<ObjectPermission> returned = getObjectPermissions(returnedObject), res = new LinkedList<ObjectPermission>();
                 for (ObjectPermission permission : returned) {
-                    if (isPermitted(authentication, permission, object)) {
+                    if (isPermitted(authentication, permission, object)
+                            || isPrivileged(object)) {
                         res.add(permission);
                     }
                 }
                 returnedObject = res;
-            } else if (returnedObject instanceof ObjectPermission && !isPermitted(authentication, (ObjectPermission) returnedObject, object)) {
+            } else if (returnedObject instanceof ObjectPermission
+                    && !(isPermitted(authentication, (ObjectPermission) returnedObject, object)
+                    || isPrivileged(object))) {
                 returnedObject = null;
             }
         }

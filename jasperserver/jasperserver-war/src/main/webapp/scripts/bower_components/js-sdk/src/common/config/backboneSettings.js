@@ -21,7 +21,7 @@
 
 /**
  * @author: Zakhar.Tomchenko
- * @version: $Id: backboneSettings.js 270 2014-10-13 19:58:03Z agodovanets $
+ * @version: $Id: backboneSettings.js 1605 2015-09-23 17:55:32Z inestere $
  */
 
 define(function(require){
@@ -29,7 +29,7 @@ define(function(require){
     "use strict";
 
     var Backbone = require("backbone.original"),
-        request = require("common/transport/request");
+        request = require("request");
 
     Backbone.ajax = request;
 

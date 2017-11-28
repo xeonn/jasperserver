@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: actionModel.primaryNavigation.js 9192 2015-08-12 19:52:08Z yplakosh $
+ * @version: $Id: actionModel.primaryNavigation.js 9551 2015-10-13 14:09:03Z dgorbenk $
  */
 
 /* global isNotNullORUndefined, actionModel, __jrsConfigs__, getAsFunction */
@@ -45,6 +45,7 @@ var primaryNavModule = {
         logOut : {url : "exituser.html"},
         search : {url : "flow.html", params : "_flowId=searchFlow&mode=search"},
         report : {url : "flow.html", params : "_flowId=searchFlow&mode=search&filterId=resourceTypeFilter&filterOption=resourceTypeFilter-reports&searchText="},
+        jobs : {url : "scheduler/main.html"},
         olap : {url : "flow.html", params : "_flowId=searchFlow&mode=search&filterId=resourceTypeFilter&filterOption=resourceTypeFilter-view&searchText="},
         event : {url : "flow.html", params : "_flowId=logEventFlow"},
         samples : {url : "flow.html", params : "_flowId=sampleFlow&page=dialogs"},

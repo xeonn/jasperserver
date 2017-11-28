@@ -536,4 +536,5 @@ public class ConfigurationBean
     public void setDefaultDontUpdateDomainDependents(boolean defaultDontUpdateDomainDependents) {
         this.defaultDontUpdateDomainDependents = defaultDontUpdateDomainDependents;
     }
+
 }

@@ -19,20 +19,22 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 package com.jaspersoft.jasperserver.dto.authority.hypermedia;
-import com.jaspersoft.jasperserver.dto.authority.ClientUserAttribute;
+import com.jaspersoft.jasperserver.dto.authority.ClientAttribute;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * <p></p>
  *
  * @author Volodya Sabadosh
- * @version $Id: HypermediaAttribute.java 53247 2015-03-24 12:32:50Z vsabados $
+ * @version $Id: HypermediaAttribute.java 58870 2015-10-27 22:30:55Z esytnik $
  */
-public class HypermediaAttribute extends ClientUserAttribute {
+@XmlRootElement(name = "hypermediaAttribute")
+public class HypermediaAttribute extends ClientAttribute {
     private HypermediaAttributeEmbeddedContainer embedded;
     private HypermediaAttributeLinks links;
 
-    public HypermediaAttribute(ClientUserAttribute other) {
+    public HypermediaAttribute(ClientAttribute other) {
         super(other);
     }
 
@@ -44,8 +46,9 @@ public class HypermediaAttribute extends ClientUserAttribute {
         return embedded;
     }
 
-    public void setEmbedded(HypermediaAttributeEmbeddedContainer embedded) {
+    public HypermediaAttribute setEmbedded(HypermediaAttributeEmbeddedContainer embedded) {
         this.embedded = embedded;
+        return this;
     }
 
     @XmlElement(name = "_links")
@@ -53,8 +56,9 @@ public class HypermediaAttribute extends ClientUserAttribute {
         return links;
     }
 
-    public void setLinks(HypermediaAttributeLinks links) {
+    public HypermediaAttribute setLinks(HypermediaAttributeLinks links) {
         this.links = links;
+        return this;
     }
 
 }

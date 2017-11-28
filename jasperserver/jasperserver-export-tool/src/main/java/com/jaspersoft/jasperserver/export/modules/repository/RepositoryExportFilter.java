@@ -22,13 +22,35 @@
 package com.jaspersoft.jasperserver.export.modules.repository;
 
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Folder;
+import com.jaspersoft.jasperserver.export.Parameters;
+
+import java.util.Set;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: RepositoryExportFilter.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: RepositoryExportFilter.java 58265 2015-10-05 16:13:56Z vzavadsk $
  */
 public interface RepositoryExportFilter {
 
 	boolean toExportContents(Folder folder);
-	
+
+	/**
+	 *  Filter folders by export parameters.
+	 *
+	 *  @param uri - folder uri
+	 *  @param exportParameters - export parameters
+	 *
+	 *  @return Return <tt>true</tt> if is it accessible folder.
+	* */
+	boolean excludeFolder(String uri, Parameters exportParameters);
+
+	/**
+	 *  Filter resources by it accessible resource type groups.
+	 *
+	 *  @param type - resource type whose will be tested
+	 *  @param resourceTypes - accessible resource type groups
+	 *
+	 *  @return Return <tt>true</tt> if is it accessible resource type.
+	 */
+	boolean isToExportResource(String type, Set<String> resourceTypes);
 }

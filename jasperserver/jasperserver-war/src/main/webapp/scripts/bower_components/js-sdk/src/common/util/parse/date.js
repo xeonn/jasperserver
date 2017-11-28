@@ -2,7 +2,7 @@ define(function (require) {
     "use strict";
 
     var moment = require("moment"),
-        jrsConfigs = require("jrs.configs"),
+        localeSettings = require("settings/localeSettings").localeSettings,
         _ = require("underscore"),
         RelativeDate = require("common/util/datetime/RelativeDate"),
         RelativeTimestamp = require("common/util/datetime/RelativeTimestamp");
@@ -60,14 +60,14 @@ define(function (require) {
     }
 
     function dateStringToMoment(value) {
-        return moment(value, toMomentDatePattern(jrsConfigs.localeSettings.dateFormat), true);
+        return moment(value, toMomentDatePattern(localeSettings.dateFormat), true);
     }
 
     function timestampStringToMoment(value) {
         return moment(value, toMomentTimestampPattern(
-            jrsConfigs.localeSettings.dateFormat,
-            jrsConfigs.localeSettings.timeFormat,
-            jrsConfigs.localeSettings.timestampSeparator), true);
+            localeSettings.dateFormat,
+            localeSettings.timeFormat,
+            localeSettings.timestampSeparator), true);
     }
 
     function isRelativeDate(value) {
@@ -146,32 +146,32 @@ define(function (require) {
 
     function localizedTimestampToIsoTimestamp(localizedTimestampString){
         return convert(localizedTimestampString, toMomentTimestampPattern(
-            jrsConfigs.localeSettings.dateFormat,
-            jrsConfigs.localeSettings.timeFormat,
-            jrsConfigs.localeSettings.timestampSeparator), ISO_8601_TIMESTAMP_PATTERN);
+            localeSettings.dateFormat,
+            localeSettings.timeFormat,
+            localeSettings.timestampSeparator), ISO_8601_TIMESTAMP_PATTERN);
     }
 
     function isoTimestampToLocalizedTimestamp(isoTimestampString){
         return convert(isoTimestampString, ISO_8601_TIMESTAMP_PATTERN, toMomentTimestampPattern(
-            jrsConfigs.localeSettings.dateFormat,
-            jrsConfigs.localeSettings.timeFormat,
-            jrsConfigs.localeSettings.timestampSeparator));
+            localeSettings.dateFormat,
+            localeSettings.timeFormat,
+            localeSettings.timestampSeparator));
     }
 
     function localizedDateToIsoDate(localizedDateString){
-        return convert(localizedDateString, toMomentDatePattern(jrsConfigs.localeSettings.dateFormat), ISO_8601_DATE_PATTERN);
+        return convert(localizedDateString, toMomentDatePattern(localeSettings.dateFormat), ISO_8601_DATE_PATTERN);
     }
 
     function isoDateToLocalizedDate(isoDateString){
-        return convert(isoDateString, ISO_8601_DATE_PATTERN, toMomentDatePattern(jrsConfigs.localeSettings.dateFormat));
+        return convert(isoDateString, ISO_8601_DATE_PATTERN, toMomentDatePattern(localeSettings.dateFormat));
     }
 
     function localizedTimeToIsoTime(localizedTimeString){
-        return convert(localizedTimeString, toMomentTimePattern(jrsConfigs.localeSettings.timeFormat), ISO_8601_TIME_PATTERN);
+        return convert(localizedTimeString, toMomentTimePattern(localeSettings.timeFormat), ISO_8601_TIME_PATTERN);
     }
 
     function isoTimeToLocalizedTime(isoTimeString){
-        return convert(isoTimeString, ISO_8601_TIME_PATTERN, toMomentTimePattern(jrsConfigs.localeSettings.timeFormat));
+        return convert(isoTimeString, ISO_8601_TIME_PATTERN, toMomentTimePattern(localeSettings.timeFormat));
     }
 
     function convert(value, fromPattern, toPattern) {

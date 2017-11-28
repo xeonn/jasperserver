@@ -22,7 +22,7 @@
 
 package com.jaspersoft.jasperserver.remote.exception.builders;
 
-import com.jaspersoft.jasperserver.remote.exception.xml.ErrorDescriptor;
+import com.jaspersoft.jasperserver.dto.common.ErrorDescriptor;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 
@@ -30,10 +30,10 @@ import java.util.Locale;
 
 /**
  * @author inesterenko
- * @version $Id: LocalizedErrorDescriptorBuilder.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: LocalizedErrorDescriptorBuilder.java 57603 2015-09-15 17:20:48Z psavushc $
  */
 
-public class LocalizedErrorDescriptorBuilder extends ErrorDescriptor.Builder{
+public class LocalizedErrorDescriptorBuilder extends ErrorDescriptor {
     public static final String BUNDLE_PREFIX = "exception.remote.";
 
     private MessageSource messageSource;
@@ -45,7 +45,7 @@ public class LocalizedErrorDescriptorBuilder extends ErrorDescriptor.Builder{
     public ErrorDescriptor createDescriptor(String errorCode, Object... params) {
         Locale locale = LocaleContextHolder.getLocale();
         String message = messageSource != null ? messageSource.getMessage(errorCode, params, null, locale) : errorCode;
-        return this.setMessage(message).setErrorCode(errorCode).setParameters(params).getErrorDescriptor();
+        return this.setMessage(message).setErrorCode(errorCode).setParameters(params);
     }
 
     public ErrorDescriptor localizeDescriptor(ErrorDescriptor base){

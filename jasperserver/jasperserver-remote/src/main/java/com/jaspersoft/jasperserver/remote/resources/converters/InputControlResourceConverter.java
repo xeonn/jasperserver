@@ -22,6 +22,7 @@
 package com.jaspersoft.jasperserver.remote.resources.converters;
 
 import com.jaspersoft.jasperserver.api.metadata.common.domain.InputControl;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConversionOptions;
 import com.jaspersoft.jasperserver.dto.resources.ClientInputControl;
 import com.jaspersoft.jasperserver.dto.resources.ClientReferenceableDataType;
 import com.jaspersoft.jasperserver.dto.resources.ClientReferenceableListOfValues;
@@ -38,7 +39,7 @@ import java.util.Arrays;
  * <p></p>
  *
  * @author Zakhar.Tomchenco
- * @version $Id: InputControlResourceConverter.java 51947 2014-12-11 14:38:38Z ogavavka $
+ * @version $Id: InputControlResourceConverter.java 58870 2015-10-27 22:30:55Z esytnik $
  */
 @Service
 public class InputControlResourceConverter extends ResourceConverterImpl<InputControl, ClientInputControl> {

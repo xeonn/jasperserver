@@ -21,6 +21,7 @@
 
 package com.jaspersoft.jasperserver.remote.services.impl;
 
+import com.jaspersoft.jasperserver.api.JSDuplicateResourceException;
 import com.jaspersoft.jasperserver.api.JSExceptionWrapper;
 import com.jaspersoft.jasperserver.api.common.domain.impl.ExecutionContextImpl;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.*;
@@ -34,7 +35,7 @@ import com.jaspersoft.jasperserver.dto.resources.ClientResource;
 import com.jaspersoft.jasperserver.remote.exception.*;
 import com.jaspersoft.jasperserver.remote.resources.ClientTypeHelper;
 import com.jaspersoft.jasperserver.remote.resources.converters.ResourceConverterProvider;
-import com.jaspersoft.jasperserver.remote.resources.converters.ToClientConversionOptions;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConversionOptions;
 import com.jaspersoft.jasperserver.remote.resources.converters.ToServerConversionOptions;
 import com.jaspersoft.jasperserver.remote.resources.converters.ToServerConverter;
 import com.jaspersoft.jasperserver.remote.resources.operation.CopyMoveOperationStrategy;
@@ -160,6 +161,8 @@ public class SingleRepositoryServiceImpl implements SingleRepositoryService {
             } else {
                 repositoryService.saveResource(null, serverResource);
             }
+        } catch (JSDuplicateResourceException e) {
+            throw new AccessDeniedException(e.getMessage(), new String[] {serverResource.getName(), parentUri});
         } catch (JSExceptionWrapper w) {
             throw getRootException(w);
         }

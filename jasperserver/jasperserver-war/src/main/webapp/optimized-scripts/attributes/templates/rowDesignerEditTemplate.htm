@@ -1,21 +1,21 @@
 <div class="editMode">
     <span class="control firstInputGroup">
-        <span class="name editMode control" data-bind="validationErrorClass:name" data-model-attr="name">
+        <span class="name editMode control" data-bind="validationErrorClass:name">
             <div class="wrap">{{- i18n["attributes.name"]}}:</div>
             <input type="text" data-bind="value:name, events:['keyup']" />
-            <span class="message warning" data-bind="validationErrorText:name" data-model-attr="name"></span>
+            <span class="message warning" data-bind="validationErrorText:name" ></span>
         </span>
-        <span class="value editMode control" data-bind="validationErrorClass:value" data-model-attr="value">
+        <span class="value editMode control" data-bind="validationErrorClass:value">
             <div class="wrap">{{- i18n["attributes.value"]}}:</div>
             <input type="password" data-bind="toggle:secure, value:encrypt, events:['keyup']" />
             <input type="text" data-bind="toggle:not(secure), value:value, events:['keyup']" />
-            <span class="message warning" data-bind="validationErrorText:value" data-model-attr="value"></span>
+            <span class="message warning" data-bind="validationErrorText:value"></span>
         </span>
     </span>
-    <label class="descriptionArea editMode control" data-bind="validationErrorClass:description" data-model-attr="description">
+    <label class="descriptionArea editMode control" data-bind="validationErrorClass:description">
         <div class="wrap">{{- i18n["attributes.description"]}}:</div>
         <input type="text" data-bind="value:description, events:['keyup']" />
-        <span class="message warning" data-bind="validationErrorText:description" data-model-attr="description"></span>
+        <span class="message warning" data-bind="validationErrorText:description"></span>
     </label>
     {{ if (type !== types.USER) { }}
     <span class="permission editMode control">

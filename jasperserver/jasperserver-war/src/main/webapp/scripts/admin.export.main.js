@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: admin.export.main.js 7762 2014-09-19 10:16:02Z sergey.prilukin $
+ * @version: $Id: admin.export.main.js 9490 2015-10-05 16:46:54Z obobruyk $
  */
 
 define(function(require){
@@ -31,26 +31,17 @@ define(function(require){
         logging = require("administer.logging"),
         Administer = require("administer.base"),
         jrsConfigs = require("jrs.configs"),
-        jrsExport = require("export"),
-        _ = require("underscore"),
-        jaspersoft = require("namespace");
+        ExportPageView = require("tenantImportExport/export/view/ExportPageView");
 
     require("controls.logging");
     require("json2");
-    require("components.stateview");
     require("components.dialog");
-    require("export.extendedformview");
-    require("export.shortformview");
-    require("export.app");
 
     domReady(function() {
         Administer.urlContext = jrsConfigs.urlContext;
 
-        _.extend(jaspersoft.i18n, jrsConfigs.Export.i18n);
-        _.extend(jrsExport.i18n, jrsConfigs.Export.i18n);
-
         logging.initialize();
 
-        jrsExport.App.initialize(jrsConfigs.Export.initParams);
+        new ExportPageView({el: document.getElementById("settings")});
     });
 });

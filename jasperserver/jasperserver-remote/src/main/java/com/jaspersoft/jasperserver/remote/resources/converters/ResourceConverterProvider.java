@@ -21,6 +21,7 @@
 package com.jaspersoft.jasperserver.remote.resources.converters;
 
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConverter;
 import com.jaspersoft.jasperserver.dto.resources.ClientResource;
 import com.jaspersoft.jasperserver.remote.exception.IllegalParameterValueException;
 
@@ -28,7 +29,7 @@ import com.jaspersoft.jasperserver.remote.exception.IllegalParameterValueExcepti
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: ResourceConverterProvider.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: ResourceConverterProvider.java 58870 2015-10-27 22:30:55Z esytnik $
  */
 public interface ResourceConverterProvider {
     ToClientConverter<? super Resource, ? extends ClientResource> getToClientConverter(String serverType) throws IllegalParameterValueException;

@@ -24,6 +24,8 @@ package com.jaspersoft.jasperserver.remote.resources.converters;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Folder;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.InternalURI;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.PermissionUriProtocol;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConversionOptions;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConverter;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.ObjectPermission;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.client.ObjectPermissionImpl;

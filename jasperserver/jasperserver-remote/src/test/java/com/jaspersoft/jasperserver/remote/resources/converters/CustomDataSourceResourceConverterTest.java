@@ -23,6 +23,7 @@ package com.jaspersoft.jasperserver.remote.resources.converters;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl.CustomReportDataSourceServiceFactory;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.util.CustomDataSourceDefinition;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceReference;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConversionOptions;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.CustomReportDataSource;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.client.CustomReportDataSourceImpl;
 import com.jaspersoft.jasperserver.dto.resources.ClientCustomDataSource;
@@ -62,7 +63,7 @@ import static org.testng.Assert.fail;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: CustomDataSourceResourceConverterTest.java 53873 2015-04-07 18:59:44Z mchan $
+ * @version $Id: CustomDataSourceResourceConverterTest.java 58870 2015-10-27 22:30:55Z esytnik $
  */
 public class CustomDataSourceResourceConverterTest {
 

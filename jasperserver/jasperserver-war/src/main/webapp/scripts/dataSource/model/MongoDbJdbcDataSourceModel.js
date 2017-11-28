@@ -25,7 +25,7 @@ define(function (require) {
     var CustomDataSourceModel = require("dataSource/model/CustomDataSourceModel"),
 		connectionTypes = require("dataSource/enum/connectionTypes"),
 	    mongoJdbcFileSourceTypes = require("dataSource/enum/mongoJdbcFileSourceTypes"),
-        repositoryResourceTypes = require("common/enum/repositoryResourceTypes"),
+        repositoryResourceTypes = require("bi/repo/enum/repositoryResourceTypes"),
         adminWorkflows = require("restResource!hypermedia/workflows?parentName=admin"),
         _ = require("underscore"),
         i18n = require("bundle!jasperserver_messages");

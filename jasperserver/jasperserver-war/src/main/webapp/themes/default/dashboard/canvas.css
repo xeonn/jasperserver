@@ -227,6 +227,8 @@
     float: left;
     overflow: hidden;
     border: 1px solid #ffffff;
+    margin-top: 4px; /* added to fix bug 43513 */
+    margin-bottom: 16px; /* added to fix bug 43513 */
 }
 
 .dashboardCanvas .dashlet .inputControlWrapper .inputControls  label > .wrap,
@@ -290,9 +292,11 @@
     width: 100%;
 }
 
-.dashboardCanvas .control.select.single {
-    margin-bottom: 29px; /* eliminates single select control jumping */
-}
+/* .dashboardCanvas .control.select.single {
+    margin-bottom: 29px;
+} */
+/* eliminates single select control jumping */
+/* This contributes to bug 43513 */
 
 .dashboardCanvas .mSelect {
     min-width: 50px;
@@ -358,10 +362,6 @@
     word-wrap: break-word;
 }
 
-#jive_components #jive_dialog {
-    z-index: 498;
-}
-
 .jrPage tr[valign="top"] > td {
     vertical-align: top;
 }
@@ -370,12 +370,12 @@
     cursor: pointer;
 }
 
-.dashboardCanvas  .dashlet .inputControlWrapper > .overlay {
+.dashlet .inputControlWrapper > .overlay {
     left: auto;
 }
 
-.dashboardCanvas .dashlet > .dashletContent > .overlay,
-.dashboardCanvas .dashlet .inputControlWrapper > .overlay
+.dashlet > .dashletContent > .overlay,
+.dashlet .inputControlWrapper > .overlay
 {
     background-color: #000000;
     opacity: 0;
@@ -386,4 +386,44 @@
     height:100%;
     top: 0;
     position: absolute;
+}
+
+.filterGroup.dialog .inputControlWrapper {
+    position: relative;
+    border: 1px transparent solid;
+}
+
+.filterGroup.dialog {
+    height: 600px;
+    width: 450px;
+}
+
+.filterGroup.dialog .dashlet > .dashletContent {
+    border: 1px transparent solid;
+}
+
+.filterGroup.dialog  .dashletContent .content {
+    min-height: 500px;
+    max-height: 525px;
+    padding: 10px;
+    overflow: auto;
+}
+
+.filterGroup.dialog .header .button .icon {
+    background-image: url(../images/dashboard_toolbar_buttons_sprite.png);
+    background-repeat: no-repeat;
+    background-position: 3px 3px;
+    clear: both;
+}
+
+}
+
+/*new styles below fix bug 43513*/
+.dashletContent .control,
+.dashletContent .picker input {
+    margin-bottom: 0;
+}
+
+.dashletContent .list.inputControls {
+    margin-top: 0;
 }

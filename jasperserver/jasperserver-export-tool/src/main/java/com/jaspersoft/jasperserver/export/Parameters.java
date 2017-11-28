@@ -25,7 +25,7 @@ import java.util.Iterator;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: Parameters.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: Parameters.java 58265 2015-10-05 16:13:56Z vzavadsk $
  */
 public interface Parameters {
 
@@ -43,4 +43,5 @@ public interface Parameters {
 	
 	Parameters addParameterValues(String parameterName, String[] parameterValues);
 
+	Parameters setParameterValue(String parameterName, String parameterValue);
 }

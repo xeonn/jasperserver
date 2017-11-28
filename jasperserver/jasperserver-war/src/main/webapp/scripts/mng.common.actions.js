@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: mng.common.actions.js 8900 2015-05-06 20:57:14Z yplakosh $
+ * @version: $Id: mng.common.actions.js 9610 2015-11-06 13:52:34Z obobruyk $
  */
 
 /* global repositorySearch, SearchBox, toolbarButtonModule, toFunction, getAsFunction, localContext, isArray, JSCookie,
@@ -183,8 +183,8 @@ orgModule.serverActionFactory = {
 orgModule.clientActionFactory = {
     'create': function () {
         var org;
-        if (orgModule.manager.tree) {
-            org = orgModule.manager.tree.getOrganization();
+        if (orgModule.manager.tenantsTree) {
+            org = orgModule.manager.tenantsTree.getTenant();
         }
 
         var entities = orgModule.entityList.getSelectedEntities();
@@ -252,7 +252,7 @@ orgModule.clientActionFactory = {
     'cancelIfEdit': function (options) {
         options = options || {};
 
-        var entity = options.entity,
+        var entity = options.entity || orgModule.manager.tenantsTree && orgModule.manager.tenantsTree.getTenant(),
             showConfirm = typeof options.showConfirm === "undefined" ? true : options.showConfirm,
             entityEvent = typeof options.entityEvent === "undefined" ? true : options.entityEvent,
             properties = orgModule.properties;
@@ -270,7 +270,7 @@ orgModule.clientActionFactory = {
 
                         if(showProperties){
                             orgModule.fire(orgModule.Event.ENTITY_SELECT_AND_GET_DETAILS, {
-                                entity: entity,
+                                entityId: entity.id,
                                 cancelIfEdit: true,
                                 entityEvent: true
                             });

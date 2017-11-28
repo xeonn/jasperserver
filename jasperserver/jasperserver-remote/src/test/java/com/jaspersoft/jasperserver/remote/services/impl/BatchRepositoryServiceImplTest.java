@@ -35,7 +35,7 @@ import com.jaspersoft.jasperserver.remote.exception.ResourceNotFoundException;
 import com.jaspersoft.jasperserver.remote.resources.ClientTypeHelper;
 import com.jaspersoft.jasperserver.remote.resources.converters.LookupResourceConverter;
 import com.jaspersoft.jasperserver.remote.resources.converters.ResourceConverterProviderImpl;
-import com.jaspersoft.jasperserver.remote.resources.converters.ToClientConversionOptions;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConversionOptions;
 import com.jaspersoft.jasperserver.remote.resources.converters.ToServerConverter;
 import com.jaspersoft.jasperserver.search.common.RepositorySearchConfiguration;
 import com.jaspersoft.jasperserver.search.common.ResourceDetails;

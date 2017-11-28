@@ -23,7 +23,7 @@
     cursor: pointer;
 }
 
-.simpleColorPicker .body .color.transparent{
+.simpleColorPicker .body .color.transparent, .simpleColorPicker .body .color.none{
     border: 1px solid #9e9e9e;
     width: 234px;
     height: 20px;
@@ -72,7 +72,7 @@
     outline: 2px solid orange;
 }
 
-.simpleColorPicker .body .color.transparent.selected {
+.simpleColorPicker .body .color.transparent.selected, .simpleColorPicker .body .color.none.selected {
     /* padding: 1px; */
     /* margin: 1px; */
     border: 1px solid #fff;

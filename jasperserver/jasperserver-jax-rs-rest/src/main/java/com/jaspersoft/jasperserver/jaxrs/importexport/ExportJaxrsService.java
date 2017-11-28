@@ -20,6 +20,7 @@
  */
 package com.jaspersoft.jasperserver.jaxrs.importexport;
 
+import com.jaspersoft.jasperserver.dto.importexport.ExportTask;
 import com.jaspersoft.jasperserver.export.service.ImportExportService;
 import com.jaspersoft.jasperserver.remote.exception.RemoteException;
 import com.jaspersoft.jasperserver.remote.services.async.ExportRunnable;
@@ -56,7 +57,7 @@ public class ExportJaxrsService  {
     @POST
     @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    public Response createNewTask(final ExportTaskDto data) throws RemoteException{
+    public Response createNewTask(final ExportTask data) throws RemoteException{
 
         Map<String, Boolean> params = new HashMap<String, Boolean>();
         if (data.getParameters() != null){
@@ -65,9 +66,11 @@ public class ExportJaxrsService  {
             }
         }
 
-        ExportRunnable exportRunnable = new ExportRunnable(params, data.getUris(), data.getScheduledJobs(), data.getRoles(), data.getUsers(), LocaleContextHolder.getLocale());
+        ExportRunnable exportRunnable = new ExportRunnable(params, data.getUris(), data.getScheduledJobs(),
+                data.getRoles(), data.getUsers(), data.getResourceTypes(), LocaleContextHolder.getLocale());
         exportRunnable.setService(synchImportExportService);
         exportRunnable.setMessageSource(messageSource);
+        exportRunnable.setOrganizationId(data.getOrganization());
         basicTaskManager.startTask(new ImportExportTask<InputStream>(exportRunnable));
 
         return Response.ok(exportRunnable.getState()).build();
@@ -88,5 +91,13 @@ public class ExportJaxrsService  {
         basicTaskManager.finishTask(taskId);
         return response;
     }
+
+    @DELETE
+    @Path("/{id}")
+    public Response cancel(@PathParam("id")String id){
+        basicTaskManager.finishTask(id);
+        return Response.noContent().build();
+    }
+
 
 }

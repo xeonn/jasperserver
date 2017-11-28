@@ -24,7 +24,7 @@
  * Simple accordion component. Works with Array of Panel objects.
  *
  * @author Kostiantyn Tsaregradskyi
- * @version: $Id: Accordion.js 270 2014-10-13 19:58:03Z agodovanets $
+ * @version: $Id: Accordion.js 1605 2015-09-23 17:55:32Z inestere $
  */
 
 define(function (require) {
@@ -60,11 +60,14 @@ define(function (require) {
 
     /**
      * @constructor Accordion
+     * @class Accordion
+     * @mixes Backbone.Events
      * @classdesc Simple accordion component. Works with Array of Panel objects.
      * @param {object} options
-     * @param {jQuery|HTMLElement|selector} options.container - element to which accordion will be attached.
-     * @param {array} [options.panels=[]] - array of Panel objects.
+     * @param {jQuery|HTMLElement|string} options.container - element to which accordion will be attached.
+     * @param {Panel[]} [options.panels=[]] - array of Panel objects.
      * @param {boolean} [options.allowMultiplePanelsOpen=false] - if multiple panels in accordion can be opened at the same time.
+     * @throws {Error} Accordion should have specified container
      */
     function Accordion(options) {
         options || (options = {});
@@ -85,35 +88,35 @@ define(function (require) {
     }
 
     /**
-     * @method toggle
      * @description Toggle collapsed/expanded state of a panel in accordion
-     * @param {object} panel - instance of Panel class
+     * @memberof! Accordion
+     * @param {Panel} panel - instance of Panel class
      */
     Accordion.prototype.toggle = function(panel) {
         doPanelAction.call(this, "toggle", panel);
     };
 
     /**
-     * @method expand
      * @description Expand a panel in accordion
-     * @param {object} panel - instance of Panel class
+     * @memberof! Accordion
+     * @param {Panel} panel - instance of Panel class
      */
     Accordion.prototype.expand = function(panel) {
         doPanelAction.call(this, "open", panel);
     };
 
     /**
-     * @method collapse
      * @description Collapse a panel in accordion
-     * @param {object} panel - instance of Panel class
+     * @memberof! Accordion
+     * @param {Panel} panel - instance of Panel class
      */
     Accordion.prototype.collapse = function(panel) {
         doPanelAction.call(this, "close", panel);
     };
 
     /**
-     * @method fit
      * @description Fit all panels inside accordion
+     * @memberof! Accordion
      * @fires Accordion#fit
      */
     Accordion.prototype.fit = function() {
@@ -150,6 +153,9 @@ define(function (require) {
             }
         });
 
+        /**
+         * @event Accordion#fit
+         */
         this.trigger("fit", this);
     };
 

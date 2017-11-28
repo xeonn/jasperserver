@@ -22,6 +22,7 @@ package com.jaspersoft.jasperserver.remote.resources.converters;
 
 import com.jaspersoft.jasperserver.api.metadata.common.domain.FileResource;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceReference;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConversionOptions;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportUnit;
 import com.jaspersoft.jasperserver.dto.resources.AbstractClientReportUnit;
 import com.jaspersoft.jasperserver.dto.resources.ClientFile;
@@ -44,7 +45,7 @@ import java.util.regex.Pattern;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: GenericReportUnitResourceConverter.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: GenericReportUnitResourceConverter.java 58870 2015-10-27 22:30:55Z esytnik $
  */
 public class GenericReportUnitResourceConverter
         <ServerReportUnitType extends ReportUnit, ClientReportUnitType extends AbstractClientReportUnit<ClientReportUnitType>>

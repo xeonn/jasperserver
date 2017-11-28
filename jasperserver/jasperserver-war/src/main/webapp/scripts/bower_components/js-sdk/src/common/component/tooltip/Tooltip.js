@@ -22,7 +22,7 @@
 
 /**
  * @author: Sergii Kylypko, Kostiantyn Tsaregradskyi
- * @version: $Id: Tooltip.js 1178 2015-05-06 20:40:12Z yplakosh $
+ * @version: $Id: Tooltip.js 1605 2015-09-23 17:55:32Z inestere $
  */
 
 define(function(require){
@@ -34,8 +34,9 @@ define(function(require){
         Backbone = require('backbone'),
         tooltipTemplate = require('text!./template/tooltipTemplate.htm');
 
-    return Backbone.View.extend({
-
+    return Backbone.View.extend(
+        /** @lends Tooltip.prototype */
+        {
         template: _.template(tooltipTemplate),
 
         delay: 500,
@@ -54,11 +55,31 @@ define(function(require){
             return this.template({ cssClasses: this.cssClasses });
         },
 
+        /**
+         * @constructor Tooltip
+         * @classdesc Tooltip Component that can be attached to any DOM element and be shown on hover
+         * @param {object} options
+         * @param {(HTMLElement|jQuery)} options.attachTo - DOM element to attach to
+         * @param {object} options.contentTemplate Content template
+         * @param {object} [options.i18n] Internationalization bundle
+         * @param {number} [options.delay] Tooltip on show delay
+         * @param {number} [options.offset] Tooltip offset
+         * @param {string} [options.attribute] Tooltip attribute (default data-tooltip=true, means that tooltip will be attached to elements with such attribute
+         * @param {string} [options.cssClasses] Tooltip custom css classes
+         * @param {boolean} [options.triggerEvents] Trigger or not tooltip events (default false)
+         * @throws {Error} Tooltip should be attached to an element
+         * @throws {Error} Tooltip should have contentTemplate
+         */
+
         constructor: function(options){
             options || (options = {});
 
             if (!options.attachTo || $(options.attachTo).length === 0) {
                 throw new Error('Tooltip should be attached to an element');
+            }
+
+            if (!options.contentTemplate) {
+                throw new Error('Tooltip should have contentTemplate');
             }
 
             this._shown = false;
@@ -88,7 +109,7 @@ define(function(require){
             Backbone.View.prototype.constructor.apply(this, arguments);
         },
 
-        render: function(model, options, dfd){
+        _render: function(model, options, dfd){
             if(this._event){
                 model = model instanceof Backbone.Model ? model.toJSON() : model;
 
@@ -102,9 +123,13 @@ define(function(require){
             dfd.resolve();
         },
 
+        /**
+         * @description Shows tooltip near element after specified delay.
+         * @returns {Deferred} Deferred
+         */
         show: function(model, options){
             var dfd = new $.Deferred();
-            this._timer = setTimeout(_.bind(this.render, this, model, options, dfd), this.delay);
+            this._timer = setTimeout(_.bind(this._render, this, model, options, dfd), this.delay);
             return dfd;
         },
 
@@ -112,15 +137,24 @@ define(function(require){
             $('body').append(this.$el);
             this._updatePosition();
             this._shown = true;
+            /**
+             * @event Tooltip#event:show
+             */
             this.triggerEvents && this.trigger('show', this);
         },
 
+        /**
+         * @description Hides tooltip near element after specified delay.
+         */
         hide: function(){
             this.contentTemplate && this._timer && clearTimeout(this._timer);
 
             this.$el.detach();
 
             this._shown = false;
+            /**
+             * @event Tooltip#event:hide
+             */
             this.triggerEvents && this.trigger('hide', this);
         },
 
@@ -154,7 +188,9 @@ define(function(require){
             this._timer && clearTimeout(this._timer);
             this._event = null;
         },
-
+        /**
+         * @description Removes tooltip component.
+         */
         remove: function(){
             this._shown && this.hide();
             this._timer && clearTimeout(this._timer);
@@ -166,6 +202,13 @@ define(function(require){
         }
 
     }, {
+        /**
+         * @static
+         * @memberof! Tooltip
+         * @param {(HTMLElement|jQuery)} container - DOM element to attach to
+         * @param {object} options - Tooltip options
+         * @description Attaches new Tooltip component instance.
+         */
         attachTo: function(container, options){
             var Tooltip = this;
 
@@ -175,6 +218,12 @@ define(function(require){
             return new Tooltip(options);
         },
 
+        /**
+         * @static
+         * @memberof! Tooltip
+         * @param {(HTMLElement|jQuery)} container - DOM element to detach from
+         * @description Detaches tooltip from specified element.
+         */
         detachFrom: function(container){
             container = $(container)[0];
             container.tooltip && container.tooltip.remove();

@@ -22,7 +22,7 @@
 
 /**
  * @author: Zakhar Tomchenko, Kostiantyn Tsaregradskyi
- * @version: $Id: OptionContainer.js 380 2014-11-09 15:04:25Z ktsaregradskyi $
+ * @version: $Id: OptionContainer.js 1309 2015-06-18 19:03:13Z dgorbenk $
  */
 
 define(function (require) {
@@ -81,11 +81,12 @@ define(function (require) {
                     toggleClass: self.toggleClass
                 });
 
-                self.listenTo(view, "mouseover", function(option, ev) {
-                    self.trigger("mouseover", option, self, ev);
+	            // listen to synthetic events from OptionView and trigger the same event with other parameters
+                self.listenTo(view, "mouseover", function(optionView, optionViewModel, ev) {
+                    self.trigger("mouseover", optionView, self, ev);
                 });
-                self.listenTo(view, "mouseout", function(option, ev) {
-                    self.trigger("mouseout", option, self, ev);
+                self.listenTo(view, "mouseout", function(optionView, optionViewModel, ev) {
+                    self.trigger("mouseout", optionView, self, ev);
                 });
 
                 self.options.push(view);
@@ -118,6 +119,7 @@ define(function (require) {
                 optionView.addSelection();
             }
 
+	        this.trigger("selectionMade");
             this.trigger(this.contextName + ":" + optionModel.get("action"), optionView, optionModel);
         },
 

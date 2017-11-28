@@ -30,14 +30,14 @@ import org.apache.commons.logging.LogFactory;
 import net.sf.jasperreports.engine.JRParameter;
 
 import com.jaspersoft.jasperserver.api.JSExceptionWrapper;
-import com.jaspersoft.jasperserver.api.engine.jasperreports.util.JRTimezoneJdbcQueryExecuterFactory;
+import com.jaspersoft.jasperserver.api.metadata.jasperreports.service.ConnectionTestingDataSourceService;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.service.ReportDataSourceService;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: BaseJdbcDataSource.java 50011 2014-10-09 16:57:26Z vzavadskii $
+ * @version $Id: BaseJdbcDataSource.java 58870 2015-10-27 22:30:55Z esytnik $
  */
-public abstract class BaseJdbcDataSource implements ReportDataSourceService {
+public abstract class BaseJdbcDataSource implements ReportDataSourceService, ConnectionTestingDataSourceService {
 
 
 	private static final Log log = LogFactory.getLog(BaseJdbcDataSource.class);
@@ -67,7 +67,5 @@ public abstract class BaseJdbcDataSource implements ReportDataSourceService {
 		}
 	}
 	
-	public abstract boolean testConnection() throws Exception;
-
 	protected abstract Connection createConnection();
 }

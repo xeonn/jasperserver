@@ -9,7 +9,7 @@
     <parent>
         <groupId>com.jaspersoft.jasperserver</groupId>
         <artifactId>server</artifactId>
-        <version>6.1.1</version>
+        <version>6.2.0</version>
     </parent>
     <profiles>
         <!-- enable handling between internal and external builds -->    
@@ -26,7 +26,7 @@
                 <dependency>
                     <groupId>com.jaspersoft</groupId>
                     <artifactId>jrs-ui</artifactId>
-                    <version>1.2.5</version>
+                    <version>1.5.2</version>
                     <type>zip</type>
                 </dependency>
             </dependencies>
@@ -107,7 +107,7 @@
         <dependency>
             <groupId>com.jaspersoft.jasperreports</groupId>
             <artifactId>jasperreports-customvisualization</artifactId>
-            <version>6.1.1</version>
+            <version>6.2.0</version>
             <exclusions>
                 <exclusion>
                     <groupId>net.sf.jasperreports</groupId>
@@ -279,12 +279,12 @@
         <dependency>
             <groupId>com.jaspersoft.jasperserver</groupId>
             <artifactId>jasperserver-hive-connector</artifactId>
-            <version>6.1.1</version>
+            <version>6.2.0</version>
         </dependency>
         <dependency>
             <groupId>com.jaspersoft.jasperserver</groupId>
             <artifactId>jasperserver-cassandra-connector</artifactId>
-            <version>6.1.1</version>
+            <version>6.2.0</version>
             <exclusions>
                 <exclusion>
                     <groupId>antlr</groupId>
@@ -292,7 +292,7 @@
                 </exclusion>
                 <exclusion>
                      <groupId>org.antlr</groupId>
-                     <artifactId>antlr-runtime</artifactId>
+                     <artifactId>antlr4-runtime</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -520,7 +520,7 @@
         <dependency>
             <groupId>commons-net</groupId>
             <artifactId>commons-net</artifactId>
-            <version>3.1</version>
+            <version>3.3</version>
         </dependency>
         <dependency>
             <groupId>org.easymock</groupId>
@@ -540,12 +540,12 @@
         <dependency>
             <groupId>net.sf.jasperreports</groupId>
             <artifactId>jasperreports-chart-themes</artifactId>
-            <version>6.1.1</version>
+            <version>6.2.0</version>
         </dependency>
         <dependency>
             <groupId>net.sf.jasperreports</groupId>
             <artifactId>jasperreports-functions</artifactId>
-            <version>6.1.1</version>
+            <version>6.2.0</version>
         </dependency>
         <!-- bug 32641: fix for installation to JBoss 7. Because we have use deployment module to precisely    -->
         <!--            control batik jar dependencies used by jboss 7, we need to make sure the same jars are -->
@@ -735,7 +735,7 @@
         <dependency>
             <groupId>com.jaspersoft.jasperserver</groupId>
             <artifactId>jrs-mongodb-datasource</artifactId>
-            <version>6.1.1</version>
+            <version>6.2.0</version>
         </dependency>
 
         <!-- big data connector components END -->
@@ -770,6 +770,52 @@
             <filter>${platform-path}/js.quartz.properties</filter>
         </filters>
         <plugins>
+            <!--&lt;!&ndash; mvn remote-resources:bundle assembly:single &ndash;&gt;-->
+            <!--&lt;!&ndash; mvn remote-resources:bundle &ndash;&gt;-->
+            <plugin>
+                <artifactId>maven-remote-resources-plugin</artifactId>
+                <version>1.5</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>bundle</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <resourcesDirectory>${basedir}/shared-config</resourcesDirectory>
+                    <includes>
+                        <include>**/applicationContext-remote-services.xml</include>
+                        <include>**/applicationContext-rest-services.xml</include>
+                        <include>**/applicationContext-security-web.xml</include>
+                        <include>**/applicationContext-web-services.xml</include>
+                        <include>**/applicationContext-settings.xml</include>
+                        <include>**/applicationContext-export-import-web.xml</include>
+                    </includes>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.3</version>
+                <configuration>
+                    <finalName>jasperserver-pro-${project.version}</finalName>
+                    <descriptors>
+                        <file>shared-it-resources-descriptor.xml</file>
+                    </descriptors>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>attached</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
             <plugin>
                 <!-- use config collector -->
                 <groupId>org.apache.maven.plugins</groupId>

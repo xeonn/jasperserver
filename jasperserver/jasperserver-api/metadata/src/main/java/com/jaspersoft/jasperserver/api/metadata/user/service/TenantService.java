@@ -31,7 +31,7 @@ import java.util.Map;
  * TenantService is the interface which is used to manage {@link Tenant} objects.
  *
  * @author achan
- * @version $Id: TenantService.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: TenantService.java 58870 2015-10-27 22:30:55Z esytnik $
  * @since 3.5.0
  */
 @JasperServerAPI
@@ -135,6 +135,20 @@ public interface TenantService {
      * @return a list of all sub tenants if the tenant with specified identifier exists or empty list otherwise.
      */
     public List<Tenant> getAllSubTenantList(ExecutionContext context, String parentTenantId, String text, int depth);
+
+    /**
+     * Returns a list of sub tenants (including sub tenants of sub tenants with corresondint depth) of the specified parent tenant identifier.
+     * Allows to search by id, name, alias and description
+     *
+     * @param context the execution context.
+     * @param parentTenantId the parent tenant id.
+     * @param text the search string to filter results
+     * @param depth max depth of affected subtree
+     * @param sortBy field to sortBy
+     *
+     * @return a list of all sub tenants if the tenant with specified identifier exists or empty list otherwise.
+     */
+    public List<Tenant> getAllSubTenantList(ExecutionContext context, String parentTenantId, String text, int depth, String sortBy);
 
     /**
      * Returns the number of all tenants.

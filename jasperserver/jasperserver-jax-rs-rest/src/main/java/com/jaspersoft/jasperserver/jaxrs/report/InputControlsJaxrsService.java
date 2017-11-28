@@ -30,7 +30,7 @@ import com.jaspersoft.jasperserver.remote.common.RemoteServiceWrapper;
 import com.jaspersoft.jasperserver.remote.exception.ModificationNotAllowedException;
 import com.jaspersoft.jasperserver.remote.exception.RemoteException;
 import com.jaspersoft.jasperserver.remote.exception.ResourceNotFoundException;
-import com.jaspersoft.jasperserver.remote.exception.xml.ErrorDescriptor;
+import com.jaspersoft.jasperserver.dto.common.ErrorDescriptor;
 import com.jaspersoft.jasperserver.war.cascade.CascadeResourceNotFoundException;
 import com.jaspersoft.jasperserver.war.cascade.InputControlsLogicService;
 import com.jaspersoft.jasperserver.war.cascade.InputControlsValidationException;
@@ -143,10 +143,9 @@ public class InputControlsJaxrsService extends RemoteServiceWrapper<InputControl
                 } catch (AccessDeniedException spe) {
                     throw new ModificationNotAllowedException("");
                 } catch (InputControlsValidationException e) {
-                    throw new ModificationNotAllowedException(new ErrorDescriptor.Builder()
+                    throw new ModificationNotAllowedException(new ErrorDescriptor()
                             .setMessage("Malformed data")
-                            .setParameters(e.getErrors())
-                            .getErrorDescriptor());
+                            .setParameters(e.getErrors()));
                 }
                 return Response.ok(new ReportInputControlsListWrapper(updated)).build();
             }

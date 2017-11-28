@@ -23,7 +23,7 @@ package com.jaspersoft.jasperserver.jaxrs.common;
 
 import com.jaspersoft.jasperserver.remote.exception.IllegalParameterValueException;
 import com.jaspersoft.jasperserver.remote.exception.builders.LocalizedErrorDescriptorBuilder;
-import com.jaspersoft.jasperserver.remote.exception.xml.ErrorDescriptor;
+import com.jaspersoft.jasperserver.dto.common.ErrorDescriptor;
 import com.sun.jersey.api.ParamException;
 import org.springframework.stereotype.Component;
 
@@ -43,11 +43,11 @@ import javax.ws.rs.ext.Provider;
 public class GenericParamExceptionMapper implements ExceptionMapper<ParamException> {
 
     @Resource(name= "localizedErrorDescriptorBuilder")
-    private LocalizedErrorDescriptorBuilder builder;
+    private LocalizedErrorDescriptorBuilder localizedErrorDescriptorBuilder;
 
     @Override
     public Response toResponse(ParamException exception) {
-        ErrorDescriptor descriptor = builder.createDescriptor(
+        ErrorDescriptor descriptor = localizedErrorDescriptorBuilder.createDescriptor(
                 LocalizedErrorDescriptorBuilder.BUNDLE_PREFIX + IllegalParameterValueException.ERROR_CODE,
                 exception.getParameterName(),
                 "",

@@ -21,6 +21,7 @@
 package com.jaspersoft.jasperserver.remote.resources.converters;
 
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceReference;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConversionOptions;
 import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.VirtualReportDataSource;
 import com.jaspersoft.jasperserver.dto.resources.ClientSubDataSourceReference;
@@ -38,7 +39,7 @@ import java.util.Map;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: VirtualDataSourceResourceConverter.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: VirtualDataSourceResourceConverter.java 58870 2015-10-27 22:30:55Z esytnik $
  */
 @Service
 public class VirtualDataSourceResourceConverter extends ResourceConverterImpl<VirtualReportDataSource, ClientVirtualDataSource> {

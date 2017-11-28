@@ -23,24 +23,35 @@ package com.jaspersoft.jasperserver.export.modules.repository;
 
 import com.jaspersoft.jasperserver.api.JSException;
 import com.jaspersoft.jasperserver.api.JSExceptionWrapper;
-import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
-import com.jaspersoft.jasperserver.api.metadata.common.service.impl.GlobalPropertiesListUpgradeExecutor;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Folder;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ListOfValues;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceReference;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.client.FolderImpl;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.util.DataContainerStreamUtil;
+import com.jaspersoft.jasperserver.api.metadata.common.service.JSResourceNotFoundException;
 import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
+import com.jaspersoft.jasperserver.api.metadata.common.service.impl.GlobalPropertiesListUpgradeExecutor;
+import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.HibernateRepositoryServiceImpl;
+import com.jaspersoft.jasperserver.api.metadata.user.domain.ObjectPermission;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.Tenant;
 import com.jaspersoft.jasperserver.api.metadata.user.service.TenantService;
-import com.jaspersoft.jasperserver.export.modules.BaseImporterModule;
-import com.jaspersoft.jasperserver.export.modules.ImporterModuleContext;
-import com.jaspersoft.jasperserver.export.modules.repository.beans.FolderBean;
-import com.jaspersoft.jasperserver.export.modules.repository.beans.ResourceBean;
-import com.jaspersoft.jasperserver.export.modules.repository.beans.ResourceReferenceBean;
 import com.jaspersoft.jasperserver.core.util.PathUtils;
 import com.jaspersoft.jasperserver.core.util.PathUtils.SplittedPath;
+import com.jaspersoft.jasperserver.dto.common.BrokenDependenciesStrategy;
+import com.jaspersoft.jasperserver.dto.common.WarningDescriptor;
+import com.jaspersoft.jasperserver.export.modules.BaseImporterModule;
+import com.jaspersoft.jasperserver.export.modules.ImporterModuleContext;
+import com.jaspersoft.jasperserver.export.modules.common.ExportImportWarningCode;
+import com.jaspersoft.jasperserver.export.modules.common.TenantStrHolderPattern;
+import com.jaspersoft.jasperserver.export.modules.repository.beans.FolderBean;
+import com.jaspersoft.jasperserver.export.modules.repository.beans.PermissionRecipient;
+import com.jaspersoft.jasperserver.export.modules.repository.beans.ResourceBean;
+import com.jaspersoft.jasperserver.export.modules.repository.beans.ResourceReferenceBean;
+import com.jaspersoft.jasperserver.export.service.ImportExportService;
+import com.jaspersoft.jasperserver.export.service.impl.ImportExportServiceImpl;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dom4j.Element;
@@ -48,35 +59,38 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.security.access.AccessDeniedException;
 
-import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.Writer;
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Deque;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ResourceImporter.java 55164 2015-05-06 20:54:37Z mchan $
+ * @version $Id: ResourceImporter.java 59074 2015-11-12 20:09:18Z vsabados $
  */
 public class ResourceImporter extends BaseImporterModule implements ResourceImportHandler, InitializingBean {
 	
 	public final static String ATTRIBUTE_UPDATE_RESOURCES = "updateResources";
-	
-	private final static Log log = LogFactory.getLog(ResourceImporter.class);
+
+	protected final static Log log = LogFactory.getLog(ResourceImporter.class);
 	
 	protected ResourceModuleConfiguration configuration;
-    private TenantService tenantService;
+    protected TenantService tenantService;
 	private String prependPathArg;
 	private String updateArg;
 	private String includeSettingsArg;
 	private String skipThemesArgument;
-    private List<String> rootSubTenantFolderUris;
+    protected Set<String> rootSubTenantFolderUris;
     private Pattern orgPattern = Pattern.compile("((/" + TenantService.ORGANIZATIONS + "/[^/]+)*)");
     private Pattern themesPattern = Pattern.compile(".*/themes/.*");
 	private GlobalPropertiesListUpgradeExecutor globalPropertiesListUpgradeExecutor;
@@ -101,7 +115,7 @@ public class ResourceImporter extends BaseImporterModule implements ResourceImpo
 		update = getUpdateFlag();
         //Retrieve all root subtenants
         List<Tenant> allRootSubTenantList = tenantService.getAllSubTenantList(executionContext, TenantService.ORGANIZATIONS);
-        rootSubTenantFolderUris = new ArrayList<String>();
+		rootSubTenantFolderUris = new HashSet<String>();
         for (Tenant tenant : allRootSubTenantList) {
             rootSubTenantFolderUris.add(tenant.getTenantFolderUri());
         }
@@ -150,16 +164,18 @@ public class ResourceImporter extends BaseImporterModule implements ResourceImpo
 				try {
                     importResource(uri, false);
                 } catch (ResourceBeanDataNotFoundException e) {
-                    final String msg;
-                    if (uri.equals(e.getMessage())) {
-                        msg = "Reference resource \"" + e.getMessage() +
-                                "\" not found.";
+					String referenceUri = e.getMessage();
+                    String msg;
+                    if (uri.equals(referenceUri)) {
+                        msg = "Reference resource \"" + referenceUri + "\" not found.";
+						logWarning(ExportImportWarningCode.IMPORT_RESOURCE_NOT_FOUND,
+								new String[]{referenceUri}, msg);
                     } else {
-                        msg = "Reference resource \"" + e.getMessage() +
+                        msg = "Reference resource \"" + referenceUri +
                                 "\" not found when importing resource \"" + uri + "\".";
+						logWarning(ExportImportWarningCode.IMPORT_REFERENCE_RESOURCE_NOT_FOUND,
+								new String[]{referenceUri, uri}, msg);
                     }
-                    commandOut.warn(msg);
-                    fileBrokenResource(msg);
                 }
 			} else {
 				String uri = (String) folderQueue.removeFirst();
@@ -171,25 +187,6 @@ public class ResourceImporter extends BaseImporterModule implements ResourceImpo
 
         return null;
 	}
-
-    private void fileBrokenResource(String message) {
-        File file = new File("import-errors.log");
-        Writer out = null;
-        try {
-            out = new BufferedWriter(new FileWriter(file, true));
-            out.write(message);
-            out.write('\n');
-        } catch (IOException e) {
-            commandOut.error("Error writing to import.log", e);
-        }
-        finally {
-            if (out != null) {
-                try {
-                    out.close();
-                } catch (IOException e1) {}
-            }
-        }
-    }
 
     protected void queueEntryFolders() {
 		List entryFolders = new ArrayList();
@@ -231,8 +228,10 @@ public class ResourceImporter extends BaseImporterModule implements ResourceImpo
 				commandOut.debug("About to save folder " + path);
 				try{
 				    repository.saveFolder(executionContext, folder);
-                } catch (AccessDeniedException er) {
-                    this.updateSecuredResource(executionContext, folder);
+                } catch (Exception er) {
+					if (!handledException(er, folder.getURIString())) {
+						throwRuntimeException(er);
+					}
                 }
  			}
 		}
@@ -262,28 +261,39 @@ public class ResourceImporter extends BaseImporterModule implements ResourceImpo
 			return;
 		}
 
-        // All organization folder uris have pattern /organizations/org_1../organizations/org2/folder except of template folder
-        // which has pattern /organizations/org_template, so we have to skip it.
-        String tenantFolderUri = "";
-        int orgTeplateIndex = uri.indexOf("/" + TenantService.ORGANIZATIONS + "/" + TenantService.ORG_TEMPLATE);
-        if (orgTeplateIndex >= 0) {
-            tenantFolderUri = uri.substring(0, orgTeplateIndex);
-        } else {
-            Matcher m = orgPattern.matcher(uri);
-            if (m.find()) {
-                tenantFolderUri = m.group(1);
-            }
-        }
+		String importUri = prependedPath(uri);
 
-        if (!(rootSubTenantFolderUris.contains(tenantFolderUri) || tenantFolderUri.equals(""))) {
-            commandOut.info("Folder with the uri" + uri+" is attached to not existing organization. Not imported");
-            return;
-        }
+		// All organization folder uris have pattern /organizations/org_1../organizations/org2/folder except of template folder
+		// which has pattern /organizations/org_template, so we have to skip it.
+		String tenantFolderUri = "";
+		int orgTeplateIndex = importUri.indexOf("/" + TenantService.ORGANIZATIONS + "/" + TenantService.ORG_TEMPLATE);
+		if (orgTeplateIndex >= 0) {
+			tenantFolderUri = importUri.substring(0, orgTeplateIndex);
+		} else {
+			Matcher m = orgPattern.matcher(importUri);
+			if (m.find()) {
+				tenantFolderUri = m.group(1);
+			}
+		}
+
+		if (!(rootSubTenantFolderUris.contains(tenantFolderUri) || tenantFolderUri.equals(""))) {
+			String msg = "Resource with the uri \"" + importUri + "\" is attached to not existing organization. Not imported";
+			logWarning(ExportImportWarningCode.IMPORT_RESOURCE_ATTACHED_NOT_EXIST_ORG, new String[]{importUri}, msg);
+			return;
+		}
 
 		FolderBean folderBean = getFolderDetails(uri, detailsRequired);
 
-		String importUri = prependedPath(uri);
-		Folder folder = repository.getFolder(executionContext, importUri);
+		Folder folder = null;
+		try {
+			folder = repository.getFolder(executionContext, importUri);
+		} catch (Exception ex) {
+			if (handledException(ex, importUri)) {
+				importedURIs.add(uri);
+			} else {
+				throwRuntimeException(ex);
+			}
+		}
 
         if (executionContext.getAttributes() == null) {
             executionContext.setAttributes(new ArrayList());
@@ -304,8 +314,10 @@ public class ResourceImporter extends BaseImporterModule implements ResourceImpo
             try{
                 commandOut.debug("About to save folder " + importUri);
                 repository.saveFolder(executionContext, folder);
-            } catch (AccessDeniedException er) {
-                this.updateSecuredResource(executionContext, folder);
+            } catch (Exception er) {
+				if (!handledException(er, folder.getURIString())) {
+					throwRuntimeException(er);
+				}
             }
 
             if (folderBean != null) {
@@ -314,19 +326,23 @@ public class ResourceImporter extends BaseImporterModule implements ResourceImpo
 
             commandOut.info("Created repository folder " + importUri);
 		} else if (update && folderBean != null) {
+			prepareFolderBeanBeforeFolderUpdate(folderBean, folder);
+
             folder.setLabel(folderBean.getLabel());
             folder.setDescription(folderBean.getDescription());
 
             try {
                 commandOut.debug("About to save folder " + importUri);
                 repository.saveFolder(executionContext, folder);
-            } catch (AccessDeniedException er) {
-                this.updateSecuredResource(executionContext, folder);
+            } catch (Exception er) {
+				if (!handledException(er, folder.getURIString())) {
+					throwRuntimeException(er);
+				}
             }
             commandOut.info("Updating folder " + importUri);
 
             if (folderBean.isExportedWithPermissions()){
-                configuration.getPermissionService().deleteObjectPermissionForObject(executionContext, folder);
+				deleteObjectPermissions(folder);
             }
             setPermissions(folder, folderBean.getPermissions(), false);
         } else {
@@ -346,9 +362,38 @@ public class ResourceImporter extends BaseImporterModule implements ResourceImpo
 		}
 	}
 
-    private boolean skipResource(String uri) {
-        return themesPattern.matcher(uri).matches() && skipThemes();
-    }
+	private void prepareFolderBeanBeforeFolderUpdate(FolderBean folderBean, Folder folder) {
+		//Tenant id we import into
+		String destinationTenantId = importContext.getImportTask()
+				.getParameters().getParameterValue(ImportExportServiceImpl.ORGANIZATION);
+		// check if we are importing into tenant destinationTenantId
+		if (folder != null
+				&& StringUtils.isNotBlank(destinationTenantId)
+				&& !destinationTenantId.equals(TenantService.ORGANIZATIONS)) {
+
+			// check for the root folder from import input
+			if (folderBean.getParent() == null || Folder.SEPARATOR.equals(folderBean.getName())) {
+				// it is the root folder from import input
+				// for the root folder from import input, update only label and description
+				String description = folderBean.getDescription();
+				folderBean.copyFrom(folder);
+				folderBean.setDescription(description);
+			}
+		}
+	}
+
+	protected boolean skipResource(String uri) {
+		String brokenDependenciesStrategy = importContext.getImportTask()
+				.getParameters().getParameterValue(ImportExportService.BROKEN_DEPENDENCIES);
+		if (BrokenDependenciesStrategy.SKIP.getLabel().equals(brokenDependenciesStrategy)) {
+			Set<String> brokenDependencies = importContext.getImportTask().getInputMetadata().getBrokenDependencies();
+			if (brokenDependencies != null && brokenDependencies.contains(uri)) {
+				return true;
+			}
+		}
+
+		return themesPattern.matcher(uri).matches() && skipThemes();
+	}
 
 	protected void queueSubFolders(String uri, FolderBean folderBean) {
 		String[] subFolders = folderBean.getSubFolders();
@@ -391,14 +436,13 @@ public class ResourceImporter extends BaseImporterModule implements ResourceImpo
 			folderBean = (FolderBean) deserialize(folderPath, configuration.getFolderDetailsFileName(), configuration.getSerializer());
 		} else {
 			if (required) {
-                // Adding non localized message cause import-export tool does not support localization.
-                StringBuilder message = new StringBuilder("Folder details for folder ");
-                message.append(uri);
-                message.append(" were not found in the import information.");
-                commandOut.info(message.toString());
-				throw new JSException(message.toString());       
+                String message = "Folder details for folder \"" + uri + "\"" +
+						" were not found in the import information.";
+				commandOut.error(message);
+				throw new JSException(message);
 			}
  		}
+
 		return folderBean;
 	}
 	
@@ -420,7 +464,7 @@ public class ResourceImporter extends BaseImporterModule implements ResourceImpo
 	
 	protected Folder createFolder(FolderBean folderBean) {
 		Folder folder = new FolderImpl();
-		folderBean.copyTo(folder);
+		folderBean.copyTo(folder, importContext);
 		folder.setCreationDate(folderBean.getCreationDate());
 		folder.setUpdateDate(folderBean.getUpdateDate());
 		folder.setParentFolder(prependedPath(folder.getParentFolder()));
@@ -431,7 +475,10 @@ public class ResourceImporter extends BaseImporterModule implements ResourceImpo
 		String importUri = prependedPath(uri);
 		if (!importedURIs.contains(uri) && !skipResource(uri)) {
 			if (ignoreMissing && !hasResourceBeanData(uri)) {
-				commandOut.info("Resource " + uri + " data missing from the catalog, skipping from import");
+				String warningMessage = "Resource \"" + uri + "\" data missing from the catalog, skipping from import";
+				//logWarning(ExportImportWarningCode.IMPORT_RESOURCE_DATA_MISSING, new String[]{uri}, warningMessage);
+				commandOut.warn(warningMessage);
+				importedURIs.add(uri);
 			} else {
                 if (!hasResourceBeanData(uri)) {
                     throw new ResourceBeanDataNotFoundException(uri);
@@ -442,9 +489,19 @@ public class ResourceImporter extends BaseImporterModule implements ResourceImpo
                     update = getIncludeSettingsFlag();
                 }
 
- 				Resource resource = repository.getResource(executionContext, importUri);
+				Resource resource = null;
+				try {
+					resource = repository.getResource(executionContext, importUri);
+				} catch (Exception e) {
+					if (handledException(e, importUri)) {
+						importedURIs.add(uri);
+						return importUri;
+					} else {
+						throwRuntimeException(e);
+					}
+				}
 
-                if (executionContext.getAttributes() == null) {
+				if (executionContext.getAttributes() == null) {
                     executionContext.setAttributes(new ArrayList());
                 }
                 if (!executionContext.getAttributes().contains(RepositoryService.IS_IMPORTING)) {
@@ -458,15 +515,20 @@ public class ResourceImporter extends BaseImporterModule implements ResourceImpo
 					resource = createResource(bean);
 
                     commandOut.debug("About to save resource " + importUri);
+					boolean saved = false;
                     try {
                         repository.saveResource(executionContext, resource);
-                    } catch (AccessDeniedException er) {
-                        this.updateSecuredResource(executionContext, resource);
-                    }
+						saved = true;
+                    } catch (Exception er) {
+						if (!handledException(er, resource.getURIString())) {
+							throwRuntimeException(er);
+						}
+					}
 
-                    setPermissions(resource, bean.getPermissions(), false);
-					
-					commandOut.info("Imported resource " + importUri);
+					if (saved) {
+						setPermissions(resource, bean.getPermissions(), false);
+						commandOut.info("Imported resource " + importUri);
+					}
 				} else if (update) {
 					registerUpdateResource(importUri);
 					
@@ -481,23 +543,31 @@ public class ResourceImporter extends BaseImporterModule implements ResourceImpo
 						updated.setVersion(resource2.getVersion());
 						handleSubResources(resource, updated);
                         commandOut.debug("About to save resource " + importUri);
+						boolean saved = false;
                         try {
                             repository.saveResource(executionContext, updated);
-                        } catch (AccessDeniedException er) {
-                            this.updateSecuredResource(executionContext, resource);
-                        }
-                        if (bean.isExportedWithPermissions()){
-                            configuration.getPermissionService().deleteObjectPermissionForObject(executionContext, resource);
-                        }
-                        setPermissions(resource, bean.getPermissions(), false);
+							saved = true;
+                        } catch (Exception er) {
+							if (!handledException(er, resource.getURIString())) {
+								throwRuntimeException(er);
+							}
+						}
 
-                        commandOut.info("Updated resource " + importUri);
+						if (saved) {
+							if (bean.isExportedWithPermissions()) {
+								deleteObjectPermissions(resource);
+							}
+							setPermissions(resource, bean.getPermissions(), false);
+
+							commandOut.info("Updated resource " + importUri);
+						}
 					} else {
-						commandOut.warn("Resource " + importUri 
-								+ " already exists in the repository and has a different type than in the catalog, not updating");
+						String warningMessage = "Resource \"" + importUri + "\" already exists in " +
+								"the repository and has a different type than in the catalog, not updating";
+						logWarning(ExportImportWarningCode.IMPORT_RESOURCE_DIFFERENT_TYPE, new String[]{importUri}, warningMessage);
 					}
 				} else {
-					commandOut.warn("Resource " + importUri + " already exists, not importing");
+					commandOut.warn("Resource \"" + importUri + "\" already exists, not importing");
 				}
 
                 if (importingSettings) {
@@ -510,9 +580,107 @@ public class ResourceImporter extends BaseImporterModule implements ResourceImpo
 		return importUri;
 	}
 
-    protected void updateSecuredResource(ExecutionContext context, Resource resource) {
-        commandOut.info("Access denied for " + resource.getURIString());
-    }
+	protected void deleteObjectPermissions(Resource resource) {
+		@SuppressWarnings("unchecked")
+		List<ObjectPermission> objectPermissions = configuration.getPermissionService().
+				getObjectPermissionsForObject(executionContext, resource);
+		if (objectPermissions != null) {
+			for (ObjectPermission objectPermission : objectPermissions) {
+				try {
+					configuration.getPermissionService().deleteObjectPermission(executionContext, objectPermission);
+				} catch (Exception ex) {
+					if (ex instanceof AccessDeniedException
+							|| ExceptionUtils.getRootCause(ex) instanceof  AccessDeniedException) {
+						PermissionRecipient permissionRecipient =
+								toPermissionRecipient(objectPermission.getPermissionRecipient());
+
+						String msg = "Access denied. Cannot delete permission for resource \"" +
+								objectPermission.getURI() + "\" with " +
+								permissionRecipient.getRecipientType() + " "
+								+ makeRecipientId(permissionRecipient);
+
+						logWarning(ExportImportWarningCode.IMPORT_ACCESS_DENIED, new String[]{objectPermission.getURI()}, msg);
+					} else {
+						throwRuntimeException(ex);
+					}
+				}
+			}
+		}
+	}
+
+	protected boolean handledException(Exception ex, String uri) {
+		String msg = null;
+		ExportImportWarningCode warningCode = null;
+
+		String[] warningParams = new String[]{uri};
+		if (ex instanceof AccessDeniedException
+				|| ExceptionUtils.getRootCause(ex) instanceof AccessDeniedException) {
+			msg  = "Access denied for \"" + uri + "\"";
+			warningCode = ExportImportWarningCode.IMPORT_ACCESS_DENIED;
+		}
+		else if (ex instanceof JSResourceNotFoundException
+				|| ExceptionUtils.getRootCause(ex) instanceof JSResourceNotFoundException) {
+			Throwable rootCause = ex;
+			if (!(ex instanceof JSResourceNotFoundException)) {
+				rootCause = ExceptionUtils.getRootCause(ex);
+			}
+			msg  = "Resource \"" + uri + "\" cannot be found.";
+			warningCode = ExportImportWarningCode.IMPORT_RESOURCE_NOT_FOUND;
+			JSException jsException = (JSException) rootCause;
+			String referenceUri = extractResourceUriFromException(jsException);
+			if (referenceUri != uri) {
+				msg = "Reference resource \"" + referenceUri + "\" not found when importing resource \"" + uri + "\".";
+				warningCode = ExportImportWarningCode.IMPORT_REFERENCE_RESOURCE_NOT_FOUND;
+				warningParams = new String[]{referenceUri, uri};
+			}
+		}
+		else if (ex.getMessage() != null && HibernateRepositoryServiceImpl.JS_EXCEPTION_FOLDER_TOO_LONG_URI.equals(ex.getMessage())) {
+			Exception rootException = ex;
+			Throwable rootCause = ExceptionUtils.getRootCause(ex);
+			if (rootCause instanceof Exception) {
+				rootException = (Exception) rootCause;
+			}
+			if (rootException instanceof JSException) {
+				msg = "The URI \"" + uri + "\" is too long. The maximum length is "
+						+ ((JSException) rootException).getArgs()[0] + " characters.";
+				warningParams = new String[]{uri, Integer.toString((Integer)((JSException) rootException).getArgs()[0])};
+			} else {
+				msg = "The URI \"" + uri + "\" is too long.";
+			}
+
+			warningCode = ExportImportWarningCode.IMPORT_RESOURCE_URI_TOO_LONG;
+		}
+
+		if (msg != null) {
+			logWarning(warningCode, warningParams, msg);
+			return true;
+		}
+
+		return false;
+	}
+
+	protected String extractResourceUriFromException(JSException jsException) {
+		if (jsException.getArgs() != null && jsException.getArgs().length > 0 && jsException.getArgs()[0] instanceof String) {
+			return (String) jsException.getArgs()[0];
+		}
+		return null;
+	}
+
+	protected void logWarning(ExportImportWarningCode warningCode, String[] parameters, String message) {
+		if (importContext.getImportTask().getWarnings() != null) {
+			importContext.getImportTask().getWarnings()
+					.add(new WarningDescriptor(warningCode.toString(), parameters, message));
+		}
+		commandOut.warn(message);
+	}
+
+	private void throwRuntimeException(Exception ex) {
+		if (ex instanceof RuntimeException) {
+			throw (RuntimeException) ex;
+		} else {
+			throw new JSExceptionWrapper(ex);
+		}
+	}
 
 	protected void handleSubResources(Resource resource, Resource clientResource) {
 		;
@@ -552,6 +720,7 @@ public class ResourceImporter extends BaseImporterModule implements ResourceImpo
 	protected ResourceBean readResourceBean(String uri) {
 		String resourceFileName = getResourceFileName(uri);
 		ResourceBean bean = (ResourceBean) deserialize(configuration.getResourcesDirName(), resourceFileName, configuration.getSerializer());
+
 		return bean;
 	}
 	
@@ -582,14 +751,25 @@ public class ResourceImporter extends BaseImporterModule implements ResourceImpo
 			if (referenceURI == null || referenceURI.equals("")) {
                 return null;
             }
-			
+
+			String brokenDependenciesStrategy = importContext.getImportTask()
+					.getParameters().getParameterValue(ImportExportService.BROKEN_DEPENDENCIES);
+			boolean ignoreMissing = BrokenDependenciesStrategy.SKIP.getLabel().equals(brokenDependenciesStrategy)
+					|| BrokenDependenciesStrategy.INCLUDE.getLabel().equals(brokenDependenciesStrategy);
+
 			 // Import referenced URI, or the containing URI
 			 // In some cases the containing URI needs to be imported instead of the specific resource
 			 if (beanReference.useContainingURI()) {
-			     importResource(beanReference.getContainingURI(), false);
+			     importResource(beanReference.getContainingURI(), ignoreMissing);
 			 } else {
-				 importResource(referenceURI, false);
+				 importResource(referenceURI, ignoreMissing);
 			 }
+
+			if (!importContext.getNewGeneratedTenantIds().isEmpty()) {
+				referenceURI = TenantStrHolderPattern.TENANT_FOLDER_URI
+						.replaceWithNewTenantIds(importContext.getNewGeneratedTenantIds(), referenceURI);
+			}
+
 			reference = new ResourceReference(prependedPath(referenceURI));
 		}
 		return reference;
@@ -627,7 +807,11 @@ public class ResourceImporter extends BaseImporterModule implements ResourceImpo
 	}
 
 	public String handleResource(String uri) {
-		return handleResource(uri, false);
+		String brokenDependenciesStrategy = importContext.getImportTask()
+				.getParameters().getParameterValue(ImportExportService.BROKEN_DEPENDENCIES);
+		boolean ignoreMissing = BrokenDependenciesStrategy.INCLUDE.getLabel().equals(brokenDependenciesStrategy);
+
+		return handleResource(uri, ignoreMissing);
 	}
 
 	public String handleResource(String uri, boolean ignoreMissing) {

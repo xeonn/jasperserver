@@ -23,6 +23,8 @@ package com.jaspersoft.jasperserver.search.filter;
 
 import java.io.Serializable;
 
+import org.hibernate.criterion.Criterion;
+
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
 import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.util.ResourceCriterionUtils;
 import com.jaspersoft.jasperserver.api.metadata.common.util.DatabaseCharactersEscapeResolver;
@@ -34,7 +36,7 @@ import com.jaspersoft.jasperserver.search.service.RepositorySearchCriteria;
  * Text filter.
  *
  * @author Yuriy Plakosh
- * @version $Id: TextFilter.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: TextFilter.java 58870 2015-10-27 22:30:55Z esytnik $
  */
 public class TextFilter extends BaseSearchFilter implements Serializable {
     private DatabaseCharactersEscapeResolver databaseCharactersEscapeResolver;
@@ -44,8 +46,10 @@ public class TextFilter extends BaseSearchFilter implements Serializable {
     }
 
     public void applyRestrictions(String type, ExecutionContext context, SearchCriteria criteria) {
-
-        criteria.add(ResourceCriterionUtils.getTextCriterion(getText(context)));
+    	Criterion criterion = ResourceCriterionUtils.getTextCriterion(getText(context));
+    	if(criterion!=null){
+    		criteria.add(criterion);
+    	}
     }
 
     protected String getText(ExecutionContext context) {

@@ -24,6 +24,7 @@ import com.jaspersoft.jasperserver.api.metadata.common.domain.Folder;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceLookup;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.client.FolderImpl;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.client.ResourceLookupImpl;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConversionOptions;
 import com.jaspersoft.jasperserver.dto.resources.ClientFile;
 import com.jaspersoft.jasperserver.dto.resources.ClientResource;
 import com.jaspersoft.jasperserver.dto.resources.ClientResourceLookup;
@@ -49,7 +50,7 @@ import static org.testng.Assert.*;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: ResourceConverterProviderImplTest.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: ResourceConverterProviderImplTest.java 58870 2015-10-27 22:30:55Z esytnik $
  */
 public class ResourceConverterProviderImplTest {
     @InjectMocks

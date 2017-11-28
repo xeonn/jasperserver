@@ -25,6 +25,8 @@ import com.jaspersoft.jasperserver.api.metadata.common.domain.DataType;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceReference;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.client.DataTypeImpl;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConversionOptions;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConverter;
 import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.AwsReportDataSource;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.client.AwsReportDataSourceImpl;
@@ -54,7 +56,7 @@ import static org.testng.Assert.*;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: ResourceReferenceConverterTest.java 55164 2015-05-06 20:54:37Z mchan $
+ * @version $Id: ResourceReferenceConverterTest.java 58870 2015-10-27 22:30:55Z esytnik $
  */
 public class ResourceReferenceConverterTest {
     private ResourceReferenceConverter converter;

@@ -26,9 +26,11 @@ import com.jaspersoft.jasperserver.api.engine.scheduling.domain.ReportJob;
 import com.jaspersoft.jasperserver.api.engine.scheduling.domain.ReportJobMailNotification;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ContentResource;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.DataContainer;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.Folder;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.MemoryDataContainer;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.util.DataContainerResource;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.util.DataContainerStreamUtil;
+import com.jaspersoft.jasperserver.dto.common.ErrorDescriptor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.quartz.JobExecutionException;
@@ -51,7 +53,7 @@ import java.util.zip.ZipOutputStream;
 
 /**
  * @author Ivan Chan (ichan@jaspersoft.com)
- * @version $Id: ReportExecutionJobMailNotificationImpl.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: ReportExecutionJobMailNotificationImpl.java 58960 2015-11-03 15:00:31Z idornach $
  */
 public class ReportExecutionJobMailNotificationImpl implements ReportExecutionJobMailNotification {
 
@@ -82,25 +84,27 @@ public class ReportExecutionJobMailNotificationImpl implements ReportExecutionJo
                     byte resultSendType = jobDetails.getMailNotification().getResultSendType();
 
 					if ((resultSendType == ReportJobMailNotification.RESULT_SEND_EMBED) || (resultSendType == ReportJobMailNotification.RESULT_SEND_EMBED_ZIP_ALL_OTHERS)) {
-                        List attachmentReportList = new ArrayList();
+                        if (resultSendType == ReportJobMailNotification.RESULT_SEND_EMBED_ZIP_ALL_OTHERS) {
+                            // put all the attachments in 1 zip file
+                            attachOutputs(job, messageHelper, reportOutputs);
+                        }
                         for (Iterator it = reportOutputs.iterator(); it.hasNext();) {
 							ReportOutput output = (ReportOutput) it.next();
-                            if ((!isEmailBodyOccupied) && output.getFileType().equals(ContentResource.TYPE_HTML) && (job.exceptions.isEmpty())) {
+                            boolean isOutputFileTypeHTML = output.getFileType().equals(ContentResource.TYPE_HTML);
+                            if (resultSendType == ReportJobMailNotification.RESULT_SEND_EMBED) {
+                                // save the rest of the output as attachments
+                                if (isOutputFileTypeHTML){
+                                    attachZippedOutput(job, messageHelper, output);
+                                } else {
+                                    attachOutput(job, messageHelper, output, false);
+                                }
+                            }
+                            if ((!isEmailBodyOccupied) && isOutputFileTypeHTML && (job.exceptions.isEmpty())) {
                                 // only embed html output
                                 embedOutput(messageHelper, output);
                                 isEmailBodyOccupied = true;
-                            } else if (resultSendType == ReportJobMailNotification.RESULT_SEND_EMBED) {
-                                // save the rest of the output as attachments
-							    attachOutput(job, messageHelper, output, (resultSendType == ReportJobMailNotification.RESULT_SEND_ATTACHMENT));
-                            } else {  // RESULT_SEND_EMBED_ZIP_ALL_OTHERS
-                                attachmentReportList.add(output);
                             }
 						}
-                        if (attachmentReportList.size() > 0) {
-                            // put the rest of attachments in 1 zip file
-                            attachOutputs(job, messageHelper, attachmentReportList);
-
-                        }
                     } else if (resultSendType == ReportJobMailNotification.RESULT_SEND_ATTACHMENT ||
                         resultSendType == ReportJobMailNotification.RESULT_SEND_ATTACHMENT_NOZIP) {
 						for (Iterator it = reportOutputs.iterator(); it.hasNext();) {
@@ -115,15 +119,15 @@ public class ReportExecutionJobMailNotificationImpl implements ReportExecutionJo
 					}
 				}
                 if (mailNotification.isIncludingStackTraceWhenJobFails()) {
-                    if (!job.exceptions.isEmpty()) {
-                        for (Iterator it = job.exceptions.iterator(); it.hasNext();) {
-                            ExceptionInfo exception = (ExceptionInfo) it.next();
+					for (ErrorDescriptor ed : job.exceptions) {
+						messageText.append("\n");
+						messageText.append(ed.getMessage());
 
-                            messageText.append("\n");
-                            messageText.append(exception.getMessage());
+						final String errorUid = ed.getErrorUid();
+						if (errorUid != null && !errorUid.isEmpty())
+							messageText.append(" Error Uid: " + errorUid);
 
-                            attachException(messageHelper, exception);
-                        }
+						attachException(messageHelper, ed);
                     }
                 }
                 String text = mailNotification.getMessageText();
@@ -139,6 +143,58 @@ public class ReportExecutionJobMailNotificationImpl implements ReportExecutionJo
 			}
 		}
 	}
+
+
+    protected void attachZippedOutput(ReportExecutionJob job, MimeMessageHelper messageHelper, ReportOutput output)
+            throws MessagingException, JobExecutionException {
+        String attachmentName;
+        DataContainer attachmentData;
+
+        attachmentName = output.getFilename();
+        List<ReportOutput> outputs = new ArrayList<ReportOutput>();
+        outputs.add(output);
+
+        try {
+            attachmentName = MimeUtility.encodeWord(attachmentName, job.getCharacterEncoding(), null);
+        } catch (UnsupportedEncodingException e) {
+            throw new JSExceptionWrapper(e);
+        }
+
+        for (Iterator it = output.getChildren().iterator(); it.hasNext();) {
+            ReportOutput child = (ReportOutput) it.next();
+            outputs.add(child);
+        }
+
+        attachmentData = job.createDataContainer();
+        createZipOutput(new ZipOutputStream(attachmentData.getOutputStream()), outputs);
+        attachmentName = output.getFilename() + ".zip";
+        messageHelper.addAttachment(attachmentName, new DataContainerResource(attachmentData));
+    }
+
+
+    protected void createZipOutput(ZipOutputStream zipOut, List<ReportOutput> outputs) {
+        if (null == outputs || null == zipOut) return;
+
+        boolean close = true;
+        try {
+            zipOutput(outputs, zipOut);
+            zipOut.finish();
+            zipOut.flush();
+            close = false;
+            zipOut.close();
+        } catch (IOException e) {
+            throw new JSExceptionWrapper(e);
+        } finally {
+            if (close) {
+                try {
+                    zipOut.close();
+                } catch (IOException e) {
+                    log.error("Error closing zip output stream", e);
+                }
+            }
+        }
+    }
+
 
     protected void appendRepositoryLinks(ReportExecutionJob job, StringBuffer notificationMessage, List reportOutputs) {
 		if (reportOutputs != null && !reportOutputs.isEmpty()) {
@@ -187,9 +243,13 @@ public class ReportExecutionJobMailNotificationImpl implements ReportExecutionJo
             if (output.getFileType().equals(ContentResource.TYPE_HTML)) {
                 if (primaryPage == null) primaryPage = new StringBuffer(new String(output.getData().getData()));
                 int fromIndex = 0;
+                boolean findChild = false;
                 while ((fromIndex = primaryPage.indexOf("src=\""+ childName + "\"", fromIndex)) > 0) {
                     primaryPage.insert(fromIndex + 5, "cid:");
+                    findChild = true;
                 }
+                // for zipped attachment & embed resources - with repo folder hierarchy, long child file name
+                if (!findChild) cutFolderPathFromSrc(output.getFilename(), childName, primaryPage);
             }
         }
 
@@ -201,7 +261,21 @@ public class ReportExecutionJobMailNotificationImpl implements ReportExecutionJo
             DataContainerResource dataContainerResource = new DataContainerResource(child.getData());
             dataContainerResource.setFilename(childName);
             messageHelper.addInline(childName, dataContainerResource);
+        }
+    }
 
+    private void cutFolderPathFromSrc(String folderName, String childName, StringBuffer primaryPage) {
+        int fromIndex = 0;
+        final String HTML_SRC = "src=\"";
+        final String HTML_CID = "cid:";
+        final String FOLDER_SUFFIX = "_files";
+
+        String pattern = folderName + FOLDER_SUFFIX + Folder.SEPARATOR;
+        while ((fromIndex = primaryPage.indexOf(HTML_SRC + pattern + childName, fromIndex)) > 0) {
+            int insertIndex = fromIndex + HTML_SRC.length();
+            int endIndex = insertIndex + pattern.length();
+            primaryPage.replace(insertIndex, endIndex, HTML_CID);
+            fromIndex = insertIndex;
         }
     }
 
@@ -253,6 +327,15 @@ public class ReportExecutionJobMailNotificationImpl implements ReportExecutionJo
         }
     }
 
+    protected void zipOutput(List<ReportOutput> outputs, ZipOutputStream zipOut) throws IOException {
+        for (int i = 0; i < outputs.size(); i++) {
+            ReportOutput output = outputs.get(i);
+
+            zipOut.putNextEntry(new ZipEntry(output.getFilename()));
+            DataContainerStreamUtil.pipeDataAndCloseInput(output.getData().getInputStream(), zipOut);
+            zipOut.closeEntry();
+        }
+    }
 
     protected void attachOutput(ReportExecutionJob job, MimeMessageHelper messageHelper, ReportOutput output, boolean useZipFormat) throws MessagingException, JobExecutionException {
 		String attachmentName;
@@ -330,15 +413,17 @@ public class ReportExecutionJobMailNotificationImpl implements ReportExecutionJo
 	}
 
 
-    protected static void attachException(MimeMessageHelper messageHelper, ExceptionInfo exceptionInfo) throws MessagingException {
-		Throwable exception = exceptionInfo.getException();
-		if (exception == null) {
+    protected static void attachException(MimeMessageHelper messageHelper, ErrorDescriptor errorDescriptor) throws MessagingException {
+		String[] stackTrace = errorDescriptor.getParameters();
+		Throwable exception = errorDescriptor.getException();
+		if (stackTrace == null || stackTrace.length == 0) {
 			return;
 		}
 
 		ByteArrayOutputStream bufOut = new ByteArrayOutputStream();
 		PrintStream printOut = new PrintStream(bufOut);
-		exception.printStackTrace(printOut);
+		for (String stack : stackTrace)
+			printOut.append(stack);
 		printOut.flush();
 
 		String attachmentName = "exception_" + System.identityHashCode(exception) + ".txt";

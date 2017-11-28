@@ -24,7 +24,7 @@
  * Context menu.
  *
  * @author: Andriy Godovanets
- * @version: $Id: ContextMenu.js 812 2015-01-27 11:01:30Z psavushchik $
+ * @version: $Id: ContextMenu.js 1658 2015-10-05 16:13:24Z obobruyk $
  */
 
 define(function (require) {
@@ -35,27 +35,27 @@ define(function (require) {
         json3 = require("json3"),
         _ = require("underscore");
 
-    return Menu.extend(
-        /** @lends ContextMenu.prototype */
-        {
+    return Menu.extend(/** @lends ContextMenu.prototype */{
         /**
          * @constructor ContextMenu
          * @classdesc Context menu that is shown at specified position.
          * @extends Menu
-         * @param {array} options - Array containing objects with "label" and "action" properties, e.g. [ { label: "Save Dashboard", action: "save" } ].
-         * @param {object} [additionalSettings] - Additional settings object. @see {@link Menu.js} for more information.
+         * @param {array} options - Options for {@link Menu}.
+         * @param {object} [additionalSettings] - Additional settings object. See {@link Menu} for more information.
          * @param {number} [additionalSettings.topPadding=5] - Top padding of context menu.
-         * @param {nubmer} [additionalSettings.leftPadding=5] - Left padding of context menu.
-         * @throws "Menu should have options" error if no menu options were passed to constructor.
-         * @fires option:action events when menu option is selected.
+         * @param {number} [additionalSettings.leftPadding=5] - Left padding of context menu.
          * @example
-         *  var contextMenu = new ContextMenu([ { label: "Save Dashboard", action: "save" } ]);
+         *      var contextMenu = new ContextMenu([ { label: "Save Dashboard", action: "save" } ]);
          */
         constructor: function(options, additionalSettings) {
             Menu.call(this, options, additionalSettings);
 
             this.topPadding = additionalSettings && additionalSettings.topPadding || 5;
             this.leftPadding = additionalSettings && additionalSettings.leftPadding || 5;
+
+            this.hideOnMouseLeave = additionalSettings && additionalSettings.hideOnMouseLeave || false;
+
+            this.hideOnMouseLeave && this.$el.on("mouseleave", this._tryHide);
 
             _.bindAll(this, "_tryHide");
         },
@@ -71,14 +71,13 @@ define(function (require) {
         },
 
         /**
-         * @method show
          * @description Shows context menu at specified position.
          * @param {object} position - Position object.
-         * @param {object} container - containment of context menu.
          * @param {number} position.left - Absolute position in px of context menu from left edge of the screen.
          * @param {number} position.top - Absolute position in px of context menu from top edge of the screen.
-         * @param {number} position.padding - Padding with what context menu will be shown within container.
-         * @throws Error if position object is missing or left/top properties are missing.
+         * @param {number} [position.padding] - Padding with what context menu will be shown within container.
+         * @param {jQuery} [container=$("body")] - containment of context menu.
+         * @throws {Error} Required params (top, left) missing
          */
         show: function(position, container) {
             if (!position || !_.isNumber(position.top) || !_.isNumber(position.left)) {
@@ -118,11 +117,15 @@ define(function (require) {
             return Menu.prototype.show.apply(this, arguments);
         },
 
+
+
         /**
          * @description Removes ContextMenu from DOM and removes events handlers from BODY.
          */
         remove: function() {
             $(document.body).off("click.contextMenu", this._tryHide);
+
+            this.hideOnMouseLeave && this.$el.off("mouseleave", this._tryHide);
 
             Menu.prototype.remove.apply(this, arguments);
         }

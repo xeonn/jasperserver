@@ -128,8 +128,12 @@
         <if test="not (flowScope.prevForm == null or flowScope.prevForm == '')" then="${flowScope.prevForm}" else="done"/>
     </decision-state>
 
-    <view-state id="errorPage" view="modules/system/errorPage"/>
-    <view-state id="jasperInteractiveErrorPage" view="modules/system/jasperInteractiveErrorPage"/>
+    <view-state id="errorPage" view="modules/system/errorPage">
+        <on-entry>
+            <evaluate expression="errorPageHandlerAction"/>
+        </on-entry>
+    </view-state>
+
 <!--<view-state id="accessDeniedPage" view="modules/system/AccessDeniedPage"/>-->
 
     <global-transitions>
@@ -147,9 +151,8 @@
        		<evaluate expression="viewReportActionBean.initInputControls"/>       		
        		<evaluate expression="viewReportActionBean.resetSearchCache"/>
        </transition>
-       
+
        <!--<transition on-exception="org.springframework.security.access.AccessDeniedException" to="accessDeniedPage"/>-->
-       <transition on-exception="net.sf.jasperreports.web.JRInteractiveRuntimeException" to="jasperInteractiveErrorPage"/>
         <transition on-exception="java.lang.Throwable" to="errorPage"/>
     </global-transitions>
 

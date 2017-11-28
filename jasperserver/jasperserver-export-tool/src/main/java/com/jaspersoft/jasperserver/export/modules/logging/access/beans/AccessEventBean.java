@@ -20,12 +20,11 @@
  */
 package com.jaspersoft.jasperserver.export.modules.logging.access.beans;
 
-import com.jaspersoft.jasperserver.export.modules.repository.beans.ResourceBean;
-import com.jaspersoft.jasperserver.export.modules.repository.ResourceExportHandler;
-import com.jaspersoft.jasperserver.export.modules.repository.ResourceImportHandler;
-import com.jaspersoft.jasperserver.export.modules.common.TenantQualifiedName;
-import com.jaspersoft.jasperserver.export.modules.logging.access.AccessEventsImportHandler;
 import com.jaspersoft.jasperserver.api.logging.access.domain.AccessEvent;
+import com.jaspersoft.jasperserver.export.modules.ImporterModuleContext;
+import com.jaspersoft.jasperserver.export.modules.common.TenantQualifiedName;
+import com.jaspersoft.jasperserver.export.modules.common.TenantStrHolderPattern;
+import com.jaspersoft.jasperserver.export.modules.logging.access.AccessEventsImportHandler;
 
 import java.util.Date;
 
@@ -49,11 +48,22 @@ public class AccessEventBean {
         setResourceUri(accessEvent.getResource().getURI());
     }
 
-    public void copyTo(AccessEvent accessEvent, AccessEventsImportHandler accessImportHandler) {
-        accessEvent.setUser(accessImportHandler.resolveUser(new TenantQualifiedName(getTenantId(), getUserName())));
+    public void copyTo(AccessEvent accessEvent,
+                       AccessEventsImportHandler accessImportHandler,
+                       ImporterModuleContext context) {
+        String tenantId = getTenantId();
+        String resourceUri = getResourceUri();
+        if (!context.getNewGeneratedTenantIds().isEmpty()) {
+            tenantId = TenantStrHolderPattern.TENANT_ID
+                    .replaceWithNewTenantIds(context.getNewGeneratedTenantIds(), tenantId);
+            resourceUri = TenantStrHolderPattern.TENANT_FOLDER_URI
+                    .replaceWithNewTenantIds(context.getNewGeneratedTenantIds(), resourceUri);
+        }
+
+        accessEvent.setUser(accessImportHandler.resolveUser(new TenantQualifiedName(tenantId, getUserName())));
         accessEvent.setEventDate(getEventDate());
         accessEvent.setUpdating(isUpdating());
-        accessEvent.setResource(accessImportHandler.resolveResource(getResourceUri()));
+        accessEvent.setResource(accessImportHandler.resolveResource(resourceUri));
     }
 
     public String getUserName() {

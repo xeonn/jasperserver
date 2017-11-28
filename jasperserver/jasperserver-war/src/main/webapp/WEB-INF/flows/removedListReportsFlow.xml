@@ -40,7 +40,11 @@
       <if test="not (flowScope.prevForm == null or flowScope.prevForm == '')" then="${flowScope.prevForm}" else="listReports"/>
    </decision-state>
 
-   <view-state id="errorPage" view="modules/system/errorPage"/>
+   <view-state id="errorPage" view="modules/system/errorPage">
+       <on-entry>
+           <evaluate expression="errorPageHandlerAction"/>
+       </on-entry>
+   </view-state>
 
    <global-transitions>
       <transition on="backFromErrorPage" to="backFromError"/>

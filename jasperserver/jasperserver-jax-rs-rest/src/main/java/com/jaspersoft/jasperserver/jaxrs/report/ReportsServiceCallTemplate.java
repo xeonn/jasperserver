@@ -27,7 +27,7 @@ import com.jaspersoft.jasperserver.remote.common.RemoteServiceInTemplateCaller;
 import com.jaspersoft.jasperserver.remote.exception.AccessDeniedException;
 import com.jaspersoft.jasperserver.remote.exception.ResourceAlreadyExistsException;
 import com.jaspersoft.jasperserver.remote.exception.ResourceNotFoundException;
-import com.jaspersoft.jasperserver.remote.exception.xml.ErrorDescriptor;
+import com.jaspersoft.jasperserver.dto.common.ErrorDescriptor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -37,7 +37,7 @@ import javax.ws.rs.core.Response;
 
 /**
  * @author Yaroslav.Kovalchyk
- * @version $Id: ReportsServiceCallTemplate.java 51947 2014-12-11 14:38:38Z ogavavka $
+ * @version $Id: ReportsServiceCallTemplate.java 57603 2015-09-15 17:20:48Z psavushc $
  */
 public class ReportsServiceCallTemplate<T> implements RemoteServiceCallTemplate<T> {
     private static final Log log = LogFactory.getLog(ReportsServiceCallTemplate.class);
@@ -53,9 +53,9 @@ public class ReportsServiceCallTemplate<T> implements RemoteServiceCallTemplate<
             response = Response.status(Response.Status.FORBIDDEN).entity(e.getErrorDescriptor()).build();
         }catch (JSResourceNotFoundException e){
             response = Response.status(Response.Status.NOT_FOUND).entity(
-                    new ErrorDescriptor.Builder().setMessage("Resource not found")
+                    new ErrorDescriptor().setMessage("Resource not found")
                             .setErrorCode(ResourceNotFoundException.ERROR_CODE_RESOURCE_NOT_FOUND)
-                            .setParameters(e.getArgs()).getErrorDescriptor())
+                            .setParameters(e.getArgs()))
                     .build();
         }catch (org.springframework.security.access.AccessDeniedException e){
             response = Response.status(Response.Status.FORBIDDEN).entity(new AccessDeniedException(e.getMessage()).getErrorDescriptor()).build();

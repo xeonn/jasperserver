@@ -52,6 +52,11 @@ public class TenantServiceMock implements TenantService {
         return null;
     }
 
+    @Override
+    public List<Tenant> getAllSubTenantList(ExecutionContext context, String parentTenantId, String text, int depth, String sortBy) {
+        return null;
+    }
+
     public int getNumberOfTenants(ExecutionContext context) {
         return 0;  //To change body of implemented methods use File | Settings | File Templates.
     }

@@ -22,12 +22,17 @@
 
 /**
  * @author: Kostiantyn Tsaregradskyi
- * @version: $Id: DialogWithModelInputValidation.js 307 2014-10-22 13:15:28Z psavushchik $
+ * @version: $Id: DialogWithModelInputValidation.js 1760 2015-10-27 18:45:31Z yplakosh $
  */
 
 define(function (require) {
     "use strict";
 
+    // THIS CLASS IS DEPRECATED! DO NOT USE IT FOR NEW PROJECTS!!!
+    // As alternative you should use Epoxy and epoxy binders to perform validation on model fields
+    // You can find out how to use Epoxy at http://wiki.jaspersoft.com/display/FAF/Data-binding+with+Epoxy.js
+    // Also for real world example you can check out Properties dialogs in bi-dashboard
+    // (dashboard/view/designer/propertiesDialog/view/PropertiesDialogView) and its templates.
 
     var $ = require("jquery"),
         _ = require("underscore"),
@@ -83,7 +88,24 @@ define(function (require) {
             $parentEl.find(".message.warning").text(error.toString());
         },
 
-        clearValidationErrors: function() {
+	    // simpler version of 'validField' which works always on the same
+	    // context ('view' parameter is absent), and selector does not build from two parameters
+	    validField: function(selector) {
+		    var $parentEl = this.$(selector).parent();
+		    $parentEl.removeClass("error");
+		    $parentEl.find(".message.warning").text("");
+	    },
+
+	    // simpler version of 'fieldIsInvalid' which works always on the same
+	    // context ('view' parameter is absent), and selector does not build from two parameters
+	    // also, the order of parameters has changed
+	    invalidField: function(selector, error) {
+		    var $parentEl = this.$(selector).parent();
+		    $parentEl.addClass("error");
+		    $parentEl.find(".message.warning").text(error.toString());
+	    },
+
+	    clearValidationErrors: function() {
             this.$("label").removeClass("error");
             this.$(".message.warning").text("");
         },

@@ -39,7 +39,7 @@ import com.jaspersoft.jasperserver.api.metadata.jasperreports.service.ReportData
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: JdbcReportDataSourceServiceFactory.java 50011 2014-10-09 16:57:26Z vzavadskii $
+ * @version $Id: JdbcReportDataSourceServiceFactory.java 58828 2015-10-24 00:23:32Z mchan $
  */
 public class JdbcReportDataSourceServiceFactory implements ReportDataSourceServiceFactory {
 
@@ -125,8 +125,15 @@ public class JdbcReportDataSourceServiceFactory implements ReportDataSourceServi
 			throw new JSException("jsexception.invalid.jdbc.datasource", new Object[] {reportDataSource.getClass()});
 		}
         JdbcReportDataSource jdbcDataSource = (JdbcReportDataSource) reportDataSource;
+        String driverClass = jdbcDataSource.getDriverClass();
+        String userName = jdbcDataSource.getUsername();
+        String password = jdbcDataSource.getPassword();
+        if (driverClass.startsWith("tibcosoftware.jdbc")) {
+            userName = (( (userName != null) && (!userName.isEmpty())) ? userName : "dummy");
+            password = (( (password != null) && (!password.isEmpty())) ? password : "dummy");
+        }
+        DataSource dataSource = getPoolDataSource(driverClass, jdbcDataSource.getConnectionUrl(), userName, password);
 
-		DataSource dataSource = getPoolDataSource(jdbcDataSource.getDriverClass(), jdbcDataSource.getConnectionUrl(), jdbcDataSource.getUsername(), jdbcDataSource.getPassword());
 
 		return new JdbcDataSourceService(dataSource, getTimeZoneByDataSourceTimeZone(jdbcDataSource.getTimezone()));
 	}

@@ -56,15 +56,13 @@ public class StaticFilesCacheControlFilter implements Filter {
     public static final String EXPIRES_AFTER_ACCESS_IN_SECS = "expiresAfterAccessInSecs";
     public static final String DATE_FORMAT_PATTERN = "EEE, d MMM yyyy HH:mm:ss z";
 
-    // All HTTP dates are in english.
-    private static final DateFormat DATE_FORMAT = new SimpleDateFormat(DATE_FORMAT_PATTERN, Locale.ENGLISH);
+    // keeps thread unsafe instances of DateFormat
+    private static final ThreadLocal<Map<Locale, DateFormat>> lastDateFormat =
+            new ThreadLocal<Map<Locale, DateFormat>>();
 
     // All HTTP date/time stamps MUST be represented in Greenwich Mean Time (GMT), without exception.
     // See: http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.3.1
     private static final TimeZone GMT_ZONE = TimeZone.getTimeZone("GMT");
-    static {
-        DATE_FORMAT.setTimeZone(GMT_ZONE);
-    }
 
     private static final Log log = LogFactory.getLog(StaticFilesCacheControlFilter.class);
 
@@ -169,12 +167,30 @@ public class StaticFilesCacheControlFilter implements Filter {
 
     private void setHeaders(HttpServletRequest request, HttpServletResponse response) {
         try {
+            DateFormat df = getFormat(Locale.ENGLISH);
+
             response.setHeader("Cache-Control", "max-age=" + expiresInSecs + ", public");
             response.setHeader("Pragma", "");
-            response.setHeader("Expires", DATE_FORMAT.format(new Date(new Date().getTime() + expiresInSecs * 1000)));
+            response.setHeader("Expires", df.format(new Date(new Date().getTime() + expiresInSecs * 1000)));
 
         } catch (Exception ex) {
             log.warn("Cannot set cache headers", ex);
         }
+    }
+
+    private DateFormat getFormat(Locale locale) {
+        Map<Locale, DateFormat> map = lastDateFormat.get();
+        if (map == null) {
+            map = new HashMap<Locale, DateFormat>();
+            lastDateFormat.set(map);
+        }
+        DateFormat dateFormat = map.get(locale);
+        if (dateFormat == null) {
+            dateFormat = new SimpleDateFormat(DATE_FORMAT_PATTERN, locale);
+            dateFormat.setTimeZone(GMT_ZONE);
+
+            map.put(locale, dateFormat);
+        }
+        return dateFormat;
     }
 }

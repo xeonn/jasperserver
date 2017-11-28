@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: dynamicTree.tree.js 8790 2015-04-22 21:28:09Z obobruyk $
+ * @version: $Id: dynamicTree.tree.js 9599 2015-10-27 19:38:56Z yplakosh $
  */
 
 /* global layoutModule, console, isNotNullORUndefined, cloneCustomAttributes */
@@ -57,7 +57,7 @@ var dynamicTree = {
      */
     activeTreeId: null,
 
-    /**
+    /*
      * The Tree Object.
      *
      * @param id {String} - tree id.
@@ -436,7 +436,7 @@ dynamicTree.Tree.addMethod('resetStates', function() {
     dynamicTree.setStorageVal('tree' + this.id,'');
 });
 
-/**
+/*
  * Comparer for sorting.
  * Calls sorters on order they appear in tree.sorters array until sorter returns non-zero value
  * @param {Object} node1 first node
@@ -617,7 +617,12 @@ dynamicTree.Tree.addMethod('_selectNextNode', function (node, event) {
 	//recurse up the parent chain until we get a parent with a next sibling
 	function getNextUncle(node) {
 		node = node.parent;
-		return (!node && null) || node.nextSibling || getNextUncle(node);
+		if (!node) {
+			return null;
+		} else if (node.nextSibling) {
+			return node.nextSibling;
+		}
+		return getNextUncle(node);
 	}
 	var nextNode = (node.isOpen() && node.getFirstChild()) || node.nextSibling || getNextUncle(node);
 	nextNode && (node.deselect() && nextNode.select(event));
@@ -656,7 +661,7 @@ dynamicTree.Tree.addMethod('_selectOutwards', function (node, event) {
 	}
 });
 
-/**
+/*
  * Sorter by order value assigned to nodes.
  * Order has to be a number. Node that has some order is considered to be
  * LESS than node that does not have any order (order=null)
@@ -679,7 +684,7 @@ dynamicTree.Tree.addMethod('sortByOrder', function (node1, node2) {
     return order1 - order2;
 });
 
-/**
+/*
  * Sorter alphabetically by node names
  * @param {Object} node1 first node
  * @param {Object} node2 second node

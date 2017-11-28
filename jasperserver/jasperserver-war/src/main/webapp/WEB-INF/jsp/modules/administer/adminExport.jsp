@@ -32,10 +32,6 @@
 
     <t:putAttribute name="headerContent">
         <%@ include file="../common/jsEdition.jsp" %>
-        <t:insertTemplate template="/WEB-INF/jsp/templates/exportControls.jsp">
-            <t:putAttribute name="containerID" value="#settings"/>
-            <t:putAttribute name="typeID" value="ExtendedFormView"/>
-        </t:insertTemplate>
     </t:putAttribute>
     <t:putAttribute name="bodyContent">
 		<t:insertTemplate template="/WEB-INF/jsp/templates/container.jsp">
@@ -44,7 +40,12 @@
 		    <t:putAttribute name="containerTitle"><spring:message code="export.export"/></t:putAttribute>
 		    <t:putAttribute name="bodyClass" value=""/>
 		    <t:putAttribute name="bodyContent"> </t:putAttribute>
-		    <t:putAttribute name="footerContent"> </t:putAttribute>
+		    <t:putAttribute name="footerContent">
+                <button id="exportButton" class="button action primary up">
+                    <span class="wrap"><spring:message code="export.export"/></span>
+                    <span class="icon"></span>
+                </button>
+            </t:putAttribute>
 		</t:insertTemplate>
 		<t:insertTemplate template="/WEB-INF/jsp/templates/container.jsp">
 		    <t:putAttribute name="containerID" value="serverSettingsMenu"/>

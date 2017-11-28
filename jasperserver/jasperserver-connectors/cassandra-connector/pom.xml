@@ -5,7 +5,7 @@
     <parent>
         <artifactId>jasperserver-connectors</artifactId>
         <groupId>com.jaspersoft.jasperserver</groupId>
-        <version>6.1.1</version>
+        <version>6.2.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <packaging>jar</packaging>
@@ -28,14 +28,14 @@
         	<artifactId>js-cassandracql3-datasource</artifactId>
         	<version>2.3</version>
 		<exclusions>
-                   <exclusion>
-                       <groupId>antlr</groupId>
-                       <artifactId>antlr</artifactId>
-                   </exclusion>
-                   <exclusion>
-                        <groupId>org.antlr</groupId>
-                        <artifactId>antlr-runtime</artifactId>
-                   </exclusion>
+            <exclusion>
+                <groupId>antlr</groupId>
+                <artifactId>antlr</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>org.antlr</groupId>
+                <artifactId>antlr4-runtime</artifactId>
+            </exclusion>
 		</exclusions>
         </dependency>
     </dependencies>

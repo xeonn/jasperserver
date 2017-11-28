@@ -21,11 +21,15 @@
 
 package com.jaspersoft.jasperserver.remote.services.async;
 
+import com.jaspersoft.jasperserver.dto.common.BrokenDependenciesStrategy;
+import com.jaspersoft.jasperserver.dto.importexport.State;
 import com.jaspersoft.jasperserver.export.service.ImportExportService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.MessageSource;
-import org.springframework.context.i18n.LocaleContextHolder;
 
 import java.io.File;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
@@ -35,19 +39,27 @@ import java.util.Map;
 
 abstract public class BaseImportExportTaskRunnable<T> implements TaskRunnable {
 
-    protected Map<String, Boolean> parameters;
+    protected volatile Map<String, Boolean> parameters;
     protected File file;
-    protected StateDto state;
+    protected final State state;
 
     private MessageSource messageSource;
     protected ImportExportService service;
     protected Locale locale;
 
+    protected volatile String organizationId;
+    protected volatile String brokenDependenciesStrategy;
+    protected Date taskCompletionDate;
+
+    public BaseImportExportTaskRunnable(State state) {
+        this.state = state;
+    }
+
     public File getFile(){
             return file;
         }
 
-    public StateDto getState(){
+    public State getState(){
         return state;
     }
 
@@ -72,4 +84,62 @@ abstract public class BaseImportExportTaskRunnable<T> implements TaskRunnable {
     }
 
     abstract public void prepare();
+
+    @Override
+    public String getOrganizationId() {
+        return this.organizationId;
+    }
+
+    @Override
+    public void setOrganizationId(String organizationId) {
+        this.organizationId = organizationId;
+    }
+
+    @Override
+    public String getBrokenDependenciesStrategy() {
+        return StringUtils.isBlank(brokenDependenciesStrategy)
+                ? BrokenDependenciesStrategy.FAIL.getLabel() : brokenDependenciesStrategy;
+    }
+
+    @Override
+    public void setBrokenDependenciesStrategy(String value) {
+        this.brokenDependenciesStrategy = BrokenDependenciesStrategy.parseString(value).getLabel();
+    }
+
+    @Override
+    public Map<String, Boolean> getParameters() {
+        if (this.parameters == null) {
+            return null;
+        } else {
+            return new HashMap<String, Boolean>(this.parameters);
+        }
+    }
+
+    @Override
+    public void setParameters(Map parameters) {
+        if (parameters == null) {
+            this.parameters = null;
+        } else {
+            Map<String, Boolean> map = new HashMap<String, Boolean>(parameters.size());
+            for (Object key : parameters.keySet()) {
+                Object value = parameters.get(key);
+                if (key instanceof String) {
+                    if (value instanceof Boolean) {
+                        map.put((String) key, (Boolean) value);
+                    } else if (value instanceof String) {
+                        map.put((String) key, Boolean.parseBoolean((String) value));
+                    }
+                }
+            }
+            if (map.isEmpty()) {
+                this.parameters = null;
+            } else {
+                this.parameters = map;
+            }
+        }
+    }
+
+    protected Date getTaskCompletionDate() {
+        return taskCompletionDate;
+    }
 }

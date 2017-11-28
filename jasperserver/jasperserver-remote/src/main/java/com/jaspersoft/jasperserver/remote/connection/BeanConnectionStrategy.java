@@ -20,6 +20,7 @@
 */
 package com.jaspersoft.jasperserver.remote.connection;
 
+import com.jaspersoft.jasperserver.api.common.error.handling.SecureExceptionHandler;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.BeanReportDataSource;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.service.ReportDataSourceService;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.service.ReportDataSourceServiceFactory;
@@ -36,7 +37,7 @@ import java.util.Map;
  * <p></p>
  *
  * @author yaroslav.kovalchyk
- * @version $Id: BeanConnectionStrategy.java 50011 2014-10-09 16:57:26Z vzavadskii $
+ * @version $Id: BeanConnectionStrategy.java 57603 2015-09-15 17:20:48Z psavushc $
  */
 @Service
 public class BeanConnectionStrategy implements ConnectionManagementStrategy<ClientBeanDataSource> {
@@ -44,6 +45,8 @@ public class BeanConnectionStrategy implements ConnectionManagementStrategy<Clie
     private ReportDataSourceServiceFactory dataSourceFactory;
     @Resource
     private BeanDataSourceResourceConverter beanDataSourceResourceConverter;
+    @Resource
+    private SecureExceptionHandler secureExceptionHandler;
 
     @Override
     public ClientBeanDataSource createConnection(ClientBeanDataSource connectionDescription, Map<String, Object> data) throws IllegalParameterValueException {
@@ -63,7 +66,7 @@ public class BeanConnectionStrategy implements ConnectionManagementStrategy<Clie
         }
 
         if(!passed){
-            throw new ConnectionFailedException(connectionDescription, exception);
+            throw new ConnectionFailedException(connectionDescription, exception, secureExceptionHandler);
         }
 
 

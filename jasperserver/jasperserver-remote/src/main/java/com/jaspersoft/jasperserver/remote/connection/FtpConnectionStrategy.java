@@ -20,6 +20,7 @@
 */
 package com.jaspersoft.jasperserver.remote.connection;
 
+import com.jaspersoft.jasperserver.api.common.error.handling.SecureExceptionHandler;
 import com.jaspersoft.jasperserver.api.common.util.FTPService;
 import com.jaspersoft.jasperserver.api.engine.common.util.impl.FTPUtil;
 import com.jaspersoft.jasperserver.dto.connection.FtpConnection;
@@ -29,6 +30,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.commons.net.util.TrustManagerUtils;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.net.UnknownHostException;
 import java.util.Map;
 
@@ -36,12 +38,15 @@ import java.util.Map;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: FtpConnectionStrategy.java 55164 2015-05-06 20:54:37Z mchan $
+ * @version $Id: FtpConnectionStrategy.java 57603 2015-09-15 17:20:48Z psavushc $
  */
 @Service
 public class FtpConnectionStrategy implements ConnectionManagementStrategy<FtpConnection> {
     private final static Log log = LogFactory.getLog(FtpConnectionStrategy.class);
     private FTPService ftpService = new FTPUtil();
+
+    @Resource
+    private SecureExceptionHandler secureExceptionHandler;
 
     @Override
     public FtpConnection createConnection(FtpConnection connectionDescription, Map<String, Object> data) throws IllegalParameterValueException {
@@ -58,9 +63,9 @@ public class FtpConnectionStrategy implements ConnectionManagementStrategy<FtpCo
             }
             client.changeDirectory(connectionDescription.getFolderPath());
         } catch (UnknownHostException e) {
-            throw new ConnectionFailedException(connectionDescription.getHost(), "host", null, e);
+            throw new ConnectionFailedException(connectionDescription.getHost(), "host", null, e, secureExceptionHandler);
         } catch (Exception e) {
-            throw new ConnectionFailedException(connectionDescription, e);
+            throw new ConnectionFailedException(connectionDescription, e, secureExceptionHandler);
         } finally {
             if (client != null) try {
                 client.disconnect();

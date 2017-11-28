@@ -22,7 +22,7 @@ package com.jaspersoft.jasperserver.remote.services;
 
 import com.jaspersoft.jasperserver.api.metadata.user.service.AttributesSearchCriteria;
 import com.jaspersoft.jasperserver.api.metadata.user.service.AttributesSearchResult;
-import com.jaspersoft.jasperserver.dto.authority.ClientUserAttribute;
+import com.jaspersoft.jasperserver.dto.authority.ClientAttribute;
 import com.jaspersoft.jasperserver.remote.exception.RemoteException;
 import com.jaspersoft.jasperserver.remote.helpers.RecipientIdentity;
 
@@ -31,17 +31,17 @@ import java.util.Set;
 
 /**
  * @author Volodya Sabadosh
- * @version $Id: AttributesService.java 54590 2015-04-22 17:55:42Z vzavadsk $
+ * @version $Id: AttributesService.java 58870 2015-10-27 22:30:55Z esytnik $
  */
 public interface AttributesService {
     void deleteAttributes(RecipientIdentity holder, Set<String> attrNames) throws RemoteException;
 
-    List<ClientUserAttribute> putAttributes(RecipientIdentity recipientIdentity, List<? extends ClientUserAttribute> newCollection,
+    List<ClientAttribute> putAttributes(RecipientIdentity recipientIdentity, List<? extends ClientAttribute> newCollection,
                                             Set<String> names, boolean includeEffectivePermissions) throws RemoteException;
 
-    AttributesSearchResult<ClientUserAttribute>
+    AttributesSearchResult<ClientAttribute>
     getAttributes(AttributesSearchCriteria searchCriteria, boolean includeEffectivePermissions) throws RemoteException;
 
-    List<ClientUserAttribute> getAttributes(RecipientIdentity holder, Set<String> names, boolean includeEffectivePermissions) throws RemoteException;
+    List<ClientAttribute> getAttributes(RecipientIdentity holder, Set<String> names, boolean includeEffectivePermissions) throws RemoteException;
 
 }

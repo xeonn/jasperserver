@@ -33,16 +33,15 @@ import com.jaspersoft.jasperserver.api.metadata.user.service.AttributesSearchCri
 import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributeLevel;
 import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributeService;
 import com.jaspersoft.jasperserver.api.metadata.user.service.impl.InternalURIDefinition;
+import com.jaspersoft.jasperserver.dto.common.ErrorDescriptor;
 import com.jaspersoft.jasperserver.remote.exception.IllegalParameterValueException;
 import com.jaspersoft.jasperserver.remote.exception.RemoteException;
-import com.jaspersoft.jasperserver.remote.exception.xml.ErrorDescriptor;
 import org.apache.commons.lang.StringUtils;
-
+import org.springframework.security.acls.model.Permission;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import org.springframework.security.acls.model.Permission;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -50,7 +49,7 @@ import java.util.Map;
 
 /**
  * @author Volodya Sabadosh
- * @version $Id: AttributesPermissionServiceImpI.java 55228 2015-05-08 13:06:46Z vsabados $
+ * @version $Id: AttributesPermissionServiceImpI.java 57603 2015-09-15 17:20:48Z psavushc $
  */
 @Component("attributesPermissionService")
 @Transactional(rollbackFor = Exception.class)
@@ -150,10 +149,10 @@ public class AttributesPermissionServiceImpI extends PermissionsServiceImpl {
         } else {
             String attrName = RepositoryUtils.getName(objectPermission.getURI());
 
-            throw new IllegalParameterValueException(new ErrorDescriptor.Builder()
+            throw new IllegalParameterValueException(new ErrorDescriptor()
                     .setErrorCode("attribute.invalid.permission.recipient")
                     .setMessage("The attribute permission recipient is invalid")
-                    .setParameters(new String[]{attrName}).getErrorDescriptor());
+                    .setParameters(new String[]{attrName}));
         }
     }
 
@@ -189,9 +188,9 @@ public class AttributesPermissionServiceImpI extends PermissionsServiceImpl {
             String[] errorParameters = new String[]{attrName,
                     Integer.toString(targetPermissionMask.getMask()), Integer.toString(inheritedPermissionMask.getMask())};
 
-            throw new IllegalParameterValueException(new ErrorDescriptor.Builder()
+            throw new IllegalParameterValueException(new ErrorDescriptor()
                     .setErrorCode("attribute.invalid.permission.order").setMessage("The attribute permission order is invalid")
-                    .setParameters(errorParameters).getErrorDescriptor());
+                    .setParameters(errorParameters));
         }
     }
 

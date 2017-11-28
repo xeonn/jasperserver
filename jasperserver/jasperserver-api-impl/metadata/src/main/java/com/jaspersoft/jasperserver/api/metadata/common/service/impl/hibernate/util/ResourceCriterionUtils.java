@@ -44,15 +44,21 @@ public class ResourceCriterionUtils {
     public static Criterion getTextCriterion(String text) {
         String[] words = text.trim().split("\\s+");
 
-        Conjunction wordsCriterion = Restrictions.conjunction();
+        Conjunction wordsCriterion = null;
 
         for (String word : words) {
+        	if(word.trim().isEmpty()){
+        		continue;
+        	}
             Disjunction wordCriterion = Restrictions.disjunction();
 
             // Each word should be in label or in description.
             wordCriterion.add(new IlikeEscapeAwareExpression("label", word, MatchMode.ANYWHERE));
             wordCriterion.add(new IlikeEscapeAwareExpression("description", word, MatchMode.ANYWHERE));
 
+            if(wordsCriterion == null){
+            	wordsCriterion = Restrictions.conjunction();
+            }
             // Resource should contain all the words.
             wordsCriterion.add(wordCriterion);
         }

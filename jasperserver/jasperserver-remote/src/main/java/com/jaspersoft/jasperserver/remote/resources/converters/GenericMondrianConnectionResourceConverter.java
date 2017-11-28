@@ -21,6 +21,7 @@
 package com.jaspersoft.jasperserver.remote.resources.converters;
 
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceReference;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConversionOptions;
 import com.jaspersoft.jasperserver.api.metadata.olap.domain.MondrianConnection;
 import com.jaspersoft.jasperserver.dto.resources.AbstractClientMondrianConnection;
 import com.jaspersoft.jasperserver.dto.resources.ClientFile;
@@ -32,7 +33,7 @@ import com.jaspersoft.jasperserver.remote.exception.MandatoryParameterNotFoundEx
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: GenericMondrianConnectionResourceConverter.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: GenericMondrianConnectionResourceConverter.java 58870 2015-10-27 22:30:55Z esytnik $
  */
 public class GenericMondrianConnectionResourceConverter
         <MondrianConnectionServerSubType extends MondrianConnection,MondrianConnectionClientSubType extends AbstractClientMondrianConnection<MondrianConnectionClientSubType>>

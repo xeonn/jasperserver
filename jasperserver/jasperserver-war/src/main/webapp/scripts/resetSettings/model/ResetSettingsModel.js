@@ -21,12 +21,11 @@
 
 
 /**
- * @version: $Id: ResetSettingsModel.js 8875 2015-05-01 19:05:09Z obobruyk $
+ * @version: $Id: ResetSettingsModel.js 9566 2015-10-15 12:56:14Z psavushc $
  */
 
 define(function(require) {
-    // TODO change to backbone.epoxy
-    var Epoxy = require("common/extension/epoxyExtension");
+    var Epoxy = require("backbone.epoxy");
 
     var ResetSettingsModel = Epoxy.Model.extend({
         defaults: {

@@ -22,14 +22,16 @@
 package com.jaspersoft.jasperserver.export.modules.auth;
 
 import com.jaspersoft.jasperserver.api.metadata.user.domain.Role;
+import com.jaspersoft.jasperserver.export.modules.ImporterModuleContext;
 import com.jaspersoft.jasperserver.export.modules.common.TenantQualifiedName;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: AuthorityImportHandler.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: AuthorityImportHandler.java 58265 2015-10-05 16:13:56Z vzavadsk $
  */
 public interface AuthorityImportHandler {
 
 	Role resolveRole(TenantQualifiedName rolename);
-	
+
+	ImporterModuleContext getImportContext();
 }

@@ -25,7 +25,7 @@ import org.springframework.stereotype.Service;
 
 /**
  * @author Yaroslav.Kovalchyk
- * @version $Id$
+ * @version $Id: StringDataConverter.java 58870 2015-10-27 22:30:55Z esytnik $
  */
 @Service
 public class StringDataConverter implements DataConverter<String> {

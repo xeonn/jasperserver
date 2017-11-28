@@ -41,8 +41,9 @@ public class HypermediaAttributeEmbeddedContainer {
         return repositoryPermissions;
     }
 
-    public void setRepositoryPermissions(List<RepositoryPermission> repositoryPermissions) {
+    public HypermediaAttributeEmbeddedContainer setRepositoryPermissions(List<RepositoryPermission> repositoryPermissions) {
         this.repositoryPermissions = repositoryPermissions;
+        return this;
     }
 
 }

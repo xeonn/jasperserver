@@ -26,6 +26,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.jaspersoft.jasperserver.api.metadata.user.domain.TenantQualified;
 import org.dom4j.Element;
 
 import com.jaspersoft.jasperserver.api.JSException;
@@ -38,7 +39,7 @@ import com.jaspersoft.jasperserver.export.modules.auth.beans.UserBean;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: AuthorityExporter.java 54590 2015-04-22 17:55:42Z vzavadsk $
+ * @version $Id: AuthorityExporter.java 58265 2015-10-05 16:13:56Z vzavadsk $
  */
 public class AuthorityExporter extends BaseExporterModule {
 
@@ -46,12 +47,13 @@ public class AuthorityExporter extends BaseExporterModule {
 	private String rolesArgument;
 	private String includeRoleUsersArgument;
 	private String includeUsersRolesArgument;
-	private AuthorityModuleConfiguration configuration;
 
 	private Map users;
 	private Map roles;
-	private boolean includeRoleUsers;
-	private boolean includeUsersRoles;
+
+	protected AuthorityModuleConfiguration configuration;
+	protected boolean includeRoleUsers;
+	protected boolean includeUsersRoles;
 
 	public String getIncludeRoleUsersArgument() {
 		return includeRoleUsersArgument;
@@ -99,42 +101,57 @@ public class AuthorityExporter extends BaseExporterModule {
         roles = new LinkedHashMap();
         users = new LinkedHashMap();
 
+		includeUsersRoles = hasParameter(getIncludeUsersRolesArgument());
+		includeRoleUsers = hasParameter(getIncludeRoleUsersArgument());
+
+		initUsersAndRoles();
+	}
+
+	protected void initUsersAndRoles() {
 		initUsers();
 		initRoles();
 	}
 
 	protected void initUsers() {
-        includeUsersRoles = hasParameter(getIncludeUsersRolesArgument());
-
-		if (exportEverything || hasParameter(getUsersArgument())) {
+		if (isExportEverything() || hasParameter(getUsersArgument())) {
 			String[] userNames = getParameterValues(getUsersArgument());
-			if (exportEverything || userNames == null) {
-				List usersList = configuration.getAuthorityService().getUsers(executionContext, null);
-				for (Iterator it = usersList.iterator(); it.hasNext();) {
-					User user = (User) it.next();
-					addUser(user);
+			if (isExportEverything() || userNames == null) {
+				List<User> usersList = getUsers();
+				for (User user : usersList) {
+					addUser(getUser(user));
 				}
 			} else {
 				for (int i = 0; i < userNames.length; i++) {
-					addUser(userNames[i]);
+					addUser(getUser(userNames[i]));
 				}
 			}
 		}
 	}
 
-	protected void addUser(User user) {
-		//fetch again the user so that its profile attributes are set
-		addUser(user.getUsername());
+	protected List<User> getUsers () {
+		return configuration.getAuthorityService().getUsers(executionContext, null);
 	}
-	
-	protected void addUser(String userName) {
-		User user = getUser(userName);
-		users.put(userName, user);
-        if (includeUsersRoles){
-            for (Object role : user.getRoles()){
-                roles.put(getName((Role) role), role);
-            }
-        }
+
+	protected void addUser(User user) {
+		if (isNotVisibleAuthority(user)) return;
+
+		users.put(getUserName(user), user);
+		if (includeUsersRoles){
+			addUsersRoles(user);
+		}
+	}
+
+	protected void addUsersRoles(User user) {
+		for (Object roleObject : user.getRoles()) {
+			Role role = (Role) roleObject;
+			if (isNotVisibleAuthority(role)) continue;
+
+			roles.put(getRoleName(role), role);
+		}
+	}
+
+	protected User getUser(User user) {
+		return getUser(getUserName(user));
 	}
 
 	protected User getUser(String userName) {
@@ -146,40 +163,39 @@ public class AuthorityExporter extends BaseExporterModule {
 	}
 
 	protected void initRoles() {
-		includeRoleUsers = hasParameter(getIncludeRoleUsersArgument());
-
-		if (exportEverything || hasParameter(getRolesArgument())) {
+		if (isExportEverything() || hasParameter(getRolesArgument())) {
 			String[] roleNames = getParameterValues(getRolesArgument());
-			if (exportEverything || roleNames == null) {
-				List rolesList = configuration.getAuthorityService().getRoles(executionContext, null);
-				for (Iterator it = rolesList.iterator(); it.hasNext();) {
-					Role role = (Role) it.next();
+			if (isExportEverything() || roleNames == null) {
+				List<Role> rolesList = getRoles();
+				for (Role role : rolesList) {
 					addRole(role);
 				}
 			} else {
 				for (int i = 0; i < roleNames.length; i++) {
-					addRole(roleNames[i]);
+					addRole(getRole(roleNames[i]));
 				}
 			}
 		}
 	}
-	
+
+	protected List<Role> getRoles () {
+		return configuration.getAuthorityService().getRoles(executionContext, null);
+	}
+
 	protected void addRole(Role role) {
-		if (roles.put(getName(role), role) == null) {
+		if (isNotVisibleAuthority(role)) return;
+
+		if (roles.put(getRoleName(role), role) == null) {
 			addRoleUsers(role);
 		}
 	}
 
-	protected String getName(Role role) {
+	protected String getRoleName(Role role) {
 		return role.getRoleName();
 	}
-	
-	protected void addRole(String name) {
-		if (!roles.containsKey(name)) {
-			Role role = getRole(name);
-			roles.put(name, role);
-			addRoleUsers(role);
-		}		
+
+	protected String getUserName(User user) {
+		return user.getUsername();
 	}
 
 	protected Role getRole(String name) {
@@ -192,16 +208,19 @@ public class AuthorityExporter extends BaseExporterModule {
 
 	protected void addRoleUsers(Role role) {
 		if (includeRoleUsers) {
-			String roleName = getName(role);
+			String roleName = getRoleName(role);
 			List usersInRole = configuration.getAuthorityService().getUsersInRole(executionContext, roleName);
-			if (usersInRole != null && !usersInRole.isEmpty()) {
-				for (Iterator userIt = usersInRole.iterator(); userIt.hasNext();) {
-					User user = (User) userIt.next();
-					//fetch again the user so that its attributes are set
-					addUser(user);
-				}
-			}
+			addUsers(usersInRole);
 		}		
+	}
+
+	protected void addUsers(List<User> usersInRole) {
+		if (usersInRole != null) {
+			for (User user : usersInRole) {
+				//fetch again the user so that its attributes are set
+				addUser(getUser(user));
+			}
+		}
 	}
 
 	protected boolean hasUsers() {
@@ -287,4 +306,7 @@ public class AuthorityExporter extends BaseExporterModule {
 		return role.getRoleName() + ".xml";
 	}
 
+	protected boolean isNotVisibleAuthority(TenantQualified qualified) {
+		return false;
+	}
 }

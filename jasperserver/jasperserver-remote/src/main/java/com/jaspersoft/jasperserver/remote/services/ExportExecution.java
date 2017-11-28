@@ -20,9 +20,10 @@
  */
 package com.jaspersoft.jasperserver.remote.services;
 
+import com.jaspersoft.jasperserver.api.common.error.handling.SecureExceptionHandler;
+import com.jaspersoft.jasperserver.dto.common.ErrorDescriptor;
 import com.jaspersoft.jasperserver.remote.exception.ExportExecutionRejectedException;
 import com.jaspersoft.jasperserver.remote.exception.RemoteException;
-import com.jaspersoft.jasperserver.remote.exception.xml.ErrorDescriptor;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
@@ -41,7 +42,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: ExportExecution.java 26714 2012-12-12 10:18:22Z ykovalchyk $
+ * @version $Id: ExportExecution.java 58870 2015-10-27 22:30:55Z esytnik $
  */
 @XmlRootElement
 public class ExportExecution {
@@ -55,6 +56,7 @@ public class ExportExecution {
     private Condition condition;
     private volatile Boolean done = false;
     private volatile ReportOutputResource notFetched;
+    private SecureExceptionHandler secureExceptionHandler;
 
     public ExportExecution() {
         lock = new ReentrantLock();
@@ -128,7 +130,7 @@ public class ExportExecution {
                 try {
                     condition.await();
                 } catch (InterruptedException e) {
-                    throw new RemoteException(new ErrorDescriptor(e));
+                    throw new RemoteException(secureExceptionHandler.handleException(e));
                 }
             }
             final ExecutionStatus currentStatus = status;
@@ -138,8 +140,7 @@ public class ExportExecution {
             switch (currentStatus) {
                 case failed: {
                     descriptor = errorDescriptor != null ? errorDescriptor :
-                            new ErrorDescriptor.Builder().setErrorCode("export.failed").setMessage("Export failed")
-                                    .getErrorDescriptor();
+                            new ErrorDescriptor().setErrorCode("export.failed").setMessage("Export failed");
                 }
                 break;
                 case cancelled: {
@@ -148,16 +149,17 @@ public class ExportExecution {
                         result = notFetched;
                         notFetched = null;
                     } else {
-                        descriptor = new ErrorDescriptor.Builder().setErrorCode("export.cancelled")
-                                .setMessage("Export cancelled").getErrorDescriptor();
+                        descriptor = new ErrorDescriptor().setErrorCode("export.cancelled")
+                                .setMessage("Export cancelled");
                     }
                 }
                 break;
                 case ready:
                     break;
                 default: {
-                    descriptor = new ErrorDescriptor.Builder().setErrorCode("export.not.ready")
-                            .setMessage("Export not ready").getErrorDescriptor();
+                    descriptor = new ErrorDescriptor()
+                            .setErrorCode("export.not.ready")
+                            .setMessage("Export not ready");
                 }
             }
             if (descriptor != null) throw new ExportExecutionRejectedException(descriptor);
@@ -187,12 +189,21 @@ public class ExportExecution {
     }
 
     public void reset(){
-        // if reset happen before actual fetch, save the result
-        notFetched = status == ExecutionStatus.ready ? outputResource : null;
-        status = ExecutionStatus.cancelled;
-        errorDescriptor = null;
-        outputResource = null;
-        attachments.clear();
-        done = false;
+        lock.lock();
+        try {
+            // if reset happen before actual fetch, save the result
+            notFetched = status == ExecutionStatus.ready ? outputResource : null;
+            status = ExecutionStatus.cancelled;
+            errorDescriptor = null;
+            outputResource = null;
+            attachments.clear();
+            done = false;
+        }finally {
+            lock.unlock();
+        }
+    }
+
+    public void setSecureExceptionHandler(SecureExceptionHandler secureExceptionHandler) {
+        this.secureExceptionHandler = secureExceptionHandler;
     }
 }

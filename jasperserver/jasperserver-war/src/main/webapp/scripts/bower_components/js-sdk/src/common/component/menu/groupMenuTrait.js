@@ -22,27 +22,27 @@
 
  /**
  * @author: Olesya Bobruyko
- * @version: $Id: groupMenuTrait.js
+ * @version: $Id: groupMenuTrait.js 1605 2015-09-23 17:55:32Z inestere $
  */
 
 define(function (require) {
     "use strict";
 
-    var _ = require("underscore"),
-        $ = require("jquery");
+    var _ = require("underscore");
 
     /**
      * @mixin groupMenuTrait
      * @description extends any Menu component, adding menu groups.
      * @example
      *  var GroupContextMenu = ClickMenu.extend(groupMenuTrait);
+     *
      *  var groupContextMenu = new GroupContextMenu([
-        { label: "List View", groupId: "view", action: "list", "default": true },
-        { label: "Folder View", groupId: "view", action: "folder" },
-        { label: "All", groupId: "visualization", action: "all", "default": true },
-        { label: "Reports", groupId: "visualization", action: "report" },
-        { label: "Ad Hoc Views", groupId: "visualization", action: "adhoc"}
-     ], "#someElement", { toggle: true });
+     *      { label: "List View", groupId: "view", action: "list", "default": true },
+     *      { label: "Folder View", groupId: "view", action: "folder" },
+     *      { label: "All", groupId: "visualization", action: "all", "default": true },
+     *      { label: "Reports", groupId: "visualization", action: "report" },
+     *      { label: "Ad Hoc Views", groupId: "visualization", action: "adhoc"}
+     *  ], "#someElement", { toggle: true });
      */
 
     var groupMenuTrait = {

@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: list.base.js 9231 2015-08-24 22:16:45Z yplakosh $
+ * @version: $Id: list.base.js 9400 2015-09-23 21:10:46Z inestere $
  */
 
 /* global layoutModule, buttonManager, isNotNullORUndefined, matchAny, deepClone, Mustache, JSTooltip, _,
@@ -165,7 +165,7 @@ dynamicList.ListItem.addMethod('getId', function () {
     return this._itemId;
 });
 
-/**
+/*
  * Sets the list and generates new id in that list.
  * This method is used by the list to set reference on itself.
  *
@@ -185,7 +185,7 @@ dynamicList.ListItem.addMethod('setList', function (list) {
     }
 });
 
-/**
+/*
  * Explicitly clears the item's link to its previous list.
  * Use this function instead of setList(null) or setList(undefined).
  *
@@ -197,7 +197,7 @@ dynamicList.ListItem.addMethod('unsetList', function () {
     this._itemId = undefined;
 });
 
-/**
+/*
  * Gets the list where this item is listed.
  *
  * @return {{@see dynamicList.List}}
@@ -748,7 +748,7 @@ dynamicList.UnderscoreTemplatedListItem.prototype.processTemplate = function () 
 // List Component
 ///////////////////////////////////////////////////////
 
-/**
+/*
  * Dynamically creates items on specified UL element. Supports sorting and ...
  *
  * @param id {String} - ID of the UL element, this id will be used as ID of the list.

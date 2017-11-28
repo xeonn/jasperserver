@@ -28,7 +28,6 @@ import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
 import com.jaspersoft.jasperserver.api.common.domain.LogEvent;
 import com.jaspersoft.jasperserver.api.common.domain.impl.ExecutionContextImpl;
 import com.jaspersoft.jasperserver.api.engine.common.service.LoggingService;
-
 import com.jaspersoft.jasperserver.api.engine.scheduling.domain.FTPInfo;
 import com.jaspersoft.jasperserver.api.engine.scheduling.domain.ReportJob;
 import com.jaspersoft.jasperserver.api.engine.scheduling.domain.ReportJobAlert;
@@ -50,11 +49,15 @@ import com.jaspersoft.jasperserver.api.engine.scheduling.domain.reportjobmodel.R
 import com.jaspersoft.jasperserver.api.engine.scheduling.quartz.ReportExecutionJob;
 import com.jaspersoft.jasperserver.api.engine.scheduling.service.ReportJobsPersistenceService;
 import com.jaspersoft.jasperserver.api.engine.scheduling.service.ReportSchedulingService;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.Folder;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceReference;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.client.FolderImpl;
+import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.persistent.RepoFolder;
+import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportUnit;
 import com.jaspersoft.jasperserver.util.test.BaseServiceSetupTestNG;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
@@ -65,7 +68,7 @@ import static org.testng.AssertJUnit.*;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ReportSchedulingTestTestNG.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: ReportSchedulingTestTestNG.java 58870 2015-10-27 22:30:55Z esytnik $
  */
 public class ReportSchedulingTestTestNG extends BaseServiceSetupTestNG
 {
@@ -135,11 +138,12 @@ public class ReportSchedulingTestTestNG extends BaseServiceSetupTestNG
      */
   @Test()
 	public void doPersistenceTest() {
+
         m_logger.info("ReportSchedulingTestTestNG => doPersistenceTest() called");
 
 
         // REPORT JOB 1
-
+ 
 		ReportJobSource source = new ReportJobSource();
 		source.setReportUnitURI("/test/reportURI");
 		Map params = new HashMap();
@@ -167,7 +171,26 @@ public class ReportSchedulingTestTestNG extends BaseServiceSetupTestNG
 		mailNotification.setSubject("Scheduled report");
 		mailNotification.setMessageText("Executed report");
 
+		
+		Folder folder = new FolderImpl();
+		folder.setURIString("/test");
+		folder.setName("test");
+		folder.setLabel("test");
+		folder.setDescription("test");
+		
+		getRepositoryService().saveFolder(m_executionContext, folder);
+		
+		
+		ReportUnit report = (ReportUnit) getRepositoryService().newResource(m_executionContext, ReportUnit.class);
+        report.setURIString("/test/reportURI");
+        report.setLabel("reportURI");
+        report.setName("reportURI");
+        report.setDescription("reportURI");
+        
+        getRepositoryService().saveResource(m_executionContext, report);
+		
 		ReportJob job_01 = new ReportJob();
+		job_01.setScheduledResource(new ResourceReference(report.getURIString()));
 		job_01.setLabel("foo");
 		job_01.setDescription("bar");
 		job_01.setSource(source);
@@ -239,7 +262,11 @@ public class ReportSchedulingTestTestNG extends BaseServiceSetupTestNG
         to_Addresses.add("peter.pan@gmail.com");
         alert.setToAddresses(to_Addresses);
 
-		ReportJob job_02 = new ReportJob();
+		ReportUnit report2 = (ReportUnit) getRepositoryService().newResource(m_executionContext, ReportUnit.class);
+        report2.setURIString("/test/reportURI");
+
+        ReportJob job_02 = new ReportJob();
+		job_02.setScheduledResource(new ResourceReference(report2.getURIString()));
 		job_02.setLabel("A_ReportJob_2");
 		job_02.setDescription("bar");
 		job_02.setSource(source);
@@ -424,6 +451,8 @@ public class ReportSchedulingTestTestNG extends BaseServiceSetupTestNG
 				m_reportJobsPersistenceService.deleteJob(m_executionContext, new ReportJobIdHolder(jobId_01));
                 m_reportJobsPersistenceService.deleteJob(m_executionContext, new ReportJobIdHolder(jobId_02));
 			}
+			getRepositoryService().deleteFolder(m_executionContext, folder.getURIString());
+			
 		}
 	}
 

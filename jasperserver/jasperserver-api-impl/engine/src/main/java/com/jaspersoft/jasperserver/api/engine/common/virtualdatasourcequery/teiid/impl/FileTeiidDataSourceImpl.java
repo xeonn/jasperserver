@@ -37,7 +37,7 @@ import java.util.Map;
 
 /**
  * @author Ivan Chan (ichan@jaspersoft.com)
- * @version $Id: FileTeiidDataSourceImpl.java 55164 2015-05-06 20:54:37Z mchan $
+ * @version $Id: FileTeiidDataSourceImpl.java 58870 2015-10-27 22:30:55Z esytnik $
  */
 public class FileTeiidDataSourceImpl implements TeiidDataSource {
 

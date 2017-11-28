@@ -24,30 +24,24 @@
  * Context menu that is invoked when user clicks on an element.
  *
  * @author: Kostiantyn Tsaregradskyi
- * @version: $Id: ClickMenu.js 812 2015-01-27 11:01:30Z psavushchik $
+ * @version: $Id: ClickMenu.js 1605 2015-09-23 17:55:32Z inestere $
  */
 
 define(function (require) {
     "use strict";
 
     var Menu = require("common/component/menu/Menu"),
-        ClickComponent = require("common/component/base/ClickComponent"),
-        _ = require("underscore");
+        ClickComponent = require("common/component/base/ClickComponent");
 
-    return Menu.extend(ClickComponent.extend(
-        /** @lends ClickMenu.prototype */
-        {
-
+    return Menu.extend(ClickComponent.extend(/** @lends ClickMenu.prototype */{
         /**
          * @constructor ClickMenu
          * @classdesc Context menu that is invoked when user clicks on an element.
-         * @extends AttachableMenu
-         * @param {array} options - Array containing objects with "label" and "action" properties, e.g. [ { label: "Save Dashboard", action: "save" } ].
-         * @param {jQuery|HTMLElement|selector} attachTo - Element to attach menu to.
-         * @param {object} [additionalSettings] - Additional settings object.
-         * @throws "AttachableComponent should be attached to an element" error if attachTo is missing.
-         * @throws "Menu should have options" error if no menu options were passed to constructor.
-         * @fires option:action events when menu option is selected.
+         * @extends Menu
+         * @extends ClickComponent
+         * @param {array} options - Options for {@link Menu}.
+         * @param {jQuery|HTMLElement|string} attachTo - Element to attach menu to.
+         * @param {object} [additionalSettings] - Additional settings object. See {@link Menu} for more details.
          * @example
          *  var clickMenu = new ClickMenu([ { label: "Save Dashboard", action: "save" } ], "#someElement", { toggle: true });
          */

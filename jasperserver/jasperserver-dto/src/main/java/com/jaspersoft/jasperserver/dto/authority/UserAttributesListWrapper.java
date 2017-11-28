@@ -30,34 +30,34 @@ import java.util.List;
  */
 @XmlRootElement(name = "attributes")
 public class UserAttributesListWrapper {
-    private List<ClientUserAttribute> profileAttributes;
+    private List<ClientAttribute> profileAttributes;
 
     public UserAttributesListWrapper(){}
 
-    public UserAttributesListWrapper(List<ClientUserAttribute> attributes){
-        profileAttributes = new ArrayList<ClientUserAttribute>(attributes.size());
-        for (ClientUserAttribute r : attributes){
-            profileAttributes.add((ClientUserAttribute)r);
+    public UserAttributesListWrapper(List<ClientAttribute> attributes){
+        profileAttributes = new ArrayList<ClientAttribute>(attributes.size());
+        for (ClientAttribute r : attributes){
+            profileAttributes.add((ClientAttribute)r);
         }
     }
 
     public UserAttributesListWrapper(UserAttributesListWrapper other) {
-        final List<ClientUserAttribute> clientUserAttributes = other.getProfileAttributes();
-        if(clientUserAttributes != null){
-            profileAttributes = new ArrayList<ClientUserAttribute>(other.getProfileAttributes().size());
-            for(ClientUserAttribute attribute : clientUserAttributes){
-                profileAttributes.add(new ClientUserAttribute(attribute));
+        final List<ClientAttribute> clientAttributes = other.getProfileAttributes();
+        if(clientAttributes != null){
+            profileAttributes = new ArrayList<ClientAttribute>(other.getProfileAttributes().size());
+            for(ClientAttribute attribute : clientAttributes){
+                profileAttributes.add(new ClientAttribute(attribute));
             }
         }
     }
 
 
     @XmlElement(name = "attribute")
-    public List<ClientUserAttribute> getProfileAttributes() {
+    public List<ClientAttribute> getProfileAttributes() {
         return profileAttributes;
     }
 
-    public void setProfileAttributes(List<ClientUserAttribute> profileAttributes) {
+    public void setProfileAttributes(List<ClientAttribute> profileAttributes) {
         this.profileAttributes = profileAttributes;
     }
 

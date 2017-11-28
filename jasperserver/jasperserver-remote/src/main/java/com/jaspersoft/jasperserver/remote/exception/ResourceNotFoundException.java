@@ -20,11 +20,12 @@
 */
 package com.jaspersoft.jasperserver.remote.exception;
 
-import com.jaspersoft.jasperserver.remote.exception.xml.ErrorDescriptor;
+import com.jaspersoft.jasperserver.api.common.error.handling.SecureExceptionHandler;
+import com.jaspersoft.jasperserver.dto.common.ErrorDescriptor;
 
 /**
  * @author Yaroslav.Kovalchyk
- * @version $Id: ResourceNotFoundException.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: ResourceNotFoundException.java 57603 2015-09-15 17:20:48Z psavushc $
  */
 public class ResourceNotFoundException extends RemoteException {
     public static final String ERROR_CODE_RESOURCE_NOT_FOUND = "resource.not.found";
@@ -54,8 +55,8 @@ public class ResourceNotFoundException extends RemoteException {
         errorDescriptor.setParameters(message);
     }
 
-    public ResourceNotFoundException(Throwable cause) {
-        super(cause);
+    public ResourceNotFoundException(Throwable cause, SecureExceptionHandler exceptionHandler) {
+        super(cause, exceptionHandler);
         getErrorDescriptor().setErrorCode(ERROR_CODE_RESOURCE_NOT_FOUND);
     }
 

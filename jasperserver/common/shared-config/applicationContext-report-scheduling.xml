@@ -27,6 +27,8 @@
         <property name="sessionFactory" ref="sessionFactory"/>
         <property name="userHandler"><ref bean="${bean.standardUserPersistenceHandler}"/></property>
         <property name="profileAttributeService" ref="profileAttributeServiceTarget"/>
+        <!-- defer getting the repo service ref (ugly, but don't want to add to existing circular deps) -->
+        <property name="referenceResolverBean" value="${bean.internalRepositoryService}"/>
     </bean>
 
     <!-- reportJobsPersistenceService bean: this bean was moved into sub-folder specific locations. -->

@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: export.uploader.js 7762 2014-09-19 10:16:02Z sergey.prilukin $
+ * @version: $Id: export.uploader.js 9490 2015-10-05 16:46:54Z obobruyk $
  */
 
 (function ($) {
@@ -32,7 +32,7 @@
     $("#exportButton").click(function () {
         firstRequest = false;
         iframe.src = "export/export/{filename}.zip"
-            .replace("{filename}", $("#filenameId").val());
+            .replace("{filename}", $(".fileName").val());
     });
 
     $(document).bind("global.ajaxPost", function (evt) {

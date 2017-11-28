@@ -20,7 +20,9 @@
 */
 package com.jaspersoft.jasperserver.remote.exception;
 
-import com.jaspersoft.jasperserver.remote.exception.xml.ErrorDescriptor;
+
+import com.jaspersoft.jasperserver.api.common.error.handling.SecureExceptionHandler;
+import com.jaspersoft.jasperserver.dto.common.ErrorDescriptor;
 import com.jaspersoft.jasperserver.war.cascade.handlers.GenericTypeProcessorRegistry;
 import org.springframework.stereotype.Service;
 
@@ -30,15 +32,19 @@ import javax.annotation.Resource;
  * <p></p>
  *
  * @author yaroslav.kovalchyk
- * @version $Id: ErrorDescriptorBuildingService.java 50801 2014-10-29 00:20:56Z inesterenko $
+ * @version $Id: ErrorDescriptorBuildingService.java 57603 2015-09-15 17:20:48Z psavushc $
  */
 @Service
 public class ErrorDescriptorBuildingService {
     @Resource
     private GenericTypeProcessorRegistry genericTypeProcessorRegistry;
+
+    @Resource
+    private SecureExceptionHandler secureExceptionHandler;
+
     public ErrorDescriptor buildErrorDescriptor(Throwable e){
         final ErrorDescriptorBuilder errorDescriptorBuilder = genericTypeProcessorRegistry
                 .getTypeProcessor(e.getClass(), ErrorDescriptorBuilder.class, false);
-        return errorDescriptorBuilder != null ? errorDescriptorBuilder.build(e) : new ErrorDescriptor(e);
+        return errorDescriptorBuilder != null ? errorDescriptorBuilder.build(e) : secureExceptionHandler.handleException(e);
     }
 }

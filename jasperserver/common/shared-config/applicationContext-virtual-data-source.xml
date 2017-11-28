@@ -94,6 +94,11 @@
                     <property name="translatorName" value="impala"/>
                     <property name="translatorFactoryClass" value="org.teiid.translator.hive.ImpalaExecutionFactory"/>
                 </bean>
+                <bean class="com.jaspersoft.jasperserver.api.engine.common.virtualdatasourcequery.teiid.TranslatorConfig">
+                    <property name="productName" value="Spark"/>
+                    <property name="translatorName" value="Spark"/>
+                    <property name="translatorFactoryClass" value="org.teiid.translator.hive.HiveExecutionFactory"/>
+                </bean>
             </list>
         </property>
 
@@ -119,10 +124,10 @@
                     <bean class="com.jaspersoft.jasperserver.api.engine.common.virtualdatasourcequery.teiid.impl.HiveTeiidConnectorImpl">
                     </bean>
                 </entry>
-                <entry key="com.jaspersoft.mongodb.jasperserver.MongoDbDataSourceService">
+                <!-- entry key="com.jaspersoft.mongodb.jasperserver.MongoDbDataSourceService">
                     <bean class="com.jaspersoft.jasperserver.api.engine.common.virtualdatasourcequery.teiid.impl.MongoDBTeiidConnectorImpl">
                     </bean>
-                </entry>
+                </entry  -->
             </map>
         </property>
 

@@ -20,46 +20,40 @@
 */
 package com.jaspersoft.jasperserver.remote.connection;
 
+import com.jaspersoft.jasperserver.api.common.error.handling.SecureExceptionHandler;
+import com.jaspersoft.jasperserver.dto.common.ErrorDescriptor;
 import com.jaspersoft.jasperserver.remote.exception.RemoteException;
-import com.jaspersoft.jasperserver.remote.exception.xml.ErrorDescriptor;
 import com.jaspersoft.jasperserver.remote.resources.ClientTypeHelper;
-
-import java.io.PrintWriter;
-import java.io.StringWriter;
 
 /**
  * <p></p>
  *
  * @author yaroslav.kovalchyk
- * @version $Id: ConnectionFailedException.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: ConnectionFailedException.java 57603 2015-09-15 17:20:48Z psavushc $
  */
 public class ConnectionFailedException extends RemoteException {
     private static final String ERROR_KEY_CONNECTION_FAILED = "connection.failed";
 
-    public ConnectionFailedException(Object errorValue, String errorField, String errorMessage, Throwable cause) {
-        super(new ErrorDescriptor.Builder().setErrorCode(ERROR_KEY_CONNECTION_FAILED)
-                .setMessage("Invalid connection information")
-                .getErrorDescriptor(), cause);
+    public ConnectionFailedException(Object errorValue, String errorField, String errorMessage,
+                                     Throwable cause, SecureExceptionHandler secureExceptionHandler) {
+        super(new ErrorDescriptor().setErrorCode(ERROR_KEY_CONNECTION_FAILED)
+                .setMessage("Invalid connection information"), cause);
         String errorItem = errorField != null ? errorField : ClientTypeHelper.extractClientType(errorValue.getClass());
         if (cause != null) {
-            final StringWriter trace = new StringWriter();
-            final PrintWriter traceWriter = new PrintWriter(trace);
-            cause.printStackTrace(traceWriter);
-            String message = errorMessage;
-            if(message == null){
-                message = cause.getMessage() != null ? cause.getMessage() : "Connection failed";
-            }
-            getErrorDescriptor().setParameters(errorValue.toString(), errorItem, message, trace);
+            if(errorMessage == null)
+                errorMessage = cause.getMessage() != null ? cause.getMessage() : "Connection failed";
+
+            ErrorDescriptor ed = secureExceptionHandler.handleException(cause, new ErrorDescriptor().setMessage(errorMessage));
+
+            final String[] params = ed.getParameters();
+            String trace = params != null && params.length > 0 ? params[0] : null;
+            getErrorDescriptor().setParameters(errorValue.toString(), errorItem, ed.getMessage(), trace );
         } else {
             getErrorDescriptor().setParameters(errorValue.toString(), errorItem, errorMessage);
         }
     }
 
-    public ConnectionFailedException(Object connectionDescription, Throwable cause){
-        this(connectionDescription, null, null, cause);
-    }
-
-    public ConnectionFailedException(Object connectionDescription){
-        this(connectionDescription, null, null, null);
+    public ConnectionFailedException(Object connectionDescription, Throwable cause, SecureExceptionHandler secureExceptionHandler){
+        this(connectionDescription, null, null, cause, secureExceptionHandler);
     }
 }

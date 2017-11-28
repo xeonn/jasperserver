@@ -91,10 +91,12 @@ public class FileResourceWrapper extends BaseDTO implements Serializable {
 		this.source = source;
 	}
 
+	@Deprecated
 	public List getAllResources() {
 		return allResources;
 	}
 
+	@Deprecated
 	public void setAllResources(List allResources) {
 		this.allResources = allResources;
 	}
@@ -205,10 +207,12 @@ public class FileResourceWrapper extends BaseDTO implements Serializable {
 		this.folder = folder;
 	}
 
+	@Deprecated
 	public List getAllFolders() {
 		return allFolders;
 	}
 
+	@Deprecated
 	public void setAllFolders(List allFolders) {
 		this.allFolders = allFolders;
 	}

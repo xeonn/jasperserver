@@ -20,13 +20,18 @@
  */
 package com.jaspersoft.jasperserver.export.modules.mt;
 
-import com.jaspersoft.jasperserver.api.metadata.user.domain.ProfileAttribute;
+import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.Tenant;
 import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributeService;
 import com.jaspersoft.jasperserver.api.metadata.user.service.TenantService;
+import com.jaspersoft.jasperserver.export.ImportTask;
 import com.jaspersoft.jasperserver.export.modules.BaseImporterModule;
+import com.jaspersoft.jasperserver.export.modules.ImporterModuleContext;
 import com.jaspersoft.jasperserver.export.modules.common.ProfileAttributeBean;
 import com.jaspersoft.jasperserver.export.modules.mt.beans.TenantBean;
+import com.jaspersoft.jasperserver.export.service.ImportExportService;
+import com.jaspersoft.jasperserver.export.service.impl.ImportExportServiceImpl;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dom4j.Element;
@@ -41,11 +46,18 @@ import java.util.List;
  */
 public class TenantImporter extends BaseImporterModule
 {
-	private static final Log log = LogFactory.getLog(TenantImporter.class);
+	protected static final Log log = LogFactory.getLog(TenantImporter.class);
 	
 	private TenantModuleConfiguration moduleConfiguration;
     private String updateArg;
     private String includeServerSettings;
+    private TenantService tenantServiceUnsecured;
+    protected boolean createCopyForNonUniqueTenantIds;
+
+    @Override
+    public void init(ImporterModuleContext moduleContext) {
+        super.init(moduleContext);
+    }
 
     public List<String> process()
 	{
@@ -65,13 +77,47 @@ public class TenantImporter extends BaseImporterModule
         return true;
     }
 
+    public TenantBean getTenantBean(String tenantId) {
+        return (TenantBean) deserialize(getModuleConfiguration().getTenantsDirectory(),
+                getTenantFileName(tenantId),
+                getModuleConfiguration().getTenantSerializer());
+    }
+
+    private Tenant defineExistingTenant(String tenantId) {
+        ImportTask task = importContext.getImportTask();
+        TenantService tenantService = getTenantService();
+        ExecutionContext executionContext = task.getExecutionContext();
+
+        //Root Tenant from import input
+        String sourceTenantId = task.getInputMetadata().getProperty(ImportExportService.ROOT_TENANT_ID);
+        //Tenant id we import into
+        String destinationTenantId = task.getParameters().getParameterValue(ImportExportServiceImpl.ORGANIZATION);
+
+        // define existingTenant
+        Tenant existingTenant;
+        if (tenantId.equals(sourceTenantId)
+                && StringUtils.isNotBlank(destinationTenantId)
+                && !destinationTenantId.equals(TenantService.ORGANIZATIONS)) {
+
+            existingTenant = tenantService.getTenant(executionContext, destinationTenantId);
+        } else if (isCreateCopyForNonUniqueTenantIds()
+                && StringUtils.isNotBlank(importContext.getNewGeneratedTenantIds().get(tenantId))) {
+
+            existingTenant = null;
+        } else {
+            existingTenant = tenantService.getTenant(executionContext, tenantId);
+        }
+
+        return existingTenant;
+    }
+
     protected void process(String tenantId) {
-        Tenant existingTenant = getTenantService().getTenant(executionContext, tenantId);
+        Tenant existingTenant = defineExistingTenant(tenantId);
+
         if (existingTenant != null) {
             if (hasParameter(getUpdateArg())) {
-                TenantBean tenantBean = (TenantBean) deserialize(getModuleConfiguration().getTenantsDirectory(),
-                        getTenantFileName(tenantId),
-                        getModuleConfiguration().getTenantSerializer());
+                TenantBean tenantBean = getTenantBean(tenantId);
+
                 updateTenant(existingTenant, tenantBean);
             } else {
                 commandOut.info("Tenant " + tenantId + " already exists, skipping");
@@ -95,9 +141,8 @@ public class TenantImporter extends BaseImporterModule
                     log.debug("Deserializing tenant " + tenantId);
                 }
 
-                TenantBean tenantBean = (TenantBean) deserialize(getModuleConfiguration().getTenantsDirectory(),
-                        getTenantFileName(tenantId),
-                        getModuleConfiguration().getTenantSerializer());
+                TenantBean tenantBean = getTenantBean(tenantId);
+
                 createTenant(tenantBean);
                 commandOut.info("Imported tenant " + tenantId);
             } else {
@@ -115,9 +160,9 @@ public class TenantImporter extends BaseImporterModule
         return getModuleConfiguration().getTenantService();
     }
 
-    private void createTenant(TenantBean tenantBean) {
+    protected Tenant createTenant(TenantBean tenantBean) {
         Tenant tenant = (Tenant)moduleConfiguration.getObjectMappingFactory().newObject(Tenant.class);
-        tenantBean.copyTo(tenant);
+        tenantBean.copyTo(tenant, importContext);
         // In previous versions of JasperServer we did not have tenant alias and theme.
         // So, setting alias with tenant id value and default theme for such versions.
         if (tenant.getAlias() == null) {
@@ -127,23 +172,14 @@ public class TenantImporter extends BaseImporterModule
             tenant.setTheme(getModuleConfiguration().getTenantExportConfiguration().getDefaultThemeName());
         }
         getTenantService().putTenant(executionContext, tenant);
-        saveTenantAttributes(tenant, tenantBean.getAttributes());
+        saveProfileAttributes(moduleConfiguration.getAttributeService(), tenant, tenantBean.getAttributes());
+
+        return tenant;
     }
 
     private void updateTenant(Tenant existing, TenantBean newTenant) {
-        existing.setParentId(newTenant.getParentId());
-        existing.setTenantDesc(newTenant.getTenantDesc());
-        existing.setTenantFolderUri(newTenant.getTenantFolderUri());
-        existing.setTenantName(newTenant.getTenantName());
-        existing.setTenantNote(newTenant.getTenantNote());
-        existing.setTenantUri(existing.getTenantUri());
+        newTenant.copyTo(existing, importContext);
 
-        if (newTenant.getAlias() != null) {
-            existing.setAlias(newTenant.getAlias());
-        }
-        if (newTenant.getTheme() != null) {
-            existing.setTheme(newTenant.getTheme());
-        }
         getTenantService().putTenant(executionContext, existing);
 
         ProfileAttributeBean[] profileAttributes = newTenant.getAttributes();
@@ -154,27 +190,9 @@ public class TenantImporter extends BaseImporterModule
             profileAttributes = getCustomProfileAttributes(profileAttributes);
         }
 
-        saveTenantAttributes(existing, profileAttributes);
+        saveProfileAttributes(moduleConfiguration.getAttributeService(), existing, profileAttributes);
 
         commandOut.info("Updated tenant " + existing.getId());
-    }
-
-    protected void saveTenantAttributes(Tenant tenant, ProfileAttributeBean[] attributes) {
-        if (attributes != null && attributes.length > 0) {
-            for (ProfileAttributeBean profileAttributeBean : attributes) {
-                saveTenantAttribute(tenant, profileAttributeBean);
-            }
-        }
-    }
-
-    protected void saveTenantAttribute(Tenant tenant, ProfileAttributeBean attributeBean) {
-        ProfileAttributeService attributeService = moduleConfiguration.getAttributeService();
-        ProfileAttribute attribute = attributeService.newProfileAttribute(executionContext);
-        attribute.setPrincipal(tenant);
-        attributeBean.copyTo(attribute);
-        attribute.setUri(attribute.getAttrName(), attributeService.generateAttributeHolderUri(attribute.getPrincipal()));
-        setPermissions(attribute, attributeBean.getPermissions(), false);
-        attributeService.putProfileAttribute(executionContext, attribute);
     }
 
     protected ProfileAttributeBean[] getCustomProfileAttributes(ProfileAttributeBean[] profileAttributes) {
@@ -209,5 +227,21 @@ public class TenantImporter extends BaseImporterModule
 
     public void setIncludeServerSettings(String includeServerSettings) {
         this.includeServerSettings = includeServerSettings;
+    }
+
+    public TenantService getTenantServiceUnsecured() {
+        return tenantServiceUnsecured;
+    }
+
+    public void setTenantServiceUnsecured(TenantService tenantServiceUnsecured) {
+        this.tenantServiceUnsecured = tenantServiceUnsecured;
+    }
+
+    public boolean isCreateCopyForNonUniqueTenantIds() {
+        return createCopyForNonUniqueTenantIds;
+    }
+
+    public void setCreateCopyForNonUniqueTenantIds(boolean createCopyForNonUniqueTenantIds) {
+        this.createCopyForNonUniqueTenantIds = createCopyForNonUniqueTenantIds;
     }
 }

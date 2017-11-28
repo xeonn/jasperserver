@@ -30,9 +30,9 @@ define(function(require) {
         _ = require("underscore"),
         $ = require("jquery"),
         jrsConfigs = require("jrs.configs"),
-        requestSettings = require("common/config/requestSettings"),
+        requestSettings = require("requestSettings"),
 		connectionTypes = require("dataSource/enum/connectionTypes"),
-        repositoryResourceTypes = require("common/enum/repositoryResourceTypes"),
+        repositoryResourceTypes = require("bi/repo/enum/repositoryResourceTypes"),
         dialogs = require("components.dialogs"),
 		i18n = require("bundle!all"),
         jasperserverConfig = require("bundle!jasperserver_config");

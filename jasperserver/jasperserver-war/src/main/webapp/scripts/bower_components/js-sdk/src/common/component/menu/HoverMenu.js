@@ -24,7 +24,7 @@
  * Menu that is shown near element when element is mouseovered.
  *
  * @author: Kostiantyn Tsaregradskyi
- * @version: $Id: HoverMenu.js 812 2015-01-27 11:01:30Z psavushchik $
+ * @version: $Id: HoverMenu.js 1721 2015-10-15 11:56:43Z psavushc $
  */
 
 define(function (require) {
@@ -33,15 +33,14 @@ define(function (require) {
     var AttachableMenu = require("./AttachableMenu"),
         _ = require("underscore");
 
-    var TIME_BETWEEN_MOUSE_OVERS = 10;
-
     return AttachableMenu.extend(
         /** @lends HoverMenu.prototype */
         {
-        events: {
-            "mouseover": "_onMenuMouseOver",
-            "mouseout": "_onMenuMouseOut"
-        },
+
+        _isVisible: false,
+        _elementHovered: false,
+        _menuHovered: false,
+        TIME_BETWEEN_MOUSE_OVERS: 200,
 
         /**
         * @constructor HoverMenu
@@ -49,6 +48,7 @@ define(function (require) {
         * @extends AttachableMenu
         * @param {array} options - Array containing objects with "label" and "action" properties, e.g. [ { label: "Save Dashboard", action: "save" } ].
         * @param {jQuery|HTMLElement|selector} attachTo - Element to attach menu to.
+        * @param {object} [padding={top: 5, left: 5}] - padding of attachable menu.
         * @param {object} [additionalSettings] - Additional settings object. For more details on this see Menu.js
         * @throws "Menu should have options" error if no menu options were passed to constructor.
         * @throws "AttachableComponent should be attached to an element" error if attachTo is missing.
@@ -60,18 +60,21 @@ define(function (require) {
             this.padding = padding || {top: 0, left: 0};
             AttachableMenu.call(this, options, attachTo, this.padding, additionalSettings);
 
-            _.bindAll(this, "_onElementMouseOver", "_onElementMouseOut");
+	        // listen to synthetic events from OptionContainer which we inherit from
+            this.on("mouseover", this._onMenuItemMouseOver);
+            this.on("mouseout", this._onMenuItemMouseOut);
+	        this.on("selectionMade", this._hide);
 
-            this.$attachTo.on("mouseover", this._onElementMouseOver);
-            this.$attachTo.on("mouseout", this._onElementMouseOut);
+	        _.bindAll(this, "_onAttachToMouseOver", "_onAttachToMouseOut");
+            this.$attachTo.on("mouseover", this._onAttachToMouseOver);
+            this.$attachTo.on("mouseout", this._onAttachToMouseOut);
         },
-
 
         /**
          * @description on hover menu mouse over event handler.
          * @access protected
          */
-        _onMenuMouseOver: function() {
+        _onMenuItemMouseOver: function() {
             this._menuHovered = true;
         },
 
@@ -79,25 +82,27 @@ define(function (require) {
          * @description on hover menu mouse out event handler.
          * @access protected
          */
-        _onMenuMouseOut: function() {
+        _onMenuItemMouseOut: function() {
             this._menuHovered = false;
 
-            this._tryHide();
+            this._hideByTimeout();
         },
 
         /**
          * @description on attached element mouse over event handler.
          * @access protected
          */
-        _onElementMouseOver: function() {
+        _onAttachToMouseOver: function() {
+
             if (this.$attachTo.is(":disabled")) {
                 return;
             }
 
             this._elementHovered = true;
 
-            if (!this.$el.is(":visible")) {
-                this.show();
+            if (!this._isVisible) {
+	            this.show();
+	            this._isVisible = true;
             }
         },
 
@@ -105,31 +110,58 @@ define(function (require) {
          * @description on attached element mouse out event handler.
          * @access protected
          */
-        _onElementMouseOut: function() {
+        _onAttachToMouseOut: function() {
             this._elementHovered = false;
 
-            this._tryHide();
+            this._hideByTimeout();
         },
 
 
         /**
-         * @description hides previous hover menu.
+         * @description tried to hide menu after some timeout
+         * @access protected
+         */
+        _hideByTimeout: function() {
+
+	        if (this._elementHovered || this._menuHovered) {
+		        return;
+	        }
+
+            setTimeout(_.bind(this._tryHide, this), this.TIME_BETWEEN_MOUSE_OVERS);
+        },
+
+        /**
+         * @description tries to hide menu.
          * @access protected
          */
         _tryHide: function() {
-            setTimeout(_.bind(function() {
-                if (!this._elementHovered && !this._menuHovered) {
-                    this.hide();
-                }
-            }, this), TIME_BETWEEN_MOUSE_OVERS);
+
+	        if (this._elementHovered || this._menuHovered) {
+		        return;
+	        }
+
+	        this._hide();
+        },
+
+        /**
+         * @description hides menu.
+         * @access protected
+         */
+        _hide: function() {
+
+	        this.hide();
+	        this._isVisible = false;
+
+	        this.trigger("hidden");
         },
 
         /**
          * @description Removes HoverMenu from DOM and remove event handlers from element that menu is attached to.
          */
         remove: function() {
-            this.$attachTo.off("mouseover", this._onElementMouseOver);
-            this.$attachTo.off("mouseout", this._onElementMouseOut);
+
+            this.$attachTo.off("mouseover", this._onAttachToMouseOver);
+            this.$attachTo.off("mouseout", this._onAttachToMouseOut);
 
             AttachableMenu.prototype.remove.apply(this, arguments);
         }

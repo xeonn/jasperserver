@@ -230,4 +230,121 @@
         <property name="resourceFactory" ref="mappingResourceFactory"/>
         <property name="userAuthorityPersistenceService" ref="userAuthorityService"/>
     </bean>
+
+    <bean id="roleAdministrator" class="java.lang.String">
+        <constructor-arg type="java.lang.String">
+            <value>ROLE_ADMINISTRATOR</value>
+        </constructor-arg>
+    </bean>
+
+    <bean id="importExportPrivilegeRoles" class="java.util.HashSet">
+        <constructor-arg  index="0" type="java.util.Collection">
+            <list merge="true" value-type="java.lang.String">
+                <ref bean="roleAdministrator"/>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="clientResourceResolver" class="com.jaspersoft.jasperserver.api.metadata.common.service.impl.ClientResourceResolver">
+        <property name="clientResourceTypeToServerResourceTypes" ref="${bean.clientResourceTypeToServerResourceTypes}"/>
+    </bean>
+
+    <bean id="clientResourceTypeToServerResourceTypes" class="java.util.HashMap">
+        <constructor-arg index="0" type="java.util.Map">
+            <map>
+                <entry key="awsDataSource">
+                    <set value-type="java.lang.Class">
+                        <value>com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.AwsReportDataSource</value>
+                    </set>
+                </entry>
+                <entry key="beanDataSource">
+                    <set value-type="java.lang.Class">
+                        <value>com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.BeanReportDataSource</value>
+                    </set>
+                </entry>
+                <entry key="customDataSource">
+                    <set value-type="java.lang.Class">
+                        <value>com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.CustomReportDataSource</value>
+                    </set>
+                </entry>
+                <entry key="dataType">
+                    <set value-type="java.lang.Class">
+                        <value>com.jaspersoft.jasperserver.api.metadata.common.domain.DataType</value>
+                    </set>
+                </entry>
+                <entry key="file">
+                    <set value-type="java.lang.Class">
+                        <value>com.jaspersoft.jasperserver.api.metadata.common.domain.ContentResource</value>
+                        <value>com.jaspersoft.jasperserver.api.metadata.common.domain.FileResource</value>
+                    </set>
+                </entry>
+                <entry key="folder">
+                    <set value-type="java.lang.Class">
+                        <value>com.jaspersoft.jasperserver.api.metadata.common.domain.Folder</value>
+                    </set>
+                </entry>
+                <entry key="inputControl">
+                    <set value-type="java.lang.Class">
+                        <value>com.jaspersoft.jasperserver.api.metadata.common.domain.InputControl</value>
+                    </set>
+                </entry>
+                <entry key="jdbcDataSource">
+                    <set value-type="java.lang.Class">
+                        <value>com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.JdbcReportDataSource</value>
+                    </set>
+                </entry>
+                <entry key="jndiJdbcDataSource">
+                    <set value-type="java.lang.Class">
+                        <value>com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.JndiJdbcReportDataSource</value>
+                    </set>
+                </entry>
+                <entry key="listOfValues">
+                    <set value-type="java.lang.Class">
+                        <value>com.jaspersoft.jasperserver.api.metadata.common.domain.ListOfValues</value>
+                    </set>
+                </entry>
+                <entry key="mondrianConnection">
+                    <set value-type="java.lang.Class">
+                        <value>com.jaspersoft.jasperserver.api.metadata.olap.domain.MondrianConnection</value>
+                    </set>
+                </entry>
+                <entry key="mondrianXmlaDefinition">
+                    <set value-type="java.lang.Class">
+                        <value>com.jaspersoft.jasperserver.api.metadata.olap.domain.MondrianXMLADefinition</value>
+                    </set>
+                </entry>
+                <entry key="olapUnit">
+                    <set value-type="java.lang.Class">
+                        <value>com.jaspersoft.jasperserver.api.metadata.olap.domain.OlapUnit</value>
+                    </set>
+                </entry>
+                <entry key="query">
+                    <set value-type="java.lang.Class">
+                        <value>com.jaspersoft.jasperserver.api.metadata.common.domain.Query</value>
+                    </set>
+                </entry>
+                <entry key="reportUnit">
+                    <set value-type="java.lang.Class">
+                        <value>com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportUnit</value>
+                    </set>
+                </entry>
+                <entry key="resourceLookup">
+                    <set value-type="java.lang.Class">
+                        <value>com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceLookup</value>
+                    </set>
+                </entry>
+                <entry key="virtualDataSource">
+                    <set value-type="java.lang.Class">
+                        <value>com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.VirtualReportDataSource</value>
+                    </set>
+                </entry>
+                <entry key="xmlaConnection">
+                    <set value-type="java.lang.Class">
+                        <value>com.jaspersoft.jasperserver.api.metadata.olap.domain.XMLAConnection</value>
+                    </set>
+                </entry>
+            </map>
+        </constructor-arg>
+    </bean>
+
 </beans>

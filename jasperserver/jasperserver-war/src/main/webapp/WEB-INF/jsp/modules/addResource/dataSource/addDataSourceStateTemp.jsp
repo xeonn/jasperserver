@@ -89,6 +89,7 @@
     resource.messages["resource.dataSource.jdbc.dbPort"] = '<spring:message code="resource.dataSource.jdbc.dbPort" javaScriptEscape="true"/>';
     resource.messages["resource.dataSource.jdbc.dbName"] = '<spring:message code="resource.dataSource.jdbc.dbName" javaScriptEscape="true"/>';
     resource.messages["resource.dataSource.jdbc.sName"] = '<spring:message code="resource.dataSource.jdbc.sName" javaScriptEscape="true"/>';
+    resource.messages["resource.dataSource.jdbc.securityToken"] = '<spring:message code="resource.dataSource.jdbc.securityToken" javaScriptEscape="true"/>';
     resource.messages["resource.dataSource.jdbc.informixServerName"] = '<spring:message code="resource.dataSource.jdbc.informixServerName" javaScriptEscape="true"/>';
     resource.messages["resource.dataSource.jdbc.urlID"] = '<spring:message code="resource.dataSource.jdbc.url" javaScriptEscape="true"/>';
     resource.messages["resource.dataSource.jdbc.schemaName"] = '<spring:message code="resource.dataSource.jdbc.schemaName" javaScriptEscape="true"/>';

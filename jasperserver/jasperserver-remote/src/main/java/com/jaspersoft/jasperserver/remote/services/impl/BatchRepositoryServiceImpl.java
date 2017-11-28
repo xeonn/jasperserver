@@ -72,7 +72,7 @@ import java.util.regex.Pattern;
 public class BatchRepositoryServiceImpl implements BatchRepositoryService {
 
     protected static final Log log = LogFactory.getLog(BatchRepositoryServiceImpl.class);
-    protected static final Pattern ILLEGAL_URI_SYMBOL_PATTERN = Pattern.compile("[~!#\\$%^|\\s`@&*()\\-+={}\\[\\]:;\"',?\\|\\\\]");
+    protected static final Pattern ILLEGAL_URI_SYMBOL_PATTERN = Pattern.compile("[~!#\\$%^|\\s`&*()\\-+={}\\[\\]:;\"',?\\|\\\\]");
 
 
     @javax.annotation.Resource(name = "concreteRepository")

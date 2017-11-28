@@ -20,12 +20,13 @@
 */
 package com.jaspersoft.jasperserver.remote.connection;
 
+import com.jaspersoft.jasperserver.api.common.error.handling.SecureExceptionHandler;
 import com.jaspersoft.jasperserver.api.engine.common.service.EngineService;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl.CustomReportDataSourceServiceFactory;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.util.CustomDomainMetaDataImpl;
 import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.CustomReportDataSource;
-import com.jaspersoft.jasperserver.api.metadata.jasperreports.service.CustomReportDataSourceService;
+import com.jaspersoft.jasperserver.api.metadata.jasperreports.service.ConnectionTestingDataSourceService;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.service.ReportDataAdapterService;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.service.ReportDataSourceService;
 import com.jaspersoft.jasperserver.dto.resources.ClientCustomDataSource;
@@ -38,6 +39,7 @@ import com.jaspersoft.jasperserver.remote.resources.converters.ToServerConversio
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -47,7 +49,7 @@ import java.util.Set;
  * <p></p>
  *
  * @author yaroslav.kovalchyk
- * @version $Id: CustomDataSourceConnectionStrategy.java 53873 2015-04-07 18:59:44Z mchan $
+ * @version $Id: CustomDataSourceConnectionStrategy.java 58870 2015-10-27 22:30:55Z esytnik $
  */
 @Service
 public class CustomDataSourceConnectionStrategy implements ConnectionManagementStrategy<ClientCustomDataSource>, ConnectionMetadataBuilder<ClientCustomDataSource> {
@@ -63,6 +65,8 @@ public class CustomDataSourceConnectionStrategy implements ConnectionManagementS
     private EngineService engine;
     @Resource
     private TableMetadataConverter tableMetadataConverter;
+    @Resource
+    private SecureExceptionHandler secureExceptionHandler;
     @Override
     public ClientCustomDataSource createConnection(ClientCustomDataSource connectionDescription, Map<String, Object> data) throws IllegalParameterValueException {
         boolean passed = false;
@@ -72,7 +76,12 @@ public class CustomDataSourceConnectionStrategy implements ConnectionManagementS
             final CustomReportDataSource reportDataSource = toServer(connectionDescription);
             ReportDataSourceService service = customDataSourceFactory.createService(reportDataSource);
 
-            passed = !(service instanceof CustomReportDataSourceService) || ((CustomReportDataSourceService) service).testConnection();
+            if (service instanceof ConnectionTestingDataSourceService) {
+                passed = ((ConnectionTestingDataSourceService) service).testConnection();
+            } else {
+                passed = true;
+            }
+
             if (service instanceof ReportDataAdapterService) {
                 // try to generate metadata to validate if file is accessible and valid
                 engine.getMetaDataFromConnector(reportDataSource);
@@ -84,7 +93,7 @@ public class CustomDataSourceConnectionStrategy implements ConnectionManagementS
             if(exception instanceof RemoteException){
                 throw (RemoteException)exception;
             } else {
-                throw new ConnectionFailedException(connectionDescription, null, "Connection failed", exception);
+                throw new ConnectionFailedException(connectionDescription, null, "Connection failed", exception, secureExceptionHandler);
             }
         }
         return connectionDescription;
@@ -133,7 +142,7 @@ public class CustomDataSourceConnectionStrategy implements ConnectionManagementS
         try {
             return tableMetadataConverter.toClient((CustomDomainMetaDataImpl)engine.getMetaDataFromConnector(toServer(connection)), null);
         } catch (Exception e) {
-            throw new RemoteException(e);
+            throw new RemoteException(e, secureExceptionHandler);
         }
     }
 }

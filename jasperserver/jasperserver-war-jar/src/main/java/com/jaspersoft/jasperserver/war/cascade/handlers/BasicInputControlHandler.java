@@ -24,21 +24,28 @@ import com.jaspersoft.jasperserver.api.engine.common.service.ReportInputControlI
 import com.jaspersoft.jasperserver.api.metadata.common.domain.DataType;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.InputControl;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceReference;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConversionOptions;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConverter;
 import com.jaspersoft.jasperserver.dto.common.validations.DateTimeFormatValidationRule;
-import com.jaspersoft.jasperserver.dto.reports.inputcontrols.InputControlState;
 import com.jaspersoft.jasperserver.dto.common.validations.MandatoryValidationRule;
-import com.jaspersoft.jasperserver.dto.reports.inputcontrols.ReportInputControl;
 import com.jaspersoft.jasperserver.dto.common.validations.ValidationRule;
+import com.jaspersoft.jasperserver.dto.reports.inputcontrols.InputControlState;
+import com.jaspersoft.jasperserver.dto.reports.inputcontrols.ReportInputControl;
+import com.jaspersoft.jasperserver.dto.resources.ClientDataType;
 import com.jaspersoft.jasperserver.war.cascade.CachedRepositoryService;
 import com.jaspersoft.jasperserver.war.cascade.CascadeResourceNotFoundException;
 import com.jaspersoft.jasperserver.war.cascade.InputControlValidationException;
 import com.jaspersoft.jasperserver.war.cascade.handlers.converters.DataConverterService;
 import com.jaspersoft.jasperserver.war.cascade.handlers.validators.InputControlValueValidator;
 import com.jaspersoft.jasperserver.war.util.CalendarFormatProvider;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -49,7 +56,7 @@ import java.util.Set;
 
 /**
  * @author Yaroslav.Kovalchyk
- * @version $Id: BasicInputControlHandler.java 51947 2014-12-11 14:38:38Z ogavavka $
+ * @version $Id: BasicInputControlHandler.java 58870 2015-10-27 22:30:55Z esytnik $
  */
 @Service
 public class BasicInputControlHandler implements InputControlHandler {
@@ -58,7 +65,8 @@ public class BasicInputControlHandler implements InputControlHandler {
      * multyDataTypeMapping is used to determine UI type of control in this case
      */
     public static final String MULTI_DATA_TYPE_UI_TYPE = "singleValue";
-
+    @Autowired
+    private ApplicationContext applicationContext;
     @Resource
     private Map<String, String> multyDataTypeMapping;
     @Resource
@@ -71,6 +79,21 @@ public class BasicInputControlHandler implements InputControlHandler {
     protected MessageSource messageSource;
     @Resource(name = "isoCalendarFormatProvider")
     protected CalendarFormatProvider calendarFormatProvider;
+
+    protected ToClientConverter<DataType, ClientDataType> dataTypeResourceConverter;
+
+    @PostConstruct
+    public void init(){
+        // this hint is needed in case of integration tests or import/export(command line) applicationContext.
+        // There's no required converter in a context. But it's not used in these cases, it's used in web context only.
+        // So, let's make this dependency optional.
+        // This trick should be removed if jasperserver-remote module become part of test and import/export context
+        try {
+            dataTypeResourceConverter = applicationContext.getBean("dataTypeResourceConverter", ToClientConverter.class);
+        }catch (NoSuchBeanDefinitionException e){
+            // do nothing. Optional dependency
+        }
+    }
 
     @Override
     public void applyNothingSelected(String controlName, Map<String, Object> parameters) {
@@ -105,8 +128,17 @@ public class BasicInputControlHandler implements InputControlHandler {
         control.setVisible(inputControl.isVisible());
         control.setType(getType(inputControl, uiType));
         final List<ValidationRule> validationRules = getValidationRules(inputControl);
-        if (validationRules != null && !validationRules.isEmpty())
+        if (validationRules != null && !validationRules.isEmpty()) {
             control.setValidationRules(validationRules);
+        }
+        final ResourceReference dataTypeReference = inputControl.getDataType();
+        if(dataTypeReference != null){
+            final DataType dataType = dataTypeReference.isLocal() ? (DataType) dataTypeReference.getLocalResource()
+                    : cachedRepositoryService.getResource(DataType.class, dataTypeReference.getReferenceURI());
+            if(dataType != null && dataTypeResourceConverter != null) {
+                control.setDataType(dataTypeResourceConverter.toClient(dataType, ToClientConversionOptions.getDefault()));
+            }
+        }
         return control;
     }
 

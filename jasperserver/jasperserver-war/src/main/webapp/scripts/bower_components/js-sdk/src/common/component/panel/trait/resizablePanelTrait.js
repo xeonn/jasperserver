@@ -22,46 +22,80 @@
 
 /**
  * @author: Olesya Bobruyko
- * @version: $Id: resizablePanelTrait.js 812 2015-01-27 11:01:30Z psavushchik $
+ * @version: $Id: resizablePanelTrait.js 1605 2015-09-23 17:55:32Z inestere $
  */
 
 define(function(require){
     "use strict";
 
     var _ = require("underscore"),
-        $ = require("jquery"),
         abstractPanelTrait = require("./abstractPanelTrait");
+
+    require("jquery.ui");
+    require("csslink!jquery-ui-custom-css");
+
+    /**
+     * @event resizablePanelTrait#resize
+     * @description This event is constantly fired during resizing.
+     */
+    function onResize(e, ui) {
+        this.trigger("resize", e, ui);
+    }
+
+    /**
+     * @event resizablePanelTrait#resizeStart
+     * @description This event is fired when resizing started.
+     */
+    function onStart(e, ui){
+        this.trigger("resizeStart", e, ui);
+    }
+
+    /**
+     * @event resizablePanelTrait#resizeStop
+     * @description This event is fired when resizing stopped.
+     */
+    function onStop(e, ui){
+        this.trigger("resizeStop", e, ui);
+    }
 
     /**
      * @mixin resizablePanelTrait
-     * @description Mixin that adds methods to Panel.
-     * @augments abstractPanelTrait
+     * @description Extend panel with resizable behavior.
+     * @extends abstractPanelTrait
      */
     return _.extend({}, abstractPanelTrait, {
         /**
-         * Sets properties.
-         * @memberof resizablePanelTrait
-         * @param {object} options
-         * @param {string} [options.handles="e, s, se"] - jQuery ui resizable handles.
-         * @param {number} [options.minWidth=10] - jQuery ui minWidth.
-         * @param {number} [options.maxWidth=null] - jQuery ui maxWidth.
-         * @param {selector} options.resizableEl - selector of resizable element.
+         * @description Initialize additional Panel options.
+         * @memberof! resizablePanelTrait
+         * @param {object} [options]
+         * @param {string} [options.handles="e, s, se"] jQuery UI resizable handles.
+         * @param {number} [options.minWidth=10] jQuery UI resizable minWidth option.
+         * @param {number} [options.minHeight=10] jQuery UI resizable minHeight option.
+         * @param {number} [options.maxWidth=null] jQuery UI resizable maxWidth option.
+         * @param {number} [options.maxHeight=null] jQuery UI resizable maxHeight option.
+         * @param {string|jQuery|HTMLElement} [options.alsoResize] jQuery UI resizable alsoResize option.
+         * @param {string} [options.resizableEl] Selector of resizable element.
          */
         onConstructor: function(options) {
+            options || (options = {});
+
             this.handles = options.handles || "e, s, se";
             this.minWidth = options.minWidth || 10;
             this.minHeight = options.minHeight || 10;
             this.maxWidth = options.maxWidth || null;
+            this.maxHeight = options.maxHeight || null;
             this.alsoResize = options.alsoResize || false;
             this.resizableEl = options.resizableEl;
         },
 
         /**
-         * Initializes jQuery UI Resizable for element.
-         * @memberof resizablePanelTrait
-         * @param el
+         * @description Initialize jQuery UI Resizable for element.
+         * @memberof! resizablePanelTrait
+         * @fires resizablePanelTrait#resizeStart
+         * @fires resizablePanelTrait#resize
+         * @fires resizablePanelTrait#resizeStop
          */
-        afterSetElement: function(el){
+        afterSetElement: function(){
             this.$resizableEl = this.$el.find(this.resizableEl).length ? this.$el.find(this.resizableEl) : this.$el;
 
             this.$resizableEl.resizable({
@@ -69,67 +103,23 @@ define(function(require){
                 minHeight: this.minHeight,
                 minWidth: this.minWidth,
                 maxWidth: this.maxWidth,
+                maxHeight: this.maxHeight,
                 alsoResize: this.alsoResize,
-                resize: _.bind(this._onResize, this),
-                start: _.bind(this._onStart, this),
-                stop: _.bind(this._onStop, this)
+                resize: _.bind(onResize, this),
+                start: _.bind(onStart, this),
+                stop: _.bind(onStop, this)
             });
         },
 
         /**
-         * Destroys jQuery UI Resizable.
-         * @memberof resizablePanelTrait
+         * @description Destroy jQuery UI Resizable on Panel remove.
+         * @memberof! resizablePanelTrait
          */
         onRemove: function() {
             try {
                 this.$el.resizable("destroy");
             } catch (e) {
                 // destroyed already, skip
-            }
-        },
-
-        /**
-         * Additional methods of trait.
-         * @memberof resizablePanelTrait
-         */
-        extension: {
-            /**
-             * Resize handler.
-             * @fires "resize"
-             * @param {object} e - jQuery event.
-             * @param {object} ui - ui object.
-             * @alias extension._onResize
-             * @memberof! resizablePanelTrait
-             * @private
-             */
-            _onResize: function(e, ui) {
-                this.trigger("resize", e, ui);
-            },
-
-            /**
-             * Resize start handler.
-             * @fires "resizeStart"
-             * @param {object} e - jQuery event.
-             * @param {object} ui - ui object.
-             * @alias extension._onStart
-             * @memberof! resizablePanelTrait
-             * @private
-             */
-            _onStart: function(e, ui){
-                this.trigger("resizeStart", e, ui);
-            },
-
-            /**
-             * Resize stop handler.
-             * @fires "resizeStop"
-             * @param {object} e - jQuery event.
-             * @param {object} ui - ui object.
-             * @alias extension._onStop
-             * @memberof! resizablePanelTrait
-             * @private
-             */
-            _onStop: function(e, ui){
-                this.trigger("resizeStop", e, ui);
             }
         }
     });

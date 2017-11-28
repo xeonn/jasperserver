@@ -9,7 +9,7 @@ import com.jaspersoft.jasperserver.api.metadata.user.domain.client.ProfileAttrib
 import com.jaspersoft.jasperserver.api.metadata.user.domain.client.UserImpl;
 import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributeService;
 import com.jaspersoft.jasperserver.api.metadata.user.service.impl.AttributePathTransformer;
-import com.jaspersoft.jasperserver.dto.authority.ClientUserAttribute;
+import com.jaspersoft.jasperserver.dto.authority.ClientAttribute;
 import com.jaspersoft.jasperserver.remote.helpers.AttributesConfig;
 import com.jaspersoft.jasperserver.remote.helpers.RecipientIdentityResolver;
 import com.jaspersoft.jasperserver.remote.services.PermissionsService;
@@ -29,11 +29,11 @@ import static org.testng.Assert.assertTrue;
  *
  * @author Zakhar.Tomchenco
  * @author Volodya Sabadosh
- * @version $Id: UserAttributesConverterTest.java 54590 2015-04-22 17:55:42Z vzavadsk $
+ * @version $Id: UserAttributesConverterTest.java 58870 2015-10-27 22:30:55Z esytnik $
  */
 public class UserAttributesConverterTest {
     private final ProfileAttribute server = new ProfileAttributeImpl();
-    private final ClientUserAttribute client = new ClientUserAttribute();
+    private final ClientAttribute client = new ClientAttribute();
     private final String holderUri = "/organizations/organization_1/users/joeuser";
     private final String holderId = "user:/organization_1/joeuser";
     private final User principal = new UserImpl();
@@ -91,7 +91,7 @@ public class UserAttributesConverterTest {
 
     @Test
     public void testToClient() throws Exception {
-        ClientUserAttribute converted = converter.toClient(server, null);
+        ClientAttribute converted = converter.toClient(server, null);
 
         assertEquals(converted.getName(), server.getAttrName());
         assertEquals(converted.getValue(), server.getAttrValue());

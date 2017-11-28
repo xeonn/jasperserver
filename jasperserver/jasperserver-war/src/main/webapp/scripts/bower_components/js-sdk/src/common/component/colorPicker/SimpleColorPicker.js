@@ -26,30 +26,32 @@ define(function(require){
     var Backbone = require("backbone"),
         _ = require("underscore"),
         $ = require("jquery"),
-        i18n = require("bundle!CommonBundle"),
+        i18n = require("bundle!js-sdk/CommonBundle"),
         colors = require("./enum/colors"),
         template = require("text!common/component/colorPicker/template/simpleColorPickerTemplate.htm");
 
-    require("css!simpleColorPicker.css");
+    require("css!simpleColorPicker");
 
-    return Backbone.View.extend(
-        /** @lends SimpleColorPicker.prototype */
-        {
-
+    return Backbone.View.extend(/** @lends SimpleColorPicker.prototype */{
         events: {
             "click .color": "_selectColor"
         },
 
         /**
          * @constructor SimpleColorPicker
+         * @class SimpleColorPicker
          * @classdesc SimpleColorPicker component.
+         * @extends Backbone.View
          * @param {object} options
-         * @param {string} [options.label=undefined] - color picker label
-         * @param {string} [options.label=showTransparentInput] - show transparent (to set transparent property) input field.
+         * @param {string} [options.label] Color picker label
+         * @param {boolean} [options.showTransparentInput] Show transparent (to set transparent property) input field.
         */
         constructor: function(options){
+            options || (options = {});
+
             this.label = options && options.label;
             this.showTransparentInput = options && options.showTransparentInput;
+            this.showNoneInput = options && options.showNoneInput;
 
             Backbone.View.apply(this, arguments);
         },
@@ -58,19 +60,29 @@ define(function(require){
             return _.template(template)({
                 colors: colors, i18n: i18n,
                 label: this.label,
-                showTransparentInput: this.showTransparentInput
+                showTransparentInput: this.showTransparentInput,
+                showNoneInput: this.showNoneInput
             });
         },
 
         /**
-         * @description Highlights color in color picker with orange borders.
+         * @description Highlights color in color picker.
          * @param {string} color - hex color value
         */
         highlightColor: function(color){
-            var index = _.indexOf(colors, color);
-            var colorBox = index >= 0 ? this.$el.find("div[data-index='" + index + "']") : this.$el.find(".color.transparent");
-            this.$el.find(".color.transparent.selected, .colorWrapper.selected").removeClass("selected");
-            colorBox.addClass("selected");
+            var colorBox, index;
+
+            if (color === null) {
+                colorBox = this.$el.find(".color.none");
+            } else if (color === "rgba(0, 0, 0, 0)" || color === "transparent") {
+                colorBox = this.$el.find(".color.transparent");
+            } else {
+                index = _.indexOf(colors, color);
+                index >= 0 && (colorBox =  this.$el.find("div[data-index='" + index + "']"));
+            }
+
+            this.$el.find(".color.transparent.selected, .color.none.selected, .colorWrapper.selected").removeClass("selected");
+            colorBox && colorBox.addClass("selected");
         },
 
         /**
@@ -79,10 +91,20 @@ define(function(require){
          * @fires SimpleColorPicker#color:selected
          */
         _selectColor: function(event){
-            var colorEl = $(event.target);
-            var color = colorEl.css("background-color");
+            var colorEl = $(event.target),
+                color;
+
+            if (colorEl.is(".none")) {
+                color = null;
+            } else {
+                color = colorEl.css("background-color");
+            }
             this.highlightColor(color);
-            this.trigger("color:selected", colorEl.css("background-color"));
+
+            /**
+             * @event SimpleColorPicker#color:selected
+             */
+            this.trigger("color:selected", color);
         },
 
         /**
@@ -93,11 +115,10 @@ define(function(require){
         },
 
         /**
-         * @description Hides color picker.
+         * @description Hide color picker.
          */
         hide: function(){
             this.$el.hide();
         }
-
     });
 });

@@ -21,6 +21,7 @@
 
 package com.jaspersoft.jasperserver.remote.services.async;
 
+import com.jaspersoft.jasperserver.dto.importexport.State;
 import com.jaspersoft.jasperserver.remote.exception.NoSuchTaskException;
 import org.springframework.stereotype.Component;
 
@@ -29,6 +30,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /*
 *  @author inesterenko
@@ -39,12 +42,22 @@ public class BasicTasksManager implements TasksManager {
 
     protected Map<String, Task> tasks = new ConcurrentHashMap<String, Task>();
 
+    private final ExecutorService executor;
+
     public BasicTasksManager(Map<String, Task> tasks) {
+        this.executor = Executors.newCachedThreadPool();
         this.tasks = new ConcurrentHashMap<String, Task>(tasks);
     }
 
     public BasicTasksManager() {
         super();
+
+        this.executor = Executors.newCachedThreadPool();
+    }
+
+    @Override
+    public ExecutorService getExecutor() {
+        return executor;
     }
 
     protected  String generateUniqueId(){
@@ -56,15 +69,28 @@ public class BasicTasksManager implements TasksManager {
     }
 
     @Override
-    public StateDto startTask(Task task) {
-        StateDto stateDto = task.getState();
-        stateDto.setPhase(Task.INPROGRESS);
+    public State startTask(Task task) {
+        State state = task.getState();
+        state.setPhase(Task.INPROGRESS);
         String uuid = generateUniqueId();
         task.setUniqueId(uuid);
-        stateDto.setId(uuid);
+        state.setId(uuid);
         tasks.put(uuid, task);
-        task.start();
-        return stateDto;
+        task.start(executor);
+        return state;
+    }
+
+    @Override
+    public State restartTask(Task task) {
+        State state = task.getState();
+        String taskId = state.getId();
+        if (!tasks.containsKey(taskId)) {
+            throw new NoSuchTaskException(taskId);
+        }
+        state.setPhase(Task.INPROGRESS);
+        state.setError(null);
+        task.start(executor);
+        return state;
     }
 
     @Override
@@ -87,7 +113,7 @@ public class BasicTasksManager implements TasksManager {
         tasks.remove(taskId);
     }
 
-    public StateDto getTaskState(String taskId) throws NoSuchTaskException {
+    public State getTaskState(String taskId) throws NoSuchTaskException {
         return getTask(taskId).getState();
     }
 }

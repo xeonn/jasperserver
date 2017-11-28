@@ -22,46 +22,44 @@
 
 /**
  * @author: Zakhar Tomchenko, Igor Nesterenko, Andrew Godovanec, Sergey Prilukin
- * @version: $Id: bundle.js 270 2014-10-13 19:58:03Z agodovanets $
+ * @version: $Id: bundle.js 1605 2015-09-23 17:55:32Z inestere $
  */
 
 define(function (require) {
     "use strict";
 
-    var request = require("common/transport/request"),
-        requestSettings = require("common/config/requestSettings"),
-        _ = require("underscore"),
-        configs = require("jrs.configs"),
-        urlRoot = configs.contextPath + "/rest_v2/bundles";
+    var _ = require("underscore"),
+        requestSettings = require("requestSettings"),
+        request = require("request"),
+        javaPropertiesParser = require("common/util/parse/javaProperties");
 
-    // use bundle name "all" to get all available bundles merged to single bundle
-    var MERGED_BUNDLES_NAME = "all";
+    return {
+        load: function (name, req, onLoad, config) {
 
-    var bundlePluginFn = function(bundleName, callback) {
-        var urlSuffix = MERGED_BUNDLES_NAME === bundleName ? "?expanded=true" : ("/" + bundleName);
+            if (config.isBuild) {
+                onLoad();
+                return;
+            }
 
-        var settings = _.extend({}, requestSettings, {
-            type: "GET",
-            dataType: "json",
-            url: urlRoot + urlSuffix
-        });
+            var i18nConf = config.config.i18n || {},
+                path = config.baseUrl ? config.baseUrl + "../bundles" : "/bundles",
+                module = name.split("/")[0],
+                locale = i18nConf.locale ? ("_" + i18nConf.locale) : "",
+                replaceTo = i18nConf.paths && i18nConf.paths[module] || "";
 
-        request(settings).then(function(resp) {
-            callback(MERGED_BUNDLES_NAME !== bundleName ? resp : _(resp).reduce(function(memo, bundle) {
-                return _.extend(memo, bundle);
-            }, {}));
-        });
-    };
+            name = name.replace(module, replaceTo);
 
-    bundlePluginFn.load = function (name, req, onLoad, config) {
+            name[0] !== "/" && (name = "/" + name);
 
-        if (config.isBuild) {
-            onLoad();
-            return;
+            var settings = _.extend({}, requestSettings, {
+                type: "GET",
+                url: path + name + locale + ".properties"
+            });
+
+            request(settings).then(function(resp) {
+                onLoad(javaPropertiesParser(resp));
+            });
         }
-
-        bundlePluginFn(name, onLoad);
     };
 
-    return bundlePluginFn;
 });

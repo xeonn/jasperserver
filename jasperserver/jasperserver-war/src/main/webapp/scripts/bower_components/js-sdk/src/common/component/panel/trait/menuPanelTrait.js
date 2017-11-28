@@ -22,7 +22,7 @@
 
 /**
  * @author: Zakhar Tomchenko, Kostiantyn Tsaregradskyi
- * @version: $Id: menuPanelTrait.js 270 2014-10-13 19:58:03Z agodovanets $
+ * @version: $Id: menuPanelTrait.js 1605 2015-09-23 17:55:32Z inestere $
  */
 
 define(function(require){
@@ -37,7 +37,19 @@ define(function(require){
 
     var GroupMenu = ClickMenu.extend(groupMenuTrait);
 
+    /**
+     * @mixin menuPanelTrait
+     * @description Add context menu to panel.
+     * @extends abstractPanelTrait
+     */
     return _.extend({}, abstractPanelTrait, {
+        /**
+         * @description Initialize additional Panel options.
+         * @memberof! menuPanelTrait
+         * @param {object} [options]
+         * @param {object} [options.menuOptions] Options for menu. See {@link ClickMenu}, {@link groupMenuTrait}
+         * @param {boolean} [options.menuOptionSelectable] If option can be selected.
+         */
         onConstructor: function(options) {
             options || (options = {});
 
@@ -45,7 +57,12 @@ define(function(require){
             this.menuOptionSelectable = options.menuOptionSelectable;
         },
 
-        afterSetElement: function(el){
+        /**
+         * @description Initialize menu.
+         * @memberof! menuPanelTrait
+         * @fires menuPanelTrait#option:ID
+         */
+        afterSetElement: function(){
             this.$menuEl = $(menuPanelMarkup);
             this.$el.find(".title").after(this.$menuEl);
 
@@ -54,11 +71,19 @@ define(function(require){
             this.listenTo(this.filterMenu, "all", function(name, view, model){
                 if (name.indexOf(this.filterMenu.contextName) >= 0) {
                     this.filterMenu.hide();
+                    /**
+                     * @event menuPanelTrait#option:ID
+                     * @description This event is fired when option with corresponding ID is selected
+                     */
                     this.trigger(name, view, model);
                 }
             }, this);
         },
 
+        /**
+         * @description Destroy menu.
+         * @memberof! menuPanelTrait
+         */
         onRemove: function() {
             this.filterMenu.remove();
         }

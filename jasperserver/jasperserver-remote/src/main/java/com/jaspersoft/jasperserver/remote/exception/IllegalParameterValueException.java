@@ -20,11 +20,11 @@
 */
 package com.jaspersoft.jasperserver.remote.exception;
 
-import com.jaspersoft.jasperserver.remote.exception.xml.ErrorDescriptor;
+import com.jaspersoft.jasperserver.dto.common.ErrorDescriptor;
 
 /**
  * @author Yaroslav.Kovalchyk
- * @version $Id: IllegalParameterValueException.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: IllegalParameterValueException.java 57603 2015-09-15 17:20:48Z psavushc $
  */
 public class IllegalParameterValueException extends RemoteException {
     public static final String ERROR_CODE  = "illegal.parameter.value.error";
@@ -35,7 +35,7 @@ public class IllegalParameterValueException extends RemoteException {
 
     public IllegalParameterValueException(String message, String... parameters) {
         super(message);
-        setErrorDescriptor(new ErrorDescriptor.Builder().setMessage(message).setErrorCode(ERROR_CODE).setParameters(parameters).getErrorDescriptor());
+        setErrorDescriptor(new ErrorDescriptor().setMessage(message).setErrorCode(ERROR_CODE).setParameters(parameters));
     }
 
     public IllegalParameterValueException(ErrorDescriptor errorDescriptor){

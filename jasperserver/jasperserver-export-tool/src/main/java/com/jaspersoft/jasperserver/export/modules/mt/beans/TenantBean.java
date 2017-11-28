@@ -1,16 +1,16 @@
 package com.jaspersoft.jasperserver.export.modules.mt.beans;
 
-import com.jaspersoft.jasperserver.api.metadata.user.domain.ProfileAttribute;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.Tenant;
-import com.jaspersoft.jasperserver.export.modules.BaseExporterModule;
+import com.jaspersoft.jasperserver.api.metadata.user.service.TenantService;
+import com.jaspersoft.jasperserver.export.modules.ImporterModuleContext;
 import com.jaspersoft.jasperserver.export.modules.common.ProfileAttributeBean;
-
-import java.util.Iterator;
-import java.util.List;
+import com.jaspersoft.jasperserver.export.modules.common.TenantStrHolderPattern;
+import com.jaspersoft.jasperserver.export.service.ImportExportService;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author Voloyda Sabadosh
- * @version $Id: TenantBean.java 54590 2015-04-22 17:55:42Z vzavadsk $
+ * @version $Id: TenantBean.java 58870 2015-10-27 22:30:55Z esytnik $
  */
 public class TenantBean {
     private String id = null;
@@ -36,16 +36,66 @@ public class TenantBean {
         setTheme(tenant.getTheme());
     }
 
-    public void copyTo(Tenant tenant) {
-        tenant.setId(getId());
-        tenant.setAlias(getAlias());
-        tenant.setParentId(getParentId());
-        tenant.setTenantName(getTenantName());
+    public void copyTo(Tenant tenant, ImporterModuleContext context) {
+        //Root Tenant from import input
+        String sourceTenantId = context.getImportTask()
+                .getInputMetadata().getProperty(ImportExportService.ROOT_TENANT_ID);
+
+        if (TenantService.ORGANIZATIONS.equals(sourceTenantId)
+                || !StringUtils.equals(sourceTenantId, getId())) {
+            tenant.setId(getId());
+            tenant.setParentId(getParentId());
+            if (getAlias() != null) {
+                tenant.setAlias(getAlias());
+            }
+            tenant.setTenantName(getTenantName());
+        }
+
         tenant.setTenantDesc(getTenantDesc());
         tenant.setTenantNote(getTenantNote());
         tenant.setTenantUri(getTenantUri());
         tenant.setTenantFolderUri(getTenantFolderUri());
-        tenant.setTheme(getTheme());
+
+        if (context.getImportTask().getParameters().hasParameter(ImportExportService.SKIP_THEMES)) {
+            if (!StringUtils.equals(getTheme(), tenant.getTheme())) {
+                if (StringUtils.isBlank(tenant.getTheme())) {
+                    tenant.setTheme(ImportExportService.DEFAULT_THEME_NAME);
+                }
+            }
+        } else if (getTheme() != null) {
+            tenant.setTheme(getTheme());
+        }
+
+        if (TenantService.ORGANIZATIONS.equals(sourceTenantId)
+                || !StringUtils.equals(sourceTenantId, getId())) {
+            if (!context.getNewGeneratedTenantIds().isEmpty()) {
+                handleNewTenantIds(tenant, context);
+            }
+        }
+    }
+
+    private void handleNewTenantIds(Tenant tenant, ImporterModuleContext context) {
+        //Root Tenant from import input
+        String sourceTenantId = context.getImportTask()
+                .getInputMetadata().getProperty(ImportExportService.ROOT_TENANT_ID);
+
+        String originalId = tenant.getId();
+        tenant.setId(TenantStrHolderPattern.TENANT_ID
+                .replaceWithNewTenantIds(context.getNewGeneratedTenantIds(), tenant.getId()));
+
+        if (originalId != null && !originalId.equals(tenant.getId())) {
+            if (!originalId.equals(sourceTenantId)) {
+                tenant.setAlias(tenant.getId());
+                tenant.setTenantName(tenant.getAlias());
+            }
+        }
+
+        tenant.setParentId(TenantStrHolderPattern.TENANT_ID
+                .replaceWithNewTenantIds(context.getNewGeneratedTenantIds(), tenant.getParentId()));
+        tenant.setTenantUri(TenantStrHolderPattern.TENANT_URI
+                .replaceWithNewTenantIds(context.getNewGeneratedTenantIds(), tenant.getTenantUri()));
+        tenant.setTenantFolderUri(TenantStrHolderPattern.TENANT_FOLDER_URI
+                .replaceWithNewTenantIds(context.getNewGeneratedTenantIds(), tenant.getTenantFolderUri()));
     }
 
 

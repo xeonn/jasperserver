@@ -20,18 +20,20 @@
 */
 package com.jaspersoft.jasperserver.remote.reports;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
-
+import com.jaspersoft.jasperserver.api.common.error.handling.SecureExceptionHandler;
+import com.jaspersoft.jasperserver.api.engine.jasperreports.util.ExportUtil;
+import com.jaspersoft.jasperserver.dto.common.ErrorDescriptor;
+import com.jaspersoft.jasperserver.remote.exception.RemoteException;
+import com.jaspersoft.jasperserver.remote.services.ExportExecution;
+import com.jaspersoft.jasperserver.remote.services.ExportExecutionOptions;
+import com.jaspersoft.jasperserver.remote.services.ReportExecution;
+import com.jaspersoft.jasperserver.remote.services.ReportExecutionOptions;
+import com.jaspersoft.jasperserver.remote.services.ReportOutputPages;
+import com.jaspersoft.jasperserver.remote.services.ReportOutputResource;
+import com.jaspersoft.jasperserver.remote.services.RunReportService;
+import com.jaspersoft.jasperserver.remote.utils.AuditHelper;
+import com.jaspersoft.jasperserver.war.util.JRHtmlExportUtils;
 import net.sf.jasperreports.engine.JRAbstractExporter;
 import net.sf.jasperreports.engine.JRExporterParameter;
 import net.sf.jasperreports.engine.JRRuntimeException;
@@ -44,29 +46,27 @@ import net.sf.jasperreports.engine.export.JRHtmlExporterParameter;
 import net.sf.jasperreports.engine.export.MapHtmlResourceHandler;
 import net.sf.jasperreports.engine.util.JRTypeSniffer;
 import net.sf.jasperreports.web.util.WebHtmlResourceHandler;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Value;
 
-import com.jaspersoft.jasperserver.api.engine.jasperreports.util.ExportUtil;
-import com.jaspersoft.jasperserver.remote.exception.RemoteException;
-import com.jaspersoft.jasperserver.remote.exception.xml.ErrorDescriptor;
-import com.jaspersoft.jasperserver.remote.services.ExportExecution;
-import com.jaspersoft.jasperserver.remote.services.ExportExecutionOptions;
-import com.jaspersoft.jasperserver.remote.services.ReportExecution;
-import com.jaspersoft.jasperserver.remote.services.ReportExecutionOptions;
-import com.jaspersoft.jasperserver.remote.services.ReportOutputPages;
-import com.jaspersoft.jasperserver.remote.services.ReportOutputResource;
-import com.jaspersoft.jasperserver.remote.services.RunReportService;
-import com.jaspersoft.jasperserver.remote.utils.AuditHelper;
-import com.jaspersoft.jasperserver.war.util.JRHtmlExportUtils;
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * <p></p>
  *
  * @author yaroslav.kovalchyk
- * @version $Id: AbstractHtmlExportStrategy.java 55164 2015-05-06 20:54:37Z mchan $
+ * @version $Id: AbstractHtmlExportStrategy.java 57603 2015-09-15 17:20:48Z psavushc $
  */
 public abstract class AbstractHtmlExportStrategy implements HtmlExportStrategy {
     private final static Log log = LogFactory.getLog(FullHtmlExportStrategy.class);
@@ -76,6 +76,8 @@ public abstract class AbstractHtmlExportStrategy implements HtmlExportStrategy {
     private AuditHelper auditHelper;
     @Value("${deploy.base.url:}")
     private String deployBaseUrl;
+    @Resource
+    private SecureExceptionHandler secureExceptionHandler;
 
     @Override
     public void export(ReportExecution reportExecution, ExportExecution exportExecution, JasperPrint jasperPrint) {
@@ -129,22 +131,21 @@ public abstract class AbstractHtmlExportStrategy implements HtmlExportStrategy {
             		|| JRAbstractExporter.EXCEPTION_MESSAGE_KEY_START_PAGE_INDEX_OUT_OF_RANGE.equals(e.getMessageKey())
             		|| JRAbstractExporter.EXCEPTION_MESSAGE_KEY_END_PAGE_INDEX_OUT_OF_RANGE.equals(e.getMessageKey())) {
                 final String pagesString = pages.toString();
-                throw new RemoteException(new ErrorDescriptor.Builder().setMessage(
+                throw new RemoteException(new ErrorDescriptor().setMessage(
                         "Page out of range. Requested: "
                                 + pagesString + (reportExecution.getTotalPages() != null
                                 ? " Total pages: " + reportExecution.getTotalPages() : ""))
                         .setErrorCode("export.pages.out.of.range")
-                        .setParameters(pagesString, reportExecution.getTotalPages()).getErrorDescriptor());
+                        .setParameters(pagesString, reportExecution.getTotalPages()));
             } else {
-                throw new RemoteException(e);
+                throw new RemoteException(e, secureExceptionHandler);
             }
         } catch (Exception e) {
             log.debug("Error exporting report", e);
             auditHelper.addExceptionToAllAuditEvents(e);
             throw new RemoteException(
-                    new ErrorDescriptor.Builder()
-                            .setErrorCode("webservices.error.errorExportingReportUnit").setParameters(e.getMessage())
-                            .getErrorDescriptor(), e
+                    new ErrorDescriptor()
+                            .setErrorCode("webservices.error.errorExportingReportUnit").setParameters(e.getMessage()), e
             );
         } finally {
             try {
@@ -222,9 +223,10 @@ public abstract class AbstractHtmlExportStrategy implements HtmlExportStrategy {
                 }
             }
         } catch (Throwable e) {
-            log.error(e);
-            throw new RemoteException(new ErrorDescriptor.Builder()
-                    .setErrorCode("webservices.error.errorAddingImage").setParameters(e.getMessage()).getErrorDescriptor(), e);
+			ErrorDescriptor ed = secureExceptionHandler.handleException(e, new ErrorDescriptor().setErrorCode("webservices.error.errorAddingImage"));
+
+			log.error(ed.getMessage(), e);
+            throw new RemoteException(ed, e);
         }
     }
 }

@@ -10,6 +10,7 @@
                 <ref bean="logPurgerTrigger"/>
                 <ref bean="heartbeatTrigger"/>
                 <ref bean="accessEventPurgerTrigger"/>
+                <ref bean="importExportTaskRemoverTrigger"/>
             </list>
         </constructor-arg>
     </bean>

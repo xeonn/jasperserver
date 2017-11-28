@@ -14,7 +14,7 @@ import com.jaspersoft.jasperserver.api.metadata.user.service.AttributesSearchRes
 import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributeLevel;
 import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributeService;
 import com.jaspersoft.jasperserver.api.metadata.user.service.impl.AttributesSearchResultImpl;
-import com.jaspersoft.jasperserver.dto.authority.ClientUserAttribute;
+import com.jaspersoft.jasperserver.dto.authority.ClientAttribute;
 import com.jaspersoft.jasperserver.dto.authority.hypermedia.HypermediaAttribute;
 import com.jaspersoft.jasperserver.dto.authority.hypermedia.HypermediaAttributeEmbeddedContainer;
 import com.jaspersoft.jasperserver.dto.permissions.RepositoryPermission;
@@ -58,7 +58,7 @@ import static org.mockito.Mockito.when;
  * An unit-test for the AttributesServiceImpl class
  *
  * @author askorodumov
- * @version $Id: AttributesServiceImplTest.java 56967 2015-08-20 23:20:53Z esytnik $
+ * @version $Id: AttributesServiceImplTest.java 58870 2015-10-27 22:30:55Z esytnik $
  */
 public class AttributesServiceImplTest {
     @Mock
@@ -89,10 +89,10 @@ public class AttributesServiceImplTest {
     private final ProfileAttribute attributeB;
     private final ProfileAttribute attributeC;
     private final ProfileAttribute attributeD;
-    private final ClientUserAttribute clientAttributeA = new ClientUserAttribute();
-    private final ClientUserAttribute clientAttributeB = new ClientUserAttribute();
-    private final ClientUserAttribute clientAttributeC = new ClientUserAttribute();
-    private final ClientUserAttribute clientAttributeD = new ClientUserAttribute();
+    private final ClientAttribute clientAttributeA = new ClientAttribute();
+    private final ClientAttribute clientAttributeB = new ClientAttribute();
+    private final ClientAttribute clientAttributeC = new ClientAttribute();
+    private final ClientAttribute clientAttributeD = new ClientAttribute();
 
 
     /**
@@ -183,7 +183,7 @@ public class AttributesServiceImplTest {
                 eq(new AttributesSearchCriteria.Builder().setNames(Collections.singleton(attributeB.getAttrName())).build())
         )).thenReturn(new AttributesSearchResultImpl<ProfileAttribute>());
 
-        List<ClientUserAttribute> list = service.getAttributes(
+        List<ClientAttribute> list = service.getAttributes(
                 recipientIdentity, Collections.singleton(attributeB.getAttrName()), false);
         assertNotNull("Result should not be null", list);
         assertTrue("Size of the result should be zero", list.size() == 0);
@@ -201,7 +201,7 @@ public class AttributesServiceImplTest {
                 eq(new AttributesSearchCriteria.Builder().build())
         )).thenReturn(searchResult);
 
-        List<ClientUserAttribute> result
+        List<ClientAttribute> result
                 = service.getAttributes(recipientIdentity, null, true);
         assertNotNull("Result should not be null", result);
         assertTrue("Size of the result should be two", result.size() == 2);
@@ -226,7 +226,7 @@ public class AttributesServiceImplTest {
                 eq(new AttributesSearchCriteria.Builder().setHolder(RECIPIENT_URI).build())
         )).thenReturn(searchResult);
 
-        AttributesSearchResult<ClientUserAttribute> result = service.getAttributes(
+        AttributesSearchResult<ClientAttribute> result = service.getAttributes(
                 new AttributesSearchCriteria.Builder().setHolder(RECIPIENT_URI).build(),
                 false);
         assertNotNull("Result should not be null", result);
@@ -250,7 +250,7 @@ public class AttributesServiceImplTest {
                 eq(new AttributesSearchCriteria.Builder().setNames(Collections.singleton(attributeB.getAttrName())).build())
         )).thenReturn(new AttributesSearchResultImpl<ProfileAttribute>());
 
-        List<ClientUserAttribute> result = service.putAttributes(
+        List<ClientAttribute> result = service.putAttributes(
                 recipientIdentity,
                 Collections.singletonList(clientAttributeB),
                 Collections.singleton(attributeB.getAttrName()),
@@ -296,14 +296,14 @@ public class AttributesServiceImplTest {
             throws Exception {
         final int ATTRIBUTES_COUNT = 15;
         final List<ProfileAttribute> attributes = new ArrayList<ProfileAttribute>(ATTRIBUTES_COUNT);
-        final List<ClientUserAttribute> clientAttributes = new ArrayList<ClientUserAttribute>(ATTRIBUTES_COUNT);
+        final List<ClientAttribute> clientAttributes = new ArrayList<ClientAttribute>(ATTRIBUTES_COUNT);
 
         for (int i = 0; i < ATTRIBUTES_COUNT; i++) {
             String name = Integer.toString(i);
             ProfileAttribute attribute = new UnmodifiableProfileAttribute(name, name, HOLDER_URI);
             attributes.add(attribute);
 
-            ClientUserAttribute clientAttribute = new ClientUserAttribute();
+            ClientAttribute clientAttribute = new ClientAttribute();
             clientAttribute.setName(attribute.getAttrName());
             clientAttribute.setValue(attribute.getAttrValue());
             clientAttributes.add(clientAttribute);
@@ -324,8 +324,8 @@ public class AttributesServiceImplTest {
         }
 
         ArgumentCaptor<ProfileAttribute> captor = ArgumentCaptor.forClass(ProfileAttribute.class);
-        List<ClientUserAttribute> immutableList = Collections.unmodifiableList(clientAttributes);
-        List<ClientUserAttribute> list = service.putAttributes(
+        List<ClientAttribute> immutableList = Collections.unmodifiableList(clientAttributes);
+        List<ClientAttribute> list = service.putAttributes(
                 recipientIdentity,
                 immutableList,
                 null,
@@ -364,7 +364,7 @@ public class AttributesServiceImplTest {
         when(recipientIdentityResolver.resolveRecipientObject(wrongHolderUri))
                 .thenThrow(new RuntimeException("wrong holder URI"));
 
-        AttributesSearchResult<ClientUserAttribute> searchResult = service.getAttributes(searchCriteria, false);
+        AttributesSearchResult<ClientAttribute> searchResult = service.getAttributes(searchCriteria, false);
         assertNotNull(searchResult.getList());
         assertTrue("", searchResult.getList().isEmpty());
     }
@@ -391,10 +391,10 @@ public class AttributesServiceImplTest {
                 any(ExecutionContext.class), eq(recipient), eq(searchCriteria)))
                 .thenReturn(serverSearchResult);
 
-        AttributesSearchResult<ClientUserAttribute> result = service.getAttributes(searchCriteria, true);
+        AttributesSearchResult<ClientAttribute> result = service.getAttributes(searchCriteria, true);
         assertEquals("Result must contain 2 attributes", result.getList().size(), 2);
 
-        LinkedList<ClientUserAttribute> cleanupList = new LinkedList<ClientUserAttribute>(result.getList());
+        LinkedList<ClientAttribute> cleanupList = new LinkedList<ClientAttribute>(result.getList());
         HypermediaAttribute hypermediaAttribute;
         while (!cleanupList.isEmpty() && (cleanupList.get(0) instanceof HypermediaAttribute)
                 && (attributeA.getAttrName().equals((hypermediaAttribute = (HypermediaAttribute) cleanupList.get(0)).getName())
@@ -434,7 +434,7 @@ public class AttributesServiceImplTest {
                 any(ExecutionContext.class), eq(recipient), eq(searchCriteria)))
                 .thenReturn(searchResult);
 
-        List<ClientUserAttribute> result = service.putAttributes(
+        List<ClientAttribute> result = service.putAttributes(
                 recipientIdentity,
                 Arrays.asList(clientAttributeC, clientAttributeD),
                 null,
@@ -505,7 +505,7 @@ public class AttributesServiceImplTest {
                 any(ExecutionContext.class), eq(recipient), eq(searchCriteria)))
                 .thenReturn(searchResult);
 
-        List<ClientUserAttribute> result = service.putAttributes(
+        List<ClientAttribute> result = service.putAttributes(
                 recipientIdentity,
                 null,
                 null,
@@ -553,10 +553,10 @@ public class AttributesServiceImplTest {
         ProfileAttribute attribute4 = new UnmodifiableProfileAttribute(
                 "attribute-4", "value for attribute 4", HOLDER_URI);
 
-        ClientUserAttribute clientAttribute1 = new ClientUserAttribute();
-        ClientUserAttribute clientAttribute2 = new ClientUserAttribute();
-        ClientUserAttribute clientAttribute3 = new ClientUserAttribute();
-        ClientUserAttribute clientAttribute4 = new ClientUserAttribute();
+        ClientAttribute clientAttribute1 = new ClientAttribute();
+        ClientAttribute clientAttribute2 = new ClientAttribute();
+        ClientAttribute clientAttribute3 = new ClientAttribute();
+        ClientAttribute clientAttribute4 = new ClientAttribute();
 
         clientAttribute1.setName(attribute1.getAttrName());
         clientAttribute1.setValue(attribute1.getAttrValue());
@@ -640,7 +640,7 @@ public class AttributesServiceImplTest {
         when(permissionConverter.toClient(objectPermission, null))
                 .thenReturn(repositoryPermission2);
 
-        List<ClientUserAttribute> result = service.putAttributes(
+        List<ClientAttribute> result = service.putAttributes(
                 recipientIdentity,
                 Arrays.asList(hypermediaAttribute1, hypermediaAttribute2),
                 null,
@@ -758,7 +758,7 @@ public class AttributesServiceImplTest {
                 any(ExecutionContext.class), eq(recipient), eq(searchCriteria)))
                 .thenReturn(searchResult);
 
-        List<ClientUserAttribute> result = service.putAttributes(
+        List<ClientAttribute> result = service.putAttributes(
                 recipientIdentity,
                 Arrays.asList(clientAttributeC, clientAttributeD),
                 namesSet,
@@ -816,7 +816,7 @@ public class AttributesServiceImplTest {
                 any(ExecutionContext.class), eq(recipient), eq(searchCriteria)))
                 .thenReturn(searchResult);
 
-        List<ClientUserAttribute> result = service.putAttributes(
+        List<ClientAttribute> result = service.putAttributes(
                 recipientIdentity,
                 Arrays.asList(clientAttributeC, clientAttributeD),
                 names,
@@ -863,7 +863,7 @@ public class AttributesServiceImplTest {
                 any(ExecutionContext.class), eq(recipient), eq(searchCriteria)))
                 .thenReturn(searchResult);
 
-        List<ClientUserAttribute> result = service.putAttributes(
+        List<ClientAttribute> result = service.putAttributes(
                 recipientIdentity,
                 Arrays.asList(clientAttributeC, clientAttributeD),
                 namesSet,
@@ -1060,14 +1060,14 @@ public class AttributesServiceImplTest {
     /*
      * Return true if the list of attributes matches the arrays of names and values
      *
-     * @param list is a list of ClientUserAttribute instances
+     * @param list is a list of ClientAttribute instances
      * @param keys is an array of attributes names. In the order corresponding to the "values" array
      * @param values is an array of attributes values. In the order corresponding to the "keys" array.
      *     Must contains null for an attribute if you do not want check the value of the attribute.
      * @return true if the list matches the arrays of names and values
      */
     private static boolean isListClientAttributesIdenticalInCompositionOfNamesValues(
-            List<ClientUserAttribute> list, String[] names, String[] values) {
+            List<ClientAttribute> list, String[] names, String[] values) {
 
         if (list == null) {
             throw new IllegalArgumentException();
@@ -1081,7 +1081,7 @@ public class AttributesServiceImplTest {
 
         Set<String> keySet = map.keySet();
 
-        for (ClientUserAttribute clientAttribute : list) {
+        for (ClientAttribute clientAttribute : list) {
             String name = clientAttribute.getName();
             if (!keySet.contains(name)) {
                 return false;
@@ -1101,7 +1101,7 @@ public class AttributesServiceImplTest {
      * see isListClientAttributesIdenticalInCompositionOfNamesValues(List, String[], String[])
      */
     private static boolean isListClientAttributesIdenticalInCompositionOfNamesValues(
-            List<ClientUserAttribute> list, String name, String value) {
+            List<ClientAttribute> list, String name, String value) {
         return isListClientAttributesIdenticalInCompositionOfNamesValues(list, strings(name), strings(value));
     }
 

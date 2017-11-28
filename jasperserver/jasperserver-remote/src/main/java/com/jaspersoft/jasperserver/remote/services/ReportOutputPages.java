@@ -21,7 +21,7 @@
 package com.jaspersoft.jasperserver.remote.services;
 
 import com.jaspersoft.jasperserver.remote.exception.IllegalParameterValueException;
-import com.jaspersoft.jasperserver.remote.exception.xml.ErrorDescriptor;
+import com.jaspersoft.jasperserver.dto.common.ErrorDescriptor;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -76,14 +76,14 @@ public class ReportOutputPages {
                     setStartPage(startPage);
                     setEndPage(endPage);
                 } else {
-                    throw new IllegalParameterValueException(new ErrorDescriptor.Builder()
+                    throw new IllegalParameterValueException(new ErrorDescriptor()
                             .setErrorCode("report.start.page.greater.then.end.page")
-                            .setParameters("Start page: " + startPage, "End page: " + endPage).getErrorDescriptor());
+                            .setParameters("Start page: " + startPage, "End page: " + endPage));
                 }
             } else {
-                throw new IllegalParameterValueException(new ErrorDescriptor.Builder()
+                throw new IllegalParameterValueException(new ErrorDescriptor()
                         .setErrorCode("report.invalid.page.range")
-                        .setParameters(pages).getErrorDescriptor());
+                        .setParameters(pages));
             }
         }
         return this;

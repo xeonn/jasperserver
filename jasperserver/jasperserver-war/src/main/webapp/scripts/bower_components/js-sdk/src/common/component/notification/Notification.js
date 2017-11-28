@@ -21,7 +21,7 @@
 
 /**
  * @author: Olesya Bobruyko
- * @version: $Id: Notification.js 812 2015-01-27 11:01:30Z psavushchik $
+ * @version: $Id: Notification.js 1658 2015-10-05 16:13:24Z obobruyk $
  */
 
 define(function(require) {
@@ -30,10 +30,10 @@ define(function(require) {
     var _ = require('underscore'),
         $ = require('jquery'),
         Backbone = require('backbone'),
-        i18n = require("bundle!CommonBundle"),
+        i18n = require("bundle!js-sdk/CommonBundle"),
         notificationTemplate = require('text!./template/notificationTemplate.htm');
 
-    require("css!notifications.css");
+    require("css!notifications");
 
     var NOTIFICATION_TYPES = {
             SUCCESS: "success",
@@ -44,84 +44,81 @@ define(function(require) {
 
     notificationTypeToCssClassMap[NOTIFICATION_TYPES.WARNING] = NOTIFICATION_TYPES.WARNING;
 
-    return Backbone.View.extend(
-        /** @lends Notification.prototype */
-        {
-            template: _.template(notificationTemplate),
+    return Backbone.View.extend(/** @lends Notification.prototype */{
+        template: _.template(notificationTemplate),
 
-            events: {
-                "click .close a": "hide"
-            },
+        events: {
+            "click .close a": "hide"
+        },
 
-            el: function() {
-                return this.template({
-                    message: this.message,
-                    i18n: i18n
-                });
-            },
+        el: function() {
+            return this.template({ message: this.message, i18n: i18n });
+        },
 
-            /**
-             * @constructor Notification
-             * @classdesc Notification component.
-             *
-             */
-            initialize: function() {
-                this.render();
-            },
+        /**
+         * @constructor Notification
+         * @classdesc Notification component.
+         * @extends Backbone.View
+         */
+        initialize: function() {
+            this.render();
+        },
 
-            /**
-             * @description Renders notification.
-             * @returns {Notification}
-             */
-            render: function() {
-                $("body").append(this.$el);
-                this.$el.hide();
-                this.$messageContainer = this.$(".notificationMessage > span:first-child");
+        /**
+         * @description Render notification.
+         * @returns {Notification}
+         * @private
+         */
+        render: function() {
+            $("body").append(this.$el);
+            this.$el.hide();
+            this.$messageContainer = this.$(".notificationMessage > span:first-child");
 
-                return this;
-            },
+            return this;
+        },
 
-            /**
-             * @description Shows notification.
-             * @param {object} options
-             * @param {string} [options.type="warning"] - type of notification (success, warning).
-             * @param {number} [options.delay=2000] - delay before notification is closed.
-             * @param {string} options.message - notification text.
-             */
-            show: function(options) {
-                options = _.extend({
-                    type: NOTIFICATION_TYPES.WARNING,
-                    delay: NOTIFICATION_DEFAULT_DELAY
-                }, options);
+        /**
+         * @description Show notification.
+         * @param {object} options
+         * @param {string} [options.type="warning"] Type of notification (success, warning).
+         * @param {number} [options.delay=2000] Delay before notification is hidden.
+         * @param {string} options.message Notification text.
+         * @returns {Notification}
+         */
+        show: function(options) {
+            options = _.extend({
+                type: NOTIFICATION_TYPES.WARNING,
+                delay: NOTIFICATION_DEFAULT_DELAY
+            }, options);
 
-                this.$messageContainer.text(options.message);
+            this.$messageContainer.text(options.message);
 
-                this.$messageContainer.removeClass().attr({"class": notificationTypeToCssClassMap[options.type]});
+            this.$messageContainer.removeClass().attr({"class": notificationTypeToCssClassMap[options.type]});
 
-                this.$el.slideDown();
+            this.$el.slideDown();
 
-                _.delay(_.bind(this.hide, this), options.delay);
+            options.delay && _.delay(_.bind(this.hide, this), options.delay);
 
-                return this;
-            },
+            return this;
+        },
 
-            /**
-             * @description Hides notification.
-             * @param {object} event - jQuery event.
-             */
-            hide: function(event) {
-                event && event.preventDefault();
+        /**
+         * @description Hide notification.
+         * @returns {Notification}
+         */
+        hide: function() {
+            arguments.length && arguments[0].preventDefault && arguments[0].preventDefault();
 
-                this.$el.slideUp();
+            this.$el.slideUp();
 
-                return this;
-            },
+            return this;
+        },
 
-            /**
-             * @description Removes notification.
-             */
-            remove: function() {
-                Backbone.View.prototype.remove.call(this);
-            }
-        });
+        /**
+         * @description Remove component from DOM.
+         */
+        remove: function() {
+            Backbone.View.prototype.remove.apply(this, arguments);
+        }
+    });
 });

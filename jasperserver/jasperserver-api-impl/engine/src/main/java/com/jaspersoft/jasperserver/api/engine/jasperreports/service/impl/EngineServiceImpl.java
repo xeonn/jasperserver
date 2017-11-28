@@ -80,8 +80,22 @@ import com.jaspersoft.jasperserver.api.logging.diagnostic.domain.DiagnosticAttri
 import com.jaspersoft.jasperserver.api.logging.diagnostic.helper.DiagnosticAttributeBuilder;
 import com.jaspersoft.jasperserver.api.logging.diagnostic.service.Diagnostic;
 import com.jaspersoft.jasperserver.api.logging.diagnostic.service.DiagnosticCallback;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.*;
-import com.jaspersoft.jasperserver.api.metadata.common.service.*;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.DataType;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.FileResource;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.FileResourceData;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.InputControl;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.InputControlsContainer;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.ListOfValues;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.MemoryDataContainer;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.Query;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceContainer;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceLookup;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceReference;
+import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryCache;
+import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryCacheableItem;
+import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
+import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryUnsecure;
 import com.jaspersoft.jasperserver.api.metadata.common.service.impl.AsyncThumbnailCreator;
 import com.jaspersoft.jasperserver.api.metadata.common.service.impl.ExecutorServiceWrapper;
 import com.jaspersoft.jasperserver.api.metadata.data.cache.DataCacheSnapshot;
@@ -96,7 +110,6 @@ import com.jaspersoft.jasperserver.api.metadata.jasperreports.service.ReportData
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.service.ReportDataSourceServiceFactory;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
 import com.jaspersoft.jasperserver.api.metadata.view.domain.FilterCriteria;
-
 import net.sf.ehcache.pool.SizeOfEngine;
 import net.sf.ehcache.pool.impl.DefaultSizeOfEngine;
 import net.sf.jasperreports.data.cache.DataSnapshotException;
@@ -135,7 +148,6 @@ import net.sf.jasperreports.repo.JasperDesignCache;
 import net.sf.jasperreports.web.servlets.AsyncJasperPrintAccessor;
 import net.sf.jasperreports.web.servlets.JasperPrintAccessor;
 import net.sf.jasperreports.web.servlets.SimpleJasperPrintAccessor;
-
 import org.apache.commons.collections.OrderedMap;
 import org.apache.commons.collections.map.ReferenceMap;
 import org.apache.commons.lang.exception.ExceptionUtils;
@@ -149,8 +161,15 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
-
-import java.io.*;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InvalidClassException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -163,7 +182,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.TimeZone;
@@ -179,7 +197,7 @@ import java.util.jar.JarFile;
 /**
  *
  * @author Teodor Danciu (teodord@users.sourceforge.net)
- * @version $Id: EngineServiceImpl.java 56967 2015-08-20 23:20:53Z esytnik $
+ * @version $Id: EngineServiceImpl.java 58870 2015-10-27 22:30:55Z esytnik $
  */
 public class EngineServiceImpl implements EngineService, ReportExecuter,
 		CompiledReportProvider, InternalReportCompiler, InitializingBean, Diagnostic
@@ -208,6 +226,8 @@ public class EngineServiceImpl implements EngineService, ReportExecuter,
 
     private AuditContext auditContext;
     protected boolean recordSizeof=false;
+    @javax.annotation.Resource
+    protected GlobalDefaultValueProvider globalDefaultValueProvider;
 
     protected InputControlsInfoExtractor inputControlsInfoExtractor = new InputControlsInfoRoutingExtractor();
     //TODO consider injecting and using ReportLoadingService
@@ -929,6 +949,7 @@ public class EngineServiceImpl implements EngineService, ReportExecuter,
 			} catch (Throwable t) {
 				filler.setError(t);
                 incrementErrorReportExecutionCount();
+				addPropertyToAuditEvent("exception", t);
 			} finally {
 				long size = -1;
 				if (recordSizeof) {
@@ -996,8 +1017,15 @@ public class EngineServiceImpl implements EngineService, ReportExecuter,
 							report, AsynchronousFillHandle.PROPERTY_REPORT_ASYNC, true);
 					filler.setAsyncable(reportAsyncable);
 					
+					@SuppressWarnings("unchecked")
+					Map<String, Object> reportParameters = getReportParameters(runtimeContext, report, 
+							request.getReportParameters());
+					setReportTemplates(runtimeContext, unitResources, reportParameters);
+					
 					// parameter values used to match data snapshots
-					Map<String, Object> dataParameters = getDataParameters(runtimeContext, request, reportUnit, report);
+					Map<String, Object> dataParameters = new LinkedHashMap<String, Object>();
+					addDataParameters(runtimeContext, request, reportUnit, report,
+							reportParameters, dataParameters);
 					
 					boolean hasCachedData = false;
 					if (dataCacheProvider != null) {
@@ -1006,18 +1034,6 @@ public class EngineServiceImpl implements EngineService, ReportExecuter,
 						if (snapshot != null) {
 							hasCachedData = true;
 							filler.setDataTimestamp(snapshot.getMetadata().getSnapshotDate());
-						}
-					}
-					
-					@SuppressWarnings("unchecked")
-					Map<String, Object> reportParameters = getReportParameters(runtimeContext, report, 
-							request.getReportParameters());
-					setReportTemplates(runtimeContext, unitResources, reportParameters);
-					
-					// put additional data parameters into the report parameters map for data source services
-					for (Entry<String, Object> entry : dataParameters.entrySet()) {
-						if (!reportParameters.containsKey(entry.getKey())) {
-							reportParameters.put(entry.getKey(), entry.getValue());
 						}
 					}
 
@@ -1327,17 +1343,28 @@ public class EngineServiceImpl implements EngineService, ReportExecuter,
         }
 	}
 
-	protected Map<String, Object> getDataParameters(ExecutionContext runtimeContext,
-			ReportUnitRequestBase request, ReportUnit reportUnit, JasperReport report) {
-		Map<String, Object> dataParameters = new LinkedHashMap<String, Object>();
-		for (ReportDataParameterContributor contributor : getDataParameterContributors()) {
-			Map<String, Object> providerParameters = contributor.getDataParameters(runtimeContext, 
-					request, reportUnit, report);
-			if (providerParameters != null && !providerParameters.isEmpty()) {
-				dataParameters.putAll(providerParameters);
+	protected void addDataParameters(ExecutionContext runtimeContext,
+			ReportUnitRequestBase request, ReportUnit reportUnit, JasperReport report, 
+			final Map<String, Object> reportParameters, final Map<String, Object> dataParameters) {
+		ReportDataParameters parameters = new ReportDataParameters() {
+			@Override
+			public void addReportParameter(String name, Object value) {
+				if (!reportParameters.containsKey(name)) {
+					// also put additional data parameters into the report parameters map for data source services
+					reportParameters.put(name, value);
+				}
+				dataParameters.put(name, value);
 			}
+			
+			@Override
+			public void addDataParameter(String name, Object value) {
+				dataParameters.put(name, value);
+			}
+		};
+		
+		for (ReportDataParameterContributor contributor : getDataParameterContributors()) {
+			contributor.addDataParameters(runtimeContext, request, reportUnit, report, parameters);
 		}
-		return dataParameters;
 	}
 
 	protected Map getReportParameters(ExecutionContext context, JasperReport report, 
@@ -2558,8 +2585,9 @@ public class EngineServiceImpl implements EngineService, ReportExecuter,
             }
 
             ReportInputControlInformation info;
-
+            boolean useGlobalDefaultValue = true;
             if (param != null) {
+                useGlobalDefaultValue = !jrDefaultValues.containsKey(name);
                 JasperReportInputControlInformation jrInfo = new JasperReportInputControlInformation();
                 jrInfo.setReportParameter(param);
                 jrInfo.setDefaultValue(jrDefaultValues.get(name));
@@ -2571,6 +2599,16 @@ public class EngineServiceImpl implements EngineService, ReportExecuter,
                 // input control is not assigned to any report parameter.
                 // Create an anonymous ReportInputControlInformation class which doesn't need the JRParameter.
                 info = createReportInputControlInformationWithoutParameter(inputControl.getName(), label, description, valuesInformation);
+            }
+            if(useGlobalDefaultValue){
+                final ResourceReference dataTypeReference = inputControl.getDataType();
+                DataType dataType = null;
+                if(dataTypeReference != null) {
+                    dataType = (DataType) (dataTypeReference.isLocal() ? dataTypeReference.getLocalResource()
+                            : repository.getResource(ExecutionContextImpl.getRuntimeExecutionContext(),
+                            dataTypeReference.getReferenceURI()));
+                }
+                info.setDefaultValue(globalDefaultValueProvider.getDefaultValueForDataType(dataType));
             }
             result.setInputControlInformation(name, info);
         }

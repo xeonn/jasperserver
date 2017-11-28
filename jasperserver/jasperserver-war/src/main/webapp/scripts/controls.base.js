@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: controls.base.js 8179 2015-01-27 12:34:21Z psavushchik $
+ * @version: $Id: controls.base.js 9551 2015-10-13 14:09:03Z dgorbenk $
  */
 
 /* global Template, layoutModule, $$, $break, _, dialogs, matchAny */
@@ -217,9 +217,13 @@ var OptionsDialog = function(buttonActions) {
     this.overwrite = false;
 
     this.buttonActions = buttonActions;
-    this._dom.observe('click', this._dialogClickHandler.bindAsEventListener(this));
-
+	this._dialogClickHandler = this._dialogClickHandler.bindAsEventListener(this);
+    this._dom.observe('click', this._dialogClickHandler);
 };
+
+OptionsDialog.addMethod("remove", function() {
+	this._dom.stopObserving('click', this._dialogClickHandler);
+});
 
 // observe buttons
 OptionsDialog.addMethod("_dialogClickHandler", function(e) {

@@ -21,14 +21,14 @@
 
 /**
  * @author: Kostiantyn Tsaregradskyi
- * @version: $Id: vizShim.js 1178 2015-05-06 20:40:12Z yplakosh $
+ * @version: $Id: vizShim.js 1605 2015-09-23 17:55:32Z inestere $
  */
 
 define(function (require) {
     "use strict";
 
-    var request = require("common/transport/request"),
-        requestSettings = require("common/config/requestSettings"),
+    var request = require("request"),
+        requestSettings = require("requestSettings"),
         _ = require("underscore");
 
     var VISUALIZE_NS = "__visualize__.";

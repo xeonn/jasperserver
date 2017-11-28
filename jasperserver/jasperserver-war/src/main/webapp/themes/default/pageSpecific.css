@@ -8,7 +8,7 @@
         right: 0;
         left: 0;
     padding-right: 12px;
-    z-index: 9999; 
+    z-index: 9999;
 }
 
 #loginPage #logo {
@@ -89,7 +89,7 @@
 #loginPage .login .footer {
     /* padding: 0 20px 20px 20px; */
     /* height: 75px; */
-    
+
     border-width: 0;
     height: auto;
     padding: 0;
@@ -277,7 +277,7 @@
 }
 
 #loginForm .devices {
-    background-image:url("images/login_devices.png"); 
+    background-image:url("images/login_devices.png");
     background-repeat:no-repeat;
     background-position:0px 0px;
     background-size:439px;
@@ -407,8 +407,8 @@ text-align:right;
     overflow: visible;
 }
 
-.tabbed.showingToolBar .tabSet.horizontal.buttons > .tab.selected > .button, 
-.tabbed.showingToolBar .tabSet.horizontal.buttons > .tab.selected > .button.over, 
+.tabbed.showingToolBar .tabSet.horizontal.buttons > .tab.selected > .button,
+.tabbed.showingToolBar .tabSet.horizontal.buttons > .tab.selected > .button.over,
 .tabbed.showingToolBar .tabSet.horizontal.buttons > .tab.selected > .button.pressed {
     background-color: #ebebeb;
     border-top: 1px solid #ccc;
@@ -584,7 +584,7 @@ text-align:right;
 #addResource_listOfValues #listOfValues p.column {
     line-height: 28px;
     padding-top: 1px;
-    
+
     height: 32px \9; /* for IE8 and 9 */
     line-height: 32px \9; /* for IE8 and 9 */
     padding-top: 0 \9; /* for IE8 and 9 */
@@ -708,6 +708,7 @@ text-align:right;
 .dataSourceSaveDialog .treeBox {
     overflow: auto;
     margin: 0;
+    float: none;
 }
 
 .dataSourceSaveDialog .j-view-port-chunk{
@@ -739,6 +740,11 @@ text-align:right;
     position: absolute;
     bottom: 0;
 }
+
+.dataSourceSaveDialog.no-minheight {
+    min-height: 0;
+}
+
 
 #urlID, /* old selector */
 .dataSourceBody[dstype=aws] [name=connectionUrl] /* new selector */ {
@@ -1667,14 +1673,13 @@ x:-o-prefocus, #selectedDataSources label {
     min-height: 500px;
 }
 
-#dataChooserSource .sourceDialogNew {
-    height: 500px;
-    width: 450px;
+.sourceDialogNew {
     min-width: 450px;
     min-height: 400px;
 }
 
-#dataChooserSource .sourceDialogNew .treeBox {
+.sourceDialogNew .treeBox {
+    float: none;
     height: 100% !important;
     -webkit-touch-callout: none;
     -webkit-user-select: none;
@@ -1806,7 +1811,7 @@ and (orientation:landscape) {
 #dataChooserPreFilters #values {
     box-sizing: border-box;
     margin-bottom: 0;
-   /*  padding-top: 1px; */ /* DELETE IF NO PROBLEMS */
+    /*  padding-top: 1px; */ /* DELETE IF NO PROBLEMS */
 }
 
 #dataChooserPreFilters #values > .availableValues > .wrap {
@@ -1832,7 +1837,7 @@ and (orientation:landscape) {
 }
 
 #dataChooserPreFilters .column.two.pickWells {
-    /* float:none; */ /* DELETE IF NO PROBLEMS */ 
+    /* float:none; */ /* DELETE IF NO PROBLEMS */
 }
 
 #dataChooserPreFilters .button.minimize {
@@ -1898,7 +1903,7 @@ and (orientation:landscape) {
 
 #designer .toolbar > .buttonSet {
     width:800px;
-    
+
     height: 100%; /* NEW */
     margin: 0; /* NEW */
 }
@@ -1974,10 +1979,26 @@ and (orientation:landscape) {
 
 #designer #availableFields {
     top: 29px; /* needs to match previous rule */
+    overflow: hidden;
 }
 
-#designer #availableFields .content > .body {
+#designer #availableFields.body.twoPanes .content > .body {
     background-color: #fafafa;
+    top: 60px;
+    border-top: 1px solid #b7b7b7;
+}
+
+#designer #availableFields .control.searchLockup {
+    margin-top: 3px;
+    padding-bottom: 3px;
+    margin-right: 3px;
+    margin-left: 3px;
+}
+
+#designer #availableFields .control.searchLockup input[type="text"] {
+    height: 21px;
+    width: 100%;
+    padding-right: 25px;
 }
 
 #designer #canvas > .content > .header {
@@ -2134,6 +2155,10 @@ and (max-device-width : 1024px) {
 
 #designer .OLAP {
     border-bottom: 1px solid #e0e0e0;
+}
+
+#designer .OLAP .dropTarget {
+    background-color:transparent !important;
 }
 
 #designer .calculatedField {
@@ -2612,7 +2637,7 @@ and (max-device-width : 1024px) {
 
 .tokens > .measure,
 .dragging.dimension {
-    background: #E9D9FE;
+    background: #e9e3f7;
     -moz-border-radius: 1px;
     -webkit-border-radius: 1px;
     border-radius: 1px;
@@ -2641,9 +2666,9 @@ and (max-device-width : 1024px) {
 li.level.meazure, /* misspelling is intentional */
 #designer #availableFields .measure .header {
    /*  background-color: #aedbf0; */
-    
+
     /* purple measures */
-    background-color: #d3c8eb;
+    background: #dacce9;
 }
 
 .dimension > .levels > .level,
@@ -2651,9 +2676,9 @@ li.level.meazure, /* misspelling is intentional */
 li.level.dimenzion, /* misspelling is intentional */
 .dragging.dimension {
     /* background-color: #ced98b; */
-    
+
     /* blue dimensions */
-    background-color: #d5dee8;
+    background-color: #d9e4f1;
 }
 
 .dimension > .levels > .level.notShown,
@@ -2852,7 +2877,7 @@ li.dragging.measure {
     background-position: -15px -922px;
 }
 
-#filter-container .title .button.mutton  {  
+#filter-container .title .button.mutton  {
     height: 28px;
     position: absolute;
         top: 0;
@@ -3026,7 +3051,7 @@ li.dragging.measure {
     line-height: 1.3em;
     padding-left: 20px;
     margin-top: 4px;
-    white-space: normal;   
+    white-space: normal;
 }
 
 #filterMessage span {
@@ -3590,7 +3615,7 @@ li.dragging.measure {
 
 
 /* manage_users_and_roles */
- 
+
 /* this ruleset is for CE only */
 #manage_users .twoColumn.manager > .primary.column,
 #manage_roles .twoColumn.manager > .primary.column {
@@ -3650,6 +3675,13 @@ li.dragging.measure {
 #manage_orgs #propertiesButtons {
     white-space:normal;
 }
+
+#manage_users #display > .tertiary.column.decorated,
+#manage_roles #display > .tertiary.column.decorated,
+#manage_orgs #display > .tertiary.column.decorated {
+    z-index: 1;
+}
+
 
 .nothingToDisplay #properties fieldset,
 .nothingToDisplay #properties #edit,
@@ -3894,8 +3926,11 @@ li.dragging.measure {
 #settings .pane.settings .control.input.text > .wrap {
     margin: 6px 0 0 8px;
 }
- 
- 
+
+#settings .export-view {
+    min-width: 800px;
+}
+
 #serverSettingsMenu .footer {
     display: none;
 }
@@ -3972,7 +4007,7 @@ li.dragging.measure {
     min-width: 800px;
 }
 
-#logSettings .list.threeColumn .wrap .column.one, 
+#logSettings .list.threeColumn .wrap .column.one,
 #logSettings .list.threeColumn .wrap .column.two {
     display: inline-block;
     line-height: 1.6em;
@@ -3980,7 +4015,7 @@ li.dragging.measure {
     white-space: normal;
     width: 40%;
     word-wrap: break-word;
-    
+
     /* overflow: hidden; */ /* DELETE IF NO PROBLEMS, redundant to rule in lists.css */
 }
 
@@ -4001,7 +4036,7 @@ li.dragging.measure {
 }
 
 #importDataFile #uploadFile {
-    height: 22px; 
+    height: 22px;
     width: 100%;
 }
 
@@ -4396,7 +4431,7 @@ li.dragging.measure {
 
 #reportViewer .list.buttonSet > .node.conditional > .list.buttonSet {
     border: none;
-    position: relative;    
+    position: relative;
 }
 
 #reportViewer .list.buttonSet > .node.conditional.first {
@@ -4606,10 +4641,13 @@ and (max-device-width : 1024px) {
     margin-left:0;
 }
 
+#reportViewer #saveAs {
+     width: 510px;
+ }
+
 #reportViewer .saveAs > .content > .body .groupBox {
     top: 170px;
     right: 18px;
-    bottom: 12px;
     left: 18px;
 }
 
@@ -4907,299 +4945,369 @@ and (orientation:portrait) {
 /* *************************************************************************************** */
 /*          SCHEDULER (scheduler, Scheduler)     BEGIN            */
 
-/* general rules for scheduler job list */
-
-#scheduler_jobSummary #resultsList .action.over,
-#scheduler_jobSummary #resultsList .action.pressed,
-#scheduler_jobSummary #resultsList .action.square.over,
-#scheduler_jobSummary #resultsList .action.square.pressed {
-    background-color: transparent;
+.schedulerApp .nothingToDisplay {
+	top: 37%;
+	left: 30%; /* fallback for older browsers */
+	left: calc(50% - 300px);
+	min-width: 600px;
+	overflow: hidden;
+	margin: 0;
+	padding: 28px 8px;
+	text-align: center;
 }
 
-#scheduler_editor > .content.hasFooter > .body {
-    top:66px;
-    bottom:38px;
+.schedulerApp .list.jobs .action.over,
+.schedulerApp .list.jobs .action.pressed,
+.schedulerApp .list.jobs .action.square.over,
+.schedulerApp .list.jobs .action.square.pressed {
+	background-color: transparent;
+}
+
+.schedulerApp .singleReportView > .content > .body {
+	top: 84px;
+}
+.schedulerApp .singleReportView > .content > .subheader {
+	top: 29px;
+}
+.schedulerApp .singleReportView .list {
+	margin-top: 0;
+}
+.schedulerApp .masterView > .content > .body {
+	top: 55px;
+}
+.schedulerApp .masterView .list {
+	margin-top: 0;
+}
+.schedulerApp .masterView .body>.list.jobs .wrap {
+	height: 48px;
+}
+.schedulerApp .masterView .content > .subheader .wrap {
+	margin-right: 15px;
+}
+
+/* Columns position */
+
+.schedulerApp .singleReportView .list .column.one { width: 6%; }
+.schedulerApp .singleReportView .list .column.two { width: 42%; }
+.schedulerApp .singleReportView .list .column.three { width: 10%; }
+.schedulerApp .singleReportView .list .column.four { width: 30%; }
+.schedulerApp .singleReportView .list .column.five { width: 11%; }
+
+.schedulerApp .masterView .list .column.one { width: 23%; }
+.schedulerApp .masterView .list .column.two { width: 23%; }
+.schedulerApp .masterView .list .column.three { width: 24%; }
+.schedulerApp .masterView .list .column.four { width: 18%; }
+.schedulerApp .masterView .list .column.five { width: 11%; }
+
+
+.schedulerApp .list .column.one {
+	height: 100%;
+	padding-left: 10px;
+}
+.schedulerApp .list .column.two {
+	height: 100%;
+}
+.schedulerApp .list .column.five {
+	padding-left: 20px;
+}
+/* define vertical position of the icons */
+.schedulerApp .list .column.five {
+	padding-top: 5px;
+}
+.schedulerApp .singleReportView .list .column.five {
+	padding-top: 2px;
+}
+.schedulerApp .list.header .column.five {
+	padding-top: 0;
+}
+/* adjust position of the icons inside container */
+.schedulerApp .list.jobs .jobEnabled {
+	display: inline-block;
+	margin-top: 2px;
+}
+.schedulerApp .list.jobs .jobEnabled,
+.schedulerApp .list.jobs .jobDelete,
+.schedulerApp .list.jobs .jobEdit {
+	float: right;
+	margin-left: 10px;
+	width: auto;
+}
+.schedulerApp .header.list.jobs .column.five .jobEnabled {
+	margin-right: 38px;
 }
 
 
-/* START general rules for scheduler */
-#scheduler_jobSummary .saveAs {
-    height: 250px;
+/* Columns position End */
+
+.schedulerApp .masterView .list.jobs .jobResource,
+.schedulerApp .masterView .list.jobs .jobResourcePath,
+.schedulerApp .masterView .list.jobs .jobName,
+.schedulerApp .masterView .list.jobs .jobDescription,
+.schedulerApp .masterView .list.jobs .jobID,
+.schedulerApp .masterView .list.jobs .jobOwner {
+	float: left;
+}
+.schedulerApp .masterView .list.jobs .jobResource,
+.schedulerApp .masterView .list.jobs .jobName {
+	font-weight: bold;
+}
+.schedulerApp .masterView .list.jobs .jobResourcePath,
+.schedulerApp .masterView .list.jobs .jobDescription {
+	width: 98%;
+}
+.schedulerApp .masterView .list.jobs .jobID {
+	width: 50px;
+}
+.schedulerApp .masterView .list.jobs .jobState {
+	width: 90px;
+	float: right;
+}
+.schedulerApp .schedulerEditor > .content.hasFooter > .body {
+	top: 66px;
+	bottom: 38px;
 }
 
-#scheduler_jobSummary .saveAs .body {
-    top: 30px;
-    padding-bottom: 0;
+/* applying the style below prevents the style from affecting the global search control */
+.schedulerApp .scheduleTab .section .control,
+.schedulerApp .outputTab .section .control,
+.schedulerApp .scheduleTab .control.radio .datepicker,
+.schedulerApp .outputTab .control.radio .datepicker {
+	margin-bottom: 0;
+	margin-top: 0;
 }
 
-/* applying the style below at the #scheduler_editor level
-prevents the style from affecting the global search control */
-#schedulerTab-schedule .control,
-#schedulerTab-output .control,
-#schedulerTab-schedule .control.radio .datepicker,
-#schedulerTab-output .control.radio .datepicker {
-    margin-bottom: 0;
-    margin-top: 0;
-} 
-
-#scheduler_editor #stepDisplay { 
-    padding: 24px 32px;
+.schedulerApp .schedulerEditor .body {
+	padding: 24px 32px;
 }
 
-#scheduler_editor .content .body .schedule_for {
-    position: relative;
-    border-bottom: 1px solid #D4D5D5;
+.schedulerApp .schedulerEditor .content .body .schedule_for {
+	position: relative;
+	border-bottom: 1px solid #D4D5D5;
 }
 
-#scheduler_editor .content .body .sub.header {
-    display: none;
-    border: 0;
+.schedulerApp .schedulerEditor .body > fieldset > legend {
+	display: block;
+	height: 24px;
+	line-height: 24px;
+	position: relative;
+	width: 100%;
 }
 
-#scheduler_editor .content .body .sub.header .button.options {
-    height: 28px; /* NEW */
-    top: 0;
-    right: 0;
+.schedulerApp .schedulerEditor .body > fieldset legend {
+	left: 0;
 }
-
-#scheduler_editor .content .body .schedule_for select {
-    width: auto;
-}
-
-#scheduler_editor .content .body [data-tab-current=parameters] .sub.header {
-    display: block;
-    margin: 10px 0 0 16px;
-    position: absolute;
-        left: 0;
-        right: 0;
-}
-
-#scheduler_editor #stepDisplay > fieldset > legend {
-    display: block;
-    height: 24px;
-    line-height: 24px;
-    position: relative;
-    width: 100%;
-}
-
-#scheduler_editor #stepDisplay > fieldset legend {
-    left: 0;
-}
-
-/* END general rules for scheduler */
-
 
 /* START shared rules across scheduler tabs */
-#scheduler_editor #timeZone select,
-#scheduler_editor #outputLocale select {
-    width:auto;
-    min-width:300px;
+.schedulerApp .schedulerEditor #timeZone select,
+.schedulerApp .schedulerEditor #outputLocale select {
+	width:auto;
+	min-width:300px;
 }
 
-#scheduler_editor input[type=text] {
-    padding:2px 3px;
+.schedulerApp .schedulerEditor input[type=text] {
+	padding:2px 3px;
 }
 
-#scheduler_editor .warning.success {
-    background-position: 2px -80px;
+.schedulerApp .schedulerEditor .warning.success {
+	background-position: 2px -80px;
 }
 
-#scheduler_editor input[type="text"]:disabled,
-#scheduler_editor input[type="password"]:disabled {
-    background-image:none;
+.schedulerApp .schedulerEditor input[type="text"]:disabled,
+.schedulerApp .schedulerEditor input[type="password"]:disabled {
+	background-image:none;
 }
 /* END shared rules across scheduler tabs */
 
 
 /* START scheduler: schedule tab */
 
-#schedulerTab-schedule .neverFire {
-    margin-top: 25px;
+.schedulerApp .scheduleTab .neverFire {
+	margin-top: 25px;
 }
 
-#schedulerTab-schedule #recurrenceSelector select {
-    width:auto;
-    min-width:150px;
+.schedulerApp .scheduleTab #recurrenceSelector select {
+	width:auto;
+	min-width:150px;
 }
 
-#schedulerTab-schedule #simpleRecurrence > label,
-#schedulerTab-schedule #simpleRecurrenceInterval label {
-    width:60px;
+.schedulerApp .scheduleTab #simpleRecurrence > label,
+.schedulerApp .scheduleTab #simpleRecurrenceInterval label {
+	width:60px;
 }
 
-#schedulerTab-schedule #simpleRecurrenceInterval input[type=text] {
-    margin-top:5px;
-    margin-left:0;
-    padding:2px 3px;
-    width:60px;
+.schedulerApp .scheduleTab #simpleRecurrenceInterval input[type=text] {
+	margin-top:5px;
+	margin-left:0;
+	padding:2px 3px;
+	width:60px;
 }
 
-#schedulerTab-schedule #simpleRecurrenceInterval select {
-    display:inline;
-    width:auto;
-    min-width:100px;
-    margin-left:12px;
+.schedulerApp .scheduleTab #simpleRecurrenceInterval select {
+	display:inline;
+	width:auto;
+	min-width:100px;
+	margin-left:12px;
 }
 
-#schedulerTab-schedule #fixedRepeat,
-#schedulerTab-schedule #timestampSequence {
-    top: 4px;
+.schedulerApp .scheduleTab #fixedRepeat,
+.schedulerApp .scheduleTab #timestampSequence {
+	top: 4px;
 }
 
-#schedulerTab-schedule #scheduleEndSimple .leaf {
-    margin-bottom:6px;
+.schedulerApp .scheduleTab #scheduleEndSimple .leaf {
+	margin-bottom:6px;
 }
 
-#schedulerTab-schedule #scheduleEndSimple legend {
-    margin-bottom:3px;
+.schedulerApp .scheduleTab #scheduleEndSimple legend {
+	margin-bottom:3px;
 }
 
-#schedulerTab-schedule #scheduleEndSimple .message.warning,
-#schedulerTab-schedule #jobCommon .message.warning {
-    margin-left:6px;
+.schedulerApp .scheduleTab #scheduleEndSimple .message.warning,
+.schedulerApp .scheduleTab #jobCommon .message.warning {
+	margin-left:6px;
 }
 
-#schedulerTab-schedule #selectedMonths .message.warning,
-#schedulerTab-schedule #weekDays .message.warning {
-    margin-top:4px;
+.schedulerApp .scheduleTab #selectedMonths .message.warning,
+.schedulerApp .scheduleTab #weekDays .message.warning {
+	margin-top:4px;
 }
 
-#schedulerTab-schedule #simpleRecurrenceInterval .message.warning {
-    position: absolute;
-    margin-top:3px;
+.schedulerApp .scheduleTab #simpleRecurrenceInterval .message.warning {
+	position: absolute;
+	margin-top:3px;
 }
 
-#schedulerTab-schedule #startOn .datepicker,
-#schedulerTab-schedule #calendarEnd .datepicker {
-    width: 170px !important;
-    margin-bottom:3px;
+.schedulerApp .scheduleTab #startOn .datepicker,
+.schedulerApp .scheduleTab #calendarEnd .datepicker {
+	width: 170px !important;
+	margin-bottom:3px;
 }
 
-#schedulerTab-schedule #selectedMonths > .control.select,
-#schedulerTab-schedule #weekDays > .control.select {
-    position: relative;
-    left:20px;
+.schedulerApp .scheduleTab #selectedMonths > .control.select,
+.schedulerApp .scheduleTab #weekDays > .control.select {
+	position: relative;
+	left:20px;
 }
 
-#schedulerTab-schedule #selectedMonths,
-#schedulerTab-schedule #weekDays {
-    padding-right:20px;
-    *width:200px; /* IE7 */
+.schedulerApp .scheduleTab #selectedMonths,
+.schedulerApp .scheduleTab #weekDays {
+	padding-right:20px;
+	*width:200px; /* IE7 */
 }
 
-#schedulerTab-schedule #calendarRecurrence .list > .node {
-    float: left;
-    clear: none;
+.schedulerApp .scheduleTab #calendarRecurrence .list > .node {
+	float: left;
+	clear: none;
 }
 
-#schedulerTab-schedule #calendarRecurrence .control.picker {
-    clear: both;
+.schedulerApp .scheduleTab #calendarRecurrence .control.picker {
+	clear: both;
 }
 
-#schedulerTab-schedule #calendarRecurrence .control.picker > .wrap {
-    display: inline; 
+.schedulerApp .scheduleTab #calendarRecurrence .control.picker > .wrap {
+	display: inline;
 }
 
-#schedulerTab-schedule #calendarRecurrence .control.picker input {
-    width: auto;
+.schedulerApp .scheduleTab #calendarRecurrence .control.picker input {
+	width: auto;
 }
 
-#schedulerTab-schedule #calendarRecurrence > .inputSet {
-    overflow:hidden
+.schedulerApp .scheduleTab #calendarRecurrence > .inputSet {
+	overflow:hidden
 } /* this is only for giving layout to the inputSet container */
 
-#schedulerTab-schedule #calendarRecurrence .node {
-    width:220px;
-    margin-right:12px;
+.schedulerApp .scheduleTab #calendarRecurrence .node {
+	width:220px;
+	margin-right:12px;
 }
 
-#schedulerTab-schedule #calendarRecurrence .hint {
-    white-space:normal;
-    line-height:1.182;
+.schedulerApp .scheduleTab #calendarRecurrence .hint {
+	white-space:normal;
+	line-height:1.182;
 }
 
-#schedulerTab-schedule #repeatTimes > .group legend {
-    margin-left:0;
+.schedulerApp .scheduleTab #repeatTimes > .group legend {
+	margin-left:0;
 }
 
-#schedulerTab-schedule #repeatTimes .leaf {
-    margin-bottom:8px;
+.schedulerApp .scheduleTab #repeatTimes .leaf {
+	margin-bottom:8px;
 }
 
-#schedulerTab-schedule #repeatTimes input {
-    width:97%;
+.schedulerApp .scheduleTab #repeatTimes input {
+	width:97%;
 }
 
-#schedulerTab-schedule #days,
-#schedulerTab-schedule #repeatTimes .control.twoLine {
-    margin-left:12px;
+.schedulerApp .scheduleTab #days,
+.schedulerApp .scheduleTab #repeatTimes .control.twoLine {
+	margin-left:12px;
 }
 
-#schedulerTab-schedule #theMonthDays {
-    width:162px !important;
-    margin-top:0;
+.schedulerApp .scheduleTab #theMonthDays {
+	width:162px !important;
+	margin-top:0;
 }
 
-#schedulerTab-schedule button.ui-datepicker-trigger {
-    top: 0px \9; /* IE8 and IE9 */
+.schedulerApp .scheduleTab button.ui-datepicker-trigger {
+	top: 0px \9; /* IE8 and IE9 */
 }
 
 
-#schedulerTab-schedule .warning.opened[data-field=ftpTest] {
-    display: inline;
-    margin-left: 20px;
+.schedulerApp .scheduleTab .warning.opened[data-field=ftpTest] {
+	display: inline;
+	margin-left: 20px;
 } /* ??? */
 
-#schedulerTab-schedule .control.select.multiple {
-    min-height: 64px;
+.schedulerApp .scheduleTab .control.select.multiple {
+	min-height: 64px;
 }
 
-#schedulerTab-schedule #startDateLabel {
-    *padding-top:0; /* IE7 */
-    *padding-bottom:0; /* IE7 */
+.schedulerApp .scheduleTab #startDateLabel {
+	*padding-top:0; /* IE7 */
+	*padding-bottom:0; /* IE7 */
 }
 
-#schedulerTab-schedule #startDate {
-    *top:8px; /* IE7 */
+.schedulerApp .scheduleTab #startDate {
+	*top:8px; /* IE7 */
 }
 
-#schedulerTab-schedule #startDateLabel .wrap {
-    *display:inline-block; /* IE7 */
-    *padding-top:9px; /* IE7 */
+.schedulerApp .scheduleTab #startDateLabel .wrap {
+	*display:inline-block; /* IE7 */
+	*padding-top:9px; /* IE7 */
 }
 
-#schedulerTab-schedule #startOn {
-    *vertical-align:top; /* IE7 */
+.schedulerApp .scheduleTab #startOn {
+	*vertical-align:top; /* IE7 */
 }
 
-#schedulerTab-schedule .button.picker {
-    height: 27px \9; /* IE8 and IE9 */
+.schedulerApp .scheduleTab .button.picker {
+	height: 27px \9; /* IE8 and IE9 */
 }
 
-#schedulerTab-schedule .control.inline.text .hint,
-#schedulerTab-schedule .control.inline.text .warning {
-    margin-left:6px;
+.schedulerApp .scheduleTab .control.inline.text .hint,
+.schedulerApp .scheduleTab .control.inline.text .warning {
+	margin-left:6px;
 }
 
-#schedulerTab-schedule .holidayCalendar select {
-    width: 240px;
+.schedulerApp .scheduleTab .holidayCalendar select {
+	width: 240px;
 }
 
-#schedulerTab-schedule .holidayCalendar.disabled select,
-#schedulerTab-schedule .holidayCalendar select.loading {
-    opacity: 0.5;
+.schedulerApp .scheduleTab .holidayCalendar.disabled select,
+.schedulerApp .scheduleTab .holidayCalendar select.loading {
+	opacity: 0.5;
 }
 
-#schedulerTab-schedule #startDate,
-#schedulerTab-schedule #calendarRepeat,
-#schedulerTab-schedule #selectedMonths_radio,
-#schedulerTab-schedule #weekDays_radio,
-#schedulerTab-schedule #monthDays_radio {
-    top: 4px;
+.schedulerApp .scheduleTab #startDate,
+.schedulerApp .scheduleTab #calendarRepeat,
+.schedulerApp .scheduleTab #selectedMonths_radio,
+.schedulerApp .scheduleTab #weekDays_radio,
+.schedulerApp .scheduleTab #monthDays_radio {
+	top: 4px;
 }
 
-#schedulerTab-schedule #calendarRecurrence .warning.message {
-    white-space:normal;
+.schedulerApp .scheduleTab #calendarRecurrence .warning.message {
+	white-space:normal;
 }
 /* END scheduler: schedule tab */
 
@@ -5207,112 +5315,141 @@ prevents the style from affecting the global search control */
 
 /* START scheduler: parameters tab */
 
-#schedulerTab-parameters {
-    margin-top:52px;
-    overflow-x:visible;
-    max-width:400px;
+.schedulerApp .parametersTab .inputControlsContainer {
+	width: 400px;
+}
+
+.schedulerApp .parametersTab .saveCurrentValuesContainer {
+	height: 28px;
+	margin-top: 10px;
+	position: relative;
+}
+
+.schedulerApp .parametersTab select {
+	width: auto;
+}
+
+.schedulerApp .parametersTab [name=saveCurrentValuesButton] {
+	position: absolute;
+	top: 0;
+	right: 0;
+	height: 28px;
 }
 
 /* END scheduler: parameters tab */
 
 
-
 /* START scheduler: output tab */
-#schedulerTab-output #outputFileOptions {
-    width: 500px;
+.schedulerApp .outputTab .outputFileOptions {
+	width: 500px;
 }
 
-#schedulerTab-output #repositoryOutput,
-#schedulerTab-output #fileSystemOutput {
-    width:400px;
-    -moz-box-sizing: border-box;
+.schedulerApp .outputTab #repositoryOutput,
+.schedulerApp .outputTab #fileSystemOutput {
+	width:400px;
+	-moz-box-sizing: border-box;
 }
 
-#ftpServerOutput {
-    width:auto;
-    margin-top:20px;
+.schedulerApp .outputTab #ftpServerOutput {
+	width:auto;
+	margin-top:20px;
 }
 
-#schedulerTab-output #outputFormat .list.inputSet {
-    overflow:hidden;
+.schedulerApp .outputTab #outputFormat .list.inputSet {
+	overflow:hidden;
 }
 
-#schedulerTab-output #outputFormat > .list.inputSet > .leaf {
-    clear:none;
-    float:left;
-    margin-right:15px;
-    width:30%;
+.schedulerApp .outputTab #outputFormat > .list.inputSet > .leaf {
+	clear:none;
+	float:left;
+	margin-right:15px;
+	width:30%;
 }
 
-#schedulerTab-output .control .message.warning {
-    margin-top:3px;
+.schedulerApp .outputTab .control .message.warning {
+	margin-top:3px;
 }
 
-#schedulerTab-output #fileHandling .control.twoLine label.wrap {
-    line-height:20px;
-    top:-2px;
+.schedulerApp .outputTab #fileHandling .control.twoLine label.wrap {
+	line-height:20px;
+	top:-2px;
 }
 
-#schedulerTab-output #fileHandling input[type=text]  {
-    display:block;
+.schedulerApp .outputTab #fileHandling input[type=text]  {
+	display:block;
 }
 
-#schedulerTab-output #fileHandling .message.warning {
-    margin-left:6px;
+.schedulerApp .outputTab #fileHandling .message.warning {
+	margin-left:6px;
 }
 
-#schedulerTab-output #outputDestination .leaf > .control.text {
-    margin-bottom: 10px;
-    margin-top: 8px;
-    margin-left:20px;
+.schedulerApp .outputTab .outputDestination .leaf > .control.text {
+	margin-bottom: 10px;
+	margin-top: 8px;
+	margin-left:20px;
 }
 
-#schedulerTab-output #repositoryOutput input[type=text],
-#schedulerTab-output #fileSystemOutput input[type=text]  {
-    width:97%
+.schedulerApp .outputTab #repositoryOutput input[type=text],
+.schedulerApp .outputTab #fileSystemOutput input[type=text]  {
+	width:97%
 }
 
-#ftpServerOutput .list {
-    overflow:hidden;
+.schedulerApp .outputTab #ftpServerOutput .list {
+	overflow:hidden;
 }
 
-#ftpServerOutput .leaf {
-    width:400px;
-    margin-right:24px;
-    clear: none;
-    float: left;
+.schedulerApp .outputTab #ftpServerOutput .leaf {
+	width:400px;
+	margin-right:24px;
+	clear: none;
+	float: left;
 }
 
-#schedulerTab-output #testConnection {
-    margin-left: 44px;
-    margin-top: 0;
+.schedulerApp .outputTab #testConnection {
+	margin-left: 44px;
+	margin-top: 0;
 }
 
-#schedulerTab-output #ftpTestButton.checking,
-#schedulerTab-output #ftpTestButton.checking.over,
-#schedulerTab-output #ftpTestButton.checking.pressed {
-    color: #aaa;
-    background: url("images/button_action_sprite.png") repeat-x scroll 0 0 #d8dad7;
-    cursor: default;
+.schedulerApp .outputTab #ftpTestButton.checking,
+.schedulerApp .outputTab #ftpTestButton.checking.over,
+.schedulerApp .outputTab #ftpTestButton.checking.pressed {
+	color: #aaa;
+	background: url("images/button_action_sprite.png") repeat-x scroll 0 0 #d8dad7;
+	cursor: default;
 }
 
 /* END scheduler: output tab */
 
 
 /* START scheduler: notification tab */
-#schedulerTab-notifications #jobSuccess .group.first legend,
-#schedulerTab-notifications #jobNotification .group.first legend {
-    margin-bottom: 18px;
+.schedulerApp .notificationsTab #jobSuccess .group.first legend,
+.schedulerApp .notificationsTab #jobNotification .group.first legend {
+	margin-bottom: 18px;
 }
 
-#schedulerTab-notifications #jobNotification {
-    margin-top: 49px;
+.schedulerApp .notificationsTab #jobNotification {
+	margin-top: 49px;
 }
 
-#schedulerTab-notifications #failureIncludes .list.inputSet {
-    margin-top:-4px;
+.schedulerApp .notificationsTab #failureIncludes .list.inputSet {
+	margin-top:-4px;
 }
 /* schedule editor: notification tab end */
+
+/* schedule save dialog: begin */
+
+.jrs.schedulerSaveDialog .m-Dialog-body .control.textArea {
+	position: static;
+	margin-bottom: 0;
+	height: 83px; /* fix for IE8 */
+	height: calc(100% - 87px);
+}
+.jrs.schedulerSaveDialog .m-Dialog-body .control.textArea textarea {
+	height: 100%;
+	min-height: 0;
+}
+
+/* schedule save dialog: end */
 
 /*          SCHEDULER (scheduler, Scheduler)     END                */
 /* *************************************************************************************** */
@@ -5419,7 +5556,7 @@ prevents the style from affecting the global search control */
 }
 
 .authorityPicker > .list.disabled {
-    opacity: 1; 
+    opacity: 1;
     /* this list is somehow getting a double-disabled effect; 
        full opacity is required for item selections within 
        this element to be visible */
@@ -5910,11 +6047,11 @@ and (orientation:portrait) {
     .homeSidebar {
         width: 280px;
     }
-    
+
     .homeMain {
         left: 345px;
     }
-    
+
     .workflow {
         margin-bottom: 30px;
         width: 100%;
@@ -6676,7 +6813,7 @@ input[type="text"].mSelect-input {
 
 #designer #availableFieldsMutton,
 #designer #availableFieldsMutton.over,
-#designer #availableMeasuresMutton, 
+#designer #availableMeasuresMutton,
 #designer #availableMeasuresMutton.over {
     background-position: 0 -150px;
     top: 4px;
@@ -6691,33 +6828,39 @@ input[type="text"].mSelect-input {
     border: none;
 }
 
-.sourceDialogNew.dialog.overlay > .content > .footer {
-    position: absolute;
+.sourceDialogNew > .m-Dialog-body {
+    padding: 4px 15px 10px 15px !important;
+    overflow: inherit !important;
 }
 
-.sourceDialogNew.overlay .itemDescription {
+.sourceDialogNew > .m-Dialog-footer {
+    position: absolute;
+    padding-left: 20px !important;
+}
+
+.sourceDialogNew .itemDescription {
     height: 54px;
     margin: 0;
     padding: 8px 22px;
 }
 
-.sourceDialogNew.overlay > .content > .header.mover > .sub.header.tabHeaderContainer {
+.sourceDialogNew > .sub.header.tabHeaderContainer {
     /* margin: 15px 8px 0 17px; */ /* DELETE IF NO PROBLEMS */
     border: none;
     height: 42px;
     margin: 0;
 }
 
-.sourceDialogNew.overlay > .content > .subcontainer {
+.sourceDialogNew > .subcontainer {
     padding: 4px 15px 10px 15px;
 }
 
-.sourceDialogNew.overlay .list.collapsible.folders.hideRoot {
+.sourceDialogNew .list.collapsible.folders.hideRoot {
     margin-left: -18px;
     margin-top: 4px;
 }
 
-.sourceDialogNew.overlay > .content > .header > .sub.header > .control {
+.sourceDialogNew > .sub.header > .control {
     /* box-sizing: border-box; */
     float: right;
     margin: 16px 24px 0 0;
@@ -6725,31 +6868,39 @@ input[type="text"].mSelect-input {
     width: 100%;
 }
 
-.sourceDialogNew.overlay > .content > .header > .sub.header > .button {
+.sourceDialogNew > .sub.header > .button {
     position: absolute;
-        top: 16px;
-        left: 17px;
+    top: 16px;
+    left: 17px;
 }
 
-.sourceDialogNew.overlay > .content > .header > .sub.header > .button.list {
+.sourceDialogNew > .sub.header > .button.list {
     left: 54px;
 }
 
-.sourceDialogNew.overlay .control.searchLockup > .wrap {
+.sourceDialogNew .control.searchLockup > .wrap {
     height: 24px; /* this one is 2px taller than normal to match height of adjacent buttons */
 }
 
-.sourceDialogNew.overlay .control.searchLockup .button.search.up, 
-.sourceDialogNew.overlay .control.searchLockup .button.search.over, 
-.sourceDialogNew.overlay .control.searchLockup .button.search.pressed, 
-.sourceDialogNew.overlay .control.searchLockup .button.search.disabled {
+.sourceDialogNew .control.searchLockup > .wrap {
+    height: 24px; /* this one is 2px taller than normal to match height of adjacent buttons */
+}
+
+.sourceDialogNew .control.searchLockup .button.search.up,
+.sourceDialogNew .control.searchLockup .button.search.over,
+.sourceDialogNew .control.searchLockup .button.search.pressed,
+.sourceDialogNew .control.searchLockup .button.search.disabled {
     background-position: 0 -57px;
 }
 
-.sourceDialogNew.overlay .control.searchLockup .button.searchClear.up,
-.sourceDialogNew.overlay .control.searchLockup .button.searchClear.over,
-.sourceDialogNew.overlay .control.searchLockup .button.searchClear.pressed {
+.sourceDialogNew .control.searchLockup .button.searchClear.up,
+.sourceDialogNew .control.searchLockup .button.searchClear.over,
+.sourceDialogNew .control.searchLockup .button.searchClear.pressed {
     background-position: -84px -59px;
+}
+
+.sourceDialogNew .hideRoot>.node>.subcontainer>.j-view-port-chunk>.collapsible{
+    margin-left: 2em !important;
 }
 /* END New Select Data Dialog Box */
 
@@ -6892,10 +7043,10 @@ input[type="text"].mSelect-input {
 
 .LogCollectors .nothingToDisplay.panel.info {
     position: absolute;
-       top: 50%;
-       right: 35%;
-       bottom: 33%;
-       left: 50%;
+    top: 50%;
+    right: 35%;
+    bottom: 33%;
+    left: 50%;
     min-width: 600px;
     margin-left: -300px;
     margin-top: 0;
@@ -6933,12 +7084,6 @@ input[type="text"].mSelect-input {
     border-top: 1px solid #D4D5D5;
 }
 
-.CreateLogCollector .reportChooserDialog .sourceDialogNew {
-    min-width: 450px;
-    min-height: 510px;
-    height: 510px;
-    width: 450px;
-}
 
 .logCollectorSaveDialog {
     width: 500px;
@@ -6949,28 +7094,142 @@ input[type="text"].mSelect-input {
 
 
 
+
 /* =========================== */
-/* Report Chooser Dialog Begin */
+/* AdHock Formatting Dialog Begin */
 
-.reportChooserDialog {
-    min-width: 450px;
-    min-height: 510px;
-    height: 510px;
-    width: 450px;
+#chartFormatDialog #advancedSection {
+    background-color: #fafafa;
+    padding: 0;
+    position: relative;
+    top: -2px;
+    min-width: 672px;
+    clear: both;
 }
 
-.reportChooserDialog .treeBox {
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
+#chartFormatDialog .header {
+    border-bottom: 1px solid #b5b5b5;
 }
-.reportChooserDialog.sourceDialogNew.overlay .itemDescription {
-    height: 54px;
-    margin: 11px 0 0 0;
-    padding: 8px 22px;
+
+#chartFormatDialog .body.section {
+    border-top: none;
+}
+
+.advancedSection .table-container {
+    height: 250px;
+    overflow: auto;
+}
+
+.advancedSection .header-container {
+    line-height: 30px;
+    height: 30px;
+    border-bottom: 1px solid #b5b5b5;
+    background: #ecf1f7;
+}
+
+.advancedSection .name,
+.advancedSection .value,
+.advancedSection .actions {
+    float: left;
+}
+
+.advancedSection .name {
+    width: 200px;
+}
+
+.advancedSection .value {
+    width: 380px;
+}
+
+.advancedSection table {
+    background-color: #ffffff;
+    width: 100%;
+    margin-top: -29px;
+}
+
+.advancedSection thead th {
+    color: #333333;
+    font-weight: normal;
+    line-height: 28px;
+    padding-left: 10px;
+    text-align: left;
+}
+
+.advancedSection thead th > div {
+    position: absolute;
+    top: 0;
+}
+
+.advancedSection tbody td {
+    text-align: left;
+    color: #878787;
+    padding-left: 10px;
+    line-height: 28px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    height: 28px;
+}
+
+.advancedSection tbody .edit td {
+    height: auto;
+}
+
+.advancedSection tbody tr {
+    border-bottom: 1px solid #b5b5b5;
+}
+
+.advancedSection .actions {
+    line-height: 0;
+    width: 70px;
+}
+
+.advancedSection .action.simple.edit,
+.advancedSection .action.simple.delete,
+.advancedSection .action.simple.button.save,
+.advancedSection .action.simple.button.cancel {
+    background-color: white;
+    margin: 6px 3px 0 3px;
+}
+
+.advancedSection .action.simple.button.save {
+    background-position: 0px -239px;
+}
+
+.advancedSection .action.simple.button.cancel {
+    background-position: 0px -197px;
+}
+
+#advancedSection td input,
+.advancedSection td textarea {
+    margin-top: 5px;
+    width: 100%;
+}
+
+.advancedSection textarea {
+    height: 100px;
+    resize: none;
+}
+
+.advancedSection a {
+    color: #195b8a;
+    float: right;
+    margin: 12px 5px 5px 8px;
+    text-decoration: none;
+}
+
+.advancedSection a.information-link {
+    text-decoration: underline;
+    font-weight: bold;
+}
+
+.advancedSection .warning {
+    margin-bottom: 5px;
+}
+
+.advancedSection .button-container {
+    height: 40px;
+    position: relative;
 }
 
 /* Report Chooser Dialog End   */
@@ -7000,5 +7259,4 @@ input[type="text"].mSelect-input {
     }
 
 }
-
 

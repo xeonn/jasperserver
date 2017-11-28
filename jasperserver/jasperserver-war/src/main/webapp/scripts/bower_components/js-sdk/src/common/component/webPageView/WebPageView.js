@@ -22,7 +22,7 @@
 
 /**
  * @author: Kostiantyn Tsaregradskyi
- * @version: $Id: WebPageView.js 812 2015-01-27 11:01:30Z psavushchik $
+ * @version: $Id: WebPageView.js 1618 2015-09-29 12:06:41Z ztomchen $
  */
 
 define(function (require) {
@@ -31,77 +31,45 @@ define(function (require) {
     var Backbone = require("backbone"),
         _ = require("underscore"),
         $ = require("jquery"),
-        browserDetection = require("common/util/browserDetection"),
-        i18n = require("bundle!CommonBundle");
+        browserDetection = require("common/util/browserDetection");
 
-    require("css!webPageView.css");
+    require("css!webPageView");
 
-    /*
-     * Set "src" attribute for <iframe> and start timeout to show error message.
+    /**
+     * @description Set "src" attribute for iframe and start timeout to show error message.
+     * @private
+     * @memberof! WebPageView
      */
     function setIframeSrc() {
         this.$iframe.attr("src", this.url);
 
         this._iframeSrcSet = true;
 
-        //this.$el.removeClass("hideLoadingAnimation").find(".externalUrlLoadError").remove();
-
         this.$iframe.css({
-            //"top": 0,
             "background-color": "transparent"
         });
 
         this._loadingTimeoutId && clearTimeout(this._loadingTimeoutId);
 
-        //this._loadingTimeoutId = setTimeout(_.bind(showError, this), this.timeout);
         this._loadingTimeoutId = setTimeout(_.bind(function() {
             this.$iframe.css("background-color", "#FFFFFF");
         }, this), this.timeout);
     }
 
-    /*
-     * Show error message after timeout.
-     * This is done because we cannot determine if site was loaded in iframe or not.
-     * If site was successfully loaded, then this error message will not be visible (it will covered with actual iframe
-     * content).
-     */
-    function showError() {
-        var $div = $("<div></div>"),
-            errorMessage = i18n["external.url.load.error"] || "Failed to load external URL '{0}'";
-
-        $div
-            .html(errorMessage.replace("{0}", this.url).replace("\n", "<br/>"))
-            .addClass("externalUrlLoadError");
-
-        this.$el.addClass("hideLoadingAnimation").prepend($div);
-
-        this.$iframe.css({
-            "top": (-$div.outerHeight()) + "px",
-            "background-color": "#FFFFFF"
-        });
-    }
-
-    /*
-     * Embeddable WebPageView component.
-     */
-    var WebPageView = Backbone.View.extend({
-        /*
-         * Backbone will automatically create element for view with specified tagName and className.
-         */
+    var WebPageView = Backbone.View.extend(/** @lends WebPageView.prototype */{
         tagName: "div",
         className: "webPageView",
 
-        /*
-         * Constructor.
-         *
-         * @param options Object that holds various options for component:
-         *      url - String - url of web-site to open
-         *      scrolling - Boolean - should iframe element have scroll-bars
-         *      timeout - Number - timeout in milliseconds after which error message will be shown
-         *      renderTo - Sizzle-style selector, DOM element or jQuery element - if specified, component will be
-         *              rendered to this container automatically
-         *
-         * @throws Error Error is thrown if renderTo option is specified but such element doesn't exist in DOM.
+        /**
+         * @constructor WebPageView
+         * @class WebPageView
+         * @classdesc Embeddable WebPageView component
+         * @param {object} options Object that holds various options for component.
+         * @param {string|HTMLElement|jQuery} [options.renderTo] If specified, component will be rendered to this container automatically
+         * @param {string} [options.url] Url to open
+         * @param {boolean} [options.scrolling=true] Should iframe element have scroll-bars
+         * @param {number} [options.timeout=20000] Timeout in milliseconds after which error message will be shown
+         * @throws {Error} WebPageView cannot be rendered to specified container
          */
         constructor: function(options) {
             options || (options = {});
@@ -118,16 +86,15 @@ define(function (require) {
             Backbone.View.prototype.constructor.apply(this, arguments);
         },
 
-        /*
-         * Create an <iframe> element, make it invisible and attach it to <body>.
-         */
         initialize: function() {
+            var self = this;
             this.$iframe = $("<iframe></iframe>")
                 .addClass("externalUrlIframe");
 
             this.$iframe.on("load", function(){
                 $(this).blur();
                 $(this).parent().focus();
+                self.trigger("load");
             });
 
             this.$el.html(this.$iframe);
@@ -147,15 +114,13 @@ define(function (require) {
             }
         },
 
-        /*
-         * Render component to specified container. Triggers "render" event.
-         *
-         * @param container Sizzle-style selector, DOM element or jQuery element to render component to.
-         *
-         * @throws Error If url for component is not specified.
-         * @throws Error If container cannot be found in DOM.
-         *
-         * @return Component instance.
+        /**
+         * @description Render component to specified container
+         * @param {string|HTMLElement|jQuery} container Where to render
+         * @throws {Error} WebPageView URL is not specified
+         * @throws {Error} WebPageView cannot be rendered to specified container
+         * @fires WebPageView#render
+         * @return {WebPageView}
          */
         render: function(container) {
             if (!this.url || !_.isString(this.url)) {
@@ -178,20 +143,26 @@ define(function (require) {
 
             this._rendered = true;
 
+            /**
+             * @event WebPageView#render
+             */
             this.trigger("render", this, $(container));
 
             return this;
         },
 
-        /*
-         * Set URL property. Triggers "change:url" event.
-         *
-         * @param url String representing URL of web page.
-         * @param noRefresh Optional parameter. If equals to true, component will not be automatically refreshed.
+        /**
+         * @description Set URL property
+         * @param {string} url String representing URL of web page.
+         * @param {boolean} [noRefresh] If equals to true, component will not be automatically refreshed.
+         * @fires WebPageView#change:url
          */
         setUrl: function(url, noRefresh) {
             this.url = url;
 
+            /**
+             * @event WebPageView#change:url
+             */
             this.trigger("change:url", this, this.url);
 
             if (!noRefresh) {
@@ -199,23 +170,26 @@ define(function (require) {
             }
         },
 
-        /*
-         * Set timeout property. Triggers "change:timeout" event.
-         *
-         * @param timeout Number in milliseconds for load timeout.
+        /**
+         * @description Set timeout property. Triggers "change:timeout" event.
+         * @param {number} timeout Number in milliseconds for load timeout.
+         * @fires WebPageView#change:timeout
          */
         setTimeout: function(timeout) {
             this.timeout = timeout;
 
+            /**
+             * @event WebPageView#change:timeout
+             */
             this.trigger("change:timeout", this, this.timeout);
         },
 
-        /*
-         * Set scrolling property. Will automatically update scroll-bars of the <iframe> element. Triggers "change:scrolling" event.
-         *
-         * @param {boolean} scrolling value meaning if scroll-bars should be shown or not.
-         * @param {object} options
-         * @param {boolean} options.silent if set to 'true' then no event will be triggered
+        /**
+         * @description Set scrolling property. Will automatically update scroll-bars of the iframe element.
+         * @param {boolean} scrolling If scroll-bars should be shown or not.
+         * @param {object} [options]
+         * @param {boolean} [options.silent] if set to 'true' then no event will be triggered
+         * @fires WebPageView#change:scrolling
          */
         setScrolling: function(scrolling, options) {
             this.scrolling = scrolling;
@@ -233,15 +207,18 @@ define(function (require) {
             }
 
             if (!options || !options.silent) {
+                /**
+                 * @event WebPageView#change:scrolling
+                 */
                 this.trigger("change:scrolling", this, this.scrolling);
             }
         },
 
-        /*
-         * Refresh <iframe> content. Triggers "refresh" event.
-         *
+        /**
+         * @description Refresh iframe content.
          * @throws Error If component was not yet rendered to container.
          * @throws Error If URL is not specified.
+         * @fires WebPageView#change:refresh
          */
         refresh: function() {
             if (!this._rendered) {
@@ -254,45 +231,55 @@ define(function (require) {
 
             setIframeSrc.call(this);
 
+            /**
+             * @event WebPageView#refresh
+             */
             this.trigger("refresh", this, this.url);
         },
 
-        /*
-         * Remove component from DOM. Triggers "remove" event.
+        /**
+         * @description Remove component from DOM.
+         * @fires WebPageView#remove
          */
         remove: function() {
             this._loadingTimeoutId && clearTimeout(this._loadingTimeoutId);
 
             this.$iframe.off("load");
 
+            /**
+             * @event WebPageView#remove
+             */
             this.trigger("remove", this);
 
             Backbone.View.prototype.remove.apply(this, arguments);
         }
     }, {
-        /*
-         * Static Number property representing default timeout in milliseconds after which error message will
-         * be shown while loading web page in <iframe>.
+        /**
+         * @static
+         * @memberof! WebPageView
+         * @type {number}
+         * @description Number property representing default timeout in milliseconds after which error message will be shown while loading web page in iframe.
          */
         TIMEOUT: 20000,
 
-        /*
-         * Static Boolean property representing default state of scroll-bars of <iframe> element.
+        /**
+         * @static
+         * @memberof! WebPageView
+         * @type {boolean}
+         * @description Default state of scroll-bars of iframe element.
          */
         SCROLLING: true,
 
-        /*
-         * Static method to create new WebPageView component instance.
-         *
-         * @param settings String or Object If String, then it's treated as url parameter.
-         *                                  For object case see parameters of constructor.
-         * @param callback Function Optional function to call after component initialization. If error occurred, callback
+        /**
+         * @static
+         * @memberof! WebPageView
+         * @description Static method to create new WebPageView component instance.
+         * @param {(string|object)} settings If String, then it's treated as url parameter. For object case see {@link WebPageView#constructor}.
+         * @param {function} [callback] Optional function to call after component initialization. If error occurred, callback
          *      will be called with Error as first argument. If component instance was successfully created, then
          *      callback is called with undefined as first argument and component instance as second.
-         *
-         * @return New WebPageView component instance.
-         *
-         * @throws Error If callback was not specified and error occurred while initializing new instance of component.
+         * @returns {WebPageView} New component instance.
+         * @throws {Error} If callback was not specified and error occurred while initializing new instance of component.
          */
         open: function(settings, callback) {
             var view, err;

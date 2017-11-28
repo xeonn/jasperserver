@@ -35,6 +35,8 @@
         </selectAction>
         <simpleAction labelKey="ADH_1213_SHOW_DISPLAY_MANAGER" clientTest="!adhocDesigner.isDisplayManagerVisible" action="adhocDesigner.toggleDisplayManager"/>
         <simpleAction labelKey="ADH_1213_HIDE_DISPLAY_MANAGER" clientTest="adhocDesigner.isDisplayManagerVisible" action="adhocDesigner.toggleDisplayManager"/>
+        <simpleAction labelKey="ADH_1151_TOOLBAR_MENU_UNMERGE_CROSSTAB_CELLS" clientTest="adhocDesigner.isCrosstabCellsMerged" action="adhocDesigner.mergeCrosstabCells" actionArgs="false"/>
+        <simpleAction labelKey="ADH_1152_TOOLBAR_MENU_MERGE_CROSSTAB_CELLS" clientTest="!adhocDesigner.isCrosstabCellsMerged" action="adhocDesigner.mergeCrosstabCells" actionArgs="true"/>
 
         <condition test="getIsOlapMode">
             <selectAction labelKey="hidden">
@@ -64,6 +66,12 @@
                 <option labelKey="ADH_1231_MENU_SORT_ASCENDING" clientTest="AdHocCrosstab.canShowSortOptions" isSelectedTest="AdHocCrosstab.isSortOptionSelected" isSelectedTestArgs="ascending" action="AdHocCrosstab.sortingChosen" actionArgs="asc@@groupSortControlClicked"/>
                 <option labelKey="ADH_1231_MENU_SORT_DESCENDING" clientTest="AdHocCrosstab.canShowSortOptions"  isSelectedTest="AdHocCrosstab.isSortOptionSelected" isSelectedTestArgs="descending" action="AdHocCrosstab.sortingChosen" actionArgs="desc@@groupSortControlClicked"/>
                 <option labelKey="ADH_1231_MENU_SORT_NONE" clientTest="AdHocCrosstab.canShowSortOptions"  isSelectedTest="AdHocCrosstab.isSortOptionSelected" isSelectedTestArgs="natural" action="AdHocCrosstab.sortingChosen" actionArgs="none@@groupSortControlClicked"/>
+            </selectAction>
+            <separator/>
+            <selectAction labelKey="ADH_1236_MENU_TOP_BOTTOM_N_FILTER">
+                <option labelKey="ADH_1236_MENU_TOP_N_FILTER" clientTest="AdHocCrosstab.canShowTopBottomNFilterMenu" isSelectedTest="AdHocCrosstab.isTopBottomNOptionSelected" isSelectedTestArgs="top" action="AdHocCrosstab.topBottomNFilteringClicked" actionArgs="top"/>
+                <option labelKey="ADH_1236_MENU_BOTTOM_N_FILTER" clientTest="AdHocCrosstab.canShowTopBottomNFilterMenu"  isSelectedTest="AdHocCrosstab.isTopBottomNOptionSelected" isSelectedTestArgs="bottom" action="AdHocCrosstab.topBottomNFilteringClicked" actionArgs="bottom"/>
+                <option labelKey="ADH_1236_MENU_TOP_BOTTOM_N_FILTER_NONE" clientTest="AdHocCrosstab.canShowTopBottomNFilterMenu"  isSelectedTest="AdHocCrosstab.isTopBottomNOptionSelected" isSelectedTestArgs="none" action="AdHocCrosstab.topBottomNFilteringClicked" actionArgs="none"/>
             </selectAction>
         </condition>
     </context>
@@ -222,6 +230,12 @@
                 <option labelKey="ADH_1231_MENU_SORT_ASCENDING" clientTest="AdHocCrosstab.canShowSortOptions" isSelectedTest="AdHocCrosstab.isSortOptionSelected" isSelectedTestArgs="ascending" action="AdHocCrosstab.sortingChosen" actionArgs="asc@@groupSortControlClicked"/>
                 <option labelKey="ADH_1231_MENU_SORT_DESCENDING" clientTest="AdHocCrosstab.canShowSortOptions"  isSelectedTest="AdHocCrosstab.isSortOptionSelected" isSelectedTestArgs="descending" action="AdHocCrosstab.sortingChosen" actionArgs="desc@@groupSortControlClicked"/>
                 <option labelKey="ADH_1231_MENU_SORT_NONE" clientTest="AdHocCrosstab.canShowSortOptions"  isSelectedTest="AdHocCrosstab.isSortOptionSelected" isSelectedTestArgs="natural" action="AdHocCrosstab.sortingChosen" actionArgs="none@@groupSortControlClicked"/>
+            </selectAction>
+            <separator/>
+            <selectAction labelKey="ADH_1236_MENU_TOP_BOTTOM_N_FILTER">
+                <option labelKey="ADH_1236_MENU_TOP_N_FILTER" clientTest="AdHocCrosstab.canShowTopBottomNFilterMenu" isSelectedTest="AdHocCrosstab.isTopBottomNOptionSelected" isSelectedTestArgs="top" action="AdHocCrosstab.topBottomNFilteringClicked" actionArgs="top"/>
+                <option labelKey="ADH_1236_MENU_BOTTOM_N_FILTER" clientTest="AdHocCrosstab.canShowTopBottomNFilterMenu"  isSelectedTest="AdHocCrosstab.isTopBottomNOptionSelected" isSelectedTestArgs="bottom" action="AdHocCrosstab.topBottomNFilteringClicked" actionArgs="bottom"/>
+                <option labelKey="ADH_1236_MENU_TOP_BOTTOM_N_FILTER_NONE" clientTest="AdHocCrosstab.canShowTopBottomNFilterMenu"  isSelectedTest="AdHocCrosstab.isTopBottomNOptionSelected" isSelectedTestArgs="none" action="AdHocCrosstab.topBottomNFilteringClicked" actionArgs="none"/>
             </selectAction>
             <separator/>
             <simpleAction clientTest="AdHocCrosstab.canMoveMeasureUpOrLeft" labelKey="ADH_060_MENU_MOVE_LEFT" action="AdHocCrosstab.moveMeasureLeft"/>

@@ -73,7 +73,7 @@ import java.util.Set;
 
 /**
  * @author Ivan Chan (ichan@jaspersoft.com)
- * @version $Id: TeiidVirtualDataSourceQueryServiceImpl.java 53880 2015-04-08 02:08:21Z rzhilkib $
+ * @version $Id: TeiidVirtualDataSourceQueryServiceImpl.java 58827 2015-10-23 23:47:48Z mchan $
  */
 public class TeiidVirtualDataSourceQueryServiceImpl extends AbstractVirtualDataSourceQueryServiceImpl implements CacheManager, InitializingBean {
 
@@ -554,22 +554,36 @@ public class TeiidVirtualDataSourceQueryServiceImpl extends AbstractVirtualDataS
         String productVersion = null;
         debug("Getting translator for database " + productName);
         // loop through translator config list to find matching translator
+        TranslatorConfig newPossibleConfig = null;
         for (TranslatorConfig config : translatorConfigList) {
 			if (productName.indexOf(config.getProductName().toLowerCase()) >= 0) {
                 if (config.getProductVersion() != null) {
-                    productVersion = metaData.getDatabaseProductVersion().toLowerCase();
                     debug("Getting translator for database " + productName + (productVersion != null? " " + productVersion : ""));
                     if (productVersion == null) {
                         productVersion = metaData.getDatabaseProductVersion().toLowerCase();
                         debug("Database Version: " + productVersion);
                     }
-                    if (productVersion.indexOf(config.getProductVersion().toLowerCase()) < 0) continue;
+                    if (productVersion.indexOf(config.getProductVersion().toLowerCase()) >= 0) {
+                        // if exact version is found, return config
+                        debug("Teiid - reuse TranslatorConfig "+ productName + (productVersion != null? " " + productVersion: ""));
+                        config.setupTranslator();
+                        return config;
+                    }
+                } else {
+                    newPossibleConfig = new TranslatorConfig(config);
+                    newPossibleConfig.setProductVersion(metaData.getDatabaseProductVersion());
+                    debug("Database Version: " + productVersion);
                 }
-                // setup translator
-				config.setupTranslator();
-                return config;
 			}
 		}
+        if (newPossibleConfig != null) {
+            // create new config with new version number
+            translatorConfigList.add(newPossibleConfig);
+            // setup translator
+            debug("Teiid - create new TranslatorConfig for specific version "+ productName + (productVersion != null? " " + productVersion: ""));
+            newPossibleConfig.setupTranslator();
+            return newPossibleConfig;
+        }
         // use default translator if it is available
         if (defaultTranslatorConfig != null) {
             debug("Teiid - cannot find matching translator for database " + productName + (productVersion != null? " " + productVersion : "") + ".  Use default translator instead.");

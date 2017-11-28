@@ -7,14 +7,14 @@ import com.jaspersoft.jasperserver.api.metadata.common.domain.InputControlsConta
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Query;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceReference;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportUnit;
+import com.jaspersoft.jasperserver.dto.reports.inputcontrols.InputControlOption;
+import com.jaspersoft.jasperserver.dto.reports.inputcontrols.InputControlState;
+import com.jaspersoft.jasperserver.dto.reports.inputcontrols.ReportInputControl;
 import com.jaspersoft.jasperserver.war.action.EngineServiceCascadeTestQueryExecutor;
 import com.jaspersoft.jasperserver.war.cascade.cache.ControlLogicCacheManager;
 import com.jaspersoft.jasperserver.war.cascade.handlers.InputControlHandler;
 import com.jaspersoft.jasperserver.war.cascade.handlers.ParametersHelper;
 import com.jaspersoft.jasperserver.war.cascade.token.FilterResolver;
-import com.jaspersoft.jasperserver.dto.reports.inputcontrols.InputControlOption;
-import com.jaspersoft.jasperserver.dto.reports.inputcontrols.InputControlState;
-import com.jaspersoft.jasperserver.dto.reports.inputcontrols.ReportInputControl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Test;
@@ -62,7 +62,7 @@ import static org.unitils.reflectionassert.ReflectionAssert.assertReflectionEqua
  * Tests for {@link com.jaspersoft.jasperserver.war.cascade.GenericInputControlLogic}
  *
  * @author Sergey Prilukin
- * @version $Id: GenericInputControlLogicNewTest.java 48468 2014-08-21 07:47:20Z yuriy.plakosh $
+ * @version $Id: GenericInputControlLogicNewTest.java 58870 2015-10-27 22:30:55Z esytnik $
  */
 
 public class GenericInputControlLogicNewTest extends UnitilsJUnit4 {
@@ -82,6 +82,7 @@ public class GenericInputControlLogicNewTest extends UnitilsJUnit4 {
 
     @InjectInto(property = "filterResolver")
     protected Mock<FilterResolver> filterResolver;
+
 
     private ParametersHelper ph;
 

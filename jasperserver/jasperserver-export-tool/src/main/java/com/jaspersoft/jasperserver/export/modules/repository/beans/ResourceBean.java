@@ -22,13 +22,14 @@ package com.jaspersoft.jasperserver.export.modules.repository.beans;
 
 /**
  * @author tkavanagh
- * @version $Id: ResourceBean.java 55164 2015-05-06 20:54:37Z mchan $
+ * @version $Id: ResourceBean.java 58265 2015-10-05 16:13:56Z vzavadsk $
  */
 
+import com.jaspersoft.jasperserver.api.common.crypto.Cipherer;
 import com.jaspersoft.jasperserver.api.common.util.spring.StaticApplicationContext;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceReference;
-import com.jaspersoft.jasperserver.api.common.crypto.Cipherer;
+import com.jaspersoft.jasperserver.export.modules.common.TenantStrHolderPattern;
 import com.jaspersoft.jasperserver.export.modules.repository.ResourceExportHandler;
 import com.jaspersoft.jasperserver.export.modules.repository.ResourceImportHandler;
 import org.apache.log4j.LogManager;
@@ -38,6 +39,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 /**
  * The following information applies to all "bean" classes used to marshal and 
@@ -182,6 +184,14 @@ public abstract class ResourceBean{
 		res.setUpdateDate(getUpdateDate());
 
 		additionalCopyTo(res, importHandler);
+
+		if (!importHandler.getImportContext().getNewGeneratedTenantIds().isEmpty()) {
+			handleNewTenantIds(res, importHandler.getImportContext().getNewGeneratedTenantIds());
+		}
+	}
+
+	protected void handleNewTenantIds(Resource res, Map<String, String> map) {
+		res.setParentFolder(TenantStrHolderPattern.TENANT_FOLDER_URI.replaceWithNewTenantIds(map, res.getParentFolder()));
 	}
 
 	/**
@@ -235,7 +245,7 @@ public abstract class ResourceBean{
                                                        ResourceImportHandler importHandler) {
         List<ResourceReference> references;
         if (beanReferences == null) {
-            references = null;
+            references = new ArrayList<ResourceReference>();
         } else {
             references = new ArrayList<ResourceReference>(beanReferences.length);
             for (ResourceReferenceBean beanReference : beanReferences) {

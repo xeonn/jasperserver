@@ -21,6 +21,23 @@
 
 package com.jaspersoft.jasperserver.export;
 
+import com.jaspersoft.jasperserver.api.JSExceptionWrapper;
+import com.jaspersoft.jasperserver.dto.common.WarningDescriptor;
+import com.jaspersoft.jasperserver.export.io.ExportOutput;
+import com.jaspersoft.jasperserver.export.modules.ExporterModule;
+import com.jaspersoft.jasperserver.export.modules.ExporterModuleContext;
+import com.jaspersoft.jasperserver.export.modules.common.ExportImportWarningCode;
+import com.jaspersoft.jasperserver.export.service.ImportExportService;
+import com.jaspersoft.jasperserver.export.service.impl.ImportExportServiceImpl;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.dom4j.Document;
+import org.dom4j.DocumentHelper;
+import org.dom4j.Element;
+import org.dom4j.io.OutputFormat;
+import org.dom4j.io.XMLWriter;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Enumeration;
@@ -30,28 +47,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.dom4j.Document;
-import org.dom4j.DocumentHelper;
-import org.dom4j.Element;
-import org.dom4j.io.OutputFormat;
-import org.dom4j.io.XMLWriter;
-
-import com.jaspersoft.jasperserver.api.JSExceptionWrapper;
-import com.jaspersoft.jasperserver.export.io.ExportOutput;
-import com.jaspersoft.jasperserver.export.modules.ExporterModule;
-import com.jaspersoft.jasperserver.export.modules.ExporterModuleContext;
-
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ExporterImpl.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: ExporterImpl.java 58265 2015-10-05 16:13:56Z vzavadsk $
  */
 
 public class ExporterImpl extends BaseExporterImporter implements Exporter {
-	
+
 	private static final Log log = LogFactory.getLog(ExporterImpl.class);
-	
+
 	protected class ModuleContextImpl implements ExporterModuleContext {
 		
 		private final String moduleId;
@@ -121,6 +125,7 @@ public class ExporterImpl extends BaseExporterImporter implements Exporter {
 				close = false;
 				output.close();
 			} finally {
+				BaseExporterImporter.setTenant(null);
 				if (close) {
 					try {
 						output.close();
@@ -142,11 +147,20 @@ public class ExporterImpl extends BaseExporterImporter implements Exporter {
 		setOutputProperties();
 		invokeModules();
 		
-		writeIndexDocument(indexDocument);		
+		writeDocument(indexDocument, getIndexFilename());
+		writeExportWarnings();
 	}
 
 	protected void setOutputProperties() {
 		Properties properties = output.getOutputProperties();
+
+		String organizationId = getExportTask().getParameters().getParameterValue(ImportExportServiceImpl.ORGANIZATION);
+		if (StringUtils.isBlank(organizationId)) {
+			properties.put(ImportExportService.ROOT_TENANT_ID, getAuthenticatedTenantId());
+		} else {
+			properties.put(ImportExportService.ROOT_TENANT_ID, organizationId);
+		}
+
 		for (Enumeration it = properties.propertyNames(); it.hasMoreElements();) {
 			String property = (String) it.nextElement();
 			String value = properties.getProperty(property);
@@ -168,7 +182,7 @@ public class ExporterImpl extends BaseExporterImporter implements Exporter {
 
 	protected void invokeModules() {
 		List modules = getModuleRegister().getExporterModules();
-		
+
 		moduleIndexElements = new HashMap();
 		for (Iterator it = modules.iterator(); it.hasNext();) {
             if (Thread.interrupted()){
@@ -193,38 +207,53 @@ public class ExporterImpl extends BaseExporterImporter implements Exporter {
 		moduleIndexElements.put(module.getId(), moduleElement);
 	}
 
-	protected void writeIndexDocument(Document indexDocument) {
-		OutputStream indexOut = getIndexOutput();
-		boolean closeIndexOut = true;
+	private void writeDocument(Document document, String filename) {
+		OutputStream output = getDocumentOutput(filename);
+		boolean closeOutput = true;
 		try {
 			OutputFormat format = new OutputFormat();
 			format.setEncoding(getCharacterEncoding());
-			XMLWriter writer = new XMLWriter(indexOut, format);
-			writer.write(indexDocument);
-			
-			closeIndexOut = false;
-			indexOut.close();
+			XMLWriter writer = new XMLWriter(output, format);
+			writer.write(document);
+
+			closeOutput = false;
+			output.close();
 		} catch (IOException e) {
 			log.error(e);
 			throw new JSExceptionWrapper(e);
 		} finally {
-			if (closeIndexOut) {
+			if (closeOutput) {
 				try {
-					indexOut.close();
+					output.close();
 				} catch (IOException e) {
-					log.error("Error while closing index output", e);
+					log.error("Error while closing output", e);
 				}
 			}
 		}
 	}
 
-	protected OutputStream getIndexOutput() {
+	private OutputStream getDocumentOutput(String filename) {
 		try {
-			return output.getFileOutputStream(getIndexFilename());
+			return output.getFileOutputStream(filename);
 		} catch (IOException e) {
 			log.error(e);
 			throw new JSExceptionWrapper(e);
 		}
 	}
-	
+
+	private void writeExportWarnings() {
+		if (task.getWarnings().isEmpty()) return;
+
+		Document document = DocumentHelper.createDocument();
+		Element rootElement = document.addElement(getBrokenDependenceRootElementName());
+		for (WarningDescriptor warningDescriptor : task.getWarnings()) {
+			if (warningDescriptor.getCode().equals(ExportImportWarningCode.EXPORT_BROKEN_DEPENDENCY.toString())) {
+				for (String str : warningDescriptor.getParameters()) {
+					Element element = rootElement.addElement(getResourceElementName());
+					element.addText(str);
+				}
+			}
+		}
+		writeDocument(document, getBrokenDependenceFilename());
+	}
 }

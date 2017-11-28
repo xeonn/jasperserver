@@ -22,7 +22,7 @@
 
 /**
  * @author: Andriy Godovanets, Kostiantyn Tsaregradskyi
- * @version: $Id: cascadingMenuTrait.js 812 2015-01-27 11:01:30Z psavushchik $
+ * @version: $Id: cascadingMenuTrait.js 1721 2015-10-15 11:56:43Z psavushc $
  */
 
 define(function (require) {
@@ -33,81 +33,144 @@ define(function (require) {
         _ = require("underscore");
 
     /**
-     * @mixin cascadingMenu
+     * @mixin cascadingMenuTrait
      * @description Object that extends any Menu component with options cascade. Adds support of "children" property for "options" param.
      * @example
      *  var CascadingContextMenu = ContextMenu.extend(cascadingMenuTrait);
-     *  var cascadingContextMenu = new CascadingContextMenu([
-     {
-         label: "Remove Summary", action: "removeSummary"
-     },
-     {
-         label: "Change Function",
-         children: [
-             { label : "Distinct Count", action: "distinctCount" },
-             { label : "Count All", action: "countAll" }
-         ]
-     }
-     ], "#someElement", { toggle: true });
+     *
+     *  var menu = new CascadingContextMenu([
+     *      { label: "Remove Summary", action: "removeSummary" },
+     *      { label: "Change Function", children: [
+     *          { label : "Distinct Count", action: "distinctCount" },
+     *          { label : "Count All", action: "countAll" }
+     *      ]
+     *      }
+     *  ], "#someElement", { toggle: true });
      */
     var cascadingMenuTrait =  {
+
+	    _subMenuHovered: false,
+
+        _onConstructor: function(options, additionalOptions) {
+            this.additionalOptions = additionalOptions;
+        },
 
         /**
          * @description initializes mouseover handler. Calls _showSubMenu.
          * @memberof cascadingMenu
          * @access protected
          */
-        _onInitialize: function(options) {
+        _onInitialize: function() {
             this.on("mouseover", _.bind(this._showSubMenu, this))
         },
 
         /**
          * @description show sub menu on option mouse over.
-         * @memberof cascadingMenu
+         * @memberof cascadingMenuTrait
          * @access protected
          */
-        _showSubMenu: function(optionView) {
-            if (optionView.model.has("children")) {
-                var subView = this._getSubMenu(optionView.cid, optionView.model.get("children"), optionView);
+        _showSubMenu: function(menuItem) {
+            if (menuItem.model.has("children")) {
+                var subView = this._getSubMenu(menuItem.cid, menuItem.model.get("children"), menuItem, this);
                 subView && subView.show();
             }
         },
 
+        _onMenuItemMouseOut: function(menuItem, _ignored, ev) {
+            var children = menuItem.model.get("children");
+
+	        this._menuHovered = false;
+
+            if (children) {
+
+                var subView = this._getSubMenu(menuItem.cid),
+                    subViewOffset = subView.$el.offset(),
+                    posX = ev.pageX - subViewOffset.left,
+                    posY = ev.pageY - subViewOffset.top;
+
+                this._subMenuHovered = posX >= 0 && posX <= subView.$el.width() + 3 &&
+                    posY >= 0 && posY <= subView.$el.height() + 3;
+            }
+
+            this._hideByTimeout();
+        },
+
+        _initCascadingMenuEvents: function(subMenu) {
+            var self = this;
+
+            this.listenTo(subMenu.collection, "select", function(view, model, ev){
+                self._selectOption(view, model, ev);
+            });
+
+	        this.listenTo(subMenu, "hidden", function() {
+	            self._subMenuHovered = false;
+		        self._tryHide();
+	        });
+        },
+
+	    /**
+	     * @description tried to hide menu after some timeout
+	     * @access protected
+	     */
+	    _hideByTimeout: function() {
+
+		    if (this._elementHovered || this._menuHovered || this._subMenuHovered) {
+			    return;
+		    }
+
+		    setTimeout(_.bind(this._tryHide, this), this.TIME_BETWEEN_MOUSE_OVERS);
+	    },
+
+	    /**
+	     * @description tries to hide menu.
+	     * @access protected
+	     */
+	    _tryHide: function() {
+
+		    if (this._elementHovered || this._menuHovered || this._subMenuHovered) {
+			    return;
+		    }
+
+		    this._hide();
+	    },
+
         /**
          * @description returns new SubMenu instance.
          * @access protected
-         * @memberof cascadingMenu
+         * @memberof cascadingMenuTrait
          * @returns {SubMenu}
          */
-        _getSubMenu: _.memoize(function(cid, options, parentOption) {
-            return new SubMenu(options, parentOption);
+        _getSubMenu: _.memoize(function(cid, menuItems, parentMenuItem, context) {
+
+            var subMenu = new SubMenu(menuItems, parentMenuItem, context.additionalOptions);
+
+            context._initCascadingMenuEvents(subMenu);
+
+            return subMenu;
         })
+
     };
 
 
     /**
-     *  @memberof cascadingMenu
+     *  @memberof cascadingMenuTrait
      *  @access private
      */
-    var SubMenu = HoverMenu.extend(_.extend(
-        /** @lends SubMenu.prototype */
-
-        {
-
+    var SubMenu = HoverMenu.extend(_.extend(/** @lends SubMenu.prototype */{
         /**
          * @constructor SubMenu
          * @extends HoverMenu
          * @access private
          * @description SubMenu component.
-         * @param {object} options
-         * @param {Backbone.View} parentOption
+         * @param {object} menuItems
+         * @param {Backbone.View} parentMenuItem
+         * @param {object} additionalOptions
          * @mixes cascadingMenuTrait
          */
 
-        constructor: function(options, parentOption) {
-            this.parentOption = parentOption;
+        constructor: function(menuItems, parentMenuItem, additionalOptions) {
 
-            HoverMenu.call(this, options, parentOption.$el);
+            HoverMenu.call(this, menuItems, parentMenuItem.$el, null, additionalOptions);
         },
 
         /**
@@ -115,7 +178,7 @@ define(function (require) {
          */
         show: function() {
             var offset = this.$attachTo.offset(),
-                width = this.$attachTo.width();
+                width = this.$attachTo.outerWidth();
 
             this.$el.css({
                 top: offset.top,
@@ -123,33 +186,6 @@ define(function (require) {
             });
 
             return Menu.prototype.show.apply(this, arguments);
-        },
-
-
-        /**
-         * @desc on menu mouse out handler.
-         * @param {Backbone.View} optionView
-         * @param {SubMenu} menu
-         * @param {event} ev
-         * @access protected
-         */
-        _onMenuMouseOut: function(optionView, menu, ev) {
-            var children = optionView.model.get("children");
-
-            if (children) {
-                var subView = this._getSubMenu(optionView.cid),
-                    subViewOffset = subView.$el.offset(),
-                    posX = ev.pageX - subViewOffset.left,
-                    posY = ev.pageY - subViewOffset.top;
-
-                this._menuHovered = posX >= 0 && posX <= subView.$el.width() + 3 &&
-                     posY >= 0 && posY <= subView.$el.height() + 3;
-
-            } else {
-                this._menuHovered = false;
-            }
-
-            this._tryHide();
         }
 
     }, cascadingMenuTrait));

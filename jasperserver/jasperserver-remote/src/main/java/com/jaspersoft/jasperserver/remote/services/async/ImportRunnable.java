@@ -20,7 +20,11 @@
  */
 package com.jaspersoft.jasperserver.remote.services.async;
 
+import com.jaspersoft.jasperserver.dto.common.WarningDescriptor;
+import com.jaspersoft.jasperserver.dto.importexport.State;
+import com.jaspersoft.jasperserver.export.service.ImportExportService;
 import com.jaspersoft.jasperserver.export.service.ImportFailedException;
+import com.jaspersoft.jasperserver.dto.common.ErrorDescriptor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -29,13 +33,16 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
 
 /*
 *  @author inesterenko
 */
-public class ImportRunnable extends BaseImportExportTaskRunnable<StateDto> {
+public class ImportRunnable extends BaseImportExportTaskRunnable<State> {
 
     protected final static Log log = LogFactory.getLog(ImportRunnable.class);
 
@@ -44,26 +51,54 @@ public class ImportRunnable extends BaseImportExportTaskRunnable<StateDto> {
     }
 
     public ImportRunnable(Map<String, Boolean> exportParams, InputStream stream, Locale locale) throws Exception{
+        super(new State());
+
         this.parameters = exportParams;
         this.file = copyToTempFile(stream);
-        this.state = new StateDto();
         this.locale = locale;
     }
 
     @Override
     public void run(){
         try {
-            service.doImport(file, parameters, locale);
-            state.setPhase(Task.FINISHED);
-            state.setMessage(localize("import.finished"));
+            List<WarningDescriptor> warningDescriptors = new ArrayList<WarningDescriptor>();
+            state.setWarnings(warningDescriptors);
+            service.doImport(file, parameters, organizationId, brokenDependenciesStrategy, locale, warningDescriptors);
+            synchronized (state) {
+                state.setPhase(Task.FINISHED);
+                state.setMessage(localize("import.finished"));
+            }
         } catch (ImportFailedException e) {
-            state.setPhase(Task.FAILED);
-            state.setMessage(e.getMessage());
+            synchronized (state) {
+                if (ImportExportService.ERROR_CODE_IMPORT_TENANTS_NOT_MATCH.equals(e.getErrorCode())
+                        || ImportExportService.ERROR_CODE_IMPORT_BROKEN_DEPENDENCIES.equals(e.getErrorCode())) {
+                    state.setPhase(Task.PENDING);
+                    state.setMessage("Import is pending");
+                    log.info(String.format("Import task %s is in pending mode.", state.getId()));
+                } else {
+                    state.setPhase(Task.FAILED);
+                    state.setMessage(e.getMessage());
+                    log.error("Import failed: ", e);
+                }
+
+                ErrorDescriptor errorDescriptor = new ErrorDescriptor();
+                errorDescriptor.setErrorCode(e.getErrorCode());
+                errorDescriptor.setParameters(e.getParameters());
+                state.setError(errorDescriptor);
+            }
+        } catch (Exception e) {
+            synchronized (state) {
+                state.setPhase(Task.FAILED);
+                state.setMessage(e.getMessage());
+            }
             log.error("Import failed: ", e);
         } finally {
-            if(!file.delete()){
-                log.error("Can't delete temp file "+file.getAbsolutePath());
+            if (!state.getPhase().equals(Task.PENDING)) {
+                if(!file.delete()){
+                    log.error("Can't delete temp file "+file.getAbsolutePath());
+                }
             }
+            taskCompletionDate = new Date();
         }
     }
 
@@ -88,7 +123,7 @@ public class ImportRunnable extends BaseImportExportTaskRunnable<StateDto> {
         return tmp;
     }
 
-    public StateDto getResult() {
+    public State getResult() {
         return state;
     }
 

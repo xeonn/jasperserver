@@ -22,11 +22,13 @@ package com.jaspersoft.jasperserver.export.modules.scheduling.beans;
 
 import com.jaspersoft.jasperserver.api.engine.scheduling.domain.FTPInfo;
 import com.jaspersoft.jasperserver.api.engine.scheduling.domain.ReportJobRepositoryDestination;
+import com.jaspersoft.jasperserver.export.modules.ImporterModuleContext;
+import com.jaspersoft.jasperserver.export.modules.common.TenantStrHolderPattern;
 
 
 /**
  * @author tkavanagh
- * @version $Id: ReportJobRepositoryDestinationBean.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: ReportJobRepositoryDestinationBean.java 58265 2015-10-05 16:13:56Z vzavadsk $
  */
 public class ReportJobRepositoryDestinationBean {
 
@@ -58,7 +60,7 @@ public class ReportJobRepositoryDestinationBean {
         setOutputFTPInfo(copyFTPInfoFrom(dest));
 	}
 
-	public void copyTo(ReportJobRepositoryDestination dest) {
+	public void copyTo(ReportJobRepositoryDestination dest, ImporterModuleContext importContext) {
 		dest.setFolderURI(getFolderURI());
 		dest.setSequentialFilenames(isSequentialFilenames());
 		dest.setOverwriteFiles(isOverwriteFiles());
@@ -69,6 +71,11 @@ public class ReportJobRepositoryDestinationBean {
         dest.setUsingDefaultReportOutputFolderURI(isUsingDefaultReportOutputFolderURI());
         dest.setOutputLocalFolder(getOutputLocalFolder());
         dest.setOutputFTPInfo(copyFTPInfoTo());
+
+		if (!importContext.getNewGeneratedTenantIds().isEmpty()) {
+			dest.setFolderURI(TenantStrHolderPattern.TENANT_FOLDER_URI
+					.replaceWithNewTenantIds(importContext.getNewGeneratedTenantIds(), dest.getFolderURI()));
+		}
 	}
 
 	protected FTPInfoBean copyFTPInfoFrom(ReportJobRepositoryDestination dest) {

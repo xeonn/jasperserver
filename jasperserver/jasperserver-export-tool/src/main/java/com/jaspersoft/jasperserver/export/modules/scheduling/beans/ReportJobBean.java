@@ -22,7 +22,16 @@ package com.jaspersoft.jasperserver.export.modules.scheduling.beans;
 
 import com.jaspersoft.jasperserver.api.JSException;
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
-import com.jaspersoft.jasperserver.api.engine.scheduling.domain.*;
+import com.jaspersoft.jasperserver.api.engine.scheduling.domain.ReportJob;
+import com.jaspersoft.jasperserver.api.engine.scheduling.domain.ReportJobAlert;
+import com.jaspersoft.jasperserver.api.engine.scheduling.domain.ReportJobCalendarTrigger;
+import com.jaspersoft.jasperserver.api.engine.scheduling.domain.ReportJobMailNotification;
+import com.jaspersoft.jasperserver.api.engine.scheduling.domain.ReportJobRepositoryDestination;
+import com.jaspersoft.jasperserver.api.engine.scheduling.domain.ReportJobSimpleTrigger;
+import com.jaspersoft.jasperserver.api.engine.scheduling.domain.ReportJobSource;
+import com.jaspersoft.jasperserver.api.engine.scheduling.domain.ReportJobTrigger;
+import com.jaspersoft.jasperserver.export.modules.ImporterModuleContext;
+import com.jaspersoft.jasperserver.export.modules.common.TenantStrHolderPattern;
 import com.jaspersoft.jasperserver.export.modules.scheduling.SchedulingModuleConfiguration;
 
 import java.sql.Timestamp;
@@ -34,7 +43,7 @@ import java.util.Set;
 
 /**
  * @author tkavanagh
- * @version $Id: ReportJobBean.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: ReportJobBean.java 58265 2015-10-05 16:13:56Z vzavadsk $
  */
 public class ReportJobBean {
 
@@ -161,19 +170,24 @@ public class ReportJobBean {
 	}
 
 	public void copyTo(ReportJob job, String newReportUri, 
-			SchedulingModuleConfiguration configuration, ExecutionContext context) {
+			SchedulingModuleConfiguration configuration, ExecutionContext context, ImporterModuleContext importContext) {
 		job.setUsername(getUsername());
 		job.setLabel(getLabel());
 		job.setDescription(getDescription());
 		job.setTrigger(copyTriggerTo());
-		job.setSource(copySourceTo(newReportUri, configuration, context));
+		job.setSource(copySourceTo(newReportUri, configuration, context, importContext));
 		job.setBaseOutputFilename(getBaseOutputFilename());
 		job.setOutputFormats(copyOutputFormatsTo());
 		job.setOutputLocale(getOutputLocale());
-		job.setContentRepositoryDestination(copyRepositoryDestinationTo());
+		job.setContentRepositoryDestination(copyRepositoryDestinationTo(importContext));
 		job.setMailNotification(copyMailNotificationTo());
         job.setAlert(copyAlertTo());
         job.setCreationDate(getCreationDate() != null? getCreationDate() : new Timestamp((new GregorianCalendar()).getTimeInMillis()));
+
+		if (!importContext.getNewGeneratedTenantIds().isEmpty()) {
+			job.setUsername(TenantStrHolderPattern.TENANT_QUALIFIED_NAME
+					.replaceWithNewTenantIds(importContext.getNewGeneratedTenantIds(), job.getUsername()));
+		}
 	}
 
 	protected ReportJobTrigger copyTriggerTo() {
@@ -187,14 +201,15 @@ public class ReportJobBean {
 		return jobTrigger;
 	}
 
-	protected ReportJobSource copySourceTo(String newReportUri, 
-			SchedulingModuleConfiguration configuration, ExecutionContext context) {
+	protected ReportJobSource copySourceTo(String newReportUri,
+			SchedulingModuleConfiguration configuration, ExecutionContext context,
+			ImporterModuleContext importContext) {
 		ReportJobSource jobSource;
 		if (source == null) {
 			jobSource = null;
 		} else {
 			jobSource = new ReportJobSource();
-			source.copyTo(jobSource, newReportUri, configuration, context);
+			source.copyTo(jobSource, newReportUri, configuration, context, importContext);
 		}
 		return jobSource;
 	}
@@ -212,13 +227,13 @@ public class ReportJobBean {
 		return formats;
 	}
 
-	protected ReportJobRepositoryDestination copyRepositoryDestinationTo() {
+	protected ReportJobRepositoryDestination copyRepositoryDestinationTo(ImporterModuleContext importContext) {
 		ReportJobRepositoryDestination dest;
 		if (contentRepositoryDestination == null) {
 			dest = null;
 		} else {
 			dest = new ReportJobRepositoryDestination();
-			contentRepositoryDestination.copyTo(dest);
+			contentRepositoryDestination.copyTo(dest, importContext);
 		}
 		return dest;
 	}

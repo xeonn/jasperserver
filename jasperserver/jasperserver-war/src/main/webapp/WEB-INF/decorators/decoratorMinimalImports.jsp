@@ -36,18 +36,7 @@
     <c:otherwise>
         <link rel="stylesheet" href="${pageContext.request.contextPath}/themes/reset.css" type="text/css" media="screen">
 
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/<spring:theme code="theme.css"/>" type="text/css" media="screen,print"/>
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/<spring:theme code="pages.css"/>" type="text/css" media="screen,print"/>
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/<spring:theme code="containers.css"/>" type="text/css" media="screen,print"/>
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/<spring:theme code="dialog.css"/>" type="text/css" media="screen,print"/>
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/<spring:theme code="buttons.css"/>" type="text/css" media="screen,print"/>
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/<spring:theme code="lists.css"/>" type="text/css" media="screen,print"/>
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/<spring:theme code="controls.css"/>" type="text/css" media="screen,print"/>
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/<spring:theme code="dataDisplays.css"/>" type="text/css" media="screen,print"/>
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/<spring:theme code="pageSpecific.css"/>" type="text/css" media="screen,print"/>
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/<spring:theme code="dialogSpecific.css"/>" type="text/css" media="screen,print"/>
-
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/<spring:theme code="forPrint.css"/>" type="text/css" media="print"/>
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/themeMinimalCss.css" type="text/css" media="screen,print"/>
 
         <!--[if IE 7.0]>
         <link rel="stylesheet" href="${pageContext.request.contextPath}/<spring:theme code="overrides_ie7.css"/>" type="text/css" media="screen"/>
@@ -60,6 +49,24 @@
         <!--[if IE]>
         <link rel="stylesheet" href="${pageContext.request.contextPath}/<spring:theme code="overrides_ie.css"/>" type="text/css" media="screen"/>
         <![endif]-->
+
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/commonMinimalCss.css" type="text/css" media="screen,print"/>
+
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/<spring:theme code="panel.css"/>" type="text/css" media="screen,print"/>
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/<spring:theme code="menu.css"/>" type="text/css" media="screen,print"/>
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/<spring:theme code="simpleColorPicker.css"/>" type="text/css" media="screen,print"/>
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/<spring:theme code="webPageView.css"/>" type="text/css" media="screen,print"/>
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/<spring:theme code="notifications.css"/>" type="text/css" media="screen,print"/>
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/<spring:theme code="attributes.css"/>" type="text/css" media="screen,print"/>
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/<spring:theme code="importExport.css"/>" type="text/css" media="screen,print"/>
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/<spring:theme code="manageTenants.css"/>" type="text/css" media="screen,print"/>
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/<spring:theme code="pagination.css"/>" type="text/css" media="screen,print"/>
+
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/<spring:theme code="dashboard/designer.css"/>" type="text/css" media="screen,print"/>
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/<spring:theme code="dashboard/viewer.css"/>" type="text/css" media="screen,print"/>
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/<spring:theme code="dashboard/canvas.css"/>" type="text/css" media="screen,print"/>
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/<spring:theme code="dashboard/toolbar.css"/>" type="text/css" media="screen,print"/>
+
         <link rel="stylesheet" href="${pageContext.request.contextPath}/<spring:theme code="overrides_custom.css"/>" type="text/css" media="screen"/>
         <link rel="stylesheet" href="${pageContext.request.contextPath}/scripts/bower_components/jquery-ui/themes/redmond/jquery-ui-1.10.4-custom.css" type="text/css" media="screen">
     </c:otherwise>

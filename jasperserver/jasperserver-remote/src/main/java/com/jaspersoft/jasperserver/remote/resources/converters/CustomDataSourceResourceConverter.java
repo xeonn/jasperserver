@@ -23,6 +23,7 @@ package com.jaspersoft.jasperserver.remote.resources.converters;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl.CustomReportDataSourceServiceFactory;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.util.CustomDataSourceDefinition;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceReference;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConversionOptions;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.CustomReportDataSource;
 import com.jaspersoft.jasperserver.dto.resources.ClientCustomDataSource;
 import com.jaspersoft.jasperserver.dto.resources.ClientProperty;
@@ -41,7 +42,7 @@ import java.util.Set;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: CustomDataSourceResourceConverter.java 53873 2015-04-07 18:59:44Z mchan $
+ * @version $Id: CustomDataSourceResourceConverter.java 58870 2015-10-27 22:30:55Z esytnik $
  */
 @Service
 public class CustomDataSourceResourceConverter extends ResourceConverterImpl<CustomReportDataSource, ClientCustomDataSource> {

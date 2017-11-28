@@ -20,6 +20,28 @@
  */
 package com.jaspersoft.jasperserver.api.engine.scheduling.hibernate;
 
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hibernate.criterion.DetachedCriteria;
+import org.hibernate.criterion.Disjunction;
+import org.hibernate.criterion.Restrictions;
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.orm.hibernate3.HibernateTemplate;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
 import com.jaspersoft.jasperserver.api.engine.common.user.UserPersistenceHandler;
 import com.jaspersoft.jasperserver.api.engine.scheduling.ReportJobsInternalService;
@@ -46,40 +68,31 @@ import com.jaspersoft.jasperserver.api.engine.scheduling.service.ReportJobRuntim
 import com.jaspersoft.jasperserver.api.engine.scheduling.service.ReportJobsPersistenceService;
 import com.jaspersoft.jasperserver.api.engine.scheduling.service.TriggerTypeMismatchException;
 import com.jaspersoft.jasperserver.api.metadata.common.service.impl.HibernateDaoImpl;
+import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.HibernateRepositoryService;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.impl.hibernate.RepoUser;
 import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributeService;
 import com.jaspersoft.jasperserver.api.metadata.user.service.TenantService;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.hibernate.criterion.DetachedCriteria;
-import org.hibernate.criterion.Disjunction;
-import org.hibernate.criterion.Restrictions;
-import org.springframework.orm.hibernate3.HibernateTemplate;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
+import org.hibernate.criterion.MatchMode;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: HibernateReportJobsPersistenceService.java 51947 2014-12-11 14:38:38Z ogavavka $
+ * @version $Id: HibernateReportJobsPersistenceService.java 58870 2015-10-27 22:30:55Z esytnik $
  */
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 public class HibernateReportJobsPersistenceService extends HibernateDaoImpl
-	implements ReportJobsPersistenceService, ReportJobsInternalService {
+	implements ReportJobsPersistenceService, ReportJobsInternalService, ApplicationContextAware {
 	
 	protected static final Log log = LogFactory.getLog(HibernateReportJobsPersistenceService.class);
 
 	private UserPersistenceHandler userHandler;
 
+	private String referenceResolverBean;
+
+	private HibernateRepositoryService referenceResolver;
+
     private ProfileAttributeService profileAttributeService;
+
+	private ApplicationContext appContext;
 
 	public HibernateReportJobsPersistenceService() {
 		super();
@@ -101,6 +114,28 @@ public class HibernateReportJobsPersistenceService extends HibernateDaoImpl
         this.profileAttributeService = profileAttributeService;
     }
 
+	public String getReferenceResolverBean() {
+		return referenceResolverBean;
+	}
+
+	public void setReferenceResolverBean(String referenceResolverBean) {
+		this.referenceResolverBean = referenceResolverBean;
+	}
+
+    /*
+     * lazy lookup of repository bean
+     */
+    public HibernateRepositoryService getReferenceResolver() {
+    	if (referenceResolver == null && appContext != null) {
+    		referenceResolver = (HibernateRepositoryService) appContext.getBean(referenceResolverBean);
+    	}
+		return referenceResolver;
+	}
+
+    public void setReferenceResolver(HibernateRepositoryService referenceResolver) {
+		this.referenceResolver = referenceResolver;
+	}
+
     @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
 	public ReportJob saveJob(ExecutionContext context, final ReportJob job) {
 		return saveJob(context, job, true);
@@ -109,6 +144,7 @@ public class HibernateReportJobsPersistenceService extends HibernateDaoImpl
     @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
 	public ReportJob saveJob(final ExecutionContext context, final ReportJob job, final boolean setContextUsername) {
 		return (ReportJob) executeWriteCallback(new DaoCallback() {
+
 			public Object execute() {
 				HibernateTemplate hibernateTemplate = getHibernateTemplate();
 				
@@ -121,7 +157,7 @@ public class HibernateReportJobsPersistenceService extends HibernateDaoImpl
 				}
 				persistentJob.setOwner(owner);
                 ArrayList unusedEntities = new ArrayList();
-				persistentJob.copyFrom(job, hibernateTemplate, unusedEntities, getProfileAttributeService(), context);
+				persistentJob.copyFrom(job, hibernateTemplate, unusedEntities, getProfileAttributeService(), getReferenceResolver(), context);
 				persistentJob.cascadeSave(hibernateTemplate);
 				hibernateTemplate.save(persistentJob);
                 hibernateTemplate.deleteAll(unusedEntities);
@@ -145,7 +181,7 @@ public class HibernateReportJobsPersistenceService extends HibernateDaoImpl
 				HibernateTemplate hibernateTemplate = getHibernateTemplate();
 				PersistentReportJob persistentJob = findJob(job.getId(), true);
                 ArrayList unusedEntities = new ArrayList();
-				persistentJob.copyFrom(job, hibernateTemplate, unusedEntities, getProfileAttributeService(), context);
+				persistentJob.copyFrom(job, hibernateTemplate, unusedEntities, getProfileAttributeService(), getReferenceResolver(), context);
 				
 				persistentJob.cascadeSave(hibernateTemplate);
 				hibernateTemplate.update(persistentJob);
@@ -509,7 +545,10 @@ public class HibernateReportJobsPersistenceService extends HibernateDaoImpl
         // REPORT JOB (MAIN CLASS)
         if (criteriaReportJob.isBaseOutputFileNameModified()) addLikeRestriction(crit, "baseOutputFilename", criteriaReportJob.getBaseOutputFilename());
         if (criteriaReportJob.isCreationDateModified() && criteriaReportJob.getCreationDate() != null) requireDetailSearch = true;
-        if (criteriaReportJob.isLabelModified()) addLikeRestriction(crit, "label", criteriaReportJob.getLabel());
+        if (criteriaReportJob.isLabelModified()){
+        	crit.createAlias("scheduledResource",  "scheduledResource");
+        	addLikeRestriction(crit, new String[]{"label", "description", "scheduledResource.label"}, criteriaReportJob.getLabel());
+        }
         if (criteriaReportJob.isDescriptionModified()) addLikeRestriction(crit, "description", criteriaReportJob.getDescription());
         if (criteriaReportJob.isOutputLocaleModified()) addEqualRestriction(crit, "outputLocale", criteriaReportJob.getOutputLocale());
         // USER REPO
@@ -528,7 +567,7 @@ public class HibernateReportJobsPersistenceService extends HibernateDaoImpl
         if (criteriaReportJob.isSourceModified() && criteriaReportJob.getSourceModel() != null) {
            ReportJobSourceModel des = criteriaReportJob.getSourceModel();
            if (des.isParametersMapModified()) addEqualRestriction(crit, "source.parametersMap", des.getParametersMap());
-           if (des.isReportUnitURIModified()) addLikeRestriction(crit, "source.reportUnitURI", des.getReportUnitURI());
+           if (des.isReportUnitURIModified()) addEqualRestriction(crit, "source.reportUnitURI", des.getReportUnitURI());
         }
         // REPORTJOBREPOSITORYDESTINATION
         if (criteriaReportJob.isContentRespositoryDestinationModified() && criteriaReportJob.getContentRepositoryDestinationModel() != null) {
@@ -600,9 +639,30 @@ public class HibernateReportJobsPersistenceService extends HibernateDaoImpl
     }
 
     private void addLikeRestriction(DetachedCriteria crit, String propertyName, Object value) {
-        if (value != null) crit.add(Restrictions.eq(propertyName, value));
+        if (value != null) {
+            if (value instanceof String) {
+                crit.add(Restrictions.ilike(propertyName, (String) value, MatchMode.ANYWHERE));
+            } else {
+                crit.add(Restrictions.ilike(propertyName, value));
+            }
+         }
     }
 
+    private void addLikeRestriction(DetachedCriteria crit, String[] propertyName, Object value) {
+        if (value != null && propertyName!=null && propertyName.length>0) {
+        	Disjunction condition = Restrictions.disjunction();
+        	for(String property: propertyName){
+	            if (value instanceof String) {
+	                condition.add(Restrictions.ilike(property, (String) value, MatchMode.ANYWHERE));
+	            } else {
+	                condition.add(Restrictions.ilike(property, value));
+	            }
+        	}
+        	crit.add(condition);
+        }
+    }
+    
+    
     private boolean detailCriteriaMatch(PersistentReportJob reportJob, ReportJobModel jobModel, ExecutionContext context) {
         // report job output format
         if ((jobModel.isOutputFormatsModified() && jobModel.getOutputFormatsSet() != null) && (!jobModel.getOutputFormatsSet().isEmpty())) {
@@ -872,9 +932,9 @@ public class HibernateReportJobsPersistenceService extends HibernateDaoImpl
     }
 
 
-  private void p(String s) {
-    System.out.println(this.getClass().getName()+" - ");
+  @Override
+  public void setApplicationContext(ApplicationContext appContext) throws BeansException {
+          this.appContext = appContext;
   }
-
 
 }

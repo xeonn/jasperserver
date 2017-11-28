@@ -25,7 +25,8 @@
  */
 
 /**
- * Model extended from ScalableListModel which allows to work with selection.
+ * @class BaseListWithSelectionModel
+ * @classdesc Model extended from ScalableListModel which allows to work with selection.
  * Base class for other selection implementations
  *
  * Model API (in addition to ScalableListModel API):
@@ -53,11 +54,10 @@ define(function (require) {
     var _ = require("underscore"),
         ScalableListModel = require("common/component/list/model/ScalableListModel");
 
-    var BaseListWithSelectionModel = ScalableListModel.extend({
+    var BaseListWithSelectionModel = ScalableListModel.extend(
+        /** @lends BaseListWithSelectionModel.prototype */
+        {
 
-        /*
-            Main init function
-         */
         initialize: function(options) {
             ScalableListModel.prototype.initialize.call(this, options);
 

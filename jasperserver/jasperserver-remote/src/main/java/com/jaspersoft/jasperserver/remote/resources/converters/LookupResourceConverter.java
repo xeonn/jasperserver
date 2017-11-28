@@ -21,7 +21,8 @@
 package com.jaspersoft.jasperserver.remote.resources.converters;
 
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceLookup;
-import com.jaspersoft.jasperserver.dto.resources.ClientResource;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConversionOptions;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConverter;
 import com.jaspersoft.jasperserver.dto.resources.ClientResourceLookup;
 import com.jaspersoft.jasperserver.remote.exception.IllegalParameterValueException;
 import com.jaspersoft.jasperserver.search.common.ResourceDetails;
@@ -34,7 +35,7 @@ import javax.annotation.Resource;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: LookupResourceConverter.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: LookupResourceConverter.java 58870 2015-10-27 22:30:55Z esytnik $
  */
 @Service
 public class LookupResourceConverter extends ResourceConverterImpl<ResourceLookup, ClientResourceLookup> {

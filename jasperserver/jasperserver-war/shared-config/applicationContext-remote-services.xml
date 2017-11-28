@@ -184,10 +184,39 @@
         <value>jdbcQueryDataSource</value>
         <value>cassandraQueryDataSource</value>
         <value>JsonSeriesDataSource</value>
+        <value>HiveDataSource</value> <!-- Deprecated.  Please use Hive/ Impala JDBC drivers instead -->
     </util:set>
 
     <bean name="waitForFinalJasperPrintMs" class="java.lang.Integer">
         <constructor-arg type="java.lang.String" value="100"/>
+    </bean>
+
+    <bean id="importExportTaskRemoverJob" class="com.jaspersoft.jasperserver.api.engine.scheduling.quartz.JSMethodInvokingJobDetailFactoryBean">
+        <property name="targetObject" ref="importExportTaskRemover"/>
+        <property name="targetMethod" value="call"/>
+        <property name="scheduler" ref="quartzScheduler"/>
+    </bean>
+
+
+    <bean id="importExportTaskRemoverTrigger" class="com.jaspersoft.jasperserver.api.engine.scheduling.quartz.JSSimpleTriggerBean">
+        <property name="jobDetail" ref="importExportTaskRemoverJob"/>
+        <!-- run on startup just after 10 sec -->
+        <property name="startDelay" value="10000"/>
+        <property name="repeatInterval" value="86400000"/>
+        <!-- once a week -->
+        <!--<property name="repeatInterval" value="604800000"/>-->
+        <!-- once a day --><!--
+        <property name="repeatInterval" value="86400000"/> -->
+        <!-- once every hour --><!--
+        <property name="repeatInterval" value="3600000"/> -->
+        <!-- once a minute --><!--
+        <property name="repeatInterval" value="60000"/> -->
+        <!-- once a second --><!--
+        <property name="repeatInterval" value="1000"/> -->
+    </bean>
+
+    <bean id="importExportTaskRemover" class="com.jaspersoft.jasperserver.remote.services.async.ImportExportTaskRemover">
+        <property name="expirationInterval" value="86400000"/>
     </bean>
 
 </beans>

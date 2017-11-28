@@ -81,6 +81,7 @@ define(function (require, exports, module) {
                 'inherit': true,
                 'inheritable': true,
                 'left': [this, this._onLeft, null],
+                'mousedown': [stdnav, stdnav.basicMouseDown],
                 'right': [this, this._onRight, null],
                 'up': [this, this._onUp, null],
                 'superfocusin': [stdnav, stdnav.basicSuperfocusIn, {
@@ -178,7 +179,7 @@ define(function (require, exports, module) {
             }
         },
 
-        // THIS FUNCTION MUST NOT WRAP - IT IS USED IN INTERNAL SEARCH LOGIC!    
+        // THIS FUNCTION MUST NOT WRAP - IT IS USED IN INTERNAL SEARCH LOGIC!
         _getPreviousSection: function (element) {
             var thisSection = $(element).closest('thead,tbody,tfoot');
             var prevSection;
@@ -202,7 +203,7 @@ define(function (require, exports, module) {
             return undefined;
         },
 
-        // THIS FUNCTION MUST NOT WRAP - IT IS USED IN INTERNAL SEARCH LOGIC!    
+        // THIS FUNCTION MUST NOT WRAP - IT IS USED IN INTERNAL SEARCH LOGIC!
         _getNextSection: function (element) {
             var thisSection = $(element).closest('thead,tbody,tfoot');
             var nextSection;
@@ -227,7 +228,7 @@ define(function (require, exports, module) {
         },
 
         // Superfocus adjustment callback.  Given an element somewhere within a
-        // within a table, identify the TABLE element that should become the 
+        // within a table, identify the TABLE element that should become the
         // superfocus.
         _fixSuperfocus: function (element) {
             var newSuperfocus;
@@ -328,8 +329,8 @@ define(function (require, exports, module) {
                 break;
 
             default:
-                // Shouldn't happen, but if it does, try
-                newFocus = element;
+                // This can happen if the data cells contains SPANs, etc.
+                newFocus = this._fixFocus($(element).closest('td,th,table'));
             }
             return newFocus;
         },

@@ -21,15 +21,18 @@
 
 package com.jaspersoft.jasperserver.export;
 
+import com.jaspersoft.jasperserver.api.metadata.user.domain.Tenant;
 import com.jaspersoft.jasperserver.export.io.ExportOutput;
+
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ExportTaskImpl.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: ExportTaskImpl.java 58265 2015-10-05 16:13:56Z vzavadsk $
  */
 public class ExportTaskImpl extends BaseExportImportTask implements ExportTask {
 
 	private ExportOutput output;
+	private Tenant rootTenant;
 
 	public ExportOutput getOutput() {
 		return output;
@@ -39,4 +42,11 @@ public class ExportTaskImpl extends BaseExportImportTask implements ExportTask {
 		this.output = output;
 	}
 
+	public Tenant getRootTenant() {
+		return rootTenant;
+	}
+
+	public void setRootTenant(Tenant rootTenant) {
+		this.rootTenant = rootTenant;
+	}
 }

@@ -22,7 +22,7 @@
 
 /**
  * @author: Igor Nesterenko
- * @version: $Id: request.js 270 2014-10-13 19:58:03Z agodovanets $
+ * @version: $Id: request.js 1605 2015-09-23 17:55:32Z inestere $
  */
 
 define(function (require) {
@@ -30,22 +30,15 @@ define(function (require) {
 
     var $ = require("jquery"),
         _ = require("underscore"),
-        configs = require("jrs.configs"),
-        requestSettings = require("common/config/requestSettings"),
-        xdm = require("common/transport/xdmRequest"),
-        xhr = require("common/transport/xhrRequest"),
-        requestFunc;
+        requestSettings = require("requestSettings");
 
     return function(){
-        if (!requestFunc) {
-            requestFunc =  configs.isXdm ? xdm : xhr;
-        }
         var mergedOptions =  _.extend({}, requestSettings, arguments[0]);
 
         if (requestSettings.headers && arguments[0].headers){
             mergedOptions.headers = _.extend({}, requestSettings.headers, arguments[0].headers);
         }
         arguments[0] = mergedOptions;
-        return requestFunc.apply($, arguments);
+        return $.ajax.apply($, arguments);
     };
 });

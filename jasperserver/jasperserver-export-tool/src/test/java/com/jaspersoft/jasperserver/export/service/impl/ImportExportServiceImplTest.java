@@ -22,12 +22,11 @@
 package com.jaspersoft.jasperserver.export.service.impl;
 
 import com.jaspersoft.jasperserver.api.common.util.spring.ApplicationContextProvider;
+import com.jaspersoft.jasperserver.dto.common.WarningDescriptor;
 import com.jaspersoft.jasperserver.export.Exporter;
 import com.jaspersoft.jasperserver.export.Importer;
 import com.jaspersoft.jasperserver.export.ProfileAttributeServiceMock;
 import com.jaspersoft.jasperserver.export.UserAuthorityServiceMock;
-import com.jaspersoft.jasperserver.export.service.ImportFailedException;
-import org.springframework.context.MessageSource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.Test;
@@ -36,7 +35,16 @@ import javax.annotation.Resource;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -61,7 +69,10 @@ public class ImportExportServiceImplTest extends AbstractTestNGSpringContextTest
     @Resource(name = "userAuthorityService")
     UserAuthorityServiceMock authorityService;
 
-	//needed for import/export beans using password decryption;
+    @Resource(name = "importExportPrivilegeRoles")
+    protected Set<String> importExportPrivilegeRoles;
+
+    //needed for import/export beans using password decryption;
 	// without this resource init, UserBean's importExportCipher is
 	// not initialized correctly because StaticApplicationContext.getApplicationContext()
 	// is null.
@@ -96,6 +107,7 @@ public class ImportExportServiceImplTest extends AbstractTestNGSpringContextTest
     @Test(threadPoolSize = 10, invocationCount = 200, enabled = true)
     public void testExportRoles() throws Exception {
         Random r = new Random(new Date().getTime());
+        StringBuilder builder = new StringBuilder();
 
         List<String> expected = new ArrayList<String>();
         if (r.nextBoolean()) expected.add("ROLE_USER");
@@ -106,7 +118,7 @@ public class ImportExportServiceImplTest extends AbstractTestNGSpringContextTest
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
 //        try {
-            service.doExport(outputStream, null, null, null, expected, null, enUsLocale);
+            service.doExport(outputStream, null, null, null, expected, null, null, null, enUsLocale, new ArrayList<WarningDescriptor>());
 //        }
 //        catch (Exception e){
 //            fail(e.getMessage());
@@ -155,7 +167,7 @@ public class ImportExportServiceImplTest extends AbstractTestNGSpringContextTest
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
         try {
-            service.doExport(outputStream, params, null, null, expected, null, enUsLocale);
+            service.doExport(outputStream, params, null, null, expected, null, null, null, enUsLocale, new ArrayList<WarningDescriptor>());
         }
         catch (Exception e){
             fail(e.getMessage());
@@ -199,7 +211,7 @@ public class ImportExportServiceImplTest extends AbstractTestNGSpringContextTest
         assertNull(profileAttributeService.getProfileAttribute(null,null));
 
         try {
-            service.doImport(stream,null, enUsLocale);
+            service.doImport(stream,null, null, null, enUsLocale, new ArrayList<WarningDescriptor>());
         } catch (Exception e) {
             fail(e.getMessage());
         }
@@ -217,7 +229,7 @@ public class ImportExportServiceImplTest extends AbstractTestNGSpringContextTest
         String key = "exception.remote.import.failed.content.error";
         Locale jaJpLocale = new Locale("ja");
         try {
-            service.doImport(stream, null, jaJpLocale);
+            service.doImport(stream, null, null, null, jaJpLocale, new ArrayList<WarningDescriptor>());
         } catch (Exception e) {
             assertEquals(e.getMessage(), "インポートに失敗しました。理由：指定された zip ファイルが、有効な JasperReports Server エクスポートファイルではありません。");
         }
@@ -230,9 +242,9 @@ public class ImportExportServiceImplTest extends AbstractTestNGSpringContextTest
         String key = "exception.remote.import.failed.content.error";
         Locale esEsLocale = new Locale("es");
         try {
-            service.doImport(stream, null, esEsLocale);
+            service.doImport(stream, null, null, null, esEsLocale, new ArrayList<WarningDescriptor>());
         } catch (Exception e) {
-            assertEquals(e.getLocalizedMessage(), "Error de importación. Motivo: el archivo zip proporcionado no es un archivo de exportación de JasperReports Server válido.");
+            assertEquals(e.getLocalizedMessage(), "Error en la importación. Motivo: el archivo zip proporcionado no es un archivo de exportación de JasperReports Server válido.");
         }
     }
 
@@ -243,7 +255,7 @@ public class ImportExportServiceImplTest extends AbstractTestNGSpringContextTest
         String key = "exception.remote.import.failed.zip.error";
         Locale esEsLocale = new Locale("de");
         try {
-            service.doImport(stream, null, esEsLocale);
+            service.doImport(stream, null, null, null, esEsLocale, new ArrayList<WarningDescriptor>());
         } catch (Exception e) {
             assertEquals(e.getMessage(), "Der Import ist fehlgeschlagen. Grund: Die ZIP-Datei kann nicht gelesen werden.");
         }
@@ -256,7 +268,7 @@ public class ImportExportServiceImplTest extends AbstractTestNGSpringContextTest
         String key = "exception.remote.import.failed.zip.error";
         Locale esEsLocale = new Locale("zh", "CN");
         try {
-            service.doImport(stream, null, esEsLocale);
+            service.doImport(stream, null, null, null, esEsLocale, new ArrayList<WarningDescriptor>());
         } catch (Exception e) {
             assertEquals(e.getMessage(), "导入失败。原因: 无法读取 zip 文件。");
         }

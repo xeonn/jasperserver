@@ -20,7 +20,7 @@
  */
 package com.jaspersoft.jasperserver.dto.authority.hypermedia;
 
-import com.jaspersoft.jasperserver.dto.authority.ClientUserAttribute;
+import com.jaspersoft.jasperserver.dto.authority.ClientAttribute;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -39,9 +39,9 @@ public class HypermediaAttributesListWrapper {
 
     public HypermediaAttributesListWrapper(){}
 
-    public HypermediaAttributesListWrapper(List<? extends ClientUserAttribute> attributes){
+    public HypermediaAttributesListWrapper(List<? extends ClientAttribute> attributes){
         profileAttributes = new ArrayList<HypermediaAttribute>(attributes.size());
-        for (ClientUserAttribute client : attributes) {
+        for (ClientAttribute client : attributes) {
             if (client instanceof HypermediaAttribute) {
                 profileAttributes.add((HypermediaAttribute) client);
             } else {
@@ -51,10 +51,10 @@ public class HypermediaAttributesListWrapper {
     }
 
     public HypermediaAttributesListWrapper(HypermediaAttributesListWrapper other) {
-        final List<HypermediaAttribute> clientUserAttributes = other.getProfileAttributes();
-        if(clientUserAttributes != null){
+        final List<HypermediaAttribute> clientAttributes = other.getProfileAttributes();
+        if(clientAttributes != null){
             profileAttributes = new ArrayList<HypermediaAttribute>(other.getProfileAttributes().size());
-            for(ClientUserAttribute attribute : clientUserAttributes){
+            for(ClientAttribute attribute : clientAttributes){
                 profileAttributes.add(new HypermediaAttribute(attribute));
             }
         }

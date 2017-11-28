@@ -20,12 +20,14 @@
 */
 package com.jaspersoft.jasperserver.remote.connection;
 
+import com.jaspersoft.jasperserver.api.common.error.handling.SecureExceptionHandler;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl.CustomReportDataSourceServiceFactory;
 import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.CustomReportDataSource;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.client.CustomReportDataSourceImpl;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.service.CustomReportDataSourceService;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.service.ReportDataSourceService;
+import com.jaspersoft.jasperserver.dto.common.ErrorDescriptor;
 import com.jaspersoft.jasperserver.dto.resources.ClientCustomDataSource;
 import com.jaspersoft.jasperserver.dto.resources.ClientProperty;
 import com.jaspersoft.jasperserver.remote.resources.converters.CustomDataSourceResourceConverter;
@@ -45,6 +47,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.isA;
 import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -76,6 +79,9 @@ public class CustomDataSourceConnectionStrategyTest {
     private RepositoryService repository;
     @Mock
     private CustomReportDataSourceService customReportDataSourceService;
+    @Mock
+    private SecureExceptionHandler secureExceptionHandlerMock;
+
     private ClientCustomDataSource customDataSource;
     private CustomReportDataSource serverCustomReportDataSource;
 
@@ -94,6 +100,7 @@ public class CustomDataSourceConnectionStrategyTest {
         when(customDataSourceResourceConverter.toServer(same(customDataSource), any(ToServerConversionOptions.class)))
                 .thenReturn(serverCustomReportDataSource);
         when(customDataSourceFactory.createService(serverCustomReportDataSource)).thenReturn(customReportDataSourceService);
+        when(secureExceptionHandlerMock.handleException(isA(Throwable.class), isA(ErrorDescriptor.class))).thenReturn(new ErrorDescriptor().setMessage("test"));
     }
 
     @Test
@@ -115,7 +122,7 @@ public class CustomDataSourceConnectionStrategyTest {
     }
 
     @Test
-    public void createConnection_noPasswordProperty_success() throws JRException {
+    public void createConnection_noPasswordProperty_success() throws Exception {
         doReturn(true).when(customReportDataSourceService).testConnection();
         final ClientCustomDataSource connection = strategy.createConnection(customDataSource, null);
         assertSame(connection, customDataSource);
@@ -130,21 +137,21 @@ public class CustomDataSourceConnectionStrategyTest {
     }
 
     @Test(expectedExceptions = ConnectionFailedException.class)
-    public void createConnection_testConnectionReturnsFalse_failure() throws JRException {
+    public void createConnection_testConnectionReturnsFalse_failure() throws Exception {
         doReturn(false).when(customReportDataSourceService).testConnection();
         final ClientCustomDataSource connection = strategy.createConnection(customDataSource, null);
         assertSame(connection, customDataSource);
     }
 
     @Test(expectedExceptions = ConnectionFailedException.class)
-    public void createConnection_testConnectionThrowsException_failure() throws JRException {
+    public void createConnection_testConnectionThrowsException_failure() throws Exception {
         doThrow(new RuntimeException()).when(customReportDataSourceService).testConnection();
         final ClientCustomDataSource connection = strategy.createConnection(customDataSource, null);
         assertSame(connection, customDataSource);
     }
 
     @Test
-    public void createConnection_passwordIsNull_success() throws JRException {
+    public void createConnection_passwordIsNull_success() throws Exception {
         doReturn(true).when(customReportDataSourceService).testConnection();
         serverCustomReportDataSource.getPropertyMap().put("password", null);
         final CustomReportDataSourceImpl dsFromRepository = new CustomReportDataSourceImpl();

@@ -21,6 +21,7 @@
 package com.jaspersoft.jasperserver.remote.resources.converters;
 
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceReference;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConversionOptions;
 import com.jaspersoft.jasperserver.api.metadata.olap.domain.OlapUnit;
 import com.jaspersoft.jasperserver.api.metadata.olap.domain.client.OlapUnitImpl;
 import com.jaspersoft.jasperserver.dto.resources.ClientOlapUnit;

@@ -21,8 +21,8 @@
 package com.jaspersoft.jasperserver.api.metadata.olap.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jaspersoft.jasperserver.dto.common.ErrorDescriptor;
 
-import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -56,11 +56,13 @@ public class XMLATestResult {
             XMLATestCode.BAD_CREDENTIALS));
 
 
-    public XMLATestResult(XMLATestCode status, String message, String[] options, Exception e) {
+    public XMLATestResult(XMLATestCode status, String[] options, ErrorDescriptor ed) {
 		this.status = status;
 		this.options = options;
 
-        if (e != null) {
+        if (ed != null) {
+            String message = ed.getMessage();
+
             // In some cases the message contains the plain password.
             // Obfuscate the password if possible, otherwise - set the XMLATestCode name. Bug #34979.
             Matcher m = Pattern.compile(regexUri).matcher(message);
@@ -71,20 +73,18 @@ public class XMLATestResult {
             this.message = obfuscatePassword ? m.replaceFirst("$1********$2") : message;
 
             // set the stack trace
-            StringWriter result = new StringWriter();
-            PrintWriter trace = new PrintWriter(result);
-            e.printStackTrace(trace);
-
-            this.details = result.toString();
+            final String[] edParams = ed.getParameters();
+            if (edParams != null && edParams.length > 0)
+                this.details = edParams[0];
         }
 	}
 
-	public XMLATestResult(XMLATestCode status, String message, Exception e) {
-		this(status,message,null,e);
+	public XMLATestResult(XMLATestCode status, ErrorDescriptor errorDescriptor) {
+		this(status,null,errorDescriptor);
 	}
 
 	public XMLATestResult(XMLATestCode status) {
-		this(status,"",null,null);
+		this(status,null,null);
 	}
 
     public String buildJson() throws Exception {
@@ -120,5 +120,4 @@ public class XMLATestResult {
 	public void setOptions(String[] options) {
 		this.options = options;
 	}
-
 }

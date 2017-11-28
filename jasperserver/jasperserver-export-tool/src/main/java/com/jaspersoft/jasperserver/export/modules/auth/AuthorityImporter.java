@@ -21,15 +21,12 @@
 
 package com.jaspersoft.jasperserver.export.modules.auth;
 
-import com.jaspersoft.jasperserver.api.metadata.user.domain.ProfileAttribute;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.Role;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
-import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributeService;
 import com.jaspersoft.jasperserver.export.modules.BaseImporterModule;
 import com.jaspersoft.jasperserver.export.modules.ImporterModuleContext;
 import com.jaspersoft.jasperserver.export.modules.auth.beans.RoleBean;
 import com.jaspersoft.jasperserver.export.modules.auth.beans.UserBean;
-import com.jaspersoft.jasperserver.export.modules.common.ProfileAttributeBean;
 import com.jaspersoft.jasperserver.export.modules.common.TenantQualifiedName;
 import org.dom4j.Element;
 
@@ -40,7 +37,7 @@ import java.util.Map;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: AuthorityImporter.java 54590 2015-04-22 17:55:42Z vzavadsk $
+ * @version $Id: AuthorityImporter.java 58265 2015-10-05 16:13:56Z vzavadsk $
  */
 public class AuthorityImporter extends BaseImporterModule {
 	
@@ -51,7 +48,7 @@ public class AuthorityImporter extends BaseImporterModule {
 	private boolean update;
     private boolean updateCoreUsers;
 
-	protected static class ImportHandler implements AuthorityImportHandler {
+	protected class ImportHandler implements AuthorityImportHandler {
 
 		private final Map roles;
 		
@@ -69,6 +66,11 @@ public class AuthorityImporter extends BaseImporterModule {
 		public Role resolveRole(TenantQualifiedName rolename) {
 			Role role = (Role) roles.get(rolename);
 			return role;
+		}
+
+		@Override
+		public ImporterModuleContext getImportContext() {
+			return importContext;
 		}
 	}
 	
@@ -104,23 +106,24 @@ public class AuthorityImporter extends BaseImporterModule {
 		RoleBean roleBean = (RoleBean) deserialize(
 				configuration.getRolesDirName(), file, 
 				configuration.getSerializer());
-		if (alreadyExists(roleBean)) {
-			commandOut.warn("Role " + roleBean.getRoleName() + " already exists, skipping.");
+
+		Role role = createRole(roleBean);
+		if (alreadyExists(role)) {
+			commandOut.warn("Role " + role.getRoleName() + " already exists, skipping.");
 		} else {
-			Role role = createRole(roleBean);
 			saveRole(role);
 			
 			commandOut.info("Created role " + role.getRoleName());
 		}
 	}
 	
-	protected boolean alreadyExists(RoleBean roleBean) {
-		return configuration.getAuthorityService().getRole(executionContext, roleBean.getRoleName()) != null;
+	protected boolean alreadyExists(Role role) {
+		return configuration.getAuthorityService().getRole(executionContext, role.getRoleName()) != null;
 	}
 
 	protected Role createRole(RoleBean roleBean) {
 		Role role = configuration.getAuthorityService().newRole(executionContext);
-		roleBean.copyTo(role);
+		roleBean.copyTo(role, importContext);
 		return role;
 	}
 
@@ -146,32 +149,31 @@ public class AuthorityImporter extends BaseImporterModule {
 		UserBean userBean = (UserBean) deserialize(configuration.getUsersDirName(), file, 
 				configuration.getSerializer());
 
-		if (!alreadyExists(userBean)) {
-            User user = createUser(userBean);
+		User user = createUser(userBean);
+		if (!alreadyExists(user)) {
             saveUser(user);
-            saveUserAttributes(user, userBean.getAttributes());
+            saveProfileAttributes(configuration.getAttributeService(), user, userBean.getAttributes());
 
-            commandOut.info("Created user " + userBean.getUsername());
-        } else if (update || (updateCoreUsers && isCoreUser(userBean))) {
-			User user = createUser(userBean);
-			updateUser(userBean.getUsername(),user);
-			saveUserAttributes(user, userBean.getAttributes());
+            commandOut.info("Created user " + user.getUsername());
+        } else if (update || (updateCoreUsers && isCoreUser(user))) {
+			updateUser(user.getUsername(),user);
+			saveProfileAttributes(configuration.getAttributeService(), user, userBean.getAttributes());
 
-            commandOut.info("Updated user " + userBean.getUsername());
+            commandOut.info("Updated user " + user.getUsername());
 
         } else {
-            commandOut.warn("User " + userBean.getUsername() + " already exists, skipping.");
+            commandOut.warn("User " + user.getUsername() + " already exists, skipping.");
 		}
 	}
 
-    protected boolean isCoreUser(UserBean userBean) {
-        if (userBean.getUsername().equals("jasperadmin")) return true;
+    protected boolean isCoreUser(User user) {
+        if (user.getUsername().equals("jasperadmin")) return true;
         return false;
     }
 
 
-	protected boolean alreadyExists(UserBean userBean) {
-		return configuration.getAuthorityService().getUser(executionContext, userBean.getUsername()) != null;
+	protected boolean alreadyExists(User user) {
+		return configuration.getAuthorityService().getUser(executionContext, user.getUsername()) != null;
 	}
 
 	protected User createUser(UserBean userBean) {
@@ -186,24 +188,6 @@ public class AuthorityImporter extends BaseImporterModule {
 	
 	protected void updateUser(String userName, User aUser) {
 		configuration.getAuthorityService().updateUser(executionContext, userName, aUser);
-	}
-
-	protected void saveUserAttributes(User user, ProfileAttributeBean[] attributes) {
-		if (attributes != null && attributes.length > 0) {
-			for (ProfileAttributeBean profileAttributeBean : attributes) {
-				saveUserAttribute(user, profileAttributeBean);
-			}
-		}
-	}
-
-	protected void saveUserAttribute(User user,
-			ProfileAttributeBean attributeBean) {
-		ProfileAttributeService attributeService = configuration.getAttributeService();
-		ProfileAttribute attribute = attributeService.newProfileAttribute(executionContext);
-		attribute.setPrincipal(user);
-		attributeBean.copyTo(attribute);
-		setPermissions(attribute, attributeBean.getPermissions(), false);
-		attributeService.putProfileAttribute(executionContext, attribute);
 	}
 
 	protected boolean getUpdateFlag() {

@@ -20,11 +20,13 @@
  */
 package com.jaspersoft.jasperserver.dto.common;
 
+import java.io.Serializable;
+
 /**
  * <p></p>
  *
  * @author yaroslav.kovalchyk
  * @version $Id$
  */
-public interface ResourceLocation {
+public interface ResourceLocation extends Serializable {
 }

@@ -26,6 +26,7 @@ import com.jaspersoft.jasperserver.api.metadata.common.domain.FileResource;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.client.ContentResourceImpl;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.client.FileResourceImpl;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConversionOptions;
 import com.jaspersoft.jasperserver.dto.resources.ClientFile;
 import com.jaspersoft.jasperserver.remote.exception.IllegalParameterValueException;
 import com.jaspersoft.jasperserver.remote.exception.MandatoryParameterNotFoundException;

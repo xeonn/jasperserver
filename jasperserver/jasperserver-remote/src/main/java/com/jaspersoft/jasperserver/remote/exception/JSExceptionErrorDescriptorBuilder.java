@@ -21,33 +21,41 @@
 package com.jaspersoft.jasperserver.remote.exception;
 
 import com.jaspersoft.jasperserver.api.JSException;
-import com.jaspersoft.jasperserver.remote.exception.xml.ErrorDescriptor;
+
+import com.jaspersoft.jasperserver.api.common.error.handling.SecureExceptionHandler;
+import com.jaspersoft.jasperserver.dto.common.ErrorDescriptor;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * <p></p>
  *
  * @author yaroslav.kovalchyk
- * @version $Id: JSExceptionErrorDescriptorBuilder.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: JSExceptionErrorDescriptorBuilder.java 57603 2015-09-15 17:20:48Z psavushc $
  */
 @Component
 public class JSExceptionErrorDescriptorBuilder implements ErrorDescriptorBuilder<JSException> {
     private static final String DUMMY_DEFAULT_MESSAGE = "dummyDefaultMessage";
     @Resource
     private MessageSource messageSource;
+    @Resource
+    private SecureExceptionHandler secureExceptionHandler;
+
     @Override
     public ErrorDescriptor build(JSException e) {
-        ErrorDescriptor errorDescriptor = new ErrorDescriptor(e.getCause() != null ? e.getCause() : e);
+		String errorCode = null;
         if(e.getMessage() != null && !DUMMY_DEFAULT_MESSAGE.equals(messageSource.getMessage(e.getMessage(),
                 new Object[]{}, DUMMY_DEFAULT_MESSAGE, Locale.getDefault()))){
-            // exception message is an message code in bundles. Let's use it as error code,
-            // but add common prefix "jrs.error." to identify the case
-            errorDescriptor.setErrorCode("jrs." + e.getMessage());
-        }
-        return errorDescriptor;
+			// exception message is an message code in bundles. Let's use it as error code,
+			// but add common prefix "jrs.error." to identify the case
+			errorCode = "jrs." + e.getMessage();
+		}
+
+		return secureExceptionHandler.handleException(e.getCause() != null ? e.getCause() : e, new ErrorDescriptor().setErrorCode(errorCode));
     }
 }

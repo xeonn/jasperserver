@@ -22,14 +22,11 @@
 
 /**
  * @author: Sergey Prilukin
- * @version: $Id: ScalableList.js 1160 2015-04-28 12:46:42Z spriluki $
+ * @version: $Id: ScalableList.js 1605 2015-09-23 17:55:32Z inestere $
  */
 
 /**
- * List component which supports view port
- *
- * Usage:
- *
+ * @example
  *    var list = new jaspersoft.components.ScalableList({
  *        el: <DOM element or it's jQuery wrapper which will be used to render list component>,
  *        * getData: <function to retrieve data> @see description in ScalableListModel,
@@ -44,6 +41,8 @@
  *    });
  *
  *    * - required items
+ *
+ * @description List component which extends ScalableList component and supports single and multi selection.
  *
  * ScalableList API:
  *      render                      - renders view. Rendering occurred immediately after
@@ -92,7 +91,8 @@ define(function (require) {
         Backbone = require("backbone"),
         _ = require("underscore"),
         ScalableListModel = require("common/component/list/model/ScalableListModel"),
-        defaultChunksTemplate = require("text!common/component/list/templates/viewPortChunksTemplate.htm");
+        defaultChunksTemplate = require("text!common/component/list/templates/viewPortChunksTemplate.htm"),
+        defaultItemsTemplate = require("text!common/component/list/templates/itemsTemplate.htm");
 
     // ListView constants with default values
 
@@ -137,9 +137,15 @@ define(function (require) {
         //Default list model,
         ListModel: ScalableListModel,
 
+        listItemSelector: "li",
+
         events: {
             "scroll": "onScroll",
             "touchmove": "onScroll"
+        },
+
+        attributes: {
+            "style": "overflow-y: auto; height: 100px"
         },
 
         /*
@@ -152,16 +158,14 @@ define(function (require) {
 
             this.model = options.model || new this.ListModel(options);
             this.chunksTemplate = _.template(options.chunksTemplate || defaultChunksTemplate);
-            this.itemsTemplate = _.template(options.itemsTemplate);
-            if (!this.itemsTemplate) {
-                throw "itemsTemplate is a required attribute. Please see doc for ScalableList.js component";
-            }
+            this.itemsTemplate = _.template(options.itemsTemplate || defaultItemsTemplate);
 
             this.defaultChunkHeight = this.chunkHeight = options.chunkHeight || DEFAULT_VIEW_PORT_CHUNK_HEIGHT;
             this.scrollTimeout = typeof options.scrollTimeout !== "undefined"? options.scrollTimeout : DEFAULT_SCROLL_TIMEOUT;
             this.manualScrollInterval = options.manualScrollInterval || DEFAULT_MANUAL_SCROLL_INTERVAL;
             this.lazy = options.lazy;
             this.defaultItemHeight = options.listItemHeight || DEFAULT_LIST_ITEM_HEIGHT;
+            this.listItemSelector = options.listItemSelector || this.listItemSelector;
 
             //Renders container
             this.render();
@@ -322,8 +326,7 @@ define(function (require) {
 
                 if (this.$firstViewChunk) {
                     //item height could be calculated only after it is present in DOM and visible
-                    //this.itemHeight = this.$firstViewChunk.find("li:first").height();
-                    this.itemHeight = this.$el.find("li:first").outerHeight(true);
+                    this.itemHeight = this.$el.find(this.listItemSelector + ":first").outerHeight(true);
 
                     if (!this.itemHeight || this.itemHeight <= MIN_ITEM_HEIGHT_TRESHOLD) {
                         //Ok, we still can not find height of one item, not a problem, use default value

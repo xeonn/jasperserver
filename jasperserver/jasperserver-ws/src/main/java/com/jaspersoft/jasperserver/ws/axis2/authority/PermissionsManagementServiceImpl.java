@@ -33,7 +33,7 @@ import com.jaspersoft.jasperserver.remote.common.CallTemplate;
 import com.jaspersoft.jasperserver.remote.common.RemoteServiceWrapperWithCheckedException;
 import com.jaspersoft.jasperserver.remote.exception.IllegalParameterValueException;
 import com.jaspersoft.jasperserver.remote.exception.RemoteException;
-import com.jaspersoft.jasperserver.remote.exception.xml.ErrorDescriptor;
+import com.jaspersoft.jasperserver.dto.common.ErrorDescriptor;
 import com.jaspersoft.jasperserver.remote.services.PermissionsService;
 import com.jaspersoft.jasperserver.ws.authority.WSObjectPermission;
 import com.jaspersoft.jasperserver.ws.axis2.util.RemoteServiceFromWsCallTemplate;
@@ -68,7 +68,7 @@ public class PermissionsManagementServiceImpl extends RemoteServiceWrapperWithCh
                     return permissionsService.putPermission(op);
                 } catch (AccessDeniedException ade) {
                     final String message = "The resource belongs to the organization which is not visible from the recipient's organization.";
-                    throw new IllegalParameterValueException(new ErrorDescriptor.Builder().setMessage(message).getErrorDescriptor());
+                    throw new IllegalParameterValueException(new ErrorDescriptor().setMessage(message));
                 }
 
             }

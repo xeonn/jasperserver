@@ -2,7 +2,7 @@ package com.jaspersoft.jasperserver.remote.services.impl.async;
 
 import com.jaspersoft.jasperserver.remote.exception.NoSuchTaskException;
 import com.jaspersoft.jasperserver.remote.services.async.BasicTasksManager;
-import com.jaspersoft.jasperserver.remote.services.async.StateDto;
+import com.jaspersoft.jasperserver.dto.importexport.State;
 import com.jaspersoft.jasperserver.remote.services.async.Task;
 import org.junit.Before;
 import org.junit.Test;
@@ -32,9 +32,9 @@ public class BasicTasksManagerTest {
     public void startTask_Normal(){
         MockObject<Task> task = new MockObject<Task>(Task.class, this);
         Task mock = task.getMock();
-        task.returns(new StateDto()).getState();
-        StateDto uuid = manager.startTask(mock);
-        task.assertInvoked().start();
+        task.returns(new State()).getState();
+        State uuid = manager.startTask(mock);
+        task.assertInvoked().start(manager.getExecutor());
         assertNotNull(uuid);
         assertEquals(mock.getState().getPhase(), Task.INPROGRESS);
     }
@@ -54,9 +54,9 @@ public class BasicTasksManagerTest {
         ConcurrentHashMap<String, Task> tasks = new ConcurrentHashMap<String, Task>();
         taskMock = (new MockObject<Task>(Task.class, this));
         taskMock.returns("1").getUniqueId();
-        StateDto stateDto = new StateDto();
-        stateDto.setPhase(Task.INPROGRESS);
-        taskMock.returns(stateDto).getState();
+        State state = new State();
+        state.setPhase(Task.INPROGRESS);
+        taskMock.returns(state).getState();
         task = taskMock.getMock();
         tasks.put(task.getUniqueId(), task);
         manager = new BasicTasksManager(tasks);

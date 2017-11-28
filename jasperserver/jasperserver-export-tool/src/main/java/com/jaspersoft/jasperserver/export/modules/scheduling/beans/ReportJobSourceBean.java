@@ -22,14 +22,16 @@ package com.jaspersoft.jasperserver.export.modules.scheduling.beans;
 
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
 import com.jaspersoft.jasperserver.api.engine.scheduling.domain.ReportJobSource;
+import com.jaspersoft.jasperserver.export.modules.ImporterModuleContext;
 import com.jaspersoft.jasperserver.export.modules.common.ReportParameterValueBean;
+import com.jaspersoft.jasperserver.export.modules.common.TenantStrHolderPattern;
 import com.jaspersoft.jasperserver.export.modules.scheduling.SchedulingModuleConfiguration;
 
 import java.util.Map;
 
 /**
  * @author tkavanagh
- * @version $Id: ReportJobSourceBean.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: ReportJobSourceBean.java 58265 2015-10-05 16:13:56Z vzavadsk $
  */
 public class ReportJobSourceBean {
 
@@ -51,9 +53,15 @@ public class ReportJobSourceBean {
 	}
 
 	public void copyTo(ReportJobSource dest, String newReportUri, 
-			SchedulingModuleConfiguration configuration, ExecutionContext context) {
+			SchedulingModuleConfiguration configuration, ExecutionContext context,
+			ImporterModuleContext importContext) {
 		dest.setReportUnitURI(newReportUri);
 		copyParametersMap(dest, newReportUri, configuration, context);
+
+		if (!importContext.getNewGeneratedTenantIds().isEmpty()) {
+			dest.setReportUnitURI(TenantStrHolderPattern.TENANT_FOLDER_URI
+					.replaceWithNewTenantIds(importContext.getNewGeneratedTenantIds(), dest.getReportUnitURI()));
+		}
 	}
 
 	protected void copyParametersMap(ReportJobSource dest, 

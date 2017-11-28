@@ -509,7 +509,29 @@
             <isset property="maven.jdbc.version" />
           </and>
           <then>
-            <property name="jdbcJar" value="${maven.jdbc.artifactId}-${maven.jdbc.version}.jar"/>
+              <if>
+                  <equals arg1="${maven.jdbc.groupId}" arg2="tibcosoftwareinc.jdbc" />
+                  <then>
+                      <if>
+                          <available type="dir" file="${importExportConfigPro}/lib"/>
+                          <then>
+                              <copy toDir="${currentDbDir}/jdbc/"  overwrite="true">
+                                  <fileset dir="${importExportConfigPro}/lib" includes="jasperreports-pro-*.jar"/>
+                              </copy>
+                          </then>
+                          <else>
+                              <copy file="${currentConf}/../../install_resources/extra-jars/jswlstc-1.0.jar"
+                                    tofile="${currentDbDir}/jdbc/jasperreports-pro-tc-1.0.jar"
+                                    overwrite="true"/>
+
+                          </else>
+                      </if>
+                      <property name="jdbcJar" value="*.jar"/>
+                  </then>
+                  <else>
+                      <property name="jdbcJar" value="${maven.jdbc.artifactId}-${maven.jdbc.version}.jar"/>
+                  </else>
+              </if>
           </then>
           <else>
             <property name="jdbcJar" value="*.jar"/>

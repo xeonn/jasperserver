@@ -22,6 +22,7 @@ package com.jaspersoft.jasperserver.remote.resources.converters;
 
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceLookup;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConverter;
 import com.jaspersoft.jasperserver.dto.resources.ClientResource;
 import com.jaspersoft.jasperserver.remote.exception.IllegalParameterValueException;
 import com.jaspersoft.jasperserver.remote.resources.ClientTypeHelper;
@@ -38,7 +39,7 @@ import java.util.Map;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: ResourceConverterProviderImpl.java 55164 2015-05-06 20:54:37Z mchan $
+ * @version $Id: ResourceConverterProviderImpl.java 58870 2015-10-27 22:30:55Z esytnik $
  */
 @Service("resourceConverterProvider")
 public class ResourceConverterProviderImpl implements ResourceConverterProvider {

@@ -22,9 +22,9 @@ package com.jaspersoft.jasperserver.war.cascade;
 
 /**
  * @author Anton Fomin
- * @version $Id: InputControlValidationException.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: InputControlValidationException.java 58870 2015-10-27 22:30:55Z esytnik $
  */
-public class InputControlValidationException extends Exception {
+public class InputControlValidationException extends RuntimeException {
 
     InputControlValidationError validationError;
 

@@ -1,1 +1,0 @@
-define(["require","jquery.timepicker.addon","settings!dateTimeSettings"],function(e){var t=e("jquery.timepicker.addon"),i=e("settings!dateTimeSettings");return i&&t.timepicker.setDefaults(i.timepicker),t});

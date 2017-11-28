@@ -22,7 +22,6 @@
 
 package com.jaspersoft.jasperserver.api.metadata.user.service.impl;
 
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -47,6 +46,7 @@ import com.jaspersoft.jasperserver.api.metadata.user.domain.impl.hibernate.RepoO
 import org.springframework.security.acls.domain.AccessControlEntryImpl;
 import org.springframework.security.acls.model.AccessControlEntry;
 import org.springframework.security.acls.model.Acl;
+import org.springframework.security.acls.model.AclService;
 
 /**
  * this interceptor is put in the chain for the repo service
@@ -64,7 +64,8 @@ import org.springframework.security.acls.model.Acl;
 public class PermissionsPrefetcher extends HibernateDaoImpl implements MethodInterceptor {
 	private static Logger log = Logger.getLogger(PermissionsPrefetcher.class);
 	
-	private int minimumPrefetch = 10; 
+	private int minimumPrefetch = 10;
+	private AclService repositoryAclService;
     private EhCacheBasedJasperServerAclCache aclCache;
     private JasperServerSidRetrievalStrategyImpl sidRetrievalStrategy;
 	private ResourceFactory objectMappingFactory;
@@ -87,7 +88,12 @@ public class PermissionsPrefetcher extends HibernateDaoImpl implements MethodInt
 		if (folderURI.equals("/")) {
 			return;
 		}
+
         Acl parentAcl = aclCache.getFromCache(new InternalURIDefinition(folderURI));
+		if (parentAcl == null) {
+			parentAcl = repositoryAclService.readAclById(new InternalURIDefinition(folderURI));
+		}
+
 		Set<String> missingEntries = new HashSet<String>();
 		for (Object subFolderObj : subFolderList) {
 			Folder subFolder = (Folder) subFolderObj;
@@ -185,4 +191,8 @@ public class PermissionsPrefetcher extends HibernateDaoImpl implements MethodInt
     public void setSidRetrievalStrategy(JasperServerSidRetrievalStrategyImpl sidRetrievalStrategy) {
         this.sidRetrievalStrategy = sidRetrievalStrategy;
     }
+
+	public void setRepositoryAclService(AclService repositoryAclService) {
+		this.repositoryAclService = repositoryAclService;
+	}
 }

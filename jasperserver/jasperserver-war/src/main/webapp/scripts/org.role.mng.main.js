@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: org.role.mng.main.js 8900 2015-05-06 20:57:14Z yplakosh $
+ * @version: $Id: org.role.mng.main.js 9490 2015-10-05 16:46:54Z obobruyk $
  */
 
 /* global orgModule, _, layoutModule, webHelpModule, localContext, isProVersion, invokeClientAction */
@@ -37,8 +37,8 @@ function invokeRoleManagerAction(actionName, options) {
 }
 
 function canAddRole() {
-    if (orgModule.roleManager.tree) {
-        return orgModule.roleManager.tree.getOrganization() != null;
+    if (orgModule.roleManager.tenantsTree) {
+        return orgModule.roleManager.tenantsTree.getTenant() != null;
     } else {
         return true;
     }
@@ -68,11 +68,11 @@ orgModule.roleManager = {
     Action: {
     },
 
-    initialize: function() {
+    initialize: function(opt) {
         layoutModule.resizeOnClient('folders', 'roles', 'properties');
         webHelpModule.setCurrentContext("admin");
 
-        var options = localContext.roleMngInitOptions;
+        var options = _.extend(opt, localContext.roleMngInitOptions, {removeContextMenuTreePlugin: true});
 
         // Manager customization.
         orgModule.manager.initialize(options);

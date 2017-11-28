@@ -94,7 +94,11 @@
 
     <end-state id="backToSearch" view="flowRedirect:searchFlow?lastMode=true"/>
 
-    <view-state id="errorPage" view="modules/system/errorPage"/>
+    <view-state id="errorPage" view="modules/system/errorPage">
+        <on-entry>
+            <evaluate expression="errorPageHandlerAction"/>
+        </on-entry>
+    </view-state>
 
     <global-transitions>
         <transition on="backFromErrorPage" to="backFromError"/>

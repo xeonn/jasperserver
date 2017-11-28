@@ -23,6 +23,8 @@ package com.jaspersoft.jasperserver.remote.services.impl;
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.*;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.client.*;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConversionOptions;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConverter;
 import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
 import com.jaspersoft.jasperserver.api.search.SearchCriteriaFactory;
 import com.jaspersoft.jasperserver.dto.resources.ClientInputControl;

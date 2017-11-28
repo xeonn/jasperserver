@@ -22,12 +22,15 @@
 package com.jaspersoft.jasperserver.export;
 
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
+import com.jaspersoft.jasperserver.dto.common.WarningDescriptor;
 import com.jaspersoft.jasperserver.export.io.ImportInput;
 import org.springframework.context.ApplicationContext;
 
+import java.util.List;
+
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ImportTask.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: ImportTask.java 58265 2015-10-05 16:13:56Z vzavadsk $
  */
 
 public interface ImportTask {
@@ -42,4 +45,9 @@ public interface ImportTask {
 	
 	ImportInput getInput();
 
+	ImportInputMetadata getInputMetadata();
+
+	void setInputMetadata(ImportInputMetadata inputMetadata);
+
+	List<WarningDescriptor> getWarnings();
 }

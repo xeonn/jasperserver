@@ -23,7 +23,7 @@ package com.jaspersoft.jasperserver.jaxrs.common;
 
 import com.jaspersoft.jasperserver.remote.exception.IllegalParameterValueException;
 import com.jaspersoft.jasperserver.remote.exception.ResourceInUseException;
-import com.jaspersoft.jasperserver.remote.exception.xml.ErrorDescriptor;
+import com.jaspersoft.jasperserver.dto.common.ErrorDescriptor;
 import org.hibernate.JDBCException;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -52,16 +52,14 @@ public class DataIntegrityViolationExceptionMapper implements ExceptionMapper<Da
 
         if (cause instanceof JDBCException || cause instanceof SQLException) {
             response = Response.status(isConstraintViolation(cause) ? Response.Status.FORBIDDEN : Response.Status.BAD_REQUEST)
-                    .entity(new ErrorDescriptor.Builder()
+                    .entity(new ErrorDescriptor()
                             .setErrorCode(isConstraintViolation(cause) ? ResourceInUseException.ERROR_CODE : IllegalParameterValueException.ERROR_CODE)
-                            .setMessage(cause.getLocalizedMessage() + ": " + getLocalizedMessage(cause))
-                            .getErrorDescriptor());
+                            .setMessage(cause.getLocalizedMessage() + ": " + getLocalizedMessage(cause)));
         } else {
             response = Response.status(Response.Status.BAD_REQUEST)
-                    .entity(new ErrorDescriptor.Builder()
+                    .entity(new ErrorDescriptor()
                             .setErrorCode(IllegalParameterValueException.ERROR_CODE)
-                            .setMessage(exception.getMostSpecificCause().getLocalizedMessage())
-                            .getErrorDescriptor());
+                            .setMessage(exception.getMostSpecificCause().getLocalizedMessage()));
         }
 
         return response.build();

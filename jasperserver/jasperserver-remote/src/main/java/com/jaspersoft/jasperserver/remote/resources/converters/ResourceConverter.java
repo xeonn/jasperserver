@@ -21,13 +21,14 @@
 package com.jaspersoft.jasperserver.remote.resources.converters;
 
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConverter;
 import com.jaspersoft.jasperserver.dto.resources.ClientResource;
 
 /**
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: ResourceConverter.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: ResourceConverter.java 58870 2015-10-27 22:30:55Z esytnik $
  */
 public interface ResourceConverter <ResourceType extends Resource, ClientType extends ClientResource<ClientType>> extends ToClientConverter<ResourceType, ClientType>, ToServerConverter<ClientType, ResourceType> {
     Class<ClientType> getClientTypeClass();

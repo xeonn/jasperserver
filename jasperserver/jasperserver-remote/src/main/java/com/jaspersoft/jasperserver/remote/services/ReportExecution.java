@@ -22,8 +22,8 @@ package com.jaspersoft.jasperserver.remote.services;
 
 import com.jaspersoft.jasperserver.api.JSException;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.domain.impl.ReportUnitResult;
+import com.jaspersoft.jasperserver.dto.common.ErrorDescriptor;
 import com.jaspersoft.jasperserver.remote.exception.RemoteException;
-import com.jaspersoft.jasperserver.remote.exception.xml.ErrorDescriptor;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
@@ -57,10 +57,38 @@ public class ReportExecution {
     private ReportExecutionOptions options;
     private final Lock resultLock;
     private final Condition resultExist;
+    private volatile Map<String, Object> convertedParameters;
+    private volatile ReportExecution relatedExecution;
 
     public ReportExecution() {
         resultLock = new ReentrantLock();
         resultExist = resultLock.newCondition();
+    }
+
+    public ReportExecution getRelatedExecution() {
+        return relatedExecution;
+    }
+
+    /**
+     * Setter of relatedExecution. It is required to get export with alternate pagination mode.
+     * @param relatedExecution - related report execution
+     */
+    public void setRelatedExecution(ReportExecution relatedExecution) {
+        this.relatedExecution = relatedExecution;
+    }
+
+    @XmlTransient
+    public Map<String, Object> getConvertedParameters() {
+        return convertedParameters;
+    }
+
+    /**
+     * Setter for converted parameters. It's derivation of input control logic processed raw parameters.
+     * They are cached here to be reused if report rerun is required.
+     * @param convertedParameters - converted parameters to cache
+     */
+    public void setConvertedParameters(Map<String, Object> convertedParameters) {
+        this.convertedParameters = convertedParameters;
     }
 
     @XmlTransient
@@ -69,6 +97,8 @@ public class ReportExecution {
     }
 
     public void setRawParameters(Map<String, String[]> rawParameters) {
+        // reset cached converted parameters if new raw parameters are here.
+        this.convertedParameters = null;
         this.rawParameters = rawParameters;
     }
 
@@ -92,13 +122,12 @@ public class ReportExecution {
             switch (status){
                 case failed:{
                     descriptor = errorDescriptor != null ? errorDescriptor :
-                            new ErrorDescriptor.Builder().setErrorCode("report.execution.failed").setMessage("Report execution failed")
-                                    .getErrorDescriptor();
+                            new ErrorDescriptor().setErrorCode("report.execution.failed").setMessage("Report execution failed");
                 }
                 break;
                 case cancelled:{
-                    descriptor = new ErrorDescriptor.Builder().setErrorCode("report.execution.cancelled")
-                            .setMessage("Report execution cancelled").getErrorDescriptor();
+                    descriptor = new ErrorDescriptor().setErrorCode("report.execution.cancelled")
+                            .setMessage("Report execution cancelled");
                 }
                 break;
             }
@@ -246,6 +275,7 @@ public class ReportExecution {
     }
 
     public void reset() {
+        relatedExecution = null;
         for (ExportExecution exportExecution : exports.values()) {
             exportExecution.reset();
         }

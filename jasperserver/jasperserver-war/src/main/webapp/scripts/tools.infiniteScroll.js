@@ -22,7 +22,7 @@
 
 /**
  * @author: Yuriy Plakosh, Stas Chubar
- * @version: $Id: tools.infiniteScroll.js 7762 2014-09-19 10:16:02Z sergey.prilukin $
+ * @version: $Id: tools.infiniteScroll.js 9551 2015-10-13 14:09:03Z dgorbenk $
  */
 
 /**
@@ -38,99 +38,138 @@
  * </ul>
  *
  */
-var InfiniteScroll = function(options) {
-    this._scroll = options.scroll;
-    this._id = options.id;
-    this._loadFactor = options.loadFactor ? options.loadFactor : 0.95;
-    this._contentId = options.contentId ? options.contentId : undefined;
 
-    this._lastContentHeight = 0;
-    this._loading = false;
-    this._control = this._scroll ? this._scroll.parent : $(this._id);
-    if (this._scroll) {
-        this._content = this._scroll.element;
-    } else {
-        this._content = this._contentId ? $(this._contentId) : this._control.childElements()[0];
-    }
+/* global define, isSupportsTouch, isIPad */
 
-    this._eventType = isSupportsTouch() ? "touchmove" : "scroll";
-    this._control.observe(this._eventType, this._onScrollHandler.bind(this));
-};
+define(function (require) {
 
-/**
- * Destroys the infinite scroll.
- */
-InfiniteScroll.addMethod('destroy', function() {
-    if (this._control) {
-        this._control.stopObserving(this._eventType, this._handler);
-    }
-});
+	"use strict";
 
-/**
- * Handler for scroll event on the control element.
- */
-InfiniteScroll.addMethod('_onScrollHandler', function(e) {
-    var controlScrollTop = this._scroll ? (this._scroll.y * -1) : this._control.scrollTop;
-    var contentHeight = this._content.getHeight();
-    var controlHeight = this._control.getHeight();
-    if (contentHeight != this._lastContentHeight) {
-        this._loading = false;
-    }
+	require("prototype");
+	require("utils.common");
 
-    var allowLoad = !this._loading && contentHeight != 0;
+	var InfiniteScroll = function (options) {
+		this._id = options.id;
+		this._contentId = options.contentId ? options.contentId : undefined;
+		this._scroll = options.scroll;
+		this._loadFactor = options.loadFactor ? options.loadFactor : 0.95;
 
-    if(this._scroll) {
-        allowLoad = allowLoad && this._scroll.isBottom();
-    }else {
-        allowLoad = allowLoad && (controlHeight + controlScrollTop) / contentHeight > this._loadFactor;
-    }
+		this._lastContentHeight = 0;
+		this._loading = false;
 
-    if (allowLoad) {
-        this._loading = true;
-        this._lastContentHeight = contentHeight;
-        isIPad() && this.wait();
-        this.onLoad();
-    }
-});
+		// getting control from 'id' of jquery object or from DOM element
+		if (options.control) {
+			if (options.control.length !== undefined && options.control.length > 1) {
+				this._control = $(options.control[0]);
+			} else {
+				this._control = $(options.control);
+			}
+		} else {
+			this._control = this._scroll ? this._scroll.parent : $(this._id);
+		}
 
-/**
- * This method is invoked when new data should be loaded. Actually it should load new data. The method should be
- * replaced in the instance of InfiniteScroll class. Next invocation of onLoad method will not occur till the content
- * element height changed.
- */
-InfiniteScroll.addMethod('onLoad', doNothing);
 
-/**
- * Resets the infinite scroll for totally new content. This method should be invoked in case the old data is cleaned
- * and the new data is set to the content element. Do not invoke this method in case new data is added in onLoad
- * method - this case is processed automatically.
- *
- * The method also moves the slider of the scroll in control element to top position.
- */
-InfiniteScroll.addMethod('reset', function() {
-	isIPad() ? this._scroll.reset() : this._control.scrollTop = 0;
-    this._loading = false;
-});
+		if (this._scroll) {
+			this._content = this._scroll.element;
+		} else {
 
-InfiniteScroll.addMethod('wait', function() {
-	if(!this._waitIndicator){
-	    this._waitIndicator = new Element('div', {'class': 'dimmer resultsOverlay'});
-        var dimensions = this._control.getDimensions();
-        var offsets = this._control.positionedOffset();
+			// getting content from 'id' of jquery object or from DOM element
+			if (options.content) {
+				if (options.content.length !== undefined && options.content.length > 1) {
+					this._content = $(options.content[0]);
+				} else {
+					this._content = $(options.content);
+				}
+			} else {
+				this._content = this._contentId ? $(this._contentId) : this._control.childElements()[0];
+			}
+		}
 
-        this._waitIndicator.setStyle({
-            zIndex: '4000',
-            top: offsets.top + 'px',
-            left: offsets.left + 'px',
-            height: dimensions.height + 'px',
-            width: dimensions.width + 'px'
-        });
+		this._eventType = isSupportsTouch() ? "touchmove" : "scroll";
+		this._control.observe(this._eventType, this._onScrollHandler.bind(this));
+	};
 
-        this._control.insert({after: this._waitIndicator});
-	}
-	this._waitIndicator.show();
-});
+	/**
+	 * Destroys the infinite scroll.
+	 */
+	InfiniteScroll.addMethod('destroy', function () {
+		if (this._control) {
+			this._control.stopObserving(this._eventType, this._handler);
+		}
+	});
 
-InfiniteScroll.addMethod('stopWaiting', function() {
-    this._waitIndicator && this._waitIndicator.hide();
+	/**
+	 * Handler for scroll event on the control element.
+	 */
+	InfiniteScroll.addMethod('_onScrollHandler', function (e) {
+		var controlScrollTop = this._scroll ? (this._scroll.y * -1) : this._control.scrollTop;
+		var contentHeight = this._content.getHeight();
+		var controlHeight = this._control.getHeight();
+		if (contentHeight != this._lastContentHeight) {
+			this._loading = false;
+		}
+
+		var allowLoad = !this._loading && contentHeight != 0;
+
+		if (this._scroll) {
+			allowLoad = allowLoad && this._scroll.isBottom();
+		} else {
+			allowLoad = allowLoad && (controlHeight + controlScrollTop) / contentHeight > this._loadFactor;
+		}
+
+		if (allowLoad) {
+			this._loading = true;
+			this._lastContentHeight = contentHeight;
+			isIPad() && this.wait();
+			this.onLoad();
+		}
+	});
+
+	/**
+	 * This method is invoked when new data should be loaded. Actually it should load new data. The method should be
+	 * replaced in the instance of InfiniteScroll class. Next invocation of onLoad method will not occur till the content
+	 * element height changed.
+	 */
+	InfiniteScroll.addMethod('onLoad', doNothing);
+
+	/**
+	 * Resets the infinite scroll for totally new content. This method should be invoked in case the old data is cleaned
+	 * and the new data is set to the content element. Do not invoke this method in case new data is added in onLoad
+	 * method - this case is processed automatically.
+	 *
+	 * The method also moves the slider of the scroll in control element to top position.
+	 */
+	InfiniteScroll.addMethod('reset', function () {
+		isIPad() ? this._scroll.reset() : this._control.scrollTop = 0;
+		this._loading = false;
+	});
+
+	InfiniteScroll.addMethod('wait', function () {
+		if (!this._waitIndicator) {
+			this._waitIndicator = new Element('div', {'class': 'dimmer resultsOverlay'});
+			var dimensions = this._control.getDimensions();
+			var offsets = this._control.positionedOffset();
+
+			this._waitIndicator.setStyle({
+				zIndex: '4000',
+				top: offsets.top + 'px',
+				left: offsets.left + 'px',
+				height: dimensions.height + 'px',
+				width: dimensions.width + 'px'
+			});
+
+			this._control.insert({after: this._waitIndicator});
+		}
+		this._waitIndicator.show();
+	});
+
+	InfiniteScroll.addMethod('stopWaiting', function () {
+		this._waitIndicator && this._waitIndicator.hide();
+	});
+
+	// TODO: remove it when we move Repository Search into AMD style
+	// Make it global due to RepositorySearch modules
+	window.InfiniteScroll = InfiniteScroll;
+
+	return InfiniteScroll;
 });

@@ -20,7 +20,7 @@
  */
 
 /**
- * @version: $Id: AttributesCollection.js 9218 2015-08-20 19:56:16Z yplakosh $
+ * @version: $Id: AttributesCollection.js 9599 2015-10-27 19:38:56Z yplakosh $
  */
 
 define(function(require) {
@@ -28,7 +28,7 @@ define(function(require) {
         $ = require("jquery"),
         json3 = require("json3"),
         Backbone = require("backbone"),
-        request = require("common/transport/request"),
+        request = require("request"),
         TemplateEngine = require("components.templateengine"),
         groupsEnum = require("serverSettingsCommon/enum/serverSettingGroupsEnum"),
         levelIdEnum = require("attributes/enum/levelIdEnum");
@@ -103,7 +103,7 @@ define(function(require) {
         },
 
         escapeLevelId: function(id) {
-            return encodeURIComponent(id).replace("'", "%27");
+            return encodeURIComponent(id).replace(/'/g, "%27");
         },
 
         save: function(allModels, updatedModels) {

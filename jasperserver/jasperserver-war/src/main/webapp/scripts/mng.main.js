@@ -21,10 +21,10 @@
 
 
 /**
- * @version: $Id: mng.main.js 9192 2015-08-12 19:52:08Z yplakosh $
+ * @version: $Id: mng.main.js 9665 2015-11-23 14:57:00Z dgorbenk $
  */
 
-/* global orgModule, isProVersion, alert,  */
+/* global orgModule, isProVersion, alert, _  */
 
 function invokeServerAction(actionName, options) {
     var actionBuilder = orgModule.serverActionFactory[actionName];
@@ -63,40 +63,53 @@ orgModule.manager = {
         this.options = options;
         this.state = options.state;
 
+        _.extend(this.state, {id: this.state.tenantId});
+
         if (isProVersion()) {
-            this.tree = orgModule.createOrganizationsTree();
-            this.tree.showOrganizations(this.state.tenantUri);
+            this.tenantsTree = new options.TenantsTreeView({
+                container: "#folders .body",
+                currentUser: options.currentUser,
+                removeContextMenuTreePlugin: options.removeContextMenuTreePlugin,
+                selectedTenant: this.state,
+                comparator: function(t1, t2){
+                    return orgModule._comparator(t1.tenantName, t2.tenantName)
+                }
+            });
+
+            orgModule.initTenantsTreeEvents();
+            this.tenantsTree.render();
         }
 
         // Request events listeners.
         orgModule.observe("org:browse", function(event) {
-
             var org;
-            if (this.tree) {
-                org = this.tree.getOrganization();
-            }
 
-            var entityEvent = event.memo.entityEvent;
+            this.tenantsTree && (org = this.tenantsTree.getTenant());
 
-            if (!this.lastSelectedOrg || this.lastSelectedOrg.id != org.id) {
+            var entityEvent = event.memo.entityEvent,
+                force = event.memo.force;
+
+            if (force || !this.lastSelectedOrg || this.lastSelectedOrg.id != org.id) {
                 var entities = orgModule.entityList.getSelectedEntities();
-
 
                 if(invokeClientAction("cancelIfEdit", { entity: entities[0] || org, entityEvent: entityEvent})) {
                     invokeServerAction(orgModule.ActionMap.BROWSE, {
                         tenantId : (org) ? org.id : null
                     });
-                    this.lastSelectedOrg = org
+                    this.lastSelectedOrg = org;
                 } else {
-                    this.lastSelectedOrg && this.tree.selectOrganization(this.lastSelectedOrg, {silent: orgModule.properties.locked });
+                    this.lastSelectedOrg && this.tenantsTree.selectTenant(this.lastSelectedOrg.id);
                 }
             }
         }.bindAsEventListener(this));
 
         orgModule.observe("entity:search", function(event) {
             var entities = orgModule.entityList.getSelectedEntities(),
-                text = event.memo.text,
-                org = this.tree.getOrganization();
+                text = event.memo.text, org;
+
+            if (this.tenantsTree) {
+                org = this.tenantsTree.getTenant();
+            }
 
             if(invokeClientAction("cancelIfEdit", { entity: entities[0] || org })) {
                 invokeServerAction(orgModule.ActionMap.SEARCH, {
@@ -131,7 +144,7 @@ orgModule.manager = {
                 if (firstEntity && entityEvent) {
                     entityName = firstEntity.getNameWithTenant()
                 } else {
-                    entityName = (!entityEvent || isCtrlHeld || cancelIfEdit) && event.memo.entity.getNameWithTenant();
+                    entityName = (!entityEvent || isCtrlHeld || cancelIfEdit) && event.memo.entityId;
                 }
 
                 if (!firstEntity && (orgModule.userManager || (!orgModule.userManager && orgModule.roleManager)) && isCtrlHeld) {

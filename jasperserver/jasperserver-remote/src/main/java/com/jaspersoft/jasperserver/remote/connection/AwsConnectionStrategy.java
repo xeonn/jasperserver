@@ -20,6 +20,7 @@
 */
 package com.jaspersoft.jasperserver.remote.connection;
 
+import com.jaspersoft.jasperserver.api.common.error.handling.SecureExceptionHandler;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl.BaseJdbcDataSource;
 import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.AwsReportDataSource;
@@ -40,7 +41,7 @@ import java.util.Map;
  * <p></p>
  *
  * @author yaroslav.kovalchyk
- * @version $Id: AwsConnectionStrategy.java 56967 2015-08-20 23:20:53Z esytnik $
+ * @version $Id: AwsConnectionStrategy.java 57603 2015-09-15 17:20:48Z psavushc $
  */
 @Service
 public class AwsConnectionStrategy implements ConnectionManagementStrategy<ClientAwsDataSource> {
@@ -52,6 +53,8 @@ public class AwsConnectionStrategy implements ConnectionManagementStrategy<Clien
     private AwsDataSourceResourceConverter awsDataSourceResourceConverter;
     @Resource(name = "awsDataSourceServiceFactory")
     private ReportDataSourceServiceFactory awsDataSourceFactory;
+    @Resource
+    private SecureExceptionHandler secureExceptionHandler;
 
     @Override
     public ClientAwsDataSource createConnection(ClientAwsDataSource connectionDescription, Map<String, Object> data) throws IllegalParameterValueException {
@@ -85,7 +88,7 @@ public class AwsConnectionStrategy implements ConnectionManagementStrategy<Clien
             exception = e;
         }
         if (!passed) {
-            throw new ConnectionFailedException(connectionDescription, exception);
+            throw new ConnectionFailedException(connectionDescription, exception, secureExceptionHandler);
         }
         return connectionDescription;
     }

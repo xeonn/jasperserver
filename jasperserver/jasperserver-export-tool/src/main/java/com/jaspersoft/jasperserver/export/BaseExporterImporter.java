@@ -22,22 +22,36 @@
 package com.jaspersoft.jasperserver.export;
 
 import com.jaspersoft.jasperserver.api.common.util.CharacterEncodingProvider;
+import com.jaspersoft.jasperserver.api.metadata.user.domain.Tenant;
+import com.jaspersoft.jasperserver.api.metadata.user.domain.TenantQualified;
+import com.jaspersoft.jasperserver.api.metadata.user.service.TenantService;
+import com.jaspersoft.jasperserver.export.modules.Attributes;
 import com.jaspersoft.jasperserver.export.modules.ModuleRegister;
 import com.jaspersoft.jasperserver.export.util.CommandOut;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: BaseExporterImporter.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: BaseExporterImporter.java 58265 2015-10-05 16:13:56Z vzavadsk $
  */
 
 public class BaseExporterImporter {
 	
 	protected static final CommandOut commandOut = CommandOut.getInstance();
-	
+
+	private static final ThreadLocal<Tenant> tenant = new ThreadLocal<Tenant>();
+
 	private String indexFilename;
 	private String indexRootElementName;
 	private String indexModuleElementName;
 	private String indexModuleIdAttributeName;
+	private String brokenDependenceFilename;
+	private String brokenDependenceRootElementName;
+	private String resourceElementName;
 	private ModuleRegister moduleRegister;
 	private CharacterEncodingProvider encodingProvider;
 	private String propertyElementName;
@@ -129,4 +143,67 @@ public class BaseExporterImporter {
     public void setJsVersion(String jsVersion) {
         this.jsVersion = jsVersion;
     }
+
+	public void setBrokenDependenceFilename(String brokenDependenceFilename) {
+		this.brokenDependenceFilename = brokenDependenceFilename;
+	}
+
+	public String getBrokenDependenceFilename() {
+		return brokenDependenceFilename;
+	}
+
+	public void setBrokenDependenceRootElementName(String brokenDependenceRootElementName) {
+		this.brokenDependenceRootElementName = brokenDependenceRootElementName;
+	}
+
+	public String getBrokenDependenceRootElementName() {
+		return brokenDependenceRootElementName;
+	}
+
+	public void setResourceElementName(String resourceElementName) {
+		this.resourceElementName = resourceElementName;
+	}
+
+	public String getResourceElementName() {
+		return resourceElementName;
+	}
+
+	protected static String getAuthenticatedTenantId() {
+		String result = null;
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		if (auth != null) {
+			if (auth.getPrincipal() instanceof TenantQualified) {
+				result = ((TenantQualified) auth.getPrincipal()).getTenantId();
+			}
+		}
+
+		if (result == null) {
+			return TenantService.ORGANIZATIONS;
+		}
+
+		return result;
+	}
+
+	public static Tenant getTenant() {
+		return tenant.get();
+	}
+
+	public static void setTenant(Tenant t) {
+		tenant.set(t);
+	}
+
+	/**
+	 * Returns a map, which links old tenant id to new unique tenant id
+	 */
+	protected static Map<String, String> getNewGeneratedTenantIds(Attributes contextAttributes) {
+		final String ATTRIBUTE_NAME = "newUniqueTenantIdsMap";
+		@SuppressWarnings("unchecked")
+		Map<String, String> map = (Map<String, String>) contextAttributes.getAttribute(ATTRIBUTE_NAME);
+		if (map == null) {
+			map = new HashMap<String, String>();
+			contextAttributes.setAttribute(ATTRIBUTE_NAME, map);
+		}
+
+		return map;
+	}
 }

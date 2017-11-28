@@ -195,6 +195,8 @@ public abstract class DataAdapterDefinition extends CustomDataSourceDefinition i
             if (service != null) {
                 // set data adapter to the service
                 ((ReportDataAdapterService) service).setDataAdapter(dataAdapter);
+                // setup thread repository context for looking up data source file from repo
+                if (repositoryContextManager != null) repositoryContextManager.setRepositoryContext(ExecutionContextImpl.getRuntimeExecutionContext(), "/ignore", null);
                 ((ReportDataAdapterService) service).setDataAdapterService(getDataAdapterService(DataAdapterDefinitionUtil.getJasperReportsContext(), dataAdapter));
                 // repository URI of data file is tenant dependent. E.g. for root organization is /organizations/organization_1/someFolder/dataFile.csv
                 // and for jasperadmin on organization_1 it's /someFolder/dataFile.csv

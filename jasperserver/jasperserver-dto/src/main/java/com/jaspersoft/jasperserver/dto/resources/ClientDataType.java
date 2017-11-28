@@ -26,7 +26,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: ClientDataType.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: ClientDataType.java 58870 2015-10-27 22:30:55Z esytnik $
  */
 @XmlRootElement(name = ResourceMediaType.DATA_TYPE_CLIENT_TYPE)
 public class ClientDataType extends ClientResource<ClientDataType> implements ClientReferenceableDataType {
@@ -39,6 +39,7 @@ public class ClientDataType extends ClientResource<ClientDataType> implements Cl
     private Integer maxLength;
 
     public ClientDataType(ClientDataType other) {
+        super(other);
         this.type = other.getType();
         this.pattern = other.getPattern();
         this.maxValue = other.getMaxValue();
@@ -54,7 +55,7 @@ public class ClientDataType extends ClientResource<ClientDataType> implements Cl
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof ClientDataType)) return false;
         if (!super.equals(o)) return false;
 
         ClientDataType that = (ClientDataType) o;

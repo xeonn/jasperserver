@@ -19,5 +19,5 @@
   ~ along with this program. If not, see <http://www.gnu.org/licenses/>.
   --%>
 
-<jsp:forward page="../system/errorPage.jsp" />
+<jsp:forward page="../system/prepErrorPage.jsp" />
 

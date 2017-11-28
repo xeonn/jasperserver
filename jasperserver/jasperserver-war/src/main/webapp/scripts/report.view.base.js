@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: report.view.base.js 8900 2015-05-06 20:57:14Z yplakosh $
+ * @version: $Id: report.view.base.js 9490 2015-10-05 16:46:54Z obobruyk $
  */
 
 /* global Template, ajax, layoutModule, Report, viewer, doNothing, dashboardViewFrame, dialogs, jaspersoft, _,
@@ -183,7 +183,7 @@
                 if ('pdf' === output || 'swf' === output) {
                     return Report.exportReport(output, url);
                 } else {
-                    new jaspersoft.components.AjaxDownloader().start(url + "&" + Report.requestedInputParameters);
+                   window.location.href = url + "&" + Report.requestedInputParameters;
                 }
             }
         },

@@ -20,7 +20,7 @@
  */
 package com.jaspersoft.jasperserver.jaxrs.report;
 
-import com.jaspersoft.jasperserver.remote.exception.xml.ErrorDescriptor;
+import com.jaspersoft.jasperserver.dto.common.ErrorDescriptor;
 import com.jaspersoft.jasperserver.remote.services.ExecutionStatus;
 
 import javax.xml.bind.annotation.XmlRootElement;

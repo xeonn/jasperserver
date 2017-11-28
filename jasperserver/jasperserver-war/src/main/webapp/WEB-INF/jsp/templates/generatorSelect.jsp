@@ -40,7 +40,7 @@ Usage:
 <!--/WEB-INF/jsp/templates/generatorSelect.jsp revision A-->
 <t:insertTemplate template="/WEB-INF/jsp/templates/container.jsp">
     <t:putAttribute name="containerID" value="${containerID}"/>
-    <t:putAttribute name="containerClass" value="control groupBox ${containerClass}"/>
+    <t:putAttribute name="containerClass" value="control ${containerClass}"/>
     <t:putAttribute name="bodyContent">
         <fieldset class="group locationSelector">
             <legend class=""><span><spring:message code="GENERATOR_SELECT_LEGEND"/></span></legend>

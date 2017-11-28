@@ -7,20 +7,26 @@
        xmlns:util="http://www.springframework.org/schema/util"
        default-lazy-init="true">
 
-
-
-    <bean id="baseExporterModule" class="com.jaspersoft.jasperserver.export.modules.BaseExporterModule" abstract="true">
-        <property name="everythingArg" value="everything"/>
+    <bean id="baseExporterImporterModule" class="com.jaspersoft.jasperserver.export.modules.BasicExporterImporterModule" abstract="true">
         <property name="permissionService" ref="objectPermissionServiceUnsecure"/>
         <property name="permissionRecipientRole" value="role"/>
         <property name="permissionRecipientUser" value="user"/>
     </bean>
 
-    <bean id="baseImporterModule" class="com.jaspersoft.jasperserver.export.modules.BaseImporterModule" abstract="true">
-        <property name="permissionService" ref="objectPermissionServiceUnsecure"/>
+
+    <bean id="baseExporterModule" class="com.jaspersoft.jasperserver.export.modules.BaseExporterModule"
+          parent="baseExporterImporterModule" abstract="true">
+        <property name="everythingArg" value="everything"/>
+        <property name="includeAttributes" value="include-attributes"/>
+        <property name="skipAttributeValues" value="skip-attribute-values"/>
+        <property name="includeSettingsArg" value="include-server-settings"/>
+        <property name="tenantService" ref="${bean.tenantService}"/>
+        <property name="exportFilter" ref="${bean.repositoryExportFilter}"/>
+    </bean>
+
+    <bean id="baseImporterModule" class="com.jaspersoft.jasperserver.export.modules.BaseImporterModule"
+          parent="baseExporterImporterModule" abstract="true">
         <property name="authorityService" ref="${bean.userAuthorityService}"/>
-        <property name="permissionRecipientRole" value="role"/>
-        <property name="permissionRecipientUser" value="user"/>
     </bean>
 
     <bean id="repositorySerializer" class="com.jaspersoft.jasperserver.export.io.CastorSerializer">
@@ -95,12 +101,12 @@
 
     <bean id="fileResourceDataProvider" class="com.jaspersoft.jasperserver.export.modules.repository.FileResourceDataProvider">
         <property name="filenameSuffix" value=".data"/>
-        <property name="repository" ref="repositoryService"/>
+        <property name="repository" ref="${bean.unsecureRepositoryService}"/>
     </bean>
 
     <bean id="contentResourceDataProvider" class="com.jaspersoft.jasperserver.export.modules.repository.ContentResourceDataProvider">
         <property name="filenameSuffix" value=""/>
-        <property name="repository" ref="repositoryService"/>
+        <property name="repository" ref="${bean.unsecureRepositoryService}"/>
     </bean>
 
     <bean id="olapUnitViewOptionsDataProvider" class="com.jaspersoft.jasperserver.export.modules.repository.OlapUnitViewOptionsDataProvider">
@@ -108,7 +114,7 @@
     </bean>
 
     <bean id="resourceModuleConfiguration" class="com.jaspersoft.jasperserver.export.modules.repository.ResourceModuleConfiguration">
-        <property name="repository" ref="repositoryService"/>
+        <property name="repository" ref="${bean.unsecureRepositoryService}"/>
         <property name="resourcesDirName" value="resources"/>
         <property name="folderDetailsFileName" value=".folder.xml"/>
         <property name="folderIndexElement" value="folder"/>
@@ -143,18 +149,22 @@
     <bean id="resourceExporter" class="com.jaspersoft.jasperserver.export.modules.repository.ResourceExporter" parent="baseExporterModule" scope="prototype">
         <property name="id" value="repositoryResources"/>
         <property name="configuration" ref="resourceModuleConfiguration"/>
-        <property name="tenantService" ref="tenantService"/>
         <property name="messageSource" ref="exportImportMessageSource"/>
         <property name="unavailableExportOperationMessage" value="ji.export.organization.unsupported.operation"/>
         <property name="urisArgument" value="uris"/>
         <property name="permissionsArgument" value="repository-permissions"/>
-        <property name="includeSettingsArg" value="include-server-settings"/>
+        <property name="skipDependentResource" value="skip-dependent-resources"/>
+    </bean>
+
+    <bean id="repositoryExportFilterCe" class="com.jaspersoft.jasperserver.export.modules.repository.RepositoryExportFilterImpl"
+          scope="prototype">
+        <property name="clientResourceResolver" ref="clientResourceResolver"/>
     </bean>
 
     <bean id="resourceImporter" class="com.jaspersoft.jasperserver.export.modules.repository.ResourceImporter" parent="baseImporterModule" scope="prototype">
         <property name="id" value="repositoryResources"/>
         <property name="configuration" ref="resourceModuleConfiguration"/>
-        <property name="tenantService" ref="tenantService"/>
+        <property name="tenantService" ref="${bean.tenantService}"/>
         <property name="prependPathArg" value="prepend-path"/>
         <property name="updateArg" value="update"/>
         <property name="includeSettingsArg" value="include-server-settings"/>
@@ -169,18 +179,18 @@
         <property name="userIndexElementName" value="user"/>
         <property name="usersDirName" value="users"/>
         <property name="rolesDirName" value="roles"/>
-        <property name="serializer">
-            <bean class="com.jaspersoft.jasperserver.export.io.CastorSerializer">
-                <property name="castorMappings">
-                    <list>
-                        <value>classpath:com/jaspersoft/jasperserver/export/mapping/auth/User.xml</value>
-                        <value>classpath:com/jaspersoft/jasperserver/export/mapping/auth/Role.xml</value>
-                        <value>classpath:com/jaspersoft/jasperserver/export/mapping/common/ProfileAttribute.xml</value>
-                        <value>classpath:com/jaspersoft/jasperserver/export/mapping/common/TenantQualifiedName.xml</value>
-                        <value>classpath:com/jaspersoft/jasperserver/export/mapping/repository/ObjectPermission.xml</value>
-                    </list>
-                </property>
-            </bean>
+        <property name="serializer" ref="authorityCastorSerializer"/>
+    </bean>
+
+    <bean id="authorityCastorSerializer" class="com.jaspersoft.jasperserver.export.io.CastorSerializer">
+        <property name="castorMappings">
+            <list>
+                <value>classpath:com/jaspersoft/jasperserver/export/mapping/auth/User.xml</value>
+                <value>classpath:com/jaspersoft/jasperserver/export/mapping/auth/Role.xml</value>
+                <value>classpath:com/jaspersoft/jasperserver/export/mapping/common/ProfileAttribute.xml</value>
+                <value>classpath:com/jaspersoft/jasperserver/export/mapping/common/TenantQualifiedName.xml</value>
+                <value>classpath:com/jaspersoft/jasperserver/export/mapping/repository/ObjectPermission.xml</value>
+            </list>
         </property>
     </bean>
 
@@ -189,6 +199,7 @@
         <property name="usersArgument" value="users"/>
         <property name="rolesArgument" value="roles"/>
         <property name="includeRoleUsersArgument" value="role-users"/>
+        <property name="includeUsersRolesArgument" value="users-roles"/>
         <property name="configuration" ref="authorityModuleConfiguration"/>
     </bean>
 
@@ -213,6 +224,7 @@
         <property name="updateArg" value="update"/>
         <property name="moduleConfiguration"><ref bean="tenantModuleConfiguration"/></property>
         <property name="includeServerSettings" value="include-server-settings"/>
+        <property name="tenantServiceUnsecured" ref="tenantService"/>
     </bean>
 
     <bean name="tenantModuleConfiguration"
@@ -230,7 +242,7 @@
             <ref bean="defaultTenantExportConfiguration" />
         </property>
         <property name="tenantService">
-            <ref bean="tenantService"/>
+            <ref bean="${bean.tenantService}"/>
         </property>
         <property name="tenantSerializer">
             <ref bean="tenantSerializer"/>
@@ -298,21 +310,21 @@
     </bean>
 
     <bean id="reportJobsConfiguration" class="com.jaspersoft.jasperserver.export.modules.scheduling.SchedulingModuleConfiguration">
-        <property name="repository" ref="repositoryService"/>
+        <property name="repository" ref="${bean.unsecureRepositoryService}"/>
         <property name="reportScheduler" ref="reportSchedulingService"/>
         <property name="internalReportScheduler" ref="reportSchedulingInternalService"/>
         <property name="reportJobsScheduler" ref="reportScheduler"/>
         <property name="authorityService" ref="${bean.userAuthorityService}"/>
         <property name="serializer">
             <bean class="com.jaspersoft.jasperserver.export.io.CastorSerializer">
-                <property name="castorMappings">
-                    <list>
-                        <value>classpath:com/jaspersoft/jasperserver/export/mapping/scheduling/ReportJob.xml</value>
-                        <value>classpath:com/jaspersoft/jasperserver/export/mapping/scheduling/Calendar.xml</value>
-                        <value>classpath:com/jaspersoft/jasperserver/export/mapping/scheduling/ReportUnitIndex.xml</value>
-                        <value>classpath:com/jaspersoft/jasperserver/export/mapping/common/ReportParameterValue.xml</value>
-                    </list>
-                </property>
+        <property name="castorMappings">
+            <list>
+                <value>classpath:com/jaspersoft/jasperserver/export/mapping/scheduling/ReportJob.xml</value>
+                <value>classpath:com/jaspersoft/jasperserver/export/mapping/scheduling/Calendar.xml</value>
+                <value>classpath:com/jaspersoft/jasperserver/export/mapping/scheduling/ReportUnitIndex.xml</value>
+                <value>classpath:com/jaspersoft/jasperserver/export/mapping/common/ReportParameterValue.xml</value>
+            </list>
+        </property>
             </bean>
         </property>
         <property name="reportJobsDir" value="reportJobs"/>
@@ -324,11 +336,11 @@
     </bean>
 
     <bean id="importReportLoadingService" parent="reportLoadingService">
-        <property name="repositoryService" ref="repositoryService"/>
+        <property name="repositoryService" ref="${bean.unsecureRepositoryService}"/>
     </bean>
 
     <bean id="defaultReportParametersTranslator" class="com.jaspersoft.jasperserver.export.modules.common.DefaultReportParametersTranslator">
-        <property name="repository" ref="repositoryService"/>
+        <property name="repository" ref="${bean.unsecureRepositoryService}"/>
         <property name="reportLoadingService" ref="importReportLoadingService"/>
     </bean>
 
@@ -386,13 +398,16 @@
         <property name="indexRootElementName" value="export"/>
         <property name="indexModuleElementName" value="module"/>
         <property name="indexModuleIdAttributeName" value="id"/>
+        <property name="brokenDependenceFilename" value="broken_dependencies.xml"/>
+        <property name="brokenDependenceRootElementName" value="broken_dependencies"/>
+        <property name="resourceElementName" value="resource"/>
         <property name="moduleRegister" ref="${bean.moduleRegister}"/>
         <property name="encodingProvider" ref="encodingProvider"/>
         <property name="propertyElementName" value="property"/>
         <property name="propertyNameAttribute" value="name"/>
         <property name="propertyValueAttribute" value="value"/>
         <property name="jsVersion" value="${property.jsVersion}"/>
-      </bean>
+    </bean>
 
     <bean id="exporterPrototype" class="com.jaspersoft.jasperserver.export.ExporterImpl" scope="prototype" parent="baseExporterImporter">
         <property name="xmlVersion" value="1.0"/>
@@ -474,7 +489,7 @@
 
     <bean id="exportCommandBean" class="com.jaspersoft.jasperserver.export.ExportCommandImpl">
         <property name="exportImportIOFactory" ref="exportImportIOFactory"/>
-        <property name="exporterPrototypeBeanName" value="exporterPrototype"/>
+        <property name="exporterPrototypeBeanName" value="${bean.exporterPrototype}"/>
     </bean>
 
     <bean id="importerPrototype" class="com.jaspersoft.jasperserver.export.ImporterImpl" scope="prototype" parent="baseExporterImporter">
@@ -482,11 +497,12 @@
 
     <bean id="importCommandBean" class="com.jaspersoft.jasperserver.export.ImportCommandImpl">
         <property name="exportImportIOFactory" ref="exportImportIOFactory"/>
-        <property name="importerPrototypeBeanName" value="importerPrototype"/>
+        <property name="importerPrototypeBeanName" value="${bean.importerPrototype}"/>
+        <property name="messageSource" ref="exportImportMessageSource"/>
     </bean>
 
-    <bean id="importCommandMetadata" class="com.jaspersoft.jasperserver.export.CommandMetadataImpl">
-        <property name="argumentNames">
+    <bean id="importCommandMetadataCe" class="java.util.ArrayList">
+        <constructor-arg index="0" type="java.util.Collection">
             <list>
                 <value>help</value>
                 <value>input-dir</value>
@@ -496,13 +512,17 @@
                 <value>skip-user-update</value>
                 <value>include-access-events</value>
                 <value>include-server-settings</value>
-                <value>skip-themes</value>
+                <value>broken-dependencies</value>
             </list>
-        </property>
+        </constructor-arg>
     </bean>
 
-    <bean id="exportCommandMetadata" class="com.jaspersoft.jasperserver.export.CommandMetadataImpl">
-        <property name="argumentNames">
+    <bean id="importCommandMetadata" class="com.jaspersoft.jasperserver.export.CommandMetadataImpl">
+        <property name="argumentNames" ref="${bean.importCommandMetadata}" />
+    </bean>
+
+    <bean id="exportCommandMetadataCe" class="java.util.ArrayList">
+        <constructor-arg index="0" type="java.util.Collection">
             <list>
                 <value>help</value>
                 <value>output-dir</value>
@@ -510,6 +530,7 @@
                 <value>everything</value>
                 <value>roles</value>
                 <value>role-users</value>
+                <value>users-roles</value>
                 <value>users</value>
                 <value>uris</value>
                 <value>repository-permissions</value>
@@ -517,8 +538,16 @@
                 <value>calendars</value>
                 <value>include-access-events</value>
                 <value>include-server-settings</value>
+                <value>include-attributes</value>
+                <value>skip-attribute-values</value>
+                <value>resource-types</value>
+                <value>skip-dependent-resources</value>
             </list>
-        </property>
+        </constructor-arg>
+    </bean>
+
+    <bean id="exportCommandMetadata" class="com.jaspersoft.jasperserver.export.CommandMetadataImpl">
+        <property name="argumentNames" ref="${bean.exportCommandMetadata}" />
     </bean>
 
     <bean id="removeDuplicateDisplayName" class="com.jaspersoft.jasperserver.export.RemoveDuplicatedDisplayName">
@@ -527,9 +556,12 @@
     </bean>
 
     <bean id="synchImportExportService" class="com.jaspersoft.jasperserver.export.service.impl.ImportExportServiceImpl">
-        <lookup-method name="getExporter" bean="exporterPrototype"/>
-        <lookup-method name="getImporter" bean="importerPrototype"/>
+        <lookup-method name="getExporter" bean="concreteExporterPrototype"/>
+        <lookup-method name="getImporter" bean="concreteImporterPrototype"/>
         <property name="pathProcessorFactory" ref="zipPathProcessorFactory"/>
     </bean>
+
+    <alias name="${bean.exporterPrototype}" alias="concreteExporterPrototype"/>
+    <alias name="${bean.importerPrototype}" alias="concreteImporterPrototype"/>
 
 </beans>

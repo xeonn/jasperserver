@@ -25,11 +25,12 @@ import com.jaspersoft.jasperserver.export.io.ImportInput;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ImportTaskImpl.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: ImportTaskImpl.java 58265 2015-10-05 16:13:56Z vzavadsk $
  */
 public class ImportTaskImpl extends BaseExportImportTask implements ImportTask {
 
 	private ImportInput input;
+	private ImportInputMetadata inputMetadata;
 
 	public ImportInput getInput() {
 		return input;
@@ -39,4 +40,13 @@ public class ImportTaskImpl extends BaseExportImportTask implements ImportTask {
 		this.input = input;
 	}
 
+	@Override
+	public ImportInputMetadata getInputMetadata() {
+		return inputMetadata;
+	}
+
+	@Override
+	public void setInputMetadata(ImportInputMetadata inputMetadata) {
+		this.inputMetadata = inputMetadata;
+	}
 }

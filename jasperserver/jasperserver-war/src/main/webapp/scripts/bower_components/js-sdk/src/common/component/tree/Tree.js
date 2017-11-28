@@ -22,13 +22,15 @@
 
 /**
  * @author: Zakhar Tomchenko
- * @version: $Id: Tree.js 1178 2015-05-06 20:40:12Z yplakosh $
+ * @version: $Id: Tree.js 1760 2015-10-27 18:45:31Z yplakosh $
  */
 
 define(function(require){
     "use strict";
 
     require("jquery.ui");
+
+    require("css!lists");
 
     var _ = require('underscore'),
         Backbone = require('backbone'),
@@ -38,8 +40,14 @@ define(function(require){
         listTemplate = require("text!./template/treeLevelListTemplate.htm"),
         levelTemplate = require("text!./template/treeLevelTemplate.htm"),
 
+        ITEM_ACTIONS = {
+            ADD: "add",
+            UPDATE: "update"
+        },
+
     Tree = Backbone.View.extend({
         template: _.template(levelTemplate),
+        _plugins: [],
 
         el: function() {
             return this.template();
@@ -91,7 +99,7 @@ define(function(require){
         },
 
         initialize: function(options){
-            this.rootLevel = new TreeLevel(_.extend({},this._options, {levelHeight: options.rootLevelHeight}, { id:"/", el: this.$("li")[0], resource: {id: "/", resourceType: "folder"}}));
+            this.rootLevel = new TreeLevel(_.extend({},this._options, {levelHeight: options.rootLevelHeight}, {el: this.$("li")[0]}, {item: { id:"/", value: {id: "/", resourceType: "folder"}}}));
 
             this.rootless && this.$el.find("ul:first").addClass("hideRoot");
             this.additionalCssClasses && this.$el.find("ul:first").addClass(this.additionalCssClasses);
@@ -139,8 +147,17 @@ define(function(require){
             return this;
         },
 
-        select: function(nodeId){
-            // TODO
+        select: function(nodeId) {
+            var level = this.getLevel(nodeId);
+
+            if (level) {
+                var list = level.parent.list,
+                    item = level.item;
+
+                list.model.clearSelection().addValueToSelection(item.value, item.index);
+
+                this.trigger("selection:change", list.getValue());
+            }
         },
 
         deselect: function(nodeId){
@@ -148,17 +165,19 @@ define(function(require){
         },
 
         // TODO: this should be more generic
-        addItem: function(nodeId, itemData){
-            var level = this.getLevel(nodeId);
+        addItem: function(parentId, itemData) {
+            var level = this.getLevel(parentId),
+                action = ITEM_ACTIONS.ADD;
 
-            if (level) {
-                var dataLayer = this.getDataLayer(level);
-                dataLayer.predefinedData[nodeId] = level.list.model.get("items") ? level.list.model.get("items") : [];
-                dataLayer.predefinedData[nodeId].push(itemData);
+            level && this._getNodeItems(parentId, level, itemData, action);
 
-                level.list.lazy = false;
-                level.list.fetch();
-            }
+            return this;
+        },
+
+        updateItem: function(itemData, parentId) {
+            var level = parentId ? this.getLevel(parentId) : this.rootLevel;
+
+            level && this._getNodeItems(level.id, level, itemData);
 
             return this;
         },
@@ -195,9 +214,39 @@ define(function(require){
         getDataLayer: function(level){
             return this.customDataLayers && this.customDataLayers[level.id] ?
                 this.customDataLayers[level.id] : this.defaultDataLayer;
+        },
+
+        _addItem: function(childItems, parentId, itemData) {
+            !_.findWhere(childItems, {id: itemData.id}) && childItems.push(itemData);
+
+            return childItems;
+        },
+
+        _updateItem: function(childItems, itemData) {
+            _.each(childItems, function(item) {
+                item.id === itemData.id && (_.extend(item, itemData));
+            }, this);
+
+            return childItems;
+        },
+
+        _getNodeItems: function(parentId, level, itemData, action) {
+            var dataLayer = this.getDataLayer(level),
+                childItems = level.list.model.get("items") ? level.list.model.get("items") : [],
+                updatedChildItems;
+
+            dataLayer.predefinedData = dataLayer.predefinedData || {};
+
+            updatedChildItems = (action === ITEM_ACTIONS.ADD
+                ? this._addItem(childItems, parentId, itemData)
+                : this._updateItem(childItems, itemData));
+
+            dataLayer.predefinedData[parentId] = _.sortBy(updatedChildItems, 'label');
+
+            level.list.lazy = false;
+            level.list.fetch();
         }
     },{
-        _plugins: [],
         instance: function(options){
             return new this(options);
         }
@@ -236,8 +285,7 @@ define(function(require){
                 parentLevel.items[levelName] = new TreeLevel(
                     _.extend({}, self._options, {
                             el: element,
-                            id: items[index].id,
-                            resource: items[index].value,
+                            item: items[index],
                             parent: parentLevel
                         }));
 

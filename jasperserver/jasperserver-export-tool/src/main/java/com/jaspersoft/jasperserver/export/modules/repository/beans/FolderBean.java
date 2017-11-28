@@ -20,13 +20,19 @@
  */
 package com.jaspersoft.jasperserver.export.modules.repository.beans;
 
-import java.util.Date;
-
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Folder;
+import com.jaspersoft.jasperserver.export.modules.ImporterModuleContext;
+import com.jaspersoft.jasperserver.export.modules.common.TenantStrHolderPattern;
+
+import java.util.Date;
+import java.util.regex.Pattern;
+
+import static com.jaspersoft.jasperserver.api.metadata.common.domain.Folder.SEPARATOR;
+import static com.jaspersoft.jasperserver.api.metadata.user.service.TenantService.ORGANIZATIONS;
 
 /**
  * @author tkavanagh
- * @version $Id: FolderBean.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: FolderBean.java 58265 2015-10-05 16:13:56Z vzavadsk $
  */
 
 public class FolderBean {
@@ -58,11 +64,35 @@ public class FolderBean {
 		setUpdateDate(folder.getUpdateDate());
 	}
 	
-	public void copyTo(Folder folder) {
+	public void copyTo(Folder folder, ImporterModuleContext context) {
 		folder.setName(getName());
 		folder.setLabel(getLabel());
 		folder.setDescription(getDescription());
 		folder.setParentFolder(getParent());
+
+		if (!context.getNewGeneratedTenantIds().isEmpty()) {
+			handleNewTenantIds(folder, context);
+		}
+	}
+
+	// ^(/organizations/[^/]+)*/organizations/?
+	private static final Pattern ORGANIZATIONS_FOLDER_PATTERN =
+			Pattern.compile("^(" + SEPARATOR + ORGANIZATIONS + SEPARATOR +
+					"[^" + SEPARATOR + "]+)*" + SEPARATOR + ORGANIZATIONS + SEPARATOR + "?");
+
+	private void handleNewTenantIds(Folder folder, ImporterModuleContext context) {
+		if (ORGANIZATIONS_FOLDER_PATTERN.matcher(folder.getParentFolder()).matches()) {
+			// it is organization folder
+			String name = folder.getName();
+			folder.setName(TenantStrHolderPattern.TENANT_ID
+					.replaceWithNewTenantIds(context.getNewGeneratedTenantIds(), folder.getName()));
+			if (name != null && !name.equals(folder.getName())) {
+				folder.setLabel(folder.getName());
+			}
+		}
+
+		folder.setParentFolder(TenantStrHolderPattern.TENANT_FOLDER_URI
+				.replaceWithNewTenantIds(context.getNewGeneratedTenantIds(), folder.getParentFolder()));
 	}
 	
 	/*

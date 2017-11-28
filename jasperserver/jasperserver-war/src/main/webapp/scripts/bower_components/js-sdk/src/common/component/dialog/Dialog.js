@@ -22,28 +22,29 @@
 
 /**
  * @author: Zakhar Tomchenko, Kostiantyn Tsaregradskyi
- * @version: $Id: Dialog.js 1154 2015-04-25 17:52:53Z ktsaregr $
+ * @version: $Id: Dialog.js 1721 2015-10-15 11:56:43Z psavushc $
  */
 
 define(function(require){
     "use strict";
 
     require("jquery.ui");
+    require("css!common/dialog");
 
     var _ = require('underscore'),
         $ = require('jquery'),
-        Dimmer = require("./Dimmer"),
+        Dimmer = require("../base/Dimmer"),
         Panel = require("common/component/panel/Panel"),
-        OptionContainer = require("common/component/option/OptionContainer"),
+        OptionContainer = require("common/component/base/OptionContainer"),
 
         resizablePanelTrait = require('common/component/panel/trait/resizablePanelTrait'),
 
         dialogTemplate = require('text!./template/dialogTemplate.htm'),
         dialogButtonTemplate = require("text!./template/dialogButtonTemplate.htm");
 
-    require("css!dialog.css");
+	var _savedOptions = {}; // object used to save options which came to us
 
-    var Dialog = Panel.extend({
+    var Dialog = Panel.extend(/** @lends Dialog.prototype */{
         defaultTemplate: dialogTemplate,
 
         events: {
@@ -52,6 +53,19 @@ define(function(require){
           "keydown": "_onKeyDown"
         },
 
+        /**
+         * @constructor Dialog
+         * @classdesc Base Dialog component
+         * @extends Panel
+         * @param {object} [options] Options for Dialog. For panel-specfic options see {@link Panel#constructor}
+         * @param {boolean} [options.resizable=false] If dialog is resizable
+         * @param {boolean} [options.modal=false] If dialog is modal
+         * @param {object[]} [options.buttons] Buttons for dialog
+         * @param {string} options.buttons[].action Button action
+         * @param {string} options.buttons[].label Button label
+         * @param {boolean} options.buttons[].primary If button is primary
+         * @fires Dialog#button:ACTION
+         */
         constructor: function(options) {
             options || (options = {});
             options.traits || (options.traits = []);
@@ -67,14 +81,23 @@ define(function(require){
         },
 
         initialize: function(options){
+	        _savedOptions = _.extend({}, options);
             this.collapsed = !this.collapsed;
 
             if(!_.isEmpty(options.buttons)) {
-                this.buttons = new OptionContainer({options:options.buttons, el: this.$(".footer")[0], contextName:"button", optionTemplate: dialogButtonTemplate});
+                this.buttons = new OptionContainer({
+                    options:options.buttons,
+                    el: this.$(".m-Dialog-footer")[0] || this.$(".footer")[0],
+                    contextName:"button",
+                    optionTemplate: dialogButtonTemplate
+                });
             }
 
             Panel.prototype.initialize.apply(this, arguments);
 
+            /**
+             * @event Dialog#button:ACTION
+             */
             // re-trigger button events on dialog itself
             this.buttons && this.listenTo(
                 this.buttons,
@@ -87,9 +110,17 @@ define(function(require){
         setElement: function(el){
             var res = Panel.prototype.setElement.apply(this, arguments);
 
-            this.buttons && this.buttons.setElement(this.$(".footer")[0]);
+            this.buttons && this.buttons.setElement(this.$(".m-Dialog-footer")[0] || this.$(".footer")[0]);
 
             return res;
+        },
+
+        /**
+         * @description Set panel title.
+         * @param {string} title Panel title
+         */
+        setTitle: function(title) {
+            this.$(".m-Dialog-header > .m-Dialog-header-title").text(title);
         },
 
         render: function(){
@@ -106,11 +137,23 @@ define(function(require){
             return this;
         },
 
-        open: function(coordinates) {
+        /**
+         * @description Open dialog.
+         * @param {object} [coordinates] Position to open dialog.
+         * @param {number} [coordinates.top] Top position to open dialog.
+         * @param {number} [coordinates.left] Left position to open dialog.
+         * @fires Dialog#dialog:visible
+         * @returns {Dialog}
+         */
+        open: function(coordinates){
             if (!this.isVisible()) {
                 Panel.prototype.open.apply(this, arguments);
 
-                this.modal && this.dimmer.css({ zIndex: ++Dialog.highestIndex }).show();
+                this.modal && this.dimmer.css({zIndex: ++Dialog.highestIndex}).show();
+
+	            if (_savedOptions.additionalCssClasses && _savedOptions.additionalCssClasses.indexOf("newResizeableDialog") !== -1) {
+		            this._setMinSize();
+	            }
 
                 this._position(coordinates)._increaseZIndex();
 
@@ -121,12 +164,19 @@ define(function(require){
 
                 this.$el.show();
 
-                this.trigger("dialog:visible");
+            /**
+             * @event Dialog#dialog:visible
+             */
+            this.trigger("dialog:visible");
 
                 return this;
             }
         },
 
+        /**
+         * @description Close dialog.
+         * @returns {Dialog|undefined}
+         */
         close: function(){
             if (this.isVisible()) {
                 this.$el.css({ zIndex: --Dialog.highestIndex });
@@ -141,21 +191,62 @@ define(function(require){
             }
         },
 
+        /**
+         * @description Adds additional css classes to Panel
+         * @param {string} classNames Panel css class names
+         */
+        addCssClasses: function(classNames) {
+            this.$el.addClass(classNames);
+        },
+
+        /**
+         * @description Overrides {@link Panel#toggleCollapsedState} to do nothing.
+         * @returns {Dialog}
+         */
         toggleCollapsedState: function() {
             return this;
         },
 
+        /**
+         * @description Enable specific dialog button.
+         * @param {string} id Button ID
+         */
         enableButton: function(id){
             this.buttons.enable(id);
         },
 
+        /**
+         * @description Disable specific dialog button.
+         * @param {string} id Button ID
+         */
         disableButton: function(id){
             this.buttons.disable(id);
         },
 
+        /**
+         * @description Check if dialog is visible.
+         * @returns {boolean}
+         */
         isVisible: function() {
             return this.$el.is(":visible");
         },
+
+	    _setMinSize: function() {
+
+		    if (_savedOptions.minWidth) {
+			    this.$el.css({
+				    width: _savedOptions.minWidth,
+				    minWidth: _savedOptions.minWidth
+			    });
+		    }
+
+		    if (_savedOptions.minHeight) {
+			    this.$el.css({
+				    height: _savedOptions.minHeight,
+				    minHeight: _savedOptions.minHeight
+			    });
+		    }
+	    },
 
         _position: function(coordinates){
 
@@ -209,6 +300,9 @@ define(function(require){
             this.buttons._onKeyDown(e);
         },
 
+        /**
+         * @description Remove dialog from DOM
+         */
         remove: function(){
             this.buttons && this.buttons.remove();
 

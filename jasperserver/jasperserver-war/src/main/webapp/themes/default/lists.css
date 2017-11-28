@@ -1637,7 +1637,10 @@ and (max-device-width : 1024px) {
 }
 
 /* .jobs-only styles */
+.list.jobs .jobResource,
+.list.jobs .jobResourcePath,
 .list.jobs .jobID,
+.list.jobs .jobDescription,
 .list.jobs .jobState {
     height:24px;
     overflow:hidden;
@@ -1982,4 +1985,8 @@ and (max-device-width : 1024px) {
 /* no result message */
 .list div.noSearchResults {
     text-align: center;
+}
+
+.panel.dialog.overlay.ui-resizable.selectFolder .hideRoot > .node > .subcontainer > .j-view-port-chunk > .collapsible {
+	margin-left: 0;
 }

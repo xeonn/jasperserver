@@ -21,7 +21,7 @@
 package com.jaspersoft.jasperserver.jaxrs.common;
 
 import com.jaspersoft.jasperserver.remote.exception.IllegalParameterValueException;
-import com.jaspersoft.jasperserver.remote.exception.xml.ErrorDescriptor;
+import com.jaspersoft.jasperserver.dto.common.ErrorDescriptor;
 import org.codehaus.jackson.JsonParseException;
 import org.springframework.stereotype.Service;
 
@@ -33,7 +33,7 @@ import javax.ws.rs.ext.Provider;
  * <p></p>
  *
  * @author yaroslav.kovalchyk
- * @version $Id: JsonParseExceptionMapper.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: JsonParseExceptionMapper.java 57603 2015-09-15 17:20:48Z psavushc $
  */
 @Service
 @Provider
@@ -41,9 +41,8 @@ public class JsonParseExceptionMapper implements ExceptionMapper<JsonParseExcept
     @Override
     public Response toResponse(JsonParseException exception) {
         return Response.status(Response.Status.BAD_REQUEST).entity(
-                new ErrorDescriptor.Builder()
+                new ErrorDescriptor()
                         .setErrorCode(IllegalParameterValueException.ERROR_CODE)
-                        .setMessage(exception.getMessage())
-                        .getErrorDescriptor()).build();
+                        .setMessage(exception.getMessage())).build();
     }
 }

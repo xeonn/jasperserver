@@ -22,7 +22,7 @@
 
 /**
  * @author: Angus Croll
- * @version: $Id: core.layout.js 9192 2015-08-12 19:52:08Z yplakosh $
+ * @version: $Id: core.layout.js 9351 2015-09-15 16:46:03Z psavushc $
  */
 
 /* global $H, Truncator, isIE7, parseFunc, centerElement, iScroll, matchMeOrUp, Draggable, isIPad, doNothing, $$,
@@ -64,6 +64,7 @@ var layoutModule = {
     SEPARATOR_PATTERN: '.separator',
     MESSAGE_PATTERN: '.message',
     MESSAGE_WARNING_PATTERN: '.message.warning',
+    MESSAGE_WARNING_DETAILS_PATTERN: '.details',
     MESSAGE_SUCCESS_PATTERN: '.message.success',
     DETAILS_PATTERN : '.details',
     COLUMN_NODE_WRAPPER_PATTERN: ".node > .wrap > .column",

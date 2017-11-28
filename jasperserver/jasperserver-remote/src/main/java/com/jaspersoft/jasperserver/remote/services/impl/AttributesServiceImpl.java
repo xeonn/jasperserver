@@ -28,14 +28,13 @@ import com.jaspersoft.jasperserver.api.metadata.user.service.AttributesSearchRes
 import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributeService;
 import com.jaspersoft.jasperserver.api.metadata.user.service.TenantService;
 import com.jaspersoft.jasperserver.api.metadata.user.service.impl.AttributesSearchResultImpl;
-import com.jaspersoft.jasperserver.dto.authority.ClientUserAttribute;
+import com.jaspersoft.jasperserver.dto.authority.ClientAttribute;
 import com.jaspersoft.jasperserver.dto.authority.hypermedia.HypermediaAttribute;
 import com.jaspersoft.jasperserver.dto.authority.hypermedia.HypermediaAttributeEmbeddedContainer;
+import com.jaspersoft.jasperserver.dto.common.ErrorDescriptor;
 import com.jaspersoft.jasperserver.dto.permissions.RepositoryPermission;
 import com.jaspersoft.jasperserver.remote.exception.RemoteException;
 import com.jaspersoft.jasperserver.remote.exception.ResourceAlreadyExistsException;
-import com.jaspersoft.jasperserver.remote.exception.ResourceNotFoundException;
-import com.jaspersoft.jasperserver.remote.exception.xml.ErrorDescriptor;
 import com.jaspersoft.jasperserver.remote.helpers.RecipientIdentity;
 import com.jaspersoft.jasperserver.remote.helpers.RecipientIdentityResolver;
 import com.jaspersoft.jasperserver.remote.resources.converters.PermissionConverter;
@@ -47,17 +46,15 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
  * @author Volodya Sabadosh
- * @version $Id: AttributesServiceImpl.java 55311 2015-05-13 16:39:00Z svnaskorodu $
+ * @version $Id: AttributesServiceImpl.java 58870 2015-10-27 22:30:55Z esytnik $
  */
 @Component("attributesService")
 public class AttributesServiceImpl implements AttributesService {
@@ -104,7 +101,7 @@ public class AttributesServiceImpl implements AttributesService {
     }
 
     @SuppressWarnings("unchecked")
-    public AttributesSearchResult<ClientUserAttribute>
+    public AttributesSearchResult<ClientAttribute>
     getAttributes(AttributesSearchCriteria searchCriteria, boolean includeEffectivePermissionsInResult) throws RemoteException {
         String attributeHolder = searchCriteria.getHolder() == null ||
                 searchCriteria.getHolder().equals(ROOT_HOLDER) ? ROOT_HOLDER.concat(TenantService.ORGANIZATIONS) : searchCriteria.getHolder();
@@ -113,17 +110,17 @@ public class AttributesServiceImpl implements AttributesService {
         try {
             recipient = recipientIdentityResolver.resolveRecipientObject(attributeHolder);
         } catch (Exception ex) {
-            return new AttributesSearchResultImpl<ClientUserAttribute>();
+            return new AttributesSearchResultImpl<ClientAttribute>();
         }
 
         AttributesSearchResult<ProfileAttribute> serverSearchResult = profileAttributeService.
                 getProfileAttributesForPrincipal(null, recipient, searchCriteria);
 
-        AttributesSearchResult<ClientUserAttribute> clientAttributes = new AttributesSearchResultImpl<ClientUserAttribute>();
-        clientAttributes.setList(new ArrayList<ClientUserAttribute>());
+        AttributesSearchResult<ClientAttribute> clientAttributes = new AttributesSearchResultImpl<ClientAttribute>();
+        clientAttributes.setList(new ArrayList<ClientAttribute>());
 
         for (ProfileAttribute serverAttr : serverSearchResult.getList()) {
-            ClientUserAttribute clientAttr = attributesConverter.toClient(serverAttr, null);
+            ClientAttribute clientAttr = attributesConverter.toClient(serverAttr, null);
             if (includeEffectivePermissionsInResult) {
                 clientAttr = new HypermediaAttribute(clientAttr);
                 HypermediaAttributeEmbeddedContainer embeddedContainer = new HypermediaAttributeEmbeddedContainer();
@@ -138,24 +135,24 @@ public class AttributesServiceImpl implements AttributesService {
     }
 
     @Override
-    public List<ClientUserAttribute> putAttributes(RecipientIdentity holder,
-                                                   List<? extends ClientUserAttribute> attributes,
+    public List<ClientAttribute> putAttributes(RecipientIdentity holder,
+                                                   List<? extends ClientAttribute> attributes,
                                                    Set<String> names, boolean includeEffectivePermissionsInResult) throws RemoteException {
         Object attributeHolder = recipientIdentityResolver.resolveRecipientObject(holder);
 
         List<ProfileAttribute> attributesToDelete = new ArrayList<ProfileAttribute>();
-        List<ClientUserAttribute> attributesToPut;
+        List<ClientAttribute> attributesToPut;
 
         Set<String> newAttributesNamesSet = new HashSet<String>();
 
         if (attributes != null) {
-            for (ClientUserAttribute attribute : attributes) {
+            for (ClientAttribute attribute : attributes) {
                 newAttributesNamesSet.add(attribute.getName());
             }
 
-            attributesToPut = new LinkedList<ClientUserAttribute>(attributes);
+            attributesToPut = new LinkedList<ClientAttribute>(attributes);
         } else {
-            attributesToPut = new LinkedList<ClientUserAttribute>();
+            attributesToPut = new LinkedList<ClientAttribute>();
         }
 
         AttributesSearchCriteria searchCriteria = new AttributesSearchCriteria.Builder().setNames(names).build();
@@ -169,7 +166,7 @@ public class AttributesServiceImpl implements AttributesService {
                 }
             }
         } else {
-            Iterator<ClientUserAttribute> iterator = attributesToPut.iterator();
+            Iterator<ClientAttribute> iterator = attributesToPut.iterator();
             while (iterator.hasNext()) {
                 if (!names.contains(iterator.next().getName())) {
                     iterator.remove();
@@ -196,8 +193,8 @@ public class AttributesServiceImpl implements AttributesService {
             }
         }
 
-        List<ClientUserAttribute> result = new ArrayList<ClientUserAttribute>();
-        for (ClientUserAttribute client : attributesToPut) {
+        List<ClientAttribute> result = new ArrayList<ClientAttribute>();
+        for (ClientAttribute client : attributesToPut) {
             try {
                 client.setHolder(recipientIdentityResolver.toRecipientUri(holder));
 
@@ -219,7 +216,7 @@ public class AttributesServiceImpl implements AttributesService {
                     }
                 }
 
-                ClientUserAttribute updatedClient = attributesConverter.toClient(serverAttr, null);
+                ClientAttribute updatedClient = attributesConverter.toClient(serverAttr, null);
 
                 if (includeEffectivePermissionsInResult) {
                     HypermediaAttributeEmbeddedContainer embeddedContainer = new HypermediaAttributeEmbeddedContainer();
@@ -234,11 +231,10 @@ public class AttributesServiceImpl implements AttributesService {
             } catch (AccessDeniedException ex) {
                 throw new com.jaspersoft.jasperserver.remote.exception.AccessDeniedException("Access denied for attribute ", client.getName());
             } catch (JSDuplicateResourceException ex) {
-                throw new ResourceAlreadyExistsException(new ErrorDescriptor
-                        .Builder()
+                throw new ResourceAlreadyExistsException(new ErrorDescriptor()
                         .setErrorCode("attribute.duplicate.server.level")
                         .setMessage("The attribute name is reserved for use at the server level")
-                        .setParameters(new String[]{client.getName()}).getErrorDescriptor());
+                        .setParameters(new String[]{client.getName()}));
             }
         }
 
@@ -246,7 +242,7 @@ public class AttributesServiceImpl implements AttributesService {
     }
 
     @Override
-    public List<ClientUserAttribute> getAttributes(RecipientIdentity holder,
+    public List<ClientAttribute> getAttributes(RecipientIdentity holder,
                                                    Set<String> names,
                                                    boolean includeEffectivePermissions) throws RemoteException {
         Object recipient = recipientIdentityResolver.resolveRecipientObject(holder);
@@ -257,10 +253,10 @@ public class AttributesServiceImpl implements AttributesService {
         AttributesSearchResult<ProfileAttribute> serverSearchResult = profileAttributeService.
                 getProfileAttributesForPrincipal(null, recipient, searchCriteria);
 
-        List<ClientUserAttribute> clientAttributes = new ArrayList<ClientUserAttribute>();
+        List<ClientAttribute> clientAttributes = new ArrayList<ClientAttribute>();
 
         for (ProfileAttribute serverAttr : serverSearchResult.getList()) {
-            ClientUserAttribute clientAttr = attributesConverter.toClient(serverAttr, null);
+            ClientAttribute clientAttr = attributesConverter.toClient(serverAttr, null);
             if (includeEffectivePermissions) {
                 clientAttr = new HypermediaAttribute(clientAttr);
                 HypermediaAttributeEmbeddedContainer embeddedContainer = new HypermediaAttributeEmbeddedContainer();

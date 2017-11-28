@@ -4,13 +4,13 @@ import com.jaspersoft.jasperserver.api.metadata.common.domain.DataType;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.InputControl;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceReference;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.client.DataTypeImpl;
+import com.jaspersoft.jasperserver.dto.common.validations.MandatoryValidationRule;
+import com.jaspersoft.jasperserver.dto.common.validations.ValidationRule;
+import com.jaspersoft.jasperserver.dto.reports.inputcontrols.ReportInputControl;
 import com.jaspersoft.jasperserver.war.cascade.CachedEngineService;
 import com.jaspersoft.jasperserver.war.cascade.CachedRepositoryService;
 import com.jaspersoft.jasperserver.war.cascade.CascadeResourceNotFoundException;
 import com.jaspersoft.jasperserver.war.cascade.InputControlValidationException;
-import com.jaspersoft.jasperserver.dto.common.validations.MandatoryValidationRule;
-import com.jaspersoft.jasperserver.dto.reports.inputcontrols.ReportInputControl;
-import com.jaspersoft.jasperserver.dto.common.validations.ValidationRule;
 import com.jaspersoft.jasperserver.war.util.CalendarFormatProvider;
 import com.jaspersoft.jasperserver.war.util.MessagesCalendarFormatProvider;
 import org.junit.Before;
@@ -49,7 +49,7 @@ import static org.unitils.reflectionassert.ReflectionAssert.assertReflectionEqua
 
 /**
  * @author Anton Fomin
- * @version $Id: SingleValueInputControlHandlerTest.java 51947 2014-12-11 14:38:38Z ogavavka $
+ * @version $Id: SingleValueInputControlHandlerTest.java 58870 2015-10-27 22:30:55Z esytnik $
  */
 public class SingleValueInputControlHandlerTest extends UnitilsJUnit4 {
 

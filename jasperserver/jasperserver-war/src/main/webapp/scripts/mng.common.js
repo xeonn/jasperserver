@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: mng.common.js 9225 2015-08-21 22:05:24Z mheck $
+ * @version: $Id: mng.common.js 9602 2015-10-29 14:06:10Z ztomchen $
  */
 
 /* global repositorySearch, SearchBox, toolbarButtonModule, toFunction, getAsFunction, localContext, isArray, JSCookie,
@@ -39,7 +39,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 var orgModule = {
     TREE_ID: "orgTree",
-    COOKIE_NAME: 'selectedOrganization',
+    COOKIE_NAME: 'selectedTenant',
     messages: [],
 
     ActionMap: {
@@ -104,6 +104,10 @@ var orgModule = {
         return message ? new Template(message).evaluate(options ? options : {}) : "";
     },
 
+    _comparator: function(l1, l2) {
+        return l1 > l2 ? 1 : (l1 < l2 ? -1 : 0);
+    },
+
     _getContainer: function() {
         if (!this._container) {
             this._container = document.body;
@@ -130,7 +134,6 @@ orgModule.systemRoles = [
     orgModule.Configuration.anonymousRole
 ];
 
-
 /**
  * This Class represents tenant in JS
  *
@@ -146,9 +149,9 @@ orgModule.Organization = function(jsonOrNode) {
         this.uri = jsonOrNode.param.uri;
         this.treeNode = jsonOrNode;
     } else {
-        this.id = jsonOrNode.tenantId;
+        this.id = jsonOrNode.tenantId || jsonOrNode.id;
         this.name = jsonOrNode.tenantName;
-        this.alias = jsonOrNode.tenantAlias;
+        this.alias = jsonOrNode.tenantAlias || jsonOrNode.alias;
         this.desc = jsonOrNode.tenantDesc;
         this.uri = jsonOrNode.tenantUri;
         this.parentId = jsonOrNode.parentId;
@@ -349,42 +352,42 @@ orgModule.Role.addMethod('toPermissionData', function(user) {
     };
 });
 
-/**
- * Creates the tree that represents structure of organizations
- *
- * @param id
- * @param options
- */
-orgModule.createOrganizationsTree = function(options) {
+orgModule.initTenantsTreeEvents = function() {
+    orgModule.manager.tenantsTree.on("selection:change", function(selectedItem) {
+        if (!orgModule.manager.lastSelectedOrg || orgModule.manager.lastSelectedOrg.id !== selectedItem.id) {
+            var selectedTenant = new orgModule.Organization(selectedItem),
+                properties = orgModule.properties;
 
-    dynamicTree.Organization = function(options) {
-        dynamicTree.TreeNode.call(this, options);
+            orgModule.manager.tenantsTree.setTenant(selectedTenant);
 
-        this.Types = {
-            Folder: new dynamicTree.TreeNode.Type('com.jaspersoft.jasperserver.api.metadata.common.domain.Folder')
-        };
-        this.nodeHeaderTemplateDomId = "list_responsive_collapsible_folders:folders";
-    };
+            window.localStorage && localStorage.setItem(orgModule.COOKIE_NAME, JSON.stringify(selectedItem));
 
-    dynamicTree.Organization.prototype = deepClone(dynamicTree.TreeNode.prototype);
+            orgModule.fire(orgModule.Event.ORG_BROWSE, {
+                organization: selectedTenant,
+                entityEvent: false
+            });
 
-    var tree = new dynamicTree.TreeSupport(orgModule.TREE_ID, Object.extend({
-        providerId: 'tenantTreeFoldersProvider',
-        rootUri: '/',
-        nodeClass: dynamicTree.Organization,
-        templateDomId: "list_responsive_collapsible_folders",
-        bShowRoot: true
-    }, options ? options : {}));
+            if (orgModule.orgManager) {
+                properties.changeDisable(false, ['#' + properties._EDIT_BUTTON_ID]);
 
-    tree.observe('node:selected', function(event) {
-        var node = event.memo.node,
-            uri = node.param.uri,
-            properties = orgModule.properties;
+                orgModule.fire(orgModule.Event.ENTITY_SELECT_AND_GET_DETAILS, {
+                    entityId: selectedTenant.id,
+                    entityEvent: false
+                });
+            }
 
-        window.localStorage && localStorage.setItem(orgModule.COOKIE_NAME, uri);
+            if (orgModule.userManager || orgModule.roleManager) {
+                properties.hide();
+                properties.unlock();
+            }
+        }
+    });
+
+    orgModule.manager.tenantsTree.on("import:finished", function(tenantId) {
+        var  properties = orgModule.properties;
 
         orgModule.fire(orgModule.Event.ORG_BROWSE, {
-            organization: new orgModule.Organization(node),
+            force: true,
             entityEvent: false
         });
 
@@ -392,58 +395,11 @@ orgModule.createOrganizationsTree = function(options) {
             properties.changeDisable(false, ['#' + properties._EDIT_BUTTON_ID]);
 
             orgModule.fire(orgModule.Event.ENTITY_SELECT_AND_GET_DETAILS, {
-                entity: new orgModule.Organization(node),
+                entityId: tenantId,
                 entityEvent: false
             });
         }
-
-        (orgModule.userManager || orgModule.roleManager) && properties.hide();
     });
-
-    tree.showOrganizations = function(selectedTenantUri) {
-        var uri = window.localStorage ? localStorage.getItem(orgModule.COOKIE_NAME) : undefined;
-
-        uri = selectedTenantUri || uri || "/";
-
-        this.showTreePrefetchNodes(uri, function() {
-            uri == "/" ?
-                this.getRootNode().select() :
-                this.openAndSelectNode(uri);
-
-        }.bind(this));
-    };
-
-    tree.getOrganization = function() {
-        var node = this.getSelectedNode();
-        return (node) ? new orgModule.Organization(node) : null;
-    };
-
-    tree.selectOrganization = function(org, options) {
-        var node = org.treeNode;
-        this.openAndSelectNode(node.param.uri, false, false, options);
-    };
-
-    tree.updateOrganization = function(org, parentOrg) {
-        var node = this.findNodeById(org.id, parentOrg ? parentOrg.treeNode : undefined);
-        node && node.changeName(org.name);
-    };
-
-    tree.updateSubOrganizations = function(org) {
-        if (org.treeNode) {
-            if (!org.treeNode.hasChilds()) {
-                org.treeNode.setHasChilds(true);
-            }
-
-            if (org.treeNode.isOpen()) {
-                org.treeNode.handleNode();
-            }
-
-            org.treeNode.isloaded = false;
-            org.treeNode.handleNode();
-        }
-    };
-
-    return tree;
 };
 
 orgModule.entityList = {
@@ -460,10 +416,7 @@ orgModule.entityList = {
             multiSelect: true,
             selectionDefaultsToCursor: true,
             comparator: function(item1, item2) {
-                var l1 = item1.getLabel();
-                var l2 = item2.getLabel();
-
-                return l1 > l2 ? 1 : (l1 < l2 ? -1 : 0);
+                return orgModule._comparator(item1.getLabel(), item2.getLabel());
             }
         });
 
@@ -502,21 +455,21 @@ orgModule.entityList = {
 
             this.lastSelectedName = item.getValue().getNameWithTenant();
 
-            orgModule.fire(orgModule.Event.ENTITY_SELECT_AND_GET_DETAILS, {entity: item.getValue(), entityEvent: true});
+            orgModule.fire(orgModule.Event.ENTITY_SELECT_AND_GET_DETAILS, {entityId: item.getValue().id, entityEvent: true});
 
             properties.changeDisable(false, ['#' + properties._EDIT_BUTTON_ID]);
         }.bindAsEventListener(this));
 
         this.list.observe('item:unselected', function(event) {
-            var tree = orgModule.manager.tree,
+            var tenantsTree = orgModule.manager.tenantsTree,
                 properties = orgModule.properties;
 
             properties.changeDisable(false, ['#' + properties._EDIT_BUTTON_ID]);
             // Due to complexity of code in mng.common (event flow) there is need to handle some cases in such inappropriate manner
             // This need to by refactored once mng.common will be refactored in new AMD way + new tree.
-            if (!properties.locked && tree) {
+            if (!properties.locked && tenantsTree) {
                 orgModule.fire(orgModule.Event.ENTITY_SELECT_AND_GET_DETAILS, {
-                    entity: new orgModule.Organization(tree.getSelectedNode()),
+                    entityId: tenantsTree.getTenant().id,
                     entityEvent: true,
                     isCtrlHeld: event.memo.isCtrlHeld
                 });
@@ -653,6 +606,7 @@ orgModule.entityList = {
             });
         }
 
+        this.list.resetSelected();
         this.list.removeItems(matched);
     }
 };
@@ -723,8 +677,7 @@ orgModule.properties = {
 
     _initConfirmationDialog: function() {
         var self = this,
-            i18n = this.options.i18n,
-            i18n2 = this.options.i18n2;
+            i18n = this.options.i18n;
 
         this.confirmationDialog = new this.options.ConfirmationDialog({
             title: i18n["attributes.confirm.dialog.title"],
@@ -993,9 +946,7 @@ orgModule.properties = {
                 }) : dfd.resolve();
 
                 dfd.done(function() {
-                    extObj.save(function() {
-                        extObj.changeMode(false);
-                    });
+                    extObj.save(extObj._value);
                 });
             }
         };

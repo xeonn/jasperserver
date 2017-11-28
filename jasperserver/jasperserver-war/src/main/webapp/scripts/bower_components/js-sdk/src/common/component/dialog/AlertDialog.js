@@ -1,12 +1,27 @@
 /*
- * Copyright (C) 2005 - 2014 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2015 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
- * Licensed under commercial Jaspersoft Subscription License Agreement
+ *
+ * Unless you have purchased  a commercial license agreement from Jaspersoft,
+ * the following license terms  apply:
+ *
+ * This program is free software: you can redistribute it and/or  modify
+ * it under the terms of the GNU Affero General Public License  as
+ * published by the Free Software Foundation, either version 3 of  the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero  General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public  License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 /**
- * @author:
- * @version: $Id: AlertDialog.js 1178 2015-05-06 20:40:12Z yplakosh $
+ * @author: Kostiantyn Tsaregradskyi
+ * @version: $Id: AlertDialog.js 1721 2015-10-15 11:56:43Z psavushc $
  */
 
 define(function (require) {
@@ -15,31 +30,45 @@ define(function (require) {
     var _ = require('underscore'),
         Dialog = require("./Dialog"),
         alertDialogTemplate = require("text!./template/alertDialogTemplate.htm"),
-        i18n = require('bundle!CommonBundle');
+        i18n = require('bundle!js-sdk/CommonBundle');
 
-    return Dialog.extend({
-
+    return Dialog.extend(/** @lends AlertDialog.prototype */{
         contentTemplate: _.template(alertDialogTemplate),
 
+        /**
+         * @constructor AlertDialog
+         * @extends Dialog
+         * @classdesc AlertDialog component.
+         * @param {object} options
+         * @param {string} options.message Message for dialog
+         * @fires button:close
+         */
         constructor: function(options) {
             options || (options = {});
 
             Dialog.prototype.constructor.call(this, {
                 modal: options.modal !== false,
-                additionalCssClasses: "alertDialog",
+                message: options.message,
+                additionalCssClasses: "alertDialog " + (options.additionalCssClasses || ""),
                 title: options.title || i18n["dialog.exception.title"],
                 buttons: [
                     { label: i18n["button.close"], action: "close", primary: true }
                 ]
-            });
+            }, options);
         },
 
-        initialize: function() {
+        initialize: function(options) {
             Dialog.prototype.initialize.apply(this, arguments);
 
             this.on("button:close", this.close);
+
+            this.setMessage(options.message);
         },
 
+        /**
+         * @description Set dialog message.
+         * @param {string} message Message for dialog
+         */
         setMessage: function(message) {
             this.content = this.contentTemplate({message: message});
 

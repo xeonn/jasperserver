@@ -21,13 +21,14 @@
 
 package com.jaspersoft.jasperserver.export.modules;
 
+import com.jaspersoft.jasperserver.export.ImportTask;
 import org.dom4j.Element;
 
-import com.jaspersoft.jasperserver.export.ImportTask;
+import java.util.Map;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ImporterModuleContext.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: ImporterModuleContext.java 58265 2015-10-05 16:13:56Z vzavadsk $
  */
 public interface ImporterModuleContext {
 
@@ -39,4 +40,8 @@ public interface ImporterModuleContext {
 	
 	Attributes getAttributes();
 
+	/**
+     * Returns a map, which links old tenant id to new unique tenant id
+     */
+	Map<String, String> getNewGeneratedTenantIds();
 }

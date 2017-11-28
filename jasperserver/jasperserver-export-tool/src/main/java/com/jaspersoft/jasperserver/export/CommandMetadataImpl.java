@@ -21,18 +21,17 @@
 
 package com.jaspersoft.jasperserver.export;
 
+import com.jaspersoft.jasperserver.api.JSException;
+import org.springframework.beans.factory.InitializingBean;
+
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.springframework.beans.factory.InitializingBean;
-
-import com.jaspersoft.jasperserver.api.JSException;
-
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: CommandMetadataImpl.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: CommandMetadataImpl.java 58265 2015-10-05 16:13:56Z vzavadsk $
  */
 public class CommandMetadataImpl implements CommandMetadata, InitializingBean {
 

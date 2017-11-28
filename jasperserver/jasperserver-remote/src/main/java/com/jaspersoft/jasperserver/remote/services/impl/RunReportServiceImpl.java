@@ -23,6 +23,7 @@ package com.jaspersoft.jasperserver.remote.services.impl;
 import com.jaspersoft.jasperserver.api.JSValidationException;
 import com.jaspersoft.jasperserver.api.common.domain.ValidationError;
 import com.jaspersoft.jasperserver.api.common.domain.impl.ExecutionContextImpl;
+import com.jaspersoft.jasperserver.api.common.error.handling.SecureExceptionHandler;
 import com.jaspersoft.jasperserver.api.common.util.TimeZoneContextHolder;
 import com.jaspersoft.jasperserver.api.engine.common.service.EngineService;
 import com.jaspersoft.jasperserver.api.engine.common.service.ReportExecutionStatusInformation;
@@ -32,6 +33,7 @@ import com.jaspersoft.jasperserver.api.engine.jasperreports.common.JSReportExecu
 import com.jaspersoft.jasperserver.api.engine.jasperreports.domain.impl.ReportUnitResult;
 import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
 import com.jaspersoft.jasperserver.api.metadata.xml.domain.impl.Argument;
+import com.jaspersoft.jasperserver.dto.common.ErrorDescriptor;
 import com.jaspersoft.jasperserver.dto.reports.inputcontrols.ReportInputControl;
 import com.jaspersoft.jasperserver.remote.ServiceException;
 import com.jaspersoft.jasperserver.remote.exception.ErrorDescriptorBuildingService;
@@ -40,7 +42,6 @@ import com.jaspersoft.jasperserver.remote.exception.IllegalParameterValueExcepti
 import com.jaspersoft.jasperserver.remote.exception.MandatoryParameterNotFoundException;
 import com.jaspersoft.jasperserver.remote.exception.RemoteException;
 import com.jaspersoft.jasperserver.remote.exception.ResourceNotFoundException;
-import com.jaspersoft.jasperserver.remote.exception.xml.ErrorDescriptor;
 import com.jaspersoft.jasperserver.remote.reports.HtmlExportStrategy;
 import com.jaspersoft.jasperserver.remote.services.ExecutionStatus;
 import com.jaspersoft.jasperserver.remote.services.ExportExecution;
@@ -100,7 +101,7 @@ import java.util.regex.Pattern;
  * Run a report unit using the passing in parameters and options
  *
  * @author ykovalchyk
- * @version $Id: RunReportServiceImpl.java 55351 2015-05-15 08:20:01Z ykovalch $
+ * @version $Id: RunReportServiceImpl.java 58870 2015-10-27 22:30:55Z esytnik $
  */
 @Service("runReportService")
 @Scope(value = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)
@@ -129,6 +130,8 @@ public class RunReportServiceImpl implements RunReportService, Serializable, Dis
     private HtmlExportStrategy defaultHtmlExportStrategy;
     @Resource(name = "concreteVirtualizerFactory")
     private VirtualizerFactory virtualizerFactory;
+    @Resource
+    private SecureExceptionHandler secureExceptionHandler;
 
     private final Map<String, ReportExecution> executions = new ConcurrentHashMap<String, ReportExecution>();
 
@@ -153,7 +156,7 @@ public class RunReportServiceImpl implements RunReportService, Serializable, Dis
                     break;
                 case ERROR: {
                     executionStatus = ExecutionStatus.failed;
-                    execution.setErrorDescriptor(new ErrorDescriptor(reportStatus.getError()));
+                    execution.setErrorDescriptor(secureExceptionHandler.handleException(reportStatus.getError()));
                 }
                 break;
                 case FINISHED: {
@@ -182,6 +185,9 @@ public class RunReportServiceImpl implements RunReportService, Serializable, Dis
         if(ExecutionStatus.execution == reportExecution.getStatus()){
             cancelReportExecution(reportExecution.getRequestId());
         }
+        // if we are restarting reportExecution, then we need to remove link to relatedExecution. It will be ran again
+        // if alternative pagination mode will be needed
+        reportExecution.setRelatedExecution(null);
         reportExecution.setStatus(ExecutionStatus.queued);
         final Locale locale = LocaleContextHolder.getLocale();
         final TimeZone timeZone = TimeZoneContextHolder.getTimeZone();
@@ -194,47 +200,62 @@ public class RunReportServiceImpl implements RunReportService, Serializable, Dis
                 SecurityContextHolder.setContext(context);
                 ReportUnitResult reportUnitResult = null;
                 ErrorDescriptor errorDescriptor = null;
+
                 try {
                     final String reportUnitUri = reportExecution.getReportURI();
-                    final Map<String, String[]> rawParameters = reportExecution.getRawParameters();
-                    // convert parameters from raw strings to objects
-                    Map<String, Object> convertedParameters;
-                    try {
-                        convertedParameters = executeInputControlsCascadeWithRawInput(reportUnitUri, rawParameters);
-                    } catch (CascadeResourceNotFoundException e) {
-                        throw new ResourceNotFoundException("URI:" + e.getResourceUri() + " Type:" + e.getResourceType());
-                    } catch (InputControlsValidationException e) {
-                        // raw type is used in core class. Cast is safe.
-                        @SuppressWarnings("unchecked")
-                        List<ValidationError> errors = e.getErrors().getErrors();
-                        List<String> errorParameters = new ArrayList<String>();
-                        for (ValidationError error : errors) {
-                            errorParameters.add(error.toString());
-                        }
-                        throw new RemoteException(new ErrorDescriptor.Builder().setErrorCode("input.controls.validation.error")
-                                .setMessage("Input controls validation failure").setParameters(errorParameters.toArray())
-                                .getErrorDescriptor());
-                    }
-                    // forward parameters without input control defined
-                    for (String currentKey : rawParameters.keySet()) {
-                        String[] currentValue = rawParameters.get(currentKey);
-                        if (currentValue != null && !convertedParameters.containsKey(currentKey)) {
-                            Object valueToForward;
-                            if (currentValue.length == 1) {
-                                // forward as single value
-                                valueToForward = currentValue[0];
-                            } else {
-                                // forward as collection
-                                Collection<String> collection = new ArrayList<String>();
-                                collection.addAll(Arrays.asList(currentValue));
-                                valueToForward = collection;
+                    Map<String, Object> convertedParameters = reportExecution.getConvertedParameters();
+                    if (convertedParameters == null) {
+                        synchronized (reportExecution) {
+                            convertedParameters = reportExecution.getConvertedParameters();
+                            if (convertedParameters == null) {
+                                // no cached converted parameters. Let's make them by running input controls logic
+                                // on raw parameters
+                                final Map<String, String[]> rawParameters = reportExecution.getRawParameters();
+                                // convert parameters from raw strings to objects
+                                try {
+                                    convertedParameters = executeInputControlsCascadeWithRawInput(reportUnitUri, rawParameters);
+                                } catch (CascadeResourceNotFoundException e) {
+                                    throw new ResourceNotFoundException("URI:" + e.getResourceUri() + " Type:" + e.getResourceType());
+                                } catch (InputControlsValidationException e) {
+                                    // raw type is used in core class. Cast is safe.
+                                    @SuppressWarnings("unchecked")
+                                    List<ValidationError> errors = e.getErrors().getErrors();
+                                    List<String> errorParameters = new ArrayList<String>();
+                                    for (ValidationError error : errors) {
+                                        errorParameters.add(error.toString());
+                                    }
+                                    throw new RemoteException(new ErrorDescriptor().setErrorCode("input.controls.validation.error")
+                                            .setMessage("Input controls validation failure").setParameters(errorParameters.toArray()));
+                                }
+                                // forward parameters without input control defined
+                                for (String currentKey : rawParameters.keySet()) {
+                                    String[] currentValue = rawParameters.get(currentKey);
+                                    if (currentValue != null && !convertedParameters.containsKey(currentKey)) {
+                                        Object valueToForward;
+                                        if (currentValue.length == 1) {
+                                            // forward as single value
+                                            valueToForward = currentValue[0];
+                                        } else {
+                                            // forward as collection
+                                            Collection<String> collection = new ArrayList<String>();
+                                            collection.addAll(Arrays.asList(currentValue));
+                                            valueToForward = collection;
+                                        }
+                                        convertedParameters.put(currentKey, valueToForward);
+                                    }
+                                }
                             }
-                            convertedParameters.put(currentKey, valueToForward);
+                            // cache converted parameter for feather runes.
+                            reportExecution.setConvertedParameters(convertedParameters);
                         }
                     }
                     reportExecution.setStatus(ExecutionStatus.execution);
-
                     reportUnitResult = reportExecutor.runReport(reportUnitUri, convertedParameters, options);
+                    //If reportExecutionOptions.ignorePagination wasn't set, then only here we can know what was a value
+                    // for ignorePagination in current report execution. Let's cache it to use for further executions if
+                    // not specified explicitly.
+                    options.setDefaultIgnorePagination(!reportUnitResult.isPaginated());
+
                 } catch (RemoteException e) {
                     errorDescriptor = e.getErrorDescriptor();
                 } catch (JSReportExecutionRequestCancelledException e){
@@ -304,7 +325,7 @@ public class RunReportServiceImpl implements RunReportService, Serializable, Dis
                     throw e;
                 } catch (Exception e){
                     // if report fails in non async mode, then send error immediately
-                    throw new IllegalParameterValueException(new RemoteException(e).getErrorDescriptor());
+                    throw new IllegalParameterValueException(secureExceptionHandler.handleException(e));
                 }
             }
             final ExportExecution exportExecution = executeExport(exportOptions, execution);
@@ -329,6 +350,7 @@ public class RunReportServiceImpl implements RunReportService, Serializable, Dis
 
     protected ExportExecution executeExport(ExportExecutionOptions exportOptions, final ReportExecution reportExecution) throws RemoteException {
         final ExportExecution exportExecution = new ExportExecution();
+        exportExecution.setSecureExceptionHandler(secureExceptionHandler);
         exportExecution.setStatus(ExecutionStatus.queued);
         exportExecution.setOptions(exportOptions);
         reportExecution.getExports().put(exportExecution);
@@ -347,24 +369,67 @@ public class RunReportServiceImpl implements RunReportService, Serializable, Dis
                     // If report execution is failed or cancelled, then no need to start export.
                     final ReportUnitResult finalReportUnitResult = reportExecution.getFinalReportUnitResult();
                     if (finalReportUnitResult == null) {
-                        exportExecution.setErrorDescriptor(new ErrorDescriptor.Builder()
+                        exportExecution.setErrorDescriptor(new ErrorDescriptor()
                                 .setErrorCode("export.failed")
                                 .setMessage("Export can't be executed. Report execution status is '"
                                         + reportExecution.getStatus().toString() + "'."
                                         + (reportExecution.getErrorDescriptor() != null
-                                        ? " " + reportExecution.getErrorDescriptor().toString() : "")).getErrorDescriptor());
+                                        ? " " + reportExecution.getErrorDescriptor().toString() : "")));
                     } else {
                         executeExport(exportExecution, reportExecution);
                     }
                 } catch (Exception e) {
-                    exportExecution.setErrorDescriptor(new RemoteException(e).getErrorDescriptor());
+                    exportExecution.setErrorDescriptor(secureExceptionHandler.handleException(e));
                 }
             }
         });
     }
 
+    /**
+     * If client wants to get export with another pagination mode, then we have to run report again with
+     * alternate ignorePagination flag value. This method is intended to do it.
+     * @param originalReportExecution - the original report execution to use as a template for related execution.
+     * @param ignorePagination - ignore pagination flag for report execution
+     * @return related report execution instance
+     */
+    protected ReportExecution runRelatedExecution(ReportExecution originalReportExecution, boolean ignorePagination){
+        final ReportExecution relatedReportExecution = new ReportExecution();
+        final String requestId = UUID.randomUUID().toString();
+        relatedReportExecution.setRequestId(requestId);
+        relatedReportExecution.setReportURI(originalReportExecution.getReportURI());
+        relatedReportExecution.setRawParameters(originalReportExecution.getRawParameters());
+        relatedReportExecution.setConvertedParameters(originalReportExecution.getConvertedParameters());
+        relatedReportExecution.setOptions(new ReportExecutionOptions(originalReportExecution.getOptions()).setIgnorePagination(ignorePagination));
+        executions.put(requestId, relatedReportExecution);
+        startReportExecution(relatedReportExecution);
+        originalReportExecution.setRelatedExecution(relatedReportExecution);
+        return relatedReportExecution;
+    }
+
     protected void executeExport(ExportExecution exportExecution, ReportExecution reportExecution) {
-        JasperPrintAccessor jasperPrintAccessor = reportExecution.getFinalReportUnitResult().getJasperPrintAccessor();
+        final ReportUnitResult reportUnitResult = reportExecution.getFinalReportUnitResult();
+        JasperPrintAccessor jasperPrintAccessor = reportUnitResult.getJasperPrintAccessor();
+        final Boolean ignorePagination = exportExecution.getOptions().getIgnorePagination();
+        final boolean currentExecutionIgnorePaginationValue = !reportUnitResult.isPaginated();
+        if(ignorePagination != null && !ignorePagination.equals(currentExecutionIgnorePaginationValue)){
+            // oops, we have to provide export with another pagination mode.
+            // Let's check if we already have jasperPrint with this mode generated:
+            ReportExecution relatedExecution = reportExecution.getRelatedExecution();
+            if(relatedExecution == null){
+                synchronized (reportExecution){
+                    relatedExecution = reportExecution.getRelatedExecution();
+                    if(relatedExecution == null){
+                        // No. We don't have generated jasperPrint for this pagination mode.
+                        // Let's run another report execution to generate it.
+                        relatedExecution = runRelatedExecution(reportExecution, ignorePagination);
+                        // link it to current report execution to track it's status and to be able to cancel it.
+                        reportExecution.setRelatedExecution(relatedExecution);
+                    }
+                }
+            }
+            // let's take a jasperPrintAccessor from related execution with appropriate ignorePagination flag value
+            jasperPrintAccessor = relatedExecution.getFinalReportUnitResult().getJasperPrintAccessor();
+        }
         try {
             ExportExecutionOptions exportOptions = exportExecution.getOptions();
             Integer exportEndPage = null;
@@ -422,7 +487,7 @@ public class RunReportServiceImpl implements RunReportService, Serializable, Dis
             exportExecution.setErrorDescriptor(ex.getErrorDescriptor());
         } catch (Exception ex) {
             log.debug("Unexpected error occurs during export", ex);
-            exportExecution.setErrorDescriptor(new ErrorDescriptor(ex));
+            exportExecution.setErrorDescriptor(secureExceptionHandler.handleException(ex));
         }
     }
 
@@ -514,9 +579,8 @@ public class RunReportServiceImpl implements RunReportService, Serializable, Dis
                     log.debug("Error exporting report", e);
                     auditHelper.addExceptionToAllAuditEvents(e);
                     throw new RemoteException(
-                            new ErrorDescriptor.Builder()
-                                    .setErrorCode("webservices.error.errorExportingReportUnit").setParameters(e.getMessage())
-                                    .getErrorDescriptor(), e
+                            new ErrorDescriptor()
+                                    .setErrorCode("webservices.error.errorExportingReportUnit").setParameters(e.getMessage()), e
                     );
                 } finally {
                     try {
@@ -576,7 +640,7 @@ public class RunReportServiceImpl implements RunReportService, Serializable, Dis
                     virtualizerFactory.disposeReport(execution.getFinalReportUnitResult());
                 }
             } catch (RuntimeException ex) {
-                log.error("Report execution cleanup failed: ", ex);
+                log.warn("Report execution cleanup failed: ", ex);
             }
         }
         executions.clear();

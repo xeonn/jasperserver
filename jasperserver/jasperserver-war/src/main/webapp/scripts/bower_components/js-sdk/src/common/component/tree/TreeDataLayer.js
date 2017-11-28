@@ -2,7 +2,7 @@
  * <p></p>
  *
  * @author Zakhar.Tomchenco
- * @version $Id: TreeDataLayer.js 812 2015-01-27 11:01:30Z psavushchik $
+ * @version $Id: TreeDataLayer.js 1605 2015-09-23 17:55:32Z inestere $
  */
 
 define(function(require){
@@ -15,7 +15,7 @@ define(function(require){
         ClassUtil = require('common/util/classUtil'),
         TreeLevel = require("./TreeLevel"),
 
-        request = require("common/transport/request");
+        request = require("request");
 
     return ClassUtil.extend({
         constructor: function(options){
@@ -47,7 +47,7 @@ define(function(require){
         },
 
         getDataArray: function(data, status, xhr) {
-            throw new Error("Must be overridden!")
+            return data;
         },
 
         obtainData: function(options, level) {
@@ -69,10 +69,10 @@ define(function(require){
                     data: this.data || undefined,
                     url: this.getDataUri(options)
                 }).done(function() {
-                        self.dataSize = self.getDataSize.apply(self, arguments);
+                        self.dataSize = self.getDataSize.call(self, arguments[0], options, arguments[2]);
                         result.resolve({
                             total: self.dataSize,
-                            data: process.call(self, self.getDataArray.apply(self, arguments), options)
+                            data: process.call(self, self.getDataArray.call(self, arguments[0], options, arguments[2]), options)
                         });
                     }).fail(function(xhr) {
                         result.reject(xhr.status, xhr.responseText);

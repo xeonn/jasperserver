@@ -22,6 +22,8 @@ package com.jaspersoft.jasperserver.remote.resources.converters;
 
 import com.jaspersoft.jasperserver.api.metadata.common.domain.InternalURI;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.PermissionUriProtocol;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConversionOptions;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConverter;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.ProfileAttribute;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.TenantQualified;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.client.ProfileAttributeImpl;
@@ -32,7 +34,7 @@ import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributeSer
 import com.jaspersoft.jasperserver.api.metadata.user.service.TenantService;
 import com.jaspersoft.jasperserver.api.metadata.user.service.impl.AttributePathTransformer;
 import com.jaspersoft.jasperserver.api.metadata.user.service.impl.InternalURIDefinition;
-import com.jaspersoft.jasperserver.dto.authority.ClientUserAttribute;
+import com.jaspersoft.jasperserver.dto.authority.ClientAttribute;
 import com.jaspersoft.jasperserver.remote.exception.IllegalParameterValueException;
 import com.jaspersoft.jasperserver.remote.exception.MandatoryParameterNotFoundException;
 import com.jaspersoft.jasperserver.remote.helpers.AttributesConfig;
@@ -51,11 +53,11 @@ import java.util.regex.Pattern;
  *
  * @author Zakhar.Tomchenco
  * @author Volodya Sabadosh
- * @version $Id: UserAttributesConverter.java 55164 2015-05-06 20:54:37Z mchan $
+ * @version $Id: UserAttributesConverter.java 58870 2015-10-27 22:30:55Z esytnik $
  */
 @Service
-public class UserAttributesConverter implements ToServerConverter<ClientUserAttribute, ProfileAttribute>,
-        ToClientConverter<ProfileAttribute, ClientUserAttribute> {
+public class UserAttributesConverter implements ToServerConverter<ClientAttribute, ProfileAttribute>,
+        ToClientConverter<ProfileAttribute, ClientAttribute> {
     @Resource(name = "attributesPermissionService")
     private PermissionsService attributesPermissionService;
     @Resource(name="concreteAttributesRecipientIdentityResolver")
@@ -72,8 +74,8 @@ public class UserAttributesConverter implements ToServerConverter<ClientUserAttr
     protected static final Pattern PATTERN_RESOURCE_NAME_REPLACE = Pattern.compile("[/\\\\]");
 
     @Override
-    public ClientUserAttribute toClient(ProfileAttribute serverObject, ToClientConversionOptions options) {
-        ClientUserAttribute client = new ClientUserAttribute();
+    public ClientAttribute toClient(ProfileAttribute serverObject, ToClientConversionOptions options) {
+        ClientAttribute client = new ClientAttribute();
         client.setName(serverObject.getAttrName());
         if (serverObject.isSecure()) {
             client.setSecure(true);
@@ -97,12 +99,12 @@ public class UserAttributesConverter implements ToServerConverter<ClientUserAttr
     }
 
     @Override
-    public ProfileAttribute toServer(ClientUserAttribute clientObject, ToServerConversionOptions options) throws IllegalParameterValueException, MandatoryParameterNotFoundException {
+    public ProfileAttribute toServer(ClientAttribute clientObject, ToServerConversionOptions options) throws IllegalParameterValueException, MandatoryParameterNotFoundException {
         return toServer(clientObject, new ProfileAttributeImpl(), null);
     }
 
     @Override
-    public ProfileAttribute toServer(ClientUserAttribute clientObject, ProfileAttribute resultToUpdate, ToServerConversionOptions options) throws IllegalParameterValueException, MandatoryParameterNotFoundException {
+    public ProfileAttribute toServer(ClientAttribute clientObject, ProfileAttribute resultToUpdate, ToServerConversionOptions options) throws IllegalParameterValueException, MandatoryParameterNotFoundException {
         if (isEmpty(clientObject.getName()) || clientObject.getName().length() > attributesConfig.getMaxLengthAttrName()) {
             throw new IllegalParameterValueException("name", clientObject.getName());
         }
@@ -198,6 +200,6 @@ public class UserAttributesConverter implements ToServerConverter<ClientUserAttr
 
     @Override
     public String getClientResourceType() {
-        return ClientUserAttribute.class.getName();
+        return ClientAttribute.class.getName();
     }
 }

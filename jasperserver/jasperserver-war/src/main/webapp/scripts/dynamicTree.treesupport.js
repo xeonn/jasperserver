@@ -21,13 +21,13 @@
 
 
 /**
- * @version: $Id: dynamicTree.treesupport.js 8790 2015-04-22 21:28:09Z obobruyk $
+ * @version: $Id: dynamicTree.treesupport.js 9603 2015-10-29 14:35:35Z dgorbenk $
  */
 
 /* global dynamicTree, deepClone, __jrsConfigs__, _, ajaxTargettedUpdate, baseErrorHandler, unescapeBackslash,
  ajaxTargettedUpdate, trim  */
 
-/**
+/*
  * TreeSupport is extend Tree to use it with JasperServer.
  * You can extend it to change parameters and/or look and feel
  *
@@ -126,7 +126,7 @@ dynamicTree.TreeSupport.addMethod('_getFlowUrl', function (methodName) {
     return __jrsConfigs__.contextPath + "/flow.html?_flowId=treeFlow&method=" + methodName;
 });
 
-/**
+/*
  * Loads tree from server and renders it into given container.
  * Generates "tree:loaded" event, if request was successful and userCallbackFn isn't specified.
  * Generates "server:error" event, if request was unsuccessful and errorCallbackFn isn't specified.
@@ -155,7 +155,7 @@ dynamicTree.TreeSupport.addMethod('_evaluateAdditionalParams', function() {
     return null;
 });
 
-/**
+/*
  * Loads tree from the server and renders it into given container.
  * Generates "tree:loaded" event, if request was successful and userCallbackFn isn't specified.
  * Generates "server:error" event, if request was unsuccessful and errorCallbackFn isn't specified.
@@ -177,6 +177,7 @@ dynamicTree.TreeSupport.addMethod('showTreePrefetchNodes', function (prefetchedL
 
 dynamicTree.TreeSupport.addMethod('_showTree', function (url, userCallbackFn, errorCallbackFn) {
 
+    var self = this;
     this.inInit = true;
 
     this.wait();
@@ -187,9 +188,25 @@ dynamicTree.TreeSupport.addMethod('_showTree', function (url, userCallbackFn, er
         }
     }(this, userCallbackFn, errorCallbackFn);
 
+    var httpErrorHandler = function(){
+        var rc = false;
+        if (self.httpErrorHandler) {
+            rc = self.httpErrorHandler.apply(window, arguments);
+        }
+        if (rc === false) {
+            rc = baseErrorHandler.apply(window, arguments);
+        }
+        return rc;
+    };
+
     ajaxTargettedUpdate(
         url,
-        {fillLocation:this.ajaxBufferId, callback:callback, errorHandler: baseErrorHandler, hideLoader: this.hideLoader}
+        {
+            fillLocation:this.ajaxBufferId,
+            callback: callback,
+            errorHandler: httpErrorHandler,
+            hideLoader: this.hideLoader
+        }
     );
 });
 
@@ -238,7 +255,7 @@ dynamicTree.TreeSupport.addMethod('showTreeCallback', function (userCallbackFn, 
     }
 });
 
-/**
+/*
  * internally used method to turn server model into javascript tree model
  * Be advised of the power of 'extra' property of server node object.
  * You can set there pretty much anything and therefore customize you tree behaviour.
@@ -287,7 +304,7 @@ dynamicTree.TreeSupport.addMethod('processNode', function (metaNode) {
     return localRoot;
 });
 
-/**
+/*
  * Dynamically loads children for the node
  * Generates "children:loaded" event, if request was successful and userCallbackFn isn't specified.
  * Generates "server:error" event, if request was unsuccessful and errorCallbackFn isn't specified.
@@ -382,7 +399,7 @@ dynamicTree.TreeSupport.addMethod('getTreeNodeChildrenCallback', function (paren
     }
 });
 
-/**
+/*
  * Loads children for several given nodes
  * Generates "multipleChildren:loaded" event, if request was successful and userCallbackFn isn't specified.
  * Generates "server:error" event, if request was unsuccessful and errorCallbackFn isn't specified.
@@ -461,7 +478,7 @@ dynamicTree.TreeSupport.addMethod('getTreeMultipleNodesChildrenCallback', functi
     }
 });
 
-/**
+/*
  * Default processor for getTreeMultipleNodesChildren
  *
  * @param parentNodeIds {Array<String>} parent node IDs for which server was requested
@@ -520,7 +537,7 @@ dynamicTree.TreeSupport.addMethod('setMultipleNodesChilden', function (parentNod
     }
 });
 
-/**
+/*
  * Dynamically loads children for a given node.
  * Makes sure that all requested nodes get prefetched.
  * Nodes to be prefetched have to have parentNode as a common (grand*)parent
@@ -719,7 +736,7 @@ dynamicTree.TreeSupport.addMethod('findNodeChildByMetaName', function (node, nam
     return null;
 });
 
-/**
+/*
  * This function gets the first child based on alphabetical order.
  * For e.g. if the node contains children: {topic, mail, apple, orange}, apple will be returned..
  *
@@ -781,7 +798,7 @@ dynamicTree.TreeSupport.addMethod('findNodeById', function (nodeId, startNode){
     })(nodeId, startNode ? startNode : this.getRootNode());
 });
 
-/**
+/*
  * Checks that node has child folders that are loaded and open
  *
  * @param node {{@link dynamicTree.TreeNode}} parent node

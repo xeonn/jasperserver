@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: admin.import.main.js 7762 2014-09-19 10:16:02Z sergey.prilukin $
+ * @version: $Id: admin.import.main.js 9490 2015-10-05 16:46:54Z obobruyk $
  */
 
 define(function(require){
@@ -31,27 +31,14 @@ define(function(require){
         logging = require("administer.logging"),
         Administer = require("administer.base"),
         jrsConfigs = require("jrs.configs"),
-        jrsImport = require("import"),
-        _ = require("underscore"),
-        jaspersoft = require("namespace");
 
-    require("components.statecontrollertrait");
-    require("export");
-    require("import.formmodel");
-    require("import.extendedformview");
-    require("import.app");
+        ImportPageView = require("tenantImportExport/import/view/ImportPageView");
 
     domReady(function() {
         Administer.urlContext = jrsConfigs.urlContext;
 
-        _.extend(jaspersoft.i18n, jrsConfigs.Import.i18n);
-
         logging.initialize();
 
-        jrsImport.App.initialize({
-            container: jrsConfigs.Import.initParams.container,
-            type : jrsConfigs.Import.initParams.type,
-            namespace: jrsImport
-        });
+        new ImportPageView({el: document.getElementById("settings")});
     });
 });

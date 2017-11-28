@@ -22,6 +22,7 @@
 
 /**
  * @author: Zakhar Tomchenko
+ * @version: $Id: TooltipPlugin.js 1605 2015-09-23 17:55:32Z inestere $
  */
 
 define(function(require){

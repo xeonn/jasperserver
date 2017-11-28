@@ -26,7 +26,7 @@ import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
 import com.jaspersoft.jasperserver.dto.discovery.VisualizationMetadata;
 import com.jaspersoft.jasperserver.remote.exception.ResourceNotFoundException;
-import com.jaspersoft.jasperserver.remote.resources.converters.ToClientConverter;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConverter;
 import com.jaspersoft.jasperserver.remote.services.DiscoveryService;
 import com.jaspersoft.jasperserver.war.cascade.handlers.GenericTypeProcessorRegistry;
 import org.springframework.stereotype.Service;

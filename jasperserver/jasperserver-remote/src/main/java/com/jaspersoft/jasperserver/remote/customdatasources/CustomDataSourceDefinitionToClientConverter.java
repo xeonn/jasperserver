@@ -26,8 +26,8 @@ import com.jaspersoft.jasperserver.dto.customdatasources.ClientCustomDataSourceD
 import com.jaspersoft.jasperserver.dto.customdatasources.CustomDataSourcePropertyDefinition;
 import com.jaspersoft.jasperserver.dto.resources.ClientProperty;
 import com.jaspersoft.jasperserver.remote.resources.ClientTypeHelper;
-import com.jaspersoft.jasperserver.remote.resources.converters.ToClientConversionOptions;
-import com.jaspersoft.jasperserver.remote.resources.converters.ToClientConverter;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConversionOptions;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConverter;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -38,7 +38,7 @@ import java.util.Map;
  * <p></p>
  *
  * @author yaroslav.kovalchyk
- * @version $Id: CustomDataSourceDefinitionToClientConverter.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: CustomDataSourceDefinitionToClientConverter.java 58870 2015-10-27 22:30:55Z esytnik $
  */
 @Service
 public class CustomDataSourceDefinitionToClientConverter implements ToClientConverter<CustomDataSourceDefinition, ClientCustomDataSourceDefinition> {

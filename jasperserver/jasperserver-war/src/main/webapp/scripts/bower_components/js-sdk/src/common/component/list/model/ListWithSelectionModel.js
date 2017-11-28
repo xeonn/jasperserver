@@ -21,13 +21,14 @@
 
 
 /**
- * @version: $Id: ListWithSelectionModel.js 812 2015-01-27 11:01:30Z psavushchik $
+ * @version: $Id: ListWithSelectionModel.js 1605 2015-09-23 17:55:32Z inestere $
  */
 
 /*global window, Backbone, _, jaspersoft.components */
 
 /**
- * Model extended from ScalableListModel which allows to work with selection.
+ * @class ListWithSelectionModel
+ * @classdesc Model extended from ScalableListModel which allows to work with selection.
  *
  * Model API (in addition to ScalableListModel API):
  *      addValueToSelection         - adds one value to selection and triggers "selection:add" event
@@ -52,7 +53,9 @@ define(function (require) {
     var _ = require("underscore"),
         BaseListWithSelectionModel = require("common/component/list/model/BaseListWithSelectionModel");
 
-    var ListWithSelectionModel = BaseListWithSelectionModel.extend({
+    var ListWithSelectionModel = BaseListWithSelectionModel.extend(
+        /** @lends ListWithSelectionModel.prototype */
+        {
 
 
         /* Methods which supposed to be overridden */

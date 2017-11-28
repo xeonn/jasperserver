@@ -6,6 +6,7 @@ import com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl.ReportI
 import com.jaspersoft.jasperserver.api.metadata.common.domain.InputControl;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceReference;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConverter;
 import com.jaspersoft.jasperserver.war.cascade.CachedEngineService;
 import com.jaspersoft.jasperserver.war.cascade.CachedRepositoryService;
 import com.jaspersoft.jasperserver.war.cascade.token.FilterResolver;
@@ -45,7 +46,7 @@ import static org.unitils.reflectionassert.ReflectionAssert.assertReflectionEqua
  * Helper class for cascade tests
  *
  * @author Sergey Prilukin
- * @version $Id: CascadeTestHelper.java 44712 2014-04-17 19:11:49Z ichan $
+ * @version $Id: CascadeTestHelper.java 58870 2015-10-27 22:30:55Z esytnik $
  */
 public class CascadeTestHelper {
     public static final String QUERY_EXECUTOR_KEY_NAME = "queryExecutor";
@@ -131,7 +132,12 @@ public class CascadeTestHelper {
 
     public static ApplicationContext setUpApplicationContext(Map<String, Object> mockedServices, String... contextPath) {
         GenericApplicationContext parentApplicationContext = new GenericApplicationContext();
+
         if (mockedServices != null && !mockedServices.isEmpty()) {
+            if(!mockedServices.containsKey("dataTypeResourceConverter")){
+                final Mock<ToClientConverter> mock = MockUnitils.createMock(ToClientConverter.class);
+                mockedServices.put("dataTypeResourceConverter", mock.getMock());
+            }
             DefaultListableBeanFactory beanFactory = (DefaultListableBeanFactory) parentApplicationContext.getBeanFactory();
             for (Map.Entry<String, Object> entry: mockedServices.entrySet()) {
                 beanFactory.registerSingleton(entry.getKey(), entry.getValue());

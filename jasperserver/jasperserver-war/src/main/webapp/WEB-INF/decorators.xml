@@ -15,6 +15,8 @@
         <pattern>*bif/*</pattern>
         <pattern>*JSONState*</pattern>
         <pattern>*viewAsDashboardFrame=true*</pattern>
+        <pattern>/WEB-INF/jsp/themeMinimalCss.jsp</pattern>
+        <pattern>/WEB-INF/jsp/commonMinimalCss.jsp</pattern>
     </excludes>
 
     <!--

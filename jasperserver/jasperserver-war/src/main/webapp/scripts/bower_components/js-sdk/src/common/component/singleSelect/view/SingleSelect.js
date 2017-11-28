@@ -22,7 +22,7 @@
 
 /**
  * @author Sergey Prilukin
- * @version: $Id: SingleSelect.js 1160 2015-04-28 12:46:42Z spriluki $
+ * @version: $Id: SingleSelect.js 1605 2015-09-23 17:55:32Z inestere $
  */
 
 /**
@@ -45,7 +45,7 @@ define(function (require) {
         singleSelectListTemplate = require("text!common/component/singleSelect/templates/listTemplate.htm"),
         singleSelectItemsTemplate = require("text!common/component/singleSelect/templates/itemsTemplate.htm"),
         dropDownTemplate = require("text!common/component/singleSelect/templates/dropDownTemplate.htm"),
-        i18n = require("bundle!ScalableInputControlsBundle"),
+        i18n = require("bundle!js-sdk/ScalableInputControlsBundle"),
         browserDetection = require("common/util/browserDetection"),
         xssUtil = require("common/util/xssUtil");
 

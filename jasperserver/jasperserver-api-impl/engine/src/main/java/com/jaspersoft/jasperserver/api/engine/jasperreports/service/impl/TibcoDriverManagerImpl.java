@@ -309,6 +309,7 @@ public class TibcoDriverManagerImpl implements TibcoDriverManager {
         registerDriver("tibcosoftware.jdbc.mongodb.MongoDBDriver");
         registerDriver("tibcosoftware.jdbc.redshift.RedshiftDriver");
         registerDriver("tibcosoftware.jdbc.salesforce.SalesforceDriver");
+        registerDriver("tibcosoftware.jdbc.sforce.SForceDriver");
         deregisterTibcosoftwareincDrivers();
     }
 

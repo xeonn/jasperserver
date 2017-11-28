@@ -12,7 +12,7 @@
 			<list-index/>
 			<composite-element class="com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.persistent.RepoListOfValuesItem">
 				<property name="label"/>
-				<property name="value" type="serializable"/>
+				<property name="value" type="serializable" length="20971520"/>
 			</composite-element>
 		</list>
 	</joined-subclass>

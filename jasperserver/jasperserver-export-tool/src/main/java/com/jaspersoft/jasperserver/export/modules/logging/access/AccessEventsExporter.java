@@ -20,12 +20,14 @@
  */
 package com.jaspersoft.jasperserver.export.modules.logging.access;
 
+import com.jaspersoft.jasperserver.api.metadata.user.service.TenantService;
 import com.jaspersoft.jasperserver.export.modules.BaseExporterModule;
 import com.jaspersoft.jasperserver.export.modules.logging.access.beans.AccessEventBean;
 import com.jaspersoft.jasperserver.api.logging.access.domain.AccessEvent;
 
 import java.util.List;
 
+import com.jaspersoft.jasperserver.export.service.impl.ImportExportServiceImpl;
 import org.dom4j.Element;
 
 /**
@@ -51,15 +53,19 @@ public class AccessEventsExporter extends BaseExporterModule {
 
     /**
      * Override parent since we would be able
-     * to skip exporting eccess events even if everything is selected
+     * to skip exporting access events even if everything is selected
      */
     @Override
     public boolean toProcess() {
-        return isToProcess();
+        return exportEverything && isToProcess();
     }
 
     protected boolean isToProcess() {
-        return exportEverything && hasParameter(includeAccessEvents) && hasAccessEvents();
+        return  (rootTenant == null || rootTenant.getId().equals(TenantService.ORGANIZATIONS)) &&
+                hasParameter(includeAccessEvents) &&
+                !hasParameter(ImportExportServiceImpl.RESOURCE_TYPES) &&
+                !hasParameter(ImportExportServiceImpl.SKIP_SUBORGANIZATIONS) &&
+                hasAccessEvents();
     }
 
     protected boolean hasAccessEvents() {

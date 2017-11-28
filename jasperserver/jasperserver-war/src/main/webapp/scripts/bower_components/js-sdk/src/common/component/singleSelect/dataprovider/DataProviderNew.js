@@ -24,7 +24,7 @@
  * @version: $Id: ListWithSelection.js 43947 2014-04-02 17:51:07Z sergey.prilukin $
  */
 
-/**
+/*
  * New kind of data provider which supports search,
  * and does caching so no new request call for same limit and offset will be done
  * Also it supports cache for several search terms.
@@ -119,7 +119,7 @@ define(function (require) {
             return deferred.promise();
         },
 
-        /**
+        /*
          * Clear all cached data
          */
         clear: function() {
@@ -294,7 +294,7 @@ define(function (require) {
 
         /* Working  with search by criteria */
 
-        /**
+        /*
          * We allow to cache maxSearchCacheSize criteria queries
          * otherwise old ones will be removed from the cache
          * @param criteria
@@ -337,7 +337,7 @@ define(function (require) {
             return this.getDataByCriteriaHolder[criteria].getData;
         },
 
-        /**
+        /*
          * Creates modified DataProvider where criteria will be always hardcoded.
          * This will alllows us to reuse single caching mechanism
          * and not duplicate code to query with criteria

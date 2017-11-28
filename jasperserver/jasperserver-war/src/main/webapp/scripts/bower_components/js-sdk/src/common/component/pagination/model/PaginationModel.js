@@ -24,7 +24,7 @@
  * Pagination model.
  *
  * @author: Taras Bidyuk
- * @version: $Id: PaginationModel.js 399 2014-11-12 12:02:18Z ktsaregradskyi $
+ * @version: $Id: PaginationModel.js 1605 2015-09-23 17:55:32Z inestere $
  */
 
 define(function (require) {
@@ -32,33 +32,34 @@ define(function (require) {
 
     var Backbone = require("backbone"),
         BackboneValidation = require("backbone.validation"),
-        ValidationError = require("common/validation/ValidationErrorMessage"),
+        i18n = require("bundle!js-sdk/CommonBundle"),
+        i18nMessage = require("common/util/i18nMessage").extend({bundle: i18n}),
         _ = require("underscore");
 
     var PaginationModel = Backbone.Model.extend({
         validation: {
             step: [{
                 min: 1,
-                msg: new ValidationError("error.pagination.property.min.value", "step", 1)
+                msg: new i18nMessage("error.pagination.property.min.value", "step", 1)
             }],
             current: [{
                 integerNumber: true,
-                msg: new ValidationError("error.pagination.property.integer.value", "current", 1)
+                msg: new i18nMessage("error.pagination.property.integer.value", "current", 1)
             },
             {
                 min: 1,
-                msg: new ValidationError("error.pagination.property.min.value", "current", 1)
+                msg: new i18nMessage("error.pagination.property.min.value", "current", 1)
             },
             {
                 fn: function(value){
                     if(value > this.get("total")){
-                        return new ValidationError("error.pagination.property.max.value", "current", value);
+                        return new i18nMessage("error.pagination.property.max.value", "current", value);
                     }
                 }
             }],
             total: [{
                 min: 1,
-                msg: new ValidationError("error.pagination.property.min.value", "total", 1)
+                msg: new i18nMessage("error.pagination.property.min.value", "total", 1)
             }]
         },
 

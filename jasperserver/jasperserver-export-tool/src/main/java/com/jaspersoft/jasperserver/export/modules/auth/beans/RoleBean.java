@@ -21,10 +21,12 @@
 package com.jaspersoft.jasperserver.export.modules.auth.beans;
 
 import com.jaspersoft.jasperserver.api.metadata.user.domain.Role;
+import com.jaspersoft.jasperserver.export.modules.ImporterModuleContext;
+import com.jaspersoft.jasperserver.export.modules.common.TenantStrHolderPattern;
 
 /**
  * @author tkavanagh
- * @version $Id: RoleBean.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: RoleBean.java 58265 2015-10-05 16:13:56Z vzavadsk $
  */
 public class RoleBean {
 
@@ -38,10 +40,15 @@ public class RoleBean {
 		setExternallyDefined(role.isExternallyDefined());
 	}
 
-	public void copyTo(Role role) {
+	public void copyTo(Role role, ImporterModuleContext context) {
 		role.setRoleName(getRoleName());
 		role.setTenantId(getTenantId());
 		role.setExternallyDefined(isExternallyDefined());
+
+		if (!context.getNewGeneratedTenantIds().isEmpty()) {
+			role.setTenantId(TenantStrHolderPattern.TENANT_ID
+					.replaceWithNewTenantIds(context.getNewGeneratedTenantIds(), role.getTenantId()));
+		}
 	}
 	
 	public boolean isExternallyDefined() {

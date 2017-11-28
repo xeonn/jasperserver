@@ -24,6 +24,7 @@ import com.jaspersoft.jasperserver.api.metadata.common.domain.FileResource;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceReference;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.client.FileResourceImpl;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.client.QueryImpl;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConversionOptions;
 import com.jaspersoft.jasperserver.api.metadata.common.service.ResourceFactory;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportUnit;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.client.ReportUnitImpl;
@@ -57,7 +58,7 @@ import static org.testng.Assert.*;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: GenericReportUnitResourceConverterTest.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: GenericReportUnitResourceConverterTest.java 58870 2015-10-27 22:30:55Z esytnik $
  */
 public class GenericReportUnitResourceConverterTest {
     @InjectMocks

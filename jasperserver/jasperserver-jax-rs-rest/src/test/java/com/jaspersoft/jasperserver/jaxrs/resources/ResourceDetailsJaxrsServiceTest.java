@@ -42,8 +42,8 @@ import com.jaspersoft.jasperserver.remote.exception.PatchException;
 import com.jaspersoft.jasperserver.remote.exception.RemoteException;
 import com.jaspersoft.jasperserver.remote.exception.ResourceNotFoundException;
 import com.jaspersoft.jasperserver.remote.resources.converters.ResourceConverterProvider;
-import com.jaspersoft.jasperserver.remote.resources.converters.ToClientConversionOptions;
-import com.jaspersoft.jasperserver.remote.resources.converters.ToClientConverter;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConversionOptions;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConverter;
 import com.jaspersoft.jasperserver.remote.resources.converters.ToServerConversionOptions;
 import com.jaspersoft.jasperserver.remote.resources.converters.ToServerConverter;
 import com.jaspersoft.jasperserver.remote.services.SingleRepositoryService;
@@ -75,7 +75,7 @@ import static org.testng.Assert.*;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: ResourceDetailsJaxrsServiceTest.java 55164 2015-05-06 20:54:37Z mchan $
+ * @version $Id: ResourceDetailsJaxrsServiceTest.java 58870 2015-10-27 22:30:55Z esytnik $
  */
 public class ResourceDetailsJaxrsServiceTest {
     @InjectMocks

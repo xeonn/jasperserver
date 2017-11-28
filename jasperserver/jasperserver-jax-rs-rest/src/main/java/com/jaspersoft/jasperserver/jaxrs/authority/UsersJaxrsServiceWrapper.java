@@ -21,8 +21,8 @@
 package com.jaspersoft.jasperserver.jaxrs.authority;
 
 import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
+import com.jaspersoft.jasperserver.dto.authority.ClientAttribute;
 import com.jaspersoft.jasperserver.dto.authority.ClientUser;
-import com.jaspersoft.jasperserver.dto.authority.hypermedia.HypermediaAttribute;
 import com.jaspersoft.jasperserver.dto.authority.hypermedia.HypermediaAttributesListWrapper;
 import com.jaspersoft.jasperserver.jaxrs.common.RestConstants;
 import com.jaspersoft.jasperserver.remote.exception.IllegalParameterValueException;
@@ -147,7 +147,7 @@ public class UsersJaxrsServiceWrapper {
     @Path("/{name}/attributes/{attrName}")
     @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON, "application/hal+json", "application/hal+xml"})
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON, "application/hal+json", "application/hal+xml"})
-    public Response putAttribute(HypermediaAttribute attr,
+    public Response putAttribute(ClientAttribute attr,
                                  @PathParam("name") String userName,
                                  @PathParam("attrName") String attrName,
                                  @HeaderParam(HttpHeaders.ACCEPT) String accept,
