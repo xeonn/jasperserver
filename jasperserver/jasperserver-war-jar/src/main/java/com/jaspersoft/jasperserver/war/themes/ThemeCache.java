@@ -67,7 +67,11 @@ public class ThemeCache {
     private int refreshThemeAfterUpdateInSeconds;
     private RefreshThread themeRefreshThread;
     private Stack<String> updatedURIs;
+    private ThemePreLoadListener themePreLoadListener;
 
+    public interface ThemePreLoadListener {
+        void onThemeLoad(String themeName);
+    }
     public ThemeCache() {
         name2uid = new ConcurrentHashMap<String, String>();
         uid2name = new ConcurrentHashMap<String, String>();
@@ -145,10 +149,20 @@ public class ThemeCache {
     public HierarchicalTheme getThemeByQualifiedName(String tenantQualifiedThemeName) {
         HierarchicalTheme theme = themeMap.get(tenantQualifiedThemeName);
         if (theme == null) {
-            String tenantQualifiedDefault = getTenantQualifiedThemeName(configurationBean.getThemeDefaultName());
-            theme = createTheme(tenantQualifiedThemeName);
-            if (!tenantQualifiedDefault.equals(tenantQualifiedThemeName)) {
-                theme.setParentTheme(new HierarchicalThemeProxy(tenantQualifiedDefault, this));
+            //Theme is absent in cache - lock theme loading and call preLoadlistener before loading theme
+            synchronized (this) {
+                theme = themeMap.get(tenantQualifiedThemeName);
+                if (theme!=null) {
+                    return theme;
+                }
+                if (themePreLoadListener != null) {
+                    themePreLoadListener.onThemeLoad(tenantQualifiedThemeName);
+                }
+                String tenantQualifiedDefault = getTenantQualifiedThemeName(configurationBean.getThemeDefaultName());
+                theme = createTheme(tenantQualifiedThemeName);
+                if (!tenantQualifiedDefault.equals(tenantQualifiedThemeName)) {
+                    theme.setParentTheme(new HierarchicalThemeProxy(tenantQualifiedDefault, this));
+                }
             }
         }
         
@@ -365,5 +379,9 @@ public class ThemeCache {
 
     public void setThemeUtils(ThemeUtils themeUtils) {
         this.themeUtils = themeUtils;
+    }
+
+    public void setThemePreLoadListener(ThemePreLoadListener themePreLoadListener) {
+        this.themePreLoadListener = themePreLoadListener;
     }
 }

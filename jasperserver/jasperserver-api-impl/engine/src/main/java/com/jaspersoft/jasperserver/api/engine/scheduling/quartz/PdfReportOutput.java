@@ -43,7 +43,7 @@ import net.sf.jasperreports.engine.JasperPrint;
 
 /**
  * @author sanda zaharia (shertage@users.sourceforge.net)
- * @version $Id: PdfReportOutput.java 63380 2016-05-26 20:56:46Z mchan $
+ * @version $Id: PdfReportOutput.java 67372 2017-07-24 12:16:18Z lchirita $
  */
 public class PdfReportOutput extends AbstractReportOutput 
 {
@@ -119,5 +119,25 @@ public class PdfReportOutput extends AbstractReportOutput
 			}
 		}
 		return isPaginationPreferred;
+	}
+
+	@Override
+	protected Integer getMaxPageHeight(JRPropertiesHolder propertiesHolder) {
+		Integer maxPageHeight = super.getMaxPageHeight(propertiesHolder);
+		if (maxPageHeight == null && propertiesHolder != null) {
+			maxPageHeight = JRPropertiesUtil.getInstance(getJasperReportsContext()).getIntegerProperty(
+					propertiesHolder, PdfExportParametersBean.PROPERTY_PDF_MAX_PAGE_HEIGHT);
+		}
+		return maxPageHeight;
+	}
+
+	@Override
+	protected Integer getMaxPageWidth(JRPropertiesHolder propertiesHolder) {
+		Integer maxPageWidth = super.getMaxPageWidth(propertiesHolder);
+		if (maxPageWidth == null && propertiesHolder != null) {
+			maxPageWidth = JRPropertiesUtil.getInstance(getJasperReportsContext()).getIntegerProperty(
+					propertiesHolder, PdfExportParametersBean.PROPERTY_PDF_MAX_PAGE_WIDTH);
+		}
+		return maxPageWidth;
 	}
 }

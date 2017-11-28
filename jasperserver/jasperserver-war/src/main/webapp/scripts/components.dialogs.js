@@ -22,7 +22,7 @@
 
 /**
  * @author: Yuriy Plakosh
- * @version: $Id: components.dialogs.js 10533 2017-02-24 21:58:49Z schubar $
+ * @version: $Id: components.dialogs.js 11201 2017-10-24 00:40:55Z dlitvak $
  */
 
 /**
@@ -137,7 +137,7 @@ dialogs.errorPopup = {
         options || (options = {});
 
         var fromSource = Builder.node('DIV', {style:'display:none'});
-        fromSource.innerHTML = errorContent;
+        fromSource.innerHTML = xssUtil.escape(errorContent, {softHTMLEscape: true});
         document.body.insertBefore(fromSource, document.body.firstChild);
         var content = $$(this._PAGE_CONTENT_PATTERN)[0];
         var contentText = content ? content.innerHTML : errorContent;

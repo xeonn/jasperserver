@@ -126,11 +126,14 @@ public class HiveTeiidConnectorImpl implements TeiidDataSource, com.jaspersoft.j
                 translatorConfig.setProductName("Impala");
                 translatorConfig.setTranslatorName("impala");
                 translatorConfig.setTranslatorFactoryClass("org.teiid.translator.hive.ImpalaExecutionFactory");
+                // release connection
+                conn.close();
             } else {
                 translatorConfig.setProductName("hive");
                 translatorConfig.setTranslatorName("hive");
                 translatorConfig.setTranslatorFactoryClass("org.teiid.translator.hive.HiveExecutionFactory");
             }
+                        
         }
         translatorConfig.setupTranslator();
         return ds;

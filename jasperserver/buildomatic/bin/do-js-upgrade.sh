@@ -144,7 +144,11 @@ if [[ "$JS_UPGRADE_STRATEGY" == "standard" && "$IS_INCLUDE_ACCESS_EVENTS" == "tr
   JS_IMPORT_ARGS="--include-access-events"
 fi
 if [ "$IS_INCLUDE_SERVER_SETTINGS" == "true" ]; then
-  JS_IMPORT_ARGS="--include-server-settings $JS_IMPORT_ARGS"
+  if [ "$JS_IMPORT_ARGS" != "" ]; then
+    JS_IMPORT_ARGS="--include-server-settings $JS_IMPORT_ARGS"
+  else
+    JS_IMPORT_ARGS="--include-server-settings"
+  fi
 fi
 #
 # Calling core setup script with determined parameters.

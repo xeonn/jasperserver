@@ -73,8 +73,9 @@ public class DriverDeleteListener implements PostDeleteEventListener, Applicatio
             RepoResourceBase file = (RepoResourceBase) entity;
             RepoFolder parent = file.getParent();
 
-
-            if (parent != null) {
+            //No sence to check folders if they don`t contain JDBCDriver folder name
+            //this parents checks was causing NPE errors during theme propagations
+            if (parent != null && parent.getURI().contains(this.jdbcDriversFolder)) {
                 if (parent.getResourceURI().equals(this.jdbcDriversFolder)) {
                     // If it's driver folder than just remove the property from global properties
                     getService().removeByValue(file.getName());

@@ -37,13 +37,14 @@ import org.springframework.webflow.execution.ScopeType;
 
 import com.jaspersoft.jasperserver.api.JSException;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.common.ExportParameters;
+import com.jaspersoft.jasperserver.api.engine.jasperreports.domain.impl.PaginationParameters;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportUnit;
 import com.jaspersoft.jasperserver.war.common.ConfigurationBean;
 
 
 /**
  * @author sanda zaharia (szaharia@users.sourceforge.net)
- * @version $Id: ReportExporterAction.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: ReportExporterAction.java 67372 2017-07-24 12:16:18Z lchirita $
  */
 public class ReportExporterAction extends FormAction {
 	
@@ -94,17 +95,18 @@ public class ReportExporterAction extends FormAction {
 			ReportUnit reportUnit = getViewReportAction().getReportUnit(context);
 			JasperReport jasperReport = getViewReportAction().getEngine().getMainJasperReport(ViewReportAction.getExecutionContext(context), reportUnit.getURI());;
 			
-			Boolean isPaginated = exporterConfiguration.getCurrentExporter().isPaginationPreferred(jasperReport); 
-			if (isPaginated != null && !isPaginated) 
+			PaginationParameters paginationParams = exporterConfiguration.getCurrentExporter().getPaginationParameters(jasperReport); 
+			if (paginationParams.hasParameters()) 
 			{
-			//setting the ignore pagination flag on the request so that 
-			//the following report fill will be unpaginated.
+			//setting the pagination parameters on the request so that 
+			//the following report fill will be paginated accordingly.
 			//note that this assumes the report fill will occur in the same request, 
 			//which will not be the case when we'll have export options dialogs.
 			if (log.isDebugEnabled()) {
-				log.debug("requested unpaginated report");
+				log.debug("requested report pagination parameters " + paginationParams);
 			}
-			context.getRequestScope().put(getViewReportAction().getAttributeIgnorePagination(), true);
+			
+			context.getRequestScope().put(getViewReportAction().getAttributePaginationParameters(), paginationParams);
 		}
 		}
 

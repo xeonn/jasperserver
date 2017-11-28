@@ -35,7 +35,7 @@ define(function (require) {
      E.g. < is replaced with &lt;. None of the chars (& l t or ;) are found as map values.
      */
 
-    var htmlTagWhiteList = 'a,abbr,acronym,address,area,article,aside,b,bdi,bdo,big,blockquote,body,br,caption,center,' +
+    var htmlTagWhiteList = 'a,abbr,acronym,address,area,article,aside,b,bdi,bdo,big,blockquote,body,br,caption,' +
         'center,cite,code,col,colgroup,dd,details,dfn,div,dl,dt,em,fieldset,font,footer,form,h1,h2,h3,h4,h5,h6,head,' +
         'header,hr,html,i,iframe,img,input,label,legend,li,main,map,mark,menu,menuitem,meta,nav,ol,option,p,pre,' +
         'section,select,small,span,strike,strong,sub,summary,sup,table,tbody,td,textarea,th,thead,title,tr,u,ul,!--';
@@ -69,10 +69,11 @@ define(function (require) {
     // unescapeMap is made from reverse of escapeMap + extra chars.
     var unescapeMap = (function() {
         var map = {
-            // ; is extra character from CHAR_ESCAPE_MAP in EscapeXssScript.java used to escape EL in JSP's.
-            // We do not escape this in javascript; however we need to unescape them here in addition to chars in xssUtil.escapeMap.
             '&#111;': 'o',
             '&#110;': 'n',
+            '&#115;': 's',
+            '&#114;': 'r',
+            '&#99;': 'c',
             '&amp;': '&'
         }, k;
         for (k in escapeMap) {
@@ -85,40 +86,27 @@ define(function (require) {
 
 
     //'hard' escape
-    var regexStr = '(?:' + regexKeys(escapeMap).join('|') + ')';
-    var testRegexp = RegExp(regexStr);
-    var replaceRegexp = RegExp(regexStr, 'g');
+    var regexp = RegExp('(?:' + regexKeys(escapeMap).join('|') + ')', 'g');
 
     //'soft' html escape
-    var parenEscapeRegex = '(?:\\)|\\()';
-    var testParenRegexp = RegExp(parenEscapeRegex);
-    var replaceParenRegexp = RegExp(parenEscapeRegex, 'g');
-
-    var htmlSingleQuoteEscapeRegex = "\\b='(.*?)'";
-    var testSingleQuoteRegexp = RegExp(htmlSingleQuoteEscapeRegex);
-    var replaceSingleQuoteRegexp = RegExp(htmlSingleQuoteEscapeRegex, 'g');
-
-    var htmlDoubleQuoteEscapeRegex = '\\b="(.*?)"';
-    var testDoubleQuoteRegexp = RegExp(htmlDoubleQuoteEscapeRegex);
-    var replaceDoubleQuoteRegexp = RegExp(htmlDoubleQuoteEscapeRegex, 'g');
-
-    var htmlLeftTagEscapeRegex = '<(?!/|' + htmlTagWhiteList.replace(/,/g,'|') + ')';
-    var testLeftTagRegexp = RegExp(htmlLeftTagEscapeRegex, 'i');
-    var replaceLeftTagRegexp = RegExp(htmlLeftTagEscapeRegex, 'ig');
-
-    var htmlLeftTagEscapeRegex2 = '</(?!' + htmlTagWhiteList.replace(/,/g,'|') + ')';
-    var testLeftTagRegexp2 = RegExp(htmlLeftTagEscapeRegex2, 'i');
-    var replaceLeftTagRegexp2 = RegExp(htmlLeftTagEscapeRegex2, 'ig');
+    var parenEscapeRegex = /(?:\)|\()/g;
+    var htmlSingleQuoteEscapeRegex = /\b='(.*?)'/g;
+    var htmlDoubleQuoteEscapeRegex = /\b="(.*?)"/g;
 
     //beef up javascript protection
-    var jsRegex1 = '\\bjavascript:';
-    var testJsRegex1 = RegExp(jsRegex1, 'i');
-    var replaceJsRegex1 = RegExp(jsRegex1, 'ig');
+    var jsRegex1 = /\bjavascript:/ig;
+    var jsRegex2 = /\bon(\w+?)\s*=/ig;
+    var srcdocRegex = /\bsrcdoc\s*=/ig;
 
-    var jsRegex2 = '\\bon(\\w+?)=';
-    var testJsRegex2 = RegExp(jsRegex2, 'i');
-    var replaceJsRegex2 = RegExp(jsRegex2, 'ig');
-
+    /*
+        options.softHTMLEscape - [boolean] if false (default), escape all symbols according to escapeMap.
+                           If true, do not escape valid html tags as defined by htmlTagWhiteList or options.whitelist.
+                           Subsequent options are effective only if softHTMLEscape is true.
+        options.whitelist - [array] if defined, substitute htmlTagWhiteList tags.  Those tags won't be escaped.
+                            E.g. options.whitelist=['a'].  <a> won't be escaped. <img> will be escaped as &lt;img>.
+        options.escapeTags - [array] the tags excluded from htmlTagWhiteList; those tags would be escaped.
+                            E.g. options.escapeTags = ['iframe'].  <iframe > would become &lt;iframe >.
+     */
     var _xssEscape = function(string, options) {
         string = string == null ? '' : string;
         options = options || { };
@@ -126,51 +114,63 @@ define(function (require) {
             return string;
 
         if (!options.softHTMLEscape) { // hard escape: simply escapes all the escapeMap key chars.
-            string = testRegexp.test(string) ? string.replace(replaceRegexp, function(match) { return escapeMap[match]; }) : string;
+            string = regexp.test(string) ? string.replace(regexp, function(match) { return escapeMap[match]; }) : string;
         }
         else {  //soft escape: avoid escaping html markup as much as possible
-            string = testParenRegexp.test(string) ? string.replace(replaceParenRegexp, function(match) { return escapeMap[match]; }) : string;
+            string = parenEscapeRegex.test(string) ? string.replace(parenEscapeRegex, function(match) { return escapeMap[match]; }) : string;
 
             // avoid escaping ='attrib' or ="attrib" in html
-            string = testSingleQuoteRegexp.test(string) ? string.replace(replaceSingleQuoteRegexp, '=`$1`').replace(/'/g,'&#39;').replace(/\b=`(.*?)`/g,"='$1'") : string.replace(/'/g,'&#39;');
-            string = testDoubleQuoteRegexp.test(string) ? string.replace(replaceDoubleQuoteRegexp, '=`$1`').replace(/"/g,'&quot;').replace(/\b=`(.*?)`/g,'="$1"') : string.replace(/"/g,'&quot;');
+            string = htmlSingleQuoteEscapeRegex.test(string) ? string.replace(htmlSingleQuoteEscapeRegex, '=`$1`').replace(/'/g,'&#39;').replace(/\b=`(.*?)`/g,"='$1'") : string.replace(/'/g,'&#39;');
+            string = htmlDoubleQuoteEscapeRegex.test(string) ? string.replace(htmlDoubleQuoteEscapeRegex, '=`$1`').replace(/"/g,'&quot;').replace(/\b=`(.*?)`/g,'="$1"') : string.replace(/"/g,'&quot;');
 
             //avoid escaping < or > in <TAG> or </TAG>, where TAG is white-listed
             if (options.whiteList && options.whiteList instanceof Array && options.whiteList.length > 0) {
-                var rtHtmlLeftTagEscapeRegex = '<(?!/|' + options.whiteList.join('|') + ')';
-                var rtTestLeftTagRegexp = RegExp(rtHtmlLeftTagEscapeRegex, 'i');
-                var rtReplaceLeftTagRegexp = RegExp(rtHtmlLeftTagEscapeRegex, 'ig');
-                string = rtTestLeftTagRegexp.test(string) ? string.replace(rtReplaceLeftTagRegexp, '&lt;') : string;
+                //escape </TAG>
+                var rtLeftTagRegexp = RegExp('<(?!/|' + options.whiteList.join('\\b|') + ')', 'ig');
+                string = rtLeftTagRegexp.test(string) ? string.replace(rtLeftTagRegexp, '&lt;') : string;
 
-                var rtHtmlLeftTagEscapeRegex2 = '</(?!' + options.whiteList.join('|') + ')';
-                var rtTestLeftTagRegexp2 = RegExp(rtHtmlLeftTagEscapeRegex2, 'i');
-                var rtReplaceLeftTagRegexp2 = RegExp(rtHtmlLeftTagEscapeRegex2, 'ig');
-                string = rtTestLeftTagRegexp2.test(string) ? string.replace(rtReplaceLeftTagRegexp2, '&lt;/') : string;
+                //escape <TAG>
+                var rtLeftTagRegexp2 = RegExp('</(?!' + options.whiteList.join('\\b|') + ')', 'ig');
+                string = rtLeftTagRegexp2.test(string) ? string.replace(rtLeftTagRegexp2, '&lt;/') : string;
             }
             else {
-                string = testLeftTagRegexp.test(string) ? string.replace(replaceLeftTagRegexp, '&lt;') : string;
-                string = testLeftTagRegexp2.test(string) ? string.replace(replaceLeftTagRegexp2, '&lt;/') : string;
+                var tmpTagWhiteList = htmlTagWhiteList;
+                if (options.escapeTags && options.escapeTags instanceof Array) {
+                    for (var i=0; i < options.escapeTags.length; ++i) {
+                        tmpTagWhiteList = htmlTagWhiteList.replace(options.escapeTags[i] + ',', '')
+                    }
+            }
+
+                //escape </TAG>
+                var leftTagRegexp = RegExp('<(?!/|' + tmpTagWhiteList.replace(/,/g,'\\b|') + ')', 'ig');
+                string = leftTagRegexp.test(string) ? string.replace(leftTagRegexp, '&lt;') : string;
+
+                //escape <TAG>
+                var leftTagRegexp2 = RegExp('</(?!' + tmpTagWhiteList.replace(/,/g,'\\b|') + ')', 'ig');
+                string = leftTagRegexp2.test(string) ? string.replace(leftTagRegexp2, '&lt;/') : string;
             }
 
             // beef up javascript protection by removing javascript: and escaping onload/onfocus/...
             // This assumes that html passed to java script should not have javascript  context inside.
-            string = testJsRegex1.test(string) ? string.replace(replaceJsRegex1, ''): string;
-            string = testJsRegex2.test(string) ? string.replace(replaceJsRegex2, '&#111;&#110;$1='): string;
+            string = jsRegex1.test(string) ? string.replace(jsRegex1, ''): string;
+            string = jsRegex2.test(string) ? string.replace(jsRegex2, '&#111;&#110;$1='): string;
+
+            // iframe's srcdoc allows rendering of the escaped html.  This is dangerous, as the srcdoc html
+            // may contain javascript executable in the JRS site domain
+            string = srcdocRegex.test(string) ? string.replace(srcdocRegex, '&#115;&#114;&#99;doc=') : string;
         }
 
         return string;
     };
 
     //Unescape function
-    var regexUnescapeStr = '(?:' + regexKeys(unescapeMap).join('|') + ')';
-    var testUnescapeRegexp = RegExp(regexUnescapeStr, 'i');
-    var replaceUnescapeRegexp = RegExp(regexUnescapeStr, 'ig');
+    var unescapeRegexp = RegExp('(?:' + regexKeys(unescapeMap).join('|') + ')', 'ig');
     var _xssUnescape = function(string) {
         string = string == null ? '' : string;
         if (!(typeof(string) === 'string' || string instanceof String)) {
             return string;
         }
-        return testUnescapeRegexp.test(string) ? string.replace(replaceUnescapeRegexp, function(match) { return unescapeMap[match]; }) : string;
+        return unescapeRegexp.test(string) ? string.replace(unescapeRegexp, function(match) { return unescapeMap[match]; }) : string;
     };
 
     /* jshint ignore:start */

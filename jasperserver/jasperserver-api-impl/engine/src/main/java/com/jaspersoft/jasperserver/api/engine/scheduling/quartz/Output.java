@@ -25,16 +25,20 @@ import java.io.Serializable;
 
 import org.quartz.JobExecutionException;
 
+import com.jaspersoft.jasperserver.api.engine.jasperreports.domain.impl.PaginationParameters;
+
 import net.sf.jasperreports.engine.JRPropertiesHolder;
 import net.sf.jasperreports.engine.JasperPrint;
 
 /**
  * @author sanda zaharia (shertage@users.sourceforge.net)
- * @version $Id: Output.java 63380 2016-05-26 20:56:46Z mchan $
+ * @version $Id: Output.java 67372 2017-07-24 12:16:18Z lchirita $
  */
 public interface Output extends Serializable 
 {
 	public Boolean isIgnorePagination();
+	
+	public PaginationParameters getPaginationParameters(JRPropertiesHolder propertiesHolder);
 	
 	public boolean isCompress();
 

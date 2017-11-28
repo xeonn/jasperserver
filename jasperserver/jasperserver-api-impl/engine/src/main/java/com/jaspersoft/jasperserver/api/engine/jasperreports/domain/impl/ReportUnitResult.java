@@ -21,11 +21,18 @@
 package com.jaspersoft.jasperserver.api.engine.jasperreports.domain.impl;
 
 import java.util.Date;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
 
+import net.sf.jasperreports.engine.JRParameter;
 import net.sf.jasperreports.engine.JRVirtualizer;
 import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.PrintPart;
+import net.sf.jasperreports.engine.PrintParts;
 import net.sf.jasperreports.engine.ReportContext;
 import net.sf.jasperreports.web.servlets.JasperPrintAccessor;
+import net.sf.jasperreports.web.servlets.ReportExecutionStatus.Status;
 import net.sf.jasperreports.web.servlets.SimpleJasperPrintAccessor;
 
 import com.jaspersoft.jasperserver.api.engine.common.domain.ReportResult;
@@ -42,9 +49,12 @@ public class ReportUnitResult implements ReportResult
 	private String reportUnitURI;
 	private JasperPrintAccessor jasperPrintAccessor;
 	private JRVirtualizer virtualizer = null;
+	private Integer requestedMaxPageHeight;
+	private Integer requestedMaxPageWidth;
 	private Date dataTimestamp;
 	private ReportContext reportContext;
 	private boolean paginated = true;//default
+	private int usedPageWidth;
 
 	public ReportUnitResult(
 			String reportUnitURI,
@@ -67,12 +77,20 @@ public class ReportUnitResult implements ReportResult
 
 	public ReportUnitResult(
 			String reportUnitURI,
-			JasperPrintAccessor jasperPrintAccessor,
-			JRVirtualizer virtualizer
+			ReportUnitRequestBase request
 			)
 	{
-		this(reportUnitURI, virtualizer);
-		this.jasperPrintAccessor = jasperPrintAccessor;
+		this.reportUnitURI = reportUnitURI;
+		this.requestId = request.getId();
+		this.reportContext = request.getReportContext();
+
+		Map<?, ?> reportParameters = request.getReportParameters();
+		if (reportParameters != null)
+		{
+			this.virtualizer = ((JRVirtualizer) reportParameters.get(JRParameter.REPORT_VIRTUALIZER));
+			this.requestedMaxPageHeight = (Integer) reportParameters.get(JRParameter.MAX_PAGE_HEIGHT);
+			this.requestedMaxPageWidth = (Integer) reportParameters.get(JRParameter.MAX_PAGE_WIDTH);
+		}
 	}
 	
 	/**
@@ -156,6 +174,72 @@ public class ReportUnitResult implements ReportResult
 
 	public void setPaginated(boolean paginated) {
 		this.paginated = paginated;
+	}
+
+	public void setUsedPageWidth(int usedPageWidth) {
+		this.usedPageWidth = usedPageWidth;
+	}
+	
+	public boolean matchesPagination(PaginationParameters params) {
+		Boolean paramsPaginated = params.getPaginated();
+		boolean matches;
+		if (paginated) {
+			matches = paramsPaginated == null || paramsPaginated;
+		} else if (paramsPaginated != null && paramsPaginated) {
+			matches = false;
+		} else {
+			matches = matchesMaxPageHeight(params.getMaxPageHeight())
+					&& matchesMaxPageWidth(params.getMaxPageWidth());
+		}
+		return matches;
+	}
+	
+	protected boolean matchesMaxPageHeight(Integer maxPageHeight) {
+		boolean matches;
+		if (maxPageHeight == null) {
+			matches = requestedMaxPageHeight == null;
+		} else if (maxPageHeight.equals(requestedMaxPageHeight)) {
+			matches = true;
+		} else if (requestedMaxPageHeight != null && requestedMaxPageHeight < maxPageHeight) {
+			matches = false;
+		} else if (jasperPrintAccessor.getReportStatus().getStatus() != Status.FINISHED) {
+			matches = false;
+		} else {
+			JasperPrint jasperPrint = jasperPrintAccessor.getFinalJasperPrint();
+			if (jasperPrint.getPages().isEmpty()) {
+				matches = true;
+			} else if (jasperPrint.getPageHeight() > maxPageHeight) {
+				matches = false;
+			} else {
+				matches = true;
+				PrintParts parts = jasperPrint.getParts();
+				if (parts != null) {
+					for (Iterator<Entry<Integer, PrintPart>> iterator = parts.partsIterator(); iterator.hasNext();) {
+						PrintPart part = iterator.next().getValue();
+						if (part.getPageFormat().getPageHeight() > maxPageHeight) {
+							matches = false;
+						}
+					}
+				}
+			}
+		}
+		return matches;
+	}
+	
+	protected boolean matchesMaxPageWidth(Integer maxPageWidth) {
+		boolean matches;
+		if (maxPageWidth == null) {
+			matches = requestedMaxPageWidth == null;
+		} else if (maxPageWidth.equals(requestedMaxPageWidth)) {
+			matches = true;
+		} else if (requestedMaxPageWidth != null && requestedMaxPageWidth < maxPageWidth) {
+			matches = false;
+		} else if (jasperPrintAccessor.getReportStatus().getStatus() != Status.FINISHED) {
+			matches = false;
+		} else {
+			matches = usedPageWidth <= maxPageWidth;
+		}
+		return matches;
 	}
 	
 }

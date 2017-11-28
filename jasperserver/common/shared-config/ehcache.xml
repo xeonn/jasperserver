@@ -59,4 +59,12 @@
         -->
     </cache>
 
+    <cache name="systemUserStorageCache"
+           maxElementsInMemory="10000"
+           eternal="false"
+           overflowToDisk="false"
+           timeToIdleSeconds="360000"
+           timeToLiveSeconds="720000"
+           diskPersistent="false"/>
+
 </ehcache>

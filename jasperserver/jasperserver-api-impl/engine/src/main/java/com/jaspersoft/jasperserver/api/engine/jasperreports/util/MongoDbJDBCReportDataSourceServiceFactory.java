@@ -46,6 +46,7 @@ import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Connection;
 import java.sql.DriverManager;
 import java.util.*;
 
@@ -191,12 +192,21 @@ public class MongoDbJDBCReportDataSourceServiceFactory extends JdbcReportDataSou
     }
 
     private void createAndUploadSchemaToRepo(CustomReportDataSource customReportDataSource, JdbcReportDataSourceImpl jdbcReportDataSource) {
-        try {
+    	Connection conn = null;	
+    	try {
             Class.forName(jdbcReportDataSource.getDriverClass());
-            DriverManager.getConnection(jdbcReportDataSource.getConnectionUrl(), jdbcReportDataSource.getUsername(), jdbcReportDataSource.getPassword());
+            conn = DriverManager.getConnection(jdbcReportDataSource.getConnectionUrl(), jdbcReportDataSource.getUsername(), jdbcReportDataSource.getPassword());
             saveFileToResource(customReportDataSource, jdbcReportDataSource);
         } catch (Exception ex) {
             ex.getStackTrace();
+        } finally {
+        	if(conn!=null){
+        		try{
+        			conn.close();
+        		} catch(Exception e){
+        			log.error("Couldn't close JDBC connection", e);
+        		}
+        	}
         }
 
     }

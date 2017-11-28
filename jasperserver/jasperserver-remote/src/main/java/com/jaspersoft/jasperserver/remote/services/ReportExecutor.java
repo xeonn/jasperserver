@@ -20,6 +20,7 @@
  */
 package com.jaspersoft.jasperserver.remote.services;
 
+import com.jaspersoft.jasperserver.api.engine.jasperreports.domain.impl.PaginationParameters;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.domain.impl.ReportUnitResult;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 import com.jaspersoft.jasperserver.remote.ServiceException;
@@ -46,4 +47,5 @@ public interface ReportExecutor {
     Map<JRExporterParameter, Object> exportReport(String reportUnitURI, JasperPrint jasperPrint, String format, OutputStream output,
             HashMap exportParameters) throws ServiceException;
     JasperReportsContext getJasperReportsContext(Boolean interactive);
+	PaginationParameters getExportPaginationParameters(String reportUnitURI, JasperPrint jasperPrint, String outputFormat);
 }

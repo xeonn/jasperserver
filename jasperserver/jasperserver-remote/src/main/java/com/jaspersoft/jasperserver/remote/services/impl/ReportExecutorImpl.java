@@ -26,6 +26,7 @@ import com.jaspersoft.jasperserver.api.common.util.TimeZoneContextHolder;
 import com.jaspersoft.jasperserver.api.engine.common.domain.Request;
 import com.jaspersoft.jasperserver.api.engine.common.service.EngineService;
 import com.jaspersoft.jasperserver.api.engine.common.service.VirtualizerFactory;
+import com.jaspersoft.jasperserver.api.engine.jasperreports.domain.impl.PaginationParameters;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.domain.impl.ReportUnitRequest;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.domain.impl.ReportUnitResult;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.service.DataCacheProvider;
@@ -118,13 +119,19 @@ public class ReportExecutorImpl implements ReportExecutor {
             throw new RemoteException(new ErrorDescriptor()
                     .setErrorCode("webservices.error.errorExecutingReportUnit").setParameters(report.getURI()));
         }
+        
         // if ignorePagination isn't set, then use value from defaultIgnorePagination, which become not null just after
         // reportUnitResult available.
-        final Boolean ignorePagination = reportExecutionOptions.getIgnorePagination() != null
-                ? reportExecutionOptions.getIgnorePagination() : reportExecutionOptions.getDefaultIgnorePagination();
-        if (ignorePagination != null) {
-            parameters.put(JRParameter.IS_IGNORE_PAGINATION, ignorePagination);
+        PaginationParameters pagination = reportExecutionOptions.getPaginationParameters();
+        if ((pagination == null || pagination.getPaginated() == null) 
+        		&& reportExecutionOptions.getDefaultIgnorePagination() != null) {
+        	pagination = new PaginationParameters(pagination);
+        	pagination.setPaginated(!reportExecutionOptions.getDefaultIgnorePagination());
         }
+        if (pagination != null) {
+        	pagination.setReportParameters(parameters);
+        }
+        
         // run the report
         ReportUnitResult reportUnitResult = strategy.runReport(report, parameters, engine,
                 getJasperReportsContext(reportExecutionOptions.isInteractive()), reportExecutionOptions);
@@ -363,4 +370,24 @@ public class ReportExecutorImpl implements ReportExecutor {
 
         String getConcreteReportURI(Resource reportResource);
     }
+
+	@Override
+	public PaginationParameters getExportPaginationParameters(String reportUnitURI, JasperPrint jasperPrint, String outputFormat) {
+        PaginationParameters pagination = null;
+        ReportExporter exporter = servicesConfiguration.getExporter(outputFormat.toLowerCase());
+        if (exporter != null) {
+        	pagination = exporter.getPaginationParameters(jasperPrint);
+        } else {
+        	//avoid dealing with exceptions in calling code, returning default pagination
+        	if (log.isDebugEnabled()) {
+        		log.debug("did not find exporter " + outputFormat + " for pagination parameters");
+        	}
+        }
+        
+        if (pagination == null) {
+        	//non null object expected
+        	pagination = new PaginationParameters();
+        }
+		return pagination;
+	}
 }

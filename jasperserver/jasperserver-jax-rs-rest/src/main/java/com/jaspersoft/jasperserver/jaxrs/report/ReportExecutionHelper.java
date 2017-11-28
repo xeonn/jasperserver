@@ -58,7 +58,7 @@ public class ReportExecutionHelper {
         } else {
             String contentType = outputResource.getContentType();
             responseBuilder = Response.ok(outputResource.getData(), contentType);
-            if (!suppressContentDisposition && outputResource.getFileName() != null && !contentType.equals("text/html")) {
+            if (!suppressContentDisposition && outputResource.getFileName() != null && !"text/html".equals(contentType)) {
                 responseBuilder.header("Content-Disposition", "attachment; filename=\"" + outputResource.getFileName() + "\"");
             }
             if (outputResource.getOutputFinal() != null) {

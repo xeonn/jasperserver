@@ -20,6 +20,8 @@
 */
 package com.jaspersoft.jasperserver.remote.services;
 
+import com.jaspersoft.jasperserver.api.engine.jasperreports.domain.impl.PaginationParameters;
+
 import net.sf.jasperreports.engine.JasperReportsContext;
 import net.sf.jasperreports.engine.ReportContext;
 
@@ -27,14 +29,14 @@ import net.sf.jasperreports.engine.ReportContext;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: ReportExecutionOptions.java 58870 2015-10-27 22:30:55Z esytnik $
+ * @version $Id: ReportExecutionOptions.java 67374 2017-07-24 12:28:57Z lchirita $
  */
 public class ReportExecutionOptions {
 
     private Boolean freshData = false;
     private Boolean saveDataSnapshot = false;
     private Boolean interactive = false;
-    private Boolean ignorePagination;
+    private PaginationParameters paginationParameters;
     private Boolean defaultIgnorePagination;
     private Boolean async = false;
     private String transformerKey;
@@ -44,12 +46,15 @@ public class ReportExecutionOptions {
     private ReportContext reportContext;
     private JasperReportsContext jasperReportsContext;
 
-    public ReportExecutionOptions(){}
+    public ReportExecutionOptions(){
+    	paginationParameters = new PaginationParameters();
+    }
+    
     public ReportExecutionOptions(ReportExecutionOptions source){
         freshData = source.isFreshData();
         saveDataSnapshot = source.isSaveDataSnapshot();
         interactive = source.isInteractive();
-        ignorePagination = source.getIgnorePagination();
+        paginationParameters = new PaginationParameters(source.paginationParameters);
         async = source.isAsync();
         transformerKey = source.getTransformerKey();
         contextPath = source.getContextPath();
@@ -154,13 +159,36 @@ public class ReportExecutionOptions {
      * @return the ignorePagination value
      */
     public Boolean getIgnorePagination() {
-        return ignorePagination;
+        return (paginationParameters == null || paginationParameters.getPaginated() == null) ? null 
+        		: !paginationParameters.getPaginated();
     }
 
     public ReportExecutionOptions setIgnorePagination(Boolean ignorePagination) {
-        this.ignorePagination = ignorePagination;
+    	if (ignorePagination != null) {
+    		if (paginationParameters == null) {
+    			paginationParameters = new PaginationParameters();
+    		}
+    		paginationParameters.setPaginated(!ignorePagination);
+    	}
         return this;
     }
+
+    public PaginationParameters getPaginationParameters() {
+		return paginationParameters;
+	}
+    
+	public ReportExecutionOptions setPaginationParameters(PaginationParameters paginationParameters) {
+		this.paginationParameters = paginationParameters != null ? paginationParameters : new PaginationParameters();
+		return this;
+	}
+
+	public void setPaginationDefaults(PaginationParameters paginationDefaults) {
+		if (paginationParameters == null) {
+			paginationParameters = new PaginationParameters(paginationDefaults);
+		} else {
+			paginationParameters.setDefaults(paginationDefaults);
+		}
+	}
 
     public String getTransformerKey() {
         return transformerKey;

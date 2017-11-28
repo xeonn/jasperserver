@@ -23,7 +23,10 @@ package com.jaspersoft.jasperserver.remote;
 
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
 import com.jaspersoft.jasperserver.api.engine.common.service.EngineService;
+import com.jaspersoft.jasperserver.api.engine.jasperreports.domain.impl.PaginationParameters;
+
 import net.sf.jasperreports.engine.JRExporterParameter;
+import net.sf.jasperreports.engine.JRPropertiesHolder;
 import net.sf.jasperreports.engine.JasperPrint;
 
 import java.io.OutputStream;
@@ -47,4 +50,7 @@ public interface ReportExporter extends Serializable {
 			) throws Exception;
 
     public String getContentType();
+    
+	public PaginationParameters getPaginationParameters(JRPropertiesHolder propertiesHolder);
+
 }

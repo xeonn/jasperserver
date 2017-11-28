@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd"
-         xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.jaspersoft.jasperserver</groupId>
     <artifactId>jasperserver-war</artifactId>
@@ -9,7 +8,7 @@
     <parent>
         <groupId>com.jaspersoft.jasperserver</groupId>
         <artifactId>server</artifactId>
-        <version>6.4.0</version>
+        <version>6.4.2</version>
     </parent>
     <profiles>
         <!-- enable handling between internal and external builds -->
@@ -26,7 +25,7 @@
                 <dependency>
                     <groupId>com.jaspersoft</groupId>
                     <artifactId>jrs-ui</artifactId>
-                    <version>1.6.12</version>
+                    <version>1.6.12-1</version>
                     <type>zip</type>
                 </dependency>
             </dependencies>
@@ -285,7 +284,7 @@
         <dependency>
             <groupId>com.jaspersoft.jasperserver</groupId>
             <artifactId>jasperserver-cassandra-connector</artifactId>
-            <version>6.4.0</version>
+            <version>6.4.2</version>
             <exclusions>
                 <exclusion>
                     <groupId>antlr</groupId>
@@ -560,7 +559,7 @@
         <dependency>
             <groupId>net.sf.jasperreports</groupId>
             <artifactId>jasperreports-functions</artifactId>
-            <version>6.4.1</version>
+            <version>6.4.2</version>
         </dependency>
         <!-- bug 32641: fix for installation to JBoss 7. Because we have use deployment module to precisely    -->
         <!--            control batik jar dependencies used by jboss 7, we need to make sure the same jars are -->
@@ -714,7 +713,7 @@
         <dependency>
             <groupId>com.jaspersoft.jasperserver</groupId>
             <artifactId>jrs-mongodb-datasource</artifactId>
-            <version>6.4.0</version>
+            <version>6.4.2</version>
         </dependency>
 
         <!-- big data connector components END -->

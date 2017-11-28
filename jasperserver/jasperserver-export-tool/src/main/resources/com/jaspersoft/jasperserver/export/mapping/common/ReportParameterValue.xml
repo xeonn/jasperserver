@@ -10,5 +10,8 @@
 			<field name="values" collection="array" type="other">
 				<bind-xml name="value" node="element"/>
 			</field>
+			<field name="valueType" type="string">
+				<bind-xml name="valueType" node="element"/>
+			</field>
 	</class>
 </mapping>

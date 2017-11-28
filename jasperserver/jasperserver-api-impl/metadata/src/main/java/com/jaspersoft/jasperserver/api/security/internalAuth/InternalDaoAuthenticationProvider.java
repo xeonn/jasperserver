@@ -20,8 +20,10 @@
  */
 package com.jaspersoft.jasperserver.api.security.internalAuth;
 
+import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.impl.client.MetadataUserDetails;
 import com.jaspersoft.jasperserver.api.metadata.user.service.impl.UserIsNotInternalException;
+import com.jaspersoft.jasperserver.api.security.SystemLoggedInUserStorage;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.core.Authentication;
@@ -37,12 +39,21 @@ import org.springframework.security.core.userdetails.UserDetails;
  * Date: 11/14/12
  */
 public class InternalDaoAuthenticationProvider extends DaoAuthenticationProvider {
+	SystemLoggedInUserStorage systemLoggedInUserStorage;
+
 	@Override
 	protected void additionalAuthenticationChecks(UserDetails userDetails,
 												  UsernamePasswordAuthenticationToken authentication) throws AuthenticationException {
-		if (!(userDetails instanceof MetadataUserDetails) || ((MetadataUserDetails)userDetails).isExternallyDefined())
+		if (!(userDetails instanceof MetadataUserDetails))
 			throw new UserIsNotInternalException("User needs to be internal to be authenticated by " + this.getClass());
-
+		if (((MetadataUserDetails)userDetails).isExternallyDefined()) {
+			User sysUser = loadUserFromSystemStorageByAuth(authentication);
+			if (sysUser == null) {
+				throw new UserIsNotInternalException("User needs to be internal to be authenticated by " + this.getClass());
+			} else {
+				((MetadataUserDetails) userDetails).setPassword(sysUser.getPassword());
+			}
+		}
 		super.additionalAuthenticationChecks(userDetails, authentication);
 	}
 
@@ -66,4 +77,17 @@ public class InternalDaoAuthenticationProvider extends DaoAuthenticationProvider
 		return result;
 	}
 
+	private User loadUserFromSystemStorageByAuth(UsernamePasswordAuthenticationToken authentication) {
+		User sysUser = null;
+		if (authentication.getPrincipal() instanceof String && authentication.getCredentials() instanceof String) {
+			String userName = (String)authentication.getPrincipal();
+			String password = (String)authentication.getCredentials();
+			sysUser = systemLoggedInUserStorage != null ? systemLoggedInUserStorage.loadUserByNameAndPassword(userName, password) : null;
+		}
+		return sysUser;
+	}
+
+	public void setSystemLoggedInUserStorage(SystemLoggedInUserStorage systemLoggedInUserStorage) {
+		this.systemLoggedInUserStorage = systemLoggedInUserStorage;
+	}
 }

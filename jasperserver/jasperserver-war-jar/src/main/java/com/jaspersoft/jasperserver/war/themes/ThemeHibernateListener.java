@@ -21,14 +21,27 @@
 
 package com.jaspersoft.jasperserver.war.themes;
 
+import com.jaspersoft.jasperserver.api.common.domain.impl.RepoLogEvent;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ComparableBlob;
 import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.HibernateSaveUpdateDeleteListener;
+import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.persistent.RepoFileResource;
+import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.persistent.RepoFolder;
 import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.persistent.RepoResource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.Criteria;
+import org.hibernate.criterion.DetachedCriteria;
+import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.orm.hibernate3.HibernateTemplate;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 /**
  * This class listens delete and saveOrUpdate hibernate events.
@@ -113,6 +126,45 @@ public class ThemeHibernateListener implements HibernateSaveUpdateDeleteListener
             	}
             	preProcessDelete(res);
                 getThemeCache().onThemeResourceChanged(uri);
+            }
+        }
+        if (entity instanceof RepoFolder) {
+            RepoFolder folder = (RepoFolder) entity;
+            String uri = folder.getResourceURI();
+            if (getThemeCache().isThemeResource(uri+"/")) {
+                // ok we are deleteing Theme folder
+                // as this folder can contain resource files which are used in propagated resources as reference
+                // we should unreference all resources which are using resources in this folder
+                for( Object resource: folder.getChildren()) {
+                    if (resource instanceof RepoFileResource) {
+                        RepoFileResource fileResource = (RepoFileResource) resource;
+                        unreferenceFileResource(fileResource,hibernateTemplate);
+                        getThemeCache().onThemeResourceChanged(fileResource.getResourceURI());
+                    }
+                }
+
+                // Iterate to all subFolders
+                Set subFolders = folder.getSubFolders();
+                for(Iterator<RepoFolder> iterator = subFolders.iterator(); iterator.hasNext();) {
+                    beforeDelete(iterator.next(),hibernateTemplate);
+                }
+
+            }
+        }
+    }
+
+    private void unreferenceFileResource(RepoFileResource resource, HibernateTemplate hibernateTemplate) {
+        DetachedCriteria criteria = DetachedCriteria.forClass(RepoFileResource.class);
+        criteria.add(Restrictions.eq("reference", resource));
+        List<RepoFileResource> referencedResources = hibernateTemplate.findByCriteria(criteria);
+        for(RepoFileResource fileResource: referencedResources) {
+            // if current resource is reference then just change reference in dependant resource
+            // if not - then set data in dependant resource and remove reference
+            if (resource.isFileReference()) {
+                fileResource.setReference(resource.getReference());
+            } else {
+                fileResource.setData((ComparableBlob) resource.getData());
+                fileResource.setReference(null);
             }
         }
     }

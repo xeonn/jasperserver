@@ -29,6 +29,7 @@ import com.jaspersoft.jasperserver.api.common.util.LocaleHelper;
 import com.jaspersoft.jasperserver.api.engine.common.domain.Request;
 import com.jaspersoft.jasperserver.api.engine.common.service.SecurityContextProvider;
 import com.jaspersoft.jasperserver.api.engine.common.service.VirtualizerFactory;
+import com.jaspersoft.jasperserver.api.engine.jasperreports.domain.impl.PaginationParameters;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.domain.impl.ReportUnitRequest;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.domain.impl.ReportUnitResult;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl.EhcacheEngineService;
@@ -89,7 +90,7 @@ import java.util.Set;
 
 /**
  * @author Ionut Nedelcu (ionutned@users.sourceforge.net)
- * @version $Id: ViewReportAction.java 65088 2016-11-03 23:22:01Z gbacon $
+ * @version $Id: ViewReportAction.java 67372 2017-07-24 12:16:18Z lchirita $
  */
 public class ViewReportAction extends ReportParametersAction
 {
@@ -129,7 +130,7 @@ public class ViewReportAction extends ReportParametersAction
 	private String attributeSavedInputsState;
 	private String attributeControlsHidden;
     private String attributeDashboardParametersHasError;
-	private String attributeIgnorePagination;
+	private String attributePaginationParameters = "paginationParameters";//default value
 	private String attributeReportLocale;
     private String parameterReportLocale;
     private AuditContext auditContext;
@@ -369,9 +370,10 @@ public class ViewReportAction extends ReportParametersAction
 	}
 
 	protected void setIgnorePaginationParameter(RequestContext context, Map<String, Object> parameterValues) {
-		Boolean ignorePagination = (Boolean) context.getRequestScope().get(getAttributeIgnorePagination(), Boolean.class);
-		if (ignorePagination != null) {
-			parameterValues.put(JRParameter.IS_IGNORE_PAGINATION, ignorePagination);
+		PaginationParameters paginationParams = (PaginationParameters) context.getRequestScope().get(
+				getAttributePaginationParameters(), PaginationParameters.class);
+		if (paginationParams != null) {
+			paginationParams.setReportParameters(parameterValues);
 		}
 	}
 
@@ -1034,12 +1036,12 @@ public class ViewReportAction extends ReportParametersAction
 		this.attributeReportLocale = attributeReportLocale;
 	}
 
-	public String getAttributeIgnorePagination() {
-		return attributeIgnorePagination;
+	public String getAttributePaginationParameters() {
+		return attributePaginationParameters;
 	}
 
-	public void setAttributeIgnorePagination(String attributeIgnorePagination) {
-		this.attributeIgnorePagination = attributeIgnorePagination;
+	public void setAttributePaginationParameters(String attributePaginationParameters) {
+		this.attributePaginationParameters = attributePaginationParameters;
 	}
 
     public String getAttributeDashboardParametersHasError() {

@@ -30,6 +30,7 @@ import com.jaspersoft.jasperserver.api.engine.common.service.ReportExecutionStat
 import com.jaspersoft.jasperserver.api.engine.common.service.SchedulerReportExecutionStatusSearchCriteria;
 import com.jaspersoft.jasperserver.api.engine.common.service.VirtualizerFactory;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.common.JSReportExecutionRequestCancelledException;
+import com.jaspersoft.jasperserver.api.engine.jasperreports.domain.impl.PaginationParameters;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.domain.impl.ReportUnitResult;
 import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
 import com.jaspersoft.jasperserver.api.metadata.xml.domain.impl.Argument;
@@ -101,7 +102,7 @@ import java.util.regex.Pattern;
  * Run a report unit using the passing in parameters and options
  *
  * @author ykovalchyk
- * @version $Id: RunReportServiceImpl.java 63760 2016-07-05 18:59:28Z agodovan $
+ * @version $Id: RunReportServiceImpl.java 67372 2017-07-24 12:16:18Z lchirita $
  */
 @Service("runReportService")
 @Scope(value = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)
@@ -289,6 +290,14 @@ public class RunReportServiceImpl implements RunReportService, Serializable, Dis
     public ReportExecution getReportExecutionFromRawParameters(final String reportUnitURI, final Map<String, String[]> rawParameters,
             ReportExecutionOptions inputOptions, ExportExecutionOptions exportOptions) throws RemoteException, JSValidationException {
         final ReportExecutionOptions options = inputOptions != null ? inputOptions : new ReportExecutionOptions();
+        
+        String exportFormat = (exportOptions != null && exportOptions.getOutputFormat() != null 
+        		&& !exportOptions.getOutputFormat().isEmpty()) ? exportOptions.getOutputFormat().toUpperCase() : null;
+        if (exportFormat != null) {
+            PaginationParameters exportPagination = getExportPaginationParameters(reportUnitURI, null, exportFormat);
+            options.setPaginationDefaults(exportPagination);
+        }
+        
         final ReportExecution execution = new ReportExecution();
         final String requestId;
         if (options.getRequestId() == null) {
@@ -327,7 +336,7 @@ public class RunReportServiceImpl implements RunReportService, Serializable, Dis
                 throw new IllegalParameterValueException(secureExceptionHandler.handleException(e));
             }
         }
-        if (exportOptions != null && exportOptions.getOutputFormat() != null && !exportOptions.getOutputFormat().isEmpty()) {
+        if (exportFormat != null) {
             final ExportExecution exportExecution = executeExport(exportOptions, execution);
             if (!options.isAsync()) {
                 // wait till export is complete
@@ -392,14 +401,14 @@ public class RunReportServiceImpl implements RunReportService, Serializable, Dis
      * @param ignorePagination - ignore pagination flag for report execution
      * @return related report execution instance
      */
-    protected ReportExecution runRelatedExecution(ReportExecution originalReportExecution, boolean ignorePagination){
+    protected ReportExecution runRelatedExecution(ReportExecution originalReportExecution, PaginationParameters pagination){
         final ReportExecution relatedReportExecution = new ReportExecution();
         final String requestId = UUID.randomUUID().toString();
         relatedReportExecution.setRequestId(requestId);
         relatedReportExecution.setReportURI(originalReportExecution.getReportURI());
         relatedReportExecution.setRawParameters(originalReportExecution.getRawParameters());
         relatedReportExecution.setConvertedParameters(originalReportExecution.getConvertedParameters());
-        relatedReportExecution.setOptions(new ReportExecutionOptions(originalReportExecution.getOptions()).setIgnorePagination(ignorePagination));
+        relatedReportExecution.setOptions(new ReportExecutionOptions(originalReportExecution.getOptions()).setPaginationParameters(pagination));
         executions.put(requestId, relatedReportExecution);
         startReportExecution(relatedReportExecution);
         originalReportExecution.setRelatedExecution(relatedReportExecution);
@@ -409,21 +418,36 @@ public class RunReportServiceImpl implements RunReportService, Serializable, Dis
     protected void executeExport(ExportExecution exportExecution, ReportExecution reportExecution) {
         final ReportUnitResult reportUnitResult = reportExecution.getFinalReportUnitResult();
         JasperPrintAccessor jasperPrintAccessor = reportUnitResult.getJasperPrintAccessor();
+
+        String rawOutputFormat = exportExecution.getOptions().getOutputFormat();
+        String outputFormat = rawOutputFormat != null ? rawOutputFormat.toUpperCase() : Argument.RUN_OUTPUT_FORMAT_PDF;
+        PaginationParameters exportPagination = getExportPaginationParameters(reportUnitResult.getReportUnitURI(), reportUnitResult.getJasperPrint(), 
+        		outputFormat);
+        
         final Boolean ignorePagination = exportExecution.getOptions().getIgnorePagination();
-        final boolean currentExecutionIgnorePaginationValue = !reportUnitResult.isPaginated();
-        if(ignorePagination != null && !ignorePagination.equals(currentExecutionIgnorePaginationValue)){
+        if (ignorePagination != null) {
+        	exportPagination = new PaginationParameters(exportPagination);
+        	exportPagination.setPaginated(!ignorePagination);
+        }
+        
+        if(!reportUnitResult.matchesPagination(exportPagination)){
             // oops, we have to provide export with another pagination mode.
             // Let's check if we already have jasperPrint with this mode generated:
             ReportExecution relatedExecution = reportExecution.getRelatedExecution();
-            if(relatedExecution == null){
+            if(relatedExecution == null
+            		|| !relatedExecution.getFinalReportUnitResult().matchesPagination(exportPagination)){
                 synchronized (reportExecution){
                     relatedExecution = reportExecution.getRelatedExecution();
-                    if(relatedExecution == null){
+                    if(relatedExecution == null
+                    		|| !relatedExecution.getFinalReportUnitResult().matchesPagination(exportPagination)){
                         // No. We don't have generated jasperPrint for this pagination mode.
                         // Let's run another report execution to generate it.
-                        relatedExecution = runRelatedExecution(reportExecution, ignorePagination);
+                    	//TODO use a data snapshot to refill the report with a different pagination
+                        relatedExecution = runRelatedExecution(reportExecution, exportPagination);
                         // link it to current report execution to track it's status and to be able to cancel it.
                         reportExecution.setRelatedExecution(relatedExecution);
+                    	//TODO keep a map of ReportExecution per PaginationParameters instead of replacing the single related execution
+                        //not changing now (6.4.0 hotfix) because it would change the ReportExecution JSON/XML serialization
                     }
                 }
             }
@@ -471,12 +495,12 @@ public class RunReportServiceImpl implements RunReportService, Serializable, Dis
                     break;
                 default:{
                     exportExecution.setStatus(ExecutionStatus.execution);
-                    if (Argument.RUN_OUTPUT_FORMAT_HTML.equalsIgnoreCase(exportExecution.getOptions().getOutputFormat())) {
+                    if (Argument.RUN_OUTPUT_FORMAT_HTML.equalsIgnoreCase(outputFormat)) {
                         HtmlExportStrategy htmlExportStrategy = htmlExportStrategies.get(exportExecution.getOptions().getMarkupType()) != null
                                 ? htmlExportStrategies.get(exportExecution.getOptions().getMarkupType()) : defaultHtmlExportStrategy;
                         htmlExportStrategy.export(reportExecution, exportExecution, jasperPrint);
                     } else {
-                        generateReportOutput(reportExecution, jasperPrint, exportExecution.getOptions().getOutputFormat(),
+                        generateReportOutput(reportExecution, jasperPrint, outputFormat,
                                 exportExecution, exportExecution.getOptions().getPages());
                     }
                     exportExecution.getOutputResource().setOutputFinal(isOutputFinal);
@@ -490,6 +514,20 @@ public class RunReportServiceImpl implements RunReportService, Serializable, Dis
             exportExecution.setErrorDescriptor(secureExceptionHandler.handleException(ex));
         }
     }
+
+    protected PaginationParameters getExportPaginationParameters(String reportURI, JasperPrint jasperPrint, 
+    		String outputFormat) {
+    	PaginationParameters pagination;
+    	if (Argument.RUN_OUTPUT_FORMAT_HTML.equalsIgnoreCase(outputFormat)
+    			|| Argument.RUN_OUTPUT_FORMAT_JRPRINT.equalsIgnoreCase(outputFormat)) {
+    		//default params
+    		pagination = new PaginationParameters();
+    	} else {
+    		pagination = reportExecutor.getExportPaginationParameters(reportURI, 
+    				jasperPrint, outputFormat);
+    	}
+		return pagination;
+	}
 
     public ReportOutputResource getOutputResource(String executionId, ExportExecutionOptions exportExecutionOptions) throws RemoteException {
         final ReportExecution execution = executions.get(executionId);
@@ -545,9 +583,8 @@ public class RunReportServiceImpl implements RunReportService, Serializable, Dis
      * @throws RemoteException
      */
     protected void generateReportOutput(ReportExecution reportExecution, JasperPrint jasperPrint,
-            String rawOutputFormat, ExportExecution exportExecution, ReportOutputPages pages) throws RemoteException {
+            String outputFormat, ExportExecution exportExecution, ReportOutputPages pages) throws RemoteException {
         try {
-            String outputFormat = rawOutputFormat != null ? rawOutputFormat.toUpperCase() : Argument.RUN_OUTPUT_FORMAT_PDF;
             // Export...
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             final ReportExecutionOptions reportExecutionOptions = reportExecution.getOptions();

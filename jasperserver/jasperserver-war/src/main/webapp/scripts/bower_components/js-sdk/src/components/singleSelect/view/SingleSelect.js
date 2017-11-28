@@ -55,7 +55,8 @@ define(function (require) {
 
         events: function() {
             return {
-                "keydown input": this.keyboardManager.onKeydown,
+                "keydown": this.keyboardManager.onKeydown,
+                "input": this.keyboardManager.onKeydown,
                 "focus input": "onFocus",
                 "blur input": "onBlur",
                 "mousedown": "onMousedown",

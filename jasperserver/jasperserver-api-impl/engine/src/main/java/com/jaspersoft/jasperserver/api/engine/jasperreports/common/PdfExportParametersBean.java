@@ -24,11 +24,15 @@ package com.jaspersoft.jasperserver.api.engine.jasperreports.common;
 
 /**
  * @author sanda zaharia
- * @version $Id: PdfExportParametersBean.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: PdfExportParametersBean.java 67372 2017-07-24 12:16:18Z lchirita $
  */
 public class PdfExportParametersBean extends AbstractExportParameters {
 	
 	public static final String PROPERTY_PDF_PAGINATED = "com.jaspersoft.jrs.export.pdf.paginated";
+	
+	public static final String PROPERTY_PDF_MAX_PAGE_HEIGHT = "com.jaspersoft.jrs.export.pdf.max.page.height";
+	
+	public static final String PROPERTY_PDF_MAX_PAGE_WIDTH = "com.jaspersoft.jrs.export.pdf.max.page.width";
 
 	public void setPropertyValues(Object object){
 		if(object instanceof PdfExportParametersBean){

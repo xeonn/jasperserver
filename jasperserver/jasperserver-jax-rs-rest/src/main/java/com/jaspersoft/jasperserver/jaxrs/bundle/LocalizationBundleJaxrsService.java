@@ -25,7 +25,7 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Folder;
 import com.jaspersoft.jasperserver.jaxrs.common.RestConstants;
-import com.jaspersoft.jasperserver.war.JavascriptForwardingServlet;
+import com.jaspersoft.jasperserver.war.ResourceForwardingServlet;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -42,8 +42,6 @@ import javax.ws.rs.ext.Providers;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static org.springframework.util.DigestUtils.md5DigestAsHex;
@@ -58,7 +56,7 @@ import static org.springframework.util.DigestUtils.md5DigestAsHex;
  * cache invalidated on change of the Accept-Language header
  *
  * @author Igor.Nesterenko, Zahar.Tomchenko
- * @version $Id: LocalizationBundleJaxrsService.java 64299 2016-08-24 17:18:42Z asokolni $
+ * @version $Id: LocalizationBundleJaxrsService.java 68049 2017-10-24 00:40:51Z dlitvak $
  */
 @Service
 @Path("/bundles")
@@ -87,7 +85,7 @@ public class LocalizationBundleJaxrsService {
     public Response getBundles(@QueryParam(RestConstants.QUERY_PARAM_EXPANDED) Boolean expanded,
                                @Context HttpHeaders headers, @Context Request request) {
         if (httpRequest != null && expanded == null) {
-            Map<String, String[]> forwardedParameters = (Map<String, String[]>)httpRequest.getAttribute(JavascriptForwardingServlet.FORWARDED_PARAMETERS);
+            Map<String, String[]> forwardedParameters = (Map<String, String[]>)httpRequest.getAttribute(ResourceForwardingServlet.FORWARDED_PARAMETERS);
             if (forwardedParameters != null && forwardedParameters.get(RestConstants.QUERY_PARAM_EXPANDED) != null) {
                 expanded = Boolean.valueOf(forwardedParameters.get(RestConstants.QUERY_PARAM_EXPANDED)[0]);
             }

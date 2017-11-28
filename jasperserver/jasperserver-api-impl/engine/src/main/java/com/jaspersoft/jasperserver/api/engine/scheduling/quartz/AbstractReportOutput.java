@@ -21,6 +21,8 @@
 
 package com.jaspersoft.jasperserver.api.engine.scheduling.quartz;
 
+import com.jaspersoft.jasperserver.api.engine.jasperreports.domain.impl.PaginationParameters;
+
 import net.sf.jasperreports.engine.JRPropertiesHolder;
 import net.sf.jasperreports.engine.JasperReportsContext;
 
@@ -44,6 +46,16 @@ public abstract class AbstractReportOutput implements Output
 		return this.isIgnorePagination; 
 	}
 	
+	@Override
+	public PaginationParameters getPaginationParameters(JRPropertiesHolder propertiesHolder)
+	{
+		PaginationParameters params = new PaginationParameters();
+		params.setPaginated(isPaginationPreferred(propertiesHolder));
+		params.setMaxPageHeight(getMaxPageHeight(propertiesHolder));
+		params.setMaxPageWidth(getMaxPageWidth(propertiesHolder));
+		return params;
+	}
+
 	/** 
 	 *
 	 */
@@ -70,5 +82,13 @@ public abstract class AbstractReportOutput implements Output
 	
 	public Boolean isPaginationPreferred(JRPropertiesHolder propertiesHolder){
 		return isIgnorePagination() == null ? null : !isIgnorePagination();
+	}
+	
+	protected Integer getMaxPageHeight(JRPropertiesHolder propertiesHolder) {
+		return null;
+	}
+	
+	protected Integer getMaxPageWidth(JRPropertiesHolder propertiesHolder) {
+		return null;
 	}
 }

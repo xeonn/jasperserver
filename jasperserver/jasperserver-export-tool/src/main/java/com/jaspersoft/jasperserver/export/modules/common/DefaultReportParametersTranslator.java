@@ -25,6 +25,7 @@ import com.jaspersoft.jasperserver.api.JSException;
 import com.jaspersoft.jasperserver.api.JSExceptionWrapper;
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl.ReportLoadingService;
+import com.jaspersoft.jasperserver.api.engine.jasperreports.util.MaterializedDataParameter;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.FileResource;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.FileResourceData;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.InputControl;
@@ -37,21 +38,27 @@ import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRParameter;
 import net.sf.jasperreports.engine.JRReport;
 import net.sf.jasperreports.engine.design.JasperDesign;
+import net.sf.jasperreports.engine.util.Pair;
 import net.sf.jasperreports.types.date.DateRange;
 import net.sf.jasperreports.engine.xml.JRXmlLoader;
 import org.apache.commons.collections.set.ListOrderedSet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.exolab.castor.types.AnyNode;
+import org.exolab.castor.types.DateTime;
+import org.exolab.castor.xml.handlers.SQLTimestampFieldHandler;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Array;
+import java.sql.Time;
+import java.text.ParseException;
 import java.util.*;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: DefaultReportParametersTranslator.java 51947 2014-12-11 14:38:38Z ogavavka $
+ * @version $Id: DefaultReportParametersTranslator.java 68036 2017-10-23 13:13:29Z lchirita $
  */
 public class DefaultReportParametersTranslator implements
 		ReportParametersTranslator {
@@ -81,17 +88,16 @@ public class DefaultReportParametersTranslator implements
 				Map.Entry entry = (Map.Entry) it.next();
 				String name = (String) entry.getKey();
 				Object value = entry.getValue();
-				Object[] beanValue = toBeanParameterValues(value);
-
-				ReportParameterValueBean param = new ReportParameterValueBean(name, beanValue);
+				ReportParameterValueBean param = toParameterValueBean(name, value);
 				beanValues[idx] = param;
 			}
 		}
 		return beanValues;
 	}
 
-	protected Object[] toBeanParameterValues(Object value) {
+	protected ReportParameterValueBean toParameterValueBean(String name, Object value) {
 		Object[] values;
+		String valueType = null;
 		if (value == null) {
 			values = new Object[] { toBeanParameterValue(null) };
 		} else if (value.getClass().isArray()) {
@@ -110,9 +116,11 @@ public class DefaultReportParametersTranslator implements
             }
 		} else {
 			values = new Object[] { toBeanParameterValue(value) };
+			valueType = ReportParameterValueBean.VALUE_TYPE_SINGLE;
 		}
 
-		return values;
+		ReportParameterValueBean paramBean = new ReportParameterValueBean(name, values, valueType);
+		return paramBean;
 	}
 
     protected Object toBeanParameterValue(Object value) {
@@ -123,6 +131,18 @@ public class DefaultReportParametersTranslator implements
 
         if (value instanceof DateRange) {
             return new DateRangeDTO((DateRange)value);
+        }
+        
+        if (value instanceof MaterializedDataParameter) {
+        		MaterializedDataParameter param = (MaterializedDataParameter) value;
+        		return new MaterializedDataParameterBean(toBeanParameterValue(param.getParameterValue()), 
+        				toBeanParameterValue(param.getEffectiveValue()));
+        }
+        
+        //used via MaterializedDataParameter for DateRanges
+        if (value instanceof Pair) {
+        		Pair<?, ?> pair = (Pair<?, ?>) value;
+        		return new PairBean(toBeanParameterValue(pair.first()), toBeanParameterValue(pair.second()));
         }
 
         return value;
@@ -147,10 +167,15 @@ public class DefaultReportParametersTranslator implements
 			ReportParameterValueBean beanParam = beanValues[i];
 			String name = (String) beanParam.getName();
             Object[] beanValue = beanParam.getValues();
-            if (beanValue == null) {
-                beanValue = new Object[] {null};
-            }
-            Object value = toParameterValue(reportUnit, inputControls, jReport, name, beanValue);
+			if (beanValue == null) {
+				InputControl control = inputControls.get(name);
+				if (control != null && isMulti(control)) {
+					beanValue = new Object[]{};
+				} else {
+					beanValue = new Object[]{null};
+				}
+			}
+            Object value = toParameterValue(reportUnit, inputControls, jReport, beanParam, beanValue);
 			values.put(name, value);
 		}
 	}
@@ -210,13 +235,18 @@ public class DefaultReportParametersTranslator implements
     }
 
 	protected Object toParameterValue(ReportUnit reportUnit, Map inputControls,
-			JRReport jReport, String name, Object[] beanValue) {
+			JRReport jReport, ReportParameterValueBean beanParam, Object[] beanValue) {
+		String name = (String) beanParam.getName();
 		Object value;
 		InputControl control = (InputControl) inputControls.get(name);
 		if (control == null) {
 			JRParameter parameter = getParameter(jReport, name);
 			if (parameter == null) {
-				value = beanValue;
+				if (beanParam.isSingleValue()) {
+					value = toSingleValue(reportUnit, name, beanValue);
+				} else {
+					value = beanValue;
+				}
 			} else if (parameter.getValueClass().isArray()) {
 				value = toArrayValue(parameter.getValueClass(), beanValue);
 			} else if (Collection.class.isAssignableFrom(parameter
@@ -328,6 +358,21 @@ public class DefaultReportParametersTranslator implements
         if (beanValue instanceof DateRangeDTO) {
             return ((DateRangeDTO)beanValue).toDateRange();
         }
+        
+        if (beanValue instanceof MaterializedDataParameterBean) {
+        		MaterializedDataParameterBean param = (MaterializedDataParameterBean) beanValue;
+        		return new MaterializedDataParameter(toValue(param.getParameterValue()), toValue(param.getEffectiveValue()));
+        }
+        
+        if (beanValue instanceof PairBean) {
+        		PairBean pair = (PairBean) beanValue;
+        		return new Pair<Object, Object>(toValue(pair.getFirst()), toValue(pair.getSecond()));
+        }
+        
+        if (beanValue instanceof AnyNode) {
+        		Object dateValue = parseDateNode((AnyNode) beanValue);
+        		return dateValue == null ? beanValue : dateValue;
+        }
 
         return beanValue;
     }
@@ -340,4 +385,51 @@ public class DefaultReportParametersTranslator implements
 		this.repository = repository;
 	}
 
+	protected static Object parseDateNode(AnyNode node) {
+		Object dateValue = null;
+		String type = getNodeAttributeValue(node, "type");
+		if ("date".equals(type)) {
+			String strValue = node.getStringValue();
+			if (strValue != null) {
+				try {
+					DateTime dateTime = new DateTime(strValue);
+					dateValue = dateTime.toDate();
+				} catch (ParseException e) {
+					throw new JSExceptionWrapper(e);
+				}
+			}
+		} else if ("sql-time".equals(type)) {
+			String strValue = node.getStringValue();
+			if (strValue != null) {
+				try {
+					Time time = Time.valueOf(strValue);
+					dateValue = time;
+				} catch (IllegalArgumentException e) {
+					throw new JSExceptionWrapper(e);
+				}
+			}
+        } else if ("sql-timestamp".equals(type)) {
+            String strValue = node.getStringValue();
+            if (strValue != null) {
+            		//perhaps we could reuse the handler, for now creating a fresh one each time as it doesn't seem expensive
+            		SQLTimestampFieldHandler timestampHandler = new SQLTimestampFieldHandler();
+            		dateValue = timestampHandler.convertUponSet(strValue);
+            }
+		}
+		return dateValue;
+	}
+	
+	private static String getNodeAttributeValue(AnyNode node, String attributeName) {
+		String val = null;
+		for (AnyNode attr = node.getFirstAttribute();
+			attr != null;
+			attr = attr.getNextSibling()) {
+			if (attributeName.equals(attr.getLocalName())) {
+				val = attr.getStringValue();
+				break;
+			}
+		}
+		return val;
+	}
+	
 }

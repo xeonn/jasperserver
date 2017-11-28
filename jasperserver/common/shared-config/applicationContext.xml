@@ -1967,4 +1967,16 @@
         </aop:aspect>
     </aop:config>
 
+    <bean id="systemLoggedInUserStorage" class="com.jaspersoft.jasperserver.api.security.SystemLoggedInUserStorage">
+        <property name="objectFactory" ref="mappingResourceFactory"/>
+        <property name="cache" ref="systemUserStorageCache"/>
+    </bean>
+
+    <!-- Cache for for QueryExecutorService -->
+    <bean id="systemUserStorageCache" class="org.springframework.cache.ehcache.EhCacheFactoryBean"
+          lazy-init="true">
+        <property name="cacheManager" ref="cacheManager"/>
+        <property name="cacheName" value="systemUserStorageCache" />
+    </bean>
+
 </beans>

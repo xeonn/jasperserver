@@ -29,6 +29,12 @@
             <security:filter-chain pattern="/rest_v2/**" filters="httpSessionContextIntegrationFilter,encryptionFilter,delegatingCASSingleSignOutFilter,textOnlyResponseWebAppSecurityFilter,${bean.loggingFilter},${bean.userPreferencesFilter},delegatingPreAuthenticatedFilter,${bean.authenticationProcessingFilter},${bean.userPreferencesFilter},delegatingBasicProcessingFilter,delegatingRequestParameterAuthenticationFilter,JIAuthenticationSynchronizer,anonymousProcessingFilter,restExceptionTranslationFilter,filterInvocationInterceptor"/>
             <security:filter-chain pattern="/**" filters="httpSessionContextIntegrationFilter,encryptionFilter,delegatingCASSingleSignOutFilter,multipartRequestWrapperFilter,webAppSecurityFilter,${bean.loggingFilter},${bean.userPreferencesFilter},delegatingPreAuthenticatedFilter,delegatingAuthenticationProcessingFilter,${bean.userPreferencesFilter},delegatingBasicProcessingFilter,delegatingRequestParameterAuthenticationFilter,JIAuthenticationSynchronizer,anonymousProcessingFilter,delegatingExceptionTranslationFilter,filterInvocationInterceptor,switchUserProcessingFilter,iPadSupportFilter"/>
         </security:filter-chain-map>
+
+        <property name="firewall">
+            <bean class="org.springframework.security.web.firewall.DefaultHttpFirewall">
+                <property name="allowUrlEncodedSlash" value="true"/>
+            </bean>
+        </property>
     </bean>
 
     <!-- updater bean to insert a filter -->

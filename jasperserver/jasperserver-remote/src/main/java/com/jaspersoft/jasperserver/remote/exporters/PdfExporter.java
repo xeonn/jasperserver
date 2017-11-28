@@ -28,7 +28,10 @@ import java.util.Map;
 import javax.annotation.Resource;
 
 import net.sf.jasperreports.engine.JRExporterParameter;
+import net.sf.jasperreports.engine.JRPropertiesHolder;
+import net.sf.jasperreports.engine.JRPropertiesUtil;
 import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReportsContext;
 
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
@@ -36,6 +39,7 @@ import org.springframework.stereotype.Service;
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
 import com.jaspersoft.jasperserver.api.engine.common.service.EngineService;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.common.PdfExportParametersBean;
+import com.jaspersoft.jasperserver.api.engine.jasperreports.domain.impl.PaginationParameters;
 import com.jaspersoft.jasperserver.api.metadata.xml.domain.impl.Argument;
 import com.jaspersoft.jasperserver.remote.ReportExporter;
 import com.jaspersoft.jasperserver.remote.services.ReportOutputPages;
@@ -54,6 +58,9 @@ public class PdfExporter implements ReportExporter {
 
     @Resource(name = "pdfExportParameters")
     PdfExportParametersBean exportParams;
+
+	@Resource(name = "jasperReportsRemoteContext")
+    private JasperReportsContext jasperReportsContext;
 
 	public Map<JRExporterParameter, Object> exportReport(
 			JasperPrint jasperPrint,
@@ -119,5 +126,18 @@ public class PdfExporter implements ReportExporter {
 	 */
 	public void setExportParams(PdfExportParametersBean exportParams) {
 		this.exportParams = exportParams;
+	}
+
+	@Override
+	public PaginationParameters getPaginationParameters(JRPropertiesHolder propertiesHolder) {
+		JRPropertiesUtil properties = JRPropertiesUtil.getInstance(jasperReportsContext);
+		Integer maxPageHeight = properties.getIntegerProperty(propertiesHolder, PdfExportParametersBean.PROPERTY_PDF_MAX_PAGE_HEIGHT);
+		Integer maxPageWidth = properties.getIntegerProperty(propertiesHolder, PdfExportParametersBean.PROPERTY_PDF_MAX_PAGE_WIDTH);
+		
+		PaginationParameters pagination = new PaginationParameters();
+		//not setting pagination flag because it was not set previously
+		pagination.setMaxPageHeight(maxPageHeight);
+		pagination.setMaxPageWidth(maxPageWidth);
+		return pagination;
 	}
 }

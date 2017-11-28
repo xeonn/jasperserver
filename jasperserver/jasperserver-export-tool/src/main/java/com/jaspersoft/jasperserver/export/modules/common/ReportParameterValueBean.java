@@ -21,30 +21,31 @@
 
 package com.jaspersoft.jasperserver.export.modules.common;
 
-import com.jaspersoft.jasperserver.api.JSExceptionWrapper;
 import org.exolab.castor.types.AnyNode;
-import org.exolab.castor.types.DateTime;
-
-import java.sql.Time;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ReportParameterValueBean.java 61296 2016-02-25 21:53:37Z mchan $
+ * @version $Id: ReportParameterValueBean.java 68036 2017-10-23 13:13:29Z lchirita $
  */
 public class ReportParameterValueBean {
+	
+	public static final String VALUE_TYPE_SINGLE = "single";
 
 	private Object name;
 	private Object[] values;
+	private String valueType;
 
 	public ReportParameterValueBean() {
 	}
 	
 	public ReportParameterValueBean(String name, Object[] values) {
+		this(name, values, null);
+	}
+	
+	public ReportParameterValueBean(String name, Object[] values, String valueType) {
 		this.name = name;
 		this.values = values;
+		this.valueType = valueType;
 	}
 	
 	public Object getName() {
@@ -67,41 +68,9 @@ public class ReportParameterValueBean {
 				Object value = values[i];
 				if (value instanceof AnyNode) {
 					AnyNode node = (AnyNode) value;
-					String type = getNodeAttributeValue(node, "type");
-					if ("date".equals(type)) {
-						String strValue = node.getStringValue();
-						if (strValue != null) {
-							try {
-								DateTime dateTime = new DateTime(strValue);
-								values[i] = dateTime.toDate();
-							} catch (ParseException e) {
-								throw new JSExceptionWrapper(e);
-							}
-						}
-					} else if ("sql-time".equals(type)) {
-						String strValue = node.getStringValue();
-						if (strValue != null) {
-							try {
-								Time time = Time.valueOf(strValue);
-								values[i] = time;
-							} catch (IllegalArgumentException e) {
-								throw new JSExceptionWrapper(e);
-							}
-						}
-                    } else if ("sql-timestamp".equals(type)) {
-                        String strValue = node.getStringValue();
-                        if (strValue != null) {
-                            try {
-                                strValue = strValue.concat("00");
-                                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-                                Date date = simpleDateFormat.parse(strValue);
-                                long milliseconds = date.getTime();
-                                java.sql.Timestamp timestamp = new java.sql.Timestamp(milliseconds);
-                                values[i] = timestamp;
-                            } catch (ParseException e) {
-                                throw new JSExceptionWrapper(e);
-                            }
-                        }
+					Object dateValue = DefaultReportParametersTranslator.parseDateNode(node);
+					if (dateValue != null) {
+						values[i] = dateValue;
 					}
 				}
 			}
@@ -109,17 +78,16 @@ public class ReportParameterValueBean {
 
 		this.values = values;
 	}
+
+	public String getValueType() {
+		return valueType;
+	}
+
+	public void setValueType(String valueType) {
+		this.valueType = valueType;
+	}
 	
-	private static String getNodeAttributeValue(AnyNode node, String attributeName) {
-		String val = null;
-		for (AnyNode attr = node.getFirstAttribute();
-			attr != null;
-			attr = attr.getNextSibling()) {
-			if (attributeName.equals(attr.getLocalName())) {
-				val = attr.getStringValue();
-				break;
-			}
-		}
-		return val;
+	public boolean isSingleValue() {
+		return valueType != null && valueType.equals(VALUE_TYPE_SINGLE);
 	}
 }

@@ -126,7 +126,6 @@ import net.sf.jasperreports.engine.JRPropertiesUtil;
 import net.sf.jasperreports.engine.JRQuery;
 import net.sf.jasperreports.engine.JRRuntimeException;
 import net.sf.jasperreports.engine.JRTemplate;
-import net.sf.jasperreports.engine.JRVirtualizer;
 import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
@@ -136,6 +135,7 @@ import net.sf.jasperreports.engine.export.JRPdfExporter;
 import net.sf.jasperreports.engine.fill.AsynchronousFillHandle;
 import net.sf.jasperreports.engine.fill.AsynchronousFilllListener;
 import net.sf.jasperreports.engine.fill.BaseFillHandle;
+import net.sf.jasperreports.engine.fill.BaseReportFiller;
 import net.sf.jasperreports.engine.fill.FillHandle;
 import net.sf.jasperreports.engine.fill.FillListener;
 import net.sf.jasperreports.engine.fill.JRFillContext;
@@ -201,7 +201,7 @@ import java.util.jar.JarFile;
 /**
  *
  * @author Teodor Danciu (teodord@users.sourceforge.net)
- * @version $Id: EngineServiceImpl.java 65213 2016-11-17 10:05:43Z agodovan $
+ * @version $Id: EngineServiceImpl.java 67372 2017-07-24 12:16:18Z lchirita $
  */
 public class EngineServiceImpl implements EngineService, ReportExecuter,
 		CompiledReportProvider, InternalReportCompiler, InitializingBean, Diagnostic
@@ -638,6 +638,8 @@ public class EngineServiceImpl implements EngineService, ReportExecuter,
 		boolean asynchronous = request.isAsynchronous();
 		ReportFiller filler = createReportFiller(asynchronous);
 		filler.setJasperReportsContext(request.getJasperReportsContext());
+		ReportUnitResult result = new ReportUnitResult(reportUnit.getURIString(), request);
+		filler.setReportResult(result);
 		
 		Executor executor = getReportExecutor(asynchronous);
 		if (log.isDebugEnabled()) {
@@ -666,14 +668,8 @@ public class EngineServiceImpl implements EngineService, ReportExecuter,
             asyncThumbnailCreator.createAndStoreThumbnail(reportAccessor, jasperReportsContext, securityContextProvider.getContextUser(), reportUnit);
         }
 
-		Map params = request.getReportParameters();
-		JRVirtualizer virtualizer = params == null ? null : ((JRVirtualizer) params.get(JRParameter.REPORT_VIRTUALIZER));
-
-		ReportUnitResult result = new ReportUnitResult(reportUnit.getURIString(),
-				reportAccessor, virtualizer);
-		result.setRequestId(request.getId());
+		result.setJasperPrintAccessor(reportAccessor);
 		result.setDataTimestamp(filler.getDataTimestamp());
-		result.setReportContext(request.getReportContext());
 		result.setPaginated(filler.isPaginated());
 		return result;
 	}
@@ -719,6 +715,7 @@ public class EngineServiceImpl implements EngineService, ReportExecuter,
 		private Date dataTimestamp;
 		protected boolean asyncable;
 		private boolean paginated = true;
+		private ReportUnitResult reportResult;
 
 		protected ReportFiller() {
 			resultLock = new ReentrantLock();
@@ -822,6 +819,16 @@ public class EngineServiceImpl implements EngineService, ReportExecuter,
 		public boolean isPaginated() {
 			return paginated;
 		}
+
+		public void setReportResult(ReportUnitResult reportResult) {
+			this.reportResult = reportResult;
+		}
+		
+		protected void setUsedPageWidth(int usedPageWidth) {
+			if (reportResult != null) {
+				reportResult.setUsedPageWidth(usedPageWidth);
+			}
+		}
 	}
 
 	protected class SynchronousReportFiller extends ReportFiller {
@@ -839,6 +846,7 @@ public class EngineServiceImpl implements EngineService, ReportExecuter,
 			// set the result
 			SimpleJasperPrintAccessor result = new SimpleJasperPrintAccessor(fillResult.getJasperPrint());
 			setResult(result, fillResult.isPaginated(), false);
+			setUsedPageWidth(fillResult.getUsedPageWidth());
 		}
 	}
 
@@ -892,6 +900,7 @@ public class EngineServiceImpl implements EngineService, ReportExecuter,
 
 			// set the result if not already set
 			setResult(result, fillHandle.isPaginated(), true);
+			setUsedPageWidth(fillHandle.getUsedPageWidth());
 			
 			// we don't need to do anything more here, AsyncJasperPrintAccessor gets the completed events
 			if (log.isDebugEnabled()) {
@@ -916,6 +925,10 @@ public class EngineServiceImpl implements EngineService, ReportExecuter,
 			JRFillContext fillContext = filler.getFillContext();
 			return fillContext == null //conservatively considered paginated
 					|| !fillContext.isIgnorePagination();
+		}
+		
+		protected int getUsedPageWidth() {
+			return ((BaseReportFiller) filler).getUsedPageWidth();
 		}
 	}
 
@@ -1289,6 +1302,7 @@ public class EngineServiceImpl implements EngineService, ReportExecuter,
 
 		private JasperPrint jasperPrint;
 		private boolean paginated;
+		private int usedPageWidth;
 
 		public void reportFinished(JasperPrint jasperPrint) {
 			this.jasperPrint = jasperPrint;
@@ -1316,6 +1330,14 @@ public class EngineServiceImpl implements EngineService, ReportExecuter,
 
 		public void setPaginated(boolean paginated) {
 			this.paginated = paginated;
+		}
+
+		public int getUsedPageWidth() {
+			return usedPageWidth;
+		}
+
+		public void setUsedPageWidth(int usedPageWidth) {
+			this.usedPageWidth = usedPageWidth;
 		}
 	}
 
@@ -1871,6 +1893,7 @@ public class EngineServiceImpl implements EngineService, ReportExecuter,
 
 		// the fill runs on the same thread, so we can set the following and return the result
 		fillResult.setPaginated(fillHandle.isPaginated());
+		fillResult.setUsedPageWidth(fillHandle.getUsedPageWidth());
 		return fillResult;
 	}
 

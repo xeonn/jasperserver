@@ -24,11 +24,13 @@ package com.jaspersoft.jasperserver.remote.exporters;
 
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
 import com.jaspersoft.jasperserver.api.engine.common.service.EngineService;
+import com.jaspersoft.jasperserver.api.engine.jasperreports.domain.impl.PaginationParameters;
 import com.jaspersoft.jasperserver.api.metadata.xml.domain.impl.Argument;
 import com.jaspersoft.jasperserver.remote.ReportExporter;
 import com.jaspersoft.jasperserver.remote.services.ReportOutputPages;
 import net.sf.jasperreports.engine.JRExporter;
 import net.sf.jasperreports.engine.JRExporterParameter;
+import net.sf.jasperreports.engine.JRPropertiesHolder;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReportsContext;
 
@@ -39,7 +41,7 @@ import java.util.Map;
 
 /**
  * @author gtoffoli
- * @version $Id: AbstractExporter.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: AbstractExporter.java 67372 2017-07-24 12:16:18Z lchirita $
  */
 public abstract class AbstractExporter implements ReportExporter {
 	
@@ -99,6 +101,12 @@ public abstract class AbstractExporter implements ReportExporter {
 
 	public JasperReportsContext getJasperReportsContext() {
 		return jasperReportsContext;
+	}
+	
+    @Override
+	public PaginationParameters getPaginationParameters(JRPropertiesHolder propertiesHolder) {
+		//default pagination
+		return new PaginationParameters();
 	}
 
 }

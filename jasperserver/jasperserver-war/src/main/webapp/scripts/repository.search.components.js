@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: repository.search.components.js 10365 2016-11-03 21:57:13Z gbacon $
+ * @version: $Id: repository.search.components.js 11201 2017-10-24 00:40:55Z dlitvak $
  */
 
 /* global repositorySearch, SearchBox, toolbarButtonModule, toFunction, getAsFunction, localContext, isArray, JSCookie,
@@ -1863,7 +1863,7 @@ repositorySearch.showBulkDeleteResourcesConfirm = function(resources) {
 repositorySearch._showDeleteDialog = function(message, action) {
     var confirmElement = $(repositorySearch.DeleteConfirmation.ID_DELETE_DIALOG_CONTAINER);
 
-    confirmElement.down('.body').update(message);
+    confirmElement.down('.body').update(xssUtil.escape(message));
 
     dialogs.popupConfirm.show(confirmElement, true, {
         okButtonSelector: '#' + repositorySearch.DeleteConfirmation.ID_DELETE_DIALOG_OK_BUTTON,

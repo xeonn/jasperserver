@@ -34,6 +34,7 @@ import com.jaspersoft.jasperserver.api.engine.common.service.LoggingService;
 import com.jaspersoft.jasperserver.api.engine.common.service.SecurityContextProvider;
 import com.jaspersoft.jasperserver.api.engine.common.service.VirtualizerFactory;
 import com.jaspersoft.jasperserver.api.engine.common.service.impl.ContentResourceURIResolver;
+import com.jaspersoft.jasperserver.api.engine.jasperreports.domain.impl.PaginationParameters;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.domain.impl.ReportUnitRequest;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.domain.impl.ReportUnitResult;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.service.DataCacheProvider;
@@ -83,20 +84,23 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.WeakHashMap;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ReportExecutionJob.java 66215 2017-02-28 08:58:26Z ykovalch $
+ * @version $Id: ReportExecutionJob.java 67372 2017-07-24 12:16:18Z lchirita $
  */
 public class ReportExecutionJob implements Job {
 
@@ -164,9 +168,8 @@ public class ReportExecutionJob implements Job {
     private boolean recordedDataSnapshot;
     private String dataSnapshotOutputName;
 
-    private ReportUnitResult defaultReportResult;
-    private ReportUnitResult paginatedReportResult;
-    private ReportUnitResult nonPaginatedReportResult;
+    private Map<PaginationParameters, ReportUnitResult> reportResults = 
+    		new LinkedHashMap<PaginationParameters, ReportUnitResult>();
 
     private String logId = null;
 
@@ -282,9 +285,9 @@ public class ReportExecutionJob implements Job {
         recordedDataSnapshot = false;
         dataSnapshotOutputName = null;
 
-        defaultReportResult = null;
-        paginatedReportResult = null;
-        nonPaginatedReportResult = null;
+        if (reportResults != null) {
+        	reportResults.clear();
+        }
 
         for (DataContainer dataContainer : dataContainers.keySet()) {
             dataContainer.dispose();
@@ -673,96 +676,84 @@ public class ReportExecutionJob implements Job {
     }
 
     protected void executeReport(List<Output> outputs, JasperReport jasperReport) {
-        boolean needDefaultReport = false;
-        boolean needPaginatedReport = false;
-        boolean needNonPaginatedReport = false;
+    	List<PaginationParameters> paginations = new ArrayList<PaginationParameters>();
         for (Output output : outputs) {
-            Boolean isPaginationPreferred = output.isPaginationPreferred(jasperReport);
-            if (isPaginationPreferred == null) {
-                // no preference, jasperReport.isIgnorePagination() will be honoured
-                needDefaultReport = true;
-            } else {
-                // strong preference
-                needPaginatedReport = needPaginatedReport || isPaginationPreferred;
-                needNonPaginatedReport = needNonPaginatedReport || !isPaginationPreferred;
-            }
+        	PaginationParameters paginationParameters = output.getPaginationParameters(jasperReport);
+        	if (!paginations.contains(paginationParameters)) {
+        		paginations.add(paginationParameters);
+        	}
         }
 
         // if we have data snapshot output but no regular output, run the default paginated report
-        if (hasDataSnapshotOutput
-                && !(needDefaultReport || needPaginatedReport || needNonPaginatedReport)) {
-            needDefaultReport = true;
+        if (hasDataSnapshotOutput && paginations.isEmpty()) {
+        	PaginationParameters defaultPagination = new PaginationParameters();
+        	paginations.add(defaultPagination);
         }
+        
+        //sort in an order that allows results to be reused for several pagination params
+        Collections.sort(paginations, PaginationParamsExecutionComparator.instance());
 
-        // determining if we're going to run the report twice
-        // note that defaultReportResult.isPaginated() is the same as !jasperReport.isIgnorePagination()
-        boolean runsTwice =
-                // having both strong requirements for paginated and non paginated
-                (needPaginatedReport && needNonPaginatedReport)
-                        // we need paginated and the default is not paginated
-                        || (needDefaultReport && needPaginatedReport && jasperReport.isIgnorePagination())
-                        // we need non paginated and the default is paginated
-                        || (needDefaultReport && needNonPaginatedReport && !jasperReport.isIgnorePagination());
-        // recording a data snapshot if saving is enabled or if we need to fill the report twice
-        recordDataSnapshot = getDataSnapshotService().isSnapshotPersistenceEnabled() || runsTwice;
-
-        // running the report
-        if (needDefaultReport) {
-            defaultReportResult = executeReport(null);
-        }
-
-        if (needPaginatedReport
-                // if the default result is paginated, not running again
-                && (defaultReportResult == null || !defaultReportResult.isPaginated())) {
-            paginatedReportResult = executeReport(false);
-        }
-
-        if (needNonPaginatedReport
-                // if the default result is not paginated, not running again
-                && (defaultReportResult == null || defaultReportResult.isPaginated())) {
-            nonPaginatedReportResult = executeReport(true);
-        }
+        // recording a data snapshot if saving is enabled or if we need to fill the report multiple times
+        recordDataSnapshot = getDataSnapshotService().isSnapshotPersistenceEnabled() 
+                //FIXME detect common cases when multiple pagination params can use a single execution
+        		|| paginations.size() > 1;
+        		
+        for (PaginationParameters paginationParams : paginations) {
+			ReportUnitResult result = findMatchingResult(paginationParams);
+			if (result == null) {
+				result = executeReport(paginationParams);
+				reportResults.put(paginationParams, result);
+			}
+		}
     }
 
+	protected ReportUnitResult findMatchingResult(PaginationParameters paginationParams) {
+		ReportUnitResult result = null;
+		//try to find an existing result that matches the params
+		for (Entry<PaginationParameters, ReportUnitResult> entry : reportResults.entrySet()) {
+			ReportUnitResult existingResult = entry.getValue();
+			if (existingResult != null && existingResult.matchesPagination(paginationParams)) {
+				result = existingResult;
+				if (log.isDebugEnabled()) {
+					log.debug("report for " + entry.getKey() + " matches pagination " + paginationParams);
+				}
+				break;
+			}
+		}
+		return result;
+	}
+
     protected boolean hasReportResult() {
-        return defaultReportResult != null || paginatedReportResult != null || nonPaginatedReportResult != null;
+        return !reportResults.isEmpty();
     }
 
     protected boolean isEmptyReportResult() {
-        return isEmpty(defaultReportResult) || isEmpty(paginatedReportResult) || isEmpty(nonPaginatedReportResult);
+    	for (ReportUnitResult result : reportResults.values()) {
+			if (isEmpty(result)) {
+	    		//old code returned true if any of the results was empty, preserving the logic
+				return true;
+			}
+		}
+    	return false;
     }
 
     protected ReportUnitResult getReportResultForOutput(Output output, JasperReport jasperReport) throws JobExecutionException {
-        Boolean isPaginationPreferred = output.isPaginationPreferred(jasperReport);
-        ReportUnitResult result;
-        if (isPaginationPreferred == null) {
-            result = defaultReportResult;
-        } else if (isPaginationPreferred) {
-            if (paginatedReportResult != null) {
-                result = paginatedReportResult;
-            } else if (defaultReportResult != null && defaultReportResult.isPaginated()) {
-                result = defaultReportResult;
-            } else {
-                // should not happen
-                throw new JobExecutionException("Did not find paginated report");
-            }
-        } else {//!isPaginationPreferred
-            if (nonPaginatedReportResult != null) {
-                result = nonPaginatedReportResult;
-            } else if (defaultReportResult != null && !defaultReportResult.isPaginated()) {
-                result = defaultReportResult;
-            } else {
-                // should not happen
-                throw new JobExecutionException("Did not find nonpaginated report");
-            }
-        }
-        return result;
+    	PaginationParameters paginationParameters = output.getPaginationParameters(jasperReport);
+    	ReportUnitResult result = reportResults.get(paginationParameters);
+    	if (result == null) {
+    		result = findMatchingResult(paginationParameters);
+    		if (result == null) {
+    			//should not happen
+    			throw new JobExecutionException("Did not find report result for " + paginationParameters);
+    		}
+    	}
+    	return result;
     }
 
     protected void disposeReportResults() {
-        disposeVirtualizer(defaultReportResult);
-        disposeVirtualizer(paginatedReportResult);
-        disposeVirtualizer(nonPaginatedReportResult);
+    	for (ReportUnitResult result : reportResults.values()) {
+			disposeVirtualizer(result);
+		}
     }
 
     protected void sendAlertMail() throws JobExecutionException {
@@ -794,10 +785,10 @@ public class ReportExecutionJob implements Job {
         }
     }
 
-    protected ReportUnitResult executeReport(Boolean ignorePagination) {
+    protected ReportUnitResult executeReport(PaginationParameters paginationParams) {
         isCancelRequested();
         if (log.isDebugEnabled()) {
-            log.debug("running report with ignorePagination " + ignorePagination);
+            log.debug("running report with pagination " + paginationParams);
         }
 
         ReportUnitResult result = null;
@@ -805,9 +796,7 @@ public class ReportExecutionJob implements Job {
             Map parametersMap = collectReportParameters();
             Map reportJobProperties = collectReportJobProperties();
 
-            if (ignorePagination != null) {
-                parametersMap.put(JRParameter.IS_IGNORE_PAGINATION, ignorePagination);
-            }
+            paginationParams.setReportParameters(parametersMap);
             ReportUnitRequest request = new ReportUnitRequest(getReportUnitURI(), parametersMap, reportJobProperties);
             request.setJasperReportsContext(getJasperReportsContext());
 

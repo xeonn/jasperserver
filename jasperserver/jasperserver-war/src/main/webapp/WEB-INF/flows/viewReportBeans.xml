@@ -52,7 +52,6 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
 			<property name="attributeSavedInputsState" value="savedInputsState"/>
 			<property name="attributeControlsHidden" value="inputControlsHidden"/>
 			<property name="attributeDashboardParametersHasError" value="dashboardParametersHasError"/>
-			<property name="attributeIgnorePagination" value="ignorePagination"/>
 			<property name="attributeReportLocale" value="reportExecutionLocale"/>
 			<property name="parameterReportLocale" value="reportLocale"/>
             <property name="auditContext" ref="${bean.auditContext}"/>

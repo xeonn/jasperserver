@@ -42,7 +42,7 @@ import com.jaspersoft.jasperserver.api.engine.jasperreports.common.PdfExportPara
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ReportPdfExporter.java 54728 2015-04-24 15:28:20Z tdanciu $
+ * @version $Id: ReportPdfExporter.java 67372 2017-07-24 12:16:18Z lchirita $
  */
 public class ReportPdfExporter extends AbstractReportExporter 
 {
@@ -119,4 +119,26 @@ public class ReportPdfExporter extends AbstractReportExporter
 		}
 		return isPaginationPreferred;
 	}
+
+	@Override
+	protected Integer getMaxPageHeight(JRPropertiesHolder propertiesHolder) {
+		Integer maxPageHeight = super.getMaxPageHeight(propertiesHolder);
+		if (maxPageHeight == null && propertiesHolder != null) {
+			maxPageHeight = JRPropertiesUtil.getInstance(getJasperReportsContext()).getIntegerProperty(
+					propertiesHolder, PdfExportParametersBean.PROPERTY_PDF_MAX_PAGE_HEIGHT);
+		}
+		return maxPageHeight;
+	}
+
+	@Override
+	protected Integer getMaxPageWidth(JRPropertiesHolder propertiesHolder) {
+		Integer maxPageWidth = super.getMaxPageWidth(propertiesHolder);
+		if (maxPageWidth == null && propertiesHolder != null) {
+			maxPageWidth = JRPropertiesUtil.getInstance(getJasperReportsContext()).getIntegerProperty(
+					propertiesHolder, PdfExportParametersBean.PROPERTY_PDF_MAX_PAGE_WIDTH);
+		}
+		return maxPageWidth;
+	}
+	
+	
 }

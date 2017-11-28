@@ -552,15 +552,18 @@
     <!--App Themes END-->
 
     <servlet>
-        <servlet-name>RuntimeForwardingServlet</servlet-name>
-        <servlet-class>com.jaspersoft.jasperserver.war.JavascriptForwardingServlet</servlet-class>
+        <servlet-name>ResourceForwardingServlet</servlet-name>
+        <servlet-class>com.jaspersoft.jasperserver.war.ResourceForwardingServlet</servlet-class>
         <init-param>
-            <param-name>urlPrefix</param-name>
-            <param-value>/runtime/</param-value>
+            <param-name>forwardForbiddenDirectories</param-name>
+            <param-value>
+                <!-- Comma separated list of any additional directories
+                    (besides WEB-INF, META-INF) that the access is forbidden to-->
+            </param-value>
         </init-param>
     </servlet>
     <servlet-mapping>
-        <servlet-name>RuntimeForwardingServlet</servlet-name>
+        <servlet-name>ResourceForwardingServlet</servlet-name>
         <url-pattern>/runtime/*</url-pattern>
     </servlet-mapping>
 

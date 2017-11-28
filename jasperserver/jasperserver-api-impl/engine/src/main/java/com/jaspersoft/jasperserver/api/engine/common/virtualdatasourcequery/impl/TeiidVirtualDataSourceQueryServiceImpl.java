@@ -73,7 +73,7 @@ import java.util.Set;
 
 /**
  * @author Ivan Chan (ichan@jaspersoft.com)
- * @version $Id: TeiidVirtualDataSourceQueryServiceImpl.java 65088 2016-11-03 23:22:01Z gbacon $
+ * @version $Id: TeiidVirtualDataSourceQueryServiceImpl.java 67494 2017-08-18 02:09:32Z esytnik $
  */
 public class TeiidVirtualDataSourceQueryServiceImpl extends AbstractVirtualDataSourceQueryServiceImpl implements CacheManager, InitializingBean {
 
@@ -383,6 +383,7 @@ public class TeiidVirtualDataSourceQueryServiceImpl extends AbstractVirtualDataS
                 try {
                     Connection subDataSourceConnection = getDataSource(subDataSources.get(i)).getConnection();
                     availableSchemaList = VirtualSQLDataSource.discoverNonEmptySchemas(subDataSourceConnection, databaseObjectTypesFilter);
+                    subDataSourceConnection.close();
                 } catch(SQLException ex) {
                     debug("Unable to read the schema list from data source!");
         //            throw new VirtualDataSourceException(ex);

@@ -6,7 +6,7 @@
     <artifactId>server</artifactId>
     <packaging>pom</packaging>
     <name>Jasper Server</name>
-    <version>6.4.0</version>
+    <version>6.4.2</version>
     <url>http://www.jaspersoft.com</url>
 
   <profiles>
@@ -568,7 +568,7 @@
       <dependency>
         <groupId>net.sf.jasperreports</groupId>
         <artifactId>jasperreports</artifactId>
-        <version>6.4.1</version>
+        <version>6.4.2</version>
         <exclusions>
             <exclusion>
                 <groupId>xml-apis</groupId>
@@ -840,8 +840,8 @@
     <jpivot-version>6.1.0</jpivot-version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <my.build.directory>target</my.build.directory>
-    <spring.version>3.2.14.RELEASE</spring.version>
-    <spring.security.version>3.2.5.RELEASE</spring.security.version>
+    <spring.version>3.2.18.RELEASE</spring.version>
+    <spring.security.version>3.2.10.RELEASE</spring.security.version>
     <spring.integration.version>3.0.7.RELEASE</spring.integration.version>
     <aws-java-sdk.version>1.9.31</aws-java-sdk.version>
     <teiid.version>8.12.3</teiid.version>

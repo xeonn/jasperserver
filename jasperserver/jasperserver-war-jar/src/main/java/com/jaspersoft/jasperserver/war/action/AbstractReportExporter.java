@@ -45,6 +45,7 @@ import com.jaspersoft.jasperserver.api.JSException;
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
 import com.jaspersoft.jasperserver.api.common.domain.impl.ExecutionContextImpl;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.common.ExportParameters;
+import com.jaspersoft.jasperserver.api.engine.jasperreports.domain.impl.PaginationParameters;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.domain.impl.ReportUnitResult;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.util.FileBufferedOutputStream;
 import com.jaspersoft.jasperserver.war.common.JasperServerUtil;
@@ -56,7 +57,7 @@ import com.jaspersoft.jasperserver.war.util.SessionObjectSerieAccessor;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: AbstractReportExporter.java 65088 2016-11-03 23:22:01Z gbacon $
+ * @version $Id: AbstractReportExporter.java 67372 2017-07-24 12:16:18Z lchirita $
  */
 public abstract class AbstractReportExporter extends MultiAction {
 	
@@ -116,15 +117,15 @@ public abstract class AbstractReportExporter extends MultiAction {
 		
 		if (result != null) 
 		{
-			Boolean isPaginationPreferred = isPaginationPreferred(result.getJasperPrint());
-			boolean isPaginated = result.isPaginated();
-			if (isPaginationPreferred != null && isPaginated != isPaginationPreferred) 
+			PaginationParameters paginationParams = getPaginationParameters(result.getJasperPrint());
+			if (!result.matchesPagination(paginationParams)) 
 			{
 			if (log.isDebugEnabled()) {
-					log.debug("requested report pagination flag: " + isPaginationPreferred + ", current report pagination flag: " + isPaginated);
+					log.debug("requested report pagination: " + paginationParams 
+							+ ", current report pagination flag: " + result.isPaginated());
 			}
 			
-				context.getRequestScope().put(getViewReportAction().getAttributeIgnorePagination(), !isPaginationPreferred);
+				context.getRequestScope().put(getViewReportAction().getAttributePaginationParameters(), paginationParams);
 				result = getViewReportAction().executeReport(context);
 			}
 		}
@@ -380,6 +381,34 @@ public abstract class AbstractReportExporter extends MultiAction {
 	protected Boolean isPaginationPreferred(JRPropertiesHolder propertiesHolder)
 	{
 		return isPaginated();
+	}
+	
+	protected Integer getMaxPageHeight(JRPropertiesHolder propertiesHolder)
+	{
+		return null;
+	}
+	
+	protected Integer getMaxPageWidth(JRPropertiesHolder propertiesHolder)
+	{
+		return null;
+	}
+	
+	protected PaginationParameters getPaginationParameters(JRPropertiesHolder propertiesHolder)
+	{
+		Boolean paginationPreferred = isPaginationPreferred(propertiesHolder);
+		Integer maxPageHeight = getMaxPageHeight(propertiesHolder);
+		Integer maxPageWidth = getMaxPageWidth(propertiesHolder);
+		
+		PaginationParameters paginationParameters = new PaginationParameters();
+		paginationParameters.setPaginated(paginationPreferred);
+		paginationParameters.setMaxPageHeight(maxPageHeight);
+		paginationParameters.setMaxPageWidth(maxPageWidth);
+		
+		if (log.isDebugEnabled()) {
+			log.debug("pagination parameters " + paginationParameters);
+		}
+		
+		return paginationParameters;
 	}
 
 	public ViewReportAction getViewReportAction() {
