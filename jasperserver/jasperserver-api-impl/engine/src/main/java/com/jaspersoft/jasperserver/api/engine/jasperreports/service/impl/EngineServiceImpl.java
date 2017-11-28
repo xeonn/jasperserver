@@ -55,6 +55,7 @@ import com.jaspersoft.jasperserver.api.engine.jasperreports.domain.impl.ReportUn
 import com.jaspersoft.jasperserver.api.engine.jasperreports.domain.impl.TrialReportUnitRequest;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.service.DataCacheProvider;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.service.InputControlsInfoExtractor;
+import com.jaspersoft.jasperserver.api.engine.jasperreports.util.DataAdapterDefinition;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.util.CustomDataSourceDefinition;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.util.DataSourceServiceFactory;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.util.DefaultProtectionDomainProvider;
@@ -107,6 +108,7 @@ import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.CustomRepor
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.DataView;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportDataSource;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportUnit;
+import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.CustomJdbcReportDataSourceProvider;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.service.ReportDataSourceService;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.service.ReportDataSourceServiceFactory;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
@@ -199,7 +201,7 @@ import java.util.jar.JarFile;
 /**
  *
  * @author Teodor Danciu (teodord@users.sourceforge.net)
- * @version $Id: EngineServiceImpl.java 63380 2016-05-26 20:56:46Z mchan $
+ * @version $Id: EngineServiceImpl.java 65213 2016-11-17 10:05:43Z agodovan $
  */
 public class EngineServiceImpl implements EngineService, ReportExecuter,
 		CompiledReportProvider, InternalReportCompiler, InitializingBean, Diagnostic
@@ -539,6 +541,11 @@ public class EngineServiceImpl implements EngineService, ReportExecuter,
             status = new ReportExecutionStatus(request, ((ReportUnitRequest)request).getPropertyMap());
             String reportUnitUri = ((ReportUnitRequest) request).getReportUnitUri();
             status.setReportURI(reportUnitUri);
+			Map propertyMap = ((ReportUnitRequest) request).getPropertyMap();
+			Object username;
+			if (null != propertyMap && (username = propertyMap.get(ReportExecutionStatus.PROPERTY_USERNAME)) != null) {
+				MDC.put(FilterBy.USER_ID.name(), username.toString());
+			}
             MDC.put(FilterBy.RESOURCE_URI.name(), reportUnitUri);
             status.setOwner(securityContextProvider.getContextUser());
         } else {
@@ -557,6 +564,7 @@ public class EngineServiceImpl implements EngineService, ReportExecuter,
 			log.debug("Ended execution " + request.getId());
 		}
         MDC.getContext().remove(FilterBy.RESOURCE_URI.name());
+		MDC.getContext().remove(FilterBy.USER_ID.name());
 	}
 
 	protected ReportExecutionStatus currentExecutionStatus() {
@@ -1012,7 +1020,7 @@ public class EngineServiceImpl implements EngineService, ReportExecuter,
 						repositoryContextHandle);
 				try {
 			        JasperDesignCache cache = JasperDesignCache.getInstance(DefaultJasperReportsContext.getInstance(), request.getReportContext());
-			        setReportCompiler(cache, repositoryContextHandle, origContext, unitResources);
+			        setReportCompiler(cache, reportUnit, inMemoryUnit, repositoryContextHandle, origContext, unitResources);
 					JasperReport report = getJasperReport(runtimeContext, cache, reportUnit, inMemoryUnit);
 					
 					// check if the report inhibits async viewing
@@ -1057,53 +1065,6 @@ public class EngineServiceImpl implements EngineService, ReportExecuter,
                 TimeZoneContextHolder.setTimeZone(null);
 				resetThreadRepositoryContext(repositoryContextHandle);
 			}
-		}
-
-		private void setReportCompiler(JasperDesignCache cache, 
-				final RepositoryContextHandle initialContextHandle, 
-				final OrigContextClassLoader initialContextClassLoader, 
-				final Map unitResources) {
-			
-			if (cache == null)
-				return;
-			
-			cache.setReportCompiler(new ReportCompiler() {
-				@Override
-				public JasperReport compile(JasperDesign design) throws JRException {
-					RepositoryContext initialContext = initialContextHandle.getRepositoryContext();
-					RepositoryContext currentContext = RepositoryUtil.getThreadRepositoryContext();
-					
-					RepositoryContextHandle newContextHandle = null;
-					if (currentContext == null || !currentContext.equals(initialContext)) {
-						newContextHandle = setThreadRepositoryContext(
-								initialContext.getExecutionContext(), 
-								reportUnit, reportUnit.getURIString());
-					}
-					
-					try {
-						OrigContextClassLoader newContextClassLoader = null;
-						ClassLoader currentClassLoader = Thread.currentThread().getContextClassLoader();
-						if (initialContextClassLoader.set && (currentClassLoader == null
-								|| !currentClassLoader.equals(initialContextClassLoader.newClassLoader))) {
-							newContextClassLoader = setContextClassLoader(
-									initialContext.getExecutionContext(), unitResources, inMemoryUnit, 
-									newContextHandle == null ? initialContextHandle : newContextHandle);
-						}
-							
-						try {
-							return compileReport(design);
-						} finally {
-							if (newContextClassLoader != null) {
-								revert(newContextClassLoader);
-							}
-						}
-					} finally {
-						if (newContextHandle != null) {
-							resetThreadRepositoryContext(newContextHandle);
-						}
-					}
-				}
-			});
 		}
 
 		protected void runWithCachedData(ExecutionContext runtimeContext, JasperReport report, 
@@ -1913,6 +1874,55 @@ public class EngineServiceImpl implements EngineService, ReportExecuter,
 		return fillResult;
 	}
 
+	private void setReportCompiler(JasperDesignCache cache, 
+			final ReportUnit reportUnit, 
+			final boolean inMemoryUnit, 
+			final RepositoryContextHandle initialContextHandle, 
+			final OrigContextClassLoader initialContextClassLoader, 
+			final Map unitResources) {
+		
+		if (cache == null)
+			return;
+		
+		cache.setReportCompiler(new ReportCompiler() {
+			@Override
+			public JasperReport compile(JasperDesign design) throws JRException {
+				RepositoryContext initialContext = initialContextHandle.getRepositoryContext();
+				RepositoryContext currentContext = RepositoryUtil.getThreadRepositoryContext();
+				
+				RepositoryContextHandle newContextHandle = null;
+				if (currentContext == null || !currentContext.equals(initialContext)) {
+					newContextHandle = setThreadRepositoryContext(
+							initialContext.getExecutionContext(), 
+							reportUnit, reportUnit.getURIString());
+				}
+				
+				try {
+					OrigContextClassLoader newContextClassLoader = null;
+					ClassLoader currentClassLoader = Thread.currentThread().getContextClassLoader();
+					if (initialContextClassLoader.set && (currentClassLoader == null
+							|| !currentClassLoader.equals(initialContextClassLoader.newClassLoader))) {
+						newContextClassLoader = setContextClassLoader(
+								initialContext.getExecutionContext(), unitResources, inMemoryUnit, 
+								newContextHandle == null ? initialContextHandle : newContextHandle);
+					}
+						
+					try {
+						return compileReport(design);
+					} finally {
+						if (newContextClassLoader != null) {
+							revert(newContextClassLoader);
+						}
+					}
+				} finally {
+					if (newContextHandle != null) {
+						resetThreadRepositoryContext(newContextHandle);
+					}
+				}
+			}
+		});
+	}
+
     private String getOriginalDataAdapterTopicUri(ReportDataSource datasource) {
         if (datasource instanceof DataView) return ((DataView)datasource).getOriginalDataAdapterTopic();
         return null;
@@ -2293,6 +2303,7 @@ public class EngineServiceImpl implements EngineService, ReportExecuter,
 
 	}
 
+
 	public void setBuiltinParameters(ExecutionContext context, boolean onlyExistingParameters, JRParameter[] existingJRParameters,
                 Map parametersMap, List additionalParameters) {
             for (Object o : getBuiltInParameterProviders() ) {
@@ -2381,7 +2392,15 @@ public class EngineServiceImpl implements EngineService, ReportExecuter,
 
     }
 
-        public ResourceLookup[] getDataSources(ExecutionContext context, String queryLanguage) {
+	public Map<String, ?> getResolvedBuiltinParameterValues(ExecutionContext ctx, JRParameter[] allJRParameters) {
+		Map<String, ?> builtInParameters = new HashMap<String, Object>();
+
+		setBuiltinParameters(ctx, true, allJRParameters, builtInParameters, null);
+
+		return builtInParameters;
+	}
+
+	public ResourceLookup[] getDataSources(ExecutionContext context, String queryLanguage) {
 		ResourceLookup[] datasources;
 		if (queryLanguage == null) {
 			datasources = repository.findResource(context, FilterCriteria.createFilter(ReportDataSource.class));
@@ -2698,7 +2717,7 @@ public class EngineServiceImpl implements EngineService, ReportExecuter,
 		String baseName = report.getResourceBundle();
 		if (baseName != null) {
 			Locale locale = LocaleContextHolder.getLocale();
-			bundle = JRResourcesUtil.loadResourceBundle(baseName, locale);
+			bundle = JRResourcesUtil.loadResourceBundle(getEffectiveJasperReportsContext(), baseName, locale);
 		}
 		return bundle;
 	}
@@ -2962,7 +2981,12 @@ public class EngineServiceImpl implements EngineService, ReportExecuter,
         }
 
         // discover metadata from connector
-        CustomDomainMetaData metaData = metaDataProvider.getCustomDomainMetaData(customReportDataSource);
+        CustomDomainMetaData metaData;
+        if (metaDataProvider instanceof DataAdapterDefinition) {
+            metaData = ((DataAdapterDefinition) metaDataProvider).retrieveCustomDomainMetaData(customReportDataSource, repository);
+        } else {
+            metaData = metaDataProvider.getCustomDomainMetaData(customReportDataSource);
+        }
         if (log.isDebugEnabled()) {
             for (JRField field : metaData.getJRFieldList()) {
                 log.debug("METADATA from CONNECTOR:  FIELD = " + field.getName() + "  TYPE = " + field.getValueClassName());
@@ -2970,6 +2994,21 @@ public class EngineServiceImpl implements EngineService, ReportExecuter,
         }
 
         return metaData;
+    }
+
+
+
+    public boolean isJDBCDiscoverySupported(CustomReportDataSource customReportDataSource) {
+        CustomReportDataSourceServiceFactory factory =
+                (CustomReportDataSourceServiceFactory) getDataSourceServiceFactories().getBean(customReportDataSource.getClass());
+        CustomDataSourceDefinition dataSourceDefinition = factory.getDefinition(customReportDataSource);
+        if  (dataSourceDefinition.getCustomFactory() != null) {
+            Class<?>[] interfaces = dataSourceDefinition.getCustomFactory().getClass().getInterfaces();
+            for (Class interfaceClass : interfaces) {
+                if (interfaceClass == CustomJdbcReportDataSourceProvider.class) return true;
+            }
+        }
+        return  false;
     }
 
     private CustomDomainMetaDataProvider getCustomDomainMetaDataProvider(CustomReportDataSource customReportDataSource,

@@ -18,5 +18,9 @@
   ~ You should have received a copy of the GNU Affero General Public  License
   ~ along with this program. If not, see <http://www.gnu.org/licenses/>.
   --%>
+    <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<c:if test="${not empty header['x-requested-with']}">
+    <c:set var="SKIP_XSS_ESCAPE" value="true" scope="request"/>
+</c:if>
 
     ${ajaxResponseModel}

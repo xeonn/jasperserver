@@ -25,10 +25,16 @@ public class JasperServerContainerResponseFilter implements ContainerResponseFil
                     mediaType = "json";
                 }
             }
-            if (containerResponse.getEntity() instanceof com.jaspersoft.jasperserver.dto.common.ErrorDescriptor) {
+            if (containerResponse.getEntity() instanceof ErrorDescriptor) {
+                if(containerResponse.getHttpHeaders() != null && containerResponse.getHttpHeaders().size() > 0) {
+                    containerResponse.getHttpHeaders().remove("Content-Type");
+                }
                 containerResponse.getHttpHeaders().add("Content-Type", "application/errorDescriptor+" + mediaType);
             } else if (containerResponse.getEntity() instanceof java.util.List
                     && ((List)containerResponse.getEntity()).get(0) instanceof com.jaspersoft.jasperserver.dto.common.ErrorDescriptor) {
+                if(containerResponse.getHttpHeaders() != null && containerResponse.getHttpHeaders().size() > 0) {
+                    containerResponse.getHttpHeaders().remove("Content-Type");
+                }
                 containerResponse.getHttpHeaders().add("Content-Type", "application/collection.errorDescriptor+" + mediaType);
             }
         }

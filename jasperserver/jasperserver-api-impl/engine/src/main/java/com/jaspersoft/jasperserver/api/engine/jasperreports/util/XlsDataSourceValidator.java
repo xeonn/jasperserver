@@ -33,41 +33,42 @@ public class XlsDataSourceValidator implements CustomDataSourceValidator {
 
 		Map props = ds.getPropertyMap();
 		if (props != null) {
-			filePath = (String) ds.getPropertyMap().get("fileName");
+
             useFirstRowAsHeader = (String) ds.getPropertyMap().get("useFirstRowAsHeader");
 		}
         final ResourceReference dataFileReference = ds.getResources() != null
                 ? ds.getResources().get(TextDataSourceDefinition.DATA_FILE_RESOURCE_ALIAS) : null;
         if(dataFileReference != null){
-            if(filePath != null) reject(errors, "fileName", "File path is redundant if data file reference is specified");
             final String targetURI = dataFileReference.getTargetURI();
             if(repositoryService.getResource(
                     ExecutionContextImpl.getRuntimeExecutionContext(), targetURI) == null){
                 reject(errors, "fileName", "Data file isn't found by URI " + targetURI);
             }
-        }
-		if (filePath == null || filePath.length() == 0) {
-            // file path can be null if data file resources is linked to the data source
-            if(dataFileReference == null) reject(errors, "fileName", "Please enter file path");
-		} else {
-            if (filePath.toLowerCase().startsWith("ftp://") || filePath.toLowerCase().startsWith("ftps://")) {
-                int idx1 = filePath.indexOf(":", 6);
-                int idx2 = filePath.indexOf("@", 6);
-                int idx3 = filePath.indexOf("/", idx1);
-                if ((idx1 <= 0) || (idx2 <= 0) || (idx3 <= 0) || (idx3 == (idx2 + 1))) {
-                    reject(errors, "fileName", "Please follow FTP syntax for FTP path: ftp://[USERNAME]:[PASSWORD]@[HOST]:[PORT]/[PATH]/[FILENAME]");
-                }
-            } else if  (filePath.toLowerCase().startsWith("repo:")) {
-            } else if  (filePath.toLowerCase().startsWith("http:")) {
-            } else if  (filePath.toLowerCase().startsWith("https:")) {
+        } else {
+            filePath = (String) ds.getPropertyMap().get("fileName");
+            if (filePath == null || filePath.length() == 0) {
+                // file path can be null if data file resources is linked to the data source
+                reject(errors, "fileName", "Please enter file path");
             } else {
-                try {
-                    File f = new File(filePath);
-                    if (!(f.exists() && !f.isDirectory())) {
+                if (filePath.toLowerCase().startsWith("ftp://") || filePath.toLowerCase().startsWith("ftps://")) {
+                    int idx1 = filePath.indexOf(":", 6);
+                    int idx2 = filePath.indexOf("@", 6);
+                    int idx3 = filePath.indexOf("/", idx1);
+                    if ((idx1 <= 0) || (idx2 <= 0) || (idx3 <= 0) || (idx3 == (idx2 + 1))) {
+                        reject(errors, "fileName", "Please follow FTP syntax for FTP path: ftp://[USERNAME]:[PASSWORD]@[HOST]:[PORT]/[PATH]/[FILENAME]");
+                    }
+                } else if (filePath.toLowerCase().startsWith("repo:")) {
+                } else if (filePath.toLowerCase().startsWith("http:")) {
+                } else if (filePath.toLowerCase().startsWith("https:")) {
+                } else {
+                    try {
+                        File f = new File(filePath);
+                        if (!(f.exists() && !f.isDirectory())) {
+                            reject(errors, "fileName", "Invalid Server file system path");
+                        }
+                    } catch (Exception ex) {
                         reject(errors, "fileName", "Invalid Server file system path");
                     }
-                } catch (Exception ex) {
-                    reject(errors, "fileName", "Invalid Server file system path");
                 }
             }
         }

@@ -34,8 +34,11 @@ import com.jaspersoft.jasperserver.export.modules.BaseExporterModule;
 import com.jaspersoft.jasperserver.export.modules.repository.ResourceExporter;
 import com.jaspersoft.jasperserver.export.modules.scheduling.beans.ReportJobBean;
 import com.jaspersoft.jasperserver.export.modules.scheduling.beans.ReportUnitJobsIndexBean;
+import com.jaspersoft.jasperserver.export.service.impl.ImportExportServiceImpl;
+import org.apache.commons.lang3.ArrayUtils;
 import org.dom4j.Element;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -43,9 +46,29 @@ import java.util.Set;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ReportJobsExporter.java 63380 2016-05-26 20:56:46Z mchan $
+ * @version $Id: ReportJobsExporter.java 64717 2016-10-05 11:58:11Z akasych $
  */
 public class ReportJobsExporter extends BaseExporterModule {
+
+	protected class OutputFolderCreator {
+		private String uri;
+		private String folderPath;
+
+		OutputFolderCreator(String uri) {
+			this.uri = uri;
+		}
+
+		public String getFolderPath() {
+			if (folderPath == null) {
+				folderPath = mkdir(configuration.getReportJobsDir(), uri);
+			}
+			return folderPath;
+		}
+	}
+
+	protected interface ExceptionHandlingCallback {
+		void execute();
+	}
 
 	protected SchedulingModuleConfiguration configuration;
 
@@ -56,6 +79,15 @@ public class ReportJobsExporter extends BaseExporterModule {
 	protected Set exportedURIs;
 
 	private String resourceExporterId;
+
+	/**
+	 * This method can be overridden in subclasses
+	 * @return <code>true</code> in successful case, or <code>false</code> in case when exception was handled
+	 */
+	protected boolean doInExceptionHandlingContext(ExceptionHandlingCallback callback) {
+		callback.execute();
+		return true;
+	}
 
 	protected boolean isToProcess() {
 		return hasParameter(reportJobsArg);
@@ -79,15 +111,21 @@ public class ReportJobsExporter extends BaseExporterModule {
 		}
 	}
 
-	private void processUri(String uri) {
+	private void processUri(final String uri) {
 		Folder folder = configuration.getRepository().getFolder(executionContext, uri);
 		if (folder == null) {
-			Resource resource = configuration.getRepository().getResource(executionContext, uri);
-			if (resource == null) {
-				throw new JSException("jsexception.repository.uri.neither.report.nor.folder", new Object[] {uri});
-			}
-			
-			processResource(resource);
+			doInExceptionHandlingContext(new ExceptionHandlingCallback() {
+				@Override
+				public void execute() {
+					Resource resource = configuration.getRepository().getResource(executionContext, uri);
+					if (resource == null) {
+						throw new JSException("jsexception.repository.uri.neither.report.nor.folder", new Object[] {uri});
+					}
+
+					processResource(resource);
+				}
+			});
+
 		} else {
 			processFolder(uri);
 		}
@@ -136,9 +174,9 @@ public class ReportJobsExporter extends BaseExporterModule {
 
 		List jobs = configuration.getReportScheduler().getScheduledJobSummaries(executionContext, uri);
 		if (jobs != null && !jobs.isEmpty()) {
-			exportJobs(uri, jobs);
-			
-			writeIndexReportUnitEntry(uri);
+			if (exportJobs(uri, jobs)) {
+				writeIndexReportUnitEntry(uri);
+			}
 			
 			exportedURIs.add(uri);
 
@@ -148,33 +186,53 @@ public class ReportJobsExporter extends BaseExporterModule {
 		}
 	}
 
-	protected void exportJobs(String uri, List jobs) {
-		String ruPath = mkdir(configuration.getReportJobsDir(), uri);
+	/**
+	 * @return <b>true</b> - at least one job was exported, <b>false</b> - no one report job was exported
+	 */
+	protected boolean exportJobs(String uri, List jobs) {
+		final OutputFolderCreator folderCreator = new OutputFolderCreator(uri);
 		
-		long[] jobIds = new long[jobs.size()];
-		Set<String> sshKeysQueue = new HashSet<String>();
-		int c = 0;
-		for (Iterator iter = jobs.iterator(); iter.hasNext(); ++c) {
-			ReportJobSummary jobSummary = (ReportJobSummary) iter.next();
-			long jobId = jobSummary.getId();
-			jobIds[c] = jobId;
-			ReportJob job = configuration.getReportScheduler().getScheduledJob(executionContext, jobId);
-			exportJob(ruPath, job, jobSummary.getRuntimeInformation());
+		final Set<String> sshKeysQueue = new HashSet<String>();
+		List<Long> processedIds = new ArrayList<Long>();
 
-			//  Add SSH Key file resource to the export queue
-			if (job.getContentRepositoryDestination() != null
-					&& job.getContentRepositoryDestination().getOutputFTPInfo() != null
-					&& job.getContentRepositoryDestination().getOutputFTPInfo().getSshKey() != null) {
-				sshKeysQueue.add(job.getContentRepositoryDestination().getOutputFTPInfo().getSshKey());
+		for (Object job : jobs) {
+			final ReportJobSummary jobSummary = (ReportJobSummary) job;
+			final long jobId = jobSummary.getId();
+
+			boolean ok = doInExceptionHandlingContext(new ExceptionHandlingCallback() {
+				@Override
+				public void execute() {
+					ReportJob job = configuration.getReportScheduler().getScheduledJob(executionContext, jobId);
+					exportJob(folderCreator.getFolderPath(), job, jobSummary.getRuntimeInformation());
+
+					//  Add SSH Key file resource to the export queue
+					if (job.getContentRepositoryDestination() != null
+							&& job.getContentRepositoryDestination().getOutputFTPInfo() != null
+							&& job.getContentRepositoryDestination().getOutputFTPInfo().getSshKey() != null) {
+						sshKeysQueue.add(job.getContentRepositoryDestination().getOutputFTPInfo().getSshKey());
+					}
+				}
+			});
+
+			if (ok) {
+				processedIds.add(jobId);
 			}
 		}
 
 		// Export dependent resources
-		exportResources(sshKeysQueue);
+		if (!exportParams.hasParameter(ImportExportServiceImpl.SKIP_DEPENDENT_RESOURCES)) {
+			exportResources(sshKeysQueue);
+		}
 
-		ReportUnitJobsIndexBean indexBean = new ReportUnitJobsIndexBean();
-		indexBean.setJobIds(jobIds);
-		serialize(indexBean, ruPath, configuration.getReportUnitIndexFilename(), configuration.getSerializer());
+		if (processedIds.isEmpty()) {
+			return false;
+		} else {
+			ReportUnitJobsIndexBean indexBean = new ReportUnitJobsIndexBean();
+			long[] jobIds = ArrayUtils.toPrimitive(processedIds.toArray(new Long[processedIds.size()]));
+			indexBean.setJobIds(jobIds);
+			serialize(indexBean, folderCreator.getFolderPath(), configuration.getReportUnitIndexFilename(), configuration.getSerializer());
+			return true;
+		}
 	}
 
 	protected void exportJob(String folderPath, ReportJob job, ReportJobRuntimeInformation runtimeInformation) {

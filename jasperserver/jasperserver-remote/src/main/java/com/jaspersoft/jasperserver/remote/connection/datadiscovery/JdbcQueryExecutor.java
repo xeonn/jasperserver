@@ -20,6 +20,10 @@
 */
 package com.jaspersoft.jasperserver.remote.connection.datadiscovery;
 
+import com.jaspersoft.jasperserver.dto.connection.datadiscovery.FlatDataSet;
+import com.jaspersoft.jasperserver.dto.resources.domain.ResourceGroupElement;
+import com.jaspersoft.jasperserver.dto.resources.domain.ResourceSingleElement;
+import com.jaspersoft.jasperserver.dto.resources.domain.SchemaElement;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -37,38 +41,52 @@ import java.util.Map;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: JdbcQueryExecutor.java 58920 2015-10-30 15:47:09Z ykovalch $
+ * @version $Id: JdbcQueryExecutor.java 64791 2016-10-12 15:08:37Z ykovalch $
  */
-public class JdbcQueryExecutor implements QueryExecutor<String, Connection, List<Map<String, Object>>, Map<String, String>> {
+public class JdbcQueryExecutor implements QueryExecutor<String, Connection, FlatDataSet, ResourceGroupElement> {
     protected final Log log = LogFactory.getLog(getClass());
 
     @Override
-    public DataSet<List<Map<String, Object>>, Map<String, String>> executeQuery(String query, Connection connection) {
+    public FlatDataSet executeQuery(String query, Connection connection) {
         return executeQuery(query, connection, false);
     }
 
     @Override
-    public Map<String, String> executeQueryForMetadata(String query, Connection connection) {
+    public ResourceGroupElement executeQueryForMetadata(String query, Connection connection) {
         return executeQuery(query, connection, true).getMetadata();
     }
 
-    protected DataSet<List<Map<String, Object>>, Map<String, String>> executeQuery(String query, Connection connection, boolean skipData) {
-        final List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
-        final Map<String, String> columns;
+    protected FlatDataSet executeQuery(String query, Connection connection, boolean skipData) {
+        final List<String[]> result = new ArrayList<String[]>();
+        final Map<String, Class<?>> columns;
+        final ArrayList<SchemaElement> columnElements = new ArrayList<SchemaElement>();
+        final ResourceGroupElement metadata = new ResourceGroupElement().setKind("resultSet").setElements(columnElements);
         Statement stmt = null;
         try {
             stmt = connection.createStatement();
             ResultSet resultSet = stmt.executeQuery(query);
-            columns = new HashMap<String, String>();
+            columns = new HashMap<String, Class<?>>();
             final ResultSetMetaData metaData = resultSet.getMetaData();
             for (int i = 1; i < metaData.getColumnCount() + 1; i++) {
-                columns.put(metaData.getColumnName(i), metaData.getColumnClassName(i));
+                final String columnClassName = metaData.getColumnClassName(i);
+                final String columnName = metaData.getColumnName(i);
+                columnElements.add(new ResourceSingleElement().setName(columnName).setType(columnClassName));
+                try {
+                    columns.put(columnName, Class.forName(columnClassName));
+                } catch (ClassNotFoundException e) {
+                    // shouldn't happen, but let's fail gracefully if happen.
+                    throw new QueryExecutionException("Column metadata processing failed. Column class not found. " +
+                            "Column name: " + columnName + " Column class: " + columnClassName, query,
+                            connection.getClass(), e);
+                }
             }
             if(!skipData) {
                 while (resultSet.next()) {
-                    Map<String, Object> row = new HashMap<String, Object>();
-                    for (String columnName : columns.keySet()) {
-                        row.put(columnName, resultSet.getString(columnName));
+                    final int size = columnElements.size();
+                    String[] row = new String[size];
+                    for (int i = 0; i < size; i++) {
+                        SchemaElement column = columnElements.get(i);
+                        row[i] = resultSet.getString(column.getName());
                     }
                     result.add(row);
                 }
@@ -84,6 +102,6 @@ public class JdbcQueryExecutor implements QueryExecutor<String, Connection, List
                 }
             }
         }
-        return new DataSet<List<Map<String, Object>>, Map<String, String>>().setData(result).setMetadata(columns);
+        return new FlatDataSet().setData(result).setMetadata(metadata);
     }
 }

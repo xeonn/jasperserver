@@ -78,7 +78,7 @@ import java.util.*;
 /**
  * @author Volodya Sabadosh (vsabadosh@jaspersoft.com)
  * @author Zakhar Tomchenco (ztomchenco@jaspersoft.com)
- * @version $Id: PermissionsServiceImpl.java 55164 2015-05-06 20:54:37Z mchan $
+ * @version $Id: PermissionsServiceImpl.java 65088 2016-11-03 23:22:01Z gbacon $
  */
 @Component("permissionsService")
 @Transactional(rollbackFor = Exception.class)
@@ -96,7 +96,7 @@ public class PermissionsServiceImpl implements PermissionsService {
 
     @javax.annotation.Resource(name = "objectPermissionService")
     protected ObjectPermissionService objectPermissionService;
-    @javax.annotation.Resource(name = "internalAclService")
+    @javax.annotation.Resource(name = "externalAclService")
     protected AclService aclService;
     @javax.annotation.Resource(name = "aclSecurityChecker")
     protected AclPermissionsSecurityChecker aclPermissionsSecurityChecker;

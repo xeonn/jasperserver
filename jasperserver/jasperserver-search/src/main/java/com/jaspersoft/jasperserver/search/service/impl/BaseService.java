@@ -52,10 +52,15 @@ public class BaseService {
 
     protected Set<String> getExistingObjectLabels(String parentFolderUri, Set<String> objectsLabels, String folderUri) {
         Set<String> existingLabels = new HashSet<String>();
+        if (objectsLabels.isEmpty()) {
+            return existingLabels;
+        }
         try {
             List repoFolderList = repositoryService.getSubFolders(null, parentFolderUri);
+
             FilterCriteria criteria = FilterCriteria.createFilter();
             criteria.addFilterElement(FilterCriteria.createParentFolderFilter(parentFolderUri));
+            criteria.addFilterElement(FilterCriteria.createPropertyInFilter("label", objectsLabels.toArray(), true));
 
             List resources = repositoryService.loadResourcesList(null, criteria);
             repoFolderList.addAll(resources);

@@ -28,7 +28,7 @@ import java.util.Map;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: ConnectionManager.java 61434 2016-03-01 16:29:49Z ykovalch $
+ * @version $Id: ConnectionManager.java 64791 2016-10-12 15:08:37Z ykovalch $
  */
 public class ConnectionManager<ConnectionDescriptorType, ConnectionType, QueryType, DataSetType, DataSetMetadataType> {
     private final Connector<ConnectionType, ConnectionDescriptorType> connector;
@@ -72,11 +72,11 @@ public class ConnectionManager<ConnectionDescriptorType, ConnectionType, QueryTy
         });
     }
 
-    public DataSet<DataSetType, DataSetMetadataType> executeQuery(ConnectionDescriptorType connectionDescriptor, final QueryType query) {
+    public DataSetType executeQuery(ConnectionDescriptorType connectionDescriptor, final QueryType query) {
 
-        return operateConnection(connectionDescriptor, new ConnectionOperator<DataSet<DataSetType, DataSetMetadataType>, ConnectionType>() {
+        return operateConnection(connectionDescriptor, new ConnectionOperator<DataSetType, ConnectionType>() {
             @Override
-            public DataSet<DataSetType, DataSetMetadataType> operate(ConnectionType connection) {
+            public DataSetType operate(ConnectionType connection) {
                 return queryExecutor.executeQuery(query, connection);
             }
         });

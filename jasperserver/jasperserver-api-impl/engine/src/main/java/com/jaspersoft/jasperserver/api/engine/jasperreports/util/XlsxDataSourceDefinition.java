@@ -62,6 +62,7 @@ public class XlsxDataSourceDefinition extends AbstractTextDataSourceDefinition {
         // hide the following properties from UI
         Set<String> hiddenPropertySet = getHiddenPropertySet();
         hiddenPropertySet.add("name");
+        hiddenPropertySet.add("dataFile");
         hiddenPropertySet.add("queryExecuterMode");
         hiddenPropertySet.add("columnIndexes");
         hiddenPropertySet.add("columnNames");
@@ -117,7 +118,7 @@ public class XlsxDataSourceDefinition extends AbstractTextDataSourceDefinition {
         }
         // create TableSourceMetadata object
         CustomDomainMetaDataImpl sourceMetadata = new CustomDomainMetaDataImpl();
-        sourceMetadata.setQueryLanguage("xlsx");
+        sourceMetadata.setQueryLanguage(getQueryLanguage());
         sourceMetadata.setFieldNames(fieldNames);
         sourceMetadata.setFieldMapping(fieldMapping);
         // set default column data type based on the actual data
@@ -146,6 +147,7 @@ public class XlsxDataSourceDefinition extends AbstractTextDataSourceDefinition {
         Map<String, Integer> columnNames = xlsxDataSource.getColumnNames();
         String columnNameArray[] = new String[columnNames.size()];
         for (Map.Entry<String, Integer> entry : columnNames.entrySet()) {
+            isValidFieldName(entry.getKey());
             System.out.println("KEY = " + entry.getKey() + ", VAL = " + entry.getValue());
             columnNameArray[entry.getValue()] = entry.getKey();
         }

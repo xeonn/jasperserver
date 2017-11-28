@@ -22,17 +22,17 @@
 
 /**
  * @author: Zakhar Tomchenko
- * @version: $Id: DragAndDropPlugin.js 1160 2015-04-28 12:46:42Z spriluki $
+ * @version: $Id: DragAndDropPlugin.js 2956 2016-07-27 19:22:11Z inestere $
  */
 
 define(function(require){
     "use strict";
 
-    require("jquery.ui");
-
     var _ = require('underscore'),
         $ = require('jquery'),
         TreePlugin = require("./TreePlugin");
+
+    require("jquery-ui/jquery.ui.draggable");
 
     return TreePlugin.extend({
         initialize: function(options){

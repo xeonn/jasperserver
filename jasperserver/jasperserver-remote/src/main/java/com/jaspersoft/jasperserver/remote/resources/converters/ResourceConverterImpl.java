@@ -37,15 +37,18 @@ import com.jaspersoft.jasperserver.war.util.CalendarFormatProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
+import javax.validation.Validator;
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.util.List;
+import java.util.Set;
 
 /**
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: ResourceConverterImpl.java 62954 2016-05-01 09:49:23Z ykovalch $
+ * @version $Id: ResourceConverterImpl.java 64791 2016-10-12 15:08:37Z ykovalch $
  */
 public abstract class ResourceConverterImpl<ResourceType extends Resource, ClientType extends ClientResource<ClientType>> implements ResourceConverter<ResourceType, ClientType> {
     @javax.annotation.Resource(name = "mappingResourceFactory")
@@ -66,6 +69,8 @@ public abstract class ResourceConverterImpl<ResourceType extends Resource, Clien
 
     @javax.annotation.Resource(name = "basicResourceValidator")
     private ResourceValidator defaultValidator;
+    @javax.annotation.Resource(name = "beanValidator")
+    private Validator validator;
 
     public ResourceConverterImpl(){
         clientTypeHelper = new ClientTypeHelper(this.getClass());
@@ -93,6 +98,10 @@ public abstract class ResourceConverterImpl<ResourceType extends Resource, Clien
 
     @Override
     public ResourceType toServer(ClientType clientObject, ResourceType resultToUpdate, ToServerConversionOptions options) throws IllegalParameterValueException, MandatoryParameterNotFoundException {
+        final Set<ConstraintViolation<ClientType>> constraintViolations = validator.validate(clientObject);
+        if (!constraintViolations.isEmpty()) {
+            throw new ConstraintViolationException("Resource validation failed.", constraintViolations);
+        }
         ResourceType resource = genericFieldsToServer(clientObject, resultToUpdate, options);
         resource = resourceSpecificFieldsToServer(clientObject, resource, options);
         if (options != null && options.getAttachments() != null) {
@@ -123,22 +132,6 @@ public abstract class ResourceConverterImpl<ResourceType extends Resource, Clien
                     Resource.VERSION_NEW : clientObject.getVersion());
         }
         resultToUpdate.setURIString(clientObject.getUri());
-        final DateFormat dateTimeFormatter = getDateTimeFormat();
-        dateTimeFormatter.setTimeZone(TimeZoneContextHolder.getTimeZone());
-        if (clientObject.getCreationDate() != null) {
-            try {
-                resultToUpdate.setCreationDate(dateTimeFormatter.parse(clientObject.getCreationDate()));
-            } catch (ParseException ex) {
-                throw new IllegalParameterValueException("creationDate", clientObject.getCreationDate());
-            }
-        }
-        if (clientObject.getUpdateDate() != null) {
-            try {
-                resultToUpdate.setUpdateDate(dateTimeFormatter.parse(clientObject.getUpdateDate()));
-            } catch (ParseException ex) {
-                throw new IllegalParameterValueException("updateDate", clientObject.getUpdateDate());
-            }
-        }
         resultToUpdate.setDescription(clientObject.getDescription());
         resultToUpdate.setLabel(clientObject.getLabel());
         return resultToUpdate;

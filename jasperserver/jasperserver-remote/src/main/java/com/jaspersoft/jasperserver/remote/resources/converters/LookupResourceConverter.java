@@ -33,7 +33,7 @@ import javax.annotation.Resource;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: LookupResourceConverter.java 63451 2016-06-01 15:33:32Z ykovalch $
+ * @version $Id: LookupResourceConverter.java 63866 2016-07-12 22:39:01Z schubar $
  */
 @Service
 public class LookupResourceConverter extends ResourceConverterImpl<ResourceLookup, ClientResourceLookup> {

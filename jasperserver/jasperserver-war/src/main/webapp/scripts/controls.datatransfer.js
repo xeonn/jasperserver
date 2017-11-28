@@ -22,7 +22,7 @@
 
 /**
  * @author: afomin, inesterenko
- * @version: $Id: controls.datatransfer.js 8900 2015-05-06 20:57:14Z yplakosh $
+ * @version: $Id: controls.datatransfer.js 10533 2017-02-24 21:58:49Z schubar $
  */
 
 /* global JRS, errorObject, __jrsConfigs__, Mustache, dialogs, _, statusText */
@@ -166,7 +166,7 @@ JRS.Controls = (function (JSON, jQuery, _, Controls) {
 
                 var controlsStructure = this.sendRequest(url, selectedData).then(_.bind(this.dataConverter.structureFormater, this.dataConverter));
 
-                Controls.Utils.showLoadingDialogOn(controlsStructure);
+                Controls.Utils.showLoadingDialogOn(controlsStructure, null, true);
                 return  controlsStructure;
             },
 
@@ -182,7 +182,7 @@ JRS.Controls = (function (JSON, jQuery, _, Controls) {
                 var initialControlsValues = this.sendRequest(url, selectedData).
                     then(this.dataConverter.convertResponseToControlsState);
 
-                Controls.Utils.showLoadingDialogOn(initialControlsValues);
+                Controls.Utils.showLoadingDialogOn(initialControlsValues, null, true);
                 return initialControlsValues;
             },
 
@@ -214,7 +214,7 @@ JRS.Controls = (function (JSON, jQuery, _, Controls) {
                     triggerRequestDeferred.reject();
                 });
 
-                Controls.Utils.showLoadingDialogOn(fullUpdateDeferred);
+                Controls.Utils.showLoadingDialogOn(fullUpdateDeferred, null, true);
 
                 this.fullUpdateDeferred = fullUpdateDeferred;
 

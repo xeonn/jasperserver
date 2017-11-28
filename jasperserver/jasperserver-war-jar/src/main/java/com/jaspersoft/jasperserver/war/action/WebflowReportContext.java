@@ -207,4 +207,19 @@ public class WebflowReportContext implements ReportContext
 		return parameterValues;
 	}
 
+	@Override
+	public Object removeParameterValue(String parameterName)
+	{
+		return parameterValues.remove(parameterName);
+	}
+
+	@Override
+	public void clearParameterValues()
+	{
+		parameterValues.clear();
+		requestParameters.clear();
+		requestAttributes.clear();
+		flowAttributes.clear();
+	}
+
 }

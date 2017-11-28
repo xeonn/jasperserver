@@ -39,7 +39,7 @@ Usage:
 <tiles:useAttribute id="containerID" name="containerID" classname="java.lang.String" ignore="true"/>
 <tiles:useAttribute id="containerClass" name="containerClass" classname="java.lang.String" ignore="true"/>
 
-<!--/WEB-INF/jsp/templates/control_groupBox.jsp revision A-->
+
 <span <c:if test="${not empty containerID}">id="<tiles:getAsString name="containerID"/>"</c:if> class="control groupBox ${containerClass}">
     <tiles:insertTemplate template="/WEB-INF/jsp/templates/utility_cosmetic.jsp"/>
     <div class="content">

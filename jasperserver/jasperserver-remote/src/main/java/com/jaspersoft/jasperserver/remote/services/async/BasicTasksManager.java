@@ -25,13 +25,13 @@ import com.jaspersoft.jasperserver.dto.importexport.State;
 import com.jaspersoft.jasperserver.remote.exception.NoSuchTaskException;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /*
 *  @author inesterenko
@@ -42,17 +42,15 @@ public class BasicTasksManager implements TasksManager {
 
     protected Map<String, Task> tasks = new ConcurrentHashMap<String, Task>();
 
-    private final ExecutorService executor;
+    @Resource(name = "loggableExecutorService")
+    private ExecutorService executor;
 
     public BasicTasksManager(Map<String, Task> tasks) {
-        this.executor = Executors.newCachedThreadPool();
         this.tasks = new ConcurrentHashMap<String, Task>(tasks);
     }
 
     public BasicTasksManager() {
         super();
-
-        this.executor = Executors.newCachedThreadPool();
     }
 
     @Override

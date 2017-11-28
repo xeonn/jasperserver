@@ -23,8 +23,11 @@ package com.jaspersoft.jasperserver.jaxrs.authority;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.Role;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.client.UserImpl;
+import com.jaspersoft.jasperserver.dto.authority.ClientRole;
 import com.jaspersoft.jasperserver.dto.authority.ClientUser;
+import com.jaspersoft.jasperserver.dto.authority.UsersListWrapper;
 import com.jaspersoft.jasperserver.jaxrs.common.RestConstants;
+import com.jaspersoft.jasperserver.remote.common.RoleSearchCriteria;
 import com.jaspersoft.jasperserver.remote.common.UserSearchCriteria;
 import com.jaspersoft.jasperserver.remote.exception.IllegalParameterValueException;
 import com.jaspersoft.jasperserver.remote.exception.RemoteException;
@@ -33,10 +36,12 @@ import com.jaspersoft.jasperserver.remote.exception.ResourceNotFoundException;
 import com.jaspersoft.jasperserver.remote.resources.converters.UserConverter;
 import com.jaspersoft.jasperserver.remote.services.UserAndRoleService;
 import com.jaspersoft.jasperserver.remote.services.impl.UserAndRoleServiceImpl;
-
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 import javax.annotation.Resource;
 import javax.ws.rs.core.Response;
-import java.util.*;
 
 /**
  * @author: Zakhar.Tomchenco
@@ -100,8 +105,12 @@ public class UsersJaxrsService {
                     .header(RestConstants.HEADER_TOTAL_COUNT, totalCount)
                     .build();
         } else {
+            List<ClientUser> clientUsers = new LinkedList<ClientUser>();
+            for (User user : users) {
+                clientUsers.add(userConverter.toClient(user, null));
+            }
             response = Response.ok()
-                    .entity(new UsersListWrapper(users))
+                    .entity(new UsersListWrapper(clientUsers))
                     .header(RestConstants.HEADER_START_INDEX, startIndex)
                     .header(RestConstants.HEADER_RESULT_COUNT, users.size())
                     .header(RestConstants.HEADER_TOTAL_COUNT, totalCount)
@@ -141,6 +150,8 @@ public class UsersJaxrsService {
     }
 
     public Response putUser(ClientUser clientUser, String name, String tenantId) throws RemoteException {
+        validateRoles(clientUser);
+
         User user = findUser(name, tenantId);
         Response.Status status = Response.Status.OK;
 
@@ -154,6 +165,32 @@ public class UsersJaxrsService {
         user.setTenantId(tenantId);
 
         return Response.status(status).entity(userConverter.toClient(service.putUser(user), null)).build();
+    }
+
+    private void validateRoles(ClientUser clientUser) {
+        if(clientUser.getRoleSet() == null || clientUser.getRoleSet().isEmpty()) {
+            return;
+        }
+        List<String> invalidRoles = new ArrayList<String>();
+        for(ClientRole clientRole : clientUser.getRoleSet()) {
+            RoleSearchCriteria roleSearchCriteria = new RoleSearchCriteria();
+            roleSearchCriteria.setRoleName(clientRole.getName());
+            roleSearchCriteria.setTenantId(clientRole.getTenantId());
+            List<Role> roles = service.findRoles(roleSearchCriteria);
+            if(roles == null || roles.isEmpty()) {
+                invalidRoles.add(clientRole.getName());
+            }
+        }
+        if (!invalidRoles.isEmpty()) {
+            String[] invalidRolesAsArray = invalidRoles.toArray(new String[invalidRoles.size()]);
+            String message;
+            if(invalidRoles.size() > 1) {
+                message = "Roles weren't found in the database";
+            } else {
+                message = "Role wasn't found in the database";
+            }
+            throw new IllegalParameterValueException(message + ": " + Arrays.toString(invalidRolesAsArray), invalidRolesAsArray);
+        }
     }
 
     public Response postToUser(String name) {

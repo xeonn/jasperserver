@@ -20,15 +20,16 @@
  */
 package com.jaspersoft.jasperserver.api.metadata.common.service.impl;
 
-import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
+import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.*;
 
 /**
  * @author Yakiv Tymoshenko
- * @version $Id: ExecutorServiceWrapper.java 56967 2015-08-20 23:20:53Z esytnik $
+ * @version $Id: ExecutorServiceWrapper.java 65088 2016-11-03 23:22:01Z gbacon $
  * @since 25.06.2015
  */
-public abstract class ExecutorServiceWrapper implements Executor {
+public abstract class ExecutorServiceWrapper implements ExecutorService {
 
     private ExecutorService wrappedExecutorService;
 
@@ -36,13 +37,76 @@ public abstract class ExecutorServiceWrapper implements Executor {
         this.wrappedExecutorService = wrappedExecutorService;
     }
 
-    /*
+    /**
     Must be overridden to pass a thread-local context from the main thread into a thread-pool-thread.
      */
     @Override
     public abstract void execute(Runnable command);
 
+    /**
+     Must be overridden to pass a thread-local context from the main thread into a thread-pool-thread.
+     */
+    @Override
+    public abstract <T> Future<T> submit(Callable<T> task);
+
+    /**
+     Must be overridden to pass a thread-local context from the main thread into a thread-pool-thread.
+     */
+    @Override
+    public abstract <T> Future<T> submit(Runnable task, T result);
+
+    /**
+     Must be overridden to pass a thread-local context from the main thread into a thread-pool-thread.
+     */
+    @Override
+    public abstract Future<?> submit(Runnable task);
+
     public ExecutorService getWrappedExecutorService() {
         return wrappedExecutorService;
+    }
+
+    @Override
+    public void shutdown() {
+        wrappedExecutorService.shutdown();
+    }
+
+    @Override
+    public List<Runnable> shutdownNow() {
+        return wrappedExecutorService.shutdownNow();
+    }
+
+    @Override
+    public boolean isShutdown() {
+        return wrappedExecutorService.isShutdown();
+    }
+
+    @Override
+    public boolean isTerminated() {
+        return wrappedExecutorService.isTerminated();
+    }
+
+    @Override
+    public boolean awaitTermination(long timeout, TimeUnit unit) throws InterruptedException {
+        return wrappedExecutorService.awaitTermination(timeout, unit);
+    }
+
+    @Override
+    public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks) throws InterruptedException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit) throws InterruptedException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public <T> T invokeAny(Collection<? extends Callable<T>> tasks) throws InterruptedException, ExecutionException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public <T> T invokeAny(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+        throw new UnsupportedOperationException();
     }
 }

@@ -43,7 +43,7 @@ import net.sf.jasperreports.export.WriterExporterOutput;
 
 /**
  * @author sanda zaharia (shertage@users.sourceforge.net)
- * @version $Id: ReportTextExporter.java 63555 2016-06-10 16:59:01Z tdanciu $
+ * @version $Id: ReportTextExporter.java 63866 2016-07-12 22:39:01Z schubar $
  */
 public class ReportTextExporter extends AbstractReportExporter
 {

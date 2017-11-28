@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: resource.add.files.js 10042 2016-04-12 14:01:27Z akasych $
+ * @version: $Id: resource.add.files.js 10293 2016-09-20 20:20:15Z mchan $
  */
 
 /* global resource, Form, ValidationModule, localContext, buttonManager, matchAny, resourceLocator */
@@ -49,7 +49,7 @@ var addFileResource = {
         "xml": ["xml", "agxml"],
 	    "config": ["config"],
 		"cer": ["p12", "pfx"],
-        "contentResource": ["docx", "doc", "ppt", "pptx", "xls", "xlsx", "ods", "odt", "odp", "pdf", "rtf", "html", "txt", "csv"],
+        "contentResource": ["docx", "doc", "ppt", "pptx", "xls", "xlsx", "ods", "odt", "odp", "pdf", "rtf", "html", "txt", "csv", "json"],
         "secureFile": ["*"]
     },
 

@@ -17,9 +17,10 @@
     <alias name="${bean.securityContextProvider}" alias="concreteSecurityContextProvider"/>
     <alias name="${bean.serverInfoService}" alias="concreteServerInfoService"/>
     <alias name="${bean.reportExecutor}" alias="reportExecutor"/>
-    <alias name="${bean.reportJobsPersistenceService}" alias="concreteJobsPersistenceService"/>
     <alias name="${bean.filterResolver}" alias="filterResolver"/>
     <alias name="fullHtmlExportStrategy" alias="defaultHtmlExportStrategy"/>
+    <bean id="beanValidator"
+          class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean"/>
 
     <util:list id="defaultRoles">
         <bean class="com.jaspersoft.jasperserver.api.metadata.user.domain.client.RoleImpl">
@@ -203,13 +204,20 @@
     </util:set>
 
     <util:set id="customDataSourcesToHide">
-        <value>xmlaQueryDataSource</value>
-        <value>remoteXmlDataSource</value>
-        <value>mongoDBQueryDataSource</value>
-        <value>jsonDataSource</value>
-        <value>jdbcQueryDataSource</value>
-        <value>cassandraQueryDataSource</value>
-        <value>JsonSeriesDataSource</value>
+        <value>remoteXmlDataSource2</value> <!-- Full domain support remote XML custom data source -->
+        <value>remoteXmlDataSource</value>  <!-- Simple single table remote XML custom data source -->
+        <value>mongoDBQueryDataSource2</value> <!-- Full domain support mongodb query custom data source -->
+        <value>mongoDBQueryDataSource</value>  <!-- Simple single table remote XML custom data source -->
+        <value>jsonDataSource2</value> <!-- Full domain support JSON custom data source -->
+        <value>jsonDataSource</value>  <!-- Simple single table remote XML custom data source -->
+        <value>jdbcQueryDataSource2</value> <!-- Full domain support jdbc query custom data source -->
+        <value>jdbcQueryDataSource</value>  <!-- Simple single table remote XML custom data source -->
+        <value>xlsDataSource</value> <!-- Full domain support XLS custom data source -->
+        <value>xlsxDataSource</value> <!-- Full domain support XLSX custom data source -->
+        <value>textDataSource</value> <!-- Full domain support TEXT/ CSV custom data source -->
+        <value>JsonSeriesDataSource</value> <!-- Simple single table remote XML custom data source -->
+        <value>xmlaQueryDataSource</value> <!-- Simple single table XMLA Query custom data source -->
+        <value>cassandraQueryDataSource</value> <!-- Deprecated.  Please use cassandra SIMBA JDBC driver to run native CQL.  Append "QueryMode=1" in URL in order to run CQL  -->
         <value>HiveDataSource</value> <!-- Deprecated.  Please use Hive/ Impala JDBC drivers instead -->
     </util:set>
 
@@ -360,8 +368,9 @@
     </bean>
 
     <util:list id="disabledResourceTypes" value-type="java.lang.Class">
-        <value>com.jaspersoft.jasperserver.dto.resources.domain.ClientDomain</value>
+        <!--add client DTO class names to disable. E.g.:
         <value>com.jaspersoft.jasperserver.dto.resources.domain.ClientDomainSchema</value>
+        -->
     </util:list>
 
 

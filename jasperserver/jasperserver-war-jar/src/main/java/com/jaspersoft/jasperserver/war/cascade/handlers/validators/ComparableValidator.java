@@ -35,7 +35,7 @@ import static com.jaspersoft.jasperserver.war.cascade.handlers.NumberUtils.toBig
 
 /**
  * @author Yaroslav.Kovalchyk
- * @version $Id: ComparableValidator.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: ComparableValidator.java 65088 2016-11-03 23:22:01Z gbacon $
  */
 @Service
 public class ComparableValidator<T extends Comparable<?>> implements InputControlValueValidator<T> {
@@ -55,10 +55,10 @@ public class ComparableValidator<T extends Comparable<?>> implements InputContro
                 int result = compare(value, min);
                 if (dataType.isStrictMin()) {
                     if (result >= 0) {
-                        throw new InputControlValidationException("fillParameters.error.smallerThan", null, messageSource.getMessage("fillParameters.error.smallerThan", null, locale), null);
+                        throw new InputControlValidationException("fillParameters.error.smallerOrEqual", null, messageSource.getMessage("fillParameters.error.smallerOrEqual", null, locale), null);
                     }
                 } else if (result > 0) {
-                    throw new InputControlValidationException("fillParameters.error.smallerOrEqual", null, messageSource.getMessage("fillParameters.error.smallerOrEqual", null, locale), null);
+                    throw new InputControlValidationException("fillParameters.error.smallerThan", null, messageSource.getMessage("fillParameters.error.smallerThan", null, locale), null);
                 }
             }
 
@@ -68,10 +68,10 @@ public class ComparableValidator<T extends Comparable<?>> implements InputContro
                 int result = compare(value, max);
                 if (dataType.isStrictMax()) {
                     if (result <= 0) {
-                        throw new InputControlValidationException("fillParameters.error.greaterThan", null, messageSource.getMessage("fillParameters.error.greaterThan", null, locale), null);
+                        throw new InputControlValidationException("fillParameters.error.greaterOrEqual", null, messageSource.getMessage("fillParameters.error.greaterOrEqual", null, locale), null);
                     }
                 } else if (result < 0) {
-                    throw new InputControlValidationException("fillParameters.error.greaterOrEqual", null, messageSource.getMessage("fillParameters.error.greaterOrEqual", null, locale), null);
+                    throw new InputControlValidationException("fillParameters.error.greaterThan", null, messageSource.getMessage("fillParameters.error.greaterThan", null, locale), null);
                 }
             }
         }

@@ -203,16 +203,5 @@
         </profile>
     </profiles>
 
-    <repositories>
-        <repository>
-            <id>repository.jboss.org-public</id>
-            <name>JBoss repository</name>
-            <url>https://repository.jboss.org/nexus/content/groups/public</url>
-        </repository>
-        <repository>
-            <id>joda</id>
-            <name>joda repo</name>
-            <url>http://oss.sonatype.org/content/repositories/joda-releases/</url>
-        </repository>
-    </repositories>
+    
 </project>

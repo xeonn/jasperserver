@@ -20,6 +20,10 @@
 */
 package com.jaspersoft.jasperserver.dto.resources.domain;
 
+import com.jaspersoft.jasperserver.dto.resources.domain.validation.ValidReferences;
+
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlElements;
@@ -32,10 +36,14 @@ import java.util.List;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: Schema.java 62044 2016-03-24 14:56:43Z ykovalch $
+ * @version $Id: Schema.java 64791 2016-10-12 15:08:37Z ykovalch $
  */
+@ValidReferences
 public class Schema {
+
+    @Valid
     private List<ResourceElement> resources;
+    @Valid
     private List<PresentationGroupElement> presentation;
 
     public Schema(){}
@@ -53,6 +61,7 @@ public class Schema {
             @XmlElement(name = "constantsGroup", type = ConstantsResourceGroupElement.class),
             @XmlElement(name = "joinGroup", type = JoinResourceGroupElement.class)
     })
+
     public List<ResourceElement> getResources() {
         return resources;
     }
@@ -64,6 +73,7 @@ public class Schema {
 
     @XmlElementWrapper(name="presentation")
     @XmlElement(name="dataIsland")
+    @NotNull
     public List<PresentationGroupElement> getPresentation() {
         return presentation;
     }
@@ -129,6 +139,9 @@ public class Schema {
     }
 
     private List<? extends SchemaElement> sortResourceGroupElement(List<? extends SchemaElement> list) {
+        if(list == null || list.isEmpty()) {
+            return list;
+        }
         Comparator<SchemaElement> comparator = new Comparator<SchemaElement>() {
             public int compare(SchemaElement elem1, SchemaElement elem2) {
                 return elem1.getName().compareTo(elem2.getName());
@@ -136,10 +149,13 @@ public class Schema {
         };
         Collections.sort(list, comparator);
 
-        if (list.get(0) instanceof AbstractResourceGroupElement) {
-            List<AbstractResourceGroupElement> castedList = (List<AbstractResourceGroupElement>) list;
-            for (AbstractResourceGroupElement element : castedList) {
-                sortResourceGroupElement(element.getElements());
+        if (list.get(0) instanceof AbstractResourceGroupElement || list.get(0) instanceof ConstantsResourceGroupElement) {
+            for (SchemaElement element : list) {
+                if (element instanceof AbstractResourceGroupElement) {
+                    sortResourceGroupElement(((AbstractResourceGroupElement) element).getElements());
+                } else if (element instanceof ConstantsResourceGroupElement) {
+                    sortResourceGroupElement(((ConstantsResourceGroupElement) element).getElements());
+                }
             }
         }
         return list;

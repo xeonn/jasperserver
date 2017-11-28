@@ -22,13 +22,12 @@
 /* global define */
 
 /**
- * @version: $Id: scheduleTabView.js 9551 2015-10-13 14:09:03Z dgorbenk $
+ * @version: $Id: scheduleTabView.js 10224 2016-07-27 20:02:40Z inestere $
  */
 
 define(function (require) {
 
 	"use strict";
-
 
 
 	var $ = require('jquery'),
@@ -37,12 +36,10 @@ define(function (require) {
 		config = require('jrs.configs'),
 		Backbone = require('backbone'),
 		scheduleTabTemplate = require("text!scheduler/template/editor/scheduleTabTemplate.htm"),
+		DateAndTimePicker = require("components/dateAndTime/DateAndTimePicker"),
 
 		holydayCalView = require('scheduler/view/editor/holidayCalView'),
 		holidayCalsCollection = require('scheduler/collection/holidayCalsCollection');
-
-	require('config/datepickerSettings');
-	require('config/timepickerSettings');
 
 	// prepare a date and time format for jQuery Date/Time library from our internal i18n settings
 	var jqueryDateFormat = config.calendar.timepicker.dateFormat;
@@ -107,18 +104,18 @@ define(function (require) {
 
 			this.$el.find(".datepicker").each(function (index, calendar) {
 
-				$(calendar).datetimepicker({
+				var $calendar = $(calendar);
+
+				new DateAndTimePicker({
+					el: $calendar[0],
+					constrainInput: true,
 					dateFormat: jqueryDateFormat,
 					timeFormat: jqueryTimeFormat,
 					showOn: "button",
-					buttonText: "",
-					changeYear: true,
-					changeMonth: true,
-					showButtonPanel: true,
-					showSecond: false,
-					onChangeMonthYear: null,
-					beforeShow: $.datepicker.movePickerRelativelyToTriggerIcon
-				}).next().addClass('button').addClass('picker');
+					buttonText: ""
+				});
+
+				$calendar.next().addClass('button').addClass('picker');
 
 				// Prototype.js compatibility
 				$(calendar)[0].getValue = function () {

@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: report.view.runtime.js 8179 2015-01-27 12:34:21Z psavushchik $
+ * @version: $Id: report.view.runtime.js 10533 2017-02-24 21:58:49Z schubar $
  */
 
 /* global Report, viewer, Controls, ControlsBase, toolbarButtonModule, matchAny, JRS, isIPad, isSupportsTouch,
@@ -203,7 +203,7 @@ jQuery.extend(Report, {
 
         jQuery('#innerPagination').css('margin', 0);
 
-        dialogs.popup.hide($(ajax.LOADING_ID));
+        dialogs.popup.hideShared($(ajax.LOADING_ID), Report.REPORT_COMPONENT_ID);
 
         JRS.reportExecutionCounter && JRS.reportExecutionCounter.check();
     }
@@ -340,10 +340,7 @@ jQuery.extend(Report, {
         // disable back button after first click
         buttonManager.disable($('back'));
 
-        // exportForm is used here to leave the page
-        Report.exportForm._eventId.value = "close";
-        Report.exportForm._flowExecutionKey.value = Report.reportExecutionKey();
-        Report.exportForm.submit();
+        window.history.back();
     },
     open: function() {
         alert("Not implemented yet: open report")

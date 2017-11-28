@@ -72,7 +72,7 @@ import net.sf.jasperreports.web.util.WebHtmlResourceHandler;
  * <p></p>
  *
  * @author yaroslav.kovalchyk
- * @version $Id: AbstractHtmlExportStrategy.java 63555 2016-06-10 16:59:01Z tdanciu $
+ * @version $Id: AbstractHtmlExportStrategy.java 63866 2016-07-12 22:39:01Z schubar $
  */
 public abstract class AbstractHtmlExportStrategy implements HtmlExportStrategy {
     private final static Log log = LogFactory.getLog(FullHtmlExportStrategy.class);

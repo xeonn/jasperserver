@@ -21,6 +21,7 @@
 package com.jaspersoft.jasperserver.api.metadata.view.domain;
 
 import com.jaspersoft.jasperserver.api.JasperServerAPI;
+import org.hibernate.criterion.MatchMode;
 
 
 /**
@@ -41,7 +42,7 @@ import com.jaspersoft.jasperserver.api.JasperServerAPI;
  * 
  * @author Sherman Wood
  * @author Lucian Chirita
- * @version $Id: FilterCriteria.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: FilterCriteria.java 65088 2016-11-03 23:22:01Z gbacon $
  * @since 1.0
  * @see com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService#findResource(com.jaspersoft.jasperserver.api.common.domain.ExecutionContext, FilterCriteria)
  * @see FilterElementCollection#addFilterElement(FilterElement)
@@ -101,9 +102,62 @@ public class FilterCriteria extends FilterElementCollection
 		return createPropertyFilter(property, value, PropertyFilter.LIKE);
 	}
 
+
+	public static PropertyFilter createPropertyLikeFilter(String property, String value, MatchMode matchMode) {
+		PropertyFilter propertyFilter = createPropertyFilter(property, value, PropertyFilter.LIKE);
+		propertyFilter.setMatchMode(matchMode);
+		return propertyFilter;
+	}
+
+	public static PropertyFilter createPropertyLikeFilter(String property, String value, MatchMode matchMode, boolean ignoreCase) {
+		byte op = ignoreCase ? PropertyFilter.LIKE_IGNORE_CASE : PropertyFilter.LIKE;
+		PropertyFilter propertyFilter = createPropertyFilter(property, value, op);
+		propertyFilter.setMatchMode(matchMode);
+		return propertyFilter;
+	}
+
+	public static PropertyFilter createPropertyLikeFilter(String property, String value, MatchMode matchMode, char escapeChar) {
+		PropertyFilter propertyFilter = createPropertyFilter(property, value, PropertyFilter.LIKE);
+		propertyFilter.setMatchMode(matchMode);
+		propertyFilter.setEscapeCharacter(escapeChar);
+		return propertyFilter;
+	}
+
+	public static PropertyFilter createPropertyLikeFilter(String property, String value,
+														  MatchMode matchMode, char escapeChar, boolean ignoreCase) {
+		byte op = ignoreCase ? PropertyFilter.LIKE_IGNORE_CASE : PropertyFilter.LIKE;
+		PropertyFilter propertyFilter = createPropertyFilter(property, value, op);
+		propertyFilter.setMatchMode(matchMode);
+		propertyFilter.setEscapeCharacter(escapeChar);
+		return propertyFilter;
+	}
+
+	public static PropertyFilter createPropertyLikeFilter(String property, String value, char escapeChar) {
+		PropertyFilter propertyFilter = createPropertyFilter(property, value, PropertyFilter.LIKE);
+		propertyFilter.setEscapeCharacter(escapeChar);
+		return propertyFilter;
+	}
+
+	public static PropertyFilter createPropertyLikeFilter(String property, String value, char escapeChar, boolean ignoreCase) {
+		byte op = ignoreCase ? PropertyFilter.LIKE_IGNORE_CASE : PropertyFilter.LIKE;
+		PropertyFilter propertyFilter = createPropertyFilter(property, value, op);
+		propertyFilter.setEscapeCharacter(escapeChar);
+		return propertyFilter;
+	}
+
+	public static PropertyFilter createPropertyLikeFilter(String property, String value, boolean ignoreCase) {
+		byte op = ignoreCase ? PropertyFilter.LIKE_IGNORE_CASE : PropertyFilter.LIKE;
+		return createPropertyFilter(property, value, op);
+	}
+
     public static PropertyFilter createPropertyInFilter(String property, Object[] values) {
         return createPropertyFilter(property, values, PropertyFilter.IN);
     }
+
+	public static PropertyFilter createPropertyInFilter(String property, Object[] values, boolean ignoreCase) {
+		byte op = ignoreCase ? PropertyFilter.IN_IGNORE_CASE : PropertyFilter.IN;
+		return createPropertyFilter(property, values, op);
+	}
 
 	/**
 	 * Creates a filter that compares a resource field to be greater than the 

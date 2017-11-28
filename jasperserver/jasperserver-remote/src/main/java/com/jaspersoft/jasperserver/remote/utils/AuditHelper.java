@@ -20,16 +20,21 @@
  */
 package com.jaspersoft.jasperserver.remote.utils;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jaspersoft.jasperserver.api.logging.audit.context.AuditContext;
 import com.jaspersoft.jasperserver.api.logging.audit.domain.AuditEvent;
+import com.jaspersoft.jasperserver.remote.helpers.JacksonMapperProvider;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 /**
  *
  * @author gtoffoli
- * @version $Id: AuditHelper.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: AuditHelper.java 64626 2016-09-26 13:25:24Z vzavadsk $
  */
 @Component
 public class AuditHelper {
@@ -120,4 +125,10 @@ public class AuditHelper {
         }
     }
 
+    public static String convertObjectToJSON(Object obj) throws IOException {
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        ObjectMapper mapper = JacksonMapperProvider.getObjectMapper();
+        mapper.writeValue(stream, obj);
+        return stream.toString(StandardCharsets.UTF_8.name());
+    }
 }

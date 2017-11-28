@@ -21,7 +21,7 @@
 
 /**
  * @author: Kostiantyn Tsaregradskyi
- * @version: $Id: AlertDialog.js 1721 2015-10-15 11:56:43Z psavushc $
+ * @version: $Id: AlertDialog.js 2934 2016-07-19 15:37:20Z dgorbenk $
  */
 
 define(function (require) {
@@ -29,6 +29,7 @@ define(function (require) {
 
     var _ = require('underscore'),
         Dialog = require("./Dialog"),
+        xssUtil = require("common/util/xssUtil"),
         alertDialogTemplate = require("text!./template/alertDialogTemplate.htm"),
         i18n = require('bundle!js-sdk/CommonBundle');
 
@@ -70,11 +71,15 @@ define(function (require) {
          * @param {string} message Message for dialog
          */
         setMessage: function(message) {
+
+            // remove all tags but let new line separator (tag <br/>) be available to be used
+            message = xssUtil.escape(message, {softHTMLEscape: true, whiteList: ["br"]});
+
             this.content = this.contentTemplate({message: message});
 
             var rendered = this.renderContent();
 
-            this.$contentContainer[typeof message === "string" ? "html" : "append"](rendered);
+            this.$contentContainer.html(rendered);
         }
     });
 });

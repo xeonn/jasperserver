@@ -20,8 +20,8 @@
 */
 package com.jaspersoft.jasperserver.jaxrs.common;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jaspersoft.jasperserver.remote.helpers.JacksonMapperProvider;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -32,7 +32,7 @@ import javax.ws.rs.ext.Provider;
  * <p></p>
  *
  * @author yaroslav.kovalchyk
- * @version $Id: JacksonMapperContextResolver.java 62954 2016-05-01 09:49:23Z ykovalch $
+ * @version $Id: JacksonMapperContextResolver.java 63760 2016-07-05 18:59:28Z agodovan $
  */
 @Provider
 @Component

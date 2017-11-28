@@ -26,9 +26,12 @@ public class LogFilterParameters {
     }
 
     public LogFilterParameters(LogFilterParameters other) {
-        this.userId = other.getUserId();
-        this.sessionId = other.getSessionId();
-        this.resourceAndSnapshotFilter = new ResourceAndSnapshotFilter(other.getResourceAndSnapshotFilter());
+        this();
+        if (null != other) {
+            this.userId = other.getUserId();
+            this.sessionId = other.getSessionId();
+            this.resourceAndSnapshotFilter = new ResourceAndSnapshotFilter(other.getResourceAndSnapshotFilter());
+        }
     }
 
     public String getUserId() {

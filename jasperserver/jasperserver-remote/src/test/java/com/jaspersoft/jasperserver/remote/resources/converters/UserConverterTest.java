@@ -12,22 +12,24 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 /**
  * <p></p>
  *
  * @author Zakhar.Tomchenco
- * @version $Id$
+ * @version $Id: UserConverterTest.java 65193 2016-11-16 00:22:55Z esytnik $
  */
 public class UserConverterTest {
     private final User server = new UserImpl();
@@ -39,6 +41,9 @@ public class UserConverterTest {
     @InjectMocks
     private UserConverter converter  = new UserConverter();
     @Mock RoleConverter roleConverter;
+
+    @Mock private HttpServletRequest httpServletRequestMock;
+    @Mock private HttpSession httpSessionMock;
 
     @BeforeMethod
     public void setUp() throws Exception {
@@ -69,6 +74,10 @@ public class UserConverterTest {
         Set<Role> serverRoles = new HashSet<Role>();
         serverRoles.add(serverRole);
         server.setRoles(serverRoles);
+
+        ServletRequestAttributes servletRequestAttributesMock = new ServletRequestAttributes(httpServletRequestMock);
+        RequestContextHolder.setRequestAttributes(servletRequestAttributesMock, false);
+        Mockito.when(httpServletRequestMock.getSession()).thenReturn(httpSessionMock);
 
         Mockito.when(roleConverter.toServer(Mockito.any(ClientRole.class),  Mockito.any(ToServerConversionOptions.class))).thenReturn(serverRole);
         Mockito.when(roleConverter.toClient(Mockito.any(Role.class), Mockito.any(ToClientConversionOptions.class))).thenReturn(clientRole);

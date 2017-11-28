@@ -28,11 +28,12 @@ import java.util.List;
  * For instance it can specify what exactly fields are required and what fields should be excluded.
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: ToClientConversionOptions.java 62954 2016-05-01 09:49:23Z ykovalch $
+ * @version $Id: ToClientConversionOptions.java 64626 2016-09-26 13:25:24Z vzavadsk $
  */
 public class ToClientConversionOptions {
     private boolean expanded;
     private List<String> includes;
+    private String acceptMediaType;
 
     public static ToClientConversionOptions getDefault(){
         return new ToClientConversionOptions();
@@ -56,22 +57,35 @@ public class ToClientConversionOptions {
         return this;
     }
 
+    public String getAcceptMediaType() {
+        return acceptMediaType;
+    }
+
+    public ToClientConversionOptions setAcceptMediaType(String acceptMediaType) {
+        this.acceptMediaType = acceptMediaType;
+        return this;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        ToClientConversionOptions options = (ToClientConversionOptions) o;
+        ToClientConversionOptions that = (ToClientConversionOptions) o;
 
-        if (expanded != options.expanded) return false;
-        return !(includes != null ? !includes.equals(options.includes) : options.includes != null);
+        if (expanded != that.expanded) return false;
+        if (acceptMediaType != null ? !acceptMediaType.equals(that.acceptMediaType) : that.acceptMediaType != null)
+            return false;
+        if (includes != null ? !includes.equals(that.includes) : that.includes != null) return false;
 
+        return true;
     }
 
     @Override
     public int hashCode() {
         int result = (expanded ? 1 : 0);
         result = 31 * result + (includes != null ? includes.hashCode() : 0);
+        result = 31 * result + (acceptMediaType != null ? acceptMediaType.hashCode() : 0);
         return result;
     }
 
@@ -79,7 +93,8 @@ public class ToClientConversionOptions {
     public String toString() {
         return "ToClientConversionOptions{" +
                 "expanded=" + expanded +
-                ", includes='" + includes + '\'' +
+                ", includes=" + includes +
+                ", acceptMediaType='" + acceptMediaType + '\'' +
                 '}';
     }
 }

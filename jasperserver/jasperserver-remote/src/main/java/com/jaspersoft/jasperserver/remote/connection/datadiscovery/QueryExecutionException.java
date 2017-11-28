@@ -27,12 +27,16 @@ import com.jaspersoft.jasperserver.remote.exception.RemoteException;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: QueryExecutionException.java 59729 2015-12-23 10:20:49Z ykovalch $
+ * @version $Id: QueryExecutionException.java 64791 2016-10-12 15:08:37Z ykovalch $
  */
 public class QueryExecutionException extends RemoteException {
 
     public QueryExecutionException(Object query, Class<?> connectionClass, Exception e){
+        this("Query execution failed", query, connectionClass, e);
+    }
+
+    public QueryExecutionException(String message, Object query, Class<?> connectionClass, Exception e){
         super(new ErrorDescriptor().setErrorCode("connection.query.failed")
-                .setMessage("Query execution failed").setParameters(query.toString(), connectionClass.getName()), e);
+                .setMessage(message).setParameters(query.toString(), connectionClass.getName()), e);
     }
 }

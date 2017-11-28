@@ -47,7 +47,7 @@ public class HibernateCompositeInterceptor extends EmptyInterceptor {
 		return false;
 	}
 
-/*
+
     @Override
     public String onPrepareStatement(String sql) {
         // See RepoResourceItemBase.hbm.xml
@@ -59,7 +59,7 @@ public class HibernateCompositeInterceptor extends EmptyInterceptor {
                 .replace("FakeJIResource", "JIResource")
                 .replace("FakeJIResourceFolder", "JIResourceFolder");
     }
-*/
+
     protected void fireDeleteListeners(Object deleted) {
 		if (listeners != null && !listeners.isEmpty()) {
 			for (Iterator it = listeners.iterator(); it.hasNext();) {

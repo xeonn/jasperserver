@@ -21,6 +21,11 @@
                 <entry key="request" value-ref="requestSettingsProvider"/>
                 <entry key="inputControls" value-ref="inputControls"/>
                 <entry key="exportResourceOptions" value-ref="${bean.exportResourceOptions}"/>
+                <entry key="clientLogging" value-ref="clientLogging"/>
+                <entry key="dateTimeSettings" value-ref="dateTimeSettingsProvider"/>
+                <entry key="decimalFormatSymbols" value-ref="decimalFormatSymbolsProvider"/>
+                <entry key="#{T(com.jaspersoft.jasperserver.dto.bridge.SettingsBridge).GROUP_NAME_PROFILE_ATTRIBUTES}"
+                       value-ref="profileAttributes"/>
             </map>
         </constructor-arg>
     </bean>
@@ -109,9 +114,15 @@
                 </constructor-arg>
             </bean>
         </property>
-        <property name="timePickerSettingsPathTemplate" value="/scripts/bower_components/jquery.timepicker.addon/src/i18n/jquery-ui-timepicker-%s.js"/>
+        <property name="timePickerSettingsPathTemplate" value="/scripts/bower_components/jquery-ui/ui/i18n/jquery-ui-timepicker-%s.js"/>
         <property name="timePickerPropertiesMapping">
             <map>
+                <entry key="timeText" value="CAL_time"/>
+                <entry key="hourText" value="CAL_hour"/>
+                <entry key="minuteText" value="CAL_min"/>
+                <entry key="secondText" value="CAL_second"/>
+                <entry key="currentText" value="CAL_now"/>
+                <entry key="closeText" value="CAL_close"/>
                 <entry key="timeFormat" value="calendar.time.format"/>
                 <entry key="dateFormat" value="calendar.date.format"/>
                 <entry key="separator" value="calendar.datetime.separator"/>
@@ -125,6 +136,13 @@
 
     <util:map id="inputControls">
         <entry key="useUrlParametersOnReset" value="true"/>
+    </util:map>
+
+    <util:map id="profileAttributes">
+        <entry key="#{T(com.jaspersoft.jasperserver.dto.bridge.SettingsBridge).SETTING_NAME_ATTRIBUTE_PLACEHOLDER_SIMPLE_PATTERN}"
+               value-ref="attributePlaceholderPatternUI"/>
+        <entry key="attributePlaceholderGroupingPattern" value-ref="attributePlaceholderPattern"/>
+        <entry key="attributeFunctionPattern" value-ref="attributeFunctionPattern"/>
     </util:map>
 
     <util:map id="exportResourceOptionsCe" >

@@ -33,6 +33,9 @@
 		</property>
 		<!-- this property must be set last -->
         <property name="dataAdapterClassName" value="net.sf.jasperreports.data.json.JsonDataAdapterImpl"/>
+        <property name="validator">
+            <bean class="com.jaspersoft.jasperserver.api.engine.jasperreports.util.JsonDataSourceValidator"/>
+        </property>
 	</bean>
 	
     <bean class="com.jaspersoft.jasperserver.api.common.util.spring.GenericBeanUpdater">

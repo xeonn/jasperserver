@@ -22,6 +22,7 @@
 package com.jaspersoft.jasperserver.api.engine.jasperreports.util;
 
 import net.sf.jasperreports.engine.JRDataSource;
+import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRField;
 import net.sf.jasperreports.engine.design.JRDesignField;
 import org.apache.commons.lang3.StringUtils;
@@ -35,6 +36,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by IntelliJ IDEA.
@@ -88,12 +91,21 @@ public abstract class AbstractTextDataSourceDefinition extends DataAdapterDefini
         return fieldMapping;
     }
 
+    public static boolean isValidFieldName(String fieldName) throws JRException {
+        if (fieldName.contains(" ")) throw new JRException("Invalid field name: [" + fieldName + "] Space is not allowed in data source field");
+        Pattern pattern = Pattern.compile("[-~#@*+%{}<>\\[\\]|\"\\^]");
+        Matcher matcher = pattern.matcher(fieldName);
+        if (matcher.find()) throw new JRException("Invalid field name: [" + fieldName + "] is not a valid name for data source field");
+        return true;
+    }
+
     // find field type from the data in JRDataSource
     protected List<String> getFieldTypes(JRDataSource dataSource, List<JRField> jrFields) {
         String columnTypeArray[] = new String[jrFields.size()];
         //scan through number of rows to use for metadata discovery
         for (int i = 0; (rowCountForMetadataDiscovery < 0) || (i < rowCountForMetadataDiscovery); i++) {
             for (int j = 0; j < jrFields.size(); j++) {
+                if ((columnTypeArray[j] != null) && (columnTypeArray[j] == "java.lang.String")) continue;
                 String type = findType(dataSource, (JRDesignField)jrFields.get(j));
                 columnTypeArray[j] = getCompatibleDataType(columnTypeArray[j], type);
             }
@@ -214,6 +226,7 @@ public abstract class AbstractTextDataSourceDefinition extends DataAdapterDefini
         if (number instanceof BigDecimal && number.doubleValue() == 0D) {
             number = new Double(number.doubleValue());
         }
+        if (number != null && number.doubleValue() == Math.floor(number.doubleValue())) number = new Integer(number.intValue());
         // use double as it's more accurate
         return (number instanceof Float) ? new Double(number.doubleValue()) : number;
     }

@@ -80,7 +80,8 @@ public abstract class ImportExportServiceImpl implements ImportExportService, Zi
     public final static String ROLES_PARAMETER = "roles";
     public final static String USERS_PARAMETER = "users";
     public final static String ORGANIZATION = "organization";
-        public final static String RESOURCE_TYPES = "resource-types";
+    public final static String RESOURCE_TYPES = "resource-types";
+    public final static String SKIP_DEPENDENT_RESOURCES = "skip-dependent-resources";
     public static final String SKIP_SUBORGANIZATIONS = "skip-suborganizations";
     public final static String URIS_PARAMETER = "uris";
     public final static String URIS_OF_SCHEDULED_PARAMETER = "report-jobs";

@@ -41,7 +41,7 @@ define(function (require) {
 
         createXhr: function () {
             var tmpXhr = textPluginXhrFactory.apply(textPlugin, arguments),
-                requestParams = {},
+                requestParams = { "headers":{"Cache-Control":"private", "Pragma":""} },
                 xhr = {
                     response: undefined,
                     responseBody: undefined,

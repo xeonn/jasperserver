@@ -50,7 +50,7 @@ import java.util.Map;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: TextFileQueryExecutor.java 62954 2016-05-01 09:49:23Z ykovalch $
+ * @version $Id: TextFileQueryExecutor.java 64791 2016-10-12 15:08:37Z ykovalch $
  */
 @Service
 public class TextFileQueryExecutor implements ConnectionQueryExecutor<TextFileQuery, ClientCustomDataSource> {
@@ -64,7 +64,7 @@ public class TextFileQueryExecutor implements ConnectionQueryExecutor<TextFileQu
     private SecureExceptionHandler secureExceptionHandler;
 
     @Override
-    public Object executeQuery(final TextFileQuery query, ClientCustomDataSource connection) {
+    public Object executeQuery(final TextFileQuery query, ClientCustomDataSource connection, Map<String, Object> data) {
         if(query == null || connection == null){
             return null;
         }
@@ -128,7 +128,7 @@ public class TextFileQueryExecutor implements ConnectionQueryExecutor<TextFileQu
     }
 
     @Override
-    public Object executeQueryForMetadata(TextFileQuery query, ClientCustomDataSource connection) {
+    public Object executeQueryForMetadata(TextFileQuery query, ClientCustomDataSource connection, Map<String, Object> data) {
         throw new JSNotImplementedException("executeQueryForMetadata() isn't implemented for TextFileQueryExecutor");
     }
 }

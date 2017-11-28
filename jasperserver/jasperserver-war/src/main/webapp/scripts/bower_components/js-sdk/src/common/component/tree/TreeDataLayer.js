@@ -2,13 +2,11 @@
  * <p></p>
  *
  * @author Zakhar.Tomchenco
- * @version $Id: TreeDataLayer.js 2569 2016-04-05 12:34:47Z dgorbenk $
+ * @version $Id: TreeDataLayer.js 2956 2016-07-27 19:22:11Z inestere $
  */
 
 define(function(require){
     "use strict";
-
-    require("jquery.ui");
 
     var _ = require('underscore'),
         $ = require('jquery'),

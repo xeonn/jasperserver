@@ -34,6 +34,7 @@ import com.jaspersoft.jasperserver.api.engine.jasperreports.domain.impl.ReportUn
 import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
 import com.jaspersoft.jasperserver.api.metadata.xml.domain.impl.Argument;
 import com.jaspersoft.jasperserver.dto.common.ErrorDescriptor;
+import com.jaspersoft.jasperserver.dto.executions.ExecutionStatus;
 import com.jaspersoft.jasperserver.dto.reports.inputcontrols.ReportInputControl;
 import com.jaspersoft.jasperserver.remote.ServiceException;
 import com.jaspersoft.jasperserver.remote.exception.ErrorDescriptorBuildingService;
@@ -43,7 +44,6 @@ import com.jaspersoft.jasperserver.remote.exception.MandatoryParameterNotFoundEx
 import com.jaspersoft.jasperserver.remote.exception.RemoteException;
 import com.jaspersoft.jasperserver.remote.exception.ResourceNotFoundException;
 import com.jaspersoft.jasperserver.remote.reports.HtmlExportStrategy;
-import com.jaspersoft.jasperserver.remote.services.ExecutionStatus;
 import com.jaspersoft.jasperserver.remote.services.ExportExecution;
 import com.jaspersoft.jasperserver.remote.services.ExportExecutionOptions;
 import com.jaspersoft.jasperserver.remote.services.ReportExecution;
@@ -101,7 +101,7 @@ import java.util.regex.Pattern;
  * Run a report unit using the passing in parameters and options
  *
  * @author ykovalchyk
- * @version $Id: RunReportServiceImpl.java 63380 2016-05-26 20:56:46Z mchan $
+ * @version $Id: RunReportServiceImpl.java 63760 2016-07-05 18:59:28Z agodovan $
  */
 @Service("runReportService")
 @Scope(value = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)

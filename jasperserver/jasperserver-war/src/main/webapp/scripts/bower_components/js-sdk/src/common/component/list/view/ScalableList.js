@@ -20,9 +20,18 @@
  */
 
 
+
+
+/**
+ * @deprecated It's outdated version use 'components/scalableList' for new stuff,
+ */
+
+//TODO: JRS-10176 we have to remove that component, requires changes in tree component
+
+
 /**
  * @author: Sergey Prilukin
- * @version: $Id: ScalableList.js 1605 2015-09-23 17:55:32Z inestere $
+ * @version: $Id: ScalableList.js 2956 2016-07-27 19:22:11Z inestere $
  */
 
 /**

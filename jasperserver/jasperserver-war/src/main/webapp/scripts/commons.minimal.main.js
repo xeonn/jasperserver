@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: commons.minimal.main.js 9192 2015-08-12 19:52:08Z yplakosh $
+ * @version: $Id: commons.minimal.main.js 10224 2016-07-27 20:02:40Z inestere $
  */
 
 /* global __jrsConfigs__ */
@@ -45,7 +45,7 @@ define(function(require){
         // Standard Navigation system (stdnav)
         // Provides focus management and keyboard event handling features.
         var stdnav = require("stdnav");
-    
+
         // Basic stdnav plugins from js-sdk
         var stdnavPluginAnchor = require("stdnavPluginAnchor");
         var stdnavPluginButton = require("stdnavPluginButton");
@@ -53,11 +53,15 @@ define(function(require){
         var stdnavPluginGrid = require("stdnavPluginGrid");
         var stdnavPluginList = require("stdnavPluginList");
         var stdnavPluginTable = require("stdnavPluginTable");
-    
-        // JasperServer-specific stdnav plugins from jrs-ui 
+
+        // JasperServer-specific stdnav plugins from jrs-ui
         var stdnavPluginActionMenu = require("stdnavPluginActionMenu");
         var stdnavPluginDynamicList = require("stdnavPluginDynamicList");
     }
+
+    //configure date/time pickers globally
+    require('config/dateAndTimeSettings');
+
     domReady(function(){
         //Heartbeat
         heartbeat.initialize(jrsConfigs.heartbeatInitOptions);
@@ -83,12 +87,12 @@ define(function(require){
             stdnavPluginGrid.activate(stdnav);
             stdnavPluginList.activate(stdnav);
             stdnavPluginTable.activate(stdnav);
-    
+
             // JasperServer-specific stdnav plugins from jrs-ui
             stdnavPluginActionMenu.activate(stdnav);
             stdnavPluginDynamicList.activate(stdnav);
             stdnav.start();
-        }      
+        }
     });
 });
 

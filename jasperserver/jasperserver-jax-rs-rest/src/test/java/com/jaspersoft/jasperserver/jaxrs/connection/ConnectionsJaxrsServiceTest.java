@@ -21,6 +21,7 @@
 package com.jaspersoft.jasperserver.jaxrs.connection;
 
 import com.jaspersoft.jasperserver.remote.connection.ConnectionsManager;
+import com.jaspersoft.jasperserver.remote.exception.UnsupportedOperationRemoteException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -50,7 +51,7 @@ import static org.testng.Assert.assertSame;
  * <p></p>
  *
  * @author yaroslav.kovalchyk
- * @version $Id: ConnectionsJaxrsServiceTest.java 62954 2016-05-01 09:49:23Z ykovalch $
+ * @version $Id: ConnectionsJaxrsServiceTest.java 64791 2016-10-12 15:08:37Z ykovalch $
  */
 public class ConnectionsJaxrsServiceTest {
     @InjectMocks
@@ -122,6 +123,7 @@ public class ConnectionsJaxrsServiceTest {
         final Object expectedConnectionObject = new Object();
         doReturn(expectedConnectionObject).when(spyService).parseEntity(connectionClass, streamMock, connectionType);
         final UUID expectedUuid = UUID.randomUUID();
+        when(connectionsManager.isMetadataSupported(expectedConnectionObject)).thenReturn(true);
         when(connectionsManager.createConnection(expectedConnectionObject)).thenReturn(expectedUuid);
         when(connectionsManager.getConnectionMetadata(expectedUuid, new HashMap<String, String[]>())).thenReturn(expectedConnectionObject);
         final String someRequestUrl = "someRequestUrl";
@@ -129,6 +131,20 @@ public class ConnectionsJaxrsServiceTest {
         final Response response = spyService.createConnection(streamMock, connectionType, metadataType);
         assertEquals(response.getMetadata().getFirst(HttpHeaders.LOCATION).toString(), someRequestUrl + "/" + expectedUuid + "/metadata");
         assertSame(response.getEntity(), expectedConnectionObject);
+    }
+
+    @Test(expectedExceptions = UnsupportedOperationRemoteException.class)
+    public void createConnection_metadata_notSupported()throws Exception{
+        final MediaType connectionType = MediaType.valueOf("application/connections.type+json");
+        final MediaType metadataType = MediaType.valueOf("application/connections.type.metadata+json");
+        final Class<Number> connectionClass = Number.class;
+        doReturn(connectionClass).when(spyService).getConnectionClass(connectionType);
+        doReturn(connectionClass).when(spyService).getConnectionClass(metadataType);
+        final InputStream streamMock = mock(InputStream.class);
+        final Object expectedConnectionObject = new Object();
+        doReturn(expectedConnectionObject).when(spyService).parseEntity(connectionClass, streamMock, connectionType);
+        when(connectionsManager.isMetadataSupported(expectedConnectionObject)).thenReturn(false);
+        spyService.createConnection(streamMock, connectionType, metadataType);
     }
 
 }

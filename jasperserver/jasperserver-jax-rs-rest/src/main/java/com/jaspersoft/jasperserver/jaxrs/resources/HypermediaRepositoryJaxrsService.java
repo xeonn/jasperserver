@@ -13,14 +13,18 @@ import com.jaspersoft.jasperserver.remote.exception.ResourceNotFoundException;
 import com.jaspersoft.jasperserver.remote.resources.converters.ResourceConverterProvider;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConversionOptions;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConverter;
+import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.persistent.RepoFolder;
+import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.persistent.RepoResourceItem;
 import com.jaspersoft.jasperserver.remote.services.BatchRepositoryService;
 import com.jaspersoft.jasperserver.remote.services.SingleRepositoryService;
 import com.jaspersoft.jasperserver.search.mode.AccessType;
 import com.jaspersoft.jasperserver.search.service.RepositorySearchResult;
 import com.jaspersoft.jasperserver.war.common.ConfigurationBean;
-import com.sun.jersey.core.spi.factory.ResponseBuilderImpl;
+
 import org.apache.commons.collections.ListUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,7 +36,10 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +49,7 @@ import java.util.Map;
 @Path("/api/resources")
 @Transactional(rollbackFor = Exception.class)
 public class HypermediaRepositoryJaxrsService {
+    protected static final Log log = LogFactory.getLog(HypermediaRepositoryJaxrsService.class);
 
     @Resource
     protected ResourceConverterProvider resourceConverterProvider;
@@ -60,7 +68,8 @@ public class HypermediaRepositoryJaxrsService {
     @Resource
     private ConfigurationBean configurationBean;
 
-    @GET
+    @SuppressWarnings("unchecked")
+	@GET
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON, ResourceMediaType.FOLDER_XML, ResourceMediaType.FOLDER_JSON})
     public Response getResources(
             @QueryParam(RestConstants.QUERY_PARAM_SEARCH_QUERY) String q,
@@ -98,46 +107,155 @@ public class HypermediaRepositoryJaxrsService {
             }
 
             User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            RepositorySearchResult<ClientResourceLookup> searchResult =
+            long startLevelQuery = System.currentTimeMillis();
+            if(log.isDebugEnabled()){
+                for(Object o: ListUtils.union(type,  containerType)){
+                	log.debug("*** HYPER *** type: " + o.toString());
+                }
+            }
+            
+            RepositorySearchResult<ClientResourceLookup> searchResult = null;
+            if(containerType.contains("folder")){
+                /// split into two queries
+                ArrayList<String> splitContainerType = new ArrayList<String>(containerType);
+                splitContainerType.remove("folder");
+
+                searchResult =
+                    batchRepositoryService.getResourcesForLookupClass(RepoFolder.class.getName(),q, folderUri, ListUtils.union(type, splitContainerType), null, excludeFolders,
+                        start, limit,
+                        recursive, showHiddenItems,
+                        sortBy, accessType, user,
+                        forceFullPage);
+                
+                int foundFolders=searchResult.getItems().size();
+                                
+                searchResult.append(
+                    batchRepositoryService.getResourcesForLookupClass(RepoResourceItem.class.getName(),q, folderUri, ListUtils.union(type, containerType), null, excludeFolders,
+                        foundFolders>0?0:start-foundFolders<0?0:start-foundFolders, limit-foundFolders,
+                        recursive, showHiddenItems,
+                        sortBy, accessType, user,
+                        forceFullPage)
+                );
+                
+                
+            } else {
+                searchResult =
                     batchRepositoryService.getResources(q, folderUri, ListUtils.union(type, containerType), null, excludeFolders,
-                            start, limit,
-                            recursive, showHiddenItems,
-                            sortBy, accessType, user,
-                            forceFullPage);
+	                    start, limit,
+	                    recursive, showHiddenItems,
+	                    sortBy, accessType, user,
+	                    forceFullPage);
+            }
+            if(log.isDebugEnabled()){
+                log.debug("*** HYPER *** level query took " + (System.currentTimeMillis() - startLevelQuery) + " (ms)");
+            }
 
             List<HypermediaResourceLookup> hypermediaLookups = new ArrayList<HypermediaResourceLookup>(searchResult.getItems().size());
             excludeFoldersWithPublic.add(configurationBean.getPublicFolderUri());
-            for (ClientResourceLookup resourceLookup : searchResult.getItems()) {
+            // split lookups into two groups
+            List<ClientResourceLookup> lookup4excludeWithPublicFolders = new ArrayList<ClientResourceLookup>();
+            List<ClientResourceLookup> lookup4excludeFolders = new ArrayList<ClientResourceLookup>();
+            
+            ClientResourceLookup parent = new ClientResourceLookup();
+            parent.setUri(folderUri);
+            
+            // pre-sort
+            for(ClientResourceLookup resourceLookup: searchResult.getItems()){
+               if (containerType.contains(resourceLookup.getResourceType())) {                     
+                   if (resourceLookup.getUri().matches(organizationFolderRegex)) {
+                       lookup4excludeWithPublicFolders.add(resourceLookup);
+                   } else {
+                       lookup4excludeFolders.add(resourceLookup);
+                   }
+               }
+            }
+           
+            // Call bulk resource count for exclude With Public
+            List<Object[]> results4excludeWithPublicFolders = lookup4excludeWithPublicFolders.isEmpty()?(List<Object[]>)Collections.EMPTY_LIST:batchRepositoryService.getResourcesCount(q, 
+                folderUri==null?lookup4excludeWithPublicFolders:Arrays.asList(parent),
+                new ArrayList<String>(type),
+                excludeFoldersWithPublic, 
+                true,
+                showHiddenItems, 
+                accessType, 
+                null
+            );
+            // Call bulk resource count for just Resource Lookup
+            List<Object[]> results4excludeFolders = lookup4excludeFolders.isEmpty()?(List<Object[]>)Collections.EMPTY_LIST:batchRepositoryService.getResourcesCount(q, 
+            	folderUri==null?lookup4excludeFolders:Arrays.asList(parent), 
+                new ArrayList<String>(type),
+                excludeFolders, 
+                true,
+                showHiddenItems, 
+                accessType, 
+                null
+            );
 
+            // remove odd entries from both lists
+            // by removing corresponding finding in opposite result lists
+            if(!results4excludeWithPublicFolders.isEmpty()){
+               for(ClientResourceLookup resource:lookup4excludeFolders){
+                   String uri = resource.getUri();
+                   for(Iterator<Object[]> it = results4excludeWithPublicFolders.iterator(); it.hasNext();){
+                       Object[] r = it.next();
+                       if(((String)r[0]).startsWith(uri)){
+                           it.remove();
+                       }
+                   }
+               }
+            }
+            if(!results4excludeFolders.isEmpty()){
+               for(ClientResourceLookup resource:lookup4excludeWithPublicFolders){
+                   String uri = resource.getUri();
+                   for(Iterator<Object[]> it = results4excludeFolders.iterator(); it.hasNext();){
+                       Object[] r = it.next();
+                       if(((String)r[0]).startsWith(uri+Folder.SEPARATOR)){
+                           it.remove();
+                       }
+                   }
+               }
+            }
+            
+            for (ClientResourceLookup resourceLookup : searchResult.getItems()) {
                 HypermediaResourceLookup hypermediaResourceLookup = new HypermediaResourceLookup(resourceLookup);
 
                 if (containerType.contains(resourceLookup.getResourceType())) {
-                	
-                	boolean excludeWithPublic = false;
-
+                        
+                    String uri = resourceLookup.getUri();
+                    // sum up results for each lookup element
+                    boolean hasResource=false;
+                        
                     if (resourceLookup.getUri().matches(organizationFolderRegex)) {
-                    	excludeWithPublic = true;
+                        for(Iterator<Object[]> it = results4excludeWithPublicFolders.iterator(); it.hasNext();){
+                            Object[] r = it.next();
+                            if(((String)r[0]).startsWith(uri+Folder.SEPARATOR)){
+                                // optimization, we do not really need exact count, just yes or no
+                                // so not really counting to squeeze little bit of performance while we can
+                                hasResource = true;
+                                it.remove(); // remove from the list to optimize multiple pass processing
+                            }
+                        }
+                    } else {
+                        for(Iterator<Object[]> it = results4excludeFolders.iterator(); it.hasNext();){
+                            String str = (String)it.next()[0] + Folder.SEPARATOR;
+                            if(str.startsWith(uri+Folder.SEPARATOR)){
+                                // optimization, we do not really need exact count, just yes or no
+                                // so not really counting to squeeze little bit of performance while we can
+                                hasResource = true;
+                                it.remove(); // remove from the list to optimize multiple pass processing
+                            }
+                        }
                     }
 
-                    int resourcesCount = batchRepositoryService.getResourcesCount(
-                    		q, resourceLookup.getUri(), 
-                            new ArrayList<String>(type),
-                            excludeWithPublic? excludeFoldersWithPublic:excludeFolders, 
-                            true,
-                            showHiddenItems, 
-                            accessType, 
-                            null
-                    );
-
-                    if (resourcesCount > 0) {
+                    if (hasResource) {
                         //add links
                         HypermediaResourceLinks links = new HypermediaResourceLinks();
                         links.setSelf(requestInfoProvider.getBaseUrl() + "rest_v2/hypermedia_ext/resources" + hypermediaResourceLookup.getUri());
 
 
                         links.setContent(buildResourcesSearchLink(q, hypermediaResourceLookup.getUri(), type,
-                                containerType, accessTypeString, start, limit, recursive, showHiddenItems,
-                                forceTotalCount, sortBy, expanded, forceFullPage, accept));
+                            containerType, accessTypeString, start, limit, recursive, showHiddenItems,
+                            forceTotalCount, sortBy, expanded, forceFullPage, accept));
 
                         hypermediaResourceLookup.setLinks(links);
                     } else {
@@ -175,13 +293,13 @@ public class HypermediaRepositoryJaxrsService {
 
             final int iStart = searchResult.getClientOffset();
             final int iLimit = searchResult.getClientLimit();
-            Response.ResponseBuilder response = new ResponseBuilderImpl();
+            Response.ResponseBuilder response = null;
 
             int realResultSize = searchResult.size();
             boolean isForceTotalCount = (forceTotalCount != null && forceTotalCount);
 
             if (realResultSize != 0) {
-                response.status(Response.Status.OK).entity(result);
+                response = Response.status(Response.Status.OK).entity(result);
 
                 response.header(RestConstants.HEADER_START_INDEX, iStart)
                         .header(RestConstants.HEADER_RESULT_COUNT, realResultSize);
@@ -201,7 +319,7 @@ public class HypermediaRepositoryJaxrsService {
                     response.header(RestConstants.HEADER_NEXT_OFFSET, searchResult.getNextOffset());
                 }
             } else {
-                response.status(Response.Status.NO_CONTENT);
+                response = Response.status(Response.Status.NO_CONTENT);
             }
 
             res = response.build();
@@ -210,7 +328,8 @@ public class HypermediaRepositoryJaxrsService {
 
     }
 
-    @GET
+    @SuppressWarnings("rawtypes")
+	@GET
     @Path("/{uri: .+}")
     public Response getResourceDetails(@PathParam(ResourceDetailsJaxrsService.PATH_PARAM_URI) String uri,
                                        @HeaderParam(HttpHeaders.ACCEPT) String accept,

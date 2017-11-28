@@ -32,7 +32,7 @@ import net.sf.jasperreports.engine.export.JRHyperlinkProducerFactory;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ReportJobContext.java 63530 2016-06-09 13:59:59Z tdanciu $
+ * @version $Id: ReportJobContext.java 63866 2016-07-12 22:39:01Z schubar $
  */
 public interface ReportJobContext {
 

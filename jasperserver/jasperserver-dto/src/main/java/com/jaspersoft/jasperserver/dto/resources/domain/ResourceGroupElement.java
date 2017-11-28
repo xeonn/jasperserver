@@ -26,23 +26,23 @@ import javax.xml.bind.annotation.XmlRootElement;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: ResourceGroupElement.java 61156 2016-02-23 15:31:16Z ykovalch $
+ * @version $Id: ResourceGroupElement.java 64791 2016-10-12 15:08:37Z ykovalch $
  */
 @XmlRootElement(name = "group")
 public class ResourceGroupElement extends AbstractResourceGroupElement<ResourceGroupElement> {
-    private String type;
+    private String kind;
     public ResourceGroupElement(){}
     public ResourceGroupElement(ResourceGroupElement source){
         super(source);
-        type = source.getType();
+        kind = source.getKind();
     }
 
-    public String getType() {
-        return type;
+    public String getKind() {
+        return kind;
     }
 
-    public ResourceGroupElement setType(String type) {
-        this.type = type;
+    public ResourceGroupElement setKind(String kind) {
+        this.kind = kind;
         return this;
     }
 
@@ -54,7 +54,7 @@ public class ResourceGroupElement extends AbstractResourceGroupElement<ResourceG
 
         ResourceGroupElement that = (ResourceGroupElement) o;
 
-        if (type != null ? !type.equals(that.type) : that.type != null) return false;
+        if (kind != null ? !kind.equals(that.kind) : that.kind != null) return false;
 
         return true;
     }
@@ -62,14 +62,14 @@ public class ResourceGroupElement extends AbstractResourceGroupElement<ResourceG
     @Override
     public int hashCode() {
         int result = super.hashCode();
-        result = 31 * result + (type != null ? type.hashCode() : 0);
+        result = 31 * result + (kind != null ? kind.hashCode() : 0);
         return result;
     }
 
     @Override
     public String toString() {
         return "ResourceGroupElement{" +
-                "type='" + type + '\'' +
+                "type='" + kind + '\'' +
                 "} " + super.toString();
     }
 }

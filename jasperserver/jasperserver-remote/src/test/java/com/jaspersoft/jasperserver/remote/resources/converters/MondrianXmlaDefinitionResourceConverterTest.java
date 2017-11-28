@@ -44,6 +44,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import javax.validation.Validator;
 import java.text.SimpleDateFormat;
 
 import static org.mockito.Matchers.any;
@@ -55,7 +56,7 @@ import static org.testng.Assert.assertEquals;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: MondrianXmlaDefinitionResourceConverterTest.java 58870 2015-10-27 22:30:55Z esytnik $
+ * @version $Id: MondrianXmlaDefinitionResourceConverterTest.java 64791 2016-10-12 15:08:37Z ykovalch $
  */
 public class MondrianXmlaDefinitionResourceConverterTest {
     @InjectMocks
@@ -68,6 +69,7 @@ public class MondrianXmlaDefinitionResourceConverterTest {
     @Mock private PermissionsService permissionsService;
     @Mock private GenericTypeProcessorRegistry genericTypeProcessorRegistry;
     @Mock private BasicResourceValidator resourceValidator;
+    @Mock private Validator validator;
 
     private final ClientMondrianXmlaDefinition client = new ClientMondrianXmlaDefinition();
     private final MondrianXMLADefinition server = new MondrianXMLADefinitionImpl();

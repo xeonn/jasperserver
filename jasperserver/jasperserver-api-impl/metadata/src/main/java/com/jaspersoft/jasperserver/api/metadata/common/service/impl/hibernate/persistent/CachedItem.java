@@ -20,6 +20,7 @@
  */
 package com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.persistent;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.Set;
 
@@ -30,11 +31,11 @@ import com.jaspersoft.jasperserver.api.metadata.common.domain.util.DataContainer
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: CachedItem.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: CachedItem.java 65088 2016-11-03 23:22:01Z gbacon $
  * 
  * @hibernate.class table="repository_cache"
  */
-public class CachedItem {
+public class CachedItem implements Serializable {
 	private long id;
 	private String uri;
 	private String cacheName;

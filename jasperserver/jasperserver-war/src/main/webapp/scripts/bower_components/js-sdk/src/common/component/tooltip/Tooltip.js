@@ -22,7 +22,7 @@
 
 /**
  * @author: Sergii Kylypko, Kostiantyn Tsaregradskyi
- * @version: $Id: Tooltip.js 1605 2015-09-23 17:55:32Z inestere $
+ * @version: $Id: Tooltip.js 2956 2016-07-27 19:22:11Z inestere $
  */
 
 define(function(require){
@@ -103,8 +103,12 @@ define(function(require){
 
             _.bindAll(this, 'show', '_onMouseMove', '_onMouseLeave');
 
-            this.$attachTo.delegate(this.selector, 'mousemove touchmove', this._onMouseMove);
-            this.$attachTo.delegate(this.selector, 'mouseleave touchend', this._onMouseLeave);
+            this.$attachTo.on('mousemove touchmove', this.selector, this._onMouseMove);
+            // this.$attachTo.on('mousemove touchmove', this._onMouseMove);
+            //this.$attachTo.delegate(this.selector, 'mousemove touchmove', this._onMouseMove);
+            this.$attachTo.on('mouseleave touchend', this.selector, this._onMouseLeave);
+            // this.$attachTo.on('mouseleave touchend', this._onMouseLeave);
+            //this.$attachTo.delegate(this.selector, 'mouseleave touchend', this._onMouseLeave);
 
             Backbone.View.prototype.constructor.apply(this, arguments);
         },
@@ -195,8 +199,10 @@ define(function(require){
             this._shown && this.hide();
             this._timer && clearTimeout(this._timer);
 
-            this.$attachTo.undelegate(this.selector, 'mousemove touchmove', this._onMouseMove);
-            this.$attachTo.undelegate(this.selector, 'mouseleave touchend', this._onMouseLeave);
+            this.$attachTo.off('mousemove touchmove', this.selector, this._onMouseMove);
+            //this.$attachTo.undelegate(this.selector, 'mousemove touchmove', this._onMouseMove);
+            this.$attachTo.off('mouseleave touchend', this.selector, this._onMouseLeave);
+            //this.$attachTo.undelegate(this.selector, 'mouseleave touchend', this._onMouseLeave);
 
             Backbone.View.prototype.remove.apply(this, arguments);
         }

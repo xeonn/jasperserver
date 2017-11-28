@@ -22,24 +22,22 @@
 
 /**
  * @author: Zakhar Tomchenko
- * @version: $Id: Tree.js 2605 2016-04-12 12:25:50Z akasych $
+ * @version: $Id: Tree.js 2956 2016-07-27 19:22:11Z inestere $
  */
 
 define(function(require){
     "use strict";
 
-    require("jquery.ui");
-
     require("css!lists");
 
     var $ = require("jquery"),
         _ = require('underscore'),
-        Backbone = require('backbone'),
-        TreeLevel = require("./TreeLevel"),
-        TreeDataLayer = require("./TreeDataLayer"),
+    Backbone = require('backbone'),
+    TreeLevel = require("./TreeLevel"),
+    TreeDataLayer = require("./TreeDataLayer"),
 
-        listTemplate = require("text!./template/treeLevelListTemplate.htm"),
-        levelTemplate = require("text!./template/treeLevelTemplate.htm"),
+    listTemplate = require("text!./template/treeLevelListTemplate.htm"),
+    levelTemplate = require("text!./template/treeLevelTemplate.htm"),
 
         ITEM_ACTIONS = {
             ADD: "add",

@@ -20,6 +20,7 @@
 */
 package com.jaspersoft.jasperserver.dto.resources.domain;
 
+import javax.validation.Valid;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import java.util.ArrayList;
@@ -29,13 +30,14 @@ import java.util.List;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: JoinInfo.java 61100 2016-02-22 14:35:33Z sblazhyi $
+ * @version $Id: JoinInfo.java 64791 2016-10-12 15:08:37Z ykovalch $
  */
 public class JoinInfo {
 
     private Boolean includeAllJoinsForQueryFieldTables;
     private Boolean includeAllDataIslandJoins;
     private Boolean suppressCircularJoins;
+    @Valid
     private List<Join> joins;
     private List<String> mandatoryTables;
 

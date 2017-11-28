@@ -20,7 +20,9 @@
 */
 package com.jaspersoft.jasperserver.remote.connection;
 
+import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributesResolver;
 import com.jaspersoft.jasperserver.remote.exception.IllegalParameterValueException;
+import com.jaspersoft.jasperserver.remote.exception.MandatoryParameterNotFoundException;
 import com.jaspersoft.jasperserver.remote.exception.ResourceNotFoundException;
 import com.jaspersoft.jasperserver.remote.exception.UnsupportedOperationRemoteException;
 import com.jaspersoft.jasperserver.remote.resources.ClientTypeHelper;
@@ -32,8 +34,8 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -44,7 +46,7 @@ import java.util.UUID;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: ConnectionsManager.java 62954 2016-05-01 09:49:23Z ykovalch $
+ * @version $Id: ConnectionsManager.java 64791 2016-10-12 15:08:37Z ykovalch $
  */
 @Service
 public class ConnectionsManager implements InitializingBean {
@@ -60,6 +62,8 @@ public class ConnectionsManager implements InitializingBean {
     private Cache cache;
     @Resource
     private GenericTypeProcessorRegistry genericTypeProcessorRegistry;
+    @Resource
+    private ProfileAttributesResolver profileAttributesResolver;
 
     public Class<?> getConnectionDescriptionClass(String connectionType) {
         return typeToClassMapping.get(connectionType != null ? connectionType.toLowerCase() : null);
@@ -70,6 +74,9 @@ public class ConnectionsManager implements InitializingBean {
     }
 
     public UUID createConnection(Object connectionDescription) throws IllegalParameterValueException {
+        if(connectionDescription == null){
+            throw new MandatoryParameterNotFoundException("body");
+        }
         final Map<String, Object> data = new HashMap<String, Object>();
         // generic type processor registry assures safety of unchecked assignment
         @SuppressWarnings("unchecked")
@@ -80,6 +87,19 @@ public class ConnectionsManager implements InitializingBean {
         final ConnectionManagementStrategy<Object> strategy = getStrategy(connectionDescription);
         final Object connection = strategy.createConnection(connectionDescription, data);
         return cacheItem(new ConnectionDataPair(connection, data));
+    }
+
+    public boolean isMetadataSupported(Object connectionDescription){
+        ConnectionMetadataBuilder metadataBuilder = genericTypeProcessorRegistry.getTypeProcessor(connectionDescription.getClass(),
+                ConnectionMetadataBuilder.class, false);
+        boolean result = metadataBuilder != null;
+        if(metadataBuilder instanceof GenericTypeMetadataBuilder){
+            // some connection strategies serves data sources of multiple types, described by generic model.
+            // E.g. custom data source or resourceLookup. In this case connection strategy is metadata builder,
+            // but not for all resources. So, let's ask it if this concrete connection description supports metadata.
+            result = ((GenericTypeMetadataBuilder) metadataBuilder).isMetadataSupported(connectionDescription);
+        }
+        return result;
     }
 
     public Object getConnection(UUID uuid) throws ResourceNotFoundException {
@@ -120,19 +140,37 @@ public class ConnectionsManager implements InitializingBean {
         if (typeProcessor == null) {
             throw new UnsupportedOperationRemoteException(ClientTypeHelper.extractClientType(pair.connection.getClass()) + "/metadata");
         }
-        return typeProcessor.build(pair.connection, options);
+        resolveAttributes(options);
+        return typeProcessor.build(pair.connection, options, pair.data);
+    }
+
+    private void resolveAttributes(Map<String, String[]> options) {
+        if(options != null && options.size() > 0) {
+            for(String[] option : options.values()) {
+                if (option != null && option.length > 0) {
+                    for (int i=0; i<option.length; i++) {
+                        String optionValue = option[i];
+                        if (profileAttributesResolver.containsAttribute(optionValue)) {
+                            option[i] = profileAttributesResolver.merge(optionValue, null);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     public Object executeQuery(UUID uuid, Object query){
-        final Object connection = getItemFromCache(uuid).connection;
+        final ConnectionDataPair connectionDataPair = getItemFromCache(uuid);
+        final Object connection = connectionDataPair.connection;
         ConnectionQueryExecutor<Object,Object> queryExecutor = getQueryExecutor(query, connection);
-        return queryExecutor.executeQuery(query, connection);
+        return queryExecutor.executeQuery(query, connection, connectionDataPair.data);
     }
 
     public Object executeQueryForMetadata(UUID uuid, Object query){
-        final Object connection = getItemFromCache(uuid).connection;
+        final ConnectionDataPair connectionDataPair = getItemFromCache(uuid);
+        final Object connection = connectionDataPair.connection;
         ConnectionQueryExecutor<Object,Object> queryExecutor = getQueryExecutor(query, connection);
-        return queryExecutor.executeQueryForMetadata(query, connection);
+        return queryExecutor.executeQueryForMetadata(query, connection, connectionDataPair.data);
     }
 
     protected ConnectionQueryExecutor<Object, Object> getQueryExecutor(Object query, Object connection) {

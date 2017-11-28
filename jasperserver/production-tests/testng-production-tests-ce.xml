@@ -75,6 +75,13 @@
         </classes>
     </test>
 
+    <!-- this class tests repository load resources with FilterCriteria -->
+    <test name="RepositoryFilterCriteriaTestsTestNG">
+        <classes>
+            <class name="com.jaspersoft.jasperserver.test.RepositoryFilterCriteriaTestsTestNG"/>
+        </classes>
+    </test>
+
     <!-- this class tests the engine service -->
     <test name="EngineServiceTestsTestNG">
         <classes>
@@ -156,6 +163,13 @@
     <test name="SampleDataImportTestTestNG">
         <classes>
             <class name="com.jaspersoft.jasperserver.test.SampleDataImportTestTestNG" />
+        </classes>
+    </test>
+
+    <!-- Import/Export test -->
+    <test name="ImportExportServiceTestNG">
+        <classes>
+            <class name="com.jaspersoft.jasperserver.test.ImportExportServiceTestNG" />
         </classes>
     </test>
 

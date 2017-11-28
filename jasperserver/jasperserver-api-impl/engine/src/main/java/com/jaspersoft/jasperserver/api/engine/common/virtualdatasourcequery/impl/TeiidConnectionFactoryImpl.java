@@ -37,7 +37,7 @@ import java.util.Set;
 
 /**
  * @author Ivan Chan (ichan@jaspersoft.com)
- * @version $Id: TeiidConnectionFactoryImpl.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: TeiidConnectionFactoryImpl.java 64558 2016-09-20 22:33:21Z mchan $
  */
 public class TeiidConnectionFactoryImpl implements VirtualSQLDataSourceMetaData {
 
@@ -79,6 +79,7 @@ public class TeiidConnectionFactoryImpl implements VirtualSQLDataSourceMetaData 
         } catch (Exception ex) {
             teiidVirtualDataSourceQueryService.debug("Teiid: deploy VDB - ", ex);
             vex = getVirtualDataSourceException(ex);
+            throw vex;
         }
         try {
             // look up connection from teiid embedded server

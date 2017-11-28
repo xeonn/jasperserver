@@ -30,12 +30,13 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
 
 /**
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: JaxrsEntityParser.java 62954 2016-05-01 09:49:23Z ykovalch $
+ * @version $Id: JaxrsEntityParser.java 64791 2016-10-12 15:08:37Z ykovalch $
  */
 public class JaxrsEntityParser {
     private final Providers providers;
@@ -54,10 +55,14 @@ public class JaxrsEntityParser {
     }
 
     public <T> T parseEntity(Class<T> clazz, InputStream entityStream, MediaType mediaType) throws IOException {
+        return parseEntity(clazz, clazz, entityStream, mediaType);
+    }
+
+    public <T> T parseEntity(Class<T> clazz, Type genericType, InputStream entityStream, MediaType mediaType) throws IOException {
         // code below comes from com.sun.jersey.multipart.BodyPart#getEntityAs(Class<T> clazz)
         Annotation annotations[] = new Annotation[0];
         MessageBodyReader<T> reader =
-                providers.getMessageBodyReader(clazz, clazz, annotations, mediaType);
+                providers.getMessageBodyReader(clazz, genericType, annotations, mediaType);
         if (reader == null) {
             throw new IllegalArgumentException("No available MessageBodyReader for class " + clazz.getName()
                     + " and media type " + mediaType);
@@ -65,7 +70,7 @@ public class JaxrsEntityParser {
         try {
             return reader.readFrom(clazz, clazz, annotations, mediaType, httpHeaders.getRequestHeaders(), entityStream);
         } catch (EOFException e) {
-            throw new MandatoryParameterNotFoundException("request body");
+            throw new MandatoryParameterNotFoundException("body");
         }
     }
 }

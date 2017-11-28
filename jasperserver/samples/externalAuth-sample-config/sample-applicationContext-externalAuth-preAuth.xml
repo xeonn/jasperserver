@@ -144,8 +144,12 @@
 
         <property name="permittedRolesRegex">
             <list>
-                <value>JRS_.*</value>
-                <value>EXT_.*</value>
+                <!-- Used to set regex's to limit what external roles are imported into Jasper Server.
+                    By default, all roles are imported.
+                    Examples of the regex's importing only roles starting with JRS_ and EXT_:
+                    <value>JRS_.*</value>
+                    <value>EXT_.*</value>
+                -->
             </list>
         </property>
     </bean>

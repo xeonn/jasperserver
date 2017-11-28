@@ -22,7 +22,7 @@
 
 /**
  * @author: Kostiantyn Tsaregradskyi
- * @version: $Id: biComponentErrorMessages.js 1184 2015-05-12 11:57:30Z psavushc $
+ * @version: $Id: biComponentErrorMessages.js 2956 2016-07-27 19:22:11Z inestere $
  */
 
 define(function(require) {
@@ -44,6 +44,7 @@ define(function(require) {
     messages[errorCodes.REPORT_EXPORT_CANCELLED] = "Report export was cancelled";
     messages[errorCodes.REPORT_RENDER_ERROR] = "Report render error";
     messages[errorCodes.REPORT_RENDER_HIGHCHARTS_ERROR] = "Highcharts render error";
+    messages[errorCodes.INPUT_CONTROLS_VALIDATION_ERROR] = "InputControls validation error";
     messages[errorCodes.ALREADY_DESTROYED_ERROR] = "Component has been already destroyed";
     messages[errorCodes.NOT_YET_RENDERED_ERROR] = "Component has not yet been rendered";
 

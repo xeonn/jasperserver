@@ -21,29 +21,26 @@
 
 package com.jaspersoft.jasperserver.dto.resources;
 
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNotSame;
-import static org.testng.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * <p></p>
  *
  * @author Zakhar.Tomchenco
- * @version $Id: ClientCustomDataSourceTest.java 62954 2016-05-01 09:49:23Z ykovalch $
+ * @version $Id: ClientCustomDataSourceTest.java 63760 2016-07-05 18:59:28Z agodovan $
  */
 public class ClientCustomDataSourceTest {
     final ClientCustomDataSource dataSource1 = new ClientCustomDataSource(), dataSource2 = new ClientCustomDataSource();
     final ClientProperty property1 = new ClientProperty("a", "b"), property2 = new ClientProperty("c", "d");
 
-    @BeforeMethod
+    @Before
     public void init(){
         dataSource1.setProperties(Arrays.asList(property1, property2));
         dataSource2.setProperties(Arrays.asList(property2, property1));

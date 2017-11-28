@@ -36,7 +36,7 @@ Usage:
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 <%@ taglib prefix="t" uri="http://tiles.apache.org/tags-tiles" %>
 
-<!--/WEB-INF/jsp/templates/selectFields.jsp revision A-->
+
 <t:useAttribute name="containerClass" id="containerClass" classname="java.lang.String" ignore="true"/>
 <t:useAttribute name="availableFields" id="availableFields" classname="java.lang.String" ignore="true"/>
 <t:useAttribute name="selectedFields" id="selectedFields" classname="java.lang.String" ignore="true"/>

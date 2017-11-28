@@ -24,7 +24,7 @@ import com.jaspersoft.jasperserver.api.JasperServerAPI;
 
 /**
  * @author Ivan Chan (ichan@jaspersoft.com)
- * @version $Id: CustomJdbcReportDataSourceProvider.java 53873 2015-04-07 18:59:44Z mchan $
+ * @version $Id: CustomJdbcReportDataSourceProvider.java 64558 2016-09-20 22:33:21Z mchan $
  */
 @JasperServerAPI
 public interface CustomJdbcReportDataSourceProvider {
@@ -33,6 +33,6 @@ public interface CustomJdbcReportDataSourceProvider {
      * return JDBC data source from custom data source service factory in order to build VDS
      * JDBC data source would provide access of JDBC data source meta data
      */
-    public JdbcReportDataSource getJdbcReportDataSource(CustomReportDataSource reportDataSource);
+    public ReportDataSource getWrappedReportDataSource(CustomReportDataSource reportDataSource);
 
 }

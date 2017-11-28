@@ -21,10 +21,10 @@
 
 
 /**
- * @version: $Id: repository.search.main.js 10166 2016-05-26 22:39:40Z gbacon $
+ * @version: $Id: repository.search.main.js 10374 2016-11-16 18:09:08Z gbacon $
  */
 
-/* global isIPad, layoutModule, webHelpModule, orgModule, buttonManager, alert, dialogs, JRS,
+/* global isIPad, isWebKitEngine, layoutModule, webHelpModule, orgModule, buttonManager, alert, dialogs, JRS,
     confirm, Template, isSupportsTouch, isRightClick, actionModel, deepClone, _, localContext, getInitOptions,
  __jrsConfigs__, require
  */
@@ -127,7 +127,8 @@ function canFolderBeMoved(folder) {
 function canFolderBeExported(folder){
     folder = folder ? folder : repositorySearch.model.getContextFolder();
     var pathElements = folder.URI.split("/");
-    return !(pathElements.length > 2 && pathElements[pathElements.length - 2] === "organizations" && pathElements[pathElements.length - 1] !== "org_template");
+    return !((folder.URI === "/"  || pathElements[pathElements.length - 1] === "organizations" || pathElements[pathElements.length - 2] === "organizations")
+        && pathElements[pathElements.length - 1] !== "org_template");
 }
 
 function canFolderPermissionsBeAssigned() {
@@ -814,11 +815,13 @@ var repositorySearch = {
         if (!localContext.rsInitOptions.errorPopupMessage.blank()) {
             dialogs.errorPopup.show(localContext.rsInitOptions.errorPopupMessage);
         }
+
+        this._disableBfCacheIfSafari();
     },
 
     showContextMenu: function(e) {
         var event = e.memo.targetEvent;
-        
+
         if (repositorySearch.mode == repositorySearch.Mode.BROWSE) {
             if (repositorySearch.foldersPanel.isFolderContextMenu(event)) {
                 repositorySearch.actionModel.showFolderMenu(event);
@@ -835,6 +838,17 @@ var repositorySearch = {
         }
 
     },
+
+    _disableBfCacheIfSafari: function() {
+        if (isWebKitEngine()) {
+            window.onpageshow = function() {
+                if (event.persisted) {
+                    window.location.reload();
+                }
+            }
+        }
+    },
+
 
     updateUI: function(state) {
         // Check sort state.

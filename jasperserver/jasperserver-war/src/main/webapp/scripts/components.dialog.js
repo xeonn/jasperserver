@@ -22,22 +22,21 @@
 
 /**
  * @author: inesterenko
- * @version: $Id: components.dialog.js 9400 2015-09-23 21:10:46Z inestere $
+ * @version: $Id: components.dialog.js 10224 2016-07-27 20:02:40Z inestere $
  */
 
 /* global jaspersoft, _, Backbone, dialogs */
 
-jaspersoft || (jaspersoft = {components:{}}); // jshint ignore: line
-jaspersoft.components || (jaspersoft.components = {});
+define(function(require){
 
-(function(exports, $, _, Backbone, templateEngine, dialogs) {
+    "use strict";
 
-//module:
-//
-//
-//summary:
-//
-//
+    var  $ = require("jquery"),
+        _ = require("underscore"),
+        Backbone = require("backbone"),
+        templateEngine = require("components.templateengine"),
+        dialogs = require("components.dialogs");
+
     var Dialog = Backbone.View.extend({
         rendered : false,
         contentSelector : ".body",
@@ -52,7 +51,7 @@ jaspersoft.components || (jaspersoft.components = {});
                 throw "Dialog template is not provided";
             }
             _.bindAll(this);
-			this.options = _.extend({}, options);
+            this.options = _.extend({}, options);
         },
 
         render : function(parentContainer){
@@ -141,14 +140,13 @@ jaspersoft.components || (jaspersoft.components = {});
         }
     });
 
-    exports.Dialog = Dialog;
-    exports.ConfirmDialog = ConfirmDialog;
+    //keep that old-school for backwarcompatibility
+    jaspersoft || (jaspersoft = {components:{}}); // jshint ignore: line
+    jaspersoft.components || (jaspersoft.components = {});
 
-})(
-    jaspersoft.components,
-    jQuery,
-    _,
-    Backbone,
-    jaspersoft.components.templateEngine,
-    dialogs
-);
+    jaspersoft.components.Dialog = Dialog;
+    jaspersoft.components.ConfirmDialog = ConfirmDialog;
+    
+    return Dialog;
+
+});

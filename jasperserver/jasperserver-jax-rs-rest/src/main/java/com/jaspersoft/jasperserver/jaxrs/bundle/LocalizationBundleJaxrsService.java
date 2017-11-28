@@ -21,13 +21,15 @@
 
 package com.jaspersoft.jasperserver.jaxrs.bundle;
 
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Folder;
 import com.jaspersoft.jasperserver.jaxrs.common.RestConstants;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
+import com.jaspersoft.jasperserver.war.JavascriptForwardingServlet;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -56,13 +58,15 @@ import static org.springframework.util.DigestUtils.md5DigestAsHex;
  * cache invalidated on change of the Accept-Language header
  *
  * @author Igor.Nesterenko, Zahar.Tomchenko
- * @version $Id: LocalizationBundleJaxrsService.java 61296 2016-02-25 21:53:37Z mchan $
+ * @version $Id: LocalizationBundleJaxrsService.java 64299 2016-08-24 17:18:42Z asokolni $
  */
 @Service
 @Path("/bundles")
 public class LocalizationBundleJaxrsService {
 
     protected List<String> bundleNames;
+    @Context
+    private HttpServletRequest httpRequest;
 
     @Resource(name = "exposedMessageSource")
     private ExposedResourceBundleMessageSource messageSource;
@@ -80,14 +84,21 @@ public class LocalizationBundleJaxrsService {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getBundles(@QueryParam(RestConstants.QUERY_PARAM_EXPANDED) Boolean expanded, @Context HttpHeaders headers, @Context Request request) throws JSONException {
+    public Response getBundles(@QueryParam(RestConstants.QUERY_PARAM_EXPANDED) Boolean expanded,
+                               @Context HttpHeaders headers, @Context Request request) {
+        if (httpRequest != null && expanded == null) {
+            Map<String, String[]> forwardedParameters = (Map<String, String[]>)httpRequest.getAttribute(JavascriptForwardingServlet.FORWARDED_PARAMETERS);
+            if (forwardedParameters != null && forwardedParameters.get(RestConstants.QUERY_PARAM_EXPANDED) != null) {
+                expanded = Boolean.valueOf(forwardedParameters.get(RestConstants.QUERY_PARAM_EXPANDED)[0]);
+            }
+        }
         if (Boolean.TRUE.equals(expanded)) {
             Locale locale = headers.getAcceptableLanguages().get(0);
 
-            JSONObject json = new JSONObject();
+            ObjectNode json = JsonNodeFactory.instance.objectNode();
             for (String currentBundle : bundleNames) {
                 final Map<String, String> messages = messageSource.getAllMessagesForBaseName(currentBundle, locale);
-                JSONObject currentMessages = new JSONObject();
+                ObjectNode currentMessages = JsonNodeFactory.instance.objectNode();
                 for (String key : messages.keySet()) {
                     currentMessages.put(key, messages.get(key));
                 }
@@ -135,13 +146,17 @@ public class LocalizationBundleJaxrsService {
             try {
                 messageBodyWriter.writeTo(messages, Map.class, Map.class, new Annotation[0], mediaType, null, entityStream);
                 return entityStream.toByteArray();
-            } catch (IOException e) { }
+            } catch (IOException e) {  }
+        }
+        ObjectNode json = JsonNodeFactory.instance.objectNode();
+        for (String key : messages.keySet()) {
+            messages.put(key, messages.get(key));
         }
 
-        return new JSONObject(messages).toString().getBytes();
+        return json.toString().getBytes();
     }
 
-    protected EntityTag generateETag(JSONObject messagesJson) {
+    protected EntityTag generateETag(ObjectNode messagesJson) {
         if (messagesJson == null) {
             return null;
         } else {

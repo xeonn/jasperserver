@@ -635,6 +635,7 @@
 
     <bean id="scheduleFilter" class="com.jaspersoft.jasperserver.search.filter.ScheduleFilter" parent="baseSearchFilter">
         <property name="jobsService" ref="reportJobsPersistenceHibernateService" />
+        <property name="tenantService" ref="tenantService"/>
     </bean>
 
     <util:map id="childrenLoaders">

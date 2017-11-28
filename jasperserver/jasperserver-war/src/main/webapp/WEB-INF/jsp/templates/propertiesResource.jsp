@@ -32,7 +32,7 @@ Usage:
 <%@ taglib prefix="t" uri="http://tiles.apache.org/tags-tiles" %>
 <%@ taglib uri="/spring" prefix="spring"%>
 
-<!--/WEB-INF/jsp/templates/propertiesResource.jsp revision A-->
+
 <t:useAttribute name="containerClass" id="containerClass" classname="java.lang.String" ignore="true"/>
 
 <t:insertTemplate template="/WEB-INF/jsp/templates/container.jsp">

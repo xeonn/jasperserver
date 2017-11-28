@@ -66,6 +66,27 @@ public interface BatchRepositoryService {
      * @throws ResourceNotFoundException if specified folder uri not exists
      *
      */
+    RepositorySearchResult<ClientResourceLookup> getResourcesForLookupClass(String lookupClass, String q, String folderUri, List<String> type, List<String> containerType, List<String> excludeFolders, Integer start, Integer limit, Boolean recursive, Boolean showHiddenItems, String sortBy, AccessType accessType, User user, Boolean forceFullPage) throws IllegalParameterValueException, ResourceNotFoundException;
+    
+    
+    /**
+     * Searches resources
+     *
+     * @param q search query
+     * @param folderUri folder, in which search should be
+     * @param excludeFolders folders from this list will be excluded, NOTE: uris are relative to organization, i.e. "/temp" will exclude /temp, /organizations/organization_1/temp, etc.
+     * @param type type of resource to find
+     * @param start start index for pagination
+     * @param limit max quantity of results
+     * @param recursive shows, if search should affect subfolders or take place in folderUri folder only
+     * @param showHiddenItems show hidden
+     * @param sortBy on which field sorting should be applied
+     * @param accessType access type - all, modified, viewed
+     * @param user to apply access type
+     * @throws IllegalParameterValueException if some parameters values are invalid
+     * @throws ResourceNotFoundException if specified folder uri not exists
+     *
+     */
     RepositorySearchResult<ClientResourceLookup> getResources(String q, String folderUri, List<String> type, List<String> containerType, List<String> excludeFolders, Integer start, Integer limit, Boolean recursive, Boolean showHiddenItems, String sortBy, AccessType accessType, User user, Boolean forceFullPage) throws IllegalParameterValueException, ResourceNotFoundException;
 
     /**
@@ -95,6 +116,25 @@ public interface BatchRepositoryService {
      */
      int getResourcesCount(String q, String folderUri, List<String> type, List<String> excludeFolders, Boolean recursive, Boolean showHiddenItems, AccessType accessType, User user) throws IllegalParameterValueException, ResourceNotFoundException;
 
+     
+     /**
+      * Gets total count of resources who matches criteria
+      *
+      * @param q search query
+      * @param folderUri folder, in which search should be
+      * @param type type of resource to find
+      * @param excludeFolders folders from this list will be excluded, NOTE: uris are relative to organization, i.e. "/temp" will exclude /temp, /organizations/organization_1/temp, etc.
+      * @param recursive shows, if search should affect subfolders or take place in folderUri folder only
+      * @param showHiddenItems show hidden
+        @param accessType access type - all, modified, viewed
+      * @param user to apply access type
+      * @throws IllegalParameterValueException if some parameters values are invalid
+      * @throws ResourceNotFoundException if specified folder uri not exists
+      *
+      */
+      List<Object[]> getResourcesCount(String q, List<ClientResourceLookup> resources, List<String> type, List<String> excludeFolders, Boolean recursive, Boolean showHiddenItems, AccessType accessType, User user) throws IllegalParameterValueException, ResourceNotFoundException;
+     
+     
     /**
      * Gets total count of resources who matches criteria
      *

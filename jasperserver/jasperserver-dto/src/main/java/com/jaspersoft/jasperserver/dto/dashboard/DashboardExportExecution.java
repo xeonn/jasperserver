@@ -23,6 +23,8 @@ public class DashboardExportExecution {
     private DashboardParameters parameters;
     private String markup;
     private List<String> jrStyle;
+    private String outputTimeZone;
+    private String outputLocale;
 
     public int getWidth() {
         return width;
@@ -114,23 +116,44 @@ public class DashboardExportExecution {
         return this;
     }
 
+    public String getOutputTimeZone() {
+        return outputTimeZone;
+    }
+
+    public DashboardExportExecution setOutputTimeZone(String outputTimeZone) {
+        this.outputTimeZone = outputTimeZone;
+        return this;
+    }
+
+    public String getOutputLocale() {
+        return outputLocale;
+    }
+
+    public DashboardExportExecution setOutputLocale(String outputLocale) {
+        this.outputLocale = outputLocale;
+        return this;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        DashboardExportExecution execution = (DashboardExportExecution) o;
+        DashboardExportExecution that = (DashboardExportExecution) o;
 
-        if (width != execution.width) return false;
-        if (height != execution.height) return false;
-        if (referenceWidth != execution.referenceWidth) return false;
-        if (referenceHeight != execution.referenceHeight) return false;
-        if (format != execution.format) return false;
-        if (uri != null ? !uri.equals(execution.uri) : execution.uri != null) return false;
-        if (id != null ? !id.equals(execution.id) : execution.id != null) return false;
-        if (parameters != null ? !parameters.equals(execution.parameters) : execution.parameters != null) return false;
-        if (markup != null ? !markup.equals(execution.markup) : execution.markup != null) return false;
-        return !(jrStyle != null ? !jrStyle.equals(execution.jrStyle) : execution.jrStyle != null);
+        if (width != that.width) return false;
+        if (height != that.height) return false;
+        if (referenceWidth != that.referenceWidth) return false;
+        if (referenceHeight != that.referenceHeight) return false;
+        if (format != that.format) return false;
+        if (uri != null ? !uri.equals(that.uri) : that.uri != null) return false;
+        if (id != null ? !id.equals(that.id) : that.id != null) return false;
+        if (parameters != null ? !parameters.equals(that.parameters) : that.parameters != null) return false;
+        if (markup != null ? !markup.equals(that.markup) : that.markup != null) return false;
+        if (jrStyle != null ? !jrStyle.equals(that.jrStyle) : that.jrStyle != null) return false;
+        if (outputTimeZone != null ? !outputTimeZone.equals(that.outputTimeZone) : that.outputTimeZone != null)
+            return false;
+        return outputLocale != null ? outputLocale.equals(that.outputLocale) : that.outputLocale == null;
 
     }
 
@@ -146,6 +169,8 @@ public class DashboardExportExecution {
         result = 31 * result + (parameters != null ? parameters.hashCode() : 0);
         result = 31 * result + (markup != null ? markup.hashCode() : 0);
         result = 31 * result + (jrStyle != null ? jrStyle.hashCode() : 0);
+        result = 31 * result + (outputTimeZone != null ? outputTimeZone.hashCode() : 0);
+        result = 31 * result + (outputLocale != null ? outputLocale.hashCode() : 0);
         return result;
     }
 
@@ -160,6 +185,10 @@ public class DashboardExportExecution {
                 ", uri='" + uri + '\'' +
                 ", id='" + id + '\'' +
                 ", parameters=" + parameters +
+                ", markup='" + markup + '\'' +
+                ", jrStyle=" + jrStyle +
+                ", outputTimeZone='" + outputTimeZone + '\'' +
+                ", outputLocale='" + outputLocale + '\'' +
                 '}';
     }
 

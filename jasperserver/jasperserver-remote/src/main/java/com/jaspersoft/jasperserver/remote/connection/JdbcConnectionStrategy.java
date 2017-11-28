@@ -26,11 +26,12 @@ import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.JdbcReportDataSource;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.service.ReportDataSourceServiceFactory;
 import com.jaspersoft.jasperserver.api.security.validators.Validator;
+import com.jaspersoft.jasperserver.dto.connection.datadiscovery.FlatDataSet;
 import com.jaspersoft.jasperserver.dto.resources.ClientJdbcDataSource;
+import com.jaspersoft.jasperserver.dto.resources.domain.ResourceGroupElement;
 import com.jaspersoft.jasperserver.remote.connection.datadiscovery.ConnectionManager;
 import com.jaspersoft.jasperserver.remote.connection.datadiscovery.Connector;
 import com.jaspersoft.jasperserver.remote.connection.datadiscovery.JdbcMetadataBuilder;
-import com.jaspersoft.jasperserver.remote.connection.datadiscovery.JdbcQueryExecutor;
 import com.jaspersoft.jasperserver.remote.exception.IllegalParameterValueException;
 import com.jaspersoft.jasperserver.remote.resources.converters.JdbcDataSourceResourceConverter;
 import com.jaspersoft.jasperserver.remote.resources.converters.ToServerConversionOptions;
@@ -43,14 +44,13 @@ import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.sql.Connection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
  * <p></p>
  *
  * @author yaroslav.kovalchyk
- * @version $Id: JdbcConnectionStrategy.java 62954 2016-05-01 09:49:23Z ykovalch $
+ * @version $Id: JdbcConnectionStrategy.java 64791 2016-10-12 15:08:37Z ykovalch $
  */
 @Service
 public class JdbcConnectionStrategy implements ConnectionManagementStrategy<ClientJdbcDataSource>, ConnectionMetadataBuilder<ClientJdbcDataSource>, ConnectionQueryExecutor<String, ClientJdbcDataSource> {
@@ -62,9 +62,7 @@ public class JdbcConnectionStrategy implements ConnectionManagementStrategy<Clie
     private ReportDataSourceServiceFactory jdbcDataSourceFactory;
     @Resource
     private JdbcDataSourceResourceConverter jdbcDataSourceResourceConverter;
-    @Resource
-    private JdbcMetadataBuilder jdbcMetadataBuilder;
-    private ConnectionManager<ClientJdbcDataSource, Connection, String, List<Map<String, Object>>, Map<String, String>> connectionManager;
+    private ConnectionManager<ClientJdbcDataSource, Connection, String, FlatDataSet, ResourceGroupElement> connectionManager;
     private Map<Connection, BaseJdbcDataSource> openConnections = new HashMap<Connection, BaseJdbcDataSource>();
     @Resource
     private SecureExceptionHandler secureExceptionHandler;
@@ -115,7 +113,7 @@ public class JdbcConnectionStrategy implements ConnectionManagementStrategy<Clie
     }
 
     @Override
-    public Object build(ClientJdbcDataSource connectionDescription, Map<String, String[]> options) {
+    public Object build(ClientJdbcDataSource connectionDescription, Map<String, String[]> options, Map<String, Object> contextData) {
         return connectionManager.buildMetadata(connectionDescription, options);
     }
 
@@ -123,8 +121,8 @@ public class JdbcConnectionStrategy implements ConnectionManagementStrategy<Clie
 
     @PostConstruct
     public void init(){
-        connectionManager = new ConnectionManager<ClientJdbcDataSource, Connection, String, List<Map<String, Object>>, Map<String, String>>(new JdbcConnector())
-                .setMetadataBuilder(new JdbcMetadataBuilder()).setQueryExecutor(new JdbcQueryExecutor());
+        connectionManager = new ConnectionManager<ClientJdbcDataSource, Connection, String, FlatDataSet, ResourceGroupElement>(new JdbcConnector())
+                .setMetadataBuilder(new JdbcMetadataBuilder());
     }
 
     private class JdbcConnector implements Connector<Connection, ClientJdbcDataSource>{
@@ -146,13 +144,13 @@ public class JdbcConnectionStrategy implements ConnectionManagementStrategy<Clie
     }
 
     @Override
-    public Object executeQuery(String query, ClientJdbcDataSource connectionDescriptor) {
+    public Object executeQuery(String query, ClientJdbcDataSource connectionDescriptor, Map<String, Object> data) {
         Validator.validateSQL(query);
         return connectionManager.executeQuery(connectionDescriptor, query);
     }
 
     @Override
-    public Object executeQueryForMetadata(String query, ClientJdbcDataSource connectionDescriptor) {
+    public Object executeQueryForMetadata(String query, ClientJdbcDataSource connectionDescriptor, Map<String, Object> data) {
         Validator.validateSQL(query);
         return connectionManager.executeQueryForMetadata(connectionDescriptor, query);
     }

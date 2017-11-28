@@ -22,7 +22,7 @@
 
 /**
  * @author: Kostiantyn Tsaregradskyi
- * @version: $Id: biComponentErrorCodes.js 1184 2015-05-12 11:57:30Z psavushc $
+ * @version: $Id: biComponentErrorCodes.js 2956 2016-07-27 19:22:11Z inestere $
  */
 
 define({
@@ -38,6 +38,8 @@ define({
     REPORT_EXPORT_CANCELLED: "report.export.cancelled",
     REPORT_RENDER_ERROR: "report.render.error",
     REPORT_RENDER_HIGHCHARTS_ERROR: "report.render.highcharts.error",
+    INPUT_CONTROLS_VALIDATION_ERROR: "input.controls.validation.error",
     ALREADY_DESTROYED_ERROR: "already.destroyed.error",
-    NOT_YET_RENDERED_ERROR: "not.yet.rendered.error"
+    NOT_YET_RENDERED_ERROR: "not.yet.rendered.error",
+    INPUT_CONTROL_PARAMETER_NOT_FOUND_ERROR: "input.control.parameter.not.found"
 });

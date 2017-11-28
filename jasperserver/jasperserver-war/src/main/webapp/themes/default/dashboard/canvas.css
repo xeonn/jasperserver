@@ -21,6 +21,10 @@
     overflow: hidden;
 }
 
+.dashboardCanvas.maximizedDashlet > .content > .body div[data-componentId] {
+    display: none;
+}
+
 .dashboardCanvas > .content > .body div[data-componentId].inputControlWrapper {
     overflow: visible;
     position: relative;
@@ -33,6 +37,7 @@
 .dashboardCanvas > .content > .body div.canvasOverlay {
     height: 100% !important;
     width: 100% !important;
+    display: block !important;
     left: 0 !important;
     top: 0 !important;
     position: absolute;
@@ -50,7 +55,6 @@
     border: 1px solid #D0D0D0;
     border-bottom: 1px solid #A4A4A4;
     height: 100%;
-    background-color: #ffffff;
     overflow: hidden;
     width: 100%;
     box-sizing: border-box;
@@ -150,7 +154,7 @@
     padding: 0 0 0 28px;
     height: 24px;
     line-height: 24px;
-    text-align: left; 
+    text-align: left;
     overflow: hidden;
     text-overflow: ellipsis;
 }
@@ -249,7 +253,7 @@
 .dashboardCanvas .dashlet > .dashletContent > .filterGroupButtons {
     height: 34px;
     position: relative;
-    padding: 0 5px;
+    padding: 2px 5px 0 5px;
     min-width: 170px;
     background-color: #ffffff;
     border-top: 1px solid #D4D5D5;
@@ -269,9 +273,6 @@
     z-index: 1;
 }
 
-.dashboardCanvas .dashlet > .dashletContent > .filterGroupButtons > .applyButton {
-	margin-top: 2px;
-}
 
 .dashboardCanvas .dashlet > .dashletContent > .filterGroupButtons.fixed.oneButton {
     margin-left: -115px;
@@ -279,13 +280,13 @@
     width: 95px;
 }
 
-.dashboardCanvas .dashlet > .dashletContent > .filterGroupButtons.fixed .button{
+.dashboardCanvas .dashlet > .dashletContent > .filterGroupButtons.fixed button{
     margin-top: 10px;
     margin-left: 2px;
 }
 
-.dashboardCanvas .dashlet > .dashletContent > .filterGroupButtons.fixed .button.applyButton{
-    margin-left: 1px;
+.dashboardCanvas .dashlet > .dashletContent > .filterGroupButtons.fixed button[data-target='applyButton']{
+    margin-left: 0;
 }
 
 .dashboardCanvas .list.inputControls {
@@ -372,7 +373,8 @@
     vertical-align: top;
 }
 
-.dashboardCanvas ._jrHyperLink {
+.dashboardCanvas ._jrHyperLink,
+.dashboardCanvas .hyperlink {
     cursor: pointer;
 }
 
@@ -422,9 +424,11 @@
     clear: both;
 }
 
+.filterGroup.dialog .footer { /* added to correctly position new jr-mButton within old dialog */
+    padding-top: 4px;
 }
 
-/*new styles below fix bug 43513*/
+/* new styles below fix bug 43513 */
 .dashletContent .control,
 .dashletContent .picker input {
     margin-bottom: 0;

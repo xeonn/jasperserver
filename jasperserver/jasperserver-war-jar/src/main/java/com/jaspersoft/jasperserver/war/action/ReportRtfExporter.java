@@ -41,7 +41,7 @@ import com.jaspersoft.jasperserver.api.engine.jasperreports.common.RtfExportPara
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ReportRtfExporter.java 63555 2016-06-10 16:59:01Z tdanciu $
+ * @version $Id: ReportRtfExporter.java 63866 2016-07-12 22:39:01Z schubar $
  */
 public class ReportRtfExporter extends AbstractReportExporter 
 {

@@ -42,7 +42,7 @@
         </repository>
         <repository>
           <id>js-repo-tibco-drivers</id>
-          <name>Repository for JasperReports Server additional resources (tibci data connectivity drivers)</name>
+          <name>Repository for JasperReports Server additional resources (TIBCO data connectivity drivers)</name>
           <url>file://${tibco-driver-path}</url>
           <snapshots>
             <enabled>true</enabled>

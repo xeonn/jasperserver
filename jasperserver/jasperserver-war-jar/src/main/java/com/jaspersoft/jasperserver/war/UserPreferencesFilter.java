@@ -54,7 +54,7 @@ import java.util.TimeZone;
 
 /**
  * @author Ionut Nedelcu (ionutned@users.sourceforge.net)
- * @version $Id: UserPreferencesFilter.java 63410 2016-05-30 11:37:52Z ykovalch $
+ * @version $Id: UserPreferencesFilter.java 63866 2016-07-12 22:39:01Z schubar $
  */
 public class UserPreferencesFilter implements Filter
 {

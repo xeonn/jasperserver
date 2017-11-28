@@ -51,7 +51,7 @@ import java.util.Collection;
 
 /**
  * @author dlitvak
- * @version $Id: ErrorPageHandlerAction.java 57603 2015-09-15 17:20:48Z psavushc $
+ * @version $Id: ErrorPageHandlerAction.java 65642 2017-01-24 01:44:20Z dlitvak $
  */
 public class ErrorPageHandlerAction extends AbstractAction {
 	private static final Logger logger = LogManager.getLogger(ErrorPageHandlerAction.class);
@@ -113,6 +113,9 @@ public class ErrorPageHandlerAction extends AbstractAction {
 
 		final RequestAttributes requestAttributes = RequestContextHolder.currentRequestAttributes();
 		requestAttributes.setAttribute("errorUID", errorDescriptor.getErrorUid(), RequestAttributes.SCOPE_REQUEST);
+
+		if (errorDescriptor.getErrorUid() != null && !errorDescriptor.getErrorUid().isEmpty() )
+			logger.error("Error UID " + errorDescriptor.getErrorUid(), exception);
 
 		final String edMessage = errorDescriptor.getMessage();
 		String[] errorMessages = (exception instanceof JRInteractiveRuntimeException) ? edMessage.split("<#_#>") : new String[] {edMessage};

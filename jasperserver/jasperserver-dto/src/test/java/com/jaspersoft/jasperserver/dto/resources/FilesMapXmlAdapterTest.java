@@ -20,20 +20,21 @@
 */
 package com.jaspersoft.jasperserver.dto.resources;
 
-import org.testng.annotations.Test;
+
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.testng.Assert.*;
+import static org.junit.Assert.*;
 
 /**
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: FilesMapXmlAdapterTest.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: FilesMapXmlAdapterTest.java 63760 2016-07-05 18:59:28Z agodovan $
  */
 public class FilesMapXmlAdapterTest {
     private  FilesMapXmlAdapter adapter = new FilesMapXmlAdapter();

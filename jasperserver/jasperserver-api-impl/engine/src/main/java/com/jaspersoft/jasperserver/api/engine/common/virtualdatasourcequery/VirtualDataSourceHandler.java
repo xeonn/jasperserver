@@ -23,7 +23,6 @@ package com.jaspersoft.jasperserver.api.engine.common.virtualdatasourcequery;
 
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
 import com.jaspersoft.jasperserver.api.common.virtualdatasourcequery.ConnectionFactory;
-import com.jaspersoft.jasperserver.api.common.virtualdatasourcequery.CustomDataSource;
 import com.jaspersoft.jasperserver.api.common.virtualdatasourcequery.DataSource;
 import com.jaspersoft.jasperserver.api.common.virtualdatasourcequery.VirtualDataSourceQueryService;
 import com.jaspersoft.jasperserver.api.common.virtualdatasourcequery.JdbcDataSource;
@@ -32,7 +31,6 @@ import com.jaspersoft.jasperserver.api.engine.common.virtualdatasourcequery.impl
 import com.jaspersoft.jasperserver.api.engine.common.virtualdatasourcequery.impl.JdbcDataSourceImpl;
 import com.jaspersoft.jasperserver.api.engine.common.virtualdatasourcequery.impl.JndiDataSourceImpl;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl.CustomReportDataSourceServiceFactory;
-import com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl.JdbcReportDataSourceServiceFactory;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.util.CustomDataSourceDefinition;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceReference;
 import com.jaspersoft.jasperserver.api.metadata.common.service.JSResourceAcessDeniedException;
@@ -55,7 +53,7 @@ import java.util.Set;
 
 /**
  * @author Ivan Chan (ichan@jaspersoft.com)
- * @version $Id: VirtualDataSourceHandler.java 55164 2015-05-06 20:54:37Z mchan $
+ * @version $Id: VirtualDataSourceHandler.java 64558 2016-09-20 22:33:21Z mchan $
  */
 public class VirtualDataSourceHandler {
 
@@ -162,8 +160,12 @@ public class VirtualDataSourceHandler {
 		// does it have its own factory? if so, delegate to it
 		if ((dsDef.getCustomFactory() != null) && (dsDef.getCustomFactory() instanceof CustomJdbcReportDataSourceProvider))
         {
-			JdbcReportDataSource jdbcReportDataSource = ((CustomJdbcReportDataSourceProvider) dsDef.getCustomFactory()).getJdbcReportDataSource(customReportDataSource);
-            return new JdbcDataSourceImpl(jdbcReportDataSource, schemas,  dataSourceName, parentDataSource);
+			ReportDataSource wrappedReportDataSource = ((CustomJdbcReportDataSourceProvider) dsDef.getCustomFactory()).getWrappedReportDataSource(customReportDataSource);
+            if (wrappedReportDataSource instanceof  JdbcReportDataSource) {
+                return new JdbcDataSourceImpl((JdbcReportDataSource)wrappedReportDataSource, schemas, dataSourceName, parentDataSource);
+            } else if (wrappedReportDataSource instanceof VirtualReportDataSource) {
+                // return custom data source impl instead.  Join in VDS in parent level
+            }
 		}
         return new CustomDataSourceImpl(customReportDataSource, schemas,  dataSourceName, parentDataSource);
     }

@@ -21,7 +21,7 @@
 package com.jaspersoft.jasperserver.jaxrs.report;
 
 import com.jaspersoft.jasperserver.dto.common.ErrorDescriptor;
-import com.jaspersoft.jasperserver.remote.services.ExecutionStatus;
+import com.jaspersoft.jasperserver.dto.executions.ExecutionStatus;
 
 import javax.xml.bind.annotation.XmlRootElement;
 

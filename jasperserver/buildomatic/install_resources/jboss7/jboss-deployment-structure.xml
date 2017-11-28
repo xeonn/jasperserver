@@ -68,6 +68,13 @@
             <module name="org.jboss.resteasy.resteasy-multipart-provider"/>
             <module name="org.jboss.resteasy.resteasy-yaml-provider"/>
 
+            <!-- 2016-06-30 gbacon
+                            exclude resteasy-jackson2-provider since we are now using com.fasterxml.jackson
+                            which is referred to as the resteasy-jackson2-provider module by wildfly
+            -->
+
+            <module name="org.jboss.resteasy.resteasy-jackson2-provider"/>
+
             <!-- 2013-03-20 thorick
                             exclude all of Hibernate 4.  We want Jasper's Hibernate 3
             -->
@@ -126,7 +133,8 @@
                   Declaring a dependency on this jaspserver created module makes them available.
 			-->
             <module name="jaspersoft.org.apache.batik"/>
-            		
+            <module name="jaspersoft.javax.validation.api" slot="1.1" export="true"/>
+
             <!--
                 2013-03-26  thorick
                             There are difficulties getting ant to create the new module
@@ -201,7 +209,10 @@
                		http://bugzilla.jaspersoft.com/show_bug.cgi?id=33207
                		This forces jboss to read the jar from WEB-INF/lib folder. These are the jars used for the modules under dependencies.               				
             -->
+            <!--   thorick  2016-12-07
+                    remove as part of the 3rd party lib security upgrade
             <resource-root path="WEB-INF/lib/jsf-api-1.1.jar" use-physical-code-source="true"/>
+            -->
             <resource-root path="WEB-INF/lib/jstl-1.1.2.jar" use-physical-code-source="true"/>
             <resource-root path="WEB-INF/lib/jaxb-api-2.1.jar" use-physical-code-source="true"/> 
             
@@ -235,7 +246,7 @@
             <!-- Add JDBC jars for installation and/or for the DataSource drop list in the UI    --> 
             <!-- =============================================================================== --> 
 
-            <resource-root path="WEB-INF/lib/postgresql-9.2-1002.jdbc4.jar" use-physical-code-source="true"/>
+            <resource-root path="WEB-INF/lib/postgresql-9.4-1210.jdbc41.jar" use-physical-code-source="true"/>
             <resource-root path="WEB-INF/lib/mariadb-java-client-1.1.2.jar" use-physical-code-source="true"/>
 
             <!-- Uncomment out JDBC driver line below to add to the JDBC driver dropdown list in the UI.      --> 

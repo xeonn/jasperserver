@@ -485,4 +485,13 @@
         </property>
     </bean>
 
+    <bean class="org.springframework.jmx.export.MBeanExporter" lazy-init="false">
+        <property name="server" ref="jasperJMXServer"/>
+        <property name="beans">
+            <util:map>
+                <entry key="jasperserver:name=JavascriptOptimizationSettings" value-ref="javascriptOptimizationSettings"/>
+            </util:map>
+        </property>
+    </bean>
+
 </beans>

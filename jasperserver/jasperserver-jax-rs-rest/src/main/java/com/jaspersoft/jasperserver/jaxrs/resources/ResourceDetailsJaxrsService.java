@@ -72,7 +72,7 @@ import java.util.Map;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: ResourceDetailsJaxrsService.java 63380 2016-05-26 20:56:46Z mchan $
+ * @version $Id: ResourceDetailsJaxrsService.java 64791 2016-10-12 15:08:37Z ykovalch $
  */
 @Component
 public class ResourceDetailsJaxrsService {
@@ -104,12 +104,24 @@ public class ResourceDetailsJaxrsService {
                 // try to find converter for specific combination of client type and server type
                 toClientConverter = resourceConverterProvider.getToClientConverter(resource.getResourceType(), clientType);
             }
-            if(toClientConverter == null){
+
+            ClientResource clientResource = null;
+            ToClientConversionOptions options = ToClientConversionOptions.getDefault().setExpanded(expanded)
+                    .setIncludes(includes).setAcceptMediaType(firstMatch);
+
+            if (toClientConverter != null) {
+                try {
+                    clientResource = toClientConverter.toClient(resource, options);
+                } catch (NotAcceptableException e) {
+                    toClientConverter = null;
+                }
+            }
+
+            if(clientResource == null){
                 // no client type or no converter for client/server type combination. Let's take server type converter then
                 toClientConverter = resourceConverterProvider.getToClientConverter(resource);
+                clientResource = toClientConverter.toClient(resource, options);
             }
-            final ClientResource clientResource = toClientConverter.toClient(resource,
-                    ToClientConversionOptions.getDefault().setExpanded(expanded).setIncludes(includes));
             String contentTypeTemplate = firstMatch != null && firstMatch.endsWith("json") ? ResourceMediaType.RESOURCE_JSON_TEMPLATE : ResourceMediaType.RESOURCE_XML_TEMPLATE;
             response = Response.ok(clientResource)
                     .header(HttpHeaders.CONTENT_TYPE,
@@ -398,6 +410,9 @@ public class ResourceDetailsJaxrsService {
 
     protected String extractType(String mimeType, String name) {
         String type = null;
+        if(mimeType == null){
+            throw new MandatoryParameterNotFoundException("Content-Type");
+        }
         if (mimeType.contains(";")) {
             mimeType = mimeType.split(";")[0].trim();
         }

@@ -22,7 +22,7 @@
 
 /**
  * @author: Kostiantyn Tsaregradskyi
- * @version: $Id: tenantTree.js 10092 2016-04-22 21:17:02Z inestere $
+ * @version: $Id: tenantTree.js 10365 2016-11-03 21:57:13Z gbacon $
  */
 
 define(function(require) {
@@ -74,6 +74,7 @@ define(function(require) {
                 rootless: true,
                 collapsed: true,
                 lazyLoad: true,
+                bufferSize: 5000,
                 allowMouseDownEventPropagation: true,
                 dataUriTemplate: jrsConfigs.contextPath + "/rest_v2/organizations?{{= id != 'organizations' ? 'rootTenantId=' + id : ''}}&offset={{= offset }}&limit={{= limit }}&maxDepth=1",
                 levelDataId: "id",
@@ -86,7 +87,7 @@ define(function(require) {
                 customDataLayers: {
                     //workaround for correct viewing of '/' tenant label
                     "/": _.extend(new TreeDataLayer({
-                        dataUriTemplate: jrsConfigs.contextPath + "/flow.html?_flowId=treeFlow&method=getNode&provider=tenantTreeFoldersProvider&uri=/&prefetch=%2F",
+                        dataUriTemplate: jrsConfigs.contextPath + "/flow.html?_flowId=treeFlow&method=getNode&provider=tenantTreeFoldersProvider&uri=/",
                         processors: [processors.tenantProcessor(options.tenantId)],
                         getDataArray: function(data) {
                             data = JSON.parse($(data).text());

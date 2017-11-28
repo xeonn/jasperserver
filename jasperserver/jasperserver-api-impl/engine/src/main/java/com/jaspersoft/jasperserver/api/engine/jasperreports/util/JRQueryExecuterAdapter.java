@@ -40,6 +40,7 @@ import com.jaspersoft.jasperserver.api.JSException;
 import com.jaspersoft.jasperserver.api.JSExceptionWrapper;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Query;
 
+import net.sf.jasperreports.engine.DatasetPropertyExpression;
 import net.sf.jasperreports.engine.DefaultJasperReportsContext;
 import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JRDataset;
@@ -72,7 +73,7 @@ import net.sf.jasperreports.engine.util.JRQueryExecuterUtils;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: JRQueryExecuterAdapter.java 63380 2016-05-26 20:56:46Z mchan $
+ * @version $Id: JRQueryExecuterAdapter.java 65088 2016-11-03 23:22:01Z gbacon $
  */
 public class JRQueryExecuterAdapter {
 	
@@ -505,6 +506,11 @@ public class JRQueryExecuterAdapter {
 
 		public UUID getUUID() {
 			return reportDataset.getUUID();
+		}
+
+		@Override
+		public DatasetPropertyExpression[] getPropertyExpressions() {
+			return reportDataset.getPropertyExpressions();
 		}
 		
 	}

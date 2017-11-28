@@ -27,16 +27,10 @@ import com.sun.jersey.api.model.AbstractResourceMethod;
 import com.sun.jersey.api.model.Parameter;
 import com.sun.jersey.server.wadl.ApplicationDescription;
 import com.sun.jersey.server.wadl.WadlGenerator;
-import com.sun.research.ws.wadl.Application;
-import com.sun.research.ws.wadl.Method;
-import com.sun.research.ws.wadl.Param;
-import com.sun.research.ws.wadl.Representation;
-import com.sun.research.ws.wadl.Request;
-import com.sun.research.ws.wadl.Resource;
-import com.sun.research.ws.wadl.Resources;
-import com.sun.research.ws.wadl.Response;
+import com.sun.research.ws.wadl.*;
 
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.UriInfo;
 import java.util.List;
 
 /**
@@ -64,8 +58,13 @@ public class PrivateFilteringWadlGenerator implements WadlGenerator {
     }
 
     @Override
-    public Application createApplication() {
-        return delegate.createApplication();
+    public void setEnvironment(Environment environment) {
+        delegate.setEnvironment(environment);
+    }
+
+    @Override
+    public Application createApplication(UriInfo uriInfo) {
+        return delegate.createApplication(uriInfo);
     }
 
     @Override

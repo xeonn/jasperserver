@@ -31,9 +31,11 @@ import com.jaspersoft.jasperserver.api.engine.common.service.VirtualizerFactory;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.domain.impl.ReportUnitResult;
 import com.jaspersoft.jasperserver.war.util.LRUSessionObjectAccessor.ObjectSerie;
 
+import net.sf.jasperreports.engine.ReportContext;
+
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: SessionReportListener.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: SessionReportListener.java 65088 2016-11-03 23:22:01Z gbacon $
  */
 public class SessionReportListener implements SessionObjectSeriesListener, Serializable{
 
@@ -70,6 +72,12 @@ public class SessionReportListener implements SessionObjectSeriesListener, Seria
 			for (Iterator it = reports.iterator(); it.hasNext();) {
 				ReportUnitResult report = (ReportUnitResult) it.next();
 				virtualizerFactory.disposeReport(report);
+				
+				ReportContext reportContext = report.getReportContext();
+				if (reportContext != null) {
+	        		//safety measure to reduce the risk of objects from the report context not getting garbage collected
+					reportContext.clearParameterValues();
+				}
 			}
 		}
 	}

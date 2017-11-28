@@ -107,7 +107,6 @@
                 <prop key="/500.html">systemErrorController</prop>
 
                 <prop key="/themeMinimalCss.css">urlViewController</prop>
-                <prop key="/commonMinimalCss.css">urlViewController</prop>
             </props>
         </property>
     </bean>
@@ -139,11 +138,6 @@
         <entry key="publicFolderUri" value="#{configurationBean.publicFolderUri}"/>
         <entry key="tempFolderUri" value="#{configurationBean.tempFolderUri}"/>
         <entry key="enableAccessibility" value="#{configurationBean.enableAccessibility}"/>
-    </util:map>
-
-    <util:map id="jsOptimizationProperties" scope="prototype">
-        <entry key="useOptimizedJavascript" value="#{javascriptOptimizationSettings.useOptimizedJavascript}"/>
-        <entry key="optimizedJavascriptPath" value="#{javascriptOptimizationSettings.optimizedJavascriptPath}"/>
     </util:map>
 
     <!-- handle file uploads using commons-fileupload -->
@@ -410,7 +404,7 @@
         <property name="repository" ref="${bean.repositoryService}"/>
         <property name="profileAttributeService" ref="profileAttributeService"/>
     </bean>
-    
+
     <bean id="xmlExportController" class="com.jaspersoft.jasperserver.war.control.XmlExportController">
     	<property name="jasperPrintAccessor" ref="jasperPrintAccessor"/>
     	<property name="jasperPrintNameParameter" value="jrprint"/>

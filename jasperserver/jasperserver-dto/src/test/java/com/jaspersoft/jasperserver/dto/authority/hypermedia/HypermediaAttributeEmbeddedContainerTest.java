@@ -22,8 +22,7 @@
 package com.jaspersoft.jasperserver.dto.authority.hypermedia;
 
 import com.jaspersoft.jasperserver.dto.permissions.RepositoryPermission;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
+
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,18 +32,19 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotEquals;
-import static org.testng.Assert.assertTrue;
 
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 /**
  * @author askorodumov
- * @version $Id: HypermediaAttributeEmbeddedContainerTest.java 59477 2015-12-14 10:19:14Z askorodu $
+ * @version $Id: HypermediaAttributeEmbeddedContainerTest.java 63760 2016-07-05 18:59:28Z agodovan $
  */
 public class HypermediaAttributeEmbeddedContainerTest {
 
-    @BeforeClass
+    @Before
     public void init() {
         createDifferentEmbeddedContainers();
     }

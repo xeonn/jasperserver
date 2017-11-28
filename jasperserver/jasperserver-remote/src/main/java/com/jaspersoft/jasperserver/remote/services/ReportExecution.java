@@ -23,6 +23,7 @@ package com.jaspersoft.jasperserver.remote.services;
 import com.jaspersoft.jasperserver.api.JSException;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.domain.impl.ReportUnitResult;
 import com.jaspersoft.jasperserver.dto.common.ErrorDescriptor;
+import com.jaspersoft.jasperserver.dto.executions.ExecutionStatus;
 import com.jaspersoft.jasperserver.remote.exception.RemoteException;
 
 import javax.xml.bind.annotation.XmlElement;

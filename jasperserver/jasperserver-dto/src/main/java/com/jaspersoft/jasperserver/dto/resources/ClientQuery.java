@@ -21,14 +21,16 @@
 package com.jaspersoft.jasperserver.dto.resources;
 
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 
 /**
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: ClientQuery.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: ClientQuery.java 64626 2016-09-26 13:25:24Z vzavadsk $
  */
 @XmlRootElement(name = ResourceMediaType.QUERY_CLIENT_TYPE)
+@XmlType(name = ResourceMediaType.QUERY_CLIENT_TYPE)
 public class ClientQuery extends AbstractClientDataSourceHolder<ClientQuery> implements ClientReferenceableQuery {
     private String value;
     private String language;

@@ -21,9 +21,9 @@
 package com.jaspersoft.jasperserver.dto.reports.inputcontrols;
 
 import com.jaspersoft.jasperserver.dto.resources.ClientDataType;
-import org.testng.annotations.Test;
+import org.junit.Test;
 
-import static org.testng.Assert.assertTrue;
+import static org.junit.Assert.assertTrue;
 
 /**
  * <p></p>

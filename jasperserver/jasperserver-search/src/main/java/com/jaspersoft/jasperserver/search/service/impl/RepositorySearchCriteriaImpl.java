@@ -22,6 +22,7 @@ package com.jaspersoft.jasperserver.search.service.impl;
 
 import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
 import com.jaspersoft.jasperserver.api.search.SearchFilter;
+import com.jaspersoft.jasperserver.dto.resources.ClientResourceLookup;
 import com.jaspersoft.jasperserver.search.mode.AccessType;
 import com.jaspersoft.jasperserver.search.mode.SearchMode;
 import com.jaspersoft.jasperserver.search.service.RepositorySearchCriteria;
@@ -32,8 +33,8 @@ import java.util.List;
 
 /**
  * @author Yaroslav.Kovalchyk
- * @version $Id: RepositorySearchCriteriaImpl.java 61759 2016-03-14 15:48:27Z ztomchen $
- * @version $Id: RepositorySearchCriteriaImpl.java 61759 2016-03-14 15:48:27Z ztomchen $
+ * @version $Id: RepositorySearchCriteriaImpl.java 66432 2017-03-10 22:04:59Z esytnik $
+ * @version $Id: RepositorySearchCriteriaImpl.java 66432 2017-03-10 22:04:59Z esytnik $
  */
 public class RepositorySearchCriteriaImpl implements RepositorySearchCriteria {
 
@@ -53,8 +54,18 @@ public class RepositorySearchCriteriaImpl implements RepositorySearchCriteria {
     private AccessType accessType = AccessType.ALL;
     private List<String> excludeRelativePaths;
     private User user;
+    private List<ClientResourceLookup> resources;
+    private String lookupClass=null;
 
-    public List<SearchFilter> getCustomFilters() {
+    public List<ClientResourceLookup> getResources() {
+		return resources;
+	}
+
+	public void setResources(List<ClientResourceLookup> resources) {
+		this.resources = resources;
+	}
+
+	public List<SearchFilter> getCustomFilters() {
         return customFilters;
     }
 
@@ -200,6 +211,11 @@ public class RepositorySearchCriteriaImpl implements RepositorySearchCriteria {
             criteria.setSearchMode(searchMode);
             return this;
         }
+        
+        public Builder setLookupClass(String lookupClass){
+        	criteria.setLookupClass(lookupClass);
+        	return this;
+        }
 
         public Builder setSortBy(String sortBy){
             criteria.setSortBy(sortBy);
@@ -285,6 +301,11 @@ public class RepositorySearchCriteriaImpl implements RepositorySearchCriteria {
             criteria.setExcludeRelativePaths(excludeRelativePaths);
             return this;
         }
+        
+        public Builder setResources(List<ClientResourceLookup> resources){
+        	criteria.setResources(resources);
+        	return this;
+        }
 
         public RepositorySearchCriteria getCriteria(){
             return criteria;
@@ -300,6 +321,8 @@ public class RepositorySearchCriteriaImpl implements RepositorySearchCriteria {
         criteria.setForceFullPage(this.forceFullPage);
         criteria.setSearchText(this.searchText);
         criteria.setFolderUri(this.folderUri);
+        criteria.setResources(this.resources);
+        
         if (this.resourceTypes != null) {
             criteria.setResourceTypes(new ArrayList<String>(this.resourceTypes));
         }
@@ -319,4 +342,14 @@ public class RepositorySearchCriteriaImpl implements RepositorySearchCriteria {
 
         return criteria;
     }
+
+	@Override
+	public String getLookupClass() {
+		return lookupClass;
+	}
+
+	@Override
+	public void setLookupClass(String lookupClass) {
+		this.lookupClass=lookupClass;
+	}
 }

@@ -22,6 +22,7 @@
 package com.jaspersoft.jasperserver.export;
 
 import com.jaspersoft.jasperserver.api.JSExceptionWrapper;
+import com.jaspersoft.jasperserver.api.common.util.ExportRunMonitor;
 import com.jaspersoft.jasperserver.dto.common.WarningDescriptor;
 import com.jaspersoft.jasperserver.export.io.ExportOutput;
 import com.jaspersoft.jasperserver.export.modules.ExporterModule;
@@ -50,7 +51,7 @@ import java.util.Properties;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ExporterImpl.java 63380 2016-05-26 20:56:46Z mchan $
+ * @version $Id: ExporterImpl.java 65088 2016-11-03 23:22:01Z gbacon $
  */
 
 public class ExporterImpl extends BaseExporterImporter implements Exporter {
@@ -149,7 +150,13 @@ public class ExporterImpl extends BaseExporterImporter implements Exporter {
 		indexRootElement = indexDocument.addElement(getIndexRootElementName());
 		
 		setOutputProperties();
-		invokeModules();
+
+		ExportRunMonitor.start();
+		try {
+			invokeModules();
+		} finally {
+			ExportRunMonitor.stop();
+		}
 		
 		writeDocument(indexDocument, getIndexFilename());
 		writeExportWarnings();

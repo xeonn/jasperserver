@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRField;
 import net.sf.jasperreports.engine.data.JsonDataSource;
@@ -61,26 +62,32 @@ public final class JsonDataSourceUtils {
      * Creates a field from the map entry.
      * @param fieldEntry - the map entry
      */
-    private static JRField createField(Map.Entry<String, JsonNode> fieldEntry) {
-        JRField field;
+    private static void createField(List<JRField> fields, ArrayList<String> parentPath, Map.Entry<String, JsonNode> fieldEntry) {
         if (fieldEntry.getValue().isBoolean()) {
-            field = createField(fieldEntry.getKey(), Boolean.class.getName());
+            fields.add(createField(fieldEntry.getKey(), Boolean.class.getName(), parentPath));
         } else if (fieldEntry.getValue().isInt()) {
-            field = createField(fieldEntry.getKey(), Integer.class.getName());
+            fields.add(createField(fieldEntry.getKey(), Integer.class.getName(), parentPath));
         } else if (fieldEntry.getValue().isLong()) {
-            field = createField(fieldEntry.getKey(), Long.class.getName());
+            fields.add(createField(fieldEntry.getKey(), Long.class.getName(), parentPath));
         } else if (fieldEntry.getValue().isDouble()) {
-            field = createField(fieldEntry.getKey(), Double.class.getName());
+            fields.add(createField(fieldEntry.getKey(), Double.class.getName(), parentPath));
         } else if (fieldEntry.getValue().isBigDecimal()) {
-            field = createField(fieldEntry.getKey(), BigDecimal.class.getName());
+            fields.add(createField(fieldEntry.getKey(), BigDecimal.class.getName(), parentPath));
         } else if (fieldEntry.getValue().isBigInteger()) {
-            field = createField(fieldEntry.getKey(), BigInteger.class.getName());
+            fields.add(createField(fieldEntry.getKey(), BigInteger.class.getName(), parentPath));
         } else if (fieldEntry.getValue().isTextual()) {
-            field = createField(fieldEntry.getKey(), String.class.getName());
+            fields.add((createField(fieldEntry.getKey(), String.class.getName(), parentPath)));
+        } else if (fieldEntry.getValue() instanceof ObjectNode) {
+            ArrayList<String> cloneParentPath = (ArrayList<String>)parentPath.clone();
+            cloneParentPath.add(fieldEntry.getKey());
+            for (Iterator iterator = ((ObjectNode) fieldEntry.getValue()).fields(); iterator.hasNext(); ) {
+                Object nextObject = iterator.next();
+                createField(fields,  cloneParentPath, (Map.Entry) nextObject);
+            }
         } else {
-            field = createField(fieldEntry.getKey(), Object.class.getName());
+            // unknown object type, cast to string for now
+            createField(fieldEntry.getKey(), String.class.getName(), parentPath);
         }
-        return field;
     }
 
     /**
@@ -88,12 +95,23 @@ public final class JsonDataSourceUtils {
      * @param fieldName - the field name
      * @param valueClassName - the field value class name
      */
-    private static JRField createField(String fieldName, String valueClassName) {
+    private static JRField createField(String fieldName, String valueClassName, ArrayList<String> parentPath) {
         JRDesignField field = new JRDesignField();
-        field.setName(fieldName);
+        field.setName(getField(parentPath, fieldName));
         field.setValueClassName(valueClassName);
-        field.setDescription(fieldName);
+        field.setDescription(getPath(parentPath, fieldName));
         return field;
+    }
+
+    static String getPath(ArrayList<String> parentPath, String currentField) {
+        String path = "";
+        for (String parent : parentPath) path = path + parent + ".";
+        return path + currentField;
+    }
+    static String getField(ArrayList<String> parentPath, String currentField) {
+        String path = "";
+        for (String parent : parentPath) path = path + parent + "_";
+        return path + currentField;
     }
 
     private JsonDataSourceUtils() {
@@ -140,8 +158,7 @@ public final class JsonDataSourceUtils {
             List<JRField> fields = new ArrayList<JRField>();
             Iterator<Map.Entry<String, JsonNode>> fieldIter = row.fields();
             while (fieldIter.hasNext()) {
-                JRField field = createField(fieldIter.next());
-                fields.add(field);
+                createField(fields, new ArrayList<String>(), fieldIter.next());
             }
             return fields;
         }

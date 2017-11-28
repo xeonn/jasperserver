@@ -34,7 +34,7 @@
         <%@include file="designerMinimalImports.jsp"%>
     </c:when>
     <c:otherwise>
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/themes/reset.css" type="text/css" media="screen">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/runtime/${not empty runtimeHash ? runtimeHash : jsOptimizationProperties.runtimeHash}/themes/reset.css" type="text/css" media="screen">
 
         <link rel="stylesheet" href="${pageContext.request.contextPath}/<spring:theme code="themeMinimal.css"/>" type="text/css" media="screen,print"/>
 
@@ -50,7 +50,8 @@
         <link rel="stylesheet" href="${pageContext.request.contextPath}/<spring:theme code="overrides_ie.css"/>" type="text/css" media="screen"/>
         <![endif]-->
 
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/<spring:theme code="commonMinimal.css"/>" type="text/css" media="screen,print"/>
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/<spring:theme code="jasper-ui/jasper-ui.css"/>" type="text/css" media="screen,print"/>
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/<spring:theme code="jquery-ui/jquery-ui.css"/>" type="text/css" media="screen,print"/>
 
         <link rel="stylesheet" href="${pageContext.request.contextPath}/<spring:theme code="panel.css"/>" type="text/css" media="screen,print"/>
         <link rel="stylesheet" href="${pageContext.request.contextPath}/<spring:theme code="menu.css"/>" type="text/css" media="screen,print"/>
@@ -68,7 +69,7 @@
         <link rel="stylesheet" href="${pageContext.request.contextPath}/<spring:theme code="dashboard/toolbar.css"/>" type="text/css" media="screen,print"/>
 
         <link rel="stylesheet" href="${pageContext.request.contextPath}/<spring:theme code="overrides_custom.css"/>" type="text/css" media="screen"/>
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/scripts/bower_components/jquery-ui/themes/redmond/jquery-ui-1.10.4-custom.css" type="text/css" media="screen">
+
     </c:otherwise>
 </c:choose>
 

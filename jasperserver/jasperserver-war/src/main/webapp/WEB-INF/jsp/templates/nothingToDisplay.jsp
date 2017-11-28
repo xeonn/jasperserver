@@ -36,7 +36,7 @@ Usage:
 
 <%@ page import="com.jaspersoft.jasperserver.api.JSException" %>
 
-<!--/WEB-INF/jsp/templates/nothingToDisplay.jsp revision A-->
+
 <t:useAttribute id="bodyContent" name="bodyContent" classname="java.lang.String" ignore="true"/>
 <t:useAttribute id="containerID" name="containerID" classname="java.lang.String" ignore="true"/>
 <t:useAttribute id="containerClass" name="containerClass" classname="java.lang.String" ignore="true"/>

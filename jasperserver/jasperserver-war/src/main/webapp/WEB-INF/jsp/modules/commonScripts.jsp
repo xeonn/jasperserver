@@ -36,7 +36,7 @@
 <%-- Preload  jQuery since some plugins assume it's global --%>
 <script type="text/javascript" src="${scriptsUri}/bower_components/jquery/dist/jquery.js"></script>
 <%-- Load CSRF protection asap, right after laoding jquery. --%>
-<script type="text/javascript" src="${pageContext.request.contextPath}/JavaScriptServlet"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/runtime/${jsOptimizationProperties.runtimeHash}/JavaScriptServlet"></script>
 
 <c:if test="${optimizeJavascript == true}">
     <%--

@@ -8,7 +8,7 @@
     <parent>
         <groupId>com.jaspersoft.jasperserver</groupId>
         <artifactId>server</artifactId>
-        <version>6.3.0</version>
+        <version>6.4.0</version>
     </parent>
     <dependencies>
         <dependency>
@@ -19,9 +19,8 @@
         </dependency>
         <!--Dependencies for WS Client test-->
         <dependency>
-            <groupId>axis</groupId>
+            <groupId>org.apache.axis</groupId>
             <artifactId>axis</artifactId>
-            <version>1.3-5784-jaspersoft</version>
         </dependency>
         <dependency>
             <groupId>javax.activation</groupId>

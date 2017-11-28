@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: mng.main.js 10172 2016-05-30 13:16:17Z tbidyuk $
+ * @version: $Id: mng.main.js 10209 2016-07-12 21:06:33Z schubar $
  */
 
 /* global orgModule, isProVersion, alert, _  */

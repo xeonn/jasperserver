@@ -115,12 +115,12 @@ public class ReportSchedulingServiceMock implements ReportSchedulingService {
     }
 
     @Override
-    public void pauseById(List<ReportJobIdHolder> jobs, boolean all) {
+    public void pauseById(ExecutionContext context, List<ReportJobIdHolder> jobs, boolean all) {
         //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
-    public void resumeById(List<ReportJobIdHolder> jobs, boolean all) {
+    public void resumeById(ExecutionContext context, List<ReportJobIdHolder> jobs, boolean all) {
         //To change body of implemented methods use File | Settings | File Templates.
     }
 }

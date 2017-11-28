@@ -5,7 +5,7 @@
     xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
 
     <display-name>JasperServer UI application</display-name>
-    
+
     <context-param>
         <param-name>webAppRootKey</param-name>
         <param-value>jasperserver.root</param-value>
@@ -14,12 +14,12 @@
     <listener>
         <listener-class>org.springframework.web.util.Log4jConfigListener</listener-class>
     </listener>
-    
+
     <context-param>
         <param-name>log4jConfigLocation</param-name>
         <param-value>/WEB-INF/log4j.properties</param-value>
     </context-param>
-    
+
     <!-- listener to load the root application context -->
     <listener>
         <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
@@ -45,7 +45,7 @@
       <param-name>contextFactory</param-name>
       <param-value>com.tonbeller.wcf.controller.RequestContextFactoryImpl</param-value>
     </context-param>
-    
+
     <!-- Close JDBC connections on end of session -->
     <listener>
         <listener-class>com.jaspersoft.jasperserver.war.OlapSessionKiller</listener-class>
@@ -59,10 +59,14 @@
     <listener>
         <display-name>Session mutex</display-name>
         <listener-class>org.springframework.web.util.HttpSessionMutexListener</listener-class>
-    </listener>    
+    </listener>
 
     <listener>
         <listener-class>com.jaspersoft.jasperserver.war.util.SpringBeanServletContextPlublisher</listener-class>
+    </listener>
+
+    <listener>
+        <listener-class>net.sf.jasperreports.phantomjs.PhantomJSServletContextListener</listener-class>
     </listener>
 
     <listener>
@@ -132,7 +136,7 @@
             <param-value>characterEncodingFilter</param-value>
         </init-param>
     </filter>
-    
+
     <filter>
         <filter-name>sessionDecoratorProxyFilter</filter-name>
         <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
@@ -150,11 +154,20 @@
             <param-value>authenticationAuthoirizationFilterChainProxy</param-value>
         </init-param>
     </filter>
-    
+
     <!-- Start of SiteMesh filter config -->
     <filter>
         <filter-name>sitemesh</filter-name>
         <filter-class>com.opensymphony.module.sitemesh.filter.PageFilter</filter-class>
+    </filter>
+
+    <filter>
+        <filter-name>DiagnosticLoggingFilter</filter-name>
+        <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+        <init-param>
+            <param-name>targetBeanName</param-name>
+            <param-value>diagnosticLoggingFilter</param-value>
+        </init-param>
     </filter>
 
     <!-- This filter must come AFTER securityFilter as it relies on SecurityContext set there. -->
@@ -215,6 +228,11 @@
       <url-pattern>/*</url-pattern>
       <dispatcher>ERROR</dispatcher>
       <dispatcher>REQUEST</dispatcher>
+  </filter-mapping>
+
+  <filter-mapping>
+      <filter-name>DiagnosticLoggingFilter</filter-name>
+      <url-pattern>/*</url-pattern>
   </filter-mapping>
 
     <!-- This filter must come AFTER securityFilter as it relies on SecurityContext set there. -->
@@ -330,10 +348,6 @@
         <servlet-name>jasperserver</servlet-name>
         <url-pattern>/themeMinimalCss.css</url-pattern>
     </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>jasperserver</servlet-name>
-        <url-pattern>/commonMinimalCss.css</url-pattern>
-    </servlet-mapping>
 <!--
     &lt;!&ndash; DWR support &ndash;&gt;
     <servlet>
@@ -371,7 +385,7 @@
   <servlet>
     <servlet-name>JasperXmlaServlet</servlet-name>
     <servlet-class>com.jaspersoft.jasperserver.war.xmla.XmlaServletImpl</servlet-class>
-    <load-on-startup>50</load-on-startup> 
+    <load-on-startup>50</load-on-startup>
   </servlet>
 
   <servlet-mapping>
@@ -380,7 +394,7 @@
   </servlet-mapping>
 
   <!-- for drillthrough -->
-  
+
   <servlet>
     <servlet-name>JasperDrillThroughServlet</servlet-name>
     <servlet-class>com.jaspersoft.jasperserver.war.CSVServlet</servlet-class>
@@ -407,9 +421,9 @@
     <description>Generate PDF and Excel files for download based on OLAP model.</description>
     <servlet-name>Print</servlet-name>
     <!--display-name>Print</display-name-->
-    
+
     <!-- Use JPivot PrintServlet which has been customized -->
-    
+
     <servlet-class>com.tonbeller.jpivot.print.PrintServlet</servlet-class>
     <!-- <servlet-class>com.jaspersoft.jasperserver.war.OlapPrint</servlet-class> -->
   </servlet>
@@ -428,7 +442,7 @@
   </servlet-mapping>
 
     <!-- web services support -->
-    
+
     <!-- webService Axis2 support START -->
     <servlet>
         <servlet-name>Axis2Servlet</servlet-name>
@@ -442,7 +456,7 @@
         -->
         <load-on-startup>1</load-on-startup>
     </servlet>
-    
+
     <servlet-mapping>
         <servlet-name>Axis2Servlet</servlet-name>
         <url-pattern>/services/*</url-pattern>
@@ -469,6 +483,7 @@
         <!--<url-pattern>/rest/*</url-pattern>-->
         <url-pattern>/rest/*</url-pattern>
     </servlet-mapping>
+
     <servlet>
         <servlet-name>JerseyREST</servlet-name>
         <servlet-class>com.sun.jersey.spi.spring.container.servlet.SpringServlet</servlet-class>
@@ -488,6 +503,26 @@
             <param-name>com.sun.jersey.spi.container.ContainerResponseFilters</param-name>
             <param-value>com.jaspersoft.jasperserver.jaxrs.common.JasperServerContainerResponseFilter</param-value>
         </init-param>
+        <init-param>
+            <param-name>com.sun.jersey.config.property.packages</param-name>
+            <param-value>
+                com.jaspersoft.ji.jaxrs.adhoc
+                com.jaspersoft.ji.jaxrs.query
+                com.jaspersoft.ji.jaxrs.common
+                com.jaspersoft.jasperserver.jaxrs.common
+                com.jaspersoft.ji.adhoc_engine.rest
+
+                <!-- Jackson 2.x JAX-RS @Providers -->
+                <!--com.fasterxml.jackson.jaxrs.json-->
+            </param-value>
+        </init-param>
+        <init-param>
+            <param-name>com.sun.jersey.config.property.classname</param-name>
+            <param-value>
+                class com.fasterxml.jackson.jaxrs.xml.JacksonXMLProvider,
+                class com.fasterxml.jackson.jaxrs.xml.JacksonJaxbXMLProvider
+            </param-value>
+        </init-param>
         <!--Enable to log request/responces-->
         <!--<init-param>-->
             <!--<param-name>com.sun.jersey.spi.container.ContainerRequestFilters</param-name>-->
@@ -504,7 +539,7 @@
         <url-pattern>/rest_v2/*</url-pattern>
     </servlet-mapping>
     <!-- REST support END -->
-    
+
     <!--App Themes START-->
     <servlet>
         <servlet-name>AppThemeServlet</servlet-name>
@@ -516,17 +551,30 @@
     </servlet-mapping>
     <!--App Themes END-->
 
+    <servlet>
+        <servlet-name>RuntimeForwardingServlet</servlet-name>
+        <servlet-class>com.jaspersoft.jasperserver.war.JavascriptForwardingServlet</servlet-class>
+        <init-param>
+            <param-name>urlPrefix</param-name>
+            <param-value>/runtime/</param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>RuntimeForwardingServlet</servlet-name>
+        <url-pattern>/runtime/*</url-pattern>
+    </servlet-mapping>
+
     <session-config>
         <!-- Default to 20 minute session timeouts -->
         <session-timeout>20</session-timeout>
     </session-config>
 
     <jsp-config>
-    
+
         <taglib>
             <taglib-uri>/WEB-INF/jasperserver.tld</taglib-uri>
             <taglib-location>/WEB-INF/jasperserver.tld</taglib-location>
-        </taglib> 
+        </taglib>
 
         <taglib>
              <taglib-uri>/spring</taglib-uri>
@@ -551,25 +599,25 @@
         <res-type>javax.sql.ConnectionPoolDataSource</res-type>
         <res-auth>Container</res-auth>
     </resource-ref>
-    
+
     <resource-ref>
     <description>SugarCRM example database</description>
         <res-ref-name>${test.jndi}</res-ref-name>
         <res-type>javax.sql.ConnectionPoolDataSource</res-type>
         <res-auth>Container</res-auth>
     </resource-ref>
-    
+
     <resource-ref>
     <description>Foodmart database</description>
         <res-ref-name>${foodmart.jndi}</res-ref-name>
         <res-type>javax.sql.ConnectionPoolDataSource</res-type>
         <res-auth>Container</res-auth>
     </resource-ref>
-    
+
     <welcome-file-list>
         <welcome-file>index.htm</welcome-file>
     </welcome-file-list>
-   
+
     <!-- currently the W3C havent settled on a media type for WSDL;
     http://www.w3.org/TR/2003/WD-wsdl12-20030303/#ietf-draft
     for now we go with the basic 'it's XML' response -->
@@ -577,7 +625,7 @@
     <extension>wsdl</extension>
      <mime-type>text/xml</mime-type>
   </mime-mapping>
-  
+
 
   <mime-mapping>
     <extension>xsd</extension>
@@ -596,11 +644,11 @@
 		</web-resource-collection>
 		<user-data-constraint>
 			<!--  SSL disabled -->
-			<transport-guarantee>NONE</transport-guarantee>   
-			<!--  SSL enabled 
+			<transport-guarantee>NONE</transport-guarantee>
+			<!--  SSL enabled
 			<transport-guarantee>CONFIDENTIAL</transport-guarantee>   -->
 		</user-data-constraint>
-	</security-constraint>  
+	</security-constraint>
 <!--
 	This constraint disables the listed HTTP methods, which are not used by JS
 	<security-constraint>
@@ -695,6 +743,10 @@
     <mime-mapping>
         <extension>woff</extension>
         <mime-type>application/font-woff</mime-type>
+    </mime-mapping>
+    <mime-mapping>
+        <extension>woff2</extension>
+        <mime-type>application/font-woff2</mime-type>
     </mime-mapping>
     <mime-mapping>
         <extension>otf</extension>

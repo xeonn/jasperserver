@@ -35,16 +35,16 @@
         <%-- hack for export menu --%>
         <script type="text/javascript" id="toolbarText">
           { "toolbar_export" : [
-            {"type": "simpleAction", "text": "As PDF", "action": "Report.exportReport", "actionArgs": ["pdf", "/jasperserver-pro/flow.html/flowFile/AllAccounts.pdf"]},
-            {"type": "simpleAction", "text": "As Excel (Paginated)", "action": "Report.exportReport", "actionArgs": ["xls", "/jasperserver-pro/flow.html/flowFile/AllAccounts.xls"]},
-            {"type": "simpleAction", "text": "As Excel", "action": "Report.exportReport", "actionArgs": ["xlsNoPag", "/jasperserver-pro/flow.html/flowFile/AllAccounts.xls"]},
-            {"type": "simpleAction", "text": "As CSV", "action": "Report.exportReport", "actionArgs": ["csv", "/jasperserver-pro/flow.html/flowFile/AllAccounts.csv"]},
-            {"type": "simpleAction", "text": "As DOCX", "action": "Report.exportReport", "actionArgs": ["docx", "/jasperserver-pro/flow.html/flowFile/AllAccounts.docx"]},
-            {"type": "simpleAction", "text": "As RTF", "action": "Report.exportReport", "actionArgs": ["rtf", "/jasperserver-pro/flow.html/flowFile/AllAccounts.rtf"]},
-            {"type": "simpleAction", "text": "As ODT", "action": "Report.exportReport", "actionArgs": ["odt", "/jasperserver-pro/flow.html/flowFile/AllAccounts.odt"]},
-            {"type": "simpleAction", "text": "As ODS", "action": "Report.exportReport", "actionArgs": ["ods", "/jasperserver-pro/flow.html/flowFile/AllAccounts.ods"]},
-            {"type": "simpleAction", "text": "As XLSX (Paginated)", "action": "Report.exportReport", "actionArgs": ["xlsx", "/jasperserver-pro/flow.html/flowFile/AllAccounts.xlsx"]},
-            {"type": "simpleAction", "text": "As XLSX", "action": "Report.exportReport", "actionArgs": ["xlsxNoPag", "/jasperserver-pro/flow.html/flowFile/AllAccounts.xlsx"]}
+            {"type": "simpleAction", "text": "PDF", "action": "Report.exportReport", "actionArgs": ["pdf", "/jasperserver-pro/flow.html/flowFile/AllAccounts.pdf"]},
+            {"type": "simpleAction", "text": "Excel (Paginated)", "action": "Report.exportReport", "actionArgs": ["xls", "/jasperserver-pro/flow.html/flowFile/AllAccounts.xls"]},
+            {"type": "simpleAction", "text": "Excel", "action": "Report.exportReport", "actionArgs": ["xlsNoPag", "/jasperserver-pro/flow.html/flowFile/AllAccounts.xls"]},
+            {"type": "simpleAction", "text": "CSV", "action": "Report.exportReport", "actionArgs": ["csv", "/jasperserver-pro/flow.html/flowFile/AllAccounts.csv"]},
+            {"type": "simpleAction", "text": "DOCX", "action": "Report.exportReport", "actionArgs": ["docx", "/jasperserver-pro/flow.html/flowFile/AllAccounts.docx"]},
+            {"type": "simpleAction", "text": "RTF", "action": "Report.exportReport", "actionArgs": ["rtf", "/jasperserver-pro/flow.html/flowFile/AllAccounts.rtf"]},
+            {"type": "simpleAction", "text": "ODT", "action": "Report.exportReport", "actionArgs": ["odt", "/jasperserver-pro/flow.html/flowFile/AllAccounts.odt"]},
+            {"type": "simpleAction", "text": "ODS", "action": "Report.exportReport", "actionArgs": ["ods", "/jasperserver-pro/flow.html/flowFile/AllAccounts.ods"]},
+            {"type": "simpleAction", "text": "XLSX (Paginated)", "action": "Report.exportReport", "actionArgs": ["xlsx", "/jasperserver-pro/flow.html/flowFile/AllAccounts.xlsx"]},
+            {"type": "simpleAction", "text": "XLSX", "action": "Report.exportReport", "actionArgs": ["xlsxNoPag", "/jasperserver-pro/flow.html/flowFile/AllAccounts.xlsx"]}
           ]}
 
     </script>

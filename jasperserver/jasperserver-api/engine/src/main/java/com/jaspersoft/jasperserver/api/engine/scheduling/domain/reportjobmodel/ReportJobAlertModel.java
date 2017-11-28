@@ -35,7 +35,7 @@ import java.util.List;
  * </p>
  *
  * @author Ivan Chan (ichan@jaspersoft.com)
- * @version $Id: ReportJobAlertModel.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: ReportJobAlertModel.java 65088 2016-11-03 23:22:01Z gbacon $
  * @since 4.7
  */
 @JasperServerAPI
@@ -136,7 +136,7 @@ public class ReportJobAlertModel extends ReportJobAlert {
 	 */
     public void setMessageTextWhenJobFails(String customizeMessage) {
         super.setMessageTextWhenJobFails(customizeMessage);
-        isMessageTextModified = true;
+        isMessageTextWhenJobFailsModified = true;
     }
 
     /**

@@ -43,7 +43,7 @@ Usage:
 <%@ taglib uri="/spring" prefix="spring"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
-<!--/WEB-INF/jsp/templates/login.jsp revision A-->
+
 <t:useAttribute name="jsEdition" id="jsEdition" classname="java.lang.String" ignore="false"/>
 <t:useAttribute name="allowUserPasswordChange" id="allowUserPasswordChange" classname="java.lang.String" ignore="false"/>
 <t:useAttribute name="showPasswordChange" id="showPasswordChange" classname="java.lang.String" ignore="true"/>

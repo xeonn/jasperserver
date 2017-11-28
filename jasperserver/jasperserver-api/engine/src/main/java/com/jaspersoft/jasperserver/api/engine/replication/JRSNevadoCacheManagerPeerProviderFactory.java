@@ -1,34 +1,21 @@
 package com.jaspersoft.jasperserver.api.engine.replication;
 
-import java.util.Properties;
-
-import javax.jms.Queue;
-import javax.jms.QueueConnection;
-import javax.jms.Session;
-import javax.jms.Topic;
-import javax.jms.TopicConnection;
-
+import net.sf.ehcache.CacheManager;
+import net.sf.ehcache.distribution.CacheManagerPeerProvider;
+import net.sf.ehcache.distribution.CacheManagerPeerProviderFactory;
+import net.sf.ehcache.distribution.jms.AcknowledgementMode;
+import net.sf.ehcache.distribution.jms.JMSCacheManagerPeerProvider;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.skyscreamer.nevado.jms.NevadoConnectionFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import com.amazon.sqs.javamessaging.AmazonSQSMessagingClientWrapper;
-import com.amazon.sqs.javamessaging.SQSConnection;
-import com.amazon.sqs.javamessaging.SQSConnectionFactory;
-import com.amazonaws.auth.ClasspathPropertiesFileCredentialsProvider;
-import com.amazonaws.auth.EnvironmentVariableCredentialsProvider;
-import com.amazonaws.regions.Region;
-import com.amazonaws.regions.Regions;
-import com.amazonaws.services.sqs.model.CreateQueueResult;
+import javax.jms.*;
+import java.util.Properties;
 
-import net.sf.ehcache.CacheManager;
-import net.sf.ehcache.distribution.CacheManagerPeerProvider;
-import net.sf.ehcache.distribution.CacheManagerPeerProviderFactory;
-import net.sf.ehcache.distribution.jms.AcknowledgementMode;
-import net.sf.ehcache.distribution.jms.JMSCacheManagerPeerProvider;
- 
+import static com.jaspersoft.jasperserver.api.engine.replication.JRSActiveMQInitialContextFactory.CACHE_REPLICATION_SETTINGS_XML_FILE;
+
 public class JRSNevadoCacheManagerPeerProviderFactory extends CacheManagerPeerProviderFactory {
 	static final Log log = LogFactory.getLog(JRSNevadoCacheManagerPeerProviderFactory.class);
 
@@ -36,7 +23,7 @@ public class JRSNevadoCacheManagerPeerProviderFactory extends CacheManagerPeerPr
 		JMSCacheManagerPeerProvider provider = null;
 		try {
 			
-			ApplicationContext context = new ClassPathXmlApplicationContext("nevado.xml");
+			ApplicationContext context = new ClassPathXmlApplicationContext(CACHE_REPLICATION_SETTINGS_XML_FILE);
 			NevadoConnectionFactory nevadoConnectionFactory = (NevadoConnectionFactory)context.getBean("connectionFactory");
 			nevadoConnectionFactory.setOverrideJMSTTL(new Long(0));
 

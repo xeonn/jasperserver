@@ -29,7 +29,7 @@ package com.jaspersoft.jasperserver.api.engine.scheduling.domain.reportjobmodel;
  * </p>
  *
  * @author Ivan Chan (ichan@jaspersoft.com)
- * @version $Id: ReportJobModel.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: ReportJobModel.java 65088 2016-11-03 23:22:01Z gbacon $
  * @since 4.7
  */
 
@@ -587,71 +587,129 @@ public class ReportJobModel extends ReportJob {
      */
     public boolean isSourceModified() { return isSourceModified; }
 
+	public void setIsSourceModified(boolean isSourceModified) {
+		this.isSourceModified = isSourceModified;
+	}
+
     /**
      * returns whether trigger has been modified
      *
      * @return true if the attribute has been modified
      */
     public boolean isTriggerModified() { return isTriggerModified; }
-    /**
+
+	public void setIsTriggerModified(boolean isTriggerModified) {
+		this.isTriggerModified = isTriggerModified;
+	}
+
+	/**
      * returns whether mail notification has been modified
      *
      * @return true if the attribute has been modified
      */
     public boolean isMailNotificationModified() { return isMailNotificationModified; }
-    /**
+
+	public void setIsMailNotificationModified(boolean isMailNotificationModified) {
+		this.isMailNotificationModified = isMailNotificationModified;
+	}
+
+	/**
      * returns whether alert has been modified
      *
      * @return true if the attribute has been modified
      */
     public boolean isAlertModified() { return isAlertModified; }
-    /**
+
+	public void setIsAlertModified(boolean isAlertModified) {
+		this.isAlertModified = isAlertModified;
+	}
+
+	/**
      * returns whether ContentRespositoryDestination has been modified
      *
      * @return true if the attribute has been modified
      */
     public boolean isContentRespositoryDestinationModified() { return isContentRespositoryDestinationModified; }
-    /**
+
+	public void setIsContentRespositoryDestinationModified(boolean isContentRespositoryDestinationModified) {
+		this.isContentRespositoryDestinationModified = isContentRespositoryDestinationModified;
+	}
+
+	/**
      * returns whether description has been modified
      *
      * @return true if the attribute has been modified
      */
     public boolean isDescriptionModified() { return isDescriptionModified; }
-    /**
+
+	public void setIsDescriptionModified(boolean isDescriptionModified) {
+		this.isDescriptionModified = isDescriptionModified;
+	}
+
+	/**
      * returns whether label has been modified
      *
      * @return true if the attribute has been modified
      */
     public boolean isLabelModified() { return isLabelModified; }
+
+	public void setIsLabelModified(boolean isLabelModified) {
+		this.isLabelModified = isLabelModified;
+	}
+
     /**
      * returns whether base output file name has been modified
      *
      * @return true if the attribute has been modified
      */
     public boolean isBaseOutputFileNameModified() { return isBaseOutputFileNameModified; }
-    /**
+
+	public void setIsBaseOutputFileNameModified(boolean isBaseOutputFileNameModified) {
+		this.isBaseOutputFileNameModified = isBaseOutputFileNameModified;
+	}
+
+	/**
      * returns whether output formats has been modified
      *
      * @return true if the attribute has been modified
      */
     public boolean isOutputFormatsModified() { return isOutputFormatsModified; }
+
+	public void setIsOutputFormatsModified(boolean isOutputFormatsModified) {
+		this.isOutputFormatsModified = isOutputFormatsModified;
+	}
+
     /**
      * returns whether the user name has been modified
      *
      * @return true if the attribute has been modified
      */
     public boolean isUsernameModified() { return isUsernameModified; }
-    /**
+
+	public void setIsUsernameModified(boolean isUsernameModified) {
+		this.isUsernameModified = isUsernameModified;
+	}
+
+	/**
      * returns whether output locale has been modified
      *
      * @return true if the attribute has been modified
      */
     public boolean isOutputLocaleModified() { return isOutputLocaleModified; }
+
+	public void setIsOutputLocaleModified(boolean isOutputLocaleModified) {
+		this.isOutputLocaleModified = isOutputLocaleModified;
+	}
+
     /**
      * returns whether runtime information has been modified
      *
      * @return true if the attribute has been modified
      */
     public boolean isRuntimeInformationModified() { return isRuntimeInformationModified; }
+
+	public void setRuntimeInformationModified(boolean isRuntimeInformationModified) {
+		this.isRuntimeInformationModified = isRuntimeInformationModified;
+	}
 
 }

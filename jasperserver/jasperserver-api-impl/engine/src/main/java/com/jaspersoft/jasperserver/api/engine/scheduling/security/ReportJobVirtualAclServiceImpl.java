@@ -20,7 +20,9 @@
  */
 package com.jaspersoft.jasperserver.api.engine.scheduling.security;
 
+import com.jaspersoft.jasperserver.api.JSException;
 import com.jaspersoft.jasperserver.api.engine.scheduling.ReportJobsInternalService;
+import com.jaspersoft.jasperserver.api.engine.scheduling.service.ReportJobNotFoundException;
 import com.jaspersoft.jasperserver.api.metadata.security.JasperServerAclImpl;
 import com.jaspersoft.jasperserver.api.metadata.security.JasperServerPermission;
 import com.jaspersoft.jasperserver.api.metadata.user.service.impl.JasperServerSidRetrievalStrategyImpl;
@@ -60,7 +62,9 @@ public class ReportJobVirtualAclServiceImpl implements AclService {
         }
         JasperServerAclImpl acl = new JasperServerAclImpl(object, permissionGrantingStrategy, null);
         List<AccessControlEntry> aces = new ArrayList<AccessControlEntry>();
-        String owner = getReportJobsInternalService().getJobOwner((Long) object.getIdentifier());
+        String owner;
+        owner = getReportJobsInternalService().getJobOwner((Long) object.getIdentifier());
+
         // Generate permissions for job owner
         aces.add(new AccessControlEntryImpl(null, acl, sidRetrievalStrategy.getSid(owner), JasperServerPermission.READ_WRITE_DELETE, true, false, false));
         // Generate permission for Admin Role

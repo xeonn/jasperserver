@@ -39,6 +39,15 @@ define(function(require){
      * @param {function} callback The function to call when the encryption has finished
      */
     $.jCryption.encryptKeyWithoutRedundancy = function(string, keyPair, callback) {
+        if (string === '') {
+            if($.isFunction(callback)) {
+                callback(string);
+                return;
+            } else {
+                return string;
+            }
+        }
+
         var charSum = 0;
         for(var i = 0; i < string.length; i++){
             charSum += string.charCodeAt(i);

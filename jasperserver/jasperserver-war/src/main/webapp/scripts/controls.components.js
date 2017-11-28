@@ -22,7 +22,7 @@
 
 /**
  * @author: afomin, inesterenko
- * @version: $Id: controls.components.js 10166 2016-05-26 22:39:40Z gbacon $
+ * @version: $Id: controls.components.js 10224 2016-07-27 20:02:40Z inestere $
  */
 
 /* global JRS, require, updateYearMonth, ControlsBase, _ */
@@ -60,22 +60,34 @@ JRS.Controls = (function (jQuery, _, Controls) {
         CacheableDataProvider,
         DataProviderWithLabelHash,
         SearcheableDataProvider,
-        resizableMultiSelectTrait;
+        resizableMultiSelectTrait,
+        DateAndTimePicker;
 
     require([
-        "common/component/singleSelect/view/SingleSelect",
-        "common/component/multiSelect/view/MultiSelect",
-        "common/component/singleSelect/dataprovider/CacheableDataProvider",
-        "common/component/multiSelect/dataprovider/DataProviderWithLabelHash",
-        "common/component/singleSelect/dataprovider/SearcheableDataProvider",
-        "common/component/multiSelect/mixin/resizableMultiSelectTrait"
-    ], function (SingleSelectModule, MultiSelectModule, CacheableDataProviderModule, DataProviderWithLabelHashModule, SearcheableDataProviderModule, resizableMultiSelectMixinModule) {
+        "components/singleSelect/view/SingleSelect",
+        "components/multiSelect/view/MultiSelect",
+        "components/singleSelect/dataprovider/CacheableDataProvider",
+        "components/multiSelect/dataprovider/DataProviderWithLabelHash",
+        "components/singleSelect/dataprovider/SearcheableDataProvider",
+        "components/multiSelect/mixin/resizableMultiSelectTrait",
+        "components/dateAndTime/DateAndTimePicker"
+
+    ], function (SingleSelectModule,
+                 MultiSelectModule,
+                 CacheableDataProviderModule,
+                 DataProviderWithLabelHashModule,
+                 SearcheableDataProviderModule,
+                 resizableMultiSelectMixinModule,
+                 DateAndTimePickerModule
+
+    ) {
         SingleSelect = SingleSelectModule;
         MultiSelect = MultiSelectModule;
         CacheableDataProvider = CacheableDataProviderModule;
         DataProviderWithLabelHash = DataProviderWithLabelHashModule;
         SearcheableDataProvider = SearcheableDataProviderModule;
         resizableMultiSelectTrait = resizableMultiSelectMixinModule;
+        DateAndTimePicker = DateAndTimePickerModule;
     });
 
     function changeDateFunc(dateText) {
@@ -196,17 +208,12 @@ JRS.Controls = (function (jQuery, _, Controls) {
             setupCalendar:function () {
                 var input = this.getElem().find('input');
 
-                input.datepicker({
-                    showOn:"button",
-                    dateFormat:JRS.i18n["bundledCalendarFormat"],
-                    changeMonth:true,
-                    changeYear:true,
-                    showButtonPanel:true,
-                    disabled:input[0].disabled,
-                    onSelect:_.bind(changeDateFunc, this),
-                    onChangeMonthYear:null,
-                    beforeShow:jQuery.datepicker.movePickerRelativelyToTriggerIcon,
-                    constrainInput:false
+                this.picker = new DateAndTimePicker({
+                    el: input,
+                    showOn: "button",
+                    dateFormat: JRS.i18n["bundledCalendarFormat"],
+                    disabled: input[0].disabled,
+                    onSelect: _.bind(changeDateFunc, this)
                 });
 
                 input.change(_.bind(function (evt) {
@@ -247,9 +254,9 @@ JRS.Controls = (function (jQuery, _, Controls) {
 
             destroyCalendar: function() {
                 var $input = this.getInput();
-
-                $input.datetimepicker && $input.datetimepicker("destroy");
                 $input.off();
+
+                this.picker && this.picker.remove();
             },
 
             setupCalendar:function () {
@@ -258,19 +265,13 @@ JRS.Controls = (function (jQuery, _, Controls) {
 
                 this.destroyCalendar();
 
-                $input.datetimepicker({
+                this.picker = new DateAndTimePicker({
+                    el: $input[0],
                     showOn: "button",
                     dateFormat: JRS.i18n["bundledCalendarFormat"],
                     timeFormat: JRS.i18n["bundledCalendarTimeFormat"],
-                    showSecond: true,
-                    changeMonth: true,
-                    changeYear: true,
-                    showButtonPanel: true,
                     disabled: $input[0].disabled,
-                    onSelect: _.bind(changeDateFunc, this),
-                    onChangeMonthYear: null,
-                    beforeShow: jQuery.datepicker.movePickerRelativelyToTriggerIcon,
-                    constrainInput: false
+                    onSelect: _.bind(changeDateFunc, this)
                 });
 
                 $input.change(_.bind(function (evt) {
@@ -328,9 +329,9 @@ JRS.Controls = (function (jQuery, _, Controls) {
 
             destroyCalendar: function() {
                 var $input = this.getInput();
-
-                $input.timepicker && $input.timepicker("destroy");
                 $input.off();
+
+                this.picker && this.picker.remove();
             },
 
             setupCalendar:function () {
@@ -339,14 +340,12 @@ JRS.Controls = (function (jQuery, _, Controls) {
 
                 this.destroyCalendar();
 
-                $input.timepicker({
+                this.picker = new DateAndTimePicker({
+                    el: $input[0],
                     showOn: "button",
                     timeFormat: JRS.i18n["bundledCalendarTimeFormat"],
-                    showSecond: true,
                     disabled: $input[0].disabled,
-                    onClose: _.bind(changeDateFunc, this),
-                    beforeShow: jQuery.datepicker.movePickerRelativelyToTriggerIcon,
-                    constrainInput: false
+                    onClose: _.bind(changeDateFunc, this)
                 });
 
                 $input.change(_.bind(function (evt) {
@@ -444,8 +443,11 @@ JRS.Controls = (function (jQuery, _, Controls) {
                             formatLabel: function(value) {
                                 return self.dataProvider.getDataLabelHash()[value];
                             }
-                        }
-                    }).setDisabled(controlStructure.readOnly);
+                        },
+                        resizable : true
+                    });
+
+                    this.multiSelect.setDisabled(controlStructure.readOnly);
 
                     this._resize = _.debounce(_.bind(this.multiSelect.resize, this.multiSelect), 500);
                 }
@@ -491,15 +493,14 @@ JRS.Controls = (function (jQuery, _, Controls) {
                 }
             },
 
-            //TODO move to decorator
             makeResizable:function () {
-                _.extend(this.multiSelect, resizableMultiSelectTrait);
 
-                this.multiSelect.makeResizable({
-                    el: this.getElem().find('.msPlaceholder'),
-                    sizer: this.getElem().find('.msPlaceholder').parents(".leaf").find('.sizer').removeClass('hidden'),
-                    sizerClass: "ui-resizable-handle ui-resizable-s"
-                });
+                var $sizer = this.multiSelect.$el.find(".jr-mSizer");
+
+                //according to IC specifics, sizer should be after alert message
+                if ($sizer.length){
+                    $sizer.detach().insertAfter(this.getElem().find('.resizeOverlay'));
+                }
             }
         }),
 
@@ -526,11 +527,11 @@ JRS.Controls = (function (jQuery, _, Controls) {
 
                 //TODO move to decorator
                 if (jQuery(list).find('li').length < 5 && this.getElem()[0].clientHeight < 125) {
-                    this.getElem().find('.sizer').addClass('hidden');
+                    this.getElem().find('.jr-mSizer').addClass('hidden');
                     this.getElem().find('.inputSet').removeClass('sizable').attr('style', false);
                 } else {
                     if (this.resizable) {
-                        this.getElem().find('.sizer').removeClass('hidden');
+                        this.getElem().find('.jr-mSizer').removeClass('hidden');
                         this.getElem().find('.inputSet').addClass('sizable');
                     }
                 }
@@ -555,8 +556,8 @@ JRS.Controls = (function (jQuery, _, Controls) {
             makeResizable:function () {
                 this.resizable = true;
                 var list = this.getElem().find('ul');
-                var sizer = this.getElem().find('.sizer').removeClass('hidden');
-                sizer.addClass("ui-resizable-handle ui-resizable-s");
+                var sizer = this.getElem().find('.jr-mSizer').removeClass('hidden');
+                sizer.addClass("ui-resizable-s");
                 list.resizable({
                     handles:{
                         's': sizer
@@ -585,11 +586,11 @@ JRS.Controls = (function (jQuery, _, Controls) {
 
                 //TODO move to decorator
                 if (jQuery(list).find('li').length < 5 && this.getElem()[0].clientHeight < 125) {
-                    this.getElem().find('.sizer').addClass('hidden');
+                    this.getElem().find('.jr-mSizer').addClass('hidden');
                     this.getElem().find('.inputSet').removeClass('sizable').attr('style', false);
                 } else {
                     if (this.resizable) {
-                        this.getElem().find('.sizer').removeClass('hidden');
+                        this.getElem().find('.jr-mSizer').removeClass('hidden');
                         this.getElem().find('.inputSet').addClass('sizable');
                     }
                 }
@@ -646,8 +647,8 @@ JRS.Controls = (function (jQuery, _, Controls) {
             makeResizable:function () {
                 this.resizable = true;
                 var list = this.getElem().find('ul');
-                var sizer = this.getElem().find('.sizer').removeClass('hidden');
-                sizer.addClass("ui-resizable-handle ui-resizable-s");
+                var sizer = this.getElem().find('.jr-mSizer').removeClass('hidden');
+                sizer.addClass("ui-resizable-s");
                 list.resizable({
                     handles:{
                         's': sizer

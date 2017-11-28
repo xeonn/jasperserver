@@ -860,6 +860,11 @@ and (orientation:portrait) {
 	opacity:.6;
 }
 
+.dimmer.fixed {
+	position: fixed;
+	z-index:4999;
+}
+
 #userCountExceeded {
 	position: absolute;
 	top: 14px;

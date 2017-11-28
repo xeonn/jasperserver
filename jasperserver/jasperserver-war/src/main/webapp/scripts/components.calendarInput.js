@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: components.calendarInput.js 9400 2015-09-23 21:10:46Z inestere $
+ * @version: $Id: components.calendarInput.js 10224 2016-07-27 20:02:40Z inestere $
  */
 
 /* global cancelEventBubbling */
@@ -34,7 +34,7 @@ define(function(require) {
         dateTimeSettings = require("settings!dateTimeSettings");
 
     require("utils.common");
-    require("config/timepickerSettings");
+    require("config/dateAndTimeSettings");
 
     var CalendarInputComponent = function(options) {
         this.container = null;

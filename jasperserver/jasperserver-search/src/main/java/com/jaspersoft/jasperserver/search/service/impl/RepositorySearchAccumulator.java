@@ -44,7 +44,7 @@ public class RepositorySearchAccumulator<T> implements RepositorySearchResult<T>
     private int clientOffset = -1;
     private int clientLimit;
     private int offset;
-    private int nexOffset;
+    private int nextOffset;
     private int nextLimit;
     private int totalCount;
     private boolean full;
@@ -109,7 +109,7 @@ public class RepositorySearchAccumulator<T> implements RepositorySearchResult<T>
 
         this.items.addAll(list);
         this.offset = offset;
-        this.nexOffset = offset + limit;
+        this.nextOffset = offset + limit;
 //        this.lastFillMissing = limit - list.size();
 //        this.nextLimit = (this.clientLimit > 0) ? calculateNextLimit(list.size()) : this.clientLimit;
         this.full = (this.clientLimit == 0 && limit == 0) || (size() == this.clientLimit) || size() == this.totalCount;
@@ -153,7 +153,7 @@ public class RepositorySearchAccumulator<T> implements RepositorySearchResult<T>
 
     @Override
     public int getNextOffset() {
-        return this.nexOffset;
+        return this.nextOffset;
     }
 
     @Override
@@ -171,7 +171,7 @@ public class RepositorySearchAccumulator<T> implements RepositorySearchResult<T>
         RepositorySearchAccumulator<U> result =
                 new RepositorySearchAccumulator<U>(this.clientOffset, this.clientLimit, this.totalCount);
 
-        result.nexOffset = this.nexOffset;
+        result.nextOffset = this.nextOffset;
         result.nextLimit = this.nextLimit;
         result.offset = this.offset;
         result.full = this.full;
@@ -186,4 +186,11 @@ public class RepositorySearchAccumulator<T> implements RepositorySearchResult<T>
     private RuntimeException negativeNumberException(final String attrName) {
         return new IllegalArgumentException(attrName + " can't be negative number.");
     }
+
+	@Override
+	public void append(RepositorySearchResult<T> r) {
+		this.totalCount += r.getTotalCount();
+		this.items.addAll(r.getItems());
+		
+	}
 }

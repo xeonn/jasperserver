@@ -27,7 +27,6 @@ import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
 import com.jaspersoft.jasperserver.api.metadata.common.service.impl.RepositorySecurityChecker;
 import com.jaspersoft.jasperserver.api.metadata.view.domain.FilterCriteria;
-import com.jaspersoft.jasperserver.war.common.ConfigurationBean;
 import com.jaspersoft.jasperserver.war.model.JSONObject;
 import com.jaspersoft.jasperserver.war.model.TreeDataFilter;
 import com.jaspersoft.jasperserver.war.model.TreeDataProvider;
@@ -52,6 +51,7 @@ public class RepositoryExplorerTreeDataProviderImpl implements TreeDataProvider 
     private RepositorySecurityChecker repositoryServiceSecurityChecker;
     private ThemeService themeService;
     private TreeDataFilter filter;
+    private boolean skipResources;
     
     private static class Properties implements JSONObject {
         public String desc = null;
@@ -175,7 +175,10 @@ public class RepositoryExplorerTreeDataProviderImpl implements TreeDataProvider 
         
         List folders = repositoryService.getSubFolders(null, folderURI);
         
-        List resources = repositoryService.loadResourcesList(null, criteria);
+        List resources = null;
+        if (!isSkipResources()) {
+            resources = repositoryService.loadResourcesList(null, criteria);
+        }
         
         /*List allResources = new ArrayList();
         allResources.addAll(folders);
@@ -236,5 +239,13 @@ public class RepositoryExplorerTreeDataProviderImpl implements TreeDataProvider 
 
     public void setThemeService(ThemeService themeService) {
         this.themeService = themeService;
+    }
+
+    public boolean isSkipResources() {
+        return skipResources;
+    }
+
+    public void setSkipResources(boolean skipResources) {
+        this.skipResources = skipResources;
     }
 }

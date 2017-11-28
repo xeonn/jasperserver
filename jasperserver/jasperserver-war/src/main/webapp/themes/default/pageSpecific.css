@@ -1168,6 +1168,21 @@ x:-o-prefocus, #selectedDataSources label {
 }
 
 
+.dashboardViewer #back {
+    border-right: 0px solid #cdcdcd;
+    border-left: 0px solid #cdcdcd;
+    right: -8px;
+    padding: 0 6px;
+}
+
+.dashboardViewer #back .wrap {
+    text-indent: inherit;
+}
+
+.dashboardViewer #back .icon {
+    background-image: none;
+}
+
 #dashboardViewerFrame {
     top: 29px;
 }
@@ -1683,6 +1698,7 @@ x:-o-prefocus, #selectedDataSources label {
 .sourceDialogNew {
     min-width: 450px;
     min-height: 400px;
+    height: 525px;
 }
 
 .sourceDialogNew .treeBox {
@@ -1987,6 +2003,7 @@ and (orientation:landscape) {
 
 #designer #availableFields {
     top: 29px; /* needs to match previous rule */
+    min-height: 350px;
     overflow: hidden;
 }
 
@@ -2610,6 +2627,8 @@ and (max-device-width : 1024px) {
 
 .displayManager .tokens {
     min-height: 24px;
+    max-height: 250px;
+    overflow: auto;
 }
 
 .displayManager .axis.disabled .tokens {
@@ -5582,13 +5601,13 @@ body.locale-pt_BR .schedulerApp .outputTab .control.browser input {
 
 /* schedule save dialog: begin */
 
-.jrs.schedulerSaveDialog .m-Dialog-body .control.textArea {
+.jrs.schedulerSaveDialog .jr-mDialog-body .control.textArea {
 	position: static;
 	margin-bottom: 0;
 	height: 83px; /* fix for IE8 */
 	height: calc(100% - 87px);
 }
-.jrs.schedulerSaveDialog .m-Dialog-body .control.textArea textarea {
+.jrs.schedulerSaveDialog .jr-mDialog-body .control.textArea textarea {
 	height: 100%;
 	min-height: 0;
 }
@@ -6976,12 +6995,12 @@ input[type="text"].mSelect-input {
     border: none;
 }
 
-.sourceDialogNew > .m-Dialog-body {
+.sourceDialogNew > .jr-mDialog-body {
     padding: 4px 15px 10px 15px !important;
     overflow: inherit !important;
 }
 
-.sourceDialogNew > .m-Dialog-footer {
+.sourceDialogNew > .jr-mDialog-footer {
     position: absolute;
     padding-left: 20px !important;
 }
@@ -7008,7 +7027,11 @@ input[type="text"].mSelect-input {
 
 .sourceDialogNew .list.collapsible.folders.hideRoot {
     margin-left: -18px;
-    margin-top: 4px;
+}
+
+
+.sourceDialogNew .list.collapsible.folders.hideRoot > .node > .subcontainer {
+    padding-top: 4px;
 }
 
 .sourceDialogNew > .sub.header > .control {
@@ -7437,6 +7460,6 @@ input[type="text"].mSelect-input {
 .reportChooserDialog.sourceDialogNew.listDisabled .itemDescription {
     margin-top: 19px;
 }
-.reportChooserDialog.sourceDialogNew.listDisabled .u-height-300px.jrs {
+.reportChooserDialog.sourceDialogNew.listDisabled .u-height-300px.jr {
     height: 33.5em;
 }

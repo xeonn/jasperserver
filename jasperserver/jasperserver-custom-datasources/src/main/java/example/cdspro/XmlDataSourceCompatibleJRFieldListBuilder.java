@@ -28,20 +28,22 @@ class XmlDataSourceCompatibleJRFieldListBuilder {
      * Maps field names to number of occurrences of this field.
      */
     private final Map<String, MutableInt> name2CountMap = new LinkedHashMap<String, MutableInt>();
-
+    private final Map<String, String> labelMap = new LinkedHashMap<String, String>();
     /**
      * Adds a new field with provided name. The field will have name based on the uniqueness of the name.
      * @param name the suggested name for the field
      * @return this builder
      */
     public XmlDataSourceCompatibleJRFieldListBuilder field(String name) {
-        checkInput(name);
+        return field(name, null);
+    }
 
+    public XmlDataSourceCompatibleJRFieldListBuilder field(String name, String label) {
+        checkInput(name);
         MutableInt count = getCountForName(name);
         count.increment();
-
         name2CountMap.put(name, count);
-
+        if (label != null) labelMap.put(name, label);
         return this;
     }
 
@@ -67,19 +69,25 @@ class XmlDataSourceCompatibleJRFieldListBuilder {
             String name = entry.getKey();
             MutableInt count = entry.getValue();
             if (count.intValue() == 1) {
-                fields.add(createJRField(name, name));
+                fields.add(createJRField(getLabel(name), name));
             } else {
                 for (int i = 1; i <= count.intValue(); i++) {
-                    fields.add(createJRField(name + "_" + i, name + "[" + i + "]"));
+                    fields.add(createJRField(getLabel(name) + "_" + i, name + "[" + i + "]"));
                 }
             }
         }
         return fields;
     }
 
-    private JRField createJRField(String name, String description) {
+    private String getLabel(String name) {
+        String label = labelMap.get(name);
+        if (label != null) return label;
+        return name;
+    }
+
+    private JRField createJRField(String label, String description) {
         JRDesignField f = new JRDesignField();
-        f.setName(name);
+        f.setName(label);
         f.setDescription(description);
         f.setValueClassName(String.class.getName());
         return f;

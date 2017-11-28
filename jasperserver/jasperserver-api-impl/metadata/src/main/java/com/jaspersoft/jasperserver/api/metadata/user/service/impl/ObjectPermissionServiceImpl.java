@@ -38,6 +38,7 @@ import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.Re
 import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.persistent.RepoResource;
 import com.jaspersoft.jasperserver.api.metadata.security.JasperServerPermission;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.ObjectPermission;
+import com.jaspersoft.jasperserver.api.metadata.user.domain.ProfileAttribute;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.Role;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.client.ObjectPermissionImpl;
@@ -337,7 +338,9 @@ public class ObjectPermissionServiceImpl extends HibernateDaoImpl implements
             public void execute(AuditEvent auditEvent) {
                 Resource resource = repoService.getResource(context, objPermission.getURI());
                 if (resource != null) {
-                    auditContext.setResourceTypeToAuditEvent(resource.getResourceType(), auditEvent);
+					auditContext.setResourceTypeToAuditEvent(resource.getResourceType(), auditEvent);
+				} else if (objPermission.getURI().startsWith(PermissionUriProtocol.ATTRIBUTE.getProtocolPrefix())) {
+					auditContext.setResourceTypeToAuditEvent(ProfileAttribute.class.getName(), auditEvent);
                 } else {
                     auditContext.setResourceTypeToAuditEvent(Folder.class.getName(), auditEvent);
                 }

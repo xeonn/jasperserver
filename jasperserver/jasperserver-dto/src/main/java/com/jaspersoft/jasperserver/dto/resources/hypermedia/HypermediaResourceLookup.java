@@ -12,6 +12,10 @@ public class HypermediaResourceLookup extends ClientResourceLookup {
     private HypermediaResourceLinks links;
     private HypermediaEmbeddedContainer embedded;
 
+    public HypermediaResourceLookup(){
+    	super();
+    }
+    
     public HypermediaResourceLookup(ClientResourceLookup other) {
         super(other);
     }

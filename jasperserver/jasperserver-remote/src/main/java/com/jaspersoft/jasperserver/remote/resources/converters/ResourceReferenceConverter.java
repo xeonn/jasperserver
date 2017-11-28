@@ -229,7 +229,7 @@ public class ResourceReferenceConverter<T extends ClientReferenceable> {
     }
 
     public static class FileTypeRestriction implements ClientReferenceRestriction{
-        private final ClientFile.FileType fileType;
+        private final List<ClientFile.FileType> fileTypes;
         private final String fieldName;
 
         public FileTypeRestriction(ClientFile.FileType fileType){
@@ -237,17 +237,26 @@ public class ResourceReferenceConverter<T extends ClientReferenceable> {
         }
 
         public FileTypeRestriction(ClientFile.FileType fileType, String fieldName){
-            this.fileType = fileType;
+            this(fieldName, fileType);
+        }
+
+        public FileTypeRestriction(String fieldName, ClientFile.FileType ... fileTypes){
+            this.fileTypes = Arrays.asList(fileTypes);
             this.fieldName = fieldName;
         }
 
         @Override
         public void validateReference(ClientResource clientResource) throws IllegalParameterValueException {
-            if(clientResource instanceof ClientFile && fileType != ((ClientFile)clientResource).getType()){
-                throw new IllegalParameterValueException("Reference target is of wrong type",
+            if(clientResource instanceof ClientFile && !fileTypes.contains(((ClientFile)clientResource).getType())){
+                final IllegalParameterValueException illegalParameterValueException =
+                        new IllegalParameterValueException("Referenced " + (fieldName != null ? fieldName : "file") +
+                                " is of wrong type. File type is expected to be " + fileTypes + " but is ["
+                                + ((ClientFile)clientResource).getType() + "]",
                         fieldName != null ? fieldName : "file.type",
-                        clientResource.getUri(),
-                        ((ClientFile)clientResource).getType().name());
+                        ((ClientFile) clientResource).getType().name(),
+                                fileTypes.size() > 1 ? fileTypes.toString() : fileTypes.get(0).toString());
+                illegalParameterValueException.getErrorDescriptor().setErrorCode("incompatible.file.type");
+                throw illegalParameterValueException;
             }
         }
     }

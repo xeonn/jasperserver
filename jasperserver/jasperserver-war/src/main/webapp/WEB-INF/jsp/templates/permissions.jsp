@@ -43,7 +43,7 @@ Usage:
 <t:useAttribute id="cancelButtonId" name="cancelButtonId" classname="java.lang.String" ignore="true"/>
 
 
-<!--/WEB-INF/jsp/templates/permissions.jsp revision A-->
+
 <t:insertTemplate template="/WEB-INF/jsp/templates/container.jsp">
     <t:putAttribute name="containerID" value="permissions"/>
     <t:putAttribute name="containerClass">panel dialog overlay moveable sizeable centered_horz centered_vert permissions ${containerClass}</t:putAttribute>

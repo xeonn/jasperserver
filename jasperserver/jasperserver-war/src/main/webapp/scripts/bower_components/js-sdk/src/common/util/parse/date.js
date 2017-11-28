@@ -9,7 +9,7 @@ define(function (require) {
 
     var ISO_8601_TIMESTAMP_PATTERN = "YYYY-MM-DD[T]HH:mm:ss",
         ISO_8601_DATE_PATTERN = "YYYY-MM-DD",
-        ISO_8601_TIME_PATTERN = "hh:mm:ss";
+        ISO_8601_TIME_PATTERN = "HH:mm:ss";
 
     function toMomentDatePattern(dateFormat) {
         var result = dateFormat;
@@ -189,6 +189,16 @@ define(function (require) {
         }
     }
 
+    function iso8601DateToMoment(isoDateString) {
+        return moment(isoDateString, ISO_8601_DATE_PATTERN, true);
+    }
+    function momentToIso8601Date(momentDate) {
+        return momentDate.format(ISO_8601_DATE_PATTERN);
+    }
+    function momentToLocalizedDate(momentDate) {
+        return momentDate.format(toMomentDatePattern(localeSettings.dateFormat));
+    }
+
     return {
         isRelativeDate: isRelativeDate,
         isRelativeTimestamp: isRelativeTimestamp,
@@ -197,6 +207,9 @@ define(function (require) {
         isIso8601Timestamp: isIso8601Timestamp,
         compareDates: compareDates,
         compareTimestamps: compareTimestamps,
+        iso8601DateToMoment: iso8601DateToMoment,
+        momentToIso8601Date: momentToIso8601Date,
+        momentToLocalizedDate: momentToLocalizedDate,
         dateObjectToIso8601Timestamp: dateObjectToIso8601Timestamp,
         iso8601TimestampToDateObject: iso8601TimestampToDateObject,
         localizedTimestampToIsoTimestamp: localizedTimestampToIsoTimestamp,

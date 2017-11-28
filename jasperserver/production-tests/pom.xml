@@ -10,7 +10,7 @@
     <parent>
         <groupId>com.jaspersoft.jasperserver</groupId>
         <artifactId>server</artifactId>
-        <version>6.3.0</version>
+        <version>6.4.0</version>
     </parent>
     <dependencies>
         <dependency>
@@ -64,12 +64,6 @@
         <dependency>
             <groupId>com.jaspersoft.jasperserver</groupId>
             <artifactId>jasperserver-custom-datasources</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.jaspersoft.jasperserver</groupId>
-            <artifactId>jasperserver-hive-connector</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
@@ -220,7 +214,7 @@
         <dependency>
             <groupId>com.jaspersoft.jasperserver</groupId>
             <artifactId>jasperserver-war</artifactId>
-            <version>6.3.0</version>
+            <version>6.4.0</version>
             <type>war</type>
             <scope>test</scope>
         </dependency>

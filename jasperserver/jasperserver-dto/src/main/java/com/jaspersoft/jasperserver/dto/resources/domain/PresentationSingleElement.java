@@ -20,13 +20,16 @@
 */
 package com.jaspersoft.jasperserver.dto.resources.domain;
 
+import javax.validation.constraints.NotNull;
+
 /**
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: PresentationSingleElement.java 62044 2016-03-24 14:56:43Z ykovalch $
+ * @version $Id: PresentationSingleElement.java 64791 2016-10-12 15:08:37Z ykovalch $
  */
 public class PresentationSingleElement extends PresentationElement<PresentationSingleElement> {
+    private String maskId;
     private String mask;
     private String aggregation;
     private Kind kind;
@@ -37,6 +40,7 @@ public class PresentationSingleElement extends PresentationElement<PresentationS
 
     public PresentationSingleElement(PresentationSingleElement source){
         super(source);
+        maskId = source.getMaskId();
         mask = source.getMask();
         aggregation = source.getAggregation();
         kind = source.getKind();
@@ -53,13 +57,22 @@ public class PresentationSingleElement extends PresentationElement<PresentationS
         this.hierarchicalName = hierarchicalName;
         return this;
     }
-
+    @NotNull
     public String getResourcePath() {
         return resourcePath;
     }
 
     public PresentationSingleElement setResourcePath(String resourcePath) {
         this.resourcePath = resourcePath;
+        return this;
+    }
+
+    public String getMaskId() {
+        return maskId;
+    }
+
+    public PresentationSingleElement setMaskId(String maskId) {
+        this.maskId = maskId;
         return this;
     }
 
@@ -102,24 +115,27 @@ public class PresentationSingleElement extends PresentationElement<PresentationS
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof PresentationSingleElement)) return false;
+        if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
 
         PresentationSingleElement that = (PresentationSingleElement) o;
 
-        if (mask != null ? !mask.equals(that.mask) : that.mask != null) return false;
         if (aggregation != null ? !aggregation.equals(that.aggregation) : that.aggregation != null) return false;
-        if (kind != that.kind) return false;
-        if (type != null ? !type.equals(that.type) : that.type != null) return false;
         if (hierarchicalName != null ? !hierarchicalName.equals(that.hierarchicalName) : that.hierarchicalName != null)
             return false;
-        return resourcePath != null ? resourcePath.equals(that.resourcePath) : that.resourcePath == null;
+        if (kind != that.kind) return false;
+        if (mask != null ? !mask.equals(that.mask) : that.mask != null) return false;
+        if (maskId != null ? !maskId.equals(that.maskId) : that.maskId != null) return false;
+        if (resourcePath != null ? !resourcePath.equals(that.resourcePath) : that.resourcePath != null) return false;
+        if (type != null ? !type.equals(that.type) : that.type != null) return false;
 
+        return true;
     }
 
     @Override
     public int hashCode() {
         int result = super.hashCode();
+        result = 31 * result + (maskId != null ? maskId.hashCode() : 0);
         result = 31 * result + (mask != null ? mask.hashCode() : 0);
         result = 31 * result + (aggregation != null ? aggregation.hashCode() : 0);
         result = 31 * result + (kind != null ? kind.hashCode() : 0);
@@ -132,7 +148,8 @@ public class PresentationSingleElement extends PresentationElement<PresentationS
     @Override
     public String toString() {
         return "PresentationSingleElement{" +
-                "mask='" + mask + '\'' +
+                "maskId='" + maskId + '\'' +
+                ", mask='" + mask + '\'' +
                 ", aggregation='" + aggregation + '\'' +
                 ", kind=" + kind +
                 ", type='" + type + '\'' +
@@ -141,7 +158,7 @@ public class PresentationSingleElement extends PresentationElement<PresentationS
                 "} " + super.toString();
     }
 
-    public enum Kind{
-        dimension, measure;
+    public enum Kind {
+        level, measure;
     }
 }

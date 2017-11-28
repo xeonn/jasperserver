@@ -67,7 +67,7 @@ Usage:
 
 <c:set var="isTabSelected" value="${false}"/>
 
-<!--/WEB-INF/jsp/templates/control_tabSet.jsp revision A-->
+
 <ul <c:if test="${not empty containerId}">id="<tiles:getAsString name="containerId"/>"</c:if> class="control tabSet ${type}${' '}${containerClass}${' '}${type == 'text' ? 'responsive' : ''}">
     <c:forEach var="tab" items="${tabset}" varStatus="status">
         <c:set var="extra" value=""/>

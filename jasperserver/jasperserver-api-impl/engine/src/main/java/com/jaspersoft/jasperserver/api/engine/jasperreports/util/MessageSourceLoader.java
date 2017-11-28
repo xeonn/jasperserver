@@ -29,6 +29,7 @@ import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService
 import org.springframework.context.MessageSource;
 import org.springframework.context.support.ResourceBundleMessageSource;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -50,24 +51,17 @@ public class MessageSourceLoader {
 
         for (ResourceReference resRef : resources) {
             Resource genericResource = getResource(exContext, repository, resRef);
-
-            if (!isFileResource(genericResource)) {
+            if (!isBundle(genericResource)) {
                 continue;
             }
 
             FileResource resource = (FileResource) genericResource;
             String fileName = resource.getName();
-            String fileType = resource.getFileType();
-
-            if (!isBundle(fileName, fileType)) {
-                continue;
-            }
 
             map.put(fileName, new RepositoryResourceKey(resource));
-
             String baseName = ResourceBundleHelper.getBaseName(fileName);
 
-            if (baseName != null && baseName.length() != 0) {
+            if (!baseName.isEmpty()) {
                 baseNames.add(baseName);
             }
         }
@@ -84,6 +78,32 @@ public class MessageSourceLoader {
 
             return messageSource;
         }
+    }
+
+    public static List<String> getBaseNames(ExecutionContext exContext, ResourceContainer resourceContainer, RepositoryService repository) {
+        List<ResourceReference> resources = resourceContainer.getResources();
+        List<String> baseNames = new ArrayList<String>();
+
+        for (ResourceReference resRef : resources) {
+            Resource genericResource = getResource(exContext, repository, resRef);
+            if (!isBundle(genericResource)) {
+                continue;
+            }
+            baseNames.add(ResourceBundleHelper.getBaseName(genericResource.getName()));
+        }
+        return baseNames;
+    }
+
+    private static boolean isBundle(Resource resource) {
+        if (!isFileResource(resource)) {
+            return false;
+        }
+
+        FileResource fileResource = (FileResource) resource;
+        String fileName = fileResource.getName();
+        String fileType = fileResource.getFileType();
+
+        return isBundle(fileName, fileType);
     }
 
     private static boolean isFileResource(Resource genericResource) {

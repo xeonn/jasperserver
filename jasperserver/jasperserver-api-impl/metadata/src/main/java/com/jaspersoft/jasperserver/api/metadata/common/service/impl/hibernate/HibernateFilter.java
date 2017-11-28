@@ -20,9 +20,13 @@
  */
 package com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.util.IlikeEscapeAwareExpression;
+import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.util.LikeEscapeAwareExpression;
+import org.hibernate.Hibernate;
 import org.hibernate.criterion.Conjunction;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Disjunction;
@@ -42,10 +46,12 @@ import com.jaspersoft.jasperserver.api.metadata.view.domain.ParentFolderFilter;
 import com.jaspersoft.jasperserver.api.metadata.view.domain.PropertyFilter;
 import com.jaspersoft.jasperserver.api.metadata.view.domain.ReferenceFilter;
 import com.jaspersoft.jasperserver.api.metadata.view.domain.URIFilter;
+import org.hibernate.type.Type;
+import org.hibernate.util.StringHelper;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: HibernateFilter.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: HibernateFilter.java 65088 2016-11-03 23:22:01Z gbacon $
  */
 public class HibernateFilter implements Filter {
 
@@ -81,26 +87,60 @@ public class HibernateFilter implements Filter {
 	public void applyPropertyFilter(PropertyFilter filter) {
 		Criterion propCriterion;
 		switch (filter.getOp()) {
-		case PropertyFilter.EQ:
-			propCriterion = Restrictions.eq(filter.getProperty(), filter.getValue());
-			break;
-		case PropertyFilter.LIKE:
-			propCriterion = Restrictions.like(filter.getProperty(), filter.getValue());
-			break;
-		case PropertyFilter.GT:
-			propCriterion = Restrictions.gt(filter.getProperty(), filter.getValue());
-			break;
-		case PropertyFilter.LT:
-			propCriterion = Restrictions.lt(filter.getProperty(), filter.getValue());
-			break;
-		case PropertyFilter.BETWEEN:
-			propCriterion = Restrictions.between(filter.getProperty(), filter.getLowValue(), filter.getHighValue());
-			break;
-        case PropertyFilter.IN:
-            propCriterion = Restrictions.in(filter.getProperty(), filter.getValues());
-            break;
-        default:
-			throw new JSException("jsexception.hibernate.unknown.property.filter.operation", new Object[] {new Byte(filter.getOp())});
+			case PropertyFilter.EQ:
+				propCriterion = Restrictions.eq(filter.getProperty(), filter.getValue());
+				break;
+			case PropertyFilter.LIKE:
+				if (filter.getEscapeCharacter() == null) {
+					if (filter.getMatchMode() == null) {
+						propCriterion = Restrictions.like(filter.getProperty(), filter.getValue());
+					} else {
+						propCriterion = Restrictions.like(filter.getProperty(), (String) filter.getValue(), filter.getMatchMode());
+					}
+				} else {
+					if (filter.getMatchMode() == null) {
+						propCriterion = new LikeEscapeAwareExpression(
+								filter.getProperty(), (String) filter.getValue(), filter.getEscapeCharacter());
+					} else {
+						propCriterion = new LikeEscapeAwareExpression(filter.getProperty(),
+								(String) filter.getValue(), filter.getMatchMode(), filter.getEscapeCharacter());
+					}
+				}
+				break;
+			case PropertyFilter.GT:
+				propCriterion = Restrictions.gt(filter.getProperty(), filter.getValue());
+				break;
+			case PropertyFilter.LT:
+				propCriterion = Restrictions.lt(filter.getProperty(), filter.getValue());
+				break;
+			case PropertyFilter.BETWEEN:
+				propCriterion = Restrictions.between(filter.getProperty(), filter.getLowValue(), filter.getHighValue());
+				break;
+			case PropertyFilter.IN:
+				propCriterion = Restrictions.in(filter.getProperty(), filter.getValues());
+				break;
+			case PropertyFilter.IN_IGNORE_CASE:
+				propCriterion = createInIgnoreCaseCriterion(filter.getProperty(), filter.getValues());
+				break;
+			case PropertyFilter.LIKE_IGNORE_CASE:
+				if (filter.getEscapeCharacter() == null) {
+					if (filter.getMatchMode() == null) {
+						propCriterion = Restrictions.ilike(filter.getProperty(), filter.getValue());
+					} else {
+						propCriterion = Restrictions.ilike(filter.getProperty(), (String) filter.getValue(), filter.getMatchMode());
+					}
+				} else {
+					if (filter.getMatchMode() == null) {
+						propCriterion = new IlikeEscapeAwareExpression(
+								filter.getProperty(), (String) filter.getValue(), filter.getEscapeCharacter());
+					} else {
+						propCriterion = new IlikeEscapeAwareExpression(filter.getProperty(),
+								(String) filter.getValue(), filter.getMatchMode(), filter.getEscapeCharacter());
+					}
+				}
+				break;
+			default:
+				throw new JSException("jsexception.hibernate.unknown.property.filter.operation", new Object[]{new Byte(filter.getOp())});
 		}
 		add(propCriterion);
 	}
@@ -178,4 +218,15 @@ public class HibernateFilter implements Filter {
 				);
 	}
 
+	private Criterion createInIgnoreCaseCriterion(String property, Object[] objValues) {
+		String valueParam = StringHelper.repeat( "?, ", objValues.length-1 )  + "?";
+		String[] values = new String[objValues.length];
+		Type[] types = new Type[objValues.length];
+		Arrays.fill(types, Hibernate.STRING);
+		for (int i = 0; i < objValues.length; i++) {
+			values[i] = ((String) objValues[i]).toUpperCase();
+		}
+
+		return Restrictions.sqlRestriction("upper({alias}." + property + ") in (" + valueParam + ")", values, types);
+	}
 }

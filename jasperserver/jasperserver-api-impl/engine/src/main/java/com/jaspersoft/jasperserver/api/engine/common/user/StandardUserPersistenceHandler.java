@@ -21,17 +21,16 @@
 
 package com.jaspersoft.jasperserver.api.engine.common.user;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.jaspersoft.jasperserver.api.JSException;
 import com.jaspersoft.jasperserver.api.engine.common.service.SecurityContextProvider;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.impl.hibernate.RepoUser;
 import com.jaspersoft.jasperserver.api.metadata.user.service.impl.UserAuthorityPersistenceService;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: StandardUserPersistenceHandler.java 63380 2016-05-26 20:56:46Z mchan $
+ * @version $Id: StandardUserPersistenceHandler.java 63760 2016-07-05 18:59:28Z agodovan $
  */
 public class StandardUserPersistenceHandler implements UserPersistenceHandler {
 	

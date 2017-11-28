@@ -24,7 +24,7 @@ package com.jaspersoft.jasperserver.dto.resources;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: ResourceMultipartConstants.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: ResourceMultipartConstants.java 65088 2016-11-03 23:22:01Z gbacon $
  */
 public interface ResourceMultipartConstants {
     public static final String RESOURCE_PART_NAME = "resource";
@@ -32,6 +32,7 @@ public interface ResourceMultipartConstants {
     public static final String MONDRIAN_ACCESS_GRANT_PART_NAME_PREFIX = "accessGrantSchemas.accessGrantSchema";
     public static final String REPORT_JRXML_PART_NAME = "jrxml";
     public static final String REPORT_FILE_PART_NAME_PREFIX = "files.";
-    public static final String SEMANTIC_LAYER_DATA_SOURCE_SECURITY_FILE_PART_NAME = "securityFile";
+    public static final String SEMANTIC_LAYER_DATA_SOURCE_SECURITY_FILE_PART_NAME =
+            BaseSemanticLayerDataSource.SECURITY_FILE_ATTRIBUTE_NAME;
     public static final String SEMANTIC_LAYER_DATA_SOURCE_BUNDLE_PART_NAME_PREFIX = "bundles.bundle";
 }

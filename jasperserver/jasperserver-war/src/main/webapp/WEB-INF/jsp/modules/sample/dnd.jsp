@@ -37,10 +37,6 @@
             background:#efefef; }
         </style>
 
-        <script type="text/javascript" language="JavaScript" src="${pageContext.request.contextPath}/scripts/lib/yui-3.1.0.js"></script>
-        <script type="text/javascript" language="JavaScript" src="${pageContext.request.contextPath}/scripts/lib/yui.console-3.1.0.js"></script>
-        <script type="text/javascript" language="JavaScript" src="${pageContext.request.contextPath}/scripts/lib/yui.console-filters-3.1.0.js"></script>
-        <script type="text/javascript" language="JavaScript" src="${pageContext.request.contextPath}/scripts/lib/yui.test-3.1.0.js"></script>
     </t:putAttribute>
     <t:putAttribute name="bodyContent" >
 	
@@ -86,33 +82,6 @@
         <script type="text/javascript">
             document.observe('dom:loaded', function() {
 //                layoutModule.initialize();
-
-                YUI({ logInclude: { TestRunner: true } }).use('test', 'console', function(Y) {
-                    var suite = new Y.Test.Suite("DnD");
-
-
-                    suite.add(new Y.Test.Case({
-                        name: "iPad",
-
-                        setUp: function() {
-                        },
-
-                        testListItemInstance: function() {
-                        }
-
-                    }));
-
-                    Y.Test.Runner.add(suite);
-
-                    // For IE7 used Yahoo console
-                    if (isIE7()) {
-                        new Y.Console({ newestOnTop: false }).render('#log');
-                    }
-
-                    Y.Test.Runner.run();
-
-                });
-
             });
         </script>
     </t:putAttribute>

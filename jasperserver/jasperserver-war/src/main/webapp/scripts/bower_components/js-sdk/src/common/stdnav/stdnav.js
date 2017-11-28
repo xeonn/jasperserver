@@ -43,6 +43,7 @@ define(function (require, exports, module) {
     var
         $ = require("jquery"),
         _ = require("underscore"),
+        browserDetection = require("common/util/browserDetection"),
         logger = require("logger").register(module),
         version = "0.0.1",
         singleton = null,
@@ -629,12 +630,13 @@ define(function (require, exports, module) {
                 }
             }
             // Hack for IE11, force a potential visual change
-            this.forceFocus($('body')[0]);
-            $('#IECM').html('&nbsp;');
-            this._unforceFocus($('body')[0]);
-            $('body').blur();
-            $('#IECM').html('&nbsp;&nbsp;');
-            // /Hack for IE11
+            if (browserDetection.isIE11()) {
+                this.forceFocus($('body')[0]);
+                $('#IECM').html('&nbsp;');
+                this._unforceFocus($('body')[0]);
+                $('body').blur();
+                $('#IECM').html('&nbsp;&nbsp;');
+            }
 
             this.forceFocus($initialFocus[$initialFocus.length-1]);
 

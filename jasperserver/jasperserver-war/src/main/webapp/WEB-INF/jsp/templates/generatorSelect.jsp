@@ -37,7 +37,7 @@ Usage:
 <t:useAttribute id="containerID" name="containerID" classname="java.lang.String" ignore="true"/>
 <t:useAttribute id="containerClass" name="containerClass" classname="java.lang.String" ignore="true"/>
 
-<!--/WEB-INF/jsp/templates/generatorSelect.jsp revision A-->
+
 <t:insertTemplate template="/WEB-INF/jsp/templates/container.jsp">
     <t:putAttribute name="containerID" value="${containerID}"/>
     <t:putAttribute name="containerClass" value="control ${containerClass}"/>

@@ -21,28 +21,29 @@
 
 package com.jaspersoft.jasperserver.dto.reports;
 
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertEquals;
+
 
 /**
  * <p></p>
  *
  * @author Zakhar.Tomchenco
- * @version $Id: ReportParameterTest.java 58870 2015-10-27 22:30:55Z esytnik $
+ * @version $Id: ReportParameterTest.java 63760 2016-07-05 18:59:28Z agodovan $
  */
 public class ReportParameterTest {
     private final ReportParameter param1 = new ReportParameter();
     private final ReportParameter param2 = new ReportParameter();
 
-    @BeforeMethod
+    @Before
     public void setUp() throws Exception {
         param1.setValues(Arrays.asList("a", "b"));
         param2.setValues(Arrays.asList("b", "a"));

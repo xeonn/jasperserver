@@ -22,7 +22,7 @@
 
 /**
  * @author: Zakhar Tomchenko
- * @version: $Id: TreeLevel.js 2605 2016-04-12 12:25:50Z akasych $
+ * @version: $Id: TreeLevel.js 3291 2016-11-03 20:59:16Z gbacon $
  */
 
 define(function (require) {
@@ -35,7 +35,7 @@ define(function (require) {
         addToSelectionModelTrait = require("common/component/tree/trait/addToSelectionModelTrait"),
         ListWithSelectionModel = require("common/component/list/model/ListWithSelectionModel").extend(addToSelectionModelTrait),
         TooltipPlugin = require("common/component/tree/plugin/TooltipPlugin"),
-        DataProviderWithSearchCache = require("common/component/singleSelect/dataprovider/DataProviderNew");
+        DataProviderWithSearchCache = require("./dataprovider/DataProviderWithSearchCache");
 
     return Panel.extend({
         constructor: function(options) {
@@ -198,6 +198,7 @@ define(function (require) {
                 this.once("ready", _.bind(itemsIterator, this, this, this.refresh, options, 1));
 
                 this.list.model.fetch({top: 0, bottom: this.list.model.bufferSize, force: true});
+                this.list.scrollTo(0);
             } else {
                 this.list.model.set("bufferStartIndex", undefined, {silent: true});
                 this.list.model.set("bufferEndIndex", undefined, {silent: true});

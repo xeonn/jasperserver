@@ -58,7 +58,7 @@ import net.sf.jasperreports.repo.RepositoryUtil;
  * Controller for JasperServer report images.
  * 
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ReportImageController.java 63510 2016-06-06 16:02:13Z tdanciu $
+ * @version $Id: ReportImageController.java 63866 2016-07-12 22:39:01Z schubar $
  */
 public class ReportImageController  implements Controller
 {

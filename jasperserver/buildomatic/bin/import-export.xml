@@ -171,7 +171,7 @@ Make sure you have compiled the jasperserver source code.
                         <jvmarg value="-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=9009"/>-->
 
                         <classpath>
-                            <!--
+            <!--
                                 TODO
                                 we should put currentConf first so it can pick up the files generated based on
                                 db settings, etc., but if you do that, beans don't get recognized because
@@ -190,36 +190,36 @@ Make sure you have compiled the jasperserver source code.
                 </then>
                 <else>
                     <!--
-                      JVM forked by Ant tries to read from input stream by default.
-                      If one of the <input>s with be executed after this call then
-                      user will be prompted for input at least one more time
-                      (pending input for forked JVM).
-                      inputstring="" is added explicitly to ensure that input will not be captured
-                      and <input>s will work as expected.
+              JVM forked by Ant tries to read from input stream by default.
+              If one of the <input>s with be executed after this call then
+              user will be prompted for input at least one more time
+              (pending input for forked JVM).
+              inputstring="" is added explicitly to ensure that input will not be captured
+              and <input>s will work as expected.
 
-                      TODO This is a known bug https://issues.apache.org/bugzilla/show_bug.cgi?id=49119. Fixed in Ant 1.8.2
-                     -->
+              TODO This is a known bug https://issues.apache.org/bugzilla/show_bug.cgi?id=49119. Fixed in Ant 1.8.2
+             -->
 
-                    <java classname="${class}" fork="true" failonerror="true" inputstring="">
-                        <arg value="--@{type}"/>
-                        <arg value="${archiveArg}"/>
-                        <args/>
-                        <!-- add arg that tells oracle JDBC driver to use utf-8 types; won't hurt anyone else -->
-                        <jvmarg value="-Doracle.jdbc.defaultNChar=true"/>
-                        <!-- add this to handle properly import catalogs with utf-8 names -->
-                        <jvmarg value="-Dfile.encoding=UTF-8"/>
-                        <!-- disable ehcache -->
-                        <jvmarg value="-Dnet.sf.ehcache.disabled=true"/>
-                        <!-- set this var to avoid certain network exceptions in OS X -->
-                        <jvmarg value="-Djava.net.preferIPv4Stack=true"/>
-                        <jvmarg value="-Xms512m"/>
-                        <jvmarg value="-Xmx2048m"/>
-                        <jvmarg value="-XX:PermSize=64m"/>
-                        <jvmarg value="-XX:MaxPermSize=128m"/>
+            <java classname="${class}" fork="true" failonerror="true" inputstring="">
+                <arg value="--@{type}"/>
+                <arg value="${archiveArg}"/>
+                <args/>
+                <!-- add arg that tells oracle JDBC driver to use utf-8 types; won't hurt anyone else -->
+                <jvmarg value="-Doracle.jdbc.defaultNChar=true"/>
+                <!-- add this to handle properly import catalogs with utf-8 names -->
+                <jvmarg value="-Dfile.encoding=UTF-8"/>
+		<!-- disable ehcache -->
+            	<jvmarg value="-Dnet.sf.ehcache.disabled=true"/>
+				<!-- set this var to avoid certain network exceptions in OS X -->
+            	<jvmarg value="-Djava.net.preferIPv4Stack=true"/>
+                <jvmarg value="-Xms512m"/>
+                <jvmarg value="-Xmx2048m"/>
+                <jvmarg value="-XX:PermSize=64m"/>
+                <jvmarg value="-XX:MaxPermSize=128m"/>
 
-                        <!-- Uncomment to debug remotely     -->
-                        <!--<jvmarg value="-Xdebug"/>
-                        <jvmarg value="-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=9009"/>-->
+                <!-- Uncomment to debug remotely     -->
+                <!--<jvmarg value="-Xdebug"/>
+                <jvmarg value="-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=9009"/>-->
 
                         <classpath>
                             <!--

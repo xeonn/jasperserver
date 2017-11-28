@@ -28,16 +28,17 @@ import org.apache.commons.logging.LogFactory;
 import org.teiid.adminapi.Model;
 import org.teiid.adminapi.impl.ModelMetaData;
 import org.teiid.dqp.internal.datamgr.ConnectorManager;
+import org.teiid.resource.adapter.file.FileManagedConnectionFactory;
 import org.teiid.translator.ExecutionFactory;
 import org.teiid.translator.TranslatorException;
-import org.teiid.resource.adapter.file.FileManagedConnectionFactory;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 /**
  * @author Ivan Chan (ichan@jaspersoft.com)
- * @version $Id: FileTeiidDataSourceImpl.java 63380 2016-05-26 20:56:46Z mchan $
+ * @version $Id: FileTeiidDataSourceImpl.java 63760 2016-07-05 18:59:28Z agodovan $
  */
 public class FileTeiidDataSourceImpl implements TeiidDataSource {
 

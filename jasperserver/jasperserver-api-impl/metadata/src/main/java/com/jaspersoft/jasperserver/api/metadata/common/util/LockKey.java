@@ -23,13 +23,16 @@ package com.jaspersoft.jasperserver.api.metadata.common.util;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: LockKey.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: LockKey.java 66288 2017-03-02 21:31:25Z rtinsman $
  */
 public class LockKey implements LockHandle {
 
 	private final Object key;
 	
 	public LockKey(Object key) {
+		if (key == null) {
+			throw new IllegalArgumentException("creating lock key with null key");
+		}
 		this.key = key;
 	}
 
@@ -37,4 +40,18 @@ public class LockKey implements LockHandle {
 		return key;
 	}
 	
+	@Override
+	public boolean equals(Object obj) {
+		return (obj instanceof LockKey) && key.equals(((LockKey)obj).key);
+	}
+	
+	@Override
+	public int hashCode() {
+		return key.hashCode();
+	}
+	
+	@Override
+	public String toString() {
+		return key.toString();
+	}
 }

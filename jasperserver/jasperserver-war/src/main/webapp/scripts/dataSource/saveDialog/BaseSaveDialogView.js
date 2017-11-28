@@ -22,7 +22,7 @@
 
 /**
  * @author: Dima Gorbenko
- * @version: $Id: BaseSaveDialogView.js 10166 2016-05-26 22:39:40Z gbacon $
+ * @version: $Id: BaseSaveDialogView.js 10224 2016-07-27 20:02:40Z inestere $
  */
 
 /* global dialogs */
@@ -244,7 +244,7 @@ define(function (require) {
             var self = this;
             var shiftHeight = 73;
             var dialogSavingArea = this.$contentContainer.find(".control.groupBox.treeBox");
-            var wholeDialog = this.$contentContainer.parent();
+            var wholeDialog = this.$contentContainer.closest(".jr-mDialog");
 
             this.$contentContainer
                 .children()

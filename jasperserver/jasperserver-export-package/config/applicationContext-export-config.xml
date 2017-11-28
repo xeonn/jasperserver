@@ -48,10 +48,6 @@
   <!-- of this bean. Only database login is required.                                -->
     <alias name="hibernateRepositoryService" alias="repositoryService"/>
 
-  <!-- reportJobsPersistenceService bean: moved from appContext-report-scheduling.xml   -->
-  <!-- this is because import-export needs a non-standard, non-authenticated version of -->
-  <!-- of this bean.                                                                    -->
-  <alias name="reportJobsPersistenceHibernateService" alias="reportJobsPersistenceService"/>
 
   <!-- this is not really satisfactory; these two lists need to be defined in six places: ce/pro * webapp/unit-test/export-import -->
   <bean id="hibernateCompositeDeleteListenerListeners" class="java.util.ArrayList">

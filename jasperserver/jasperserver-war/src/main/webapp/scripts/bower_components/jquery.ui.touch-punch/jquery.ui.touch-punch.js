@@ -10,7 +10,7 @@
  */
 (function (factory, jQuery) {
     if (typeof define === "function" && define.amd) {
-        define(["jquery.ui"], factory);
+        define(["jquery-ui/jquery.ui.widget", "jquery-ui/jquery.ui.mouse"], factory);
     } else {
     	if(jQuery && jQuery.ui){
     		factory(jQuery);
@@ -50,24 +50,24 @@
 
 	    var touch = event.originalEvent.changedTouches[0],
 	        simulatedEvent = document.createEvent('MouseEvents');
-	    
+
 	    // Initialize the simulated mouse event using the touch event's coordinates
 	    simulatedEvent.initMouseEvent(
 	      simulatedType,    // type
-	      true,             // bubbles                    
-	      true,             // cancelable                 
-	      window,           // view                       
-	      1,                // detail                     
-	      touch.screenX,    // screenX                    
-	      touch.screenY,    // screenY                    
-	      touch.clientX,    // clientX                    
-	      touch.clientY,    // clientY                    
-	      false,            // ctrlKey                    
-	      false,            // altKey                     
-	      false,            // shiftKey                   
-	      false,            // metaKey                    
-	      0,                // button                     
-	      null              // relatedTarget              
+	      true,             // bubbles
+	      true,             // cancelable
+	      window,           // view
+	      1,                // detail
+	      touch.screenX,    // screenX
+	      touch.screenY,    // screenY
+	      touch.clientX,    // clientX
+	      touch.clientY,    // clientY
+	      false,            // ctrlKey
+	      false,            // altKey
+	      false,            // shiftKey
+	      false,            // metaKey
+	      0,                // button
+	      null              // relatedTarget
 	    );
 
 	    // Dispatch the simulated event to the target element
@@ -156,7 +156,7 @@
 	   * original mouse event handling methods.
 	   */
 	  mouseProto._mouseInit = function () {
-	    
+
 	    var self = this;
 
 	    // Delegate the touch handlers to the widget's element
@@ -174,7 +174,7 @@
 	   * Remove the touch event handlers
 	   */
 	  mouseProto._mouseDestroy = function () {
-	    
+
 	    var self = this;
 
 	    // Delegate the touch handlers to the widget's element

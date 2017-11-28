@@ -24,12 +24,14 @@ package com.jaspersoft.jasperserver.core.util;
 import com.jaspersoft.jasperserver.api.JSException;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Folder;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: PathUtils.java 59102 2015-11-13 12:46:42Z vspachyn $
+ * @version $Id: PathUtils.java 63760 2016-07-05 18:59:28Z agodovan $
  */
 public class PathUtils {
 
@@ -136,6 +138,39 @@ public class PathUtils {
 		return result;
 	}
 
+	/**
+	 * Helper method for building paths from the array of path segments.
+	 * Prepends path with {@link #FILE_SEPARATOR}
+	 *
+	 * Skip all empty paths
+	 *
+	 * @param pathSegments Path segments
+	 * @return String representing path
+     */
+	public static String buildPath(String ... pathSegments) {
+		return buildPath(Arrays.asList(pathSegments));
+	}
+
+	/**
+	 * Helper method for building paths from the array of path segments.
+	 * Prepends path with {@link #FILE_SEPARATOR}
+	 *
+	 * Skip all empty paths
+	 *
+	 * @param pathSegments Path segments
+	 * @return String representing path
+     */
+	public static String buildPath(List<String> pathSegments) {
+		if (pathSegments == null || pathSegments.size() == 0) {
+			return null;
+		}
+		StringBuilder pathBuilder = new StringBuilder();
+		for (String pathSeg : pathSegments) {
+			pathBuilder.append(FILE_SEPARATOR).append(pathSeg);
+		}
+
+		return pathBuilder.toString();
+	}
 
 	public static String normalizePath(String path) {
 		if (path == null) {

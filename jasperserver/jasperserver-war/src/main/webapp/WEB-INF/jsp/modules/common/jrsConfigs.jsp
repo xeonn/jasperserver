@@ -37,6 +37,8 @@
         localContext: {},
         isIPad: "${isIPad}",
         contextPath: "${pageContext.request.contextPath}",
+        runtimeContextPath: "${pageContext.request.contextPath}/runtime/${not empty runtimeHash ? runtimeHash : jsOptimizationProperties.runtimeHash}",
+        organizationsFolderUri: "${not empty organizationsFolderUri ? organizationsFolderUri : commonProperties.organizationsFolderUri}",
         publicFolderUri: "${not empty publicFolderUri ? publicFolderUri : commonProperties.publicFolderUri}",
         tempFolderUri: "${not empty tempFolderUri ? tempFolderUri : commonProperties.tempFolderUri}",
         enableAccessibility: "${not empty enableAccessibility ? enableAccessibility : commonProperties.enableAccessibility}",

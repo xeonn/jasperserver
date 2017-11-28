@@ -53,7 +53,7 @@ import java.util.zip.ZipOutputStream;
 
 /**
  * @author Ivan Chan (ichan@jaspersoft.com)
- * @version $Id: ReportExecutionJobMailNotificationImpl.java 58960 2015-11-03 15:00:31Z idornach $
+ * @version $Id: ReportExecutionJobMailNotificationImpl.java 65088 2016-11-03 23:22:01Z gbacon $
  */
 public class ReportExecutionJobMailNotificationImpl implements ReportExecutionJobMailNotification {
 
@@ -92,15 +92,16 @@ public class ReportExecutionJobMailNotificationImpl implements ReportExecutionJo
 							ReportOutput output = (ReportOutput) it.next();
                             boolean isOutputFileTypeHTML = output.getFileType().equals(ContentResource.TYPE_HTML);
                             if (resultSendType == ReportJobMailNotification.RESULT_SEND_EMBED) {
-                                // save the rest of the output as attachments
-                                if (isOutputFileTypeHTML){
-                                    attachZippedOutput(job, messageHelper, output);
-                                } else {
+                                if (!isOutputFileTypeHTML || output.getChildren().isEmpty()){
+                                    // save the output as attachments
                                     attachOutput(job, messageHelper, output, false);
+                                } else {
+                                    // put the html output in 1 zip file if it includes images
+                                    attachZippedOutput(job, messageHelper, output);
                                 }
                             }
                             if ((!isEmailBodyOccupied) && isOutputFileTypeHTML && (job.exceptions.isEmpty())) {
-                                // only embed html output
+                                // embed html output
                                 embedOutput(messageHelper, output);
                                 isEmailBodyOccupied = true;
                             }

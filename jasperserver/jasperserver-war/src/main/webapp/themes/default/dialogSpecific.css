@@ -160,6 +160,13 @@ FLOATING DIALOGS
 	*float:left;
 }
 
+.dialog.loading.statically_centered {
+	margin-left: -85px; /* half of the loading dialog width */
+	left: 50%;
+	margin-top: -52.5px; /* half of the loading dialog height */
+	top: 50%;
+}
+
 /* #exportDialog */
 
 #exportDialog {
@@ -241,7 +248,14 @@ FLOATING DIALOGS
 	padding: 8px 6px 8px 4px;
 }
 
-/* #helpLoggingIn */
+/* Select Data dialog, .sourceDialogNew */
+
+.jr-mDialog.jr.sourceDialogNew .control.searchLockup input {
+    height: 24px;
+    width: 90%;
+}
+
+    /* #helpLoggingIn */
 
 #helpLoggingIn .message {
 	font-size: 12px;
@@ -631,35 +645,38 @@ textarea[readonly]#viewQueryInput   {
 /* selectFolder */
 
 /* fix for IE8 */
-.selectFolder.newResizeableDialog .m-Dialog-body.subcontainer {
+.selectFolder.newResizeableDialog .jr-mDialog-body .subcontainer {
 	height: 320px;
 }
-.newResizeableDialog.jrs .m-Dialog-body.subcontainer {
+.newResizeableDialog.jr .jr-mDialog-body {
+	height: 100%;
+}
+.newResizeableDialog.jr .jr-mDialog-body .subcontainer {
 	padding-bottom: 5px;
 	min-width: 0;
 	min-height: 0;
 	height: calc(100% - 76px);
 }
-.newResizeableDialog.jrs .m-Dialog-footer {
+.newResizeableDialog.jr .jr-mDialog-footer {
 	width: 100%;
 	position: absolute;
 	bottom: 0;
 	padding: 0.845em 1.40em;
 }
-.newResizeableDialog.jrs .m-Dialog-footer .button.action {
+.newResizeableDialog.jr .jr-mDialog-footer .button.action {
 	margin-right: 10px;
 }
 
 
-.selectFolder.newResizeableDialog.jrs .m-Dialog-body.subcontainer .control.groupBox.treeBox {
+.selectFolder.newResizeableDialog.jr .jr-mDialog-body .subcontainer .control.groupBox.treeBox {
 	width: 100%;
 	height: 286px; /* for IE8 */
 	height: calc(100% - 14px);
 }
-.selectFolder.newResizeableDialog.jrs .m-Dialog-body.subcontainer .control.groupBox.treeBox > .content {
+.selectFolder.newResizeableDialog.jr .jr-mDialog-body .subcontainer .control.groupBox.treeBox > .content {
 	height: 100%;
 }
-.selectFolder.newResizeableDialog.jrs .m-Dialog-body.subcontainer .control.groupBox.treeBox > .content .body {
+.selectFolder.newResizeableDialog.jr .jr-mDialog-body .subcontainer .control.groupBox.treeBox > .content .body {
 	height: 100%;
 }
 
@@ -1663,17 +1680,27 @@ PANES
 
 
 
-.confirmationDialog .m-Dialog-body {
+.confirmationDialog .jr-mDialog-body {
 	min-height: 0 !important;
 	width: 350px;
 }
 
-.schedulerJobRemoveDialog .m-Dialog-body.subcontainer.jrs {
+.schedulerJobRemoveDialog .jr-mDialog-body.subcontainer.jr {
 	padding-top: 0;
 	padding-bottom: 0;
 	min-height: 0;
 }
 
-.schedulerJobRemovedAlertDialog .m-Dialog-body.jrs {
+.schedulerJobRemovedAlertDialog .jr-mDialog-body.jr {
 	min-height: 0;
+}
+
+
+/* To fix problems with old button in new jr-mDialog footer */
+.alertDialog .jr-mDialog-footer.jr {
+    height: 40px;
+}
+
+.alertDialog .jr-mDialog-footer.jr .button.action {
+    height: 28px;
 }

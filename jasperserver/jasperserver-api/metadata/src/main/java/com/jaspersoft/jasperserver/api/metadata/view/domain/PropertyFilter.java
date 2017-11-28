@@ -22,12 +22,13 @@ package com.jaspersoft.jasperserver.api.metadata.view.domain;
 
 import com.jaspersoft.jasperserver.api.JasperServerAPI;
 import com.jaspersoft.jasperserver.api.JSExceptionWrapper;
+import org.hibernate.criterion.MatchMode;
 
 /**
  * Filter that applies an operation to a resource field against a given value.
  * 
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: PropertyFilter.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: PropertyFilter.java 65088 2016-11-03 23:22:01Z gbacon $
  * @since 1.0
  */
 @JasperServerAPI
@@ -78,11 +79,29 @@ public class PropertyFilter implements FilterElement, Cloneable {
      */
     public static final byte IN = 5;
 
+	/**
+	 * Operation that checks if the property value is in the list ignore case
+	 *
+	 * @see #getOp()
+	 */
+	public static final byte IN_IGNORE_CASE = 6;
+
+	/**
+	 * Operation that matches the field to the given value using SQL LIKE case insensitive
+	 * semantics.
+	 *
+	 * @see #getOp()
+	 */
+	public static final byte LIKE_IGNORE_CASE = 7;
+
 	private String property;
 	private Object value;
 	private Object value1;
     private Object[] values;
 	private byte op;
+
+	private MatchMode matchMode;
+	private Character escapeCharacter;
 	
 	/**
 	 * Creates an empty property filter.
@@ -231,5 +250,21 @@ public class PropertyFilter implements FilterElement, Cloneable {
 			// never
 			throw new JSExceptionWrapper(e);
 		}
+	}
+
+	public MatchMode getMatchMode() {
+		return matchMode;
+	}
+
+	public void setMatchMode(MatchMode matchMode) {
+		this.matchMode = matchMode;
+	}
+
+	public Character getEscapeCharacter() {
+		return escapeCharacter;
+	}
+
+	public void setEscapeCharacter(Character escapeCharacter) {
+		this.escapeCharacter = escapeCharacter;
 	}
 }

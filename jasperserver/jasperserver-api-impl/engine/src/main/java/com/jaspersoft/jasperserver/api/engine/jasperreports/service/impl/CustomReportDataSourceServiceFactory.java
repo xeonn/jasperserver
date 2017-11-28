@@ -23,6 +23,8 @@ package com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.jaspersoft.jasperserver.api.engine.jasperreports.util.CustomJDBCReportDataSourceServiceFactory;
+import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.CustomJdbcReportDataSourceProvider;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -43,7 +45,7 @@ public class CustomReportDataSourceServiceFactory implements ReportDataSourceSer
 	private ApplicationContext ctx;
 	private List<CustomDataSourceDefinition> customDataSourceDefs = new ArrayList<CustomDataSourceDefinition>();
 	private ResourceFactory mappingResourceFactory;
-	
+
 	/**
 	 * 
 	 */
@@ -99,9 +101,11 @@ public class CustomReportDataSourceServiceFactory implements ReportDataSourceSer
         }
 
 		// does it have its own factory? if so, delegate to it
-		if (dsDef.getCustomFactory() != null) {
-			return dsDef.getCustomFactory().createService(customDataSource);
-		}
+
+        if (useCustomFactory(dsDef, customDataSource)) {
+            return dsDef.getCustomFactory().createService(customDataSource);
+        }
+
 		// get the service class name, look up the class, and create an instance
 		String serviceClassName = customDataSource.getServiceClass();
 		ReportDataSourceService service;
@@ -124,6 +128,14 @@ public class CustomReportDataSourceServiceFactory implements ReportDataSourceSer
 		
 		return service;
 	}
+
+
+    boolean useCustomFactory(CustomDataSourceDefinition dsDef,CustomReportDataSource customDataSource) {
+        if (dsDef.getCustomFactory() == null) return false;
+        // if it is wrapped custom factory with JDBC discovery support feature, wrap cds in VDS, unless it is wrapped already
+        String isWrappedDS = (String) customDataSource.getPropertyMap().get(CustomJDBCReportDataSourceServiceFactory.IS_WRAPPED_DATASOURCE);
+        return !((isWrappedDS != null) && isWrappedDS.equalsIgnoreCase("true"));
+    }
 
 	/**
 	 * add a definition to the list of definitions
@@ -150,7 +162,6 @@ public class CustomReportDataSourceServiceFactory implements ReportDataSourceSer
 	}
 
 	/**
-	 * @param serviceClass
 	 * @return
 	 */
 	public CustomDataSourceDefinition getDefinitionByName(String name) {

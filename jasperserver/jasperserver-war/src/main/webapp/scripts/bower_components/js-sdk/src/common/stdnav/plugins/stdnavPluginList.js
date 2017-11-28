@@ -181,6 +181,11 @@ define(function (require, exports, module) {
             var ghosts;
             var newFocus;
             var $el = $(element);
+
+            if ($el.is("fieldset") && $el.children("ul.inputSet").length) {
+                return element;
+            }
+
             if ($el.is('ul,ol')) {
                 // The usual case: the entire list is gaining focus.
                 ghosts = $el.children('li .ghostfocus');

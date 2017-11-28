@@ -20,6 +20,8 @@
  */
 package com.jaspersoft.jasperserver.api.logging.access.context.impl;
 
+import com.jaspersoft.jasperserver.api.common.util.ExportRunMonitor;
+import com.jaspersoft.jasperserver.api.common.util.ImportRunMonitor;
 import com.jaspersoft.jasperserver.api.logging.context.LoggingContextProvider;
 import com.jaspersoft.jasperserver.api.logging.access.domain.AccessEvent;
 import com.jaspersoft.jasperserver.api.logging.access.context.AccessContext;
@@ -97,7 +99,10 @@ public class AccessContextImpl implements AccessContext {
     }
 
     public void doInAccessContext(AccessContextCallback callback) {
-        if (loggingContextProvider.isLoggingEnabled(AccessEvent.class) && callback != null) {
+        // Generating access events during export/import is pointless and should be disabled
+        boolean noExportImport = !ExportRunMonitor.isExportRun() && !ImportRunMonitor.isImportRun();
+
+        if (loggingContextProvider.isLoggingEnabled(AccessEvent.class) && callback != null && noExportImport) {
             User user = getContextUser();
             if (user != null) {
                 AccessEvent accessEvent = (AccessEvent)clientClassFactory.newObject(AccessEvent.class);

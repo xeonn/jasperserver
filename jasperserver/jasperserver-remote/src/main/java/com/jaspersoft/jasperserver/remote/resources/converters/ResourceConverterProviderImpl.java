@@ -41,7 +41,7 @@ import java.util.Map;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: ResourceConverterProviderImpl.java 62954 2016-05-01 09:49:23Z ykovalch $
+ * @version $Id: ResourceConverterProviderImpl.java 64791 2016-10-12 15:08:37Z ykovalch $
  */
 @Service("resourceConverterProvider")
 public class ResourceConverterProviderImpl implements ResourceConverterProvider {
@@ -122,7 +122,10 @@ public class ResourceConverterProviderImpl implements ResourceConverterProvider 
                             final String serverResourceType = currentConverter.getServerResourceType();
                             final String clientResourceType = currentConverter.getClientResourceType().toLowerCase();
                             if(!disabledResourceClientTypes.contains(clientResourceType)) {
-                                toClientConverters.put(serverResourceType, currentConverter);
+                                if (!currentConverter.getClass().isAnnotationPresent(VirtualResourceConverter.class)) {
+                                    // disallow virtual type to be used as default toClient converter
+                                    toClientConverters.put(serverResourceType, currentConverter);
+                                }
                                 toServerConverters.put(clientResourceType, currentConverter);
                                 resourceConverters.put(getCombinedConverterKey(serverResourceType, clientResourceType), currentConverter);
                             }

@@ -21,6 +21,7 @@
 
 package com.jaspersoft.jasperserver.export.modules.repository;
 
+import com.jaspersoft.jasperserver.api.JSDuplicateResourceException;
 import com.jaspersoft.jasperserver.api.JSException;
 import com.jaspersoft.jasperserver.api.JSExceptionWrapper;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Folder;
@@ -75,7 +76,7 @@ import java.util.regex.Pattern;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ResourceImporter.java 61296 2016-02-25 21:53:37Z mchan $
+ * @version $Id: ResourceImporter.java 65088 2016-11-03 23:22:01Z gbacon $
  */
 public class ResourceImporter extends BaseImporterModule implements ResourceImportHandler, InitializingBean {
 	
@@ -610,6 +611,18 @@ public class ResourceImporter extends BaseImporterModule implements ResourceImpo
 				warningCode = ExportImportWarningCode.IMPORT_REFERENCE_RESOURCE_NOT_FOUND;
 				warningParams = new String[]{referenceUri, uri};
 			}
+		}
+		else if (ex instanceof JSDuplicateResourceException
+				|| ExceptionUtils.getRootCause(ex) instanceof JSDuplicateResourceException) {
+			if (StringUtils.equals(ex.getMessage(), "jsexception.folder.already.exists")
+					|| StringUtils.equals(ex.getMessage(), "jsexception.resource.already.exists")) {
+				String warningMessage = "Resource \"" + uri + "\" already exists in the repository";
+				logWarning(ExportImportWarningCode.IMPORT_RESOURCE_DIFFERENT_TYPE, new String[]{uri}, warningMessage);
+			}
+			else {
+				logWarning(ExportImportWarningCode.IMPORT_ACCESS_DENIED, new String[]{uri}, "Access denied for \"" + uri + "\"");
+			}
+			return true;
 		}
 		else if (ex.getMessage() != null && HibernateRepositoryServiceImpl.JS_EXCEPTION_FOLDER_TOO_LONG_URI.equals(ex.getMessage())) {
 			Exception rootException = ex;

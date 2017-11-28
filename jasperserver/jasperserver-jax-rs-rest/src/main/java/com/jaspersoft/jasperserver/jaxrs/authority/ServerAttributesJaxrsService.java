@@ -52,7 +52,7 @@ import java.util.Set;
 
 /**
  * @author Volodya Sabadosh
- * @version $Id: ServerAttributesJaxrsService.java 61296 2016-02-25 21:53:37Z mchan $
+ * @version $Id: ServerAttributesJaxrsService.java 65088 2016-11-03 23:22:01Z gbacon $
  */
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -68,16 +68,7 @@ public class ServerAttributesJaxrsService {
     private HttpHeaders httpHeaders;
 
     @GET
-    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON, "application/hal+json", "application/hal+xml"})
-    public Response getAttributes(@QueryParam("name") Set<String> attrNames,
-                                  @QueryParam("_embedded") String embedded,
-                                  @HeaderParam(HttpHeaders.ACCEPT) String accept) throws RemoteException {
-        HypermediaOptions hypermediaOptions = attributesJaxrsService.getHypermediaOptions(accept, embedded);
-        return attributesJaxrsService.getAttributesOfRecipient(getHolder(), attrNames, hypermediaOptions);
-    }
-
-    @GET
-    @Produces({"application/attributes.collection+json", "application/attributes.collection+xml",
+    @Produces({"application/attributes.collection+xml", "application/attributes.collection+json",
             "application/attributes.collection.hal+json", "application/attributes.collection.hal+xml"})
     public Response getAttributes(@QueryParam("name") Set<String> attrNames,
                                   @QueryParam("group") Set<String> groups,
@@ -102,6 +93,14 @@ public class ServerAttributesJaxrsService {
         return attributesJaxrsService.getAttributes(searchCriteria, hypermediaOptions);
     }
 
+    @GET
+    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON, "application/hal+json", "application/hal+xml"})
+    public Response getAttributes(@QueryParam("name") Set<String> attrNames,
+                                  @QueryParam("_embedded") String embedded,
+                                  @HeaderParam(HttpHeaders.ACCEPT) String accept) throws RemoteException {
+        HypermediaOptions hypermediaOptions = attributesJaxrsService.getHypermediaOptions(accept, embedded);
+        return attributesJaxrsService.getAttributesOfRecipient(getHolder(), attrNames, hypermediaOptions);
+    }
 
     @PUT
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON, "application/hal+json", "application/hal+xml"})

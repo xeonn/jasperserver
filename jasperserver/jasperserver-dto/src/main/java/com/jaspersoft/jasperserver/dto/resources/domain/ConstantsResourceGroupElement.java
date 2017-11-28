@@ -20,6 +20,7 @@
 */
 package com.jaspersoft.jasperserver.dto.resources.domain;
 
+import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,9 +28,10 @@ import java.util.List;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: ConstantsResourceGroupElement.java 61746 2016-03-14 13:23:04Z tiefimen $
+ * @version $Id: ConstantsResourceGroupElement.java 64791 2016-10-12 15:08:37Z ykovalch $
  */
 public class ConstantsResourceGroupElement extends ResourceElement<ConstantsResourceGroupElement>{
+    @Valid
     private List<ResourceSingleElement> elements;
 
     public ConstantsResourceGroupElement(){}

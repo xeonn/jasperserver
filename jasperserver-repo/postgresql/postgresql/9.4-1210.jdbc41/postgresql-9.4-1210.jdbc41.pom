@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <artifactId>pgjdbc-core-prevjre</artifactId>
+    <groupId>org.postgresql</groupId>
+    <version>1.1.1</version>
+    <relativePath></relativePath>
+  </parent>
+  <groupId>postgresql</groupId>
+  <artifactId>postgresql</artifactId>
+  <version>9.4-1210.jdbc41</version>
+  <name>PostgreSQL JDBC Driver - JDBC 4.1</name>
+  <description>Java JDBC 4.1 (JRE 7+) driver for PostgreSQL database</description>
+  <scm>
+    <connection>scm:git:https://github.com/pgjdbc/pgjdbc-jre7.git</connection>
+    <developerConnection>scm:git:git@github.com:pgjdbc/pgjdbc-jre7.git</developerConnection>
+    <tag>REL9.4.1210.jre7</tag>
+    <url>https://github.com/pgjdbc/pgjdbc-jre7</url>
+  </scm>
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration combine.children="append">
+          <testExcludes>
+            <testExclude>**/jdbc42/**</testExclude>
+          </testExcludes>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+  <profiles>
+    <profile>
+      <id>release</id>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>create-unzipjdkant.xml</id>
+                <phase>generate-sources</phase>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+                <configuration>
+                  <target>
+                    <echo message="Generating ${unzip.jdk.ant.build.xml}" />
+                    <echoxml file="${unzip.jdk.ant.build.xml}">
+                      <project>
+                        <unzip dest="@{project.build.directory}/jdk-src" src="@{java.home}/../src.zip">
+                          <patternset>
+                            <include name="java/sql/**/*.java" />
+                            <include name="javax/sql/**/*.java" />
+                            <include name="javax/naming/**/*.java" />
+                            <include name="java/io/InputStream.java" />
+                            <include name="java/io/OutputStream.java" />
+                            <include name="java/io/FilterInputStream.java" />
+                            <include name="java/io/FilterOutputStream.java" />
+                          </patternset>
+                        </unzip>
+                      </project>
+                    </echoxml>
+                    <replace token="@" file="${unzip.jdk.ant.build.xml}" value="$" />
+                  </target>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+  <properties>
+    <jdbc.specification.version>4.1</jdbc.specification.version>
+    <postgresql.enforce.jdk.version>[1.7,1.8)</postgresql.enforce.jdk.version>
+    <skip.assembly>false</skip.assembly>
+    <skip.unzip-jdk-src>false</skip.unzip-jdk-src>
+    <javac.target>1.7</javac.target>
+    <jdbc.specification.version.nodot>41</jdbc.specification.version.nodot>
+  </properties>
+</project>

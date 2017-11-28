@@ -20,18 +20,28 @@
 */
 package com.jaspersoft.jasperserver.dto.resources.domain;
 
+import com.jaspersoft.jasperserver.dto.adhoc.query.el.ClientExpressionContainer;
+import com.jaspersoft.jasperserver.dto.common.DeepCloneable;
+import com.jaspersoft.jasperserver.dto.resources.domain.validation.ValidEnumValueOrProfileAttribute;
+
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+
 /**
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: Join.java 60548 2016-02-03 14:06:55Z tiefimen $
+ * @version $Id: Join.java 64791 2016-10-12 15:08:37Z ykovalch $
  */
-public class Join {
+public class Join implements DeepCloneable<Join> {
+    @NotNull
     private String left;
+    @NotNull
     private String right;
-    private String expression;
+    @Valid
+    private ClientExpressionContainer expression;
     private Integer weight;
-    private JoinType type;
+    private String type;
 
     public Join(){}
 
@@ -61,11 +71,11 @@ public class Join {
         return this;
     }
 
-    public String getExpression() {
+    public ClientExpressionContainer getExpression() {
         return expression;
     }
 
-    public Join setExpression(String expression) {
+    public Join setExpression(ClientExpressionContainer expression) {
         this.expression = expression;
         return this;
     }
@@ -78,14 +88,23 @@ public class Join {
         this.weight = weight;
         return this;
     }
-
-    public JoinType getType() {
+    @ValidEnumValueOrProfileAttribute(enumClass = JoinType.class, message = "domain.schema.join.type.invalid")
+    public String getType() {
         return type;
     }
-
-    public Join setType(JoinType type) {
+    /**
+     * Setter to set the type
+     * @param type - one of [inner, leftOuter, rightOuter, fullOuter] or profile attribute placeholder
+     * @return
+     */
+    public Join setType(String type) {
         this.type = type;
         return this;
+    }
+
+    @Override
+    public Join deepClone() {
+        return new Join(this);
     }
 
     public enum JoinType{inner, leftOuter, rightOuter, fullOuter}

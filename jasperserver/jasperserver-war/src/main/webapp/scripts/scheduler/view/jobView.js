@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: jobView.js 10042 2016-04-12 14:01:27Z akasych $
+ * @version: $Id: jobView.js 10224 2016-07-27 20:02:40Z inestere $
  */
 
 /* global getTZOffset */
@@ -81,7 +81,7 @@ define(function(require){
 
         // edit job
         edit: function() {
-            this.trigger("editJobPressed", this.model.id);
+            this.trigger("editJobPressed", this.model.get("id"));
         },
 
         // remove job

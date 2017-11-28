@@ -8,6 +8,9 @@
 		<property name="factory" ref="customDataSourceServiceFactory"/>
 		<property name="name" value="jdbcQueryDataSource"/>
 		<property name="dataAdapterClassName" value="net.sf.jasperreports.data.jdbc.JdbcDataAdapterImpl"/>
+        <property name="validator">
+            <bean class="com.jaspersoft.jasperserver.api.engine.jasperreports.util.JdbcQueryDataSourceValidator"/>
+        </property>
 	</bean>
 	
     <bean class="com.jaspersoft.jasperserver.api.common.util.spring.GenericBeanUpdater">

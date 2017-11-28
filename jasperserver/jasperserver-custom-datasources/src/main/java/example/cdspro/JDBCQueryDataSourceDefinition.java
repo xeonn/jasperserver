@@ -125,7 +125,7 @@ public class JDBCQueryDataSourceDefinition extends DataAdapterDefinition {
 
             // create CustomDomainMetaDataImpl object
             CustomDomainMetaDataImpl sourceMetadata = new CustomDomainMetaDataImpl();
-            sourceMetadata.setQueryLanguage("JDBCQuery");
+            sourceMetadata.setQueryLanguage(getQueryLanguage());
             sourceMetadata.setFieldNames(columnNames);
             sourceMetadata.setFieldMapping(fieldMapping);
             // set default column data type based on the actual data
@@ -217,5 +217,6 @@ public class JDBCQueryDataSourceDefinition extends DataAdapterDefinition {
             return JDBC_TYPES_BY_CODE.get(typeCode);
         }
     }
+
 }
 

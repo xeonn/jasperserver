@@ -86,7 +86,7 @@ import java.util.regex.Pattern;
 
 /**
  * @author swood
- * @version $Id: UserAuthorityServiceImpl.java 63380 2016-05-26 20:56:46Z mchan $
+ * @version $Id: UserAuthorityServiceImpl.java 65088 2016-11-03 23:22:01Z gbacon $
  */
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 public class UserAuthorityServiceImpl extends HibernateDaoImpl implements UserDetailsService, ExternalUserService,
@@ -473,7 +473,7 @@ public class UserAuthorityServiceImpl extends HibernateDaoImpl implements UserDe
         }
     }
 
-    private void addPropertiesToUserEvent(final String[] auditEventTypes, final User user) {
+    protected void addPropertiesToUserEvent(final String[] auditEventTypes, final User user) {
         auditContext.doInAuditContext(auditEventTypes, new AuditContext.AuditContextCallbackWithEvent() {
             public void execute(AuditEvent auditEvent) {
                 if (user != null) {
@@ -712,7 +712,7 @@ public class UserAuthorityServiceImpl extends HibernateDaoImpl implements UserDe
         return (Role) getObjectMappingFactory().newObject(Role.class);
     }
 
-    private void addParametersToRoleManagementAuditEvent(final String[] auditEventTypes, final RepoRole role, final boolean logUsers) {
+    protected void addParametersToRoleManagementAuditEvent(final String[] auditEventTypes, final RepoRole role, final boolean logUsers) {
         auditContext.doInAuditContext(auditEventTypes, new AuditContext.AuditContextCallbackWithEvent() {
             public void execute(AuditEvent auditEvent) {
                 auditContext.addPropertyToAuditEvent("roleName", role.getRoleName(), auditEvent);

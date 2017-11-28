@@ -37,7 +37,7 @@ Usage:
 
 <%@ page import="com.jaspersoft.jasperserver.api.JSException" %>
 
-<!--/WEB-INF/jsp/templates/standardAlert.jsp revision A-->
+
 <t:useAttribute id="containerClass" name="containerClass" classname="java.lang.String" ignore="true"/>
 <t:useAttribute id="containerElements" name="containerElements" classname="java.lang.String" ignore="true"/>
 <t:useAttribute id="OKButtonId" name="leftButtonId" classname="java.lang.String" ignore="true"/>

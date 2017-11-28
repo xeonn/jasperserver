@@ -20,49 +20,68 @@
 */
 package com.jaspersoft.jasperserver.jaxrs.settings;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.jaspersoft.jasperserver.dto.bridge.BridgeRegistry;
+import com.jaspersoft.jasperserver.dto.bridge.SettingsBridge;
 import com.jaspersoft.jasperserver.jaxrs.common.JacksonMapperContextResolver;
-import com.jaspersoft.jasperserver.jaxrs.poc.hypermedia.common.cache.CacheControlHelper;
 import com.jaspersoft.jasperserver.remote.exception.ResourceNotFoundException;
 import com.jaspersoft.jasperserver.remote.settings.SettingsProvider;
+import com.jayway.jsonpath.JsonPath;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
-import java.io.IOException;
 import java.util.Map;
 
 /**
  * <p></p>
  *
  * @author yaroslav.kovalchyk
- * @version $Id: SettingsJaxrsService.java 62954 2016-05-01 09:49:23Z ykovalch $
+ * @version $Id: SettingsJaxrsService.java 64791 2016-10-12 15:08:37Z ykovalch $
  */
 @Component
 @Path("/settings")
-public class SettingsJaxrsService {
+public class SettingsJaxrsService implements SettingsBridge {
     @Resource
     private Map<String, Object> settingsGroups;
     @Resource
     private JacksonMapperContextResolver jacksonMapperContextResolver;
 
     @GET
-    @Path("/{groupId}")
+    @Path("/{groupName}")
     @Produces("application/json")
-    public Response getSettingsGroup(@PathParam("groupId") String groupId) throws IOException {
-        Object settingsGroup = settingsGroups.get(groupId);
+    public Response getSettingsGroup(@PathParam("groupName") String groupName) {
+        return Response.ok(getSettingsGroupJson(groupName)).build();
+    }
+
+    protected String getSettingsGroupJson(String groupName){
+        Object settingsGroup = settingsGroups.get(groupName);
         if(settingsGroup instanceof SettingsProvider){
             settingsGroup = ((SettingsProvider) settingsGroup).getSettings();
         }
         if (settingsGroup == null) {
-            throw new ResourceNotFoundException(groupId);
+            throw new ResourceNotFoundException(groupName);
         }
-        return CacheControlHelper.enableLocaleAwareStaticCache(Response.ok(
-                jacksonMapperContextResolver.getContext(settingsGroup.getClass()).writer().writeValueAsString(settingsGroup))
-        ).build();
+        try {
+            return jacksonMapperContextResolver.getContext(settingsGroup.getClass()).writer().writeValueAsString(settingsGroup);
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException("Unable to provide settings group JSON. Group name [" + groupName + "]", e);
+        }
     }
 
+    @PostConstruct
+    public void registerSettingsBridge(){
+        BridgeRegistry.registerBridge(SettingsBridge.class, this);
+    }
+
+    @Override
+    public <T> T getSetting(String groupName, String path) {
+        final String groupJson = getSettingsGroupJson(groupName);
+        return JsonPath.read(groupJson, path);
+    }
 }

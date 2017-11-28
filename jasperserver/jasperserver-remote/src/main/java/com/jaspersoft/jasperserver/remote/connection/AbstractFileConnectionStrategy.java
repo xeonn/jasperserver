@@ -40,7 +40,7 @@ import java.util.Map;
  * <p></p>
  *
  * @author yaroslav.kovalchyk
- * @version $Id: AbstractFileConnectionStrategy.java 62954 2016-05-01 09:49:23Z ykovalch $
+ * @version $Id: AbstractFileConnectionStrategy.java 64791 2016-10-12 15:08:37Z ykovalch $
  */
 public abstract class AbstractFileConnectionStrategy<FileTypeConnection extends AbstractFileConnection>
         implements ConnectionManagementStrategy<FileTypeConnection>, ConnectionMetadataBuilder<FileTypeConnection>, ConnectionValidator<FileTypeConnection> {
@@ -73,7 +73,7 @@ public abstract class AbstractFileConnectionStrategy<FileTypeConnection extends 
     }
 
     @Override
-    public Object build(FileTypeConnection connection, Map<String, String[]> options) {
+    public Object build(FileTypeConnection connection, Map<String, String[]> options, Map<String, Object> contextData) {
         InputStream inputStream = null;
         Object metadata = null;
         try {

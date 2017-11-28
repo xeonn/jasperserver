@@ -22,6 +22,7 @@
 package com.jaspersoft.jasperserver.api.metadata.user.service.impl;
 
 import com.jaspersoft.jasperserver.api.JSException;
+import com.jaspersoft.jasperserver.api.JSProfileAttributeException;
 import com.jaspersoft.jasperserver.api.common.domain.impl.ExecutionContextImpl;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Folder;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
@@ -32,6 +33,7 @@ import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributeCat
 import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributeEscapeStrategy;
 import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributeService;
 import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributesResolver;
+import com.jaspersoft.jasperserver.dto.common.ErrorDescriptor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.codehaus.jackson.annotate.JsonAutoDetect;
@@ -45,6 +47,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
@@ -53,13 +56,17 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
+import static com.jaspersoft.jasperserver.api.JSProfileAttributeException.PROFILE_ATTRIBUTE_EXCEPTION_SUBSTITUTION_CATEGORY_INVALID;
+import static com.jaspersoft.jasperserver.api.JSProfileAttributeException.PROFILE_ATTRIBUTE_EXCEPTION_SUBSTITUTION_NOT_FOUND;
+import static com.jaspersoft.jasperserver.api.JSProfileAttributeException.PROFILE_ATTRIBUTE_EXCEPTION_SUBSTITUTION_BASE;
+
 
 /**
  * The default {@link ProfileAttributesResolver} implementation.
  *
  * @author Volodya Sabadosh
  * @author Vlad Zavadskii
- * @version $Id: ProfileAttributesResolverImpl.java 58870 2015-10-27 22:30:55Z esytnik $
+ * @version $Id: ProfileAttributesResolverImpl.java 63760 2016-07-05 18:59:28Z agodovan $
  */
 public class ProfileAttributesResolverImpl implements ProfileAttributesResolver {
     private static final Log log = LogFactory.getLog(ProfileAttributesResolverImpl.class);
@@ -181,7 +188,6 @@ public class ProfileAttributesResolverImpl implements ProfileAttributesResolver 
         }
     }
 
-
     /**
      * {@inheritDoc}
      */
@@ -214,7 +220,9 @@ public class ProfileAttributesResolverImpl implements ProfileAttributesResolver 
 
             return resultResource;
         } catch (IOException e) {
-            throw new JSException(e.toString());
+            throw new JSProfileAttributeException(
+                    new ErrorDescriptor().setMessage(e.toString())
+                            .setErrorCode(PROFILE_ATTRIBUTE_EXCEPTION_SUBSTITUTION_BASE));
         }
     }
 
@@ -235,7 +243,7 @@ public class ProfileAttributesResolverImpl implements ProfileAttributesResolver 
         Scanner scanner = new Scanner(templateString);
 
         String foundAttribute;
-        while ((foundAttribute = scanner.findInLine(attributePlaceholderPattern)) !=null || scanner.hasNextLine()) {
+        while ((foundAttribute = scanner.findInLine(attributePlaceholderPattern)) != null || scanner.hasNextLine()) {
             if (foundAttribute == null) {
                 scanner.nextLine();
                 continue;
@@ -247,21 +255,27 @@ public class ProfileAttributesResolverImpl implements ProfileAttributesResolver 
             String foundCategory = matchResult.group(3);
             ProfileAttributeCategory attrCategory = ProfileAttributeCategory.HIERARCHICAL;
 
-            String errorMessageBase = "";
+            String[] baseErrorArgs = null;
             if (isNotEmpty(identifier) && !identifier.equals(Folder.SEPARATOR)) {
-                errorMessageBase = messageSource.getMessage("profile.attribute.exception.substitution.base",
-                        new Object[]{identifier, getErrorFieldName(templateString, attrPlaceholder)},
-                        LocaleContextHolder.getLocale()) + " ";
+                baseErrorArgs = new String[]{identifier, getErrorFieldName(templateString, attrPlaceholder)};
             }
 
             if (foundCategory != null) {
                 try {
                     attrCategory = ProfileAttributeCategory.valueOf(foundCategory.toUpperCase());
                 } catch (IllegalArgumentException e) {
-                    String message = errorMessageBase + messageSource.getMessage("profile.attribute.exception.substitution.category.invalid",
-                            new Object[]{foundCategory, quote(attrName), profileAttributeCategories.toString()}, LocaleContextHolder.getLocale());
-                    log.error(message);
-                    throw new JSException(message);
+                    String[] args = new String[]{foundCategory, quote(attrName), profileAttributeCategories.toString()};
+                    String localizedMessage = getAttributeErrorMessage(PROFILE_ATTRIBUTE_EXCEPTION_SUBSTITUTION_CATEGORY_INVALID,
+                            baseErrorArgs, args, LocaleContextHolder.getLocale());
+                    String defaultMessage = getAttributeErrorMessage(PROFILE_ATTRIBUTE_EXCEPTION_SUBSTITUTION_CATEGORY_INVALID,
+                            baseErrorArgs, args, Locale.ENGLISH);
+
+                    log.error(localizedMessage);
+
+                    throw new JSProfileAttributeException(localizedMessage, new ErrorDescriptor()
+                            .setMessage(defaultMessage)
+                            .setErrorCode(PROFILE_ATTRIBUTE_EXCEPTION_SUBSTITUTION_CATEGORY_INVALID)
+                            .setParameters(args));
                 }
             }
 
@@ -284,15 +298,33 @@ public class ProfileAttributesResolverImpl implements ProfileAttributesResolver 
                         new Object[]{quote(attrName), identifier, getErrorFieldName(templateString, attrPlaceholder), attrValue},
                         LocaleContextHolder.getLocale()));
             } else {
-                String message = errorMessageBase + messageSource.getMessage("profile.attribute.exception.substitution.not.found",
-                        new Object[]{quote(attrName), attrCategory.getLabel()},
-                        LocaleContextHolder.getLocale());
-                log.error(message);
-                throw new JSException(message);
+                String[] args = new String[]{quote(attrName), attrCategory.getLabel()};
+                String localizedMessage = getAttributeErrorMessage(PROFILE_ATTRIBUTE_EXCEPTION_SUBSTITUTION_NOT_FOUND,
+                        baseErrorArgs, args, LocaleContextHolder.getLocale());
+                String defaultMessage = getAttributeErrorMessage(PROFILE_ATTRIBUTE_EXCEPTION_SUBSTITUTION_NOT_FOUND,
+                        baseErrorArgs, args, Locale.ENGLISH);
+
+                log.error(localizedMessage);
+
+                throw new JSProfileAttributeException(localizedMessage, new ErrorDescriptor()
+                        .setMessage(defaultMessage)
+                        .setErrorCode(PROFILE_ATTRIBUTE_EXCEPTION_SUBSTITUTION_NOT_FOUND)
+                        .setParameters(args));
             }
         }
 
         return replacementString;
+    }
+
+    protected String getAttributeErrorMessage(String errorCode, String[] baseArgs, String args[], Locale locale) {
+        String errorMessageBase = "";
+
+        if (baseArgs != null) {
+            errorMessageBase = messageSource.getMessage(PROFILE_ATTRIBUTE_EXCEPTION_SUBSTITUTION_BASE, baseArgs,
+                    locale) + " ";
+        }
+
+        return errorMessageBase + messageSource.getMessage(errorCode, args, locale);
     }
 
     protected Map<String, ProfileAttribute> getProfileAttributeMap(ProfileAttributeCategory category) {

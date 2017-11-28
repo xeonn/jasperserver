@@ -41,7 +41,7 @@ import org.springframework.web.util.WebUtils;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: LRUSessionObjectAccessor.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: LRUSessionObjectAccessor.java 65088 2016-11-03 23:22:01Z gbacon $
  */
 public class LRUSessionObjectAccessor implements SessionObjectSerieAccessor {
 
@@ -130,14 +130,14 @@ public class LRUSessionObjectAccessor implements SessionObjectSerieAccessor {
 		}
 	}
 
-	public void removeObject(HttpServletRequest request, String name) {
+	public Object removeObject(HttpServletRequest request, String name) {
 		if (log.isDebugEnabled()) {
 			log.debug(listSessionName + " removing object with name " + name);
 		}
 		
 		ObjectSerie objectSerie = getObjectSerie(request);
 		synchronized (objectSerie) {
-			objectSerie.remove(name);
+			return objectSerie.remove(name);
 		}
 	}
 

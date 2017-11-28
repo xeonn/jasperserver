@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import net.sf.jasperreports.data.DataAdapter;
 import net.sf.jasperreports.data.DataAdapterService;
@@ -14,6 +15,7 @@ import net.sf.jasperreports.engine.JasperReportsContext;
 import net.sf.jasperreports.engine.data.JaxenXmlDataSource;
 import net.sf.jasperreports.engine.design.JRDesignField;
 
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -36,10 +38,10 @@ public class RemoteXmlDataSourceDefinition extends AbstractTextDataSourceDefinit
         String query = (String) properties.get("selectExpression");
 
         JaxenXmlDataSource jrDataSource = new JaxenXmlDataSource(uri, query);
-        List<JRField> fields = createStringFields(jrDataSource);
+        List<JRField> fields = createStringFields(jrDataSource, query);
         setFieldTypes(jrDataSource, fields);
 
-        return CustomDomainMetadataUtils.createCustomDomainMetaData("RemoteXml", fields);
+        return CustomDomainMetadataUtils.createCustomDomainMetaData(getQueryLanguage(), fields);
     }
 
     private void setFieldTypes(JaxenXmlDataSource jrDataSource, List<JRField> fields) throws JRException {
@@ -57,10 +59,24 @@ public class RemoteXmlDataSourceDefinition extends AbstractTextDataSourceDefinit
         return new DataSourceContributingRemoteXmlDataAdapterService(jasperReportsContext, (RemoteXmlDataAdapter) dataAdapter);
     }
 
-    private List<JRField> createStringFields(JaxenXmlDataSource jrDataSource) throws Exception {
+    private List<JRField> createStringFields(JaxenXmlDataSource jrDataSource, String query) throws Exception {
         jrDataSource.moveFirst();
         XmlDataSourceCompatibleJRFieldListBuilder fieldListBuilder = new XmlDataSourceCompatibleJRFieldListBuilder();
-        if (jrDataSource.next()) {
+        int nodeCount = query.split(Pattern.quote("|")).length;
+        if (nodeCount <= 0)  nodeCount = 1;
+        for (int nodeIndex = 0; jrDataSource.next() && nodeIndex < nodeCount; nodeIndex++) {
+            // adding attribute fields
+            NamedNodeMap attrFields = jrDataSource.getCurrentNode().getAttributes();
+            if (attrFields != null) {
+                int fieldCount = attrFields.getLength();
+                for (int i = 0; i < fieldCount; i++) {
+                    Node xmlField = attrFields.item(i);
+                    String attrName = xmlField.getNodeName();
+                    if (attrName.indexOf(':') < 0) { // don't add if namespace prefix present. Fix later (Bug 41535).
+                        fieldListBuilder.field("@" + attrName);
+                    }
+                }
+            }
             NodeList xmlFields = jrDataSource.getCurrentNode().getChildNodes();
             int fieldCount = xmlFields.getLength();
             for (int i = 0; i < fieldCount; i++) {
@@ -70,10 +86,11 @@ public class RemoteXmlDataSourceDefinition extends AbstractTextDataSourceDefinit
                     if (fieldName.indexOf(':') < 0) { // don't add if namespace prefix present. Fix later (Bug 41535).
                         fieldListBuilder.field(fieldName);
                     }
+                } else if  (xmlField.getNodeType() == Node.TEXT_NODE) {
+                    fieldListBuilder.field(".", "col_" + nodeIndex);
                 }
             }
         }
-
         return fieldListBuilder.build();
     }
 

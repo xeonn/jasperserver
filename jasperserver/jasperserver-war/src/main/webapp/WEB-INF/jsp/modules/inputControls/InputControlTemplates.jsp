@@ -66,7 +66,7 @@
     <div id="{{id}}" class="leaf visibleOverflow">
         <label class="control select"  title="{{description}}">
             <span class="wrap">{{#mandatory}}* {{/mandatory}}{{label}}</span>
-            <div class="ssPlaceholder" {{#readOnly}}disabled="disabled"{{/readOnly}}></div>
+            <div class="ssPlaceholder jr jr-mInput {{#readOnly}} jr-isDisabled{{/readOnly}}" {{#readOnly}}disabled="disabled"{{/readOnly}}></div>
             <span class="warning">{{message}}</span>
         </label>
     </div>
@@ -76,10 +76,9 @@
     <div class="leaf visibleOverflow" id="{{id}}">
         <div class="control select multiple"  title="{{description}}">
             <span class="wrap">{{#mandatory}}* {{/mandatory}}{{label}}</span>
-            <div class="msPlaceholder" {{#readOnly}}disabled="disabled"{{/readOnly}}></div>
+            <div class="msPlaceholder jr {{#readOnly}} jr-mInput jr-isDisabled {{/readOnly}}" {{#readOnly}}disabled="disabled"{{/readOnly}}></div>
             <span class="warning">{{message}}</span>
             <div class="resizeOverlay hidden"></div>
-            <div class="sizer vertical hidden"><span class="ui-icon ui-icon-grip-solid-horizontal"></span></div>
         </div>
     </div>
 </script>
@@ -103,7 +102,7 @@
         </fieldset>
         <span class="warning">{{message}}</span>
         <div class="resizeOverlay hidden"></div>
-        <div class="sizer vertical hidden"><span class="ui-icon ui-icon-grip-solid-horizontal"></span></div>
+        <div class="jr-mSizer jr-mSizerVertical jr hidden"><span class="ui-icon ui-icon-grip-solid-horizontal"></span></div>
     </div>
 </script>
 
@@ -131,7 +130,7 @@
         </fieldset>
         <span class="warning">{{message}}</span>
         <div class="resizeOverlay hidden"></div>
-        <div class="sizer vertical hidden"><span class="ui-icon ui-icon-grip-solid-horizontal"></span></div>
+        <div class="jr-mSizer jr-mSizerVertical jr hidden"><span class="ui-icon ui-icon-grip-solid-horizontal"></span></div>
     </div>
 </script>
 

@@ -156,7 +156,8 @@ define(function(require) {
                     isServerOrRootType: isServerOrRootType,
                     isServerLevel: isServerType,
                     isServerCe: this.type === exportTypesEnum.SERVER_CE,
-                    isRepository: this.type === exportTypesEnum.REPOSITORY
+                    isRepository: this.type === exportTypesEnum.REPOSITORY,
+                    isSubOrgLevel: options.isSubOrgLevel
                 });
 
                 this.$el.html(this.template);
@@ -176,9 +177,9 @@ define(function(require) {
                 if (this.model.isValid(true)) {
                     this.loadingDialog.open();
                     this.model.save().done(function(status) {
-                        self.stateModel.unset("brokenDependencies", {silent: true});
+                        self.stateModel.unset("warnings", {silent: true});
                         self.stateModel.set(status);
-                        self.model.id = status.id;
+                        self.model.set("id", status.id);
                     });
                 }
             },

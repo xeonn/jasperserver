@@ -24,7 +24,7 @@ package com.jaspersoft.jasperserver.dto.resources.domain;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: PresentationElement.java 63380 2016-05-26 20:56:46Z mchan $
+ * @version $Id: PresentationElement.java 63760 2016-07-05 18:59:28Z agodovan $
  */
 public class PresentationElement<T extends PresentationElement<T>> extends SchemaElement<T> {
     private String label;

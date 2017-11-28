@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: addDataTypeMain.js 10082 2016-04-20 18:28:47Z inestere $
+ * @version: $Id: addDataTypeMain.js 10224 2016-07-27 20:02:40Z inestere $
  */
 
 /* global isIPad */
@@ -32,7 +32,7 @@ define(function(require) {
     var domReady = require("!domReady"),
         resourceDataType = require("resource.dataType"),
         _ = require("underscore"),
-        jQuery = require("jquery"),
+        $ = require("jquery"),
         jrsConfigs = require("jrs.configs"),
         resource = require("resource.base"),
         CalendarInputComponent = require("components.calendarInput");
@@ -47,16 +47,18 @@ define(function(require) {
 
         if (hasDateOrTimePickers()) {
             var minPicker = new CalendarInputComponent(jrsConfigs.addDataType.minValueText);
-            minPicker.container = jQuery("label.minPicker");
+            minPicker.container = $("label.minPicker");
             minPicker.create();
 
             var maxPicker = new CalendarInputComponent(jrsConfigs.addDataType.maxValueText);
-            maxPicker.container = jQuery("label.maxPicker");
+            maxPicker.container = $("label.maxPicker");
             maxPicker.create();
         }
 
         resourceDataType.initialize(options);
         isIPad() && resource.initSwipeScroll();
+        //workraround to make jquery-ui work properly with 'jr' prefix 
+        $("body").addClass("jr");
     });
 
     function hasDateOrTimePickers() {

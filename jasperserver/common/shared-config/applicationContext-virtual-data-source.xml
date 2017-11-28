@@ -102,16 +102,17 @@
             </list>
         </property>
 
-        <!--  example to include synonym table for specific data source -->
-        <!--property name="importPropertyMap">
+        <!--  workaround for bug JRS-11028 -->
+        <!-- skip system table when using postgres driver version 9.4-1210.jdbc41 -->
+        <property name="importPropertyMap">
             <map>
-                <entry key="FoodmartDataSource">
+                <entry key="postgresql">
                         <map>
                             <entry key="importer.tableTypes" value="TABLE,VIEW,SYNONYM"/>
                         </map>
                 </entry>
             </map>
-        </property -->
+        </property>
 
         <!--  map custom data source to teiid data source -->
         <property name="dataSourceServiceToTeiidConnectorMap">

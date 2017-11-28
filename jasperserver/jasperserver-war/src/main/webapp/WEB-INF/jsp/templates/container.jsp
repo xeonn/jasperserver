@@ -71,7 +71,7 @@ NOTES:
 <%@ taglib prefix="c" uri="http://java.sun.com/jstl/core_rt" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
-<!--/WEB-INF/jsp/templates/container.jsp revision A-->
+
 <t:useAttribute id="containerID" name="containerID" classname="java.lang.String" ignore="true"/>
 <t:useAttribute id="containerClass" name="containerClass" classname="java.lang.String" ignore="true"/>
 <t:useAttribute id="containerAttributes" name="containerAttributes" classname="java.lang.String" ignore="true"/>

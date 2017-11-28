@@ -49,6 +49,7 @@ define(function (require) {
             } else {
                 var repositoryModel = new RepositoryResourceModel(
                     {uri: parentFolderUri}, {contextPath: jrsConfigs.contextPath});
+
                 repositoryModel.fetch().always(function () {
                     if (repositoryModel.type && repositoryResourceTypes.FOLDER.toLowerCase() === repositoryModel.type.toLowerCase()) {
                         options.parentFolderUri = parentFolderUri;

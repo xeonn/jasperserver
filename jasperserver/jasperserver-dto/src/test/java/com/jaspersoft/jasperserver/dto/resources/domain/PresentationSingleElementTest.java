@@ -1,19 +1,16 @@
 package com.jaspersoft.jasperserver.dto.resources.domain;
 
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.junit.Before;
+import org.junit.Test;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * <p/>
  * <p/>
  *
  * @author tetiana.iefimenko
- * @version $Id: PresentationSingleElementTest.java 60548 2016-02-03 14:06:55Z tiefimen $
+ * @version $Id: PresentationSingleElementTest.java 64626 2016-09-26 13:25:24Z vzavadsk $
  * @see
  */
 public class PresentationSingleElementTest {
@@ -22,6 +19,7 @@ public class PresentationSingleElementTest {
     public static final String DESCRIPTION = "Description";
     public static final String DESCRIPTION_ID = "DescriptionId";
     public static final String MASK = "Mask";
+    public static final String MASK_ID = "MaskId";
     public static final String LABEL = "Label";
     public static final String LABEL_ID = "LabelId";
     public static final String RESOURCE_PATH = "ResourcePath";
@@ -30,14 +28,15 @@ public class PresentationSingleElementTest {
     PresentationSingleElement sourceElement;
     PresentationSingleElement clonedElement;
 
-    @BeforeMethod
+    @Before
     public void setUp() {
         sourceElement = new PresentationSingleElement()
                 .setName(ELEMENT_NAME)
                 .setDescription(DESCRIPTION)
                 .setDescriptionId(DESCRIPTION_ID)
-                .setKind(PresentationSingleElement.Kind.dimension)
+                .setKind(PresentationSingleElement.Kind.level)
                 .setMask(MASK)
+                .setMaskId(MASK_ID)
                 .setLabel(LABEL)
                 .setLabelId(LABEL_ID)
                 .setResourcePath(RESOURCE_PATH)
@@ -59,7 +58,7 @@ public class PresentationSingleElementTest {
         assertNotNull(clonedElement.getDescriptionId());
         assertEquals(DESCRIPTION_ID, clonedElement.getDescriptionId());
         assertNotNull(clonedElement.getKind());
-        assertEquals(PresentationSingleElement.Kind.dimension, clonedElement.getKind());
+        assertEquals(PresentationSingleElement.Kind.level, clonedElement.getKind());
         assertNotNull(clonedElement.getMask());
         assertEquals(MASK, clonedElement.getMask());
         assertNotNull(clonedElement.getLabel());

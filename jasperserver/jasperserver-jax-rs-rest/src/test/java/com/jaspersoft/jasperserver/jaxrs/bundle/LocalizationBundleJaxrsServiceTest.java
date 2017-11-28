@@ -20,8 +20,7 @@
 */
 package com.jaspersoft.jasperserver.jaxrs.bundle;
 
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -34,25 +33,18 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Providers;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertSame;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 /**
  * <p></p>
  *
  * @author yaroslav.kovalchyk
- * @version $Id: LocalizationBundleJaxrsServiceTest.java 61296 2016-02-25 21:53:37Z mchan $
+ * @version $Id: LocalizationBundleJaxrsServiceTest.java 63760 2016-07-05 18:59:28Z agodovan $
  */
 public class LocalizationBundleJaxrsServiceTest {
     private static final String BUNDLE1_NAME = "bundle1";
@@ -132,7 +124,7 @@ public class LocalizationBundleJaxrsServiceTest {
     }
 
     @Test(dependsOnMethods = "setBundleNames")
-    public void getBundles_expandedFalse() throws JSONException {
+    public void getBundles_expandedFalse() {
         final Response response = service.getBundles(false, httpHeaders, request);
         assertNotNull(response);
         final Object entity = response.getEntity();
@@ -140,31 +132,31 @@ public class LocalizationBundleJaxrsServiceTest {
     }
 
     @Test(dependsOnMethods = "setBundleNames")
-    public void getBundles_expandedTrue() throws JSONException {
+    public void getBundles_expandedTrue() {
         final Response response = service.getBundles(true, httpHeaders, request);
         assertNotNull(response);
-        assertTrue(response.getEntity() instanceof JSONObject);
-        JSONObject json = (JSONObject) response.getEntity();
-        assertEquals(json.length(), 4);
-        assertBundle((JSONObject) json.get(BUNDLE1_NAME), bundle1);
-        assertBundle((JSONObject) json.get(BUNDLE2_NAME), bundle2);
-        assertBundle((JSONObject) json.get(BUNDLE3_NAME), bundle3);
-        assertBundle((JSONObject) json.get(BUNDLE4_NAME), bundle4);
+        assertTrue(response.getEntity() instanceof ObjectNode);
+        ObjectNode json = (ObjectNode) response.getEntity();
+        assertEquals(json.size(), 4);
+        assertBundle((ObjectNode) json.get(BUNDLE1_NAME), bundle1);
+        assertBundle((ObjectNode) json.get(BUNDLE2_NAME), bundle2);
+        assertBundle((ObjectNode) json.get(BUNDLE3_NAME), bundle3);
+        assertBundle((ObjectNode) json.get(BUNDLE4_NAME), bundle4);
     }
 
     @Test(dependsOnMethods = "setBundleNames")
-    public void getBundle() throws JSONException{
+    public void getBundle() {
         assertSame(service.getBundle(BUNDLE1_NAME, httpHeaders, request).getEntity(), bundle1);
         assertSame(service.getBundle(BUNDLE2_NAME, httpHeaders, request).getEntity(), bundle2);
         assertSame(service.getBundle(BUNDLE3_NAME, httpHeaders, request).getEntity(), bundle3);
         assertSame(service.getBundle(BUNDLE4_NAME, httpHeaders, request).getEntity(), bundle4);
     }
 
-    private void assertBundle(JSONObject json, Map<String, String> bundle) throws JSONException {
+    private void assertBundle(ObjectNode json, Map<String, String> bundle) {
         assertNotNull(json);
-        assertEquals(json.length(), bundle.size());
+        assertEquals(json.size(), bundle.size());
         for(String currentKey : bundle.keySet()){
-            assertEquals(json.get(currentKey), bundle.get(currentKey));
+            assertEquals(json.get(currentKey).textValue(), bundle.get(currentKey));
         }
     }
 }

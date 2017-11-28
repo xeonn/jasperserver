@@ -29,6 +29,8 @@ import java.util.Date;
 
 import com.jaspersoft.jasperserver.api.JSException;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.jdom.Document;
 import org.jdom.input.SAXBuilder;
 
@@ -44,6 +46,7 @@ public class XMLUtil {
 
     private static Boolean skipXXECheck;
 
+    private static final Log log = LogFactory.getLog(XMLUtil.class);
 
     static{
         domFactory = DocumentBuilderFactory.newInstance();
@@ -102,7 +105,8 @@ public class XMLUtil {
         if (skipXXECheck == null) {
             skipXXECheck = bSkipXXECheck;
         } else {
-            throw new JSException("XMLUtils.skipXXEChek is set already, rewrites are not allowed!");
+            //throw new JSException("XMLUtil.skipXXECheck is set already, rewrites are not allowed!");
+            log.error("XMLUtil.skipXXECheck is set already, rewrites are not allowed!");
         }
     }
 

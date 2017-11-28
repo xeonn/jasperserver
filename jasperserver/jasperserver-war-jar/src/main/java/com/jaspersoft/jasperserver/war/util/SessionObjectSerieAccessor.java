@@ -26,7 +26,7 @@ import javax.servlet.http.HttpSession;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: SessionObjectSerieAccessor.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: SessionObjectSerieAccessor.java 65088 2016-11-03 23:22:01Z gbacon $
  */
 public interface SessionObjectSerieAccessor {
 
@@ -34,7 +34,7 @@ public interface SessionObjectSerieAccessor {
 	
 	Object getObject(HttpServletRequest request, String name);
 	
-	void removeObject(HttpServletRequest request, String name);
+	Object removeObject(HttpServletRequest request, String name);
 
 	SessionObjectSeries getSeries(HttpSession session);
 	

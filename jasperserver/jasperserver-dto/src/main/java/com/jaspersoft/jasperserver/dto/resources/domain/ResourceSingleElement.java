@@ -24,7 +24,7 @@ package com.jaspersoft.jasperserver.dto.resources.domain;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: ResourceSingleElement.java 63380 2016-05-26 20:56:46Z mchan $
+ * @version $Id: ResourceSingleElement.java 63760 2016-07-05 18:59:28Z agodovan $
  */
 public class ResourceSingleElement extends AbstractResourceSingleElement<ResourceSingleElement> {
     public ResourceSingleElement(){}

@@ -4,8 +4,9 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd">
 
+    <alias name="${bean.olapConnectionService}" alias="olapConnectionService"/>
 
-    <bean id="olapConnectionService"
+    <bean id="olapConnectionServiceCE"
           class="com.jaspersoft.jasperserver.api.metadata.olap.service.impl.OlapConnectionServiceImpl">
         <property name="repository" ref="${bean.repositoryService}"/>
         <property name="encodingProvider" ref="encodingProvider"/>

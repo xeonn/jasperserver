@@ -24,18 +24,20 @@ package com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.u
 import org.hibernate.criterion.LikeExpression;
 import org.hibernate.criterion.MatchMode;
 
+import static com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.util.LikeEscapeAwareExpression.checkEscapeChar;
+
 /**
  * A criterion representing a case-insensitive "like" expression
- * that explicitly specifies escape character '!'.
+ * that explicitly specifies escape character.
  *
  * @author Vladimir Tsukur
  */
 public class IlikeEscapeAwareExpression extends LikeExpression {
 
     /**
-     * Escape character '!'.
+     * Default escape character is '!'.
      */
-    private static final Character ESCAPE_CHAR = '!';
+    public static final Character ESCAPE_CHAR = '!';
 
     /**
      * Constructs new instance with specified property name, value and match mode.
@@ -48,4 +50,19 @@ public class IlikeEscapeAwareExpression extends LikeExpression {
         super(propertyName, value, matchMode, ESCAPE_CHAR, true);
     }
 
+    public IlikeEscapeAwareExpression(String propertyName, String value, MatchMode matchMode, Character escapeChar) {
+        super(propertyName, value, matchMode, escapeChar, true);
+
+        checkEscapeChar(escapeChar);
+    }
+
+    public IlikeEscapeAwareExpression(String propertyName, String value, Character escapeChar) {
+        super(propertyName, value, escapeChar, true);
+
+        checkEscapeChar(escapeChar);
+    }
+
+    public static String escape(String expr, char escapeChar) {
+        return LikeEscapeAwareExpression.escape(expr, escapeChar);
+    }
 }

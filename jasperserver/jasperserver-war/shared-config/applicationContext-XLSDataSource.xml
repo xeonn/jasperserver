@@ -15,7 +15,9 @@
 			<map>
 				<entry key="xls" value="net.sf.jasperreports.engine.query.JRXlsQueryExecuterFactory"/>
 			</map>
-		</property>			
+		</property>
+		<property name="customFactory" ref="customJDBCReportDataSourceServiceFactory"/>
+        <property name="rowCountForMetadataDiscovery" value="10"/>
 	</bean>
 	
     <bean class="com.jaspersoft.jasperserver.api.common.util.spring.GenericBeanUpdater">

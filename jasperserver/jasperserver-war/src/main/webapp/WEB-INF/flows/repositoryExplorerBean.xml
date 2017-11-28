@@ -78,6 +78,7 @@
 
     <bean id="repositoryExplorerTreeFoldersProvider" parent="repositoryExplorerTreeDataProvider">
         <property name="filter" ref="adhocRepositorySaveAsFilter"/>
+        <property name="skipResources" value="true"/>
     </bean>
 
     <bean id="repositorySaveReportTempBlockFilter" class="com.jaspersoft.jasperserver.war.model.impl.UriExclusiveTreeDataFilterImpl">
@@ -101,6 +102,7 @@
 
     <bean id="repositorySaveReportProvider" parent="repositoryExplorerTreeDataProvider">
         <property name="filter" ref="repositorySaveReportFilter"/>
+        <property name="skipResources" value="true"/>
     </bean>
 
     <bean name="dsTreeDataProvider" class="com.jaspersoft.jasperserver.war.model.impl.TypedTreeDataProvider">

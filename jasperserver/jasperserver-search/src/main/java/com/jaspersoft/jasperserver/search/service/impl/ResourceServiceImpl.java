@@ -29,6 +29,7 @@ import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceLookup;
 import com.jaspersoft.jasperserver.api.metadata.common.service.impl.RepositorySecurityChecker;
 import com.jaspersoft.jasperserver.api.metadata.view.domain.FilterCriteria;
+import com.jaspersoft.jasperserver.api.metadata.view.domain.FilterElementDisjunction;
 import com.jaspersoft.jasperserver.api.search.SearchCriteriaFactory;
 import com.jaspersoft.jasperserver.search.common.ResourceDetails;
 import com.jaspersoft.jasperserver.search.common.SchedulingChecker;
@@ -54,6 +55,12 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.util.LikeEscapeAwareExpression.ESCAPE_CHAR;
+import static com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.util.LikeEscapeAwareExpression.escape;
+import static com.jaspersoft.jasperserver.api.metadata.view.domain.FilterCriteria.createPropertyEqualsFilter;
+import static com.jaspersoft.jasperserver.api.metadata.view.domain.FilterCriteria.createPropertyLikeFilter;
+import static org.hibernate.criterion.MatchMode.START;
+
 /**
  * Resources management service.
  *
@@ -66,6 +73,9 @@ public class ResourceServiceImpl extends BaseService implements ResourceService 
     private static final Pattern INDEXED_NAME_PATTERN = Pattern.compile("(.*)_(\\d+)$");
 
     private static final Log log = LogFactory.getLog(ResourceServiceImpl.class);
+
+    private static final String LABEL_DELIMITER = " (";
+    private static final String NAME_DELIMITER = "_";
 
     private SessionFactory sessionFactory;
 
@@ -191,7 +201,7 @@ public class ResourceServiceImpl extends BaseService implements ResourceService 
         return result;
     }
 
-    protected Map<String, String> getExistingNamesAndLabels(String parentFolderUri) {
+    protected Map<String, String> getExistingNamesAndLabels(String parentFolderUri, Collection<Resource> copiedResources) {
         Map<String, String> result = new HashMap<String, String>();
         try {
             List<Folder> repoFolderList = repositoryService.getSubFolders(null, parentFolderUri);
@@ -200,6 +210,16 @@ public class ResourceServiceImpl extends BaseService implements ResourceService 
             }
             FilterCriteria criteria = FilterCriteria.createFilter();
             criteria.addFilterElement(FilterCriteria.createParentFolderFilter(parentFolderUri));
+            FilterElementDisjunction disjunction = criteria.addDisjunction();
+            for (Resource resource : copiedResources) {
+                String pattern;
+                disjunction.addFilterElement(createPropertyEqualsFilter("name", resource.getName()));
+                pattern = escape(resource.getName() + NAME_DELIMITER, ESCAPE_CHAR);
+                disjunction.addFilterElement(createPropertyLikeFilter("name", pattern, START, ESCAPE_CHAR));
+                disjunction.addFilterElement(createPropertyEqualsFilter("label", resource.getLabel()));
+                pattern = escape(resource.getLabel() + LABEL_DELIMITER, ESCAPE_CHAR);
+                disjunction.addFilterElement(createPropertyLikeFilter("label", pattern, START, ESCAPE_CHAR));
+            }
 
             List<Resource> resources = repositoryService.loadResourcesList(null, criteria);
             for (Resource resource : resources) {
@@ -219,7 +239,7 @@ public class ResourceServiceImpl extends BaseService implements ResourceService 
             throw new JSException("jsexception.search.duplicate.label", new Object[]{"", destinationFolderUri});
         }
         // here are all names and labels, that exist in target folder
-        final Map<String, String> existingNamesAndLabels = getExistingNamesAndLabels(destinationFolderUri);
+        final Map<String, String> existingNamesAndLabels = getExistingNamesAndLabels(destinationFolderUri, resourceMap.values());
         Set<String> resourceUrisToCopy = new HashSet<String>();
         // now we are able to paste resources to the same folder, where they are placed. To process this situation correctly
         // we have to change names/labels of resources. So, let's go over resources to copy list and process all resources
@@ -276,11 +296,11 @@ public class ResourceServiceImpl extends BaseService implements ResourceService 
     }
 
     protected String buildIndexedLabel(String labelPrefix, int index) {
-        return labelPrefix + " (" + index + ")";
+        return labelPrefix + LABEL_DELIMITER + index + ")";
     }
 
     protected String buildIndexedName(String namePrefix, int index) {
-        return namePrefix + "_" + index;
+        return namePrefix + NAME_DELIMITER + index;
     }
 
     private Set<String> getLabels(Map<String, Resource> resourceMap) {

@@ -21,20 +21,21 @@
 
 package com.jaspersoft.jasperserver.war.action;
 
-import org.json.JSONException;
-import org.springframework.webflow.execution.Event;
-import org.springframework.webflow.execution.RequestContext;
-import org.json.JSONObject;
-import org.json.JSONArray;
-import com.jaspersoft.jasperserver.api.metadata.user.service.RoleManagerService;
-
+import com.jaspersoft.jasperserver.api.metadata.common.service.PaginatedOperationResult;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.Role;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.Tenant;
-import com.jaspersoft.jasperserver.api.metadata.common.service.PaginatedOperationResult;
-
+import com.jaspersoft.jasperserver.api.metadata.user.service.RoleManagerService;
 import com.jaspersoft.jasperserver.war.common.UsersOperationResult;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.springframework.webflow.execution.Event;
+import org.springframework.webflow.execution.RequestContext;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Role manager action class.

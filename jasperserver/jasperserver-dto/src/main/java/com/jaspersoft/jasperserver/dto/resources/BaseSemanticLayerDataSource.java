@@ -30,9 +30,10 @@ import java.util.List;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: BaseSemanticLayerDataSource.java 62954 2016-05-01 09:49:23Z ykovalch $
+ * @version $Id: BaseSemanticLayerDataSource.java 65088 2016-11-03 23:22:01Z gbacon $
  */
 public abstract class BaseSemanticLayerDataSource<T extends BaseSemanticLayerDataSource<T, S>, S> extends AbstractClientDataSourceHolder<T> implements ClientReferenceableDataSource, SchemaHolder<T, S> {
+    public static final String SECURITY_FILE_ATTRIBUTE_NAME = "securityFile";
     private ClientReferenceableFile securityFile;
     private List<ClientBundle> bundles;
 
@@ -63,7 +64,7 @@ public abstract class BaseSemanticLayerDataSource<T extends BaseSemanticLayerDat
 
     @XmlElements({
             @XmlElement(name = "securityFileReference", type = ClientReference.class),
-            @XmlElement(name = "securityFile", type = ClientFile.class)
+            @XmlElement(name = BaseSemanticLayerDataSource.SECURITY_FILE_ATTRIBUTE_NAME, type = ClientFile.class)
     })
     public ClientReferenceableFile getSecurityFile() {
         return securityFile;

@@ -190,7 +190,11 @@ public class ImportExportTask<T> implements Task {
                     }
                 }
             } catch (Exception e) {
-                log.error("File " + toRemove.getAbsolutePath() + " was not deleted!");
+                // let's log exception if only toRemove file exist.
+                if(toRemove.exists()) {
+                    log.error("File " + toRemove.getAbsolutePath() + " was not deleted!");
+                }
+                // If toRemove doesn't exist, then OK, nothing to delete. Keep silent in this case
             }
         }
     }

@@ -38,7 +38,7 @@
         </repository>
         <repository>
           <id>jaspersoft-external-addons</id>
-          <url>http://jaspersoft.artifactoryonline.com/jaspersoft/jrs-ce-addons-releases</url>
+          <url>http://jaspersoft.jfrog.io/jaspersoft/jrs-ce-addons-releases</url>
           <snapshots>
             <enabled>false</enabled>
           </snapshots>
@@ -48,7 +48,7 @@
         </repository>
         <repository>
           <id>jaspersoft-external-addons-snapshots</id>
-          <url>http://jaspersoft.artifactoryonline.com/jaspersoft/jrs-ce-addons-snapshots</url>
+          <url>http://jaspersoft.jfrog.io/jaspersoft/jrs-ce-addons-snapshots</url>
           <snapshots>
             <enabled>true</enabled>
             <updatePolicy>always</updatePolicy>
@@ -59,7 +59,7 @@
         </repository>
         <repository>
           <id>jaspersoft-js-modules</id>
-          <url>http://jaspersoft.artifactoryonline.com/jaspersoft/jrs-ce-js-modules</url>
+          <url>http://jaspersoft.jfrog.io/jaspersoft/jrs-ce-js-modules</url>
           <snapshots>
             <enabled>true</enabled>
             <updatePolicy>always</updatePolicy>
@@ -70,9 +70,9 @@
         </repository>
         <repository>
           <id>jaspersoft-external-third-party</id>
-          <url>http://jaspersoft.artifactoryonline.com/jaspersoft/third-party-ce-artifacts</url>
+          <url>http://jaspersoft.jfrog.io/jaspersoft/third-party-ce-artifacts</url>
           <snapshots>
-            <enabled>false</enabled>
+            <enabled>true</enabled>
           </snapshots>
           <releases>
             <enabled>true</enabled>
@@ -80,7 +80,7 @@
         </repository>
         <repository>
           <id>jasperreports-snapshots</id>
-          <url>http://jaspersoft.artifactoryonline.com/jaspersoft/jr-ce-snapshots/</url>
+          <url>http://jaspersoft.jfrog.io/jaspersoft/jr-ce-snapshots/</url>
           <snapshots>
             <enabled>true</enabled>
             <updatePolicy>always</updatePolicy>
@@ -91,17 +91,7 @@
         </repository>
         <repository>
           <id>jasperreports-releases</id>
-          <url>http://jaspersoft.artifactoryonline.com/jaspersoft/jr-ce-releases</url>
-          <snapshots>
-            <enabled>false</enabled>
-          </snapshots>
-          <releases>
-            <enabled>true</enabled>
-          </releases>
-        </repository>
-        <repository>
-          <id>jasperreports-public</id>
-          <url>http://jasperreports.sourceforge.net/maven2</url>
+          <url>http://jaspersoft.jfrog.io/jaspersoft/jr-ce-releases</url>
           <snapshots>
             <enabled>false</enabled>
           </snapshots>
@@ -154,7 +144,7 @@
         </repository>
         <repository>
           <id>jaspersoft-3rd-party</id>
-          <url>http://jaspersoft.artifactoryonline.com/jaspersoft/jaspersoft-3rd-party</url>
+          <url>http://jaspersoft.jfrog.io/jaspersoft/jaspersoft-3rd-party</url>
           <snapshots>
             <enabled>true</enabled>
           </snapshots>
@@ -170,7 +160,7 @@
       <pluginRepositories>
         <pluginRepository>
           <id>jaspersoft-external-third-party</id>
-          <url>http://jaspersoft.artifactoryonline.com/jaspersoft/third-party-ce-artifacts</url>
+          <url>http://jaspersoft.jfrog.io/jaspersoft/third-party-ce-artifacts</url>
           <snapshots>
             <enabled>false</enabled>
           </snapshots>

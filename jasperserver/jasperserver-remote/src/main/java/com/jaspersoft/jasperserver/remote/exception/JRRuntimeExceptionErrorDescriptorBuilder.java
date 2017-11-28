@@ -23,6 +23,7 @@ package com.jaspersoft.jasperserver.remote.exception;
 
 import com.jaspersoft.jasperserver.api.common.error.handling.SecureExceptionHandler;
 import com.jaspersoft.jasperserver.dto.common.ErrorDescriptor;
+import com.jaspersoft.jasperserver.dto.common.ErrorDescriptorBuilder;
 import net.sf.jasperreports.crosstabs.fill.calculation.BucketingService;
 import net.sf.jasperreports.engine.JRRuntimeException;
 import org.springframework.stereotype.Component;
@@ -33,7 +34,7 @@ import javax.annotation.Resource;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: JRRuntimeExceptionErrorDescriptorBuilder.java 57603 2015-09-15 17:20:48Z psavushc $
+ * @version $Id: JRRuntimeExceptionErrorDescriptorBuilder.java 64791 2016-10-12 15:08:37Z ykovalch $
  */
 @Component
 public class JRRuntimeExceptionErrorDescriptorBuilder implements ErrorDescriptorBuilder<JRRuntimeException> {

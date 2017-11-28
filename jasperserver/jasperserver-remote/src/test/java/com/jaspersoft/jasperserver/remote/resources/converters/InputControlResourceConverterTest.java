@@ -49,6 +49,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import javax.validation.Validator;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -62,7 +63,7 @@ import static org.testng.Assert.assertEquals;
  * <p></p>
  *
  * @author Zakhar.Tomchenco
- * @version $Id: InputControlResourceConverterTest.java 58870 2015-10-27 22:30:55Z esytnik $
+ * @version $Id: InputControlResourceConverterTest.java 64791 2016-10-12 15:08:37Z ykovalch $
  */
 public class InputControlResourceConverterTest {
     @InjectMocks
@@ -74,6 +75,7 @@ public class InputControlResourceConverterTest {
     @Mock private PermissionsService permissionsService;
     @Mock private GenericTypeProcessorRegistry genericTypeProcessorRegistry;
     @Mock private BasicResourceValidator resourceValidator;
+    @Mock private Validator validator;
 
     private final ClientInputControl client = new ClientInputControl();
     private final InputControlImpl server = new InputControlImpl();

@@ -21,7 +21,6 @@ import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.CustomRepor
 public class XmlaQueryDataSourceDefinition extends AbstractTextDataSourceDefinition {
 
     private static final long serialVersionUID = -9093395922486182432L;
-    private static final String QUERY_LANGUAGE = "XmlaQuery";
 
     @Override
     public CustomDomainMetaData getCustomDomainMetaData(CustomReportDataSource customReportDataSource) throws Exception {
@@ -32,7 +31,7 @@ public class XmlaQueryDataSourceDefinition extends AbstractTextDataSourceDefinit
 
         setFieldTypes(helper.getDataSource(), fields);
 
-        CustomDomainMetaDataImpl md = (CustomDomainMetaDataImpl) CustomDomainMetadataUtils.createCustomDomainMetaData(QUERY_LANGUAGE, fields);
+        CustomDomainMetaDataImpl md = (CustomDomainMetaDataImpl) CustomDomainMetadataUtils.createCustomDomainMetaData(getQueryLanguage(), fields);
         md.setQueryText((String) properties.get("query"));
 
         return md;

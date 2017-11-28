@@ -23,6 +23,7 @@ package com.jaspersoft.jasperserver.search.filter;
 
 import com.jaspersoft.jasperserver.api.engine.scheduling.domain.ReportJobSummary;
 import com.jaspersoft.jasperserver.api.engine.scheduling.service.ReportJobsPersistenceService;
+import com.jaspersoft.jasperserver.api.metadata.user.service.TenantService;
 import com.jaspersoft.jasperserver.api.search.SearchCriteria;
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
@@ -55,6 +56,7 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 public class ScheduleFilter extends BaseSearchFilter implements Serializable {
 
     protected ReportJobsPersistenceService jobsService;
+    protected TenantService tenantService;
 
     public void applyRestrictions(String type, ExecutionContext context, SearchCriteria criteria) {
         SearchAttributes searchAttributes = getSearchAttributes(context);
@@ -83,16 +85,26 @@ public class ScheduleFilter extends BaseSearchFilter implements Serializable {
     }
 
     private void createCriteria(SearchCriteria criteria, User user, boolean scheduled, boolean scheduledByUser) {
+//      Get all accessible scheduled jobs for current user
         List<ReportJobSummary> jobSummaries = jobsService.listJobs(null);
 
-        if (!jobSummaries.isEmpty()) {
+        String tenantQualifiedUserName=null;
+        if (user.getTenantId()!=null) {
+            tenantQualifiedUserName=user.getUsername().concat(tenantService.getUserOrgIdDelimiter()).concat(user.getTenantId());
+        } else {
+            tenantQualifiedUserName=user.getUsername();
+
+        }
+        List uriList = scheduledByUser ? fetchURIList(jobSummaries,tenantQualifiedUserName) : fetchURIList(jobSummaries,null);
+
+        if (!uriList.isEmpty()) {
             SearchCriteria idCriteria = SearchCriteria.forClass(RepoResource.class);
 
             Disjunction disjunction = Restrictions.disjunction();
             String alias = idCriteria.getAlias("parent", "p");
 
-            for (ReportJobSummary job : jobSummaries) {
-                String uri = job.getReportUnitURI();
+            for (Object o : uriList) {
+                String uri = (String)o;
 
                 disjunction.add(getResourceCriterion(alias, uri));
             }
@@ -152,8 +164,30 @@ public class ScheduleFilter extends BaseSearchFilter implements Serializable {
 
         return Restrictions.and(Restrictions.eq("name", resourceName), Restrictions.eq(alias + ".URI", folderUri));
     }
+    protected List fetchURIList(List<ReportJobSummary> reportJobSummaries,String user) {
+        // Build list of IDs
+        List<Long> reportJobIds = new ArrayList<Long>(reportJobSummaries.size());
+        for (ReportJobSummary jobSummary : reportJobSummaries) {
+            if (user==null) {
+                reportJobIds.add(jobSummary.getId());
+            } else if (jobSummary.getUsername().equals(user)) {
+                reportJobIds.add(jobSummary.getId());
+            }
+        }
+
+        // Pool all URIs directly from persistence layer
+        SearchCriteria uriCriteria = SearchCriteria.forClass(PersistentReportJob.class);
+        uriCriteria.addProjection(Projections.property("source.reportUnitURI"));
+        uriCriteria.add(Restrictions.in("id",reportJobIds));
+        return reportJobIds.isEmpty() ? new ArrayList() : getHibernateTemplate().findByCriteria(uriCriteria);
+
+    }
 
     public void setJobsService(ReportJobsPersistenceService jobsService) {
         this.jobsService = jobsService;
+    }
+
+    public void setTenantService(TenantService tenantService) {
+        this.tenantService = tenantService;
     }
 }

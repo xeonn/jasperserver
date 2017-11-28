@@ -11,8 +11,7 @@
         },
         "folderUri": {
             "type": "string",
-            "description": "Parent folder URI.",
-            "pattern": "^(/|(/[^/~!#\\$%^|\\s`@&*()\\-+={}\\[\\]:;\"'<>,?/\\|\\\\]+(/[^/~!#\\$%^|\\s`@&*()\\-+={}\\[\\]:;\"'<>,?/\\|\\\\]+)*))$"
+            "description": "Parent folder URI."
         },
         "types": {
             "type": "array",

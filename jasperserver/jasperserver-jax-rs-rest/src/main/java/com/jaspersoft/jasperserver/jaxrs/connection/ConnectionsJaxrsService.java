@@ -25,6 +25,7 @@ import com.jaspersoft.jasperserver.remote.connection.ConnectionsManager;
 import com.jaspersoft.jasperserver.remote.exception.IllegalParameterValueException;
 import com.jaspersoft.jasperserver.remote.exception.MandatoryParameterNotFoundException;
 import com.jaspersoft.jasperserver.remote.exception.ResourceNotFoundException;
+import com.jaspersoft.jasperserver.remote.exception.UnsupportedOperationRemoteException;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -55,7 +56,7 @@ import java.util.regex.Pattern;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: ConnectionsJaxrsService.java 62954 2016-05-01 09:49:23Z ykovalch $
+ * @version $Id: ConnectionsJaxrsService.java 64791 2016-10-12 15:08:37Z ykovalch $
  */
 @Service
 @Path("/connections")
@@ -80,6 +81,12 @@ public class ConnectionsJaxrsService {
         final String acceptString = accept != null ? accept.toString() : "";
         final boolean isMetadataRequested = CONNECTION_METADATA_PATTERN.matcher(acceptString).matches();
         final Object connectionDescription = parseEntity(connectionClass, stream, mediaType);
+        if(connectionDescription == null){
+            throw new MandatoryParameterNotFoundException("body");
+        }
+        if(isMetadataRequested && !connectionsManager.isMetadataSupported(connectionDescription)){
+            throw new UnsupportedOperationRemoteException("metadata");
+        }
         final UUID connectionId = connectionsManager.createConnection(connectionDescription);
         final StringBuffer locationBuffer = request.getRequestURL().append("/").append(connectionId.toString());
         if (isMetadataRequested) {

@@ -24,6 +24,7 @@ package com.jaspersoft.jasperserver.remote.services.impl;
 import com.jaspersoft.jasperserver.api.JSExceptionWrapper;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.*;
 import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
+import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.persistent.RepoFolder;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
 import com.jaspersoft.jasperserver.api.search.SearchCriteriaFactory;
 import com.jaspersoft.jasperserver.dto.resources.ClientFile;
@@ -47,6 +48,7 @@ import com.jaspersoft.jasperserver.search.service.RepositorySearchResult;
 import com.jaspersoft.jasperserver.search.service.RepositorySearchService;
 import com.jaspersoft.jasperserver.search.service.impl.RepositorySearchAccumulator;
 import com.jaspersoft.jasperserver.search.service.impl.RepositorySearchCriteriaImpl;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
@@ -64,7 +66,9 @@ import java.util.regex.Pattern;
 public class BatchRepositoryServiceImpl implements BatchRepositoryService {
 
     protected static final Log log = LogFactory.getLog(BatchRepositoryServiceImpl.class);
-    protected static final Pattern ILLEGAL_URI_SYMBOL_PATTERN = Pattern.compile("[~!#\\$%^|\\s`&*()\\-+={}\\[\\]:;\"',?\\|\\\\]");
+    // pattern below differs from one declared in configurationBean. Here is a reason:
+    // search service has to support '-' character in 'folderUri' search parameter. See JRS-11370 for more information.
+    protected static final Pattern ILLEGAL_URI_SYMBOL_PATTERN = Pattern.compile("[~!#\\$%^|\\s`&*()\\+={}\\[\\]:;\"',?\\|\\\\]");
     protected static final Set<String> FILE_TYPES;
 
     static {
@@ -91,12 +95,14 @@ public class BatchRepositoryServiceImpl implements BatchRepositoryService {
     @javax.annotation.Resource(name = "restSearchModeSettingsResolver")
     private SearchModeSettingsResolver searchModeSettingsResolver;
 
+    
     @Override
-    public RepositorySearchResult<ClientResourceLookup> getResources(String q, String folderUri, List<String> type, List<String> containerType, List<String> excludeFolders, Integer start, Integer limit, Boolean recursive, Boolean showHiddenItems, String sortBy, AccessType accessType, User user, Boolean forceFullPage) throws IllegalParameterValueException, ResourceNotFoundException {
+    public RepositorySearchResult<ClientResourceLookup> getResourcesForLookupClass(String lookupClass, String q, String folderUri, List<String> type, List<String> containerType, List<String> excludeFolders, Integer start, Integer limit, Boolean recursive, Boolean showHiddenItems, String sortBy, AccessType accessType, User user, Boolean forceFullPage) throws IllegalParameterValueException, ResourceNotFoundException {
         SearchMode mode = (recursive == null || recursive) ? SearchMode.SEARCH : SearchMode.BROWSE;
         RepositorySearchConfiguration configuration = getConfiguration(mode);
 
         final RepositorySearchCriteriaImpl.Builder builder = new RepositorySearchCriteriaImpl.Builder()
+                .setLookupClass(lookupClass)
                 .setMaxCount(limit != null ? limit : configuration.getItemsPerPage())
                 .setForceFullPage(forceFullPage != null ? forceFullPage : false)
                 .setFolderUri(folderUri != null ? folderUri : Folder.SEPARATOR)
@@ -112,6 +118,13 @@ public class BatchRepositoryServiceImpl implements BatchRepositoryService {
                 .setUser(user);
 
         return getResources(builder.getCriteria());
+    }
+
+    @Override
+    public RepositorySearchResult<ClientResourceLookup> getResources(String q, String folderUri, List<String> type, List<String> containerType, List<String> excludeFolders, Integer start, Integer limit, Boolean recursive, Boolean showHiddenItems, String sortBy, AccessType accessType, User user, Boolean forceFullPage) throws IllegalParameterValueException, ResourceNotFoundException {
+    	return getResourcesForLookupClass(
+    			(containerType==null || containerType.isEmpty()) && type!=null && type.size()==1 && type.get(0).equals("folder")?RepoFolder.class.getName():null, 
+    			q, folderUri, type, containerType, excludeFolders, start, limit, recursive, showHiddenItems, sortBy, accessType, user, forceFullPage);
     }
 
     public RepositorySearchResult<ClientResourceLookup> getResources(RepositorySearchCriteria criteria) throws IllegalParameterValueException, ResourceNotFoundException {
@@ -168,23 +181,28 @@ public class BatchRepositoryServiceImpl implements BatchRepositoryService {
         }
         return result;
     }
-
+ 
+    
     @Override
     public int getResourcesCount(String q, String folderUri, List<String> type, List<String> excludedFolders, Boolean recursive, Boolean showHiddenItems, AccessType accessType, User user) throws IllegalParameterValueException, ResourceNotFoundException {
-
-        boolean excludeFolders = !type.contains("folder");
-
-        final RepositorySearchCriteriaImpl.Builder builder = new RepositorySearchCriteriaImpl.Builder()
-                .setSearchMode(recursive == null || recursive ? SearchMode.SEARCH : SearchMode.BROWSE)
-                .setFolderUri(folderUri != null ? folderUri : Folder.SEPARATOR)
-                .setExcludeRelativePaths(excludedFolders)
-                .setExcludeFolders(excludeFolders)
-                .setShowHidden(showHiddenItems)
-                .setAccessType(accessType)
-                .setResourceTypes(type)
-                .setSearchText(q)
-                .setUser(user);
-
+    	return getResourcesCountForLookupClass(
+    			type!=null && type.size()==1 && type.get(0).equals("folder")?RepoFolder.class.getName():null, 
+    			q, folderUri, type, excludedFolders, recursive, showHiddenItems, accessType, user);
+    }
+    
+    private int getResourcesCountForLookupClass(String lookupClass, String q, String folderUri, List<String> type, List<String> excludedFolders, Boolean recursive, Boolean showHiddenItems, AccessType accessType, User user) throws IllegalParameterValueException, ResourceNotFoundException {
+    	final RepositorySearchCriteriaImpl.Builder builder = 
+    			new RepositorySearchCriteriaImpl.Builder()
+			        .setSearchMode(recursive == null || recursive ? SearchMode.SEARCH : SearchMode.BROWSE)
+			        .setFolderUri(folderUri != null ? folderUri : Folder.SEPARATOR)
+			        .setExcludeRelativePaths(excludedFolders)
+			        .setShowHidden(showHiddenItems)
+			        .setAccessType(accessType)
+			        .setResourceTypes(type)
+			        .setSearchText(q)
+			        .setUser(user)
+        			.setExcludeFolders(!type.contains("folder"))
+        			.setLookupClass(lookupClass);
         return getResourcesCount(builder.getCriteria());
     }
 
@@ -197,6 +215,23 @@ public class BatchRepositoryServiceImpl implements BatchRepositoryService {
                 validateFolderUri(folderUri);
             }
             result = repositorySearchService.getResultsCount(null, searchCriteria);
+        }
+        return result;
+    }
+    
+    public List getResourcesCountList(RepositorySearchCriteria searchCriteria) throws IllegalParameterValueException, ResourceNotFoundException {
+        List result = null;
+
+        if (searchCriteria != null && processType(searchCriteria)) {
+            List<ClientResourceLookup> resources = searchCriteria.getResources();
+            if(resources!=null){
+                for(ClientResourceLookup resource:resources){
+                        if(resource.getUri()!=null){
+                                validateFolderUri(resource.getUri());
+                        }
+                }
+            }
+            result = repositorySearchService.getResultsCountList(null, searchCriteria);
         }
         return result;
     }
@@ -309,7 +344,7 @@ public class BatchRepositoryServiceImpl implements BatchRepositoryService {
         Integer totalCount = 0;
 
         try {
-            totalCount = getResourcesCount(null, null, types, null, true, false, null, null);
+            totalCount = getResourcesCount(null, (String) null, types, null, true, false, null, null);
         } catch (IllegalParameterValueException e) {
             log.error(e);
         } catch (ResourceNotFoundException e) {
@@ -321,5 +356,28 @@ public class BatchRepositoryServiceImpl implements BatchRepositoryService {
 
     protected RepositorySearchConfiguration getConfiguration(SearchMode mode) {
         return searchModeSettingsResolver.getSettings(mode).getRepositorySearchConfiguration();
+    }
+    
+    @Override
+    public List getResourcesCount(String q,
+                    List<ClientResourceLookup> resources, List<String> type,
+                    List<String> excludedFolders, Boolean recursive,
+                    Boolean showHiddenItems, AccessType accessType, User user)
+                    throws IllegalParameterValueException, ResourceNotFoundException {
+
+                    boolean excludeFolders = !type.contains("folder");
+
+            final RepositorySearchCriteriaImpl.Builder builder = new RepositorySearchCriteriaImpl.Builder()
+                    .setSearchMode(recursive == null || recursive ? SearchMode.SEARCH : SearchMode.BROWSE)
+                    .setResources(resources)
+                    .setExcludeRelativePaths(excludedFolders)
+                    .setExcludeFolders(excludeFolders)
+                    .setShowHidden(showHiddenItems)
+                    .setAccessType(accessType)
+                    .setResourceTypes(type)
+                    .setSearchText(q)
+                    .setUser(user);
+
+            return getResourcesCountList(builder.getCriteria());
     }
 }

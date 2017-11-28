@@ -22,7 +22,7 @@
 <meta name="viewport" content="user-scalable=no, initial-scale=1.0, maximum-scale=1.0, width=device-width">
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 
-<link rel="stylesheet" href="${pageContext.request.contextPath}/themes/reset.css" type="text/css" media="screen">
+<link rel="stylesheet" href="${pageContext.request.contextPath}/runtime/${jsOptimizationProperties.runtimeHash}/themes/reset.css" type="text/css" media="screen">
 
 <link rel="stylesheet" href="${pageContext.request.contextPath}/themes/dev/theme.css" type="text/css" media="screen,print"/>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/themes/dev/typography.css" type="text/css" media="screen,print"/>
@@ -127,8 +127,8 @@ linkurls = [
 "${pageContext.request.contextPath}/themes/dev/pageSpecific/serverError.css",
 "${pageContext.request.contextPath}/themes/dev/pageSpecific/systemError.css",
 "${pageContext.request.contextPath}/themes/default/samples.css",
-"${pageContext.request.contextPath}/scripts/bower_components/jquery-ui/themes/jquery.ui.theme.css",
-"${pageContext.request.contextPath}/scripts/bower_components/jquery-ui/themes/redmond/jquery-ui-1.10.4-custom.css",
+"${pageContext.request.contextPath}/${scriptsFolder}/bower_components/jquery-ui/themes/jquery.ui.theme.css",
+"${pageContext.request.contextPath}/${scriptsFolder}/bower_components/jquery-ui/themes/redmond/jquery-ui-1.10.4-custom.css",
 "${pageContext.request.contextPath}/themes/dev/containers/bg.css",
 "${pageContext.request.contextPath}/themes/dev/lists/bg.css",
 "${pageContext.request.contextPath}/themes/dev/buttons/bg.css",
@@ -236,8 +236,8 @@ Page Specific
 <link rel="stylesheet" href="${pageContext.request.contextPath}/themes/dev/pageSpecific/systemError.css" type="text/css" media="screen,print"/>
 
 <%--TODO: move to commmon themes approach--%>
-<link rel="stylesheet" href="${pageContext.request.contextPath}/scripts/bower_components/jquery-ui/themes/jquery.ui.theme.css" type="text/css" media="screen,print"/>
-<link rel="stylesheet" href="${pageContext.request.contextPath}/scripts/bower_components/jquery-ui/themes/redmond/jquery-ui-1.10.4-custom.css" type="text/css" media="screen">
+<link rel="stylesheet" href="${pageContext.request.contextPath}/${scriptsFolder}/bower_components/jquery-ui/themes/jquery.ui.theme.css" type="text/css" media="screen,print"/>
+<link rel="stylesheet" href="${pageContext.request.contextPath}/${scriptsFolder}/bower_components/jquery-ui/themes/redmond/jquery-ui-1.10.4-custom.css" type="text/css" media="screen">
 
 <link rel="stylesheet" href="${pageContext.request.contextPath}/themes/dev/containers/bg.css" type="text/css" media="screen,print"/>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/themes/dev/lists/bg.css" type="text/css" media="screen,print"/>

@@ -48,12 +48,15 @@ import java.util.*;
  * <p>Filters resources by resourceType field.</p>
  *
  * @author Yuriy Plakosh
- * @version $Id: ResourceTypeFilter.java 62483 2016-04-12 17:26:07Z akasych $
+ * @version $Id: ResourceTypeFilter.java 66432 2017-03-10 22:04:59Z esytnik $
  */
+@SuppressWarnings("serial")
 public class ResourceTypeFilter extends BaseSearchFilter implements Serializable {
     private Map<String, List<String>> filterOptionToResourceTypes;
-    private ResourceFactory persistentClassMappings;
-    private Map<String, List<String>> persistentResourceTypesCache =
+	@SuppressWarnings("unused")
+	private ResourceFactory persistentClassMappings;
+    @SuppressWarnings("unused")
+	private Map<String, List<String>> persistentResourceTypesCache =
             Collections.synchronizedMap(new HashMap<String, List<String>>());
 
     public void setFilterOptionToResourceTypes(Map<String, List<String>> filterOptionToResourceTypes) {
@@ -89,7 +92,7 @@ public class ResourceTypeFilter extends BaseSearchFilter implements Serializable
                     boolean extractTopics = types.remove("com.jaspersoft.commons.semantic.datasource.Topic");
                     boolean filterSecureFileType = types.remove(FileResource.TYPE_SECURE_FILE);
 
-                    Criterion criterion = types.isEmpty() ? null : Restrictions.in("resourceType", types);
+                    Criterion criterion = types.isEmpty()  ? null : Restrictions.in("resourceType", types);
 
                     // TODO: implement generic solution handling any fileType of FileResource
                     if (filterSecureFileType && types.contains(FileResource.class.getName())) {
@@ -120,7 +123,8 @@ public class ResourceTypeFilter extends BaseSearchFilter implements Serializable
 
                         Criterion isNotAdHoc = Restrictions.or(
                                 Restrictions.isNull("rds.resourceType"),
-                                Restrictions.ne("rds.resourceType", "com.jaspersoft.ji.adhoc.AdhocDataView"));
+                                Restrictions.and(Restrictions.ne("rds.resourceType", "com.jaspersoft.ji.adhoc.AdhocDataView"),
+                                Restrictions.ne("rds.resourceType", "com.jaspersoft.commons.semantic.datasource.SemanticLayerDataSource")));
 
                         Criterion hasPublicTopicsFolderUri = Restrictions.like("p.URI", "/public/adhoc/topics%");
                         Criterion hasOrganizationTopicsFolderUri = Restrictions.like("p.URI", "/organizations/%/adhoc/topics%");
@@ -134,8 +138,9 @@ public class ResourceTypeFilter extends BaseSearchFilter implements Serializable
                                 .setProjection(Projections.property("U.id"));
 
                         Criterion isReportUnit = Restrictions.eq("resourceType", ReportUnit.class.getName());
-                        Criterion isTopic = Restrictions.and(isReportUnit, Subqueries.exists(notAdhocReportsCriteria));
-
+                        Criterion isTopic =
+                         		Restrictions.and(isReportUnit, Subqueries.exists(notAdhocReportsCriteria));
+                        		
                         criterion = criterion == null ? isTopic : Restrictions.or(criterion, isTopic);
                     }
 

@@ -22,6 +22,7 @@ package com.jaspersoft.jasperserver.dto.resources.domain;
 
 import com.jaspersoft.jasperserver.dto.resources.ClientResource;
 
+import javax.validation.Valid;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlElements;
@@ -33,10 +34,11 @@ import java.util.List;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: ClientDomainSchema.java 62441 2016-04-11 14:52:39Z ykovalch $
+ * @version $Id: ClientDomainSchema.java 64791 2016-10-12 15:08:37Z ykovalch $
  */
 @XmlRootElement(name = "domainSchema")
 public class ClientDomainSchema extends ClientResource<ClientDomainSchema> {
+    @Valid
     private final Schema schema;
 
     public ClientDomainSchema(){

@@ -1,31 +1,33 @@
 package com.jaspersoft.jasperserver.dto.resources.domain;
 
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import com.jaspersoft.jasperserver.dto.adhoc.query.el.ClientExpressionContainer;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.ArrayList;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 /**
  * <p/>
  * <p/>
  *
  * @author tetiana.iefimenko
- * @version $Id: ResourceGroupElementTest.java 60839 2016-02-12 15:37:14Z ykovalch $
+ * @version $Id: ResourceGroupElementTest.java 64791 2016-10-12 15:08:37Z ykovalch $
  * @see
  */
 public class ResourceGroupElementTest {
 
     public static final String ELEMENT_NAME = "name";
-    public static final String FILTER_EXPRESSION = "FilterExpression";
+    public static final ClientExpressionContainer FILTER_EXPRESSION = new ClientExpressionContainer().setString("FilterExpression");
     public static final String SOURCE_NAME = "SourceName";
     ResourceGroupElement sourceElement;
     ResourceGroupElement clonedElement;
 
-    @BeforeMethod
+    @Before
     public void setUp() {
         sourceElement = new ResourceGroupElement()
                 .setName(ELEMENT_NAME)

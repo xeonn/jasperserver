@@ -22,7 +22,7 @@
 
 /**
  * @author: Olesya Bobruyko
- * @version: $Id: resizablePanelTrait.js 1605 2015-09-23 17:55:32Z inestere $
+ * @version: $Id: resizablePanelTrait.js 2956 2016-07-27 19:22:11Z inestere $
  */
 
 define(function(require){
@@ -31,8 +31,8 @@ define(function(require){
     var _ = require("underscore"),
         abstractPanelTrait = require("./abstractPanelTrait");
 
-    require("jquery.ui");
-    require("csslink!jquery-ui-custom-css");
+    require("css!jquery-ui/jquery-ui");
+    require("jquery-ui/jquery.ui.resizable");
 
     /**
      * @event resizablePanelTrait#resize

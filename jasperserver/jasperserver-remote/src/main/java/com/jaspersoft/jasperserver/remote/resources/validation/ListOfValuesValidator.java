@@ -30,9 +30,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import static com.jaspersoft.jasperserver.remote.resources.validation.ValidationHelper.addIllegalParameterValueError;
-import static com.jaspersoft.jasperserver.remote.resources.validation.ValidationHelper.addMandatoryParameterNotFoundError;
-import static com.jaspersoft.jasperserver.remote.resources.validation.ValidationHelper.empty;
+import static com.jaspersoft.jasperserver.remote.resources.validation.ValidationHelper.*;
 
 /**
  * <p></p>

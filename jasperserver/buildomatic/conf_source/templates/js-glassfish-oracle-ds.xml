@@ -51,6 +51,7 @@
         <property name="password" value="${escapeXML:sugarcrm.dbPassword}"/>
         <property name="url" value="${sugarcrm.jdbcUrl}"/>
         <property name="${sidOrSnParam}" value="${sidOrSnValue}"/>
+        <property name="CatalogOptions" value="0"/>
         <property name="portNumber" value="${dbPort}"/>
 		 <property name="JDBC30DataSource" value="true"/>
     </jdbc-connection-pool>
@@ -69,6 +70,7 @@
         <property name="url" value="${foodmart.jdbcUrl}"/>
         <property name="${sidOrSnParam}" value="${sidOrSnValue}"/>
         <property name="portNumber" value="${dbPort}"/>
+        <property name="CatalogOptions" value="0"/>
 		<property name="JDBC30DataSource" value="true"/>
     </jdbc-connection-pool>
 

@@ -20,11 +20,14 @@
 */
 package com.jaspersoft.jasperserver.dto.resources.domain;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.jaspersoft.jasperserver.dto.adhoc.query.el.ClientExpressionContainer;
+
+import javax.validation.Valid;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlElements;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <p></p>
@@ -32,16 +35,21 @@ import javax.xml.bind.annotation.XmlElements;
  * This class is abstract. Use ResourceGroupElement.Builder if you need to instantiate group itself.
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: AbstractResourceGroupElement.java 61746 2016-03-14 13:23:04Z tiefimen $
+ * @version $Id: AbstractResourceGroupElement.java 64791 2016-10-12 15:08:37Z ykovalch $
  */
 public abstract class AbstractResourceGroupElement<T extends AbstractResourceGroupElement<T>> extends ResourceElement<T> {
+    @Valid
     private List<SchemaElement> elements;
-    private String filterExpression;
+    @Valid
+    private ClientExpressionContainer filterExpression;
 
     public AbstractResourceGroupElement(){}
     public AbstractResourceGroupElement(AbstractResourceGroupElement<T> source) {
         super(source);
-        filterExpression = source.getFilterExpression();
+        final ClientExpressionContainer sourceFilterExpression = source.getFilterExpression();
+        if(sourceFilterExpression != null){
+            filterExpression = new ClientExpressionContainer(sourceFilterExpression);
+        }
         final List<SchemaElement> sourceElements = source.getElements();
         if(sourceElements != null){
             List<SchemaElement> clonedElements = new ArrayList<SchemaElement>(sourceElements.size());
@@ -61,6 +69,7 @@ public abstract class AbstractResourceGroupElement<T extends AbstractResourceGro
             @XmlElement(name = "element", type = ResourceSingleElement.class),
             @XmlElement(name = "element", type = ResourceMetadataSingleElement.class)
     })
+
     public List<SchemaElement> getElements() {
         return elements;
     }
@@ -70,11 +79,11 @@ public abstract class AbstractResourceGroupElement<T extends AbstractResourceGro
         return (T) this;
     }
 
-    public String getFilterExpression() {
+    public ClientExpressionContainer getFilterExpression() {
         return filterExpression;
     }
 
-    public T setFilterExpression(String filterExpression) {
+    public T setFilterExpression(ClientExpressionContainer filterExpression) {
         this.filterExpression = filterExpression;
         return (T) this;
     }

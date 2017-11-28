@@ -22,22 +22,27 @@
 package com.jaspersoft.jasperserver.search.filter;
 
 import java.io.Serializable;
+import java.util.List;
 
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Folder;
+import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.persistent.RepoResourceItem;
 import com.jaspersoft.jasperserver.api.search.SearchCriteria;
+import com.jaspersoft.jasperserver.dto.resources.ClientResourceLookup;
 import com.jaspersoft.jasperserver.search.common.SearchAttributes;
 import com.jaspersoft.jasperserver.search.mode.SearchMode;
 import com.jaspersoft.jasperserver.search.service.RepositorySearchCriteria;
 import com.jaspersoft.jasperserver.war.common.RoleAccessUrisResolver;
 import com.jaspersoft.jasperserver.war.common.UriDescriptor;
+
+import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.Restrictions;
 
 /**
  * Folder filter.
  *
  * @author Stas Shubar
- * @version $Id: FolderFilter.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: FolderFilter.java 66432 2017-03-10 22:04:59Z esytnik $
  */
 public class FolderFilter extends BaseSearchFilter implements Serializable {
     private RoleAccessUrisResolver roleAccessUrisResolver;
@@ -49,26 +54,52 @@ public class FolderFilter extends BaseSearchFilter implements Serializable {
     public void applyRestrictions(String type, ExecutionContext context, SearchCriteria criteria) {
         SearchMode searchMode = null;
         String folderUri = null;
+        List<ClientResourceLookup> resources = null;
         SearchAttributes searchAttributes = getSearchAttributes(context);
+        RepositorySearchCriteria searchCriteria = null;
         if(searchAttributes != null){
             searchMode = searchAttributes.getMode();
             folderUri = searchAttributes.getState() != null ? searchAttributes.getState().getFolderUri() : null;
         }else{
-            RepositorySearchCriteria searchCriteria = getTypedAttribute(context, RepositorySearchCriteria.class);
+            searchCriteria = getTypedAttribute(context, RepositorySearchCriteria.class);
             if(searchCriteria != null){
                 searchMode = searchCriteria.getSearchMode();
                 folderUri = searchCriteria.getFolderUri();
+                resources = searchCriteria.getResources();
             }
         }
 
-        if (folderUri != null) {
+        boolean useStrict = SearchMode.BROWSE == searchMode;
+//        &&
+//        		(	searchCriteria==null 
+//        			|| !RepoResourceItem.class.getName().equals(searchCriteria.getLookupClass())
+//        );
+        
+        if(resources!=null && !resources.isEmpty()){
+            String alias = criteria.getAlias("parent", "p");
+            Disjunction uriDisjunction = Restrictions.disjunction();
+            boolean addPublic = true;
+            for(ClientResourceLookup resource:resources){
+            	
+	            String absoluteUri = roleAccessUrisResolver.getAbsoluteUri(resource.getUri());
+	
+	            if (useStrict ) {
+	                uriDisjunction.add(Restrictions.eq(alias + ".URI", absoluteUri));
+	            } else { // Other modes are search like at the moment.
+	                addPublic = addSearchModeFolderRestrictions(criteria, uriDisjunction, absoluteUri, alias, addPublic);
+	            }
+            }
+            criteria.add(uriDisjunction);
+            addRoleAccessUrlsRestrictions(criteria);
+        	
+        } else if (folderUri != null) {
             String absoluteUri = roleAccessUrisResolver.getAbsoluteUri(folderUri);
 
             String alias = criteria.getAlias("parent", "p");
-            if (SearchMode.BROWSE == searchMode) {
+            if (useStrict) {
                 criteria.add(Restrictions.eq(alias + ".URI", absoluteUri));
             } else { // Other modes are search like at the moment.
-                addSearchModeFolderRestrictions(criteria, absoluteUri, alias);
+                addSearchModeFolderRestrictions(criteria, null, absoluteUri, alias, true);
             }
 
             addRoleAccessUrlsRestrictions(criteria);
@@ -79,9 +110,15 @@ public class FolderFilter extends BaseSearchFilter implements Serializable {
         return (folderUri.endsWith(Folder.SEPARATOR)) ? folderUri + "%" : folderUri + Folder.SEPARATOR + "%";
     }
 
-    protected void addSearchModeFolderRestrictions(SearchCriteria criteria, String folderUri, String alias) {
-        criteria.add(Restrictions.or(Restrictions.like(alias + ".URI", createSubFoldersLikeUri(folderUri)),
+    protected boolean addSearchModeFolderRestrictions(SearchCriteria criteria, Disjunction disjunction, String folderUri, String alias, boolean addPublic) {
+    	if(disjunction!=null){
+    		disjunction.add(Restrictions.or(Restrictions.like(alias + ".URI", createSubFoldersLikeUri(folderUri)),
                 Restrictions.eq(alias + ".URI", folderUri)));
+    	} else {
+    		criteria.add(Restrictions.or(Restrictions.like(alias + ".URI", createSubFoldersLikeUri(folderUri)),
+                Restrictions.eq(alias + ".URI", folderUri)));
+    	}
+    	return addPublic;
     }
 
     private void addRoleAccessUrlsRestrictions(SearchCriteria criteria) {

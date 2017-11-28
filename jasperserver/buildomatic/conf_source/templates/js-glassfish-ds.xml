@@ -13,13 +13,6 @@
         <property name="password" value="${escapeXML:js.dbPassword}"/>
         <property name="url" value="${js.jdbcUrl}"/>
         <property name="databaseName" value="${js.dbName}"/>
-        <property name="driverType" value="${db2.driverType}"/>
-        <property name="portNumber" value="${dbPort}"/>
-        <property name="currentSchema" value="${js.dbName}"/>
-        <property name="fullyMaterializeLobData" value="${db2.fullyMaterializeLobData}"/>
-        <property name="fullyMaterializeInputStreams" value="${db2.fullyMaterializeInputStreams}"/>
-        <property name="progressiveStreaming" value="${db2.progressiveStreaming}"/>
-        <property name="progresssiveLocators" value="${db2.progresssiveLocators}"/>
 		<property name="JDBC30DataSource" value="true"/>
     </jdbc-connection-pool>
 
@@ -36,9 +29,7 @@
         <property name="password" value="${escapeXML:sugarcrm.dbPassword}"/>
         <property name="url" value="${sugarcrm.jdbcUrl}"/>
         <property name="databaseName" value="${sugarcrm.dbName}"/>
-        <property name="driverType" value="${db2.driverType}"/>
         <property name="portNumber" value="${dbPort}"/>
-        <property name="currentSchema" value="${sugarcrm.dbName}"/>
 		 <property name="JDBC30DataSource" value="true"/>
     </jdbc-connection-pool>
 
@@ -55,9 +46,7 @@
         <property name="password" value="${escapeXML:foodmart.dbPassword}"/>
         <property name="url" value="${foodmart.jdbcUrl}"/>
         <property name="databaseName" value="${foodmart.dbName}"/>
-        <property name="driverType" value="${db2.driverType}"/>
         <property name="portNumber" value="${dbPort}"/>
-        <property name="currentSchema" value="${foodmart.dbName}"/>
 		<property name="JDBC30DataSource" value="true"/>
     </jdbc-connection-pool>
 

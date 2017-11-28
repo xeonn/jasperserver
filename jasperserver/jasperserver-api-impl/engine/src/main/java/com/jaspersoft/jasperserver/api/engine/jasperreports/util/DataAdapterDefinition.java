@@ -23,6 +23,8 @@ package com.jaspersoft.jasperserver.api.engine.jasperreports.util;
 
 import com.jaspersoft.jasperserver.api.common.domain.impl.ExecutionContextImpl;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl.RepositoryContextManager;
+import com.jaspersoft.jasperserver.api.engine.jasperreports.util.repo.RepositoryURLHandlerFactory;
+import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.CustomDomainMetaData;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.CustomDomainMetaDataProvider;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.CustomReportDataSource;
@@ -35,6 +37,7 @@ import net.sf.jasperreports.data.DataAdapter;
 import net.sf.jasperreports.data.DataAdapterService;
 import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JRField;
 import net.sf.jasperreports.engine.JRParameter;
 import net.sf.jasperreports.engine.JRValueParameter;
 import net.sf.jasperreports.engine.JasperReportsContext;
@@ -42,6 +45,7 @@ import net.sf.jasperreports.engine.design.JRDesignDataset;
 import net.sf.jasperreports.engine.query.JRQueryExecuter;
 import net.sf.jasperreports.engine.query.QueryExecuterFactory;
 import net.sf.jasperreports.engine.util.JRQueryExecuterUtils;
+import net.sf.jasperreports.engine.util.LocalJasperReportsContext;
 import net.sf.jasperreports.repo.DataAdapterResource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -70,13 +74,18 @@ public abstract class DataAdapterDefinition extends CustomDataSourceDefinition i
     String dataAdapterClassName = null;
     String dataAdapterUri = null;
     DataAdapter dataAdapter = null;
+    boolean retainMetaDataWithDataSourceEnabled = false;
     PropertyDescriptor[] propertyDescriptors = null;
     public static String DEFAULT_DATA_ADAPTER_DS = "dataAdapterDS";
     private Set<String> additionalPropertySet = new HashSet<String>();
     private Set<String> hiddenPropertySet = new HashSet<String>();         // a set of hidden properties
     private Map<String, String> propertyDefaultValueMap = new HashMap<String, String>();    // default value for properties
     public static String DATA_ADAPTER_SERVICE_CLASS = "com.jaspersoft.jasperserver.api.metadata.jasperreports.service.ReportDataAdapterService";  // report data adapter service
-
+    private static String METADATAFIELDNAMES = "MetaDataFieldNames";
+    private static String METADATAFIELDTYPES = "MetaDataFieldTypes";
+    private static String METADATAFIELDDESCS = "MetaDataFieldDescriptions";
+    // repo custom data source property map value size limit is defined in RepoCustomDataSource.hbm.xml
+    private static int REPOCUSTOMDATASOURCEPROPSIZELIMIT = 1000;
     @Resource(name = "concreteTenantService")
     private TenantService tenantService;
     @Resource(name = "concreteRepositoryContextManager")
@@ -91,6 +100,10 @@ public abstract class DataAdapterDefinition extends CustomDataSourceDefinition i
     public DataAdapterDefinition() {
         // set default data service for data adapter
         setServiceClassName(DATA_ADAPTER_SERVICE_CLASS);
+        Set<String> hiddenPropertySet = getHiddenPropertySet();
+        hiddenPropertySet.add(METADATAFIELDNAMES);
+        hiddenPropertySet.add(METADATAFIELDTYPES);
+        hiddenPropertySet.add(METADATAFIELDDESCS);
     }
 
     public void setJasperReportsContext(JasperReportsContext jasperReportsContext) {
@@ -142,7 +155,7 @@ public abstract class DataAdapterDefinition extends CustomDataSourceDefinition i
         if ((dataAdapterUri != null) && !dataAdapterUri.equals("")) {
             try {
                 log.debug("DATA ADAPTER URI = " + dataAdapterUri);
-                DataAdapterResource dataAdapterResource = net.sf.jasperreports.repo.RepositoryUtil.getInstance(jasperReportsContext).getResourceFromLocation(dataAdapterUri, DataAdapterResource.class);
+                DataAdapterResource dataAdapterResource = net.sf.jasperreports.repo.RepositoryUtil.getInstance(getLocalJasperReportsContext()).getResourceFromLocation(dataAdapterUri, DataAdapterResource.class);
                 DataAdapter dataAdapter = dataAdapterResource.getDataAdapter();
                 setPropertyDefinitions(dataAdapter);
             } catch (Exception ex) {
@@ -205,7 +218,7 @@ public abstract class DataAdapterDefinition extends CustomDataSourceDefinition i
             if (service != null) {
                 // set data adapter to the service
                 ((ReportDataAdapterService) service).setDataAdapter(dataAdapter);
-                ((ReportDataAdapterService) service).setDataAdapterService(getDataAdapterService(jasperReportsContext, dataAdapter));
+                ((ReportDataAdapterService) service).setDataAdapterService(getDataAdapterService(getLocalJasperReportsContext(), dataAdapter));
                 // repository URI of data file is tenant dependent. E.g. for root organization is /organizations/organization_1/someFolder/dataFile.csv
                 // and for jasperadmin on organization_1 it's /someFolder/dataFile.csv
                 // let's find user's tenant to allow service to find a data file correctly
@@ -308,7 +321,7 @@ public abstract class DataAdapterDefinition extends CustomDataSourceDefinition i
     public QueryExecuterFactory getQueryExecuterFactory() throws JRException {
         if (getQueryExecuterMap() != null) {
             for (Map.Entry<String, String> queryExecuterEntry : getQueryExecuterMap().entrySet()) {
-                return JRQueryExecuterUtils.getInstance(jasperReportsContext).getExecuterFactory(queryExecuterEntry.getKey());
+                return JRQueryExecuterUtils.getInstance(getLocalJasperReportsContext()).getExecuterFactory(queryExecuterEntry.getKey());
             }
         }
         return null;
@@ -321,7 +334,7 @@ public abstract class DataAdapterDefinition extends CustomDataSourceDefinition i
         try {
             // setup thread repository context for looking up data source file from repo
             repositoryContextManager.setRepositoryContext(ExecutionContextImpl.getRuntimeExecutionContext(), "/ignore", null);
-            DataAdapterService dataAdapterService = getDataAdapterService(jasperReportsContext, dataAdapter);
+            DataAdapterService dataAdapterService = getDataAdapterService(getLocalJasperReportsContext(), dataAdapter);
             Map<String,Object> parameterValues = new HashMap<String, Object>();
             dataAdapterService.contributeParameters(parameterValues);
             JRDataSource dataSource = (JRDataSource) parameterValues.get(JRParameter.REPORT_DATA_SOURCE);
@@ -330,7 +343,7 @@ public abstract class DataAdapterDefinition extends CustomDataSourceDefinition i
                 // convert your param map to fill params...
                 Map<String, ? extends JRValueParameter>  fillParams = DataAdapterDefinitionUtil.convertToFillParameters(parameterValues, queryExecuterFactory.getBuiltinParameters());
                 // and pass it all to the factory to get the queryExecuter
-                JRQueryExecuter queryExecuter = queryExecuterFactory.createQueryExecuter(jasperReportsContext, new JRDesignDataset(false), fillParams);
+                JRQueryExecuter queryExecuter = queryExecuterFactory.createQueryExecuter(getLocalJasperReportsContext(), new JRDesignDataset(false), fillParams);
                 // ok, now we're in the innermost Russian doll...let's get our JRDatasource!
                 dataSource = queryExecuter.createDatasource();
             }
@@ -342,7 +355,37 @@ public abstract class DataAdapterDefinition extends CustomDataSourceDefinition i
     }
 
     public DataAdapterService getDataAdapterService(JasperReportsContext jasperReportsContext, DataAdapter dataAdapter) {
-            return ReportDataAdapterService.getDataAdapterService(jasperReportsContext, dataAdapter);
+            return ReportDataAdapterService.getDataAdapterService(getLocalJasperReportsContext(), dataAdapter);
+    }
+
+    public CustomDomainMetaData retrieveCustomDomainMetaData(CustomReportDataSource customReportDataSource, RepositoryService repository) throws Exception {
+        // check whether it is ok to read metadata from data source object property map
+        if (isRetainMetaDataWithDataSourceEnabled()) {
+            boolean containsMetaData = (customReportDataSource.getPropertyMap().get(METADATAFIELDNAMES) != null);
+            if (containsMetaData) {
+                // if metadata is already existed inside data source, load metadata directly from data source
+                return loadCustomDomainMetaDataToDataSource(customReportDataSource, getQueryLanguage());
+            }
+            CustomDomainMetaData metaData = getCustomDomainMetaData(customReportDataSource);
+            // set metadata properties inside data source object
+            saveCustomDomainMetaDataToDataSource(metaData, customReportDataSource);
+            // over-write data source object in repo with metadata properties
+            if (!containsMetaData && (customReportDataSource.getPropertyMap().get(METADATAFIELDNAMES) != null)) {
+                String isWrappedInVDS = (String) customReportDataSource.getPropertyMap().get(CustomJDBCReportDataSourceServiceFactory.IS_WRAPPED_DATASOURCE);
+                // remove temporary property, for example: IS_WRAPPED_DATASOURCE, before saving the resource
+                if (isWrappedInVDS != null) customReportDataSource.getPropertyMap().remove(CustomJDBCReportDataSourceServiceFactory.IS_WRAPPED_DATASOURCE);
+                try {
+                    repository.saveResource(null, customReportDataSource);
+                } catch (Exception ex) {
+                    log.error("Fail to cache metadata info in custom data source: " + ex.getMessage(), ex);
+                }
+                customReportDataSource.getPropertyMap().put(CustomJDBCReportDataSourceServiceFactory.IS_WRAPPED_DATASOURCE, isWrappedInVDS);
+            }
+            return metaData;
+        } else {
+            // retrieving metadata layer from fresh
+            return getCustomDomainMetaData(customReportDataSource);
+        }
     }
 
 
@@ -367,4 +410,82 @@ public abstract class DataAdapterDefinition extends CustomDataSourceDefinition i
         return getJRDataSource(dataAdapter);
     }
 
+    // set metadata properties inside data source object
+    private void saveCustomDomainMetaDataToDataSource(CustomDomainMetaData customDomainMetaData, CustomReportDataSource customDataSource) {
+        if (!isRetainMetaDataWithDataSourceEnabled()) return;
+        List<String> metaDataFieldNames = new ArrayList<String>();
+        List<String> metaDataFieldTypes = new ArrayList<String>();
+        List<String> metaDataFieldDescs = new ArrayList<String>();
+        for (JRField jrField: customDomainMetaData.getJRFieldList()) {
+            metaDataFieldNames.add(jrField.getName());
+            metaDataFieldTypes.add(jrField.getValueClassName());
+            metaDataFieldDescs.add(jrField.getDescription());
+        }
+        String metaDataFieldNamesStrValue = DataAdapterDefinitionUtil.toString(metaDataFieldNames, List.class);
+        if (metaDataFieldNamesStrValue.length() > REPOCUSTOMDATASOURCEPROPSIZELIMIT) {
+            log.info("MetaData field name info is too large to cache in repo custom data source.");
+            return;
+        }
+        String metaDataFieldTypesStrValue = DataAdapterDefinitionUtil.toString(metaDataFieldTypes, List.class);
+        if (metaDataFieldTypesStrValue.length() > REPOCUSTOMDATASOURCEPROPSIZELIMIT) {
+            log.info("MetaData field type info is too large to cache in repo custom data source.");
+            return;
+        }
+        String metaDataFieldDescsStrValue = DataAdapterDefinitionUtil.toString(metaDataFieldDescs, List.class);
+        if (metaDataFieldDescsStrValue.length() > REPOCUSTOMDATASOURCEPROPSIZELIMIT) {
+            log.info("MetaData field description info is too large to cache in repo custom data source.");
+            return;
+        }
+        customDataSource.getPropertyMap().put(METADATAFIELDNAMES, metaDataFieldNamesStrValue);
+        customDataSource.getPropertyMap().put(METADATAFIELDTYPES, metaDataFieldTypesStrValue);
+        customDataSource.getPropertyMap().put(METADATAFIELDDESCS, metaDataFieldDescsStrValue);
+    }
+
+    // if metadata is already existed inside data source, load metadata directly from data source
+    private CustomDomainMetaData loadCustomDomainMetaDataToDataSource(CustomReportDataSource customDataSource, String queryLanguage) {
+        ArrayList<String> metaDataFieldNames  = (ArrayList<String>) DataAdapterDefinitionUtil.toObject((String)customDataSource.getPropertyMap().get(METADATAFIELDNAMES), List.class);
+        ArrayList<String> metaDataFieldTypes  = (ArrayList<String>) DataAdapterDefinitionUtil.toObject((String)customDataSource.getPropertyMap().get(METADATAFIELDTYPES), List.class);
+        ArrayList<String> metaDataFieldDescs  = (ArrayList<String>) DataAdapterDefinitionUtil.toObject((String)customDataSource.getPropertyMap().get(METADATAFIELDDESCS), List.class);
+        Map<String, String> fieldMapping = AbstractTextDataSourceDefinition.getFieldMapping(metaDataFieldNames);
+        // create TableSourceMetadata object
+        CustomDomainMetaDataImpl sourceMetadata = new CustomDomainMetaDataImpl();
+        sourceMetadata.setQueryLanguage(queryLanguage);
+        sourceMetadata.setFieldNames(metaDataFieldNames);
+        if (metaDataFieldDescs != null) sourceMetadata.setFieldDescriptions(metaDataFieldDescs);
+        sourceMetadata.setFieldMapping(fieldMapping);
+        // set default column data type based on the actual data
+        sourceMetadata.setFieldTypes(metaDataFieldTypes);
+        return sourceMetadata;
+    }
+
+    /**
+     *     this is a temporary workaround to change native metadata.
+     *     this feature will be removed in next release
+     */
+    public boolean isRetainMetaDataWithDataSourceEnabled() {
+        return retainMetaDataWithDataSourceEnabled;
+    }
+
+    /**
+     *     this is a temporary workaround to change native metadata.
+     *     this feature will be removed in next release
+     */
+    public void setRetainMetaDataWithDataSourceEnabled(boolean retainMetaDataWithDataSourceEnabled) {
+        this.retainMetaDataWithDataSourceEnabled = retainMetaDataWithDataSourceEnabled;
+    }
+
+    protected LocalJasperReportsContext getLocalJasperReportsContext() {
+        LocalJasperReportsContext localJasperReportsContext = new LocalJasperReportsContext(jasperReportsContext);
+        localJasperReportsContext.setURLStreamHandlerFactory(RepositoryURLHandlerFactory.getInstance());
+        return localJasperReportsContext;
+    }
+
+    protected String getQueryLanguage() throws JRException {
+        if (getQueryExecuterMap() != null) {
+            for (Map.Entry<String, String> queryExecuterEntry : getQueryExecuterMap().entrySet()) {
+                return queryExecuterEntry.getKey();
+            }
+        }
+        throw new JRException("Please define query language or query excuter map!");
+    }
 }

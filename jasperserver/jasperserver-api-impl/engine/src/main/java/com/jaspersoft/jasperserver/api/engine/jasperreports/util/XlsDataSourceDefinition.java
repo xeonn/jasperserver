@@ -26,7 +26,10 @@ import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.CustomDomai
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.CustomReportDataSource;
 import net.sf.jasperreports.data.xls.XlsDataAdapter;
 import net.sf.jasperreports.data.xls.XlsDataAdapterImpl;
-import net.sf.jasperreports.engine.data.JRXlsDataSource;
+import net.sf.jasperreports.engine.JRDataSource;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.data.XlsDataSource;
+import net.sf.jasperreports.engine.design.JRDesignField;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -59,9 +62,11 @@ public class XlsDataSourceDefinition  extends AbstractTextDataSourceDefinition {
         // hide the following properties from UI
         Set<String> hiddenPropertySet = getHiddenPropertySet();
         hiddenPropertySet.add("name");
+        hiddenPropertySet.add("dataFile");
         hiddenPropertySet.add("queryExecuterMode");
         hiddenPropertySet.add("columnIndexes");
         hiddenPropertySet.add("columnNames");
+        typeList = new Class[]{Boolean.class, Number.class, String.class};
     }
 
 
@@ -86,13 +91,13 @@ public class XlsDataSourceDefinition  extends AbstractTextDataSourceDefinition {
         boolean containsColumnNames = AbstractTextDataSourceDefinition.containsValue((List) propertyValueMap.get("columnNames"));
         List<String> fieldNames;
         Map<String, String> fieldMapping;
-        JRXlsDataSource xlsDataSource;
+        XlsDataSource xlsDataSource;
         if (!useFirstRowAsHeader && !containsColumnNames) {
             // force to use first row as header, so we can get the column count
             // then we can assign arbitrary names to columns
             xlsDataAdapter.setUseFirstRowAsHeader(true);
             // get JRDataSource from data adapter
-            xlsDataSource = (JRXlsDataSource)getJRDataSource(xlsDataAdapter);
+            xlsDataSource = (XlsDataSource)getJRDataSource(xlsDataAdapter);
             // get default JRField names
             fieldNames = getDefaultFieldNames(xlsDataSource);
             // create default name mapping <JRField Name, Display Name in Domain>
@@ -102,11 +107,11 @@ public class XlsDataSourceDefinition  extends AbstractTextDataSourceDefinition {
             // create a new JRDataSource without using first row as header
             // therefore, we can detect the data type starting from the first row of data
             xlsDataAdapter = (XlsDataAdapter) setupDataAdapter(xlsDataAdapter, propertyValueMap);
-            xlsDataSource = (JRXlsDataSource)getJRDataSource(xlsDataAdapter);
+            xlsDataSource = (XlsDataSource)getJRDataSource(xlsDataAdapter);
             xlsDataSource.next();
         } else {
             // get JRDataSource from data adapter
-            xlsDataSource = (JRXlsDataSource)getJRDataSource(xlsDataAdapter);
+            xlsDataSource = (XlsDataSource)getJRDataSource(xlsDataAdapter);
             // get default JRField names
             fieldNames = getFieldNames(xlsDataSource);
             // create default name mapping <JRField Name, Display Name in Domain>
@@ -114,7 +119,7 @@ public class XlsDataSourceDefinition  extends AbstractTextDataSourceDefinition {
         }
         // create TableSourceMetadata object
         CustomDomainMetaDataImpl sourceMetadata = new CustomDomainMetaDataImpl();
-        sourceMetadata.setQueryLanguage("xls");
+        sourceMetadata.setQueryLanguage(getQueryLanguage());
         sourceMetadata.setFieldNames(fieldNames);
         sourceMetadata.setFieldMapping(fieldMapping);
         // set default column data type based on the actual data
@@ -137,12 +142,13 @@ public class XlsDataSourceDefinition  extends AbstractTextDataSourceDefinition {
     }
 
     // get JRField names from JRDataSource
-    private List<String> getFieldNames(JRXlsDataSource xlsDataSource) throws Exception {
+    private List<String> getFieldNames(XlsDataSource xlsDataSource) throws Exception {
         // SET COLUMN NAMES
         if (!xlsDataSource.next()) return null;
         Map<String, Integer> columnNames = xlsDataSource.getColumnNames();
         String columnNameArray[] = new String[columnNames.size()];
         for (Map.Entry<String, Integer> entry : columnNames.entrySet()) {
+            isValidFieldName(entry.getKey());
             System.out.println("KEY = " + entry.getKey() + ", VAL = " + entry.getValue());
             columnNameArray[entry.getValue()] = entry.getKey();
         }
@@ -153,7 +159,7 @@ public class XlsDataSourceDefinition  extends AbstractTextDataSourceDefinition {
      * get arbitrary JRField names from JRDataSource (if header is not included in the data)
      * should be like COLUMN_1, COLUMN_2, COLUMN_3...
      */
-    private List<String> getDefaultFieldNames(JRXlsDataSource xlsDataSource) throws Exception {
+    private List<String> getDefaultFieldNames(XlsDataSource xlsDataSource) throws Exception {
         if (!xlsDataSource.next()) return null;
         int fieldCount = 0;
         Map<String, Integer> columnNames = xlsDataSource.getColumnNames();
@@ -165,6 +171,39 @@ public class XlsDataSourceDefinition  extends AbstractTextDataSourceDefinition {
             fieldNames.add("COLUMN_" + i);
         }
         return fieldNames;
+    }
+
+    protected String findType(JRDataSource csvDataSource, JRDesignField field) {
+
+        field.setValueClassName(String.class.getName());
+        field.setValueClass(String.class);
+        boolean isStrField = false;
+        try {
+            Object strValue = csvDataSource.getFieldValue(field);
+            isStrField = true;
+            if (getBooleanType(strValue.toString()) != null) Boolean.class.getName();
+            Class<?> numericType = getNumericType(strValue, field);
+            if (numericType != null) return numericType.getName();
+            // POI library return "" for numeric field also.
+            if (!strValue.equals("")) return "java.lang.String";
+        } catch (Exception ex) {
+        };
+        field.setValueClassName(Double.class.getName());
+        field.setValueClass(Double.class);
+        try {
+            Object numValue = csvDataSource.getFieldValue(field);
+            Class<?> numericType = getNumericType(numValue.toString(), field);
+            if (numericType != null) return numericType.getName();
+        } catch (Exception ex) {
+            if (isStrField) return "java.lang.String";
+        };
+        return null;
+    }
+
+    protected Class<?> getFieldType(Class<?> type) {
+        if (type == Boolean.class) return String.class;
+        if (type == Number.class) return Double.class;
+        else return type;
     }
 
     /**

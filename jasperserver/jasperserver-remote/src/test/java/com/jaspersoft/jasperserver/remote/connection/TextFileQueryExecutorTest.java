@@ -70,7 +70,7 @@ import static org.testng.Assert.fail;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: TextFileQueryExecutorTest.java 62954 2016-05-01 09:49:23Z ykovalch $
+ * @version $Id: TextFileQueryExecutorTest.java 64791 2016-10-12 15:08:37Z ykovalch $
  */
 public class TextFileQueryExecutorTest {
     @InjectMocks
@@ -180,41 +180,41 @@ public class TextFileQueryExecutorTest {
 
     @Test
     public void executeQuery_nullSafety(){
-        assertNull(queryExecutor.executeQuery(null, new ClientCustomDataSource()));
-        assertNull(queryExecutor.executeQuery(new TextFileQuery(), null));
-        assertNull(queryExecutor.executeQuery(null, null));
+        assertNull(queryExecutor.executeQuery(null, new ClientCustomDataSource(), null));
+        assertNull(queryExecutor.executeQuery(new TextFileQuery(), null, null));
+        assertNull(queryExecutor.executeQuery(null, null, null));
     }
 
     @Test
     public void executeQuery_allData(){
         final TextFileQuery query = new TextFileQuery().setSelect(new TextFileSelect().addColumn("field0", "field1", "field2"));
-        final List<List<String>> resultSet = (List<List<String>>) queryExecutor.executeQuery(query, connection);
+        final List<List<String>> resultSet = (List<List<String>>) queryExecutor.executeQuery(query, connection, null);
         assertResultSet(resultSet, query);
     }
 
     @Test
     public void executeQuery_paginationByTwoRows(){
         final TextFileQuery query = new TextFileQuery().setSelect(new TextFileSelect().addColumn("field0", "field1", "field2")).setLimit(2);
-        assertResultSet((List<List<String>>) queryExecutor.executeQuery(query, connection), query);
+        assertResultSet((List<List<String>>) queryExecutor.executeQuery(query, connection, null), query);
         query.setOffset(2);
-        assertResultSet((List<List<String>>) queryExecutor.executeQuery(query, connection), query);
+        assertResultSet((List<List<String>>) queryExecutor.executeQuery(query, connection, null), query);
         query.setOffset(4);
-        assertResultSet((List<List<String>>) queryExecutor.executeQuery(query, connection), query);
+        assertResultSet((List<List<String>>) queryExecutor.executeQuery(query, connection, null), query);
         query.setOffset(6);
-        assertResultSet((List<List<String>>) queryExecutor.executeQuery(query, connection), query);
+        assertResultSet((List<List<String>>) queryExecutor.executeQuery(query, connection, null), query);
     }
 
     @Test
     public void executeQuery_allData_randomColumns(){
         final TextFileQuery query = new TextFileQuery().setSelect(new TextFileSelect().addColumn("field2", "field0", "field1"));
-        final List<List<String>> resultSet = (List<List<String>>) queryExecutor.executeQuery(query, connection);
+        final List<List<String>> resultSet = (List<List<String>>) queryExecutor.executeQuery(query, connection, null);
         assertResultSet(resultSet, query);
     }
 
     @Test
     public void executeQuery_allData_twoColumns(){
         final TextFileQuery query = new TextFileQuery().setSelect(new TextFileSelect().addColumn("field2", "field0"));
-        final List<List<String>> resultSet = (List<List<String>>) queryExecutor.executeQuery(query, connection);
+        final List<List<String>> resultSet = (List<List<String>>) queryExecutor.executeQuery(query, connection, null);
         assertResultSet(resultSet, query);
     }
 
@@ -222,14 +222,14 @@ public class TextFileQueryExecutorTest {
     public void executeQuery_convert_ruleFieldsValidationForNull_column(){
         final TextFileQuery query = new TextFileQuery().setSelect(new TextFileSelect().addColumn("field2", "field0"))
                 .setConvert(new TextFileConvert().addRule(new TextFileCastConversionRule().setType(String.class.getName())));
-        queryExecutor.executeQuery(query, connection);
+        queryExecutor.executeQuery(query, connection, null);
     }
 
     @Test(expectedExceptions = MandatoryParameterNotFoundException.class)
     public void executeQuery_convert_ruleFieldsValidationForNull_type(){
         final TextFileQuery query = new TextFileQuery().setSelect(new TextFileSelect().addColumn("field2", "field0"))
                 .setConvert(new TextFileConvert().addRule(new TextFileCastConversionRule().setColumn("someColumn")));
-        queryExecutor.executeQuery(query, connection);
+        queryExecutor.executeQuery(query, connection, null);
     }
 
     @Test
@@ -239,7 +239,7 @@ public class TextFileQueryExecutorTest {
                         .addRule(new TextFileCastConversionRule().setColumn("field0").setType(Integer.class.getName()))
                         .addRule(new TextFileCastConversionRule().setColumn("field2").setType(BigDecimal.class.getName()))
                 );
-        queryExecutor.executeQuery(query, connection);
+        queryExecutor.executeQuery(query, connection, null);
         assertNotNull(jrDataSourceStub);
         final List<JRField> requestedFields = jrDataSourceStub.getRequestedFields();
         assertNotNull(requestedFields);

@@ -43,6 +43,7 @@ define(function (require) {
                 "update": true,
                 "skipUserUpdate": false,
                 "mergeOrganization": false,
+                "skipThemes": true,
                 "brokenDependencies": BrokenDependencyStrategyEnum.FAIL
             },
 
@@ -74,7 +75,7 @@ define(function (require) {
                 if (this.isNew()) {
                     result = new $.Deferred();
                     this.form.submit().done(function (responce) {
-                        self.id = responce.id;
+                        self.set("id",responce.id);
                         if (_.isUndefined(responce.errorCode) && _.isUndefined(responce.error)) {
                             result.resolve(responce);
                         } else {

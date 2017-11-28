@@ -22,7 +22,7 @@
 
 /**
  * @author: Zakhar Tomchenko, Igor Nesterenko, Andrew Godovanec, Sergey Prilukin
- * @version: $Id: bundle.js 9909 2016-02-25 19:56:31Z dgorbenk $
+ * @version: $Id: bundle.js 10251 2016-08-24 17:18:48Z asokolni $
  */
 
 define(function (require) {
@@ -32,7 +32,7 @@ define(function (require) {
         requestSettings = require("requestSettings"),
         _ = require("underscore"),
         configs = require("jrs.configs"),
-        urlRoot = configs.contextPath + "/rest_v2/bundles";
+        urlRoot = configs.runtimeContextPath + "/rest_v2/bundles";
 
     // use bundle name "all" to get all available bundles merged to single bundle
     var MERGED_BUNDLES_NAME = "all";

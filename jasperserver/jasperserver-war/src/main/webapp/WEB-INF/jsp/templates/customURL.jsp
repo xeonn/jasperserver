@@ -42,7 +42,7 @@ Usage:
 <t:useAttribute id="selectFileButtonId" name="selectFileButtonId" classname="java.lang.String" ignore="true"/>
 <t:useAttribute id="cancelButtonId" name="cancelButtonId" classname="java.lang.String" ignore="true"/>
 
-<!--/WEB-INF/jsp/templates/customURL.jsp revision A-->
+
 <t:insertTemplate template="/WEB-INF/jsp/templates/container.jsp">
     <t:putAttribute name="containerClass">panel dialog customURL overlay sizeable centered_vert centered_horz moveable ${containerClass}</t:putAttribute>
     <t:putAttribute name="containerID" value="customURL"/>

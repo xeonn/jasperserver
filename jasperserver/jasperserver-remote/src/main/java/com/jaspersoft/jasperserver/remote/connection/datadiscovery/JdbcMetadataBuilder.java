@@ -20,15 +20,12 @@
 */
 package com.jaspersoft.jasperserver.remote.connection.datadiscovery;
 
-import com.jaspersoft.jasperserver.api.common.error.handling.SecureExceptionHandler;
+import com.jaspersoft.jasperserver.api.JSExceptionWrapper;
+import com.jaspersoft.jasperserver.api.metadata.common.service.JSResourceNotFoundException;
 import com.jaspersoft.jasperserver.dto.resources.domain.AbstractResourceGroupElement;
 import com.jaspersoft.jasperserver.dto.resources.domain.ResourceGroupElement;
 import com.jaspersoft.jasperserver.dto.resources.domain.ResourceMetadataSingleElement;
 import com.jaspersoft.jasperserver.dto.resources.domain.SchemaElement;
-import com.jaspersoft.jasperserver.remote.exception.RemoteException;
-import org.springframework.stereotype.Service;
-
-import javax.annotation.Resource;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -47,13 +44,9 @@ import java.util.Set;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: JdbcMetadataBuilder.java 61788 2016-03-15 13:35:35Z ykovalch $
+ * @version $Id: JdbcMetadataBuilder.java 64791 2016-10-12 15:08:37Z ykovalch $
  */
-@Service
 public class JdbcMetadataBuilder implements MetadataBuilder<Connection> {
-
-    @Resource
-    private SecureExceptionHandler secureExceptionHandler;
 
     private static final Map<Integer, String> JDBC_TYPES_BY_CODE = Collections.unmodifiableMap(new HashMap<Integer, String>() {{
         put(Types.BIGINT, "java.lang.Long");
@@ -106,9 +99,22 @@ public class JdbcMetadataBuilder implements MetadataBuilder<Connection> {
                 items = expandMetadata(expandsMap, metaData);
             }
         } catch (SQLException e) {
-            throw new RemoteException(e, secureExceptionHandler);
+            throw new JSExceptionWrapper(e);
         }
         return new ResourceGroupElement().setElements(items);
+    }
+
+    private ArrayList<String> getSchemas(DatabaseMetaData metaData) {
+        ArrayList<String> result = new ArrayList<String>();
+        try {
+            final ResultSet schemas = metaData.getSchemas();
+            while (schemas.next()) {
+                result.add(schemas.getString("TABLE_SCHEM"));
+            }
+        } catch (SQLException e) {
+            throw new JSExceptionWrapper(e);
+        }
+        return result;
     }
 
     protected List<SchemaElement> expandMetadata(Map<String, List<String[]>> expandsMap, DatabaseMetaData metaData) throws SQLException {
@@ -132,6 +138,7 @@ public class JdbcMetadataBuilder implements MetadataBuilder<Connection> {
         for (String include : includes) {
             if (include != null) {
                 final String[] path = (include.startsWith("/") ? include.substring(1) : include).split("/");
+                checkResources(path, metaData);
                 switch (path.length) {
                     case 1:
                         result.add(getSchemaMetadata(path[0], new ArrayList<String[]>(), metaData));
@@ -139,24 +146,59 @@ public class JdbcMetadataBuilder implements MetadataBuilder<Connection> {
                     case 2:
                         result.add(getTableMetadata(path[0], path[1], true, metaData));
                         break;
+                    case 3:
+                        result.add(getColumnMetadata(path[0], path[1], path[2], true, metaData));
+                        break;
                 }
             }
         }
         return result;
     }
 
-    protected SchemaElement getSchemaMetadata(String schema, List<String[]> expand, DatabaseMetaData metaData) {
-        final List<SchemaElement> tableItems;
-        if (expand != null) {
-            final Set<String> tableNamesToExpand = new HashSet<String>();
-            for (String[] strings : expand) {
-                tableNamesToExpand.add(strings[0]);
+    private void checkResources(String[] path, DatabaseMetaData metaData) {
+        ResultSet result = null;
+        String fullPath = "";
+        try {
+            switch (path.length) {
+                case 1:
+                    result = metaData.getTables(null, path[0], null, new String[]{"TABLE", "VIEW", "ALIAS", "SYNONYM"});
+                    fullPath = path[0];
+                    break;
+                case 2:
+                    result = metaData.getTables(null, path[0], path[1], new String[]{"TABLE", "VIEW", "ALIAS", "SYNONYM"});
+                    fullPath = path[0] + "/" + path[1];
+                    break;
+                case 3:
+                    result = metaData.getColumns(null, path[0], path[1], path[2]);
+                    fullPath = path[0] + "/" + path[1] + "/" + path[2];
+                    break;
             }
-            tableItems = buildTablesMetadata(schema, metaData, tableNamesToExpand);
-        } else {
-            tableItems = null;
+            if (!result.next()) { //no such schema / table / column
+                throw new JSResourceNotFoundException("Can't find resource", new Object[] {fullPath});
+            }
+        } catch (SQLException e) {
+            throw new JSExceptionWrapper(e);
         }
-        return new ResourceGroupElement().setType("schema").setName(schema).setElements(tableItems);
+    }
+
+    protected SchemaElement getSchemaMetadata(String schema, List<String[]> expand, DatabaseMetaData metaData) {
+        ResourceGroupElement result = null;
+        ArrayList<String> schemas = getSchemas(metaData);
+        if (schemas.contains(schema)) {
+            result = new ResourceGroupElement().setKind("schema").setName(schema);
+            if (expand != null) {
+                final List<SchemaElement> tableItems;
+                final Set<String> tableNamesToExpand = new HashSet<String>();
+                for (String[] strings : expand) {
+                    tableNamesToExpand.add(strings[0]);
+                }
+                tableItems = buildTablesMetadata(schema, metaData, tableNamesToExpand);
+                result.setElements(tableItems);
+            }
+        } else { // in MySQL we have no schema just tablename
+            result = (ResourceGroupElement)getTableMetadata(null, schema, true, metaData);
+        }
+        return result;
     }
 
     protected List<SchemaElement> buildTablesMetadata(String schema, DatabaseMetaData metaData, Set<String> tableNamesToExpand) {
@@ -168,48 +210,73 @@ public class JdbcMetadataBuilder implements MetadataBuilder<Connection> {
                 tableItems.add(getTableMetadata(schema, tableName, tableNamesToExpand.contains(tableName), metaData));
             }
         } catch (SQLException e) {
-            throw new RemoteException(e, secureExceptionHandler);
+            throw new JSExceptionWrapper(e);
         }
         return tableItems;
     }
 
     protected SchemaElement getTableMetadata(String schema, String table, boolean expand, DatabaseMetaData metaData) {
-        AbstractResourceGroupElement result = new ResourceGroupElement().setName(table).setType("table");
+        AbstractResourceGroupElement result = new ResourceGroupElement().setName(table).setKind("table");
         if (expand) {
-            final List<SchemaElement> columnsMetadata = new ArrayList<SchemaElement>();
+            List<SchemaElement> columnsMetadata;
             try {
-                final ResultSet columns = metaData.getColumns(null, schema, table, null);
-                ResultSet primaryKeySet = metaData.getPrimaryKeys(null, schema, table);
-                List<String> primaryKeys = new ArrayList<String>();
-                while (primaryKeySet.next()) {
-                    primaryKeys.add(primaryKeySet.getString(4));
-                }
-                final ResultSet foreignKeysSet = metaData.getImportedKeys(null, schema, table);
-                Map<String, String> foreignKeyMap = new HashMap<String, String>();
-                while (foreignKeysSet.next()) {
-                    String foreignKeyColumnName = foreignKeysSet.getString("FKCOLUMN_NAME");
-                    String primaryKeyTableName = foreignKeysSet.getString("PKTABLE_NAME");
-                    String primaryKeyColumnName = foreignKeysSet.getString("PKCOLUMN_NAME");
-                    String primaryKeySchemaName = foreignKeysSet.getString("PKTABLE_SCHEM");
-                    foreignKeyMap.put(foreignKeyColumnName, primaryKeySchemaName + "." + primaryKeyTableName + "." + primaryKeyColumnName);
-                }
-                while (columns.next()) {
-                    final String columnName = columns.getString("COLUMN_NAME");
-                    int typeCode = columns.getInt("DATA_TYPE");
-                    final ResourceMetadataSingleElement columnItem = new ResourceMetadataSingleElement().setName(columnName).setType(JDBC_TYPES_BY_CODE.get(typeCode));
-                    if (primaryKeys.contains(columnName)) {
-                        columnItem.setIsIdentifier(true);
-                    }
-                    if (foreignKeyMap.containsKey(columnName)) {
-                        columnItem.setReferenceTo(foreignKeyMap.get(columnName));
-                    }
-                    columnsMetadata.add(columnItem);
-                }
+                columnsMetadata = fillColumnMetadata(schema, table, metaData);
             } catch (SQLException e) {
-                throw new RemoteException(e, secureExceptionHandler);
+                throw new JSExceptionWrapper(e);
             }
             result.setElements(columnsMetadata);
         }
         return result;
     }
+
+    protected SchemaElement getColumnMetadata(String schema, String table, String column, boolean expand, DatabaseMetaData metaData) {
+        SchemaElement columnItem = new ResourceMetadataSingleElement().setName(column);
+        if (expand) {
+            try {
+                List<SchemaElement> columnsMetadata = fillColumnMetadata(schema, table, metaData);
+                for (SchemaElement element : columnsMetadata) {
+                    if (element.getName().equals(column)) {
+                        columnItem = element;
+                        break;
+                    }
+                }
+            } catch (SQLException e) {
+                throw new JSExceptionWrapper(e);
+            }
+        }
+        return columnItem;
+    }
+
+    private List<SchemaElement> fillColumnMetadata(String schema, String table, DatabaseMetaData metaData) throws SQLException {
+        List<SchemaElement> columnsMetadata = new ArrayList<SchemaElement>();
+        final ResultSet columns = metaData.getColumns(null, schema, table, null);
+        ResultSet primaryKeySet = metaData.getPrimaryKeys(null, schema, table);
+        List<String> primaryKeys = new ArrayList<String>();
+        while (primaryKeySet.next()) {
+            primaryKeys.add(primaryKeySet.getString(4));
+        }
+        final ResultSet foreignKeysSet = metaData.getImportedKeys(null, schema, table);
+        Map<String, String> foreignKeyMap = new HashMap<String, String>();
+        while (foreignKeysSet.next()) {
+            String foreignKeyColumnName = foreignKeysSet.getString("FKCOLUMN_NAME");
+            String primaryKeyTableName = foreignKeysSet.getString("PKTABLE_NAME");
+            String primaryKeyColumnName = foreignKeysSet.getString("PKCOLUMN_NAME");
+            String primaryKeySchemaName = foreignKeysSet.getString("PKTABLE_SCHEM");
+            foreignKeyMap.put(foreignKeyColumnName, primaryKeySchemaName + "." + primaryKeyTableName + "." + primaryKeyColumnName);
+        }
+        while (columns.next()) {
+            final String columnName = columns.getString("COLUMN_NAME");
+            int typeCode = columns.getInt("DATA_TYPE");
+            final ResourceMetadataSingleElement columnItem = new ResourceMetadataSingleElement().setName(columnName).setType(JDBC_TYPES_BY_CODE.get(typeCode));
+            if (primaryKeys.contains(columnName)) {
+                columnItem.setIsIdentifier(true);
+            }
+            if (foreignKeyMap.containsKey(columnName)) {
+                columnItem.setReferenceTo(foreignKeyMap.get(columnName));
+            }
+            columnsMetadata.add(columnItem);
+        }
+        return columnsMetadata;
+    }
+
 }

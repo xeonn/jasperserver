@@ -56,7 +56,7 @@ import net.sf.jasperreports.export.SimpleHtmlReportConfiguration;
 
 /**
  * @author sanda zaharia (shertage@users.sourceforge.net)
- * @version $Id: HtmlReportOutput.java 63530 2016-06-09 13:59:59Z tdanciu $
+ * @version $Id: HtmlReportOutput.java 63866 2016-07-12 22:39:01Z schubar $
  */
 public class HtmlReportOutput extends AbstractReportOutput 
 {

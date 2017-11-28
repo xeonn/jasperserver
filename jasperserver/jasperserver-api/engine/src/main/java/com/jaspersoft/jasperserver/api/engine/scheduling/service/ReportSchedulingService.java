@@ -23,7 +23,6 @@ package com.jaspersoft.jasperserver.api.engine.scheduling.service;
 import com.jaspersoft.jasperserver.api.JasperServerAPI;
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
 import com.jaspersoft.jasperserver.api.common.domain.ValidationErrors;
-import com.jaspersoft.jasperserver.api.engine.common.service.ReportExecutionStatusInformation;
 import com.jaspersoft.jasperserver.api.engine.scheduling.domain.ReportJob;
 import com.jaspersoft.jasperserver.api.engine.scheduling.domain.ReportJobIdHolder;
 import com.jaspersoft.jasperserver.api.engine.scheduling.domain.ReportJobRuntimeInformation;
@@ -32,7 +31,6 @@ import com.jaspersoft.jasperserver.api.engine.scheduling.domain.reportjobmodel.R
 
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 
 /**
@@ -44,7 +42,7 @@ import java.util.Map;
  * </p>
  *
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ReportSchedulingService.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: ReportSchedulingService.java 65088 2016-11-03 23:22:01Z gbacon $
  * @since 1.0
  */
 @JasperServerAPI
@@ -384,12 +382,11 @@ public interface ReportSchedulingService {
    *  Throws JSException if any pause commands are rejected.
    *  If the method was called with a jobs List, then the exception
    *  will list which jobs succeeded and which failed.
-   *
+   * @param context
    * @param jobs   List of individual job ids to pause
    * @param all    true = pause all jobs (disregard the input jobs list)
-   *               false = pause individual jobs in the input jobs list
    */
-  void pauseById(List<ReportJobIdHolder> jobs, boolean all);
+  void pauseById(ExecutionContext context, List<ReportJobIdHolder> jobs, boolean all);
 
   /**
    *
@@ -399,11 +396,11 @@ public interface ReportSchedulingService {
    *  If the method was called with a jobs List, then the exception
    *  will list which jobs succeeded and which failed.
    *
+   * @param context
    * @param jobs   List of individual job ids to resume
    * @param all    true  = resume all jobs (disregard the input jobs list)
-   *               false = resume individual jobs in the input jobs list
    */
-  void resumeById(List<ReportJobIdHolder> jobs, boolean all);
+  void resumeById(ExecutionContext context, List<ReportJobIdHolder> jobs, boolean all);
 
 
 }

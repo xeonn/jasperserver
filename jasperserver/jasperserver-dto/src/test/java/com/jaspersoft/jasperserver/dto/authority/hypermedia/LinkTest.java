@@ -21,16 +21,12 @@
 
 package com.jaspersoft.jasperserver.dto.authority.hypermedia;
 
-import org.testng.annotations.Test;
+import org.junit.Test;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotEquals;
-import static org.testng.Assert.assertTrue;
-
+import static org.junit.Assert.*;
 /**
  * @author askorodumov
- * @version $Id: LinkTest.java 59477 2015-12-14 10:19:14Z askorodu $
+ * @version $Id: LinkTest.java 63760 2016-07-05 18:59:28Z agodovan $
  */
 public class LinkTest {
     @Test

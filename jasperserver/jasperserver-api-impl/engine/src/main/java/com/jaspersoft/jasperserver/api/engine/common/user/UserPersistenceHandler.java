@@ -25,7 +25,7 @@ import com.jaspersoft.jasperserver.api.metadata.user.domain.impl.hibernate.RepoU
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: UserPersistenceHandler.java 63380 2016-05-26 20:56:46Z mchan $
+ * @version $Id: UserPersistenceHandler.java 63760 2016-07-05 18:59:28Z agodovan $
  */
 public interface UserPersistenceHandler {
 	

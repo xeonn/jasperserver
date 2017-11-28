@@ -20,9 +20,7 @@
 */
 package com.jaspersoft.jasperserver.jaxrs.common;
 
-import com.jaspersoft.jasperserver.remote.exception.IllegalParameterValueException;
-import com.jaspersoft.jasperserver.dto.common.ErrorDescriptor;
-import org.codehaus.jackson.map.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import org.springframework.stereotype.Component;
 
 import javax.ws.rs.core.Response;
@@ -33,16 +31,15 @@ import javax.ws.rs.ext.Provider;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: JsonMappingExceptionMapper.java 57603 2015-09-15 17:20:48Z psavushc $
+ * @version $Id: JsonMappingExceptionMapper.java 63760 2016-07-05 18:59:28Z agodovan $
  */
 @Provider
 @Component
-public class JsonMappingExceptionMapper implements ExceptionMapper<JsonMappingException> {
+public class JsonMappingExceptionMapper extends AbstractSerializationExceptionMapper
+        implements ExceptionMapper<JsonMappingException> {
+
     @Override
     public Response toResponse(JsonMappingException exception) {
-        return Response.status(Response.Status.BAD_REQUEST).entity(
-                new ErrorDescriptor()
-                        .setErrorCode(IllegalParameterValueException.ERROR_CODE)
-                        .setMessage(exception.getMessage())).build();
+        return super.toResponse(exception);
     }
 }

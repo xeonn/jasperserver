@@ -26,8 +26,8 @@ import java.util.Map;
  * <p></p>
  *
  * @author yaroslav.kovalchyk
- * @version $Id: ConnectionMetadataBuilder.java 62954 2016-05-01 09:49:23Z ykovalch $
+ * @version $Id: ConnectionMetadataBuilder.java 64791 2016-10-12 15:08:37Z ykovalch $
  */
 public interface ConnectionMetadataBuilder<ConnectionType> {
-    Object build(ConnectionType connection, Map<String, String[]> options);
+    Object build(ConnectionType connection, Map<String, String[]> options, Map<String, Object> contextData);
 }

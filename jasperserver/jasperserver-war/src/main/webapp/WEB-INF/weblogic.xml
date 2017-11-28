@@ -34,6 +34,7 @@
             <!-- START: added for weblogic 12-->
             <package-name>org.antlr.runtime.*</package-name>
             <package-name>com.sun.jersey.*</package-name>
+            <package-name>jersey.repackaged.*</package-name>
             <package-name>org.codehaus.*</package-name>
             <package-name>com.google.*</package-name>
             <!-- END: added for weblogic 12-->
@@ -58,6 +59,13 @@
             <package-name>schemaorg_apache_xmlbeans.system.sXMLLANG.*</package-name>
             <package-name>schemaorg_apache_xmlbeans.system.sXMLSCHEMA.*</package-name>
             <package-name>schemaorg_apache_xmlbeans.system.sXMLTOOLS.*</package-name>
+
+            <!-- JRS-9865
+                org.hibernate.validator was upgraded hence force application package to be used.
+            -->
+            <package-name>org.hibernate.validator.*</package-name>
+            <package-name>javax.validation.*</package-name>
+
         </prefer-application-packages>
         <prefer-application-resources>
             <resource-name>WEB-INF/classes/*</resource-name>

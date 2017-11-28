@@ -27,10 +27,11 @@ import java.util.List;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: ResourceMediaType.java 62954 2016-05-01 09:49:23Z ykovalch $
+ * @version $Id: ResourceMediaType.java 64626 2016-09-26 13:25:24Z vzavadsk $
  */
 public interface ResourceMediaType {
     public static final String RESOURCE_MEDIA_TYPE_PREFIX = "application/repository.";
+
     public static final String RESOURCE_TYPE_PLACEHOLDER = "{resourceType}";
     public static final String RESOURCE_JSON_TYPE = "+json";
     public static final String RESOURCE_XML_TYPE = "+xml";
@@ -65,6 +66,10 @@ public interface ResourceMediaType {
     public static final String FILE_CLIENT_TYPE = "file";
     public static final String FILE_JSON = RESOURCE_MEDIA_TYPE_PREFIX + FILE_CLIENT_TYPE + RESOURCE_JSON_TYPE;
     public static final String FILE_XML = RESOURCE_MEDIA_TYPE_PREFIX + FILE_CLIENT_TYPE + RESOURCE_XML_TYPE;
+    // Properties
+    public static final String PROPERTIES_FILE_CLIENT_TYPE = "propertiesFile";
+    public static final String PROPERTIES_FILE_JSON = RESOURCE_MEDIA_TYPE_PREFIX + PROPERTIES_FILE_CLIENT_TYPE + RESOURCE_JSON_TYPE;
+    public static final String PROPERTIES_FILE_XML = RESOURCE_MEDIA_TYPE_PREFIX + PROPERTIES_FILE_CLIENT_TYPE + RESOURCE_XML_TYPE;
     // InputControl
     public static final String INPUT_CONTROL_CLIENT_TYPE = "inputControl";
     public static final String INPUT_CONTROL_JSON = RESOURCE_MEDIA_TYPE_PREFIX + INPUT_CONTROL_CLIENT_TYPE + RESOURCE_JSON_TYPE;
@@ -165,6 +170,24 @@ public interface ResourceMediaType {
     //not exist as string representation of resource type
     //used as defenition of topic type
     public static final String TOPIC_TYPE = "topic";
+
+    public static final String ADHOC_VIEW_MEDIA_TYPE_PREFIX = "application/" + ADHOC_DATA_VIEW_CLIENT_TYPE + ".";
+
+    // adhocDataView filters
+    public static final String ADHOC_VIEW_FILTER_CLIENT_TYPE = "filter";
+    public static final String ADHOC_VIEW_FILTER_JSON = ADHOC_VIEW_MEDIA_TYPE_PREFIX + ADHOC_VIEW_FILTER_CLIENT_TYPE + RESOURCE_JSON_TYPE;
+    public static final String ADHOC_VIEW_FILTER_XML = ADHOC_VIEW_MEDIA_TYPE_PREFIX + ADHOC_VIEW_FILTER_CLIENT_TYPE + RESOURCE_XML_TYPE;
+
+    // adhocDataView fields
+    public static final String ADHOC_VIEW_FIELDS_CLIENT_TYPE = "field";
+    public static final String ADHOC_VIEW_FIELDS_JSON = ADHOC_VIEW_MEDIA_TYPE_PREFIX + ADHOC_VIEW_FIELDS_CLIENT_TYPE + RESOURCE_JSON_TYPE;
+    public static final String ADHOC_VIEW_FIELDS_XML = ADHOC_VIEW_MEDIA_TYPE_PREFIX + ADHOC_VIEW_FIELDS_CLIENT_TYPE + RESOURCE_XML_TYPE;
+
+    // adhocDataView fields
+    public static final String ADHOC_VIEW_METADATA_CLIENT_TYPE = "view";
+    public static final String ADHOC_VIEW_METADATA_JSON = ADHOC_VIEW_MEDIA_TYPE_PREFIX + ADHOC_VIEW_METADATA_CLIENT_TYPE + RESOURCE_JSON_TYPE;
+    public static final String ADHOC_VIEW_METADATA_XML = ADHOC_VIEW_MEDIA_TYPE_PREFIX + ADHOC_VIEW_METADATA_CLIENT_TYPE + RESOURCE_XML_TYPE;
+
 }
 
 

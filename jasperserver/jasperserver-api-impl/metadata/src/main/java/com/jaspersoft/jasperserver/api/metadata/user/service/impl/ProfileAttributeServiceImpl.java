@@ -64,7 +64,7 @@ import java.util.*;
  * Manages attributes for principals - Users, Roles.
  *
  * @author sbirney
- * @version $Id: ProfileAttributeServiceImpl.java 58265 2015-10-05 16:13:56Z vzavadsk $
+ * @version $Id: ProfileAttributeServiceImpl.java 65088 2016-11-03 23:22:01Z gbacon $
  */
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 public class ProfileAttributeServiceImpl extends HibernateDaoImpl
@@ -80,6 +80,7 @@ public class ProfileAttributeServiceImpl extends HibernateDaoImpl
     private ResourceFactory objectFactory;
     private ResourceFactory persistentClassFactory;
     private ApplicationContext applicationContext;
+    private List<ProfileAttributeEventListener> listeners;
 
     public ProfileAttributeCache getProfileAttributeCache() {
 
@@ -148,6 +149,10 @@ public class ProfileAttributeServiceImpl extends HibernateDaoImpl
         this.changers = changers;
     }
 
+    public void setListeners(List<ProfileAttributeEventListener> listeners) {
+        this.listeners = listeners;
+    }
+
     public Map<String, PropertyChanger> getChangerObjects() {
         // This code looks up spring context for changer beans based on this name
         // We are wiring the service with changer names and not changer beans to eliminate circular references.
@@ -193,6 +198,7 @@ public class ProfileAttributeServiceImpl extends HibernateDaoImpl
     @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
     public void putProfileAttribute(ExecutionContext context, ProfileAttribute attr) {
         RepoProfileAttribute existingAttr = getRepoProfileAttribute(attr);
+        final boolean update = existingAttr != null;
 
         //Disallow to override server settings at lower relatively server level.
         if (!isServerPrincipal(attr.getPrincipal())) {
@@ -210,12 +216,24 @@ public class ProfileAttributeServiceImpl extends HibernateDaoImpl
             existingAttr = (RepoProfileAttribute) getPersistentClassFactory().newObject(ProfileAttribute.class);
         }
 
+        final String existingValue = existingAttr.getAttrValue();
+
         existingAttr.copyFromClient(attr, this);
         getHibernateTemplate().saveOrUpdate(existingAttr);
         getProfileAttributeCache().clearAll();
 
         if (isServerPrincipal(attr.getPrincipal())) {
             applyServerSetting(attr);
+        }
+
+        if (listeners != null) {
+            for (ProfileAttributeEventListener listener : listeners) {
+                if (update) {
+                    listener.onUpdate(attr, existingValue);
+                } else {
+                    listener.onCreate(attr);
+                }
+            }
         }
     }
 
@@ -230,6 +248,12 @@ public class ProfileAttributeServiceImpl extends HibernateDaoImpl
             removeServerAttribute(attr);
         }
         getProfileAttributeCache().clearAll();
+
+        if (listeners != null && existingAttr != null) {
+            for (ProfileAttributeEventListener listener : listeners) {
+                listener.onDelete(attr);
+            }
+        }
     }
 
     @Override
@@ -248,8 +272,15 @@ public class ProfileAttributeServiceImpl extends HibernateDaoImpl
         List<RepoProfileAttribute> paListToDelete = new ArrayList<RepoProfileAttribute>();
         List<RepoProfileAttribute> paList = getRepoProfileAttributes(getCurrentUserDetails());
         for (RepoProfileAttribute profileAttribute : paList) {
-            if (attributeMapToDelete.containsKey(profileAttribute.getAttrName())) {
+            ProfileAttribute attributeToDelete = attributeMapToDelete.get(profileAttribute.getAttrName());
+            if (attributeToDelete != null) {
                 paListToDelete.add(profileAttribute);
+
+                if (listeners != null) {
+                    for (ProfileAttributeEventListener listener : listeners) {
+                        listener.onDelete(attributeToDelete);
+                    }
+                }
             }
         }
         if (!paListToDelete.isEmpty()) {

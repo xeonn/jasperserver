@@ -22,7 +22,7 @@
 
 /**
  * @author: Kostiantyn Tsaregradskyi
- * @version: $Id: biComponentErrorFactory.js 1011 2015-04-01 19:34:14Z ktsaregr $
+ * @version: $Id: biComponentErrorFactory.js 2956 2016-07-27 19:22:11Z inestere $
  */
 
 define(function (require) {
@@ -34,7 +34,8 @@ define(function (require) {
         ContainerNotFoundBiComponentError = require("../error/ContainerNotFoundBiComponentError"),
         AlreadyDestroyedBiComponentError = require("../error/AlreadyDestroyedBiComponentError"),
         RequestBiComponentError = require("../error/RequestBiComponentError"),
-        NotYetRenderedBiComponentError = require("../error/NotYetRenderedBiComponentError");
+        NotYetRenderedBiComponentError = require("../error/NotYetRenderedBiComponentError"),
+        InputControlParameterNotFoundBiComponentError = require("../error/InputControlParameterNotFoundBiComponentError");
 
     return {
         genericError: function(errorCode, message, parameters) {
@@ -57,6 +58,9 @@ define(function (require) {
         },
         notYetRenderedError: function() {
             return new NotYetRenderedBiComponentError();
+        },
+        inputControlParameterNotFound: function(message) {
+            return new InputControlParameterNotFoundBiComponentError(message);
         }
     };
 });

@@ -11,11 +11,10 @@ import com.jaspersoft.jasperserver.remote.exception.RemoteException;
 import com.jaspersoft.jasperserver.remote.resources.converters.ResourceConverterProvider;
 import com.jaspersoft.jasperserver.remote.services.SingleRepositoryService;
 import com.jaspersoft.jasperserver.war.httpheaders.JRSExpiresHeader;
-import com.sun.jersey.core.spi.factory.ResponseBuilderImpl;
 import org.apache.commons.io.IOUtils;
 import org.bouncycastle.util.encoders.Base64;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -80,7 +79,7 @@ public class ThumbnailsJaxrsService {
 
         if (defaultAllowed == null)
             defaultAllowed = false;
-        Response.ResponseBuilder response = new ResponseBuilderImpl();
+        Response.ResponseBuilder response = Response.ok();
 
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         com.jaspersoft.jasperserver.api.metadata.common.domain.Resource resource;
@@ -88,18 +87,18 @@ public class ThumbnailsJaxrsService {
         try{
             resource = singleRepositoryService.getResource(Folder.SEPARATOR + uri.replaceAll("/$", ""));
         } catch (AccessDeniedException e) {
-            return response.status(Response.Status.FORBIDDEN).build();
+            return Response.status(Response.Status.FORBIDDEN).build();
         }
 
         ByteArrayInputStream thumbnailStream;
 
         if (resource == null) {
-            return response.status(Response.Status.NOT_FOUND).build();
+            return Response.status(Response.Status.NOT_FOUND).build();
         } else {
             thumbnailStream = thumbnailService.getReportThumbnail(user, resource);
             if (thumbnailStream == null) {
                 if (!defaultAllowed) {
-                    return response.status(Response.Status.NO_CONTENT).build();
+                    return Response.status(Response.Status.NO_CONTENT).build();
                 } else {
                     thumbnailStream = thumbnailService.getDefaultThumbnail();
 
@@ -118,7 +117,7 @@ public class ThumbnailsJaxrsService {
             }
         }
 
-        return response.status(Response.Status.OK).build();
+        return response.build();
     }
 
     /**
@@ -212,7 +211,6 @@ public class ThumbnailsJaxrsService {
         } while (uriIterator.hasNext());
 
         if (uriSet.isEmpty()) return Response.status(Response.Status.BAD_REQUEST).build();
-        Response.ResponseBuilder response = new ResponseBuilderImpl();
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         List<ResourceThumbnail> thumbnailEntities;
         try {
@@ -220,9 +218,9 @@ public class ThumbnailsJaxrsService {
         } catch (JSException e) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
-        if (thumbnailEntities.isEmpty()) return response.status(Response.Status.NO_CONTENT).build();
+        if (thumbnailEntities.isEmpty()) return Response.status(Response.Status.NO_CONTENT).build();
         ResourceThumbnailsListWrapper thumbnailsListWrapper = new ResourceThumbnailsListWrapper(thumbnailEntities);
-        return response.entity(thumbnailsListWrapper).status(Response.Status.OK).build();
+        return Response.status(Response.Status.OK).entity(thumbnailsListWrapper).build();
     }
 
     /**

@@ -833,8 +833,9 @@ TODO: SSU - Seems this bean is not needed
         <property name="aclLookupStrategy" ref="internalAclServiceCE"/>
     </bean>
 
-    <!--This Alias is used only for AnnotationBased injection-->
+    <!--This Aliases are used only for AnnotationBased injection-->
     <alias name="${bean.internalAclService}" alias="internalAclService"/>
+    <alias name="${bean.externalAclService}" alias="externalAclService"/>
 
     <bean name="internalAclServiceCE" class="com.jaspersoft.jasperserver.api.security.AclLookupStrategyImpl">
         <property name="aclServices">
@@ -943,18 +944,16 @@ TODO: SSU - Seems this bean is not needed
             <map>
                 <entry key="ERROR_UID">
                     <list>
-                        <!--<value>ROLE_USER</value>-->
+                        <value>ROLE_USER</value>
                     </list>
                 </entry>
                 <entry key="STACKTRACE">
                     <list>
-                        <value>ROLE_USER</value>
                         <value>ROLE_SUPERUSER</value>
                     </list>
                 </entry>
                 <entry key="MESSAGE">
                     <list>
-                        <value>ROLE_USER</value>
                         <value>ROLE_SUPERUSER</value>
                     </list>
                 </entry>

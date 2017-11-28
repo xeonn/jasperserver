@@ -26,7 +26,7 @@ import com.jaspersoft.jasperserver.dto.common.ErrorDescriptor;
  * <p></p>
  *
  * @author yaroslav.kovalchyk
- * @version $Id: UnsupportedOperationRemoteException.java 57603 2015-09-15 17:20:48Z psavushc $
+ * @version $Id: UnsupportedOperationRemoteException.java 64791 2016-10-12 15:08:37Z ykovalch $
  */
 public class UnsupportedOperationRemoteException extends RemoteException {
     public static final String ERROR_CODE_UNSUPPORTED_OPERATION = "operation.not.supported";
@@ -35,7 +35,7 @@ public class UnsupportedOperationRemoteException extends RemoteException {
         getErrorDescriptor().setErrorCode(ERROR_CODE_UNSUPPORTED_OPERATION);
     }
     public UnsupportedOperationRemoteException(String operation) {
-        super("Operation " + operation + " not supported");
+        super("Operation [" + operation + "] not supported");
         ErrorDescriptor errorDescriptor = getErrorDescriptor();
         errorDescriptor.setErrorCode(ERROR_CODE_UNSUPPORTED_OPERATION);
         errorDescriptor.setParameters(operation);

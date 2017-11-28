@@ -49,7 +49,7 @@ import java.util.regex.Pattern;
  *  from an attack riding the user's session: 401 error is returned.
  *
  * @author dlitvak
- * @version $Id: CrossDomainCommunicationFilter.java 62988 2016-05-04 23:25:15Z dlitvak $
+ * @version $Id: CrossDomainCommunicationFilter.java 65088 2016-11-03 23:22:01Z gbacon $
  */
 public class CrossDomainCommunicationFilter implements Filter {
     private static final Logger logger = LogManager.getLogger(CrossDomainCommunicationFilter.class);
@@ -106,8 +106,7 @@ public class CrossDomainCommunicationFilter implements Filter {
             if (!localPattern.matcher(remoteDomain).matches() &&
                     (whitelistPattern != null && !whitelistPattern.matcher(remoteDomain).matches())) {
 
-                if (logger.isEnabledFor(Level.WARN))
-                    logger.warn("Potential cross-domain attack. Request origin domain: " + remoteDomain + "; local pattern: " + localPattern);
+                logger.error("Potential cross-domain attack. Request origin domain: " + remoteDomain + "; local pattern: " + localPattern);
 
                 ((HttpServletResponse) response).sendError(HttpServletResponse.SC_UNAUTHORIZED, "Domain " + remoteDomain + " forbidden.");
                 return;

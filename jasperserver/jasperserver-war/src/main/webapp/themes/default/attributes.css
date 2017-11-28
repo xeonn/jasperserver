@@ -20,7 +20,7 @@
 
 .baseTable {
     background: #fff;
-/*     min-width: 700px; */
+    /*     min-width: 700px; */
 }
 
 .baseTable .table-row {
@@ -64,7 +64,7 @@
 #settings .baseTable div.table-column.actions {
     min-width: 60px;
     position: absolute; /* prevents buttons from wrapping on narrow browser widths */
-        right: 3px;
+    right: 3px;
 }
 
 .baseTable div.table-column p,
@@ -118,8 +118,9 @@ a.addNewItem {
 
 /* editMode css */
 .baseTable div.editMode {
-    padding: 15px 15px 0 15px;
-    overflow: hidden;
+    padding-top:15px;
+    padding-left:15px;
+    padding-right:15px;
 }
 
 .baseTable div.editMode div.actions {
@@ -144,11 +145,13 @@ a.addNewItem {
 
 .baseTable div.editMode span.permission {
     display: block;
+    position:static;
+    height:100%; background-color:#fff;
 }
 
 .baseTable div.editMode span.name,
 .baseTable div.editMode span.value {
-    display: inline-block;
+    float: left;
     width: 50%;
 }
 
@@ -190,7 +193,6 @@ a.addNewItem {
 }
 
 .baseTable .secure.editMode.control {
-    height: auto;
     padding: 6px 0 0 0;
 }
 
@@ -236,6 +238,7 @@ a.addNewItem {
     height: 100px; /*this will define the height of the box*/
 }
 
+
 .table-row {
     height: 100%;
     width: 100%;
@@ -253,7 +256,9 @@ a.addNewItem {
     height: 100%;
 }
 
-/** Server attributes **/
+
+
+    /** Server attributes **/
 #serverAttributes #settings {
     min-width: 675px;
 }

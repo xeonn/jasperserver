@@ -43,7 +43,7 @@ Usage:
 <t:useAttribute id="selectFileButtonId" name="selectFileButtonId" classname="java.lang.String" ignore="true"/>
 <t:useAttribute id="cancelButtonId" name="cancelButtonId" classname="java.lang.String" ignore="true"/>
 
-<!--/WEB-INF/jsp/templates/select.jsp revision A-->
+
 <t:insertTemplate template="/WEB-INF/jsp/templates/container.jsp">
     <t:putAttribute name="containerClass">panel dialog select overlay moveable centered_horz centered_vert ${containerClass}</t:putAttribute>
     <t:putAttribute name="containerElements"><div class="sizer diagonal"></div></t:putAttribute>

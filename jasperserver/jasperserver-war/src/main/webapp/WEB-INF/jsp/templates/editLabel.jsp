@@ -37,7 +37,7 @@ Usage:
 <t:useAttribute id="containerClass" name="containerClass" classname="java.lang.String" ignore="true"/>
 <t:useAttribute id="bodyContent" name="bodyContent" classname="java.lang.String" ignore="true"/>
 
-<!--/WEB-INF/jsp/templates/addRole.jsp revision A-->
+
 <t:insertTemplate template="/WEB-INF/jsp/templates/container.jsp">
     <t:putAttribute name="containerClass">panel dialog overlay editLabel moveable centered_horz centered_vert ${containerClass}</t:putAttribute>
     <t:putAttribute name="containerID" value="editLabel" />

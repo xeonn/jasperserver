@@ -40,7 +40,7 @@ define(function(require) {
         },
 
         themes = {
-            skipThemes: false
+            skipThemes: true
         },
 
         serverAssets = {

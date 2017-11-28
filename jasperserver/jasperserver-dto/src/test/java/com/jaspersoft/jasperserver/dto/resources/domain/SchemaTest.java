@@ -1,21 +1,21 @@
 package com.jaspersoft.jasperserver.dto.resources.domain;
 
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
+
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 /**
  * <p/>
  * <p/>
  *
  * @author tetiana.iefimenko
- * @version $Id: SchemaTest.java 62044 2016-03-24 14:56:43Z ykovalch $
+ * @version $Id: SchemaTest.java 63760 2016-07-05 18:59:28Z agodovan $
  * @see
  */
 public class SchemaTest {
@@ -24,7 +24,7 @@ public class SchemaTest {
     private Schema schema2;
     private Schema schema3;
 
-    @BeforeMethod
+    @Before
     public void setUp() throws Exception {
         // init Presentation field
 

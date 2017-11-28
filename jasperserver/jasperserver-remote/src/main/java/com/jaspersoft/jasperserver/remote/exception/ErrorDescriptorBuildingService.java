@@ -23,6 +23,7 @@ package com.jaspersoft.jasperserver.remote.exception;
 
 import com.jaspersoft.jasperserver.api.common.error.handling.SecureExceptionHandler;
 import com.jaspersoft.jasperserver.dto.common.ErrorDescriptor;
+import com.jaspersoft.jasperserver.dto.common.ErrorDescriptorBuilder;
 import com.jaspersoft.jasperserver.war.cascade.handlers.GenericTypeProcessorRegistry;
 import org.springframework.stereotype.Service;
 
@@ -32,7 +33,7 @@ import javax.annotation.Resource;
  * <p></p>
  *
  * @author yaroslav.kovalchyk
- * @version $Id: ErrorDescriptorBuildingService.java 57603 2015-09-15 17:20:48Z psavushc $
+ * @version $Id: ErrorDescriptorBuildingService.java 64791 2016-10-12 15:08:37Z ykovalch $
  */
 @Service
 public class ErrorDescriptorBuildingService {

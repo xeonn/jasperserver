@@ -30,7 +30,7 @@ import java.util.Date;
 
 /**
  * @author Yaroslav.Kovalchyk
- * @version $Id: DateDataConverter.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: DateDataConverter.java 65088 2016-11-03 23:22:01Z gbacon $
  */
 @Service
 public class DateDataConverter implements DataConverter<Date>{
@@ -38,7 +38,15 @@ public class DateDataConverter implements DataConverter<Date>{
     protected CalendarFormatProvider calendarFormatProvider;
     @Override
     public Date stringToValue(String rawData) throws ParseException {
-        return StringUtils.isNotEmpty(rawData) ? calendarFormatProvider.getDateFormat().parse(rawData) : null;
+        try {
+            return StringUtils.isNotEmpty(rawData) ? calendarFormatProvider.getDateFormat().parse(rawData) : null;
+        } catch (ParseException initial){
+            try {
+                return new Date(Long.parseLong(rawData));
+            } catch (Exception e){
+                throw initial;
+            }
+        }
     }
 
     @Override

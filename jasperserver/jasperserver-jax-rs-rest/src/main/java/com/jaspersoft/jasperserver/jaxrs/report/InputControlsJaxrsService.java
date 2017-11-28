@@ -34,31 +34,17 @@ import com.jaspersoft.jasperserver.dto.common.ErrorDescriptor;
 import com.jaspersoft.jasperserver.war.cascade.CascadeResourceNotFoundException;
 import com.jaspersoft.jasperserver.war.cascade.InputControlsLogicService;
 import com.jaspersoft.jasperserver.war.cascade.InputControlsValidationException;
-import org.codehaus.jettison.json.JSONObject;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.PathSegment;
 import javax.ws.rs.core.Response;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * <p></p>
@@ -90,8 +76,8 @@ public class InputControlsJaxrsService extends RemoteServiceWrapper<InputControl
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getReportInputParametersViaPost(@PathParam("reportUnitURI") String reportUnitURI, JSONObject jsonParameters) {
-        return internalGetReportInputParameters(reportUnitURI, null, JsonObjectParametersConverter.getParameterMapFromJson(jsonParameters));
+    public Response getReportInputParametersViaPost(@PathParam("reportUnitURI") String reportUnitURI, Map<String, String[]> jsonParameters) {
+        return internalGetReportInputParameters(reportUnitURI, null, jsonParameters);
     }
 
     @POST
@@ -169,8 +155,8 @@ public class InputControlsJaxrsService extends RemoteServiceWrapper<InputControl
     @Path("/{inputControlIds: [^;/]+(;[^;/]+)*}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getReportInputParametersForSpecifiedInputControlsViaPost(@PathParam("reportUnitURI") String reportUnitURI, @PathParam("inputControlIds") PathSegment inputControlIds, JSONObject jsonParameters) {
-        return internalGetReportInputParameters(reportUnitURI, getInputControlIdsFromPathSegment(inputControlIds), JsonObjectParametersConverter.getParameterMapFromJson(jsonParameters));
+    public Response getReportInputParametersForSpecifiedInputControlsViaPost(@PathParam("reportUnitURI") String reportUnitURI, @PathParam("inputControlIds") PathSegment inputControlIds, Map<String, String[]> jsonParameters) {
+        return internalGetReportInputParameters(reportUnitURI, getInputControlIdsFromPathSegment(inputControlIds), jsonParameters);
     }
 
     @POST
@@ -197,8 +183,8 @@ public class InputControlsJaxrsService extends RemoteServiceWrapper<InputControl
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response getInputControlsInitialValuesViaPost(@PathParam("reportUnitURI") String reportUnitURI,
-            JSONObject jsonParameters, @QueryParam("freshData") @DefaultValue("false") Boolean freshData) {
-        return internalGetInputControlsInitialValues(reportUnitURI, JsonObjectParametersConverter.getParameterMapFromJson(jsonParameters), freshData);
+                                                         Map<String, String[]> jsonParameters, @QueryParam("freshData") @DefaultValue("false") Boolean freshData) {
+        return internalGetInputControlsInitialValues(reportUnitURI, jsonParameters, freshData);
     }
 
     @POST
@@ -249,10 +235,10 @@ public class InputControlsJaxrsService extends RemoteServiceWrapper<InputControl
     public Response getReportInputControlValuesViaPost(
             @PathParam("reportUnitURI") final String reportUnitUri,
             @PathParam("inputControlIds") final PathSegment inputControlIds,
-            JSONObject jsonParameters,
+            Map<String, String[]> jsonParameters,
             @QueryParam("freshData") @DefaultValue("false") Boolean freshData) {
         return internalGetInputControlValues(Folder.SEPARATOR + reportUnitUri, inputControlIds,
-                JsonObjectParametersConverter.getParameterMapFromJson(jsonParameters), freshData);
+                jsonParameters, freshData);
     }
 
     @POST

@@ -30,17 +30,21 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.util.Random;
 
 /**
  * @author Sergey Prilukin
- * @version $Id: JavascriptOptimizationSettings.java 55510 2015-05-22 22:46:39Z ohavavka $
+ * @version $Id: JavascriptOptimizationSettings.java 64299 2016-08-24 17:18:42Z asokolni $
  */
-public class JavascriptOptimizationSettings {
+public class JavascriptOptimizationSettings implements JavascriptOptimizationSettingsMBean {
     public static final String OPTIMIZE_JAVASCRIPT_SESSION_PARAM = "optimizeJavascript";
     private static final Logger log = LogManager.getLogger(JavascriptOptimizationSettings.class);
 
-    private Boolean useOptimizedJavascript = false;
-    private String optimizedJavascriptPath = "optimized-scripts";
+    private Boolean useOptimizedJavascript;
+    private String optimizedJavascriptPath;
+
+    // random string per server lifecycle
+    private static String runtimeHash = Integer.toHexString(new Random().nextInt()).toUpperCase();
 
     public Boolean getUseOptimizedJavascript() {
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
@@ -88,5 +92,13 @@ public class JavascriptOptimizationSettings {
 
     public String getOptimizedJavascriptPath() {
         return optimizedJavascriptPath;
+    }
+
+    public String getRuntimeHash() {
+        return runtimeHash;
+    }
+
+    public void reGenerateRuntimeHash() {
+        runtimeHash = Integer.toHexString(new Random().nextInt()).toUpperCase();
     }
 }

@@ -22,18 +22,15 @@
 
 /**
  * @author: Zakhar Tomchenko, Kostiantyn Tsaregradskyi
- * @version: $Id: Dialog.js 1721 2015-10-15 11:56:43Z psavushc $
+ * @version: $Id: Dialog.js 2956 2016-07-27 19:22:11Z inestere $
  */
 
 define(function(require){
     "use strict";
 
-    require("jquery.ui");
-    require("css!common/dialog");
-
     var _ = require('underscore'),
         $ = require('jquery'),
-        Dimmer = require("../base/Dimmer"),
+        Dimmer = require("common/component/base/Dimmer"),
         Panel = require("common/component/panel/Panel"),
         OptionContainer = require("common/component/base/OptionContainer"),
 
@@ -41,6 +38,8 @@ define(function(require){
 
         dialogTemplate = require('text!./template/dialogTemplate.htm'),
         dialogButtonTemplate = require("text!./template/dialogButtonTemplate.htm");
+
+    require("jquery-ui/jquery.ui.draggable");
 
 	var _savedOptions = {}; // object used to save options which came to us
 
@@ -87,7 +86,7 @@ define(function(require){
             if(!_.isEmpty(options.buttons)) {
                 this.buttons = new OptionContainer({
                     options:options.buttons,
-                    el: this.$(".m-Dialog-footer")[0] || this.$(".footer")[0],
+                    el: this.$(".jr-mDialog-footer")[0] || this.$(".footer")[0],
                     contextName:"button",
                     optionTemplate: dialogButtonTemplate
                 });
@@ -110,7 +109,7 @@ define(function(require){
         setElement: function(el){
             var res = Panel.prototype.setElement.apply(this, arguments);
 
-            this.buttons && this.buttons.setElement(this.$(".m-Dialog-footer")[0] || this.$(".footer")[0]);
+            this.buttons && this.buttons.setElement(this.$(".jr-mDialog-footer")[0] || this.$(".footer")[0]);
 
             return res;
         },
@@ -120,7 +119,7 @@ define(function(require){
          * @param {string} title Panel title
          */
         setTitle: function(title) {
-            this.$(".m-Dialog-header > .m-Dialog-header-title").text(title);
+            this.$(".jr-mDialog-header > .jr-mDialog-header-title").text(title);
         },
 
         render: function(){

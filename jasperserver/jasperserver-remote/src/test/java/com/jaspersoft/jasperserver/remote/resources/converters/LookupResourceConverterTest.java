@@ -45,7 +45,7 @@ import static org.testng.Assert.assertSame;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: LookupResourceConverterTest.java 63451 2016-06-01 15:33:32Z ykovalch $
+ * @version $Id: LookupResourceConverterTest.java 65088 2016-11-03 23:22:01Z gbacon $
  */
 public class LookupResourceConverterTest {
     @InjectMocks
@@ -114,6 +114,7 @@ public class LookupResourceConverterTest {
                 return clientResourceType;
             }
         };
+        reset(resourceConverterProvider);
         when(resourceConverterProvider.getToClientConverter(serverResourceType)).thenReturn((ToClientConverter) toClientConverter);
         assertEquals(converter.toClientResourceType(serverResourceType), clientResourceType);
     }

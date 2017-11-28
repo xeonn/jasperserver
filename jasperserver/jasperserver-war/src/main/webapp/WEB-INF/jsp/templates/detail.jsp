@@ -35,7 +35,7 @@ Usage:
 <%@ taglib prefix="t" uri="http://tiles.apache.org/tags-tiles" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jstl/core_rt" %>
 
-<!--/WEB-INF/jsp/templates/detail.jsp revision A-->
+
 <t:useAttribute name="containerClass" id="containerClass" classname="java.lang.String" ignore="true"/>
 <t:useAttribute name="bodyContent" id="bodyContent" classname="java.lang.String" ignore="false"/>
 <t:useAttribute name="containerID" id="containerID" classname="java.lang.String" ignore="true"/>

@@ -62,6 +62,7 @@ public class TextDataSourceDefinition  extends AbstractTextDataSourceDefinition 
         // hide the following properties from UI
         Set<String> hiddenPropertySet = getHiddenPropertySet();
         hiddenPropertySet.add("name");
+        hiddenPropertySet.add("dataFile");
         hiddenPropertySet.add("queryExecuterMode");
         hiddenPropertySet.add("columnNames");
     }
@@ -126,7 +127,7 @@ public class TextDataSourceDefinition  extends AbstractTextDataSourceDefinition 
         }
         // create TableSourceMetadata object
         CustomDomainMetaDataImpl sourceMetadata = new CustomDomainMetaDataImpl();
-        sourceMetadata.setQueryLanguage("csv");
+        sourceMetadata.setQueryLanguage(getQueryLanguage());
         sourceMetadata.setFieldNames(fieldNames);
         sourceMetadata.setFieldMapping(fieldMapping);
         // set default column data type based on the actual data
@@ -139,13 +140,6 @@ public class TextDataSourceDefinition  extends AbstractTextDataSourceDefinition 
 
     @Override
     public Map<String, Object>  customizePropertyValueMap(CustomReportDataSource customReportDataSource, Map<String, Object>  propertyValueMap) {
-        if (propertyValueMap.get(FILE_NAME_PROP) != null) {
-            // remove organization information from REPO path and set it back to property map
-            // for example:  original repo path:  repo:/reports/interactive/CsvData|organization_1
-            // new path:  repo:/reports/interactive/CsvData
-            propertyValueMap.put(FILE_NAME_PROP, getSourceFileLocation(customReportDataSource));
-            log.debug("Set Source File Location for Data Adapter to " + propertyValueMap.get(FILE_NAME_PROP));
-        }
         if(customReportDataSource.getResources() != null && customReportDataSource.getResources().get(DATA_FILE_RESOURCE_ALIAS) != null){
             // if data source has a data file as a sub resource, then take it's URI as file name property
             propertyValueMap.put(FILE_NAME_PROP, customReportDataSource.getResources()
@@ -168,6 +162,7 @@ public class TextDataSourceDefinition  extends AbstractTextDataSourceDefinition 
         if(columnNames == null || columnNames.isEmpty())return null;
         String columnNameArray[] = new String[columnNames.size()];
         for (Map.Entry<String, Integer> entry : columnNames.entrySet()) {
+            isValidFieldName(entry.getKey());
             log.debug("KEY = " + entry.getKey() + ", VAL = " + entry.getValue());
             columnNameArray[entry.getValue()] = entry.getKey();
         }
@@ -191,21 +186,6 @@ public class TextDataSourceDefinition  extends AbstractTextDataSourceDefinition 
         }
         return fieldNames;
     }
-
-    /**
-     * obtain file location from REPO path (removing the tenant information)
-     * for example:  original repo path:  repo:/reports/interactive/CsvData|organization_1
-     * new path:  repo:/reports/interactive/CsvData
-     **/
-    private String getSourceFileLocation(CustomReportDataSource customDataSource) {
-        String fileName = (String) customDataSource.getPropertyMap().get(FILE_NAME_PROP);
-        int sepIndex = fileName.lastIndexOf("|");
-        if (fileName.startsWith("repo:/") && (sepIndex > 0)) {
-            return fileName.substring(0, sepIndex);
-        }
-        return fileName;
-    }
-
 
 }
 

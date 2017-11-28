@@ -20,6 +20,7 @@
 */
 package com.jaspersoft.jasperserver.remote.helpers;
 
+import com.jaspersoft.jasperserver.api.metadata.common.service.JsonMarshaller;
 import com.jaspersoft.jasperserver.dto.common.ErrorDescriptor;
 import com.jaspersoft.jasperserver.remote.exception.RemoteException;
 import org.springframework.stereotype.Service;
@@ -31,7 +32,7 @@ import java.io.IOException;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: JacksonJsonMarshaller.java 62954 2016-05-01 09:49:23Z ykovalch $
+ * @version $Id: JacksonJsonMarshaller.java 65088 2016-11-03 23:22:01Z gbacon $
  */
 @Service
 public class JacksonJsonMarshaller implements JsonMarshaller {

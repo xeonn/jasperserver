@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: jobEditorView.js 10166 2016-05-26 22:39:40Z gbacon $
+ * @version: $Id: jobEditorView.js 10224 2016-07-27 20:02:40Z inestere $
  */
 
 /* global dialogs */
@@ -176,7 +176,7 @@ define(function(require){
 		    this.model.clear({silent: true});
 
 		    // remove ID
-		    delete this.model.id;
+		    this.model.unset("id");
 
 		    // prevent reaction on models' change
 			this.dontReactOnModelChange = true;
@@ -208,7 +208,7 @@ define(function(require){
 		    this.changeActiveTab("scheduleTab");
 
 		    // set model id
-		    this.model.id = jobId;
+		    this.model.set({id: jobId});
 
 			this.prepareSaveOrSubmitButton();
 

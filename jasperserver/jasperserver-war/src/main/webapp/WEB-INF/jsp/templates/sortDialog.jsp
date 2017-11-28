@@ -36,7 +36,7 @@ Usage:
 <%@ taglib uri="/spring" prefix="spring"%>
 <%@ taglib prefix="t" uri="http://tiles.apache.org/tags-tiles" %>
 
-<!--/WEB-INF/jsp/templates/sortDialog.jsp revision A-->
+
 <t:useAttribute name="containerClass" id="containerClass" classname="java.lang.String" ignore="true"/>
 <t:useAttribute name="bodyContent" id="bodyContent" classname="java.lang.String" ignore="true"/>
 <t:useAttribute name="availableFields" id="availableFields" classname="java.lang.String" ignore="true"/>

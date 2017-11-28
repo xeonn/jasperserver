@@ -21,48 +21,111 @@
 
 package com.jaspersoft.jasperserver.api.metadata.common.util;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
+
+import net.sf.jasperreports.engine.util.Pair;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.jaspersoft.jasperserver.api.JSExceptionWrapper;
 
-import net.sf.jasperreports.engine.util.Pair;
-
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: LocalLockManager.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: LocalLockManager.java 66288 2017-03-02 21:31:25Z rtinsman $
  */
 public class LocalLockManager implements LockManager {
 	
 	private final static Log log = LogFactory.getLog(LocalLockManager.class);
+	// what is the max time that a key can be locked?
+	// 0 means timeout disabled
+	private int lockTimeoutMs = 10000;
+	// how often do we clean stuff up? This is not so critical.
+	private long timeoutCheckInterval = 100000;
+	// when did we check timeouts last?
+	private AtomicLong timeoutLastChecked = new AtomicLong();
 	
-	private Set locks = new HashSet();
+	private Map<LockKey, Long> locks = new HashMap<LockKey, Long>();
 
 	public LockHandle lock(String lockName, String key) {
-		Pair lockKey = getLockKey(lockName, key);
+		Pair<String, String> pair = new Pair<String, String>(lockName, key);
 		
 		if (log.isDebugEnabled()) {
-			log.debug("Acquiring lock for " + lockKey);
+			log.debug("Acquiring lock for " + pair);
 		}
 		
+		// wait loop
+		LockKey lockKey	= new LockKey(pair);
 		synchronized (locks) {
-			while (locks.contains(lockKey)) {
+			long now;
+			while (true) {
+				// do cleanup once in awhile for abandoned locks
+				// we test for the specific key below
+				removeTimedOutLocks();
+				// look in map for key and timestamp 
+				now = System.currentTimeMillis();
+				Long timestamp = locks.get(lockKey);
+				if (timestamp != null && (lockTimeoutMs <= 0 || timestamp >= now - lockTimeoutMs)) {
+					// yield if your key is still locked and the lock is not too old, or timeout is disabled
+					// use a timeout which is the same timeout as the lock timeout,
+					// so if the current lock holder doesn't unlock, you will have another go.
 				try {
-					locks.wait();
+						locks.wait(lockTimeoutMs);
+						continue;
 				} catch (InterruptedException e) {
 					throw new JSExceptionWrapper(e);
 				}
+				} else {
+					break;
+				}
 			}
-			locks.add(lockKey);
+			// add key with current timestamp
+			locks.put(lockKey, now);
 			
 			if (log.isDebugEnabled()) {
 				log.debug("Acquired lock for " + lockKey);
 			}
 		}
-		return new LockKey(lockKey);
+		return lockKey;
+	}
+
+	/**
+	 * Before looking for a key in the set, weed out any that have gotten too old.
+	 * We call this every time we look for a particular lock. We don't need to perform this each time,
+	 * so we won't check unless the timeoutCheckInterval has passed since we last checked.
+	 */
+	private void removeTimedOutLocks() {
+		// nothing to do if timeout disabled or we've checked recently
+		if (lockTimeoutMs <= 0) {
+			return;
+		}
+		if (timeoutLastChecked.get() + timeoutCheckInterval < System.currentTimeMillis()) {
+			return;
+		}
+		timeoutLastChecked.set(System.currentTimeMillis());
+		// we should already have the lock but let's just be defensive
+		synchronized(locks) {
+			long tooOld = System.currentTimeMillis() - lockTimeoutMs;
+			boolean locksRemoved = false;
+			Iterator<LockKey> lockIter = locks.keySet().iterator(); 
+			while (lockIter.hasNext()) {
+				LockKey lock = lockIter.next();
+				if (locks.get(lock) < tooOld) {
+					if (log.isDebugEnabled()) {
+						log.debug("Removing timed-out lock for " + lock.getLockKey());
+					}
+					lockIter.remove();
+					locksRemoved = true;
+				}
+			}
+			// notify waiting threads if we removed any locks
+			if (locksRemoved) {
+				locks.notifyAll();
+			}
+		}
 	}
 
 	public void unlock(LockHandle lock) {
@@ -71,13 +134,25 @@ public class LocalLockManager implements LockManager {
 		}
 		
 		synchronized (locks) {
-			locks.remove(lock.getLockKey());
+			locks.remove(lock);
 			locks.notifyAll();
 		}
 	}
 
-	protected Pair getLockKey(String lockName, String key) {
-		return new Pair(lockName, key);
+	public int getLockTimeoutMs() {
+		return lockTimeoutMs;
+	}
+
+	public void setLockTimeoutMs(int lockTimeoutMs) {
+		this.lockTimeoutMs = lockTimeoutMs;
+	}
+
+	public long getTimeoutCheckInterval() {
+		return timeoutCheckInterval;
+	}
+
+	public void setTimeoutCheckInterval(long timeoutCheckInterval) {
+		this.timeoutCheckInterval = timeoutCheckInterval;
 	}
 
 }

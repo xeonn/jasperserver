@@ -30,7 +30,6 @@ import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConve
 import com.jaspersoft.jasperserver.api.metadata.common.service.ResourceFactory;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.ObjectPermission;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.client.ObjectPermissionImpl;
-import com.jaspersoft.jasperserver.dto.common.ErrorDescriptor;
 import com.jaspersoft.jasperserver.dto.resources.ClientFolder;
 import com.jaspersoft.jasperserver.dto.resources.ClientResource;
 import com.jaspersoft.jasperserver.remote.exception.IllegalParameterValueException;
@@ -47,6 +46,7 @@ import org.springframework.security.core.Authentication;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import javax.validation.Validator;
 import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.FieldPosition;
@@ -73,7 +73,7 @@ import static org.testng.Assert.assertTrue;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: ResourceConverterImplTest.java 62954 2016-05-01 09:49:23Z ykovalch $
+ * @version $Id: ResourceConverterImplTest.java 64791 2016-10-12 15:08:37Z ykovalch $
  */
 public class ResourceConverterImplTest {
     private static final String TEST_CLIENT_OBJECT_NAME = "testClientObjectName";
@@ -85,6 +85,8 @@ public class ResourceConverterImplTest {
     private GenericTypeProcessorRegistry genericTypeProcessorRegistry;
     @Mock
     private ClientTypeHelper clientTypeHelper;
+    @Mock
+    private Validator validator;
 
     private final ObjectPermission permission = new ObjectPermissionImpl();
     private ToServerConversionOptions options = ToServerConversionOptions.getDefault();
@@ -239,8 +241,8 @@ public class ResourceConverterImplTest {
         assertEquals(resource.getDescription(), clientResource.getDescription());
         assertEquals(resource.getLabel(), clientResource.getLabel());
         assertNull(resource.getResourceType());
-        assertEquals(resource.getUpdateDate(), updateDate);
-        assertEquals(resource.getCreationDate(), creationDate);
+        assertNull(resource.getUpdateDate());
+        assertNull(resource.getCreationDate());
         assertEquals(resource.getVersion(), clientResource.getVersion().intValue());
     }
 
@@ -322,54 +324,6 @@ public class ResourceConverterImplTest {
         assertEquals(result.getVersion(), Resource.VERSION_NEW);
     }
 
-    @Test
-    public void toServer_invalidDate() throws Exception {
-        ClientResource clientObject = new ClientFolder();
-        final String invalidCreationDate = "invalidCreationDate";
-        clientObject.setCreationDate(invalidCreationDate);
-        clientObject.setLabel(invalidCreationDate);
-        final String invalidUpdateDate = "invalidUpdateDate";
-        final ResourceLookupImpl resultToUpdate = new ResourceLookupImpl();
-        when(converter.toServer(clientObject, resultToUpdate, options)).thenCallRealMethod();
-        when(converter.genericFieldsToServer(clientObject, resultToUpdate, options)).thenCallRealMethod();
-        when(converter.resourceSpecificFieldsToServer(clientObject, resultToUpdate, options)).thenReturn(resultToUpdate);
-        DateFormat dateFormatMock = mock(DateFormat.class);
-        when(dateFormatMock.parse(invalidCreationDate)).thenThrow(ParseException.class);
-        when(converter.getDateTimeFormat()).thenReturn(dateFormatMock);
-        // check invalid creation date
-        IllegalParameterValueException exception = null;
-        try {
-            converter.toServer(clientObject, resultToUpdate, options);
-        } catch (IllegalParameterValueException e) {
-            exception = e;
-        }
-        assertNotNull(exception);
-        ErrorDescriptor errorDescriptor = exception.getErrorDescriptor();
-        assertNotNull(errorDescriptor);
-        String[] parameters = errorDescriptor.getParameters();
-        assertNotNull(parameters);
-        assertEquals(parameters.length, 2);
-        assertEquals(parameters[0], "creationDate");
-        assertEquals(parameters[1], invalidCreationDate);
-        // reset mock and check invalid update date
-        exception = null;
-        clientObject.setCreationDate(null);
-        clientObject.setUpdateDate(invalidUpdateDate);
-        when(dateFormatMock.parse(invalidUpdateDate)).thenThrow(ParseException.class);
-        try {
-            converter.toServer(clientObject, resultToUpdate, options);
-        } catch (IllegalParameterValueException e) {
-            exception = e;
-        }
-        assertNotNull(exception);
-        errorDescriptor = exception.getErrorDescriptor();
-        assertNotNull(errorDescriptor);
-        parameters = errorDescriptor.getParameters();
-        assertNotNull(parameters);
-        assertEquals(parameters.length, 2);
-        assertEquals(parameters[0], "updateDate");
-        assertEquals(parameters[1], invalidUpdateDate);
-    }
 
     @Test
     public void toClient() {

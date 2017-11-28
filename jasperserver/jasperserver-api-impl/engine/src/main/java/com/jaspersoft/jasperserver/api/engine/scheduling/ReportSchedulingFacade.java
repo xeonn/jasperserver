@@ -55,22 +55,11 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ReportSchedulingFacade.java 58265 2015-10-05 16:13:56Z vzavadsk $
+ * @version $Id: ReportSchedulingFacade.java 65088 2016-11-03 23:22:01Z gbacon $
  */
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 public class ReportSchedulingFacade
@@ -645,12 +634,18 @@ public class ReportSchedulingFacade
     scheduler.resume(jobs, all);
   }
 
-  public void pauseById(List<ReportJobIdHolder> jobs, boolean all) {
-    scheduler.pauseById(jobs, all);      // for now this method is not in the interface
-  }
+    public void pauseById(ExecutionContext context, List<ReportJobIdHolder> jobs, boolean all) {
+        scheduler.pauseById(jobs, all); // for now this method is not in the interface
+        for (ReportJobIdHolder job : jobs) {
+            addParamsToAuditEvent(getScheduledJob(context, job.getId()), "pauseReportScheduling");
+        }
+    }
 
-  public void resumeById(List<ReportJobIdHolder> jobs, boolean all) {
+  public void resumeById(ExecutionContext context, List<ReportJobIdHolder> jobs, boolean all) {
     scheduler.resumeById(jobs, all);     // for now this method is not in the interface
+      for (ReportJobIdHolder job : jobs) {
+          addParamsToAuditEvent(getScheduledJob(context, job.getId()), "resumeReportScheduling");
+      }
   }
 
 	protected void validate(ExecutionContext context, ReportJob job) {

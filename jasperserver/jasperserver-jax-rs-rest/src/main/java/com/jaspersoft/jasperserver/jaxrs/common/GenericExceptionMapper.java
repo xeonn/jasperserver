@@ -30,10 +30,11 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
+import javax.xml.bind.UnmarshalException;
 
 /**
  * @author Yaroslav.Kovalchyk
- * @version $Id: GenericExceptionMapper.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: GenericExceptionMapper.java 63760 2016-07-05 18:59:28Z agodovan $
  */
 @Provider
 @Component
@@ -41,15 +42,24 @@ public class GenericExceptionMapper implements ExceptionMapper<Exception> {
     private static final Log log = LogFactory.getLog(GenericExceptionMapper.class);
 
     @Resource
+    private XmlParseExceptionMapper xmlParseExceptionMapper;
+    @Resource
     private ErrorDescriptorBuildingService errorDescriptorBuildingService;
 
     public Response toResponse(Exception exception) {
         log.error("Unexpected error occurs", exception);
         Response response;
         if (exception instanceof WebApplicationException)
-            response = ((WebApplicationException) exception).getResponse();
+            response = handleWebApplicationException(exception);
         else
             response = Response.serverError().entity(errorDescriptorBuildingService.buildErrorDescriptor(exception)).build();
         return response;
+    }
+
+    private Response handleWebApplicationException(Exception exception) {
+        if (exception.getCause() instanceof UnmarshalException) {
+            return xmlParseExceptionMapper.toResponse((UnmarshalException) exception.getCause());
+        }
+        return ((WebApplicationException) exception).getResponse();
     }
 }

@@ -23,14 +23,12 @@ package com.jaspersoft.jasperserver.api.engine.scheduling.hibernate;
 import com.jaspersoft.jasperserver.api.engine.scheduling.domain.ReportJob;
 import com.jaspersoft.jasperserver.api.engine.scheduling.domain.ReportJobAlert;
 import com.jaspersoft.jasperserver.api.engine.scheduling.domain.reportjobmodel.ReportJobAlertModel;
-
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * @author Ivan Chan (ichan@jaspersoft.com)
- * @version $Id: PersistentReportJobAlert.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: PersistentReportJobAlert.java 65088 2016-11-03 23:22:01Z gbacon $
  */
 public class PersistentReportJobAlert {
 
@@ -149,7 +147,7 @@ public class PersistentReportJobAlert {
         if (alert.isToAddressesModified()) setToAddresses(alert.getToAddresses());
         if (alert.isJobStateModified()) setJobState(alert.getJobState().getCode());
         if (alert.isMessageTextModified()) setMessageText(alert.getMessageText());
-        if (alert.isMessageTextWhenJobFailsModified()) setMessageText(alert.getMessageTextWhenJobFails());
+        if (alert.isMessageTextWhenJobFailsModified()) setMessageTextWhenJobFails(alert.getMessageTextWhenJobFails());
         if (alert.isIncludingStackTraceModified()) setIncludingStackTrace(alert.isIncludingStackTrace());
         if (alert.isIncludingReportJobInfoModified()) setIncludingReportJobInfo(alert.isIncludingReportJobInfo());
         if (alert.isSubjectModified()) setSubject(alert.getSubject());

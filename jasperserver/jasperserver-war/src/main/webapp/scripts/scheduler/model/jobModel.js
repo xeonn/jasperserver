@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: jobModel.js 10166 2016-05-26 22:39:40Z gbacon $
+ * @version: $Id: jobModel.js 10365 2016-11-03 21:57:13Z gbacon $
  */
 
 /* global getTZOffset, isIE8 */
@@ -46,9 +46,6 @@ define(function (require) {
         globalConfig = require("settings!globalConfiguration"),
         XRegExp = require("xregexp"),
         moment = require("moment");
-
-	require('config/timepickerSettings');
-	require('config/datepickerSettings');
 
 	/*
 	 Prepare a pattern for momentjs library for date validation based on our i18n settings.
@@ -533,7 +530,7 @@ define(function (require) {
                         errorCode: 'error.invalid.mailNotification.invalidEmailaddresses'
                     });
                 }
-    
+
                 // subject must be valid if TO has been specified and vice versa
                 if (toAddressAlert || subjectAlert) {
                     if (!toAddressAlert) {
@@ -1613,7 +1610,7 @@ define(function (require) {
             });
         },
 
-        // 
+        //
         resource: function(type, uri, callback){
             // call backbone sync method manually
             return Backbone.sync.call(this, 'read', new Backbone.Model(), {
@@ -1711,6 +1708,10 @@ define(function (require) {
             str = str.replace(/ /g, "");
 
             var strs = str.split(","), i, k, numbers = [], control = {}, tmp;
+
+            if (strs.length == 1) {
+                strs = str.split("/");
+            }
 
             // be default, we are checking DatesInMonth
             var MIN = 1;

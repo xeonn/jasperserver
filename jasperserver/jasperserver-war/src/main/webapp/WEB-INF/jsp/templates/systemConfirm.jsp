@@ -46,7 +46,7 @@ Usage:
 
 <tiles:useAttribute id="messageContent" name="messageContent" classname="java.lang.String" ignore="true"/>
 
-<!--/WEB-INF/jsp/templates/systemConfirm.jsp revision A-->
+
 <tiles:insertTemplate template="/WEB-INF/jsp/templates/container.jsp">
     <tiles:putAttribute name="containerID">${containerID}</tiles:putAttribute>
     <tiles:putAttribute name="containerClass">panel info system ${containerClass}</tiles:putAttribute>

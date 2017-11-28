@@ -22,6 +22,7 @@ package com.jaspersoft.jasperserver.search.service;
 
 import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
 import com.jaspersoft.jasperserver.api.search.SearchFilter;
+import com.jaspersoft.jasperserver.dto.resources.ClientResourceLookup;
 import com.jaspersoft.jasperserver.search.mode.AccessType;
 import com.jaspersoft.jasperserver.search.mode.SearchMode;
 
@@ -29,7 +30,7 @@ import java.util.List;
 
 /**
  * @author Yaroslav.Kovalchyk
- * @version $Id: RepositorySearchCriteria.java 61759 2016-03-14 15:48:27Z ztomchen $
+ * @version $Id: RepositorySearchCriteria.java 66432 2017-03-10 22:04:59Z esytnik $
  */
 public interface RepositorySearchCriteria extends Cloneable {
     SearchMode getSearchMode();
@@ -65,5 +66,9 @@ public interface RepositorySearchCriteria extends Cloneable {
     List<String> getExcludeRelativePaths();
     void setForceFullPage(boolean forceFullPage);
     boolean isForceFullPage();
+    void setResources(List<ClientResourceLookup> resources);
+    List<ClientResourceLookup> getResources();
     RepositorySearchCriteria clone() throws CloneNotSupportedException;
+    String getLookupClass();
+    void setLookupClass(final String lookupClass);
 }

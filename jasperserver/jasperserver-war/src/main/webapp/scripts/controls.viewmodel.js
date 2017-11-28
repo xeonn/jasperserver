@@ -22,10 +22,10 @@
 
 /**
  * @author: afomin, inesterenko
- * @version: $Id: controls.viewmodel.js 8179 2015-01-27 12:34:21Z psavushchik $
+ * @version: $Id: controls.viewmodel.js 10534 2017-02-28 18:13:38Z schubar $
  */
 
-/* global JRS, _, Report */
+/* global JRS, _, Report, require */
 
 JRS.Controls = (function (jQuery, _, Controls) {
 
@@ -43,6 +43,11 @@ JRS.Controls = (function (jQuery, _, Controls) {
     //  jQuery          - v1.7.1
     //  _,              - underscore.js 1.3.1
     //  Controls,       - controls.components
+
+    var isIE = false;
+    require(["common/util/browserDetection"], function(browserDetection) {
+        isIE = browserDetection.isIE();
+    });
 
     // ViewModel initialize, updates and adds controls to the DOM
     var ViewModel = Controls.Base.extend({
@@ -279,6 +284,13 @@ JRS.Controls = (function (jQuery, _, Controls) {
             var container = this.getContainer();
             container.empty();
 
+            if (isIE) {
+                // https://jira.tibco.com/browse/JS-32279 - Scroll jumps up on any click inside control aria (item select, title, tab)
+                // Solution is to skip stdnav handling on root container of this component.
+                container.attr("js-stdnav", "false");
+                container.attr("js-navtype", "none");
+            }
+
             // Iterate over each control in passed json
             _.each(jsonStructure, function (jsonControl) {
                 if (jsonControl.visible) {
@@ -291,20 +303,20 @@ JRS.Controls = (function (jQuery, _, Controls) {
             if (window.Report && window.Report.icReorderEnabled) {
                 var horizontalLayout = window.Controls.layouts.LAYOUT_TOP_OF_PAGE == Report.reportControlsLayout;
                 if(!(/Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent))) {
-                    jQuery(container).sortable({
-                        delay: 200,
-                        placeholder: horizontalLayout ? "verticalPlaceholder" : "horizontalPlaceholder",
-                        axis: horizontalLayout ? "x" : "y",
-                        items: "> .leaf",
-                        cancel: "input,textarea,button,select,option,.list.inputSet",
-                        start: function(event, ui) {
-                            ui.item.data('oldIndex', ui.item.index());
-                        },
-                        stop: _.bind(function(event, ui) {
-                            var oldIndex = ui.item.data('oldIndex');
-                            var newIndex = ui.item.index();
-                            oldIndex != newIndex && this.reorderControl(oldIndex, newIndex);
-                        }, this)});
+                     jQuery(container).sortable({
+                         delay: 200,
+                         placeholder: horizontalLayout ? "verticalPlaceholder" : "horizontalPlaceholder",
+                         axis: horizontalLayout ? "x" : "y",
+                         items: "> .leaf",
+                         cancel: "input,textarea,button,select,option,.list.inputSet,.jr-mSizer",
+                         start: function(event, ui) {
+                             ui.item.data('oldIndex', ui.item.index());
+                         },
+                         stop: _.bind(function(event, ui) {
+                             var oldIndex = ui.item.data('oldIndex');
+                             var newIndex = ui.item.index();
+                             oldIndex != newIndex && this.reorderControl(oldIndex, newIndex);
+                         }, this)});
                 }
             }
         },

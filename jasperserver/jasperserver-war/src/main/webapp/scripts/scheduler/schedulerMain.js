@@ -21,7 +21,7 @@
 
 /**
  * @author: Igor.Nesterenko
- * @version: $Id: schedulerMain.js 10092 2016-04-22 21:17:02Z inestere $
+ * @version: $Id: schedulerMain.js 10224 2016-07-27 20:02:40Z inestere $
  */
 
 define(function (require) {
@@ -38,6 +38,9 @@ define(function (require) {
     domReady(function() {
         var schedulerApp = new SchedulerApp();
         $("#display").append(schedulerApp.$el);
+
+        //workraround to make jquery-ui work properly with 'jr' prefix
+        $("body").addClass("jr");
     });
 
 });

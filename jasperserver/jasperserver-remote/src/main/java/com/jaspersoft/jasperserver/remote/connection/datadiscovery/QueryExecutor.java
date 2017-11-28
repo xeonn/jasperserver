@@ -24,9 +24,9 @@ package com.jaspersoft.jasperserver.remote.connection.datadiscovery;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: QueryExecutor.java 58920 2015-10-30 15:47:09Z ykovalch $
+ * @version $Id: QueryExecutor.java 64791 2016-10-12 15:08:37Z ykovalch $
  */
-public interface QueryExecutor<QueryType, ConnectionType, DataType, MetadataType> {
-    DataSet<DataType, MetadataType> executeQuery(QueryType query, ConnectionType connection);
+public interface QueryExecutor<QueryType, ConnectionType, ResultSetType, MetadataType> {
+    ResultSetType executeQuery(QueryType query, ConnectionType connection);
     MetadataType executeQueryForMetadata(QueryType query, ConnectionType connection);
 }

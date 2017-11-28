@@ -33,10 +33,6 @@
     height: auto;
 }
 
-#dashboard .saveAs .folders{
-    height: 250px;
-}
-
 #dashboard .saveAs .j-view-port-chunk{
     width: auto;
 }
@@ -83,7 +79,7 @@
 }
 
 .dashboardLevelPropertiesDialog {
-    width: 485px;
+    width: 500px;
 }
 
 .dashboardLevelPropertiesDialog .control label {
@@ -113,6 +109,12 @@
 .dashboardLevelPropertiesDialog .section {
     margin-top: 0;
     margin-bottom: 24px;
+}
+
+.dashboardLevelPropertiesDialog .fontProperty .control:last-of-type,
+.dashboardLevelPropertiesDialog .sizeProperty .control:last-of-type,
+.dashboardLevelPropertiesDialog .styleProperties .control:nth-child(6) {
+    margin-bottom: 0px;
 }
 
 .filterGroupDialog .section:last-of-type,
@@ -205,6 +207,7 @@ inputControlDialog .dashletNameProperty {
 
 .dashboardLevelPropertiesDialog .control.dashletHyperlinksAction{
     margin-top: 5px;
+    margin-bottom: 28px;
     margin-left: 20px;
 }
 
@@ -319,6 +322,30 @@ inputControlDialog .dashletNameProperty {
     background-position: -30px -234px;
 }
 
+.dashboardLevelPropertiesDialog .text-visualization > .styleProperties .buttons .textATop{
+    background-position: 0 -729px;
+}
+
+.dashboardLevelPropertiesDialog .text-visualization > .styleProperties .buttons .textATop.checked{
+    background-position: -30px -729px;
+}
+
+.dashboardLevelPropertiesDialog .text-visualization > .styleProperties .buttons .textAMiddle{
+    background-position: 0 -777px;
+}
+
+.dashboardLevelPropertiesDialog .text-visualization > .styleProperties .buttons .textAMiddle.checked{
+    background-position: -30px -777px;
+}
+
+.dashboardLevelPropertiesDialog .text-visualization > .styleProperties .buttons .textABottom{
+    background-position: 0 -822px;
+}
+
+.dashboardLevelPropertiesDialog .text-visualization > .styleProperties .buttons .textABottom.checked{
+    background-position: -30px -822px;
+}
+
 .dashboardLevelPropertiesDialog .colorPickerIcon,
 .dashboardLevelPropertiesDialog .text-visualization > .styleProperties .buttons .textBackgroundColor{
     background-position: 2px -551px;
@@ -337,7 +364,7 @@ inputControlDialog .dashletNameProperty {
 
 .dashboardLevelPropertiesDialog .text-visualization > .styleProperties .buttons{
     margin-bottom: 5px;
-    height: 19px;
+    height: 25px;
 }
 
 .dashboardLevelPropertiesDialog .text-visualization > .fontProperty > .control input[name='font'] {
@@ -394,13 +421,13 @@ inputControlDialog .dashletNameProperty {
     padding: 5px;
 }
 
-.dashboardLevelPropertiesDialog > .subcontainer > .tabbedPanel > .subcontainer.bordered {
+.dashboardLevelPropertiesDialog .subcontainer > .tabbedPanel > .subcontainer.bordered {
     border: 1px solid #B5B5B5;
     padding: 24px 16px 0 16px;
     position: relative;
     top: -3px;
     clear: both;
-    max-height: 460px;
+    max-height: 40.5em;
     overflow: auto;
 }
 
@@ -413,7 +440,7 @@ inputControlDialog .dashletNameProperty {
     margin-bottom: 4px;
 }
 
-.dashboardLevelPropertiesDialog > .subcontainer > .tabbedPanel > .header {
+.dashboardLevelPropertiesDialog .subcontainer > .tabbedPanel > .header {
     background-color: #FFFFFF;
     border-bottom: none;
     height: 22px;
@@ -510,6 +537,10 @@ inputControlDialog .dashletNameProperty {
     height: 25px;
 }
 
+.dashletLevelPropertiesDialog .section > .dashletHyperlinks .wrap.title {
+    font-weight: normal;
+}
+
 .dashletLevelPropertiesDialog .section > .dashletHyperlinks > .control.url > .hint {
     font-size: 80%;
     margin-top: 3px;
@@ -522,7 +553,7 @@ inputControlDialog .dashletNameProperty {
 
 .dashboardLevelPropertiesDialog .control .browsableInput input,
 .browsableInput input {
-    width: 70%;
+    width: 72%;
     float: left;
     box-sizing: border-box;
 }
@@ -543,7 +574,15 @@ inputControlDialog .dashletNameProperty {
 }
 .browsableInput button {
     float: right;
+    top: -1px;
     width: 25%;
+}
+
+@media screen and (-webkit-min-device-pixel-ratio:0)
+{
+    .browsableInput button {
+        top:0;
+    }
 }
 
 .dashletLevelPropertiesDialog .section > .control {

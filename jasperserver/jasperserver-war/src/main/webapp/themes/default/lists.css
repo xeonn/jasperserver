@@ -462,9 +462,12 @@ and (max-device-width : 1024px) {
 
 .list.filters > li:not(.selected) > .wrap.over,
 .list.filters > li:not(.selected) > .wrap.pressed {
-    /* background-color: #E0E0E0 */; /* DELETE */
     background-color: #1388d8;
     color: #fff;
+}
+
+.list.filters > li.selected.cursor > .wrap.over {
+    color: #666;
 }
 
 .list.filters > li > .wrap.pressed {

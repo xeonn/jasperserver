@@ -20,42 +20,62 @@
 */
 package com.jaspersoft.jasperserver.remote.helpers;
 
-import org.codehaus.jackson.map.AnnotationIntrospector;
-import org.codehaus.jackson.map.DeserializationConfig;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
-import org.codehaus.jackson.map.introspect.JacksonAnnotationIntrospector;
-import org.codehaus.jackson.map.util.StdDateFormat;
-import org.codehaus.jackson.xc.JaxbAnnotationIntrospector;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.AnnotationIntrospector;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.MapperFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
+import com.fasterxml.jackson.databind.util.StdDateFormat;
+import com.fasterxml.jackson.jaxrs.json.Annotations;
+import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
+import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
 import org.springframework.stereotype.Service;
 
 /**
+ * // TODO Andriy G: fix wrong usages of this provider in JacksonJsonMarshaller, JacksonMapperContextResolver, JacksonMapperProvider
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: JacksonMapperProvider.java 62954 2016-05-01 09:49:23Z ykovalch $
+ * @version $Id: JacksonMapperProvider.java 64626 2016-09-26 13:25:24Z vzavadsk $
  */
 @Service
-public class JacksonMapperProvider {
-    private final ObjectMapper mapper;
+public class JacksonMapperProvider extends JacksonJaxbJsonProvider {
+    private static ObjectMapper mapper;
 
     public JacksonMapperProvider(){
-        mapper = new ObjectMapper();
-        AnnotationIntrospector primary = new JaxbAnnotationIntrospector();
-        AnnotationIntrospector secondary =  new JacksonAnnotationIntrospector();
-        AnnotationIntrospector pair = new AnnotationIntrospector.Pair(primary, secondary);
-        mapper.setAnnotationIntrospector(pair);
-        // Serialize dates using ISO8601 format
-        // Jackson uses timestamps by default, so use StdDateFormat to get ISO8601
-        mapper.getSerializationConfig().withDateFormat(new StdDateFormat());
-        // Deserialize dates using ISO8601 format
-        mapper.getDeserializationConfig().withDateFormat(new StdDateFormat());
-        // Prevent exceptions from being thrown for unknown properties
-        mapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        // ignore fields with null values
-        mapper.setSerializationInclusion(JsonSerialize.Inclusion.NON_NULL);
+        super(getObjectMapper(), DEFAULT_ANNOTATIONS);
     }
-    public ObjectMapper getObjectMapper(){
+
+    public JacksonMapperProvider(Annotations... annotationsToUse) {
+        super(getObjectMapper(), annotationsToUse);
+    }
+
+    public JacksonMapperProvider(ObjectMapper mapper, Annotations[] annotationsToUse) {
+        super(mapper, annotationsToUse);
+    }
+
+    public static ObjectMapper getObjectMapper() {
+        if (mapper == null) {
+            synchronized (JacksonMapperProvider.class) {
+                if (mapper == null) {
+                    mapper = new ObjectMapper();
+                    AnnotationIntrospector primary = new JaxbAnnotationIntrospector();
+                    AnnotationIntrospector secondary = new JacksonAnnotationIntrospector();
+                    AnnotationIntrospector pair = AnnotationIntrospector.pair(primary, secondary);
+                    mapper.setAnnotationIntrospector(pair);
+                    // Serialize dates using ISO8601 format
+                    // Jackson uses timestamps by default, so use StdDateFormat to get ISO8601
+                    mapper.setDateFormat(new StdDateFormat());
+                    // Prevent exceptions from being thrown for unknown properties
+                    mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+                    // Use XML wrapper name as JSON property name
+                    mapper.configure(MapperFeature.USE_WRAPPER_NAME_AS_PROPERTY_NAME, true);
+                    // ignore fields with null values
+                    mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+                }
+            }
+        }
         return mapper;
     }
 }

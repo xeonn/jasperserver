@@ -1,19 +1,17 @@
 package com.jaspersoft.jasperserver.dto.resources.domain;
 
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.junit.Before;
+import org.junit.Test;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
+import static org.junit.Assert.*;
+
 
 /**
  * <p/>
  * <p/>
  *
  * @author tetiana.iefimenko
- * @version $Id: SchemaElementTest.java 60548 2016-02-03 14:06:55Z tiefimen $
+ * @version $Id: SchemaElementTest.java 63760 2016-07-05 18:59:28Z agodovan $
  * @see
  */
 public class SchemaElementTest {
@@ -23,7 +21,7 @@ public class SchemaElementTest {
     SchemaElement sourceElement;
     SchemaElement clonedElement;
 
-    @BeforeMethod
+    @Before
     public void setUp() {
         sourceElement = new SchemaElement()
                 .setName(ELEMENT_NAME);

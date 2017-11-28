@@ -6,7 +6,7 @@
 
 
 /**
- * @version: $Id: time.js 1605 2015-09-23 17:55:32Z inestere $
+ * @version: $Id: time.js 2956 2016-07-27 19:22:11Z inestere $
  */
 
 define(function (require) {
@@ -17,7 +17,7 @@ define(function (require) {
         RelativeTime = require("common/util/datetime/RelativeTime"),
         Time = require("common/util/datetime/Time");
 
-    var ISO_8061_TIME_PATTERN = "hh:mm:ss";
+    var ISO_8061_TIME_PATTERN = "HH:mm:ss";
 
     function isRelativeTime(value) {
         return RelativeTime.isValid(value);

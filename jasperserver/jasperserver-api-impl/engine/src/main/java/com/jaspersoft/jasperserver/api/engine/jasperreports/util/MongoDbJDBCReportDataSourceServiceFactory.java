@@ -81,7 +81,7 @@ public class MongoDbJDBCReportDataSourceServiceFactory extends JdbcReportDataSou
 		if (!(reportDataSource instanceof CustomReportDataSource)) {
 			throw new JSException("jsexception.invalid.jdbc.datasource", new Object[] {reportDataSource.getClass()});
 		}
-        JdbcReportDataSource jdbcReportDataSource = getJdbcReportDataSource((CustomReportDataSource) reportDataSource);
+        JdbcReportDataSource jdbcReportDataSource = getWrappedReportDataSource((CustomReportDataSource) reportDataSource);
 
 		DataSource dataSource = getPoolDataSource(jdbcReportDataSource.getDriverClass(), jdbcReportDataSource.getConnectionUrl(),
                 jdbcReportDataSource.getUsername(), jdbcReportDataSource.getPassword());
@@ -92,7 +92,7 @@ public class MongoDbJDBCReportDataSourceServiceFactory extends JdbcReportDataSou
 	}
 
 
-	public JdbcReportDataSource getJdbcReportDataSource(CustomReportDataSource customReportDataSource) {
+	public JdbcReportDataSource getWrappedReportDataSource(CustomReportDataSource customReportDataSource) {
         String driverClass = "tibcosoftware.jdbc.mongodb.MongoDBDriver";
         String url = "jdbc:tibcosoftware:mongodb://";
         String serverAddress = ((String) customReportDataSource.getPropertyMap().get("serverAddress"));

@@ -155,7 +155,7 @@
 
     <bean id="reportSchedulingService" class="com.jaspersoft.jasperserver.api.engine.scheduling.ReportSchedulingFacade">
         <property name="persistenceService" ref="${bean.reportJobsPersistenceService}"/>
-        <property name="jobsInternalService" ref="reportJobsPersistenceService"/>
+        <property name="jobsInternalService" ref="reportJobsPersistenceHibernateService"/>
         <property name="scheduler" ref="reportScheduler"/>
         <property name="validator" ref="defaultReportJobValidator"/>
         <property name="auditContext" ref="${bean.auditContext}"/>
@@ -264,10 +264,22 @@
         </property>
     </bean>
 
-    <alias name="reportJobsPersistenceHibernateService" alias="reportJobsPersistenceService"/>
-
     <bean id="reportJobAfterList" class="org.springframework.security.acls.afterinvocation.AclEntryAfterInvocationCollectionFilteringProvider">
         <constructor-arg name="aclService" ref="reportJobAclService"/>
+        <constructor-arg name="requirePermission">
+            <list>
+                <ref bean="JasperServerPermission.READ"/>
+                <ref bean="JasperServerPermission.ADMINISTRATION"/>
+            </list>
+        </constructor-arg>
+        <property name="processDomainObjectClass" value="com.jaspersoft.jasperserver.api.engine.scheduling.domain.ReportJobSummary"/>
+        <property name="sidRetrievalStrategy" ref="sidRetrievalStrategy"/>
+        <property name="objectIdentityRetrievalStrategy" ref="jobRetrievalStrategy"/>
+    </bean>
+
+    <bean id="reportJobAccessDenySubstitutor" class="com.jaspersoft.jasperserver.api.metadata.security.DefaultValueAfterInvocationFilteringProvider">
+        <constructor-arg name="aclService" ref="reportJobAclService"/>
+        <constructor-arg name="processConfigAttribute" value="ACL_REPORT_JOB_DELETE" type="java.lang.String"/>
         <constructor-arg name="requirePermission">
             <list>
                 <ref bean="JasperServerPermission.READ"/>
@@ -283,6 +295,16 @@
         <property name="providers">
             <list>
                 <ref bean="reportJobAfterList"/>
+                <!--<ref bean="reportJobAccessDenySubstitutor"/>-->
+            </list>
+        </property>
+    </bean>
+
+    <bean id="securedReportJobsPersistenceService" class="org.springframework.aop.framework.ProxyFactoryBean">
+        <property name="interceptorNames">
+            <list>
+                <idref bean="reportJobSecurity"/>
+                <idref bean="reportJobsPersistenceHibernateService"/>
             </list>
         </property>
     </bean>

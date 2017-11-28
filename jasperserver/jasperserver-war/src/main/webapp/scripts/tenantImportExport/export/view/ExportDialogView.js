@@ -29,6 +29,7 @@ define(function(require) {
 
     var $ = require("jquery"),
         _ = require("underscore"),
+        jrsConfigs = require('jrs.configs'),
 
         Dialog = require("common/component/dialog/Dialog"),
         ExportView = require("./ExportView"),
@@ -88,7 +89,15 @@ define(function(require) {
         },
 
         openRepoDialog: function(repoData) {
-            var renderOptions = {type: exportTypesEnum.REPOSITORY},
+            var uris = parseRepoData(repoData);
+
+            var organizationsFolderUri = jrsConfigs.organizationsFolderUri || "/organizations";
+            var orgTemplateFolderUri = jrsConfigs.orgTemplateFolderUri || "/org_template";
+            var subOrgRegExp = new RegExp("^(" + organizationsFolderUri + "/([^/]+))+");
+            var rootOrgTemplateRegExp = new RegExp("^" + organizationsFolderUri + orgTemplateFolderUri + "(/.*)?");
+            var isSubOrgLevel = !!subOrgRegExp.exec(uris[0]) && !rootOrgTemplateRegExp.exec(uris[0]);
+
+            var renderOptions = {type: exportTypesEnum.REPOSITORY, isSubOrgLevel: isSubOrgLevel},
                 subtitle = " " + i18n2["export.dialog.repository.title"];
 
             this.addCssClasses("repository-export-dialog");
@@ -96,7 +105,7 @@ define(function(require) {
             this._openExportDialog(renderOptions, subtitle);
 
             this.exportView.model.set({
-                "uris": parseRepoData(repoData),
+                "uris": uris,
                 "includeScheduledReportJobs": hasReports(repoData)
             });
         },

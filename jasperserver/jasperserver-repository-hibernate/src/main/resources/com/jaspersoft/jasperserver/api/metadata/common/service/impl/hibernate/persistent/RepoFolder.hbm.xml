@@ -42,4 +42,10 @@
 	<drop>DROP INDEX JIResourceFolder_version_index ON JIResourceFolder</drop>
 </database-object>
 
+<!-- create index JIResourceFolder_hidden_index on JIResourceFolder (hidden); -->
+<database-object>
+        <create>create index JIResourceFolder_hidden_index on JIResourceFolder (hidden)</create>
+        <drop>DROP INDEX JIResourceFolder_hidden_index ON JIResourceFolder</drop>
+</database-object>
+
 </hibernate-mapping>

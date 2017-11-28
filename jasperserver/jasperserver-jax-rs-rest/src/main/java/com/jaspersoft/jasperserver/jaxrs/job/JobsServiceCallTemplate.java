@@ -20,6 +20,7 @@
 */
 package com.jaspersoft.jasperserver.jaxrs.job;
 
+import com.jaspersoft.jasperserver.api.JSException;
 import com.jaspersoft.jasperserver.api.JSValidationException;
 import com.jaspersoft.jasperserver.api.engine.scheduling.service.ReportJobNotFoundException;
 import com.jaspersoft.jasperserver.remote.common.RemoteServiceCallTemplate;
@@ -37,7 +38,7 @@ import javax.ws.rs.core.Response;
 
 /**
  * @author Yaroslav.Kovalchyk
- * @version $Id: JobsServiceCallTemplate.java 63380 2016-05-26 20:56:46Z mchan $
+ * @version $Id: JobsServiceCallTemplate.java 65088 2016-11-03 23:22:01Z gbacon $
  */
 public class JobsServiceCallTemplate implements RemoteServiceCallTemplate<JobsService> {
     private static final Log log = LogFactory.getLog(JobsServiceCallTemplate.class);
@@ -63,6 +64,8 @@ public class JobsServiceCallTemplate implements RemoteServiceCallTemplate<JobsSe
             entity = new ErrorDescriptor().setErrorCode("access.denied").setMessage(e.getMessage());
         } catch (JSValidationException e) {
             entity = e.getErrors();
+        } catch (JSException e) {
+            entity = new ErrorDescriptor().setMessage(e.getMessage());
         } catch (RemoteException e) {
             entity = e.getErrorDescriptor();
             if (e.isUnexpected()){

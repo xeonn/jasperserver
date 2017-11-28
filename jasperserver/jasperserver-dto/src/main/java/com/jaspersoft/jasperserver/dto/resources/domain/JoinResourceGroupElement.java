@@ -20,13 +20,16 @@
 */
 package com.jaspersoft.jasperserver.dto.resources.domain;
 
+import javax.validation.Valid;
+
 /**
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: JoinResourceGroupElement.java 60839 2016-02-12 15:37:14Z ykovalch $
+ * @version $Id: JoinResourceGroupElement.java 64791 2016-10-12 15:08:37Z ykovalch $
  */
 public class JoinResourceGroupElement extends AbstractResourceGroupElement<JoinResourceGroupElement> {
+    @Valid
     private JoinInfo joinInfo;
 
     public JoinResourceGroupElement(){}

@@ -20,13 +20,15 @@
 */
 package com.jaspersoft.jasperserver.remote.connection;
 
+import java.util.Map;
+
 /**
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: ConnectionQueryExecutor.java 62954 2016-05-01 09:49:23Z ykovalch $
+ * @version $Id: ConnectionQueryExecutor.java 64791 2016-10-12 15:08:37Z ykovalch $
  */
 public interface ConnectionQueryExecutor<QueryType, ConnectionType> {
-    Object executeQuery(QueryType query, ConnectionType connection);
-    Object executeQueryForMetadata(QueryType query, ConnectionType connection);
+    Object executeQuery(QueryType query, ConnectionType connection, Map<String, Object> contextData);
+    Object executeQueryForMetadata(QueryType query, ConnectionType connection, Map<String, Object> contextData);
 }

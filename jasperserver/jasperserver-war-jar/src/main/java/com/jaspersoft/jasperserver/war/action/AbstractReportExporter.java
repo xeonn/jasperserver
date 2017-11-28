@@ -56,7 +56,7 @@ import com.jaspersoft.jasperserver.war.util.SessionObjectSerieAccessor;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: AbstractReportExporter.java 54728 2015-04-24 15:28:20Z tdanciu $
+ * @version $Id: AbstractReportExporter.java 65088 2016-11-03 23:22:01Z gbacon $
  */
 public abstract class AbstractReportExporter extends MultiAction {
 	
@@ -103,7 +103,6 @@ public abstract class AbstractReportExporter extends MultiAction {
 		}
 		
 		return success();
-		//FIXME lucianc remove the report from the session store on direct URL
 	}
 
 	protected JasperPrint getJasperPrint(RequestContext context, String jasperPrintName) 

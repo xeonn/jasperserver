@@ -33,6 +33,11 @@ public class RepoResourceFolderItem extends RepoResourceItemBase {
 
     private boolean hidden;
     private String uri;
+    private String resourceType=Folder.class.getName();
+    
+    public void setResourceType(String resourceType){
+    	// nada, read only
+    }
 
     public String getURI() {
         return uri;

@@ -50,7 +50,7 @@ import java.util.*;
 
 /**
  * @author Yaroslav.Kovalchyk
- * @version $Id: JobsServiceImpl.java 62483 2016-04-12 17:26:07Z akasych $
+ * @version $Id: JobsServiceImpl.java 65088 2016-11-03 23:22:01Z gbacon $
  */
 @Component("jobsService")
 public class JobsServiceImpl implements JobsService {
@@ -159,11 +159,15 @@ public class JobsServiceImpl implements JobsService {
     }
 
     public void pause(List<Long> jobIds) {
-        scheduler.pauseById(getHolders(jobIds), isAllJobs(jobIds));
+        auditHelper.createAuditEvent("pauseReportScheduling");
+        scheduler.pauseById(makeExecutionContext(), getHolders(jobIds), isAllJobs(jobIds));
+        auditHelper.closeAuditEvent("pauseReportScheduling");
     }
 
     public void resume(List<Long> jobIds) {
-        scheduler.resumeById(getHolders(jobIds), isAllJobs(jobIds));
+        auditHelper.createAuditEvent("resumeReportScheduling");
+        scheduler.resumeById(makeExecutionContext(), getHolders(jobIds), isAllJobs(jobIds));
+        auditHelper.closeAuditEvent("resumeReportScheduling");
     }
 
     public void scheduleJobsOnceNow(List<Long> jobIds) throws ResourceNotFoundException {
@@ -299,7 +303,11 @@ public class JobsServiceImpl implements JobsService {
             break;
             case annual: {
                 final AnnualCalendar annualCalendar = new AnnualCalendar(baseCalendar, timeZone);
-                annualCalendar.setDaysExcluded(jobCalendar.getExcludeDays());
+                if (jobCalendar.getExcludeDays() != null && !jobCalendar.getExcludeDays().isEmpty()) {
+                    annualCalendar.setDaysExcluded(jobCalendar.getExcludeDays());
+                } else {
+                    throw new MandatoryParameterNotFoundException("reportJobCalendar.excludeDays");
+                }
                 result = annualCalendar;
             }
             break;
@@ -308,6 +316,8 @@ public class JobsServiceImpl implements JobsService {
                     result = new CronCalendar(baseCalendar, jobCalendar.getCronExpression(), timeZone);
                 } catch (ParseException e) {
                     throw new IllegalParameterValueException("Couldn't parse cron expression", "reportJobCalendar.cronExpression", jobCalendar.getCronExpression());
+                } catch (IllegalArgumentException e) {
+                    throw new MandatoryParameterNotFoundException("reportJobCalendar.cronExpression");
                 }
                 break;
             case daily: {
@@ -334,10 +344,13 @@ public class JobsServiceImpl implements JobsService {
             case holiday: {
                 final HolidayCalendar holidayCalendar = new HolidayCalendar();
                 holidayCalendar.setBaseCalendar(baseCalendar);
-                if (jobCalendar.getExcludeDays() != null && !jobCalendar.getExcludeDays().isEmpty())
+                if (jobCalendar.getExcludeDays() != null && !jobCalendar.getExcludeDays().isEmpty()) {
                     for (java.util.Calendar currentCalendar : jobCalendar.getExcludeDays()) {
                         holidayCalendar.addExcludedDate(currentCalendar.getTime());
                     }
+                } else {
+                    throw new MandatoryParameterNotFoundException("reportJobCalendar.excludeDays");
+                }
                 holidayCalendar.setTimeZone(timeZone);
                 result = holidayCalendar;
             }

@@ -18,6 +18,19 @@ package com.jaspersoft.jasperserver.war.tiles2;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.tiles.TilesApplicationContext;
+import org.apache.tiles.TilesContainer;
+import org.apache.tiles.TilesException;
+import org.apache.tiles.access.TilesAccess;
+import org.apache.tiles.context.AbstractTilesApplicationContextFactory;
+import org.apache.tiles.definition.DefinitionsFactory;
+import org.apache.tiles.definition.digester.DigesterDefinitionsReader;
+import org.apache.tiles.factory.AbstractTilesContainerFactory;
+import org.apache.tiles.factory.TilesContainerFactory;
+import org.apache.tiles.preparer.BasicPreparerFactory;
+import org.apache.tiles.servlet.context.ServletTilesApplicationContext;
+import org.apache.tiles.servlet.context.wildcard.WildcardServletTilesApplicationContextFactory;
+import org.apache.tiles.web.util.ServletContextAdapter;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.CollectionUtils;
@@ -27,23 +40,7 @@ import org.springframework.web.servlet.view.tiles2.SpringLocaleResolver;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
-import java.util.Enumeration;
-import java.util.Properties;
-
-import org.apache.tiles.TilesApplicationContext;
-import org.apache.tiles.TilesContainer;
-import org.apache.tiles.TilesException;
-import org.apache.tiles.access.TilesAccess;
-import org.apache.tiles.context.AbstractTilesApplicationContextFactory;
-import org.apache.tiles.definition.DefinitionsFactory;
-import org.apache.tiles.definition.digester.DigesterDefinitionsReader;
-import org.apache.tiles.evaluator.el.ELAttributeEvaluator;
-import org.apache.tiles.factory.AbstractTilesContainerFactory;
-import org.apache.tiles.factory.TilesContainerFactory;
-import org.apache.tiles.preparer.BasicPreparerFactory;
-import org.apache.tiles.servlet.context.ServletTilesApplicationContext;
-import org.apache.tiles.servlet.context.wildcard.WildcardServletTilesApplicationContextFactory;
-import org.apache.tiles.web.util.ServletContextAdapter;
+import java.util.*;
 
 /**
  * Helper class to configure Tiles2 for the Spring Framework. See
@@ -87,7 +84,7 @@ public class SpringTilesConfigurer implements ServletContextAware, InitializingB
 
     protected final static Log logger = LogFactory.getLog(SpringTilesConfigurer.class);
 
-    private final Properties tilesPropertyMap = new Properties();
+    private final Map<String, String> tilesPropertyMap = Collections.synchronizedMap(new HashMap<String, String>());
 
     private ServletContext servletContext;
 
@@ -239,11 +236,11 @@ public class SpringTilesConfigurer implements ServletContextAware, InitializingB
         }
 
         public String getInitParameter(String paramName) {
-            return tilesPropertyMap.getProperty(paramName);
+            return tilesPropertyMap.get(paramName);
         }
 
-        public Enumeration<?> getInitParameterNames() {
-            return tilesPropertyMap.keys();
+        public Enumeration<String> getInitParameterNames() {
+            return Collections.enumeration(tilesPropertyMap.keySet());
         }
     }
 

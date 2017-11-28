@@ -8,7 +8,7 @@ package com.jaspersoft.jasperserver.export.modules.common;
 public enum ExportImportWarningCode {
     EXPORT_BROKEN_DEPENDENCY("export.broken.dependency"),
     IMPORT_RESOURCE_NOT_FOUND("import.resource.not.found"),
-    IMPORT_RESOURCE_DIFFERENT_TYPE("import.resource.different.type.already.exist"),
+    IMPORT_RESOURCE_DIFFERENT_TYPE("import.resource.different.type.already.exists"),
     IMPORT_RESOURCE_ATTACHED_NOT_EXIST_ORG("import.resource.attached.not.exist.org"),
     IMPORT_RESOURCE_DATA_MISSING("import.resource.data.missing"),
     IMPORT_RESOURCE_URI_TOO_LONG("import.resource.uri.too.long"),

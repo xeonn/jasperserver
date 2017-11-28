@@ -360,7 +360,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
               </entry>
           </util:map>
       </entry>
-      <entry key="impala">
+      <!--  entry key="impala">
           <util:map>
               <entry key="label" value="Impala"/>
               <entry key="jdbcUrl" value="jdbc:tibcosoftware:impala://$[dbHost]:$[dbPort];TransactionMode=ignore"/>
@@ -372,7 +372,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
                   </util:map>
               </entry>
           </util:map>
-      </entry>
+      </entry -->
         <entry key="sparksql">
             <util:map>
                 <entry key="label" value="SparkSQL"/>
@@ -428,7 +428,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
                 </entry>
             </util:map>
         </entry>
-        <entry key="cassandra">
+        <!--  entry key="cassandra">
             <util:map>
                 <entry key="label" value="Cassandra"/>
                 <entry key="jdbcUrl" value="jdbc:tibcosoftware:cassandra://$[dbHost]:$[dbPort];TransactionMode=ignore;KeyspaceName=$[defaultKeySpace];SchemaMap=[TMPDIR/]cass_$[dbHost]_$[dbPort]_$[defaultKeySpace].config"/>
@@ -441,7 +441,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
                     </util:map>
                 </entry>
             </util:map>
-        </entry>
+        </entry  -->
 
       <entry key="redshift">
           <util:map>
@@ -548,18 +548,6 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
    </util:map>
 
   <bean id="jdbcConnectionMap" parent="${bean.jdbcConnectionMap}"></bean>
-
-  <!-- reportJobsPersistenceService bean: moved from appContext-report-scheduling.xml    -->
-  <!-- the bean definition here is unchanged. bean was moved to accommodate non-standard -->
-  <!-- definition that is found for for import-export.                                   -->
-  <bean id="reportJobsPersistenceService" class="org.springframework.aop.framework.ProxyFactoryBean">
-    <property name="interceptorNames">
-      <list>
-        <idref bean="reportJobSecurity"/>
-        <idref bean="reportJobsPersistenceHibernateService"/>
-      </list>
-    </property>
-  </bean>
 
   <bean id="hibernateCompositeDeleteListenerListeners" class="java.util.ArrayList">
      <constructor-arg>
@@ -674,7 +662,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
                         </list>
                     </property>
                 </bean>
-                <bean p:method="GET" p:urlPattern="/rest_v2/bundles(/.+|\?.*&amp;?expanded=true)" class="com.jaspersoft.jasperserver.war.httpheaders.HeadersRule">
+                <bean p:method="GET" p:urlPattern="(/runtime/[0-9ABCDEF]*)*/rest_v2/bundles(/.+|\?.*&amp;?expanded=true)" class="com.jaspersoft.jasperserver.war.httpheaders.HeadersRule">
                     <property name="headers">
                         <list>
                             <bean class="org.apache.http.message.BasicHeader">
@@ -682,9 +670,33 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
                                 <constructor-arg value="no-transform,max-age=#{staticResourcesExpiresHeader.maxAge}"/>
                             </bean>
                             <bean class="org.apache.http.message.BasicHeader">
+                                <constructor-arg value="Pragma"/>
+                                <constructor-arg value=""/>
+                            </bean>
+                            <bean class="org.apache.http.message.BasicHeader">
                                 <constructor-arg value="Vary"/>
                                 <constructor-arg value="Accept-Language"/>
                             </bean>
+                            <ref local="staticResourcesExpiresHeader" />
+                        </list>
+                    </property>
+                </bean>
+                <bean p:method="GET" p:urlPattern="(/runtime/[0-9ABCDEF]*)*/rest_v2/settings/.*" class="com.jaspersoft.jasperserver.war.httpheaders.HeadersRule">
+                    <property name="headers">
+                        <list>
+                            <bean class="org.apache.http.message.BasicHeader">
+                                <constructor-arg value="Cache-Control"/>
+                                <constructor-arg value="no-transform,max-age=#{staticResourcesExpiresHeader.maxAge}"/>
+                            </bean>
+                            <bean class="org.apache.http.message.BasicHeader">
+                                <constructor-arg value="Pragma"/>
+                                <constructor-arg value=""/>
+                            </bean>
+                            <bean class="org.apache.http.message.BasicHeader">
+                                <constructor-arg value="Vary"/>
+                                <constructor-arg value="Accept-Language"/>
+                            </bean>
+                            <ref local="staticResourcesExpiresHeader" />
                         </list>
                     </property>
                 </bean>
@@ -729,8 +741,29 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
                         </list>
                     </property>
                 </bean>
+                <bean p:method="GET" p:urlPattern=".*/JavaScriptServlet$" class="com.jaspersoft.jasperserver.war.httpheaders.HeadersRule">
+                    <property name="headers">
+                        <list>
+                            <bean class="org.apache.http.message.BasicHeader">
+                                <constructor-arg value="Cache-Control"/>
+                                <constructor-arg value="private,max-age=#{staticResourcesExpiresHeader.maxAge}"/>
+                            </bean>
+                            <bean class="org.apache.http.message.BasicHeader">
+                                <constructor-arg value="Pragma"/>
+                                <constructor-arg value=""/>
+                            </bean>
+                            <ref local="staticResourcesExpiresHeader" />
+                        </list>
+                    </property>
+                </bean>
             </list>
         </property>
     </bean>
+
+    <bean id="JavascriptOptimizationSettings" class="com.jaspersoft.jasperserver.war.common.JavascriptOptimizationSettings">
+        <property name="useOptimizedJavascript" value="false"/>
+        <property name="optimizedJavascriptPath" value="optimized-scripts"/>
+    </bean>
+
 
 </beans>

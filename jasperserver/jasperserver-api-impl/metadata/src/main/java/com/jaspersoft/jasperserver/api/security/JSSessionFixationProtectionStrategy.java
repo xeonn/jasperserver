@@ -28,7 +28,7 @@ import java.util.Map;
 
 /**
  * @author dlitvak
- * @version $Id: JSSessionFixationProtectionStrategy.java 63599 2016-06-15 23:22:58Z dlitvak $
+ * @version $Id: JSSessionFixationProtectionStrategy.java 63866 2016-07-12 22:39:01Z schubar $
  */
 public class JSSessionFixationProtectionStrategy extends SessionFixationProtectionStrategy {
     /**

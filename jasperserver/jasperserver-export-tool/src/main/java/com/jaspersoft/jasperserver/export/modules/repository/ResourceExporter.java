@@ -51,7 +51,7 @@ import java.util.*;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ResourceExporter.java 63380 2016-05-26 20:56:46Z mchan $
+ * @version $Id: ResourceExporter.java 64717 2016-10-05 11:58:11Z akasych $
  */
 public class ResourceExporter extends BaseExporterModule implements ResourceExportHandler {
 	public static final String DIAGNOSTIC = "diagnostic";
@@ -150,7 +150,9 @@ public class ResourceExporter extends BaseExporterModule implements ResourceExpo
         for (String uri : uris) {
             processUri(uri, true, false);
         }
-		exportDependencies();
+		if (!isExportWithoutDependencies()) {
+			exportDependencies();
+		}
 		handleResourceWithBrokenDependencies();
 	}
 
@@ -516,9 +518,17 @@ public class ResourceExporter extends BaseExporterModule implements ResourceExpo
 
 	protected ResourceReferenceBean handleExternalReference(ResourceReference reference) {
 		String uri = reference.getReferenceURI();
-		addResourceToDependenciesMap(uri);
-		queueResource(uri);
+		handleExternalReferenceUri(uri);
 		return new ResourceReferenceBean(uri);
+	}
+
+	protected void handleExternalReferenceUri(String uri) {
+		addResourceToDependenciesMap(uri);
+		if (isExportWithoutDependencies()) {
+			notAccessibleResources.add(uri);
+			return;
+		}
+		queueResource(uri);
 	}
 
 	protected void addResourceToDependenciesMap(String uri) {
@@ -579,6 +589,10 @@ public class ResourceExporter extends BaseExporterModule implements ResourceExpo
 	protected void writeResourceData(Resource resource, InputStream dataIn, String outDataFilename) {
 		String folder = mkdir(configuration.getResourcesDirName(), resource.getParentFolder());
 		writeData(dataIn, folder, outDataFilename);
+	}
+
+	private boolean isExportWithoutDependencies() {
+		return exportParams.hasParameter(skipDependentResource) && exportResourceTypes.isEmpty();
 	}
 
 	public String getUrisArgument() {

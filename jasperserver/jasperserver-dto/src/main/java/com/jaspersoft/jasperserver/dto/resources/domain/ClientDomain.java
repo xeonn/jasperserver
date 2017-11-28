@@ -23,6 +23,8 @@ package com.jaspersoft.jasperserver.dto.resources.domain;
 import com.jaspersoft.jasperserver.dto.resources.BaseSemanticLayerDataSource;
 import com.jaspersoft.jasperserver.dto.resources.ResourceMediaType;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
@@ -32,12 +34,16 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @XmlRootElement(name= ResourceMediaType.DOMAIN_CLIENT_TYPE)
 public class ClientDomain extends BaseSemanticLayerDataSource<ClientDomain, Schema> {
+    @Valid
+    @NotNull
     private Schema schema;
 
     public ClientDomain(){}
     public ClientDomain(ClientDomain source){
         super(source);
-        schema = new Schema(source.getSchema());
+        if(source.getSchema() != null) {
+            schema = new Schema(source.getSchema());
+        }
     }
 
     public Schema getSchema() {

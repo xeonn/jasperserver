@@ -553,60 +553,6 @@
         </copy>
     </target>
 
- 
-    <target name="make-developer-dist" 
-        description="create a distribution for developers to get started quickly">
-        <property name="mydist" value="${basedir}/dist/buildomatic"/>
-        <mkdir dir="${mydist}"/>
-        <copy toDir="${mydist}">
-            <fileset dir=".">
-                <include name="bin/**"/>
-                <include name="conf_source/**"/>
-                <include name="sample_conf/**"/>
-                <include name="install_resources/sql/**"/>
-                <include name="*.xml"/>
-                <include name="*.sh"/>
-                <include name="*.bat"/>
-            </fileset>
-        </copy>
-        <!-- copy startup files from startup_conf -->
-        <copy toDir="${mydist}">
-            <fileset dir="sample_conf/dist"/>
-        </copy>
-        
-        <!-- get the ant distribution from svn and unzip it 
-        
-        This SVN path should be a property
-        
-        -->
-        
-        <runsvn>
-            <arg value="export"/>
-            <arg value="svn+ssh://${svn-user}@falcon/eng/installer/trunk/applications/apache-ant/ant.zip"/>
-            <arg value="${mydist}/ant.zip"/>
-        </runsvn>
-        <copy toDir="${mydist}">
-            <zipfileset src="${mydist}/ant.zip"/>
-        </copy>
-        <delete file="${mydist}/ant.zip"/>
-
-        <!-- get the maven distribution from svn and unzip it 
-        
-        This SVN path should be a property
-
-        -->
-        <runsvn>
-            <arg value="export"/>
-            <arg value="svn+ssh://${svn-user}@falcon/eng/installer/trunk/applications/apache-maven/apache-maven-2.0.9-bin.zip"/>
-            <arg value="${mydist}/maven.zip"/>
-        </runsvn>
-        <copy toDir="${mydist}">
-            <zipfileset src="${mydist}/maven.zip"/>
-        </copy>
-        <delete file="${mydist}/maven.zip"/>
-        <zip destfile="${basedir}/dist/buildomatic.zip" basedir="${basedir}/dist" includes="buildomatic/**"/>
-    </target>
-
     <target name="encrypt-diagnostics-data">
         <encrypt-zip inFile="${inFile}"
                      encProps="${encProps}" />

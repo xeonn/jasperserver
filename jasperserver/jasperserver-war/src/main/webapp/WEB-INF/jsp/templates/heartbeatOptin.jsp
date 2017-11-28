@@ -33,7 +33,7 @@ Usage:
 <%@ taglib uri="http://www.springframework.org/tags" prefix="spring"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
-<!--/WEB-INF/jsp/templates/heartbeatOptin.jsp revision A-->
+
 <t:useAttribute id="containerID" name="containerID" classname="java.lang.String" ignore="true"/>
 <t:useAttribute id="containerClass" name="containerClass" classname="java.lang.String" ignore="true"/>
 <t:useAttribute id="leftButtonId" name="leftButtonId" classname="java.lang.String" ignore="true"/>

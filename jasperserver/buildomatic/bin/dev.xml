@@ -57,12 +57,12 @@
             </if>
         </else>
     </if>
-   
+
     <!-- to cope with windows based builds
         <property name="OFFLINE_ARG" value="" />
         <property name="THREAD_ARG" value="" />
         -->
-       
+
     <macrodef name="oldrunmaven">
         <attribute name="dir" default="${buildBase}"/>
         <element name="args" implicit="yes"/>
@@ -157,7 +157,7 @@
                  dir="@{dir}"
                  resultproperty="maven.result">
                 <jvmarg value="-Xms128m"/>
-                <jvmarg value="-Xmx1024m"/>
+                <jvmarg value="-Xmx2048m"/>
                 <jvmarg value="-XX:PermSize=32m"/>
                 <jvmarg value="-XX:MaxPermSize=256m"/>
                 <sysproperty key="maven.multiModuleProjectDirectory" value="@{dir}"/>
@@ -363,14 +363,29 @@
            description="Builds JasperServer CE/Pro and copies WAR files to install resources">
     </target>
 
+    <target name="fix-webapp-name">
+        <!-- fix for js.quartz.properties uri property setting            -->
+        <!-- todo: need proper fix/cleanup for this issue                 -->
+        <!-- (jasperserver/WEB-INF/js.quartz.properties)                  -->
+        <!--                                                              -->
+        <replace file="${js-path}/jasperserver-war/target/jasperserver/WEB-INF/js.quartz.properties"
+                 token="${webAppNameSrcPro}"
+                 value="${webAppName}"/>
+
+        <replace file="${warSourceDir}/WEB-INF/js.quartz.properties"
+                 token="${webAppNameSrcPro}"
+                 value="${webAppName}"/>
+
+    </target>
+
     <target name="build-ce"
            depends="init-source-paths, set-ce-webapp-name, install-jdbc-dep"
            description="Builds JasperServer CE and copies WAR to install resources">
 
         <!-- set these values to package avoid runtime error on windows. these two     -->
         <!-- can't be set with java properties. And causes invalid goal error on linux -->
-        <property name="OFFLINE_ARG" value="package"/>
-        <property name="THREAD_ARG" value="package"/>
+        <property name="OFFLINE_ARG" value="-V"/>
+        <property name="THREAD_ARG" value="-V"/>
 
         <!--Run headless javascript tests before maven execution-->
         <!-- <runtarget target="run-javascript-tests-ce"/> -->
@@ -431,6 +446,9 @@
            depends="init-source-paths, set-pro-webapp-name, install-jdbc-dep"
            description="Builds JasperServer Pro and copies WAR to install resources">
 
+        <property name="OFFLINE_ARG" value="-V"/>
+        <property name="THREAD_ARG" value="-V"/>
+
         <if>
             <isset property="js.enable.unit.tests"/>
             <then>
@@ -451,8 +469,8 @@
                     <arg value="${obfuscationArg}"/>
                     <!-- skip execution of integration-tests in production-tests folder -->
                     <arg value="-D${SKIP_TEST_ARG}"/>
-                    <!--<arg value="${OFFLINE_ARG}"/>
-                   <arg value="${THREAD_ARG}"/>-->
+                    <arg value="${OFFLINE_ARG}"/>
+                    <arg value="${THREAD_ARG}"/>
                 </runmaven>
             </else>
         </if>
@@ -613,7 +631,6 @@
             </then>
         </if>
 
-
         <echo>Running tests: testXmlFile=${testXmlFile}</echo>
         <runmaven dir="${js-pro-path}/production-tests">
             <arg value="clean"/>
@@ -634,6 +651,38 @@
             <arg value="install"/>
             <arg value="-DtestNgXmlFile=${testExternalDbXmlFile}"/>
         </runmaven>
+    </target>
+
+    <target name="run-my-tests-pro"
+            depends="init-source-paths, install-jdbc-dep"
+            description="build and run the pro integration tests">
+
+        <property name="OFFLINE_ARG" value="-V"/>
+
+        <!-- to enable remote debugging, add "-Dremote.debug=true" to command line, and attach debugger to port 8000 (address set in runmaven macro) -->
+        <if>
+            <isset property="remote.debug"/>
+            <then>
+                <echo>remote.debug is ON</echo>
+            </then>
+        </if>
+        <echo></echo>
+
+        <echo>Running integration tests</echo>
+
+        <if>
+            <equals arg1="${dbType}" arg2="postgresql" />
+            <then>
+                <runtarget target="re-init-js-db-it-pro"/>
+
+                <runmaven dir="${js-pro-path}/integration-tests">
+                    <arg value="clean"/>
+                    <arg value="install"/>
+                    <arg value="-Ddatabase=${dbType}"/>
+                    <arg value="${OFFLINE_ARG}"/>
+                </runmaven>
+            </then>
+        </if>
     </target>
 
     <target name="install-jdbc-dep"
@@ -743,7 +792,7 @@
         <!--
        <echo> webAppNameCE = ${webAppNameCE}</echo>
        <echo> webAppNamePro = ${webAppNamePro}</echo>
-       <echo> webAppNameDel = ${webAppNameDel}</echo>        
+       <echo> webAppNameDel = ${webAppNameDel}</echo>
        <echo> warTargetDirDel = ${warTargetDirDel}</echo>
        -->
         <echo></echo>
@@ -1018,7 +1067,7 @@
             <arg value="clean"/>
             <arg value="install"/>
             <arg value="-DtestNgXmlFile=testng-standalone-test-pro.xml"/>
-            <arg value="-DtestdbType=h2"/>
+            <!--arg value="-DtestdbType=h2"/-->
             <arg value="${OFFLINE_ARG}"/>
             <arg value="${THREAD_ARG}"/>
         </runmaven>
@@ -1070,5 +1119,6 @@
            depends="re-create-js-db-it-pro,init-js-db-it-pro"
            description="Prepares IT database">
     </target>
+
 
 </project>

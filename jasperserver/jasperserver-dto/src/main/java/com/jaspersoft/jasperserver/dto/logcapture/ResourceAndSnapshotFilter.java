@@ -27,7 +27,7 @@ import javax.xml.bind.annotation.*;
 
 /**
  * @author Yakiv Tymoshenko
- * @version $Id: ResourceAndSnapshotFilter.java 61296 2016-02-25 21:53:37Z mchan $
+ * @version $Id: ResourceAndSnapshotFilter.java 65088 2016-11-03 23:22:01Z gbacon $
  * @since 10.02.2015
  */
 @XmlRootElement
@@ -41,8 +41,11 @@ public class ResourceAndSnapshotFilter {
     }
 
     public ResourceAndSnapshotFilter(ResourceAndSnapshotFilter other) {
-        this.resourceUri = other.getResourceUri();
-        this.includeDataSnapshots = other.getIncludeDataSnapshots();
+        this();
+        if (null != other) {
+            this.resourceUri = other.getResourceUri();
+            this.includeDataSnapshots = other.getIncludeDataSnapshots();
+        }
     }
 
     /*

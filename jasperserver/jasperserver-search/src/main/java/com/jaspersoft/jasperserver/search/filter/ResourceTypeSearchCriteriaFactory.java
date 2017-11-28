@@ -22,17 +22,23 @@
 package com.jaspersoft.jasperserver.search.filter;
 
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.Folder;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceLookup;
 import com.jaspersoft.jasperserver.api.metadata.common.service.ResourceFactory;
 import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.persistent.RepoResourceItem;
+import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.persistent.RepoResourceItemBase;
 import com.jaspersoft.jasperserver.api.search.SearchCriteria;
 import com.jaspersoft.jasperserver.api.search.SearchCriteriaFactory;
 import com.jaspersoft.jasperserver.api.search.SearchFilter;
 import com.jaspersoft.jasperserver.api.search.SearchSorter;
+import com.jaspersoft.jasperserver.search.service.RepositorySearchCriteria;
 
 import java.util.List;
 import java.util.Map;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * FIXME!!!!
@@ -47,14 +53,20 @@ import java.util.Map;
  * <p/>
  * Other things that should be addressed are to make it MT-aware
  * (currently, you have to manually adjust any repo path you're using in a filter)
- * @version $Id: ResourceTypeSearchCriteriaFactory.java 51276 2014-11-09 17:44:57Z ktsaregradskyi $
+ * @version $Id: ResourceTypeSearchCriteriaFactory.java 66432 2017-03-10 22:04:59Z esytnik $
  */
 public class ResourceTypeSearchCriteriaFactory implements SearchCriteriaFactory, Cloneable {
     private ResourceFactory persistentClassMappings;
     private Map<String, SearchFilter> typeSpecificFilters;
     private String resourceType;
+    
+    private static final Log log = LogFactory.getLog(ResourceTypeSearchCriteriaFactory.class);
+    public static String NOFOLDERALIAS="NoFolderAlias";
 
     public SearchCriteriaFactory newFactory(String type) {
+	if(log.isDebugEnabled()){
+	    log.debug("*** QUERY newFactory: new type:" + type + " : oldResourceType: " + resourceType);
+	}
         try {
             ResourceTypeSearchCriteriaFactory newOne = (ResourceTypeSearchCriteriaFactory) clone();
             if (resourceType != null){
@@ -80,8 +92,50 @@ public class ResourceTypeSearchCriteriaFactory implements SearchCriteriaFactory,
 
         // Search criteria creation.
         Class clazz = resourceType == null ? RepoResourceItem.class : persistentClassMappings.getImplementationClass(resourceType);
-        SearchCriteria searchCriteria = SearchCriteria.forClass(clazz);
 
+        // <hack>
+        // bug 45137 : performance hack
+        // issue : union query on resources and folder slows down the query execution
+        // (on 1M resources search for adhoc data sources takes 120s with union and 1.7s without union on MySQL)
+        // If we know we are searching for resources, let's use RepoResourceItem to avoid union
+        if (RepoResourceItemBase.class.equals(clazz)) {
+
+            // get Search criteria
+            RepositorySearchCriteria criteria = null;
+
+            if (context != null && context.getAttributes() != null) {
+                for (Object attr : context.getAttributes()) {
+                    if (attr instanceof RepositorySearchCriteria) {
+                        criteria = (RepositorySearchCriteria) attr;
+                        break;
+                    }
+                }
+            }
+            if (criteria != null) {
+                List<String> types = criteria.getResourceTypes();
+                if (types != null && types.size() > 0) {
+                    boolean noNeedFolders = true;
+                    for (String type : types) {
+                        if (Folder.class.getName().equals(type)) {
+                            noNeedFolders = false;
+                            break;
+                        }
+                    }
+                    if (noNeedFolders) {
+                        // set to Resources only
+                        clazz = RepoResourceItem.class;
+                        if(context != null && context.getAttributes()!=null){
+                        	context.getAttributes().add(NOFOLDERALIAS);
+                        }
+                    }
+                }
+
+            }
+        }
+        // </hack>
+
+        SearchCriteria searchCriteria = SearchCriteria.forClass(clazz);
+        
         // TODO: remove applying of typeSpecificFilters as redundant.
         // Sub-classing of current factory can be used if required.
         // RepositoryService should be refactored to.
@@ -94,6 +148,9 @@ public class ResourceTypeSearchCriteriaFactory implements SearchCriteriaFactory,
             for (SearchFilter filter : filters) {
                 filter.applyRestrictions(getResourceType(), context, searchCriteria);
             }
+        }
+        if(context !=null && context.getAttributes()!=null){
+        	context.getAttributes().remove(NOFOLDERALIAS);
         }
 
         return searchCriteria;

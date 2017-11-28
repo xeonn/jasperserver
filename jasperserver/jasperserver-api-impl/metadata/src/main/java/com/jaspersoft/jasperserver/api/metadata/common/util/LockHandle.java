@@ -23,10 +23,9 @@ package com.jaspersoft.jasperserver.api.metadata.common.util;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: LockHandle.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: LockHandle.java 66288 2017-03-02 21:31:25Z rtinsman $
  */
 public interface LockHandle {
 
 	Object getLockKey();
-	
 }

@@ -21,12 +21,18 @@
 
 package com.jaspersoft.jasperserver.api.metadata.common.util;
 
-import java.util.List;
-import java.util.regex.Pattern;
-
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
 import com.jaspersoft.jasperserver.api.metadata.view.domain.FilterCriteria;
+import com.jaspersoft.jasperserver.api.metadata.view.domain.FilterElementDisjunction;
+
+import java.util.List;
+import java.util.regex.Pattern;
+
+import static com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.util.LikeEscapeAwareExpression.ESCAPE_CHAR;
+import static com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.util.LikeEscapeAwareExpression.escape;
+import static com.jaspersoft.jasperserver.api.metadata.view.domain.FilterCriteria.createPropertyLikeFilter;
+import static org.hibernate.criterion.MatchMode.START;
 
 
 /**
@@ -45,7 +51,7 @@ public class RepositoryLabelIDHelper {
 	 * @author Alex Chan (achan@jaspersoft.com)
 	 * 
 	 *
-	 * @param RepositoryService repository service for accessing the repository
+	 * @param repository repository service for accessing the repository
 	 * @param parentFolder Full Parent Folder URI for the resource
 	 * @param label The display label for the resource
 	 * @return returns a generated ID converting non-alphanumberic characters into underscore, if the id already exists, _1, _2 so on and so forth will be appended until it's unique.
@@ -57,18 +63,22 @@ public class RepositoryLabelIDHelper {
     	if ("".equals(inputLabel)) {
     		return "";
     	}
+
+		// replace any non-alphanumeric characters into underscore
+		String id = RESOURCE_ID_INVALID_CHAR.matcher(inputLabel).replaceAll(
+				RESOURCE_ID_CHAR_REPLACEMENT);
     	
     	// get list of resource id(name) in the parent folder, so make sure the generated id(name) will be unique
 		FilterCriteria criteria = FilterCriteria.createFilter();
 		criteria.addFilterElement(FilterCriteria.createParentFolderFilter(parentFolder));
+		FilterElementDisjunction disjunction = criteria.addDisjunction();
+		disjunction.addFilterElement(createPropertyLikeFilter("name", escape(id, ESCAPE_CHAR), ESCAPE_CHAR, true));
+		disjunction.addFilterElement(createPropertyLikeFilter("name", escape(id.concat("_"), ESCAPE_CHAR), START, ESCAPE_CHAR, true));
         List listOfResources = repository.loadResourcesList(null, criteria);    
         
         List repoFolderList = repository.getSubFolders(null, parentFolder);
         listOfResources.addAll(repoFolderList);
     	
-        // replace any non-alphanumeric characters into underscore
-        String id = RESOURCE_ID_INVALID_CHAR.matcher(inputLabel).replaceAll(
-        		RESOURCE_ID_CHAR_REPLACEMENT);
         String newId = id;
         boolean doesInternalNameExist = true;
         int i = 0;

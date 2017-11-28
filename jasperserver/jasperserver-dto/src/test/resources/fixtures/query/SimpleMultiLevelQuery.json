@@ -1,0 +1,68 @@
+{
+  "select": {
+    "fields": [
+      {
+        "field": "open_date"
+      },
+      {
+        "field": "calcField"
+      },
+      {
+        "id": "city1",
+        "field": "city"
+      },
+      {
+        "field": "sales"
+      }
+    ],
+    "aggregations": [
+      {
+        "fieldRef": "open_date",
+        "expression": "CountAll(open_date)"
+      },
+      {
+        "fieldRef": "calcField",
+        "expression": "Sum(calcField)"
+      },
+      {
+        "fieldRef": "city",
+        "expression": "CountDistinct(city)"
+      },
+      {
+        "fieldRef": "sales",
+        "expression": "Sum(sales)"
+      }
+    ]
+  },
+  "groupBy": [
+    {
+      "group": {
+        "id": "open_date1",
+        "field": "open_date",
+        "categorizer": "year",
+        "includeAll": true
+      }
+    },
+    {
+      "allGroup": {}
+    }
+  ],
+  "orderBy": [
+    {
+      "fieldRef": "open_date1",
+      "ascending": true
+    },
+    {
+      "fieldRef": "country",
+      "ascending": false
+    },
+    {
+      "fieldRef": "city1",
+      "ascending": false
+    }
+  ],
+  "from": {
+    "dataSource": "/path/to/ds"
+  },
+  "limit": 15
+}

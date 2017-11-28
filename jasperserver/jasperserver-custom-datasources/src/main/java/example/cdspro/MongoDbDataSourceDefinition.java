@@ -94,7 +94,7 @@ public class MongoDbDataSourceDefinition extends DataAdapterDefinition {
         for (JRDesignField field : jrDesignFields) {
             String designName = field.getName().replace(".", "_");
             columnNames.add(designName);
-            if (isSupportedType(field.getValueClassName())) columnTypes.add(field.getValueClassName());
+            if (isSupportedType(field.getValueClassName())) columnTypes.add(getFieldType(field.getValueClassName()));
             else columnTypes.add("java.lang.String");    // if it is not supported types, converts it to string for now
             columnDescriptions.add(field.getName());
         }
@@ -135,6 +135,7 @@ public class MongoDbDataSourceDefinition extends DataAdapterDefinition {
             return MongoDbFieldsProvider.getInstance().getFields(getJasperReportsContext(), designDataset, fillParams, mongoDbConnection);
     }
 
+    private static Map typeMap;
     private static Set supportedTypeSet;
     static {
         supportedTypeSet = new HashSet();
@@ -154,10 +155,17 @@ public class MongoDbDataSourceDefinition extends DataAdapterDefinition {
         supportedTypeSet.add("java.math.BigInteger");
         supportedTypeSet.add("java.lang.Boolean");
         supportedTypeSet.add("java.lang.Object");
+        typeMap = new HashMap();
+        typeMap.put("java.util.Date", "java.sql.Timestamp");
     }
 
     private boolean isSupportedType(String type) {
         return supportedTypeSet.contains(type);
+    }
+
+    private String getFieldType(String originalType) {
+        Object mapType = typeMap.get(originalType);
+        return (mapType != null?  (String)mapType : originalType);
     }
 
 }

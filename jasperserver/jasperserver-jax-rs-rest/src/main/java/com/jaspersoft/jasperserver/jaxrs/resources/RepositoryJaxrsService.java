@@ -40,7 +40,6 @@ import com.jaspersoft.jasperserver.remote.services.BatchRepositoryService;
 import com.jaspersoft.jasperserver.remote.services.SingleRepositoryService;
 import com.jaspersoft.jasperserver.search.mode.AccessType;
 import com.jaspersoft.jasperserver.search.service.RepositorySearchResult;
-import com.sun.jersey.core.spi.factory.ResponseBuilderImpl;
 import com.sun.jersey.multipart.FormDataMultiPart;
 import com.sun.jersey.multipart.FormDataParam;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -48,17 +47,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -74,7 +63,7 @@ import java.util.List;
  * <p></p>
  *
  * @author Zakhar.Tomchenco
- * @version $Id: RepositoryJaxrsService.java 63380 2016-05-26 20:56:46Z mchan $
+ * @version $Id: RepositoryJaxrsService.java 64791 2016-10-12 15:08:37Z ykovalch $
  */
 @Service
 @Path("/resources")
@@ -135,13 +124,13 @@ public class RepositoryJaxrsService {
 
             final int iStart = result.getClientOffset();
             final int iLimit = result.getClientLimit();
-            Response.ResponseBuilder response = new ResponseBuilderImpl();
+            Response.ResponseBuilder response;
 
             int realResultSize = result.size();
             boolean isForceTotalCount = (forceTotalCount != null && forceTotalCount);
 
             if (realResultSize != 0) {
-                response.status(Response.Status.OK).entity(new ClientResourceListWrapper(result.getItems()));
+                response = Response.status(Response.Status.OK).entity(new ClientResourceListWrapper(result.getItems()));
 
                 response.header(RestConstants.HEADER_START_INDEX, iStart)
                         .header(RestConstants.HEADER_RESULT_COUNT, realResultSize);
@@ -161,7 +150,7 @@ public class RepositoryJaxrsService {
                     response.header(RestConstants.HEADER_NEXT_OFFSET, result.getNextOffset());
                 }
             } else {
-                response.status(Response.Status.NO_CONTENT);
+                response = Response.status(Response.Status.NO_CONTENT);
                 response.header(RestConstants.HEADER_TOTAL_COUNT, 0);
             }
 
@@ -290,7 +279,6 @@ public class RepositoryJaxrsService {
     @Path("/{uri: .+}")
     @Transactional(rollbackFor = Exception.class)
     @Consumes(MediaType.MULTIPART_FORM_DATA)
-    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public Response createFileViaForm(
             FormDataMultiPart multiPart,
             @PathParam(ResourceDetailsJaxrsService.PATH_PARAM_URI) String uri,
@@ -303,7 +291,6 @@ public class RepositoryJaxrsService {
     @POST
     @Transactional(rollbackFor = Exception.class)
     @Consumes(MediaType.MULTIPART_FORM_DATA)
-    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public Response createFileViaFormInRoot(
             FormDataMultiPart multiPart,
             @QueryParam(RestConstants.QUERY_PARAM_CREATE_FOLDERS)@DefaultValue("true")Boolean createFolders,
@@ -387,7 +374,6 @@ public class RepositoryJaxrsService {
     @Transactional(rollbackFor = Exception.class)
     @Path("/{uri: .+}")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
-    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public Response updateFileViaForm(
             @FormDataParam("data")InputStream stream,
             @PathParam(ResourceDetailsJaxrsService.PATH_PARAM_URI) String uri,

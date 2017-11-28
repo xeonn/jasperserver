@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: repository.search.components.js 10180 2016-06-02 07:20:47Z spriluki $
+ * @version: $Id: repository.search.components.js 10365 2016-11-03 21:57:13Z gbacon $
  */
 
 /* global repositorySearch, SearchBox, toolbarButtonModule, toFunction, getAsFunction, localContext, isArray, JSCookie,
@@ -194,7 +194,7 @@ repositorySearch.foldersPanel =  {
                 if (this.tree._overNode) {
                     var toFolder = new Folder(this.tree._overNode);
                     var hover = (dragged.node && canFolderBeCopiedOrMovedToFolder(toFolder)) ||
-                                (dragged.items && canAllBeCopiedOrMovedToFolder(toFolder));
+                         (dragged.items && canAllBeCopiedOrMovedToFolder(toFolder));
                     this.tree.refreshDropTarget(hover);
                 }
             }).bind(this),
@@ -307,7 +307,7 @@ repositorySearch.foldersPanel =  {
         this.tree.resortSubtree(folder.node.parent);
         folder.node.parent.refreshNode();
 
-//        folder.node.param.extra.date = folder.date;
+        //        folder.node.param.extra.date = folder.date;
     },
 
     updateSubFolders: function (folder) {
@@ -411,7 +411,7 @@ repositorySearch.resultsPanel =  {
         disableSelectionWithoutCursorStyle(this._container);
 
         Event.observe($(window), 'resize', function() {
-            this.refresh();
+            this._checkHeight();
         }.bind(this));
 
         this._fixHeaderWidth();
@@ -460,7 +460,7 @@ repositorySearch.resultsPanel =  {
             var isRunnable = canBeRun(this.getValue()) || canBeOpened(this.getValue());
 
             var nameSelector = isRunnable ?
-                               repositorySearch.resultsPanel.LINK_NAME_PATTERN : repositorySearch.resultsPanel.NAME_PATTERN;
+                 repositorySearch.resultsPanel.LINK_NAME_PATTERN : repositorySearch.resultsPanel.NAME_PATTERN;
 
             var name = element.select(nameSelector)[0];
             var nameTitleElement = element.select(repositorySearch.resultsPanel.NAME_PATTERN)[0];
@@ -475,7 +475,7 @@ repositorySearch.resultsPanel =  {
                     var folderPath = that.getValue().parentFolder;
                     var folderDisplayPath = repositorySearch.resultsPanel._folderDisplayPathCache[folderPath];
                     var label,
-                        uri;
+                         uri;
 
                     function getUri(parentUri, name) {
                         var separator = repositorySearch.model.getFolderSeparator();
@@ -620,9 +620,9 @@ repositorySearch.resultsPanel =  {
         }.bindAsEventListener(this));
 
         this.getList().observe('item:mouseup', function(event) {
-//            var item = event.memo.item;
-//            var resource = item.getValue();
-//            repositorySearch.model.setContextResource(resource);
+            //            var item = event.memo.item;
+            //            var resource = item.getValue();
+            //            repositorySearch.model.setContextResource(resource);
         });
 
         this.getList().observe('item:open', function(event) {
@@ -691,6 +691,15 @@ repositorySearch.resultsPanel =  {
         }
     },
 
+    _checkHeight: function() {
+        if (this.getList()._element.clientHeight < document.body.clientHeight) {
+            this._infiniteScroll.onLoad();
+        } else {
+            this.refresh();
+            this._infiniteScroll.stopWaiting();
+        }
+    },
+
     getList: function() {
         return this._list;
     },
@@ -735,16 +744,14 @@ repositorySearch.resultsPanel =  {
             this._refreshEmptyListMessage();
         }
 
-        this.refresh();
-        this._infiniteScroll.stopWaiting();
+        items.length && this._checkHeight();
     },
 
     addResources: function(resources) {
         var items = resources.collect(this._createResourceItem);
         this.getList().addItems(items);
         this.getList().refresh();
-        this.refresh();
-        this._infiniteScroll.stopWaiting();
+        items.length && this._checkHeight();
     },
 
     isResourceContextMenu: function(event) {
@@ -838,12 +845,12 @@ repositorySearch.filtersPanel =  {
                 label: repositorySearch.getMessage(optionMetaData.labelId)
             });
         }).partition(function() {
-                index++;
-                return filterMetaData.showCount === -1 || filterMetaData.showCount > index;
-            });
+            index++;
+            return filterMetaData.showCount === -1 || filterMetaData.showCount > index;
+        });
 
         if (allItems[1].length > 0) {
-             allItems[0].push(new dynamicList.CompositeItem({
+            allItems[0].push(new dynamicList.CompositeItem({
                 value: {isMore: true},
                 templateDomId: "list_responsive_filters:node",
                 openUp: true,
@@ -895,7 +902,7 @@ repositorySearch.filtersPanel =  {
                     this._ignoreFilterEvent = isRestore;
                     item.select();
                     this._ignoreFilterEvent = false;
-                    }
+                }
                 throw $break;
             }
 
@@ -1068,7 +1075,7 @@ var ResourcePermissions = function(resource) {
 
     this.viewBy = "USER",
 
-    this._processTemplate();
+         this._processTemplate();
 };
 
 ResourcePermissions.addVar("TEMPLATE_DOM_ID", "permissions");
@@ -1223,7 +1230,7 @@ ResourcePermissions.addMethod("_selectChangeHandler", function(e) {
             var value = li.listItem.getValue();
 
             li.listItem.getValue().permission.newPermission =
-                    (newPermission != value.permission.getResolvedPermission()) ? newPermission : undefined;
+                 (newPermission != value.permission.getResolvedPermission()) ? newPermission : undefined;
 
             li.listItem.refresh();
         }
@@ -1328,7 +1335,7 @@ ResourcePermissions.addMethod("show", function() {
         }
         this._dom.observe('click', this._launcherClickHandler.bindAsEventListener(this));
         // Change event not bubbled up in IE
-//        this._dom.observe('change', this._selectChangeHandler.bindAsEventListener(this));
+        //        this._dom.observe('change', this._selectChangeHandler.bindAsEventListener(this));
         this._dom.observe('mouseover', this._selectMouseOverHandler.bindAsEventListener(this));
     }
 });
@@ -1386,9 +1393,9 @@ ResourcePermissions.addMethod("disable", function() {
 
 ResourcePermissions.addMethod("_createItem", function(value) {
     var item = new dynamicList.ListItem({
-            label: value.getDisplayName(),
-            value: value
-        });
+        label: value.getDisplayName(),
+        value: value
+    });
 
     var nameTooltipSelector = this.NAME_TOOLTIP_PATTERN;
     var nameSelector = this.NAME_PATTERN;
@@ -1430,7 +1437,7 @@ ResourcePermissions.addMethod("_createItem", function(value) {
             var option = new Element('option', { value: permissionsConfig[i].name });
 
             permissions.insert(option.update(permission.inheritedPermission == permissionsConfig[i].name
-                    ? xssUtil.escape(label + " *") : xssUtil.escape(label)));
+                 ? xssUtil.escape(label + " *") : xssUtil.escape(label)));
 
             if (permission.newPermission) {
                 permission.newPermission == permissionsConfig[i].name && (index = i);
@@ -1640,11 +1647,11 @@ ResourceProperties.addMethod("_processTemplate", function() {
     title.update(title.innerHTML.strip() + ": " + xssUtil.escape(this._resource.label).truncate(50));
 
     this._label = this._updateValueAndLabel(this._dom, 'input#displayName', this._resource.label,
-            'label[for="displayName"]');
+         'label[for="displayName"]');
     this._description = this._updateContentAndLabel(this._dom, 'textarea#description', xssUtil.escape(this._resource.description),
-            'label[for="description"]');
+         'label[for="description"]');
     this._path = this._updateValueAndLabel(this._dom, 'input#path', xssUtil.escape(this._resource.URIString),
-            'label[for="path"]');
+         'label[for="path"]');
 
     if (this._showMode) {
         this._dom.addClassName('showMode');
@@ -1750,7 +1757,7 @@ ResourceProperties.addMethod("isChanged", function() {
 repositorySearch.showCreateFolderConfirm = function(folder) {
     var toFolder;
     var dialog = $('addFolder'), name = $('addFolderInputName'), description = $('addFolderInputDescription'),
-            add = $('addFolderBtnAdd'), cancel = $('addFolderBtnCancel');
+         add = $('addFolderBtnAdd'), cancel = $('addFolderBtnCancel');
 
     var doShow = function(folder) {
         toFolder = folder;
@@ -1879,7 +1886,7 @@ repositorySearch.editResourceProperties = function(resource, options) {
     var resourceProperties = repositorySearch.dialogsPool.createOrGetPropertiesDialog(resource, {
         changedCallback: function(resource) {
             var action = new repositorySearch.ServerAction.
-                    createResourceAction(repositorySearch.ResourceAction.UPDATE, {resource: resource});
+                 createResourceAction(repositorySearch.ResourceAction.UPDATE, {resource: resource});
 
             action.invokeAction();
         }
@@ -1898,7 +1905,7 @@ repositorySearch.editFolderProperties = function(folder) {
     var folderProperties = repositorySearch.dialogsPool.createOrGetPropertiesDialog(folder, {
         changedCallback: function(folder) {
             var action = new repositorySearch.ServerAction.
-                    createFolderAction(repositorySearch.FolderAction.UPDATE, { folder: folder });
+                 createFolderAction(repositorySearch.FolderAction.UPDATE, { folder: folder });
 
             action.invokeAction();
         }
@@ -1920,7 +1927,7 @@ repositorySearch.showUploadThemeConfirm = function(folder, reupload) {
     var toFolder;
     var isReupload;
     var dialog = $('uploadTheme'), themeName = $('themeName'), zip = $('themeZip'),
-            upload = $('uploadThemeBtnUpload'), cancel = $('uploadThemeBtnCancel');
+         upload = $('uploadThemeBtnUpload'), cancel = $('uploadThemeBtnCancel');
 
     var doShow = function(folder, reupload) {
         toFolder = folder;
@@ -2062,7 +2069,7 @@ GenerateResource.addMethod("_processTemplate", function(options) {
     title.update(this.TEMPLATE_TITLE_TEXT + " " + xssUtil.escape(this._resource.label.truncate(50)));
 
     var label = options.useDefaultLabel ?
-        this._resource.label + " " + repositorySearch.messages['dialog.generateResource.defaultNameSuffix'] : "";
+    this._resource.label + " " + repositorySearch.messages['dialog.generateResource.defaultNameSuffix'] : "";
     this._nameInput = this._dom.select('#generateResourceInputName')[0];
     this._nameInput.setValue(label);
 
@@ -2142,11 +2149,11 @@ GenerateResource.addMethod("show", function() {
         dialog._focusName();
     });
 
-//    this._tree.observe("node:selected", function(event) {
-//        var evt = event.memo.targetEvent;
-//        var node = event.memo.node;
-//        dialog._enableSave(node && node.param.extra && node.param.extra.isWritable);
-//    });
+    //    this._tree.observe("node:selected", function(event) {
+    //        var evt = event.memo.targetEvent;
+    //        var node = event.memo.node;
+    //        dialog._enableSave(node && node.param.extra && node.param.extra.isWritable);
+    //    });
 
     this._dom.observe('click', this._buttonClickHandler.bindAsEventListener(this));
 
@@ -2172,6 +2179,6 @@ GenerateResource.addMethod("_hide", function() {
 ///////////////////////////////
 
 window.require(["tenantImportExport/export/view/ExportDialogView", "tenantImportExport/export/enum/exportTypesEnum"], function(ExportDialogView, Type){
-    repositorySearch.exportDialog = new ExportDialogView()
+    repositorySearch.exportDialog = new ExportDialogView();
     repositorySearch.exportDialog.render({type: Type.REPOSITORY});
 });

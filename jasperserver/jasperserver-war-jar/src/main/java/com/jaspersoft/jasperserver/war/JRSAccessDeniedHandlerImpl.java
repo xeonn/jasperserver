@@ -32,6 +32,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Map;
 
 /**
  * This class extends AccessDeniedHandlerImpl to make it aware of some JRS specific attributes.
@@ -46,12 +47,14 @@ public class JRSAccessDeniedHandlerImpl extends AccessDeniedHandlerImpl {
     private ThemeResolver themeResolver;
     private ThemeSource themeSource;
     private LocaleResolver localeResolver;
+    private Map jsOptimizationProperties;
 
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
         request.setAttribute(DispatcherServlet.THEME_RESOLVER_ATTRIBUTE, themeResolver);
         request.setAttribute(DispatcherServlet.THEME_SOURCE_ATTRIBUTE, themeSource);
         request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE, localeResolver);
+        request.setAttribute("jsOptimizationProperties", jsOptimizationProperties);
         super.handle(request, response, accessDeniedException);
     }
 
@@ -77,5 +80,13 @@ public class JRSAccessDeniedHandlerImpl extends AccessDeniedHandlerImpl {
 
     public void setLocaleResolver(LocaleResolver localeResolver) {
         this.localeResolver = localeResolver;
+    }
+
+    public Map getJsOptimizationProperties() {
+        return jsOptimizationProperties;
+    }
+
+    public void setJsOptimizationProperties(Map jsOptimizationProperties) {
+        this.jsOptimizationProperties = jsOptimizationProperties;
     }
 }

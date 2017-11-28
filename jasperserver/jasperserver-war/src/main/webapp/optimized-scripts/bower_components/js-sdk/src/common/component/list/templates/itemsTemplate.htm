@@ -1,7 +1,9 @@
-<ul class="list" style="top: {{- top}}px; position: relative;">
+<ul class="jr-mSelectlist jr" style="top: {{- top}}px; position: relative;">
     {{_.each(items, function(item) { }}
-    <li class="leaf {{ if (item.selected) print('selected'); }}" data-index="{{- item.index}}">
-        <div>{{ print(item.label && item.label.trim() ? _.xssEscape(item.label) : '&nbsp;')}}</div>
+    <li class="jr-mSelectlist-item {{ if (item.selected) print('jr-isSelected'); }} jr" title="{{ print(item.label && item.label.trim() ? _.xssEscape(item.label) : '&nbsp;')}}" data-index="{{- item.index}}">
+        <div class="jr-mSelectlist-item-wrapper jr">
+            <a class="jr-mSelectlist-item-text jr">{{ print(item.label && item.label.trim() ? _.xssEscape(item.label) : '&nbsp;')}}</a>
+        </div>
     </li>
     {{ }); }}
 </ul>

@@ -35,6 +35,7 @@
 
     <alias name="${bean.jasperReportsContext}" alias="concreteJasperReportsContext"/>
 
+    <alias name="${bean.diagnosticLoggingFilter}" alias="diagnosticLoggingFilter"/>
 
     <bean id="contextApplicationContextProvider" class="com.jaspersoft.jasperserver.api.common.util.spring.ApplicationContextProvider"/>
 
@@ -320,6 +321,8 @@
         <property name="objectFactory" ref="objectFactory"/>
         <property name="implementationClassMappings">
             <map>
+        <entry key="com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.persistent.RepoResourceItem" value="com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.persistent.RepoResourceItem"/>
+        <entry key="com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.persistent.RepoFolder" value="com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.persistent.RepoResourceFolderItem"/>
                 <entry key="com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceLookup"
                     value="com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.persistent.RepoResourceItemBase"/>
                 <entry key="com.jaspersoft.jasperserver.api.metadata.common.domain.Resource"
@@ -618,6 +621,10 @@
         </property>
     </bean>
 
+    <bean id="customJDBCReportDataSourceServiceFactory" class="com.jaspersoft.jasperserver.api.engine.jasperreports.util.CustomJDBCReportDataSourceServiceFactory" parent="jdbcDataSourceServiceFactory">
+        <property name="virtualDataSourceHandler" ref="virtualDataSourceHandler"/>
+    </bean>
+
     <bean id="awsDataSourceServiceFactory" class="com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl.AwsReportDataSourceServiceFactory"
           parent="jdbcDataSourceServiceFactory">
         <property name="awsDataSourceRecovery" ref="awsDataSourceRecovery"/>
@@ -691,7 +698,21 @@
         </property>
         <!-- set 'false' to run findByCriteria() in normal mode, 'true ' to run in read-only mode [NO SQL UPDATE ALLOWED WHEN CALLING findByCriteria()   -->
         <property name="findByCriteriaToReadOnly" value="false"/>
-        <property name="transactionManager" ref="transactionManager"/>
+        <!--
+          The purpose of this property to keep legacy logic in the case of unexpected emergency,
+          that persist report cache into repository. As we added ehcache for report caching,
+          then the repository cache is not needed anymore. So, if customer will not face with emergency
+          after providing ehcache, then this property should be removed, as well as logic,
+          that dealing with repository cache.
+        -->
+        <property name="isEnabledRepositoryCaching" value="false"/>
+        <property name="hibernateRepositoryEhcache" ref="hibernateRepositoryEhcache"/>
+    </bean>
+
+    <bean id="hibernateRepositoryEhcache" class="org.springframework.cache.ehcache.EhCacheFactoryBean"
+          lazy-init="true">
+        <property name="cacheManager" ref="cacheManager"/>
+        <property name="cacheName" value="hibernate_repository_ehcache" />
     </bean>
 
     <!-- FIXME remove this once locking is implemented (see Bugzilla 10218) -->
@@ -773,7 +794,13 @@
         <property name="reportExecutionListenerFactories" ref="${bean.reportExecutionListenerFactories}"/>
         <property name="jasperReportsContext" ref="${bean.jasperReportsContext}"/>
         <property name="dataParameterContributors" ref="${bean.engineServiceDataParameterContributors}"/>
-        <property name="recordSizeof" value="${audit.sizeof.enabled}"/>
+
+        <!--
+            recordSizeOf DEPRECATED
+            Setting "recordSizeOf" to true enables calculation of memory consumed by
+            JasperPrint objects, which results in high CPU usage for large reports.
+        -->
+        <property name="recordSizeof" value="false"/>
         <property name="jrxmlFixerList">
         	<list/>
         </property>
@@ -831,6 +858,10 @@
 		<property name="loggingContextProvider" ref="${bean.loggingContextProvider}"/>
 		<property name="auditContext" ref="${bean.auditContext}"/>
 	</bean>
+
+    <bean name="profileAttributeAuditEventListener" class="com.jaspersoft.jasperserver.api.metadata.user.service.impl.ProfileAttributeAuditEventListener">
+        <property name="auditContext" ref="${bean.auditContext}"/>
+    </bean>
 
     <bean id="reportLoadingService" class="com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl.ReportLoadingService">
         <property name="repositoryService" ref="${bean.repositoryService}"/>
@@ -900,6 +931,11 @@
         <property name="profileAttributeCategories" ref="${bean.profileAttributeCategories}"/>
         <property name="changers" ref="${bean.propertyChangers}"/>
         <property name="profileAttributeCache" ref="profileAttributeCache"/>
+        <property name="listeners">
+            <list>
+                <ref bean="profileAttributeAuditEventListener"/>
+            </list>
+        </property>
     </bean>
 
     <bean id="profileAttributesResolver"
@@ -1254,6 +1290,11 @@
     					<constructor-arg ref="${bean.jasperReportsContext}"/>
     				</bean>
     			</entry>
+    			<entry key="net.sf.jasperreports.repo.ResourceBundleResource">
+    				<bean class="net.sf.jasperreports.repo.ResourceBundlePersistenceService">
+    					<constructor-arg ref="${bean.jasperReportsContext}"/>
+    				</bean>
+    			</entry>
     		</map>
     	</property>
     </bean>
@@ -1342,6 +1383,8 @@
 
     <bean id="sessionDecoratorFilter" class="com.jaspersoft.jasperserver.war.util.SessionDecoratorFilter">
     </bean>
+
+    <bean id="diagnosticLoggingFilterCE" class="com.jaspersoft.jasperserver.war.NullFilter"/>
 
     <bean id="csrfGuardFilter" class="com.jaspersoft.jasperserver.api.security.csrf.JSCsrfGuardFilter">
         <description>Servlet delegating requests to CSRFGuardFilter based on User-Agent header</description>
@@ -1672,6 +1715,11 @@
     
     <util:map id="formatPatternsMap">
         <!-- entry key="$ #,##0.00" value="$ #,##0.00"/-->
+        
+        <entry key="MMM d, yyyy h:mm:ss a" value="MMM d, yyyy h:mm:ss AM/PM"/>
+        <entry key="h:mm:ss a" value="h:mm:ss AM/PM"/> 
+        <entry key="h:mm a" value="h:mm AM/PM"/> 
+        <entry key="h:mm:ss a z" value="h:mm:ss AM/PM"/> 
     </util:map> 
 
     <!-- end export parameters -->
@@ -1829,13 +1877,6 @@
         <property name="messageSource" ref="messageSource"/>
     </bean>
 
-    <util:map id="applyClientTimezoneFormatting" key-type="java.lang.String" value-type="java.lang.Boolean">
-        <entry key="java.util.Date" value="false"/>
-        <entry key="java.sql.Date" value="false"/>
-        <entry key="java.sql.Timestamp" value="true"/>
-        <entry key="java.sql.Time" value="true"/>
-    </util:map>
-
     <bean id="jdbcDriverService" class="com.jaspersoft.jasperserver.api.common.service.impl.JdbcDriverServiceImpl">
         <!--<property name="repository" ref="${bean.internalRepositoryService}"/>-->
         <property name="repository" ref="hibernateRepositoryService"/>
@@ -1875,17 +1916,21 @@
     <bean id="instanceProductTypeResolverCe" class="com.jaspersoft.jasperserver.api.engine.jasperreports.util.InstanceProductTypeResolver" factory-method="getInstance" lazy-init="false"/>
 
     <util:list id="awsRegions" >
-        <value>us-east-1.amazonaws.com</value>
+       <value>us-east-1.amazonaws.com</value>
+        <value>us-east-2.amazonaws.com</value>
         <value>us-west-2.amazonaws.com</value>
         <value>us-west-1.amazonaws.com</value>
         <value>eu-west-1.amazonaws.com</value>
+        <value>eu-west-2.amazonaws.com</value>
+        <value>ca-central-1.amazonaws.com</value>
         <value>eu-central-1.amazonaws.com</value>
         <value>ap-southeast-1.amazonaws.com</value>
         <value>ap-southeast-2.amazonaws.com</value>
         <value>ap-northeast-1.amazonaws.com</value>
         <value>ap-northeast-2.amazonaws.com</value>
+        <value>ap-south-1.amazonaws.com</value>
         <value>sa-east-1.amazonaws.com</value>
-    </util:list>
+     </util:list>
 
     <bean id="javascriptOptimizationSettings" class="com.jaspersoft.jasperserver.war.common.JavascriptOptimizationSettings" depends-on="configurationBean">
         <property name="useOptimizedJavascript" value="#{configurationBean.optimizeJavaScript}"/>

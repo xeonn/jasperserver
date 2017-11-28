@@ -22,7 +22,7 @@
 
 /**
  * @author: afomin, inesterenko
- * @version: $Id: controls.core.js 8179 2015-01-27 12:34:21Z psavushchik $
+ * @version: $Id: controls.core.js 10533 2017-02-24 21:58:49Z schubar $
  */
 
 /* global JRS, ajax, console, _, Mustache, dialogs */
@@ -153,6 +153,7 @@ JRS.Controls = (function(jQuery, _, Mustache, dialogs){
         Utils:{
 
             LOADING_DIALOG_DELAY : 800,
+            INPUT_CONTROLS_COMPONENT_ID : "input-controls",
 
             //check presents of element in DOM
             isElementInDom:function (elem) {
@@ -226,15 +227,17 @@ JRS.Controls = (function(jQuery, _, Mustache, dialogs){
                 this.wait(delay ? delay : this.LOADING_DIALOG_DELAY).then(_.bind(function () {
                     if (deferred.state() == "pending") {
                         //Do not focus on loading dialog
-                        dialogs.popup.show($(ajax.LOADING_ID), modal, {focus: false});
+                        dialogs.popup.showShared($(ajax.LOADING_ID), modal, {focus: false, owner: this.INPUT_CONTROLS_COMPONENT_ID});
+
                         jQuery.when(deferred).always(_.bind(function () {
+                            var ownerId = this.INPUT_CONTROLS_COMPONENT_ID;
                             //don't close loading dialog very fast it irritates user
                             this.wait(500).then(function () {
                                 if(window.viewer && window.viewer.loading) {
                                     // wait until componentsRegistered event in viewer.js
-                                    window.viewer.loaded && dialogs.popup.hide($(ajax.LOADING_ID));
+                                    window.viewer.loaded && dialogs.popup.hideShared($(ajax.LOADING_ID), ownerId);
                                 } else {
-                                    dialogs.popup.hide($(ajax.LOADING_ID));
+                                    dialogs.popup.hideShared($(ajax.LOADING_ID), ownerId);
                                 }
                             });
                         },this));

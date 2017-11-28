@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.jaspersoft.jasperserver.api.engine.jasperreports.util.AbstractTextDataSourceDefinition;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.ContentResource;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRField;
 import net.sf.jasperreports.engine.design.JRDesignField;
@@ -39,7 +40,7 @@ public class JsonDataSourceDefinition extends AbstractTextDataSourceDefinition {
 
         List<JRField> jrFields = getFields(customDataSource, propertyValueMap);
 
-        return CustomDomainMetadataUtils.createCustomDomainMetaData("JsonQuery", jrFields);
+        return CustomDomainMetadataUtils.createCustomDomainMetaData(getQueryLanguage(), jrFields);
     }
 
     private List<JRField> getFields(CustomReportDataSource customDataSource, Map<String, Object> propertyValueMap) throws JRException {
@@ -54,8 +55,7 @@ public class JsonDataSourceDefinition extends AbstractTextDataSourceDefinition {
         if (resourceRef == null) {
             rowExtractor = JsonDataSourceUtils.getRowExtractor((String) propertyValueMap.get("fileName"), query);
         } else {
-            FileResource fileResource = getFileResource(resourceRef);
-            InputStream is = getJsonInputStream(fileResource);
+            InputStream is = getResourceInputStream(resourceRef);
             rowExtractor = JsonDataSourceUtils.getRowExtractor(is, query);
         }
         List<JRField> jrFields = rowExtractor.getNextRowFields();
@@ -96,14 +96,31 @@ public class JsonDataSourceDefinition extends AbstractTextDataSourceDefinition {
         return is;
     }
 
-    private FileResource getFileResource(ResourceReference resourceRef) {
+    private InputStream getResourceInputStream(ResourceReference resourceRef) {
         FileResource fileResource;
+        InputStream is = null;
         if (resourceRef.isLocal()) {
             fileResource = (FileResource) resourceRef.getLocalResource();
         } else {
             fileResource = (FileResource) repositoryService.getResource(null, resourceRef.getReferenceURI(), FileResource.class);
         }
-        return fileResource;
+        if (fileResource != null) {
+            if (fileResource.hasData()) {
+                is = fileResource.getDataStream();
+            } else {
+                FileResourceData resourceData = repositoryService.getResourceData(null, fileResource.getURIString());
+                is = resourceData.getDataStream();
+            }
+        } else {
+            ContentResource contentResource = (ContentResource) repositoryService.getResource(null, resourceRef.getReferenceURI(), ContentResource.class);
+            if (contentResource.hasData()) {
+                is = contentResource.getDataStream();
+            } else {
+                FileResourceData resourceData = repositoryService.getContentResourceData(null, contentResource.getURIString());
+                is = resourceData.getDataStream();
+            }
+        }
+        return is;
     }
 
     @Override

@@ -21,13 +21,17 @@
 
 package com.jaspersoft.jasperserver.dto.resources;
 
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.Arrays;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * <p></p>
@@ -38,7 +42,7 @@ import static org.testng.Assert.assertTrue;
 public class ClientVirtualDataSourceTest {
     final ClientVirtualDataSource dataSource1 = new ClientVirtualDataSource(), dataSource2 = new ClientVirtualDataSource();
 
-    @BeforeMethod
+    @Before
     public void setUp() throws Exception {
         dataSource1.setSubDataSources(Arrays.asList(new ClientSubDataSourceReference().setId("a").setUri("/a"), new ClientSubDataSourceReference().setId("b").setUri("/b")));
         dataSource2.setSubDataSources(Arrays.asList(new ClientSubDataSourceReference().setId("b").setUri("/b"), new ClientSubDataSourceReference().setId("a").setUri("/a")));

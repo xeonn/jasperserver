@@ -40,6 +40,7 @@ import com.jaspersoft.jasperserver.search.common.CustomSorter;
 import com.jaspersoft.jasperserver.search.common.RepositorySearchConfiguration;
 import com.jaspersoft.jasperserver.search.common.ResourceDetails;
 import com.jaspersoft.jasperserver.search.filter.AccessTypeFilter;
+import com.jaspersoft.jasperserver.search.filter.ResourceTypeFilter;
 import com.jaspersoft.jasperserver.search.filter.TextFilter;
 import com.jaspersoft.jasperserver.search.mode.AccessType;
 import com.jaspersoft.jasperserver.search.mode.SearchMode;
@@ -50,6 +51,7 @@ import com.jaspersoft.jasperserver.search.service.RepositorySearchResult;
 import com.jaspersoft.jasperserver.search.service.RepositorySearchService;
 import com.jaspersoft.jasperserver.search.service.ResourceService;
 import com.jaspersoft.jasperserver.search.sorter.ByLabelSorter;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -59,6 +61,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -68,7 +71,7 @@ import java.util.Set;
  * Implementation of {@link RepositorySearchService}.
  *
  * @author Yuriy Plakosh
- * @version $Id: RepositorySearchServiceImpl.java 62344 2016-04-05 21:19:17Z mchan $
+ * @version $Id: RepositorySearchServiceImpl.java 66432 2017-03-10 22:04:59Z esytnik $
  */
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 public class RepositorySearchServiceImpl implements RepositorySearchService, Diagnostic {
@@ -151,7 +154,8 @@ public class RepositorySearchServiceImpl implements RepositorySearchService, Dia
         return getLookups(context, obtainFactory(criteria), createAllFiltersList(configuration, criteria), getSorter(configuration, criteria.getSortBy()), criteria.getStartIndex(), criteria.getMaxCount());
     }
 
-    @Override
+    @SuppressWarnings("unchecked")
+	@Override
     @Transactional(propagation = Propagation.REQUIRED)
     public RepositorySearchResult<ResourceLookup> getLookupsForFullPage(ExecutionContext context,
                                                                         RepositorySearchCriteria clientCriteria) {
@@ -177,12 +181,11 @@ public class RepositorySearchServiceImpl implements RepositorySearchService, Dia
             int currentLimit = itemsPerPage;
 
             int totalCount = getResultsCount(null, criteria);
-            if (startIndex > totalCount) {
+            if(startIndex>totalCount){
                 return RepositorySearchAccumulator.EMPTY_RESULT;
             }
-
             result = new RepositorySearchAccumulator<ResourceLookup>(startIndex, itemsPerPage, totalCount);
-
+            
             do {
                 criteria.setStartIndex(startIndex);
                 criteria.setMaxCount(currentLimit);
@@ -326,6 +329,17 @@ public class RepositorySearchServiceImpl implements RepositorySearchService, Dia
             }
         }
 
+        // ES hack for RepoFolder lookup
+        if(criteria.getLookupClass()!=null && criteria.getLookupClass().indexOf("RepoFolder")>0){
+        	Iterator<SearchFilter> it = filterList.iterator();
+        	while(it.hasNext()){
+        		SearchFilter filter = it.next();
+        		if(filter instanceof ResourceTypeFilter){
+        			it.remove();
+        		}
+        	}
+        }
+        
         if (!criteria.getAccessType().equals(AccessType.ALL)){
             if (criteria.getCustomFilters() == null){
                 criteria.setCustomFilters(new LinkedList<SearchFilter>());
@@ -395,11 +409,26 @@ public class RepositorySearchServiceImpl implements RepositorySearchService, Dia
             }
         } else {
             String sortBy = criteria.getSortBy();
-            res = defaultSearchCriteriaFactory.newFactory(StringUtils.equals(sortBy, PARAM_SORT_BY_POPULARITY) ?
+            res = defaultSearchCriteriaFactory.newFactory(criteria.getLookupClass()!=null? criteria.getLookupClass():StringUtils.equals(sortBy, PARAM_SORT_BY_POPULARITY) ?
                     Resource.class.getName() : ResourceLookup.class.getName());
         }
 
         return res;
     }
+    
+    @Transactional(propagation = Propagation.REQUIRED)
+    public List getResultsCountList(ExecutionContext context, SearchCriteriaFactory searchCriteriaFactory,
+                               List<SearchFilter> filters, SearchSorter sorter) {
+        return repositoryService.getResourcesCountList(context, searchCriteriaFactory, filters, sorter, transformerFactory);
+    }
+
+    public List getResultsCountList(ExecutionContext context, RepositorySearchCriteria criteria) {
+        context = putCriteriaToContext(context, criteria);
+        // SearchMode.SEARCH is used by default
+        final RepositorySearchConfiguration configuration = getConfiguration(criteria.getSearchMode() != null ? criteria.getSearchMode() : SearchMode.SEARCH);
+        return getResultsCountList(context, obtainFactory(criteria), createAllFiltersList(configuration, criteria), getSorter(configuration, criteria.getSortBy()));
+    }
+
+    
 
 }

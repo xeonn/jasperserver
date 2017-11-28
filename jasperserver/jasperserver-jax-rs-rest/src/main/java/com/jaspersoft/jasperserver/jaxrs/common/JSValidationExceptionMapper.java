@@ -23,8 +23,10 @@ package com.jaspersoft.jasperserver.jaxrs.common;
 import com.jaspersoft.jasperserver.api.JSValidationException;
 import com.jaspersoft.jasperserver.api.common.domain.ValidationError;
 import com.jaspersoft.jasperserver.dto.common.ErrorDescriptor;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
@@ -32,16 +34,20 @@ import javax.ws.rs.ext.Provider;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: JSValidationExceptionMapper.java 57603 2015-09-15 17:20:48Z psavushc $
+ * @version $Id: JSValidationExceptionMapper.java 64791 2016-10-12 15:08:37Z ykovalch $
  */
 @Provider
 @Component
 public class JSValidationExceptionMapper implements ExceptionMapper<JSValidationException> {
+    @Resource(name = "messageSource")
+    private MessageSource messageSource;
+
     @Override
     public Response toResponse(JSValidationException exception) {
         // raw type is used by core class. Cast is safe
@@ -56,11 +62,18 @@ public class JSValidationExceptionMapper implements ExceptionMapper<JSValidation
             if (error.getField() != null) {
                 errorArgumentsList.add(0, error.getField());
             }
+            String errorMessage = error.getDefaultMessage();
+            if (errorMessage == null) {
+                errorMessage = messageSource.getMessage(error.getErrorCode(), error.getErrorArguments(),
+                        Locale.ENGLISH);
+            }
             errorDescriptors.add(new ErrorDescriptor()
                     .setErrorCode(error.getErrorCode())
-                    .setMessage(error.getDefaultMessage())
+                    .setMessage(errorMessage)
                     .setParameters(errorArgumentsList.toArray()));
         }
-        return Response.status(Response.Status.BAD_REQUEST).entity(new GenericEntity< List<ErrorDescriptor>>(errorDescriptors){}).build();
+        return Response.status(Response.Status.BAD_REQUEST).
+                entity(errorDescriptors.size() == 1 ? errorDescriptors.get(0) :
+                        new GenericEntity<List<ErrorDescriptor>>(errorDescriptors){}).build();
     }
 }

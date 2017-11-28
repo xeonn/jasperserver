@@ -20,7 +20,7 @@ import com.jaspersoft.jasperserver.api.search.TransformerFactory;
 
 import java.util.List;
 import java.util.Map;
-
+import java.util.Collections;
 /**
  * User: Zakhar.Tomchenco
  * Date: 7/25/12
@@ -277,6 +277,11 @@ public class HibernateRepositoryServiceMock implements HibernateRepositoryServic
         return 0; 
     }
 
+    @Override
+    public List getResourcesCountList(ExecutionContext context, SearchCriteriaFactory searchCriteriaFactory, List<SearchFilter> filters, SearchSorter sorter, TransformerFactory transformerFactory) {
+        return Collections.EMPTY_LIST;
+    }
+    
     @Override
     public List<ResourceLookup> getDependentResources(ExecutionContext context, String uri, SearchCriteriaFactory searchCriteriaFactory, int current, int max) {
         return null; 

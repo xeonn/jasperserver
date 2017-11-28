@@ -20,23 +20,17 @@
  */
 package com.jaspersoft.jasperserver.war.validation;
 
-import org.springframework.beans.BeansException;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
-import org.springframework.validation.Errors;
-import org.springframework.validation.Validator;
-
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ListOfValues;
 import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
 import com.jaspersoft.jasperserver.war.common.JasperServerConst;
 import com.jaspersoft.jasperserver.war.common.JasperServerUtil;
 import com.jaspersoft.jasperserver.war.dto.ListOfValuesDTO;
-
-import java.util.Iterator;
+import org.springframework.validation.Errors;
+import org.springframework.validation.Validator;
 
 /**
  * @author Ionut Nedelcu (ionutned@users.sourceforge.net)
- * @version $Id: ListOfValuesValidator.java 63380 2016-05-26 20:56:46Z mchan $
+ * @version $Id: ListOfValuesValidator.java 63760 2016-07-05 18:59:28Z agodovan $
  */
 public class ListOfValuesValidator implements Validator
 {

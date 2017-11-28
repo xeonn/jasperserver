@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: utils.common.js 9400 2015-09-23 21:10:46Z inestere $
+ * @version: $Id: utils.common.js 10348 2016-10-17 14:53:32Z ztomchen $
  */
 
 /**
@@ -841,7 +841,7 @@ function isNotNullORUndefined(object){
  */
 function hasDisabledAttributeSet(element) {
     var disabled = element.getAttribute('disabled');
-    return !isNotNullORUndefined(disabled) ? false : ((disabled == '0' || disabled == 'false' || disabled == '') ? false : true);
+    return !isNotNullORUndefined(disabled) ? false : ((disabled == '0' || disabled == 'false') ? false : true);
 }
 
 ///////////////////////////////////////////

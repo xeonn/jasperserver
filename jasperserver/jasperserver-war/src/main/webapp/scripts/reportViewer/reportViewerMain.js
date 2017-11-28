@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: reportViewerMain.js 10092 2016-04-22 21:17:02Z inestere $
+ * @version: $Id: reportViewerMain.js 10224 2016-07-27 20:02:40Z inestere $
  */
 
 /* global Hash, __jrsConfigs__ */
@@ -34,7 +34,7 @@ define(function (require) {
         jrsConfigs = require("jrs.configs"),
         baseControls = require("controls.base"),
         _ = require("underscore"),
-        jQuery = require("jquery"),
+        $ = require("jquery"),
         layoutModule = require("core.layout"),
         Report = require("report.view");
 
@@ -54,7 +54,7 @@ define(function (require) {
     };
 
     window.FC_Rendered = function (DOMId) {
-        jQuery('#' + DOMId).hide().show();
+        $('#' + DOMId).hide().show();
     };
 
     domReady(function() {
@@ -89,6 +89,9 @@ define(function (require) {
                 };
 
             Report.initialize();
+
+            //workraround to make JIVE jquery-ui datepickers work in ReportViewer
+            $("body").addClass("jr");
         });
     });
     });

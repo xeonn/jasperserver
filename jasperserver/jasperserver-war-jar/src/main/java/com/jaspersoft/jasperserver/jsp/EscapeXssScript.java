@@ -36,7 +36,7 @@ import java.util.Map;
  */
 public class EscapeXssScript {
 
-	protected static final Map<Character, String> CHAR_ESCAPE_MAP = new HashMap<Character, String>();
+	private static final Map<Character, String> CHAR_ESCAPE_MAP = new HashMap<Character, String>();
 
 	static {
 		// < is temporarily replaced by &lt# versus &lt; because ; is on the lhs of the map.

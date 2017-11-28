@@ -52,6 +52,14 @@ public class TibcoDriverManagerImpl implements TibcoDriverManager {
 
 
     private TibcoDriverManagerImpl() {
+        try {
+            Class runtimeDelegateImplClass = Class.forName("com.sun.jersey.server.impl.provider.RuntimeDelegateImpl");
+            Class runtimeDelegateClass = Class.forName("javax.ws.rs.ext.RuntimeDelegate");
+            Method method = runtimeDelegateClass.getMethod("setInstance", runtimeDelegateClass);
+            method.invoke(null, runtimeDelegateImplClass.newInstance());
+        } catch (Exception ex) {
+            printLog("Not able to set with jersey runtime delegate");
+        }
         preLoadDrivers();
     }
 

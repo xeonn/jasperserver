@@ -73,7 +73,7 @@ import java.util.Set;
 
 /**
  * @author Ivan Chan (ichan@jaspersoft.com)
- * @version $Id: TeiidVirtualDataSourceQueryServiceImpl.java 58827 2015-10-23 23:47:48Z mchan $
+ * @version $Id: TeiidVirtualDataSourceQueryServiceImpl.java 65088 2016-11-03 23:22:01Z gbacon $
  */
 public class TeiidVirtualDataSourceQueryServiceImpl extends AbstractVirtualDataSourceQueryServiceImpl implements CacheManager, InitializingBean {
 
@@ -606,7 +606,6 @@ public class TeiidVirtualDataSourceQueryServiceImpl extends AbstractVirtualDataS
         debug("TEIID IMPORT PROPERTY [import.userFullSchemaName, " + Boolean.FALSE.toString() + "]");
         importProperties.setProperty("importer.trimColumnNames", Boolean.TRUE.toString());
         debug("TEIID IMPORT PROPERTY [import.trimColumnNames, " + Boolean.TRUE.toString() + "]");
-
         // SET PROPERTIES FOR AWS DATA SOURCE
         try {
             if ((dataSource instanceof JdbcDataSourceImpl) && (((JdbcDataSourceImpl) dataSource).getReportDataSource() instanceof AwsReportDataSource)) {
@@ -622,20 +621,14 @@ public class TeiidVirtualDataSourceQueryServiceImpl extends AbstractVirtualDataS
             model.setName(modelName + VirtualDataSourceHandler.getDataSourceSchemaSeparator() + schema);
             importProperties.setProperty("importer.schemaPattern", schema);
             debug("TEIID IMPORT PROPERTY [import.schemaPattern, " + schema + "]");
-
         } else {
             model.setName(modelName);
         }
         // import property from spring injection
-        if (importPropertyMap != null) {
-        Map<String, String> propertyMapForDataSourceModel = importPropertyMap.get(modelName);
-            if (propertyMapForDataSourceModel != null) {
-                for (Map.Entry<String, String> entry : propertyMapForDataSourceModel.entrySet()) {
-                    importProperties.setProperty(entry.getKey(), entry.getValue());
-                    debug("TEIID IMPORT PROPERTY [" + entry.getKey() + ", " + entry.getValue() + "]");
-                }
-            }
-        }
+
+        importProperties = collectImportProperties(modelName, importProperties);
+        // import properties for specific translator
+        importProperties = collectImportProperties(translatorName, importProperties);
         model.setProperties(importProperties);
         String schemaText = null;
         String schemaType = "native";
@@ -657,6 +650,19 @@ public class TeiidVirtualDataSourceQueryServiceImpl extends AbstractVirtualDataS
         model.addSourceMapping(connectorName, translatorName, connectionName);
 		return model;
 	}
+
+    private Properties collectImportProperties(String name, Properties importProperties) {
+        if (importPropertyMap != null) {
+            Map<String, String> propertyMapForDataSourceModel = importPropertyMap.get(name);
+            if (propertyMapForDataSourceModel != null) {
+                for (Map.Entry<String, String> entry : propertyMapForDataSourceModel.entrySet()) {
+                    importProperties.setProperty(entry.getKey(), entry.getValue());
+                    debug("TEIID IMPORT PROPERTY [" + entry.getKey() + ", " + entry.getValue() + "]");
+                }
+            }
+        }
+        return importProperties;
+    }
 
     private VirtualDataSourceConfig getVirtualDataSourceConfig(String virtualDataSourceURI) {
         if (virtualDataSourceConfigList == null) return null;

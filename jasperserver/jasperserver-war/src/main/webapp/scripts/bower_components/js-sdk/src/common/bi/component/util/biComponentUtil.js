@@ -21,7 +21,7 @@
 
 /**
  * @author: Zakhar.Tomchenko
- * @version: $Id: biComponentUtil.js 1011 2015-04-01 19:34:14Z ktsaregr $
+ * @version: $Id: biComponentUtil.js 2956 2016-07-27 19:22:11Z inestere $
  */
 
 define(function(require, exports, module) {
@@ -48,6 +48,11 @@ define(function(require, exports, module) {
             return _.cloneDeep(obj, function(o) {
                 if (o instanceof $) {
                     return o;
+                }
+                if (_.isArray(o) && o.parameters) {
+                    var array = _.cloneDeep(o);
+                    array.parameters = _.cloneDeep(o.parameters);
+                    return array;
                 }
             });
         },
@@ -261,9 +266,11 @@ define(function(require, exports, module) {
                 return _.bind(obj, context);
             } else if (_.isArray(obj)) {
 	            // it's array, iterate over it and apply this function recursively.
-	            return _.map(obj, function (element) {
+	            var mapped =  _.map(obj, function (element) {
 		            return biComponentUtil.bindContextToArgument(context, element);
 	            });
+                obj.parameters && (mapped.parameters = _.cloneDeep(obj.parameters));
+                return mapped;
             } else if(_.isObject(obj)){
                 // it's an object, iterate over it's fields and apply this function recursively.
                 return _.reduce(obj, function(memo, element, key){

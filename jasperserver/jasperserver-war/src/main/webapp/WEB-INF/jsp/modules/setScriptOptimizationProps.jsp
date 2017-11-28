@@ -36,8 +36,9 @@
     </c:when>
 </c:choose>
 
-<c:set var="optimizedScriptsFolder" value="${jsOptimizationProperties.optimizedJavascriptPath}" scope="request"/>
-<c:set var="notOptimizedScriptsFolder" value="scripts" scope="request"/>
+<c:set var="runtimeHash" value="${jsOptimizationProperties.runtimeHash}" scope="request"/>
+<c:set var="optimizedScriptsFolder" value="runtime/${jsOptimizationProperties.runtimeHash}/${jsOptimizationProperties.optimizedJavascriptPath}" scope="request"/>
+<c:set var="notOptimizedScriptsFolder" value="runtime/${jsOptimizationProperties.runtimeHash}/scripts" scope="request"/>
 <c:set var="optimizedScriptsUri" value="${pageContext.request.contextPath}/${optimizedScriptsFolder}" scope="request"/>
 <c:set var="notOptimizedScriptsUri" value="${pageContext.request.contextPath}/${notOptimizedScriptsFolder}" scope="request"/>
 
@@ -45,10 +46,12 @@
 <c:if test="${optimizeJavascript == true}">
     <c:set var="scriptsUri" value="${optimizedScriptsUri}" scope="request"/>
     <c:set var="scriptsFolder" value="${optimizedScriptsFolder}" scope="request"/>
+    <c:set var="scriptsFolderInternal" value="../../../${jsOptimizationProperties.optimizedJavascriptPath}" scope="request"/>
 </c:if>
 <c:if test="${optimizeJavascript == false}">
     <c:set var="scriptsUri" value="${notOptimizedScriptsUri}" scope="request"/>
     <c:set var="scriptsFolder" value="${notOptimizedScriptsFolder}" scope="request"/>
+    <c:set var="scriptsFolderInternal" value="../../../scripts" scope="request"/>
 </c:if>
 
-<c:set var="scriptsFolderInternal" value="../../../${scriptsFolder}" scope="request"/>
+<c:set var="optimizedScriptsFolderInternal" value="../../../${jsOptimizationProperties.optimizedJavascriptPath}" scope="request"/>

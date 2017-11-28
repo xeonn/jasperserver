@@ -16,7 +16,8 @@
 			<map>
 				<entry key="csv" value="net.sf.jasperreports.engine.query.JRCsvQueryExecuterFactory"/>
 			</map>
-		</property>		
+		</property>
+        <property name="customFactory" ref="customJDBCReportDataSourceServiceFactory"/>
 	</bean>
 	
     <bean class="com.jaspersoft.jasperserver.api.common.util.spring.GenericBeanUpdater">

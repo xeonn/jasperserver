@@ -44,7 +44,7 @@ Usage:
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jstl/core_rt" %>
 
-<!--/WEB-INF/jsp/templates/page.jsp revision A-->
+
 <tiles:useAttribute id="pageTitle" name="pageTitle" classname="java.lang.String" ignore="false"/>
 <tiles:useAttribute id="bodyID" name="bodyID" classname="java.lang.String" ignore="false"/><%-- This should be renamed to 'pageID' but would require name change on all calling pages --%>
 <tiles:useAttribute id="pageClass" name="pageClass" classname="java.lang.String" ignore="true"/>
@@ -67,7 +67,7 @@ Usage:
         <jsp:include page="../modules/commonScripts.jsp"/>
         <script type="text/javascript">
             <c:choose>
-                <c:when test="${moduleName == 'common.main'}">
+                <c:when test="${moduleName == 'commons.main'}">
                     requirejs(["commons.main"]);
                 </c:when>
                 <c:when test="${decorate == 'false'}">

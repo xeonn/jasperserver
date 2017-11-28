@@ -66,19 +66,28 @@ define(function (require) {
                 fitByWidth =  attachOffset.left;
 
             var top = attachOffset.top + attachHeight + this.padding.top;
-            var left = attachOffset.left;
+            var left = attachOffset.left + attachWidth;
 
             if(bodyHeight < colorPickerHeight+fitByHeight){
                 top = attachOffset.top - colorPickerHeight - this.padding.top;
             }
+            if(top < 0) {
+                top = attachOffset.top - colorPickerHeight/2 - this.padding.top;
+            }
+            if(top < 0){
+                top = 0;
+            }
             if(bodyWidth < colorPickerWidth+fitByWidth){
-                left = attachOffset.left - colorPickerWidth + attachWidth;
+                left = attachOffset.left - colorPickerWidth;
             }
             if(left < 0){
                 left = attachOffset.left + attachWidth/2  - colorPickerWidth/2;
             }
             if(left < 0){
                 left = 0;
+            }
+            if(top > attachOffset.top && bodyWidth > colorPickerWidth+fitByWidth) {
+                left= left - attachWidth;
             }
 
             _.extend(this, {top: top, left: left});

@@ -47,6 +47,7 @@ import com.jaspersoft.jasperserver.api.engine.scheduling.domain.reportjobmodel.R
 import com.jaspersoft.jasperserver.api.engine.scheduling.domain.reportjobmodel.ReportJobRepositoryDestinationModel;
 import com.jaspersoft.jasperserver.api.engine.scheduling.domain.reportjobmodel.ReportJobSourceModel;
 import com.jaspersoft.jasperserver.api.engine.scheduling.quartz.ReportExecutionJob;
+import com.jaspersoft.jasperserver.api.engine.scheduling.service.ReportJobNotFoundException;
 import com.jaspersoft.jasperserver.api.engine.scheduling.service.ReportJobsPersistenceService;
 import com.jaspersoft.jasperserver.api.engine.scheduling.service.ReportSchedulingService;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Folder;
@@ -68,7 +69,7 @@ import static org.testng.AssertJUnit.*;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ReportSchedulingTestTestNG.java 58870 2015-10-27 22:30:55Z esytnik $
+ * @version $Id: ReportSchedulingTestTestNG.java 65265 2016-11-24 14:30:15Z ohavavka $
  */
 public class ReportSchedulingTestTestNG extends BaseServiceSetupTestNG
 {
@@ -95,7 +96,7 @@ public class ReportSchedulingTestTestNG extends BaseServiceSetupTestNG
 		return m_reportJobsPersistenceService;
 	}
 
-    @javax.annotation.Resource(name = "reportJobsPersistenceService")
+    @javax.annotation.Resource(name = "securedReportJobsPersistenceService")
 	public void setReportJobsPersistenceService(
 		ReportJobsPersistenceService reportJobsPersistenceService) {
 		m_logger.info("setReportJobsPersistenceService() called");
@@ -442,10 +443,15 @@ public class ReportSchedulingTestTestNG extends BaseServiceSetupTestNG
             m_reportJobsPersistenceService.deleteJob(m_executionContext, new ReportJobIdHolder(jobId_01));
             m_reportJobsPersistenceService.deleteJob(m_executionContext, new ReportJobIdHolder(jobId_02));
 			deleted = true;
-			job_01 = m_reportJobsPersistenceService.loadJob(m_executionContext, new ReportJobIdHolder(jobId_01));
-			assertNull(job_01);
-            job_02 = m_reportJobsPersistenceService.loadJob(m_executionContext, new ReportJobIdHolder(jobId_02));
-			assertNull(job_02);
+            try {
+                job_01 = m_reportJobsPersistenceService.loadJob(m_executionContext, new ReportJobIdHolder(jobId_01));
+                assertTrue(true);
+            } catch (ReportJobNotFoundException ad) {}
+            try {
+                job_02 = m_reportJobsPersistenceService.loadJob(m_executionContext, new ReportJobIdHolder(jobId_02));
+                assertTrue(true);
+            } catch (ReportJobNotFoundException ad) {}
+
 		} finally {
 			if (!deleted) {
 				m_reportJobsPersistenceService.deleteJob(m_executionContext, new ReportJobIdHolder(jobId_01));
@@ -661,12 +667,18 @@ public class ReportSchedulingTestTestNG extends BaseServiceSetupTestNG
         m_logger.info("Error !  Throwable while attempting to delete job '"+th.getMessage()+"'");
       }
 
-      m_reportJobsPersistenceService.deleteJob(m_executionContext, new ReportJobIdHolder(jobId_02));
-      job_01 = m_reportJobsPersistenceService.loadJob(m_executionContext, new ReportJobIdHolder(jobId_01));
-      assertNull(job_01);
-      job_02 = m_reportJobsPersistenceService.loadJob(m_executionContext, new ReportJobIdHolder(jobId_02));
-      assertNull(job_02);
-     
+      try {
+          m_reportJobsPersistenceService.deleteJob(m_executionContext, new ReportJobIdHolder(jobId_02));
+      } catch (Throwable th)  {}
+      try {
+          job_01 = m_reportJobsPersistenceService.loadJob(m_executionContext, new ReportJobIdHolder(jobId_01));
+          assertTrue(true);
+      } catch (ReportJobNotFoundException ad) {}
+      try {
+          job_02 = m_reportJobsPersistenceService.loadJob(m_executionContext, new ReportJobIdHolder(jobId_02));
+          assertTrue(true);
+      } catch (ReportJobNotFoundException ad) {}
+
     } finally {
       if (!deleted) {
         try {
@@ -863,12 +875,19 @@ public class ReportSchedulingTestTestNG extends BaseServiceSetupTestNG
       } catch (Throwable th) {
         m_logger.info("Error !  Throwable while attempting to delete job '"+th.getMessage()+"'");
       }
+      try {
+          m_reportJobsPersistenceService.deleteJob(m_executionContext, new ReportJobIdHolder(jobId_02));
+          assertTrue(true);
+      } catch (Throwable th)  {}
 
-      m_reportJobsPersistenceService.deleteJob(m_executionContext, new ReportJobIdHolder(jobId_02));
-      job_01 = m_reportJobsPersistenceService.loadJob(m_executionContext, new ReportJobIdHolder(jobId_01));
-      assertNull(job_01);
-      job_02 = m_reportJobsPersistenceService.loadJob(m_executionContext, new ReportJobIdHolder(jobId_02));
-      assertNull(job_02);
+      try {
+          job_01 = m_reportJobsPersistenceService.loadJob(m_executionContext, new ReportJobIdHolder(jobId_01));
+          assertTrue(true);
+      } catch (ReportJobNotFoundException ad) {}
+      try {
+          job_02 = m_reportJobsPersistenceService.loadJob(m_executionContext, new ReportJobIdHolder(jobId_02));
+          assertTrue(true);
+      } catch (ReportJobNotFoundException ad) {}
 
     } finally {
       if (!deleted) {
@@ -1088,11 +1107,19 @@ public class ReportSchedulingTestTestNG extends BaseServiceSetupTestNG
         m_logger.info("Error !  Throwable while attempting to delete job '"+th.getMessage()+"'");
       }
 
-      m_reportJobsPersistenceService.deleteJob(m_executionContext, new ReportJobIdHolder(jobId_02));
-      job_01 = m_reportJobsPersistenceService.loadJob(m_executionContext, new ReportJobIdHolder(jobId_01));
-      assertNull(job_01);
-      job_02 = m_reportJobsPersistenceService.loadJob(m_executionContext, new ReportJobIdHolder(jobId_02));
-      assertNull(job_02);
+      try {
+        m_reportJobsPersistenceService.deleteJob(m_executionContext, new ReportJobIdHolder(jobId_02));
+        assertTrue(true);
+      } catch (Throwable th)  {}
+
+      try {
+          job_01 = m_reportJobsPersistenceService.loadJob(m_executionContext, new ReportJobIdHolder(jobId_01));
+          assertTrue(true);
+      } catch (ReportJobNotFoundException ad) {}
+      try {
+          job_02 = m_reportJobsPersistenceService.loadJob(m_executionContext, new ReportJobIdHolder(jobId_02));
+          assertTrue(true);
+      } catch (ReportJobNotFoundException ad) {}
     } finally {
       if (!deleted) {
         try {
@@ -1243,10 +1270,14 @@ public class ReportSchedulingTestTestNG extends BaseServiceSetupTestNG
       } catch (Throwable th) {
         m_logger.info("Error !  Throwable while attempting to delete job '"+th.getMessage()+"'");
       }
-      job_01 = m_reportJobsPersistenceService.loadJob(m_executionContext, new ReportJobIdHolder(jobId_01));
-      assertNull(job_01);
-      ReportJob job_02 = m_reportJobsPersistenceService.loadJob(m_executionContext, new ReportJobIdHolder(theSummary.getId()));
-      assertNull(job_02);
+    try {
+        job_01 = m_reportJobsPersistenceService.loadJob(m_executionContext, new ReportJobIdHolder(jobId_01));
+        assertTrue(true);
+    } catch (ReportJobNotFoundException ad) {}
+    try {
+        ReportJob job_02 = m_reportJobsPersistenceService.loadJob(m_executionContext, new ReportJobIdHolder(theSummary.getId()));
+        assertTrue(true);
+    } catch (ReportJobNotFoundException ad) {}
 
     } finally {
       if (!deleted) {
@@ -1374,8 +1405,11 @@ public class ReportSchedulingTestTestNG extends BaseServiceSetupTestNG
         m_logger.info("Error !  Throwable while attempting to delete job '"+th.getMessage()+"'");
       }
 
-      job_01 = m_reportJobsPersistenceService.loadJob(m_executionContext, new ReportJobIdHolder(jobId_01));
-      assertNull(job_01);
+      try {
+          job_01 = m_reportJobsPersistenceService.loadJob(m_executionContext, new ReportJobIdHolder(jobId_01));
+          assertNull(job_01);
+      } catch (ReportJobNotFoundException ad)  {}
+
     } finally {
       if (!deleted) {
         try {

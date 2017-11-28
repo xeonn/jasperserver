@@ -24,19 +24,18 @@ import com.jaspersoft.jasperserver.api.JSException;
 
 import com.jaspersoft.jasperserver.api.common.error.handling.SecureExceptionHandler;
 import com.jaspersoft.jasperserver.dto.common.ErrorDescriptor;
+import com.jaspersoft.jasperserver.dto.common.ErrorDescriptorBuilder;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
 
 /**
  * <p></p>
  *
  * @author yaroslav.kovalchyk
- * @version $Id: JSExceptionErrorDescriptorBuilder.java 57603 2015-09-15 17:20:48Z psavushc $
+ * @version $Id: JSExceptionErrorDescriptorBuilder.java 64791 2016-10-12 15:08:37Z ykovalch $
  */
 @Component
 public class JSExceptionErrorDescriptorBuilder implements ErrorDescriptorBuilder<JSException> {

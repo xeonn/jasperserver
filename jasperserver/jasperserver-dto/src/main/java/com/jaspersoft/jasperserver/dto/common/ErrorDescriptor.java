@@ -30,7 +30,7 @@ import java.util.List;
 
 /**
  * @author Yaroslav.Kovalchyk
- * @version $Id: ErrorDescriptor.java 57603 2015-09-15 17:20:48Z psavushc $
+ * @version $Id: ErrorDescriptor.java 64791 2016-10-12 15:08:37Z ykovalch $
  */
 @XmlRootElement
 public class ErrorDescriptor {
@@ -87,6 +87,8 @@ public class ErrorDescriptor {
             for (Object arg : args) {
                 if (arg != null) {
                     values.add(arg.toString());
+                } else  {
+                    values.add(null);
                 }
             }
             if (!values.isEmpty()) {

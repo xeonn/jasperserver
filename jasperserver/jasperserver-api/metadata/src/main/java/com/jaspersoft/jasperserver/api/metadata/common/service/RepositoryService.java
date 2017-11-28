@@ -57,7 +57,7 @@ import java.util.Map;
  * @author Andrew Sokolnikov
  * @author Stas Chubar
  * @author Yuri Plakosh
- * @version $Id: RepositoryService.java 63380 2016-05-26 20:56:46Z mchan $
+ * @version $Id: RepositoryService.java 66432 2017-03-10 22:04:59Z esytnik $
  * @since 1.0
  */
 @JasperServerAPI
@@ -729,6 +729,10 @@ public interface RepositoryService
     int getResourcesCount(ExecutionContext context, SearchCriteriaFactory searchCriteriaFactory,
             List<SearchFilter> filters, SearchSorter sorter, TransformerFactory transformerFactory);
 
+    //EGS: sumtotal
+    List<Object[]> getResourcesCountList(ExecutionContext context, SearchCriteriaFactory searchCriteriaFactory,
+            List<SearchFilter> filters, SearchSorter sorter, TransformerFactory transformerFactory);
+    
     /**
      * Looking for resources which depend on the specified resource.
      * Current implementation is looking for ReportUnits only.

@@ -102,6 +102,7 @@
        <on-entry>
           <set name="flowScope.prevForm" value="'viewReport'"/>
           <evaluate expression="reportExporter.export"/>
+          <evaluate expression="viewReportActionBean.cleanAfterExport"/>
        </on-entry>
        <transition on="success" to="done"/>
     </view-state>

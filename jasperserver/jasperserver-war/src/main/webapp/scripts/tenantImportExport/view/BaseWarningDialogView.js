@@ -73,7 +73,7 @@ define(function(require) {
             // refreshes the previous scroll position to default one.
             this.$contentContainer.scrollTop(0);
 
-            this._resizableContainerShiftHeight = this.$(".m-Dialog-footer").outerHeight() + this.$(".m-Dialog-header").outerHeight() + this.$contentContainer.outerHeight() - this.$contentContainer.height();
+            this._resizableContainerShiftHeight = this.$(".jr-mDialog-footer").outerHeight() + this.$(".jr-mDialog-header").outerHeight() + this.$contentContainer.outerHeight() - this.$contentContainer.height();
         }
 
     });

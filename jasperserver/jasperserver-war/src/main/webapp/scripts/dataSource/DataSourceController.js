@@ -22,7 +22,7 @@
 
 /**
  * @author: Dima Gorbenko
- * @version: $Id: DataSourceController.js 9936 2016-03-09 05:21:23Z yplakosh $
+ * @version: $Id: DataSourceController.js 10293 2016-09-20 20:20:15Z mchan $
  */
 
 /* global dialogs, redirectToUrl */
@@ -147,9 +147,9 @@ define(function (require) {
             this.customDataSourceCollection.forEach(function(element) {
                 var currentCustomDataSourceType = element.get("id");
                 // disable file data sources for now
-                if (currentCustomDataSourceType in {"xlsDataSource": 1, "xlsxDataSource": 1, "textDataSource":1}) {
-                    return;
-                }
+        //        if (currentCustomDataSourceType in {"xlsDataSource": 1, "xlsxDataSource": 1, "textDataSource":1}) {
+        //            return;
+        //        }
 
                 dataSourceTypeOptions.push({
                     value: currentCustomDataSourceType,

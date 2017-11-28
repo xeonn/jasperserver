@@ -20,8 +20,11 @@
  */
 package com.jaspersoft.jasperserver.war.util;
 
+import org.apache.commons.lang3.time.DateUtils;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * @author schubar
@@ -31,12 +34,23 @@ public class DateTimeUtil {
     public static final String DEFAULT_DATE_PATTERN = "yyyy-MM-dd";
     public static final String DEFAULT_TIME_PATTERN = "HH:mm:ss";
 
+    public static final String[] dateTimeFormats = {DEFAULT_TIME_PATTERN, DEFAULT_DATE_PATTERN, DEFAULT_DATE_TIME_PATTERN,
+            "yyyy-MM-dd'T'HH:mm:ss.SSS", "HH:mm:ss.SSS", "yyyy-MM-dd HH:mm:ss.SSS"};
+
     public static java.util.Date parseDate(String pattern, String date) {
         SimpleDateFormat formatter = new SimpleDateFormat(pattern);
         try {
             return formatter.parse(date);
         } catch (ParseException e) {
             throw new IllegalArgumentException("Can't parse date '" + date + "' using pattern '" + pattern + "'.");
+        }
+    }
+
+    public static Date parseDateTime(String dateTime) {
+        try {
+            return DateUtils.parseDate(dateTime, dateTimeFormats);
+        } catch (ParseException e) {
+            throw new IllegalArgumentException("Can't parse date '" + dateTime);
         }
     }
 

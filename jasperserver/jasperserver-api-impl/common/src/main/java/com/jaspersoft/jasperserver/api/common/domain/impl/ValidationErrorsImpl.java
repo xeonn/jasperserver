@@ -32,7 +32,7 @@ import java.util.List;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ValidationErrorsImpl.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: ValidationErrorsImpl.java 63760 2016-07-05 18:59:28Z agodovan $
  */
 @XmlRootElement(name = "errors")
 public class ValidationErrorsImpl implements ValidationErrors, Serializable {
@@ -43,6 +43,10 @@ public class ValidationErrorsImpl implements ValidationErrors, Serializable {
 	
 	public ValidationErrorsImpl() {
 		errors = new ArrayList();
+	}
+
+	public ValidationErrorsImpl(List errors) {
+		this.errors = errors;
 	}
 
 	public boolean isError() {

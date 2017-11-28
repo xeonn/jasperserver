@@ -86,7 +86,7 @@ import java.util.*;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: HibernateRepositoryServiceImpl.java 63380 2016-05-26 20:56:46Z mchan $
+ * @version $Id: HibernateRepositoryServiceImpl.java 66432 2017-03-10 22:04:59Z esytnik $
  */
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 public class HibernateRepositoryServiceImpl extends HibernateDaoImpl implements HibernateRepositoryService, ReferenceResolver, RepoManager, ApplicationContextAware {
@@ -2500,6 +2500,39 @@ public class HibernateRepositoryServiceImpl extends HibernateDaoImpl implements 
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
+    public List<Object[]> getResourcesCountList(ExecutionContext context, SearchCriteriaFactory searchCriteriaFactory,
+            List<SearchFilter> filters, SearchSorter sorter, TransformerFactory transformerFactory) {
+        if (transformerFactory == null) {
+            throw new IllegalArgumentException("Transformer factory is null.");
+        }
+
+        SearchCriteria criteria;
+        if (queryModificationEvaluator.useFullResource(context)) {
+            criteria = searchCriteriaFactory.newFactory(Resource.class.getName()).create(context, filters);
+            String alias = criteria.getAlias("parent", "p");
+            criteria.setProjection(
+                            Projections.projectionList()
+                                    .add(Projections.groupProperty(alias+".URI"))
+                                    .add(Projections.countDistinct("id"))
+            );
+        } else {
+            criteria = searchCriteriaFactory.create(context, filters);
+            String alias = criteria.getAlias("parent", "p");
+            criteria.setProjection(
+                            Projections.projectionList()
+                                    .add(Projections.groupProperty(alias+ ".URI"))
+                                    .add(Projections.rowCount())
+            );
+        }
+
+        // do NOT turn this to true - this is bug #44272
+        List resourceList = findByCriteria(getHibernateTemplate(),criteria,false);
+        
+        return resourceList;
+    }
+    
+    
+    @Transactional(propagation = Propagation.REQUIRED)
     public int getResourcesCount(ExecutionContext context, SearchCriteriaFactory searchCriteriaFactory,
             List<SearchFilter> filters, SearchSorter sorter, TransformerFactory transformerFactory) {
         if (transformerFactory == null) {
@@ -2559,7 +2592,7 @@ public class HibernateRepositoryServiceImpl extends HibernateDaoImpl implements 
             return depResLookup;
 
         //TODO: replace 'exist' with right solution, it's hardcoded fix for CE version
-        } else if(resource instanceof ReportUnit && exist("com.jaspersoft.ji.adhoc.DashboardResource")) {
+        } else if(resource instanceof ReportUnit && exist("com.jaspersoft.ji.dashboard.DashboardModelResource")) {
             //ReportUnit can have dependent DashboardResource items
             final RepoResource repoResource = getRepoResource(resource);
             SearchFilter filter = new SearchFilter() {
@@ -2579,7 +2612,7 @@ public class HibernateRepositoryServiceImpl extends HibernateDaoImpl implements 
                 protected void addProjection(String type, ExecutionContext context, SearchCriteria criteria) { }
             };
 
-            SearchCriteriaFactory criteriaFactory = searchCriteriaFactory.newFactory("com.jaspersoft.ji.adhoc.DashboardResource");
+            SearchCriteriaFactory criteriaFactory = searchCriteriaFactory.newFactory("com.jaspersoft.ji.dashboard.DashboardModelResource");
             List<ResourceLookup> resources = getResources(
                     context,
                     criteriaFactory,

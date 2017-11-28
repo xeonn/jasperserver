@@ -24,13 +24,13 @@ import com.jaspersoft.jasperserver.api.common.domain.ValidationErrors;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: JSValidationException.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: JSValidationException.java 63760 2016-07-05 18:59:28Z agodovan $
  */
 public class JSValidationException extends JSException {
 	
 	private static final long serialVersionUID = 1L;
 
-	private final ValidationErrors errors;
+	protected final ValidationErrors errors;
 	
 	public JSValidationException(ValidationErrors errors) {
 		super(errors.toString());

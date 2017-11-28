@@ -22,6 +22,7 @@ package com.jaspersoft.jasperserver.remote.services;
 
 import com.jaspersoft.jasperserver.api.common.error.handling.SecureExceptionHandler;
 import com.jaspersoft.jasperserver.dto.common.ErrorDescriptor;
+import com.jaspersoft.jasperserver.dto.executions.ExecutionStatus;
 import com.jaspersoft.jasperserver.remote.exception.ExportExecutionRejectedException;
 import com.jaspersoft.jasperserver.remote.exception.RemoteException;
 
@@ -42,7 +43,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: ExportExecution.java 58870 2015-10-27 22:30:55Z esytnik $
+ * @version $Id: ExportExecution.java 63760 2016-07-05 18:59:28Z agodovan $
  */
 @XmlRootElement
 public class ExportExecution {

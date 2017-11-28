@@ -28,7 +28,7 @@ import java.util.Map;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: ConnectionManagementStrategy.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: ConnectionManagementStrategy.java 64791 2016-10-12 15:08:37Z ykovalch $
  */
 public interface ConnectionManagementStrategy<ConnectionDescriptionType> {
     /**
@@ -37,13 +37,13 @@ public interface ConnectionManagementStrategy<ConnectionDescriptionType> {
      * @return the connection description after successful establishment
      * @throws IllegalParameterValueException in case if any description parameter is incorrect.
      */
-    ConnectionDescriptionType createConnection(ConnectionDescriptionType connectionDescription, Map<String, Object> data) throws IllegalParameterValueException;
+    ConnectionDescriptionType createConnection(ConnectionDescriptionType connectionDescription, Map<String, Object> contextData) throws IllegalParameterValueException;
 
     /**
      * Do clean actions (if needed) before connection description is removed from the cache.
-     * @param connectionDescription
+     * @param connectionDescription - description of the connection to delete
      */
-    void deleteConnection(ConnectionDescriptionType connectionDescription, Map<String, Object> data);
+    void deleteConnection(ConnectionDescriptionType connectionDescription, Map<String, Object> contextData);
 
     /**
      * Try to connect with modified description.
@@ -54,12 +54,12 @@ public interface ConnectionManagementStrategy<ConnectionDescriptionType> {
      * @throws IllegalParameterValueException in case if any description parameter is incorrect.
      */
     ConnectionDescriptionType modifyConnection(ConnectionDescriptionType newConnectionDescription,
-            ConnectionDescriptionType oldConnectionDescription, Map<String, Object> data) throws IllegalParameterValueException;
+            ConnectionDescriptionType oldConnectionDescription, Map<String, Object> contextData) throws IllegalParameterValueException;
 
     /**
      * Prepare connection description object to be returned to the client. E.g. here is the place to return description copy without password.
      * @param connectionDescription - the original connection description to process.
      * @return connection description without authentication data.
      */
-    ConnectionDescriptionType secureGetConnection(ConnectionDescriptionType connectionDescription, Map<String, Object> data);
+    ConnectionDescriptionType secureGetConnection(ConnectionDescriptionType connectionDescription, Map<String, Object> contextData);
 }

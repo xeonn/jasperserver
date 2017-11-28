@@ -195,4 +195,9 @@ public class EngineBaseDecorator implements EngineService
     public boolean isCustomDomainMetadataProvider(CustomReportDataSource customReportDataSource) {
         return decoratedEngine.isCustomDomainMetadataProvider(customReportDataSource);
     }
+
+    @Override
+    public boolean isJDBCDiscoverySupported(CustomReportDataSource customReportDataSource) {
+        return decoratedEngine.isJDBCDiscoverySupported(customReportDataSource);
+    }
 }

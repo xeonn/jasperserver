@@ -22,7 +22,7 @@
 
 /**
  * @author: Kostiantyn Tsaregradskyi
- * @version: $Id: WebPageView.js 2569 2016-04-05 12:34:47Z dgorbenk $
+ * @version: $Id: WebPageView.js 3374 2016-12-12 18:04:03Z ztomchen $
  */
 
 define(function (require) {
@@ -41,15 +41,19 @@ define(function (require) {
      * @memberof! WebPageView
      */
     function setIframeSrc() {
-        this.$iframe.attr("src", this.url);
+        /*jshint -W107 */
+        if ((this.url || "").toLowerCase().indexOf("javascript:") === -1){
+            /*jshint +W107 */
+            this.$iframe.attr("src", this.url);
 
-        this._iframeSrcSet = true;
+            this._iframeSrcSet = true;
 
-        this.$el.addClass("loading");
+            this.$el.addClass("loading");
 
-        this._loadingTimeoutId && clearTimeout(this._loadingTimeoutId);
+            this._loadingTimeoutId && clearTimeout(this._loadingTimeoutId);
 
-        this._loadingTimeoutId = setTimeout(_.bind(this.$el.removeClass, this.$el, "loading"), this.timeout);
+            this._loadingTimeoutId = setTimeout(_.bind(this.$el.removeClass, this.$el, "loading"), this.timeout);
+        }
     }
 
     var WebPageView = Backbone.View.extend(/** @lends WebPageView.prototype */{

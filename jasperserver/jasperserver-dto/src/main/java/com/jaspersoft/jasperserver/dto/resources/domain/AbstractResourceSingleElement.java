@@ -20,15 +20,20 @@
 */
 package com.jaspersoft.jasperserver.dto.resources.domain;
 
+import com.jaspersoft.jasperserver.dto.adhoc.query.el.ClientExpressionContainer;
+
+import javax.validation.Valid;
+
 /**
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: AbstractResourceSingleElement.java 60839 2016-02-12 15:37:14Z ykovalch $
+ * @version $Id: AbstractResourceSingleElement.java 64791 2016-10-12 15:08:37Z ykovalch $
  */
 public abstract class AbstractResourceSingleElement<T extends AbstractResourceSingleElement<T>> extends ResourceElement<T> {
     private String type;
-    private String expression;
+    @Valid
+    private ClientExpressionContainer expression;
 
     public AbstractResourceSingleElement() {
     }
@@ -47,12 +52,11 @@ public abstract class AbstractResourceSingleElement<T extends AbstractResourceSi
         this.type = type;
         return (T) this;
     }
-
-    public String getExpression() {
+    public ClientExpressionContainer getExpression() {
         return expression;
     }
 
-    public T setExpression(String expression) {
+    public T setExpression(ClientExpressionContainer expression) {
         this.expression = expression;
         return (T) this;
     }

@@ -51,6 +51,7 @@ import net.sf.jasperreports.engine.ReportContext;
 import net.sf.jasperreports.engine.fill.JRFillInterruptedException;
 import net.sf.jasperreports.web.JRInteractiveException;
 import net.sf.jasperreports.web.JRInteractiveRuntimeException;
+import net.sf.jasperreports.web.WebReportContext;
 import net.sf.jasperreports.web.actions.AbstractAction;
 import net.sf.jasperreports.web.actions.Action;
 import net.sf.jasperreports.web.actions.MultiAction;
@@ -88,7 +89,7 @@ import java.util.Set;
 
 /**
  * @author Ionut Nedelcu (ionutned@users.sourceforge.net)
- * @version $Id: ViewReportAction.java 62954 2016-05-01 09:49:23Z ykovalch $
+ * @version $Id: ViewReportAction.java 65088 2016-11-03 23:22:01Z gbacon $
  */
 public class ViewReportAction extends ReportParametersAction
 {
@@ -100,6 +101,9 @@ public class ViewReportAction extends ReportParametersAction
     private static final String ATTRIBUTE_PUBLIC_FOLDER_URI = "publicFolderUri";
     private static final String ATTRIBUTE_TEMP_FOLDER_URI = "tempFolderUri";
     public static final String ATTRIBUTE_EMPTY_REPORT_MESSAGE = "emptyReportMessage";
+    
+    public static final String ATTRIBUTE_DIRECT_EXPORT = "directExport";
+    public static final String ATTRIBUTE_INPUT_CONTROLS_EXPORT = "inputControlsExport";
     
     protected static final String FLOW_ATTRIBUTE_WAIT_FOR_FINAL_REPORT_RESULT = "waitForFinalReportResult";
 
@@ -385,8 +389,10 @@ public class ViewReportAction extends ReportParametersAction
         if (reportOutput == null || reportOutput.isEmpty() || reportOutput.equals("html")) {
             return getEventFactorySupport().event(this, "viewReport");
         } else if (hasInputControls && reportForceControls && action == null) {
+        	context.getFlowScope().put(ATTRIBUTE_INPUT_CONTROLS_EXPORT, true);
             return getEventFactorySupport().event(this, "showInputControlsByExport");
         } else {
+        	context.getFlowScope().put(ATTRIBUTE_DIRECT_EXPORT, true);
             return getEventFactorySupport().event(this, "exportReport");
         }
     }
@@ -652,7 +658,7 @@ public class ViewReportAction extends ReportParametersAction
 
         // place the jasperPrintAccessor on the reportContext to be used by JR Actions
         WebflowReportContext reportContext = getReportContextAccessor().getContext(context);
-        reportContext.setParameterValue("net.sf.jasperreports.web.jasper_print.accessor", result.getJasperPrintAccessor());
+        reportContext.setParameterValue(WebReportContext.REPORT_CONTEXT_PARAMETER_JASPER_PRINT_ACCESSOR, result.getJasperPrintAccessor());
 	}
 
 
@@ -669,6 +675,18 @@ public class ViewReportAction extends ReportParametersAction
 				
 				if (virtualizerFactory != null) {
 					virtualizerFactory.disposeReport(result);
+				}
+				
+				ReportContext reportContext = result.getReportContext();
+				if (reportContext != null) {
+					JasperPrintAccessor reportContextJRPrint = (JasperPrintAccessor) reportContext.getParameterValue(
+							WebReportContext.REPORT_CONTEXT_PARAMETER_JASPER_PRINT_ACCESSOR);
+					//testing for object identity
+					if (reportContextJRPrint == result.getJasperPrintAccessor()) {
+						//it's safer to remove the JasperPrint object from the context
+						//to reduce the risk of the object not getting garbage collected  
+						reportContext.removeParameterValue(WebReportContext.REPORT_CONTEXT_PARAMETER_JASPER_PRINT_ACCESSOR);
+					}
 				}
 			}
 			getJasperPrintAccessor().removeObject((HttpServletRequest) externalContext.getNativeRequest(), jasperPrintName);
@@ -809,6 +827,24 @@ public class ViewReportAction extends ReportParametersAction
 	public Event cleanSession(RequestContext context) {
         removeCurrentJasperPrint(context);
         removeCurrentReportContext(context);
+
+		return success();
+	}
+
+	public Event cleanAfterExport(RequestContext context) {
+		//dispose the JasperPrint after a direct export
+		//leave the report context if input controls were shown, it might be still needed
+		Boolean directExport = context.getFlowScope().getBoolean(ATTRIBUTE_DIRECT_EXPORT);
+		Boolean inputControlsExport = context.getFlowScope().getBoolean(ATTRIBUTE_INPUT_CONTROLS_EXPORT);
+		
+		if ((directExport != null && directExport) 
+				|| (inputControlsExport != null && inputControlsExport)) {
+			removeCurrentJasperPrint(context);
+		}
+		
+		if (directExport != null && directExport) {
+			removeCurrentReportContext(context);
+		}
 
 		return success();
 	}

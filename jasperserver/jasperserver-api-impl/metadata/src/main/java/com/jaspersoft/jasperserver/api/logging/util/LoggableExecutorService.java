@@ -25,14 +25,16 @@ import com.jaspersoft.jasperserver.api.logging.audit.context.RequestTypeListener
 import com.jaspersoft.jasperserver.api.logging.context.LoggingContextProvider;
 import com.jaspersoft.jasperserver.api.metadata.common.service.impl.ExecutorServiceWrapper;
 
+import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /**
  * A special {@link Executor} service that asynchronously execute the tasks in which logging events are setup.
  *
  * @author vsabadosh
- * @version $Id: LoggableExecutorService.java 56967 2015-08-20 23:20:53Z esytnik $
+ * @version $Id: LoggableExecutorService.java 65088 2016-11-03 23:22:01Z gbacon $
  */
 public class LoggableExecutorService extends ExecutorServiceWrapper {
     private LoggingContextProvider loggingContextProvider;
@@ -46,7 +48,36 @@ public class LoggableExecutorService extends ExecutorServiceWrapper {
     public void execute(final Runnable command) {
         //As requestType is thread local then we have to move it from main thread to the new thread.
         final RequestType requestType = requestTypeListener.getRequestType();
-        getWrappedExecutorService().execute(new Runnable() {
+
+        getWrappedExecutorService().execute(wrapRunnable(command, requestType));
+    }
+
+    @Override
+    public <T> Future<T> submit(final Callable<T> task) {
+        //As requestType is thread local then we have to move it from main thread to the new thread.
+        final RequestType requestType = requestTypeListener.getRequestType();
+
+        return getWrappedExecutorService().submit(wrapCallable(task, requestType));
+    }
+
+    @Override
+    public <T> Future<T> submit(Runnable task, T result) {
+        //As requestType is thread local then we have to move it from main thread to the new thread.
+        final RequestType requestType = requestTypeListener.getRequestType();
+
+        return getWrappedExecutorService().submit(wrapRunnable(task, requestType), result);
+    }
+
+    @Override
+    public Future<?> submit(final Runnable task) {
+        //As requestType is thread local then we have to move it from main thread to the new thread.
+        final RequestType requestType = requestTypeListener.getRequestType();
+
+        return getWrappedExecutorService().submit(wrapRunnable(task, requestType));
+    }
+
+    private Runnable wrapRunnable(final Runnable command, final RequestType requestType) {
+        return new Runnable() {
             @Override
             public void run() {
                 requestTypeListener.setRequestType(requestType);
@@ -54,7 +85,23 @@ public class LoggableExecutorService extends ExecutorServiceWrapper {
                 //flushing logging context after task is executed.
                 loggingContextProvider.flushContext();
             }
-        });
+        };
+    }
+
+    private <T> Callable<T> wrapCallable(final Callable<T> task, final RequestType requestType) {
+        return new Callable<T>() {
+            @Override
+            public T call() throws Exception {
+                requestTypeListener.setRequestType(requestType);
+
+                T result = task.call();
+
+                //flushing logging context after task is executed.
+                loggingContextProvider.flushContext();
+
+                return result;
+            }
+        };
     }
 
     public void setLoggingContextProvider(LoggingContextProvider loggingContextProvider) {

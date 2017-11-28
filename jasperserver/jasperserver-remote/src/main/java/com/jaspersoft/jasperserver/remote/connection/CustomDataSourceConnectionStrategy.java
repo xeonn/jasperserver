@@ -48,10 +48,10 @@ import java.util.Set;
  * <p></p>
  *
  * @author yaroslav.kovalchyk
- * @version $Id: CustomDataSourceConnectionStrategy.java 62954 2016-05-01 09:49:23Z ykovalch $
+ * @version $Id: CustomDataSourceConnectionStrategy.java 64791 2016-10-12 15:08:37Z ykovalch $
  */
 @Service
-public class CustomDataSourceConnectionStrategy implements ConnectionManagementStrategy<ClientCustomDataSource>, ConnectionMetadataBuilder<ClientCustomDataSource> {
+public class CustomDataSourceConnectionStrategy implements ConnectionManagementStrategy<ClientCustomDataSource>, GenericTypeMetadataBuilder<ClientCustomDataSource> {
     @Resource(name = "cdsPropertiesToIgnore")
     private Set<String> propertiesToIgnore;
     @Resource(name = "customDataSourceServiceFactory")
@@ -136,8 +136,14 @@ public class CustomDataSourceConnectionStrategy implements ConnectionManagementS
         return copy;
     }
 
+    public boolean isMetadataSupported(ClientCustomDataSource clientCustomDataSource){
+        // disabling metadata building for now. Let file data source project put
+        // specific logic for enabling of metadata for file custom data source only
+        return false;
+    }
+
     @Override
-    public Object build(ClientCustomDataSource connection, Map<String, String[]> options) {
+    public Object build(ClientCustomDataSource connection, Map<String, String[]> options, Map<String, Object> contextData) {
         try {
             return tableMetadataConverter.toClient((CustomDomainMetaDataImpl)engine.getMetaDataFromConnector(toServer(connection)), null);
         } catch (Exception e) {

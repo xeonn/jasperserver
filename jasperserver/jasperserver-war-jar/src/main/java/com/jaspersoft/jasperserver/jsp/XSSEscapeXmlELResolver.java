@@ -23,6 +23,8 @@ package com.jaspersoft.jasperserver.jsp;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.util.JavaScriptUtils;
 
 import javax.el.ELContext;
@@ -35,18 +37,21 @@ import java.util.*;
 
 /**
  * @author  dlitvak
- * @version $id$
+ * @version $Id: XSSEscapeXmlELResolver.java 66717 2017-04-08 19:44:36Z dlitvak $
  */
 public class XSSEscapeXmlELResolver extends ELResolver {
 	private static final Logger log = LogManager.getLogger(XSSEscapeXmlELResolver.class);
 
-	public static final String XSSESCAPE_XML_ELRESOLVER_PROPERTIES = "com/jaspersoft/jasperserver/jsp/XSSEscapeXmlELResolver.properties";
+	private static final String XSSESCAPE_XML_ELRESOLVER_PROPERTIES = "com/jaspersoft/jasperserver/jsp/XSSEscapeXmlELResolver.properties";
 
 	/** pageContext attribute name for flag to enable XML escaping */
 	public static final String ESCAPE_XSS_SCRIPT = XSSEscapeXmlELResolver.class.getName() + ".escapeScript";
 
 	public static final String UTF8_ESCAPE_XSS_SCRIPT = XSSEscapeXmlELResolver.class.getName() + ".javaScriptEscape";
-	public static final String UNESCAPED_TILE_AND_EL_ATTRIBUTES_PROP = "unescapedTileandELAttributes";
+	private static final String UNESCAPED_TILE_AND_EL_ATTRIBUTES_PROP = "unescapedTileandELAttributes";
+
+	//used with ${ajaxResponseModel} and ${ajaxError} in jsp's
+	private static final String SKIP_XSS_ESCAPE_REQ_ATTRIB = "SKIP_XSS_ESCAPE";
 
 	private static Set<String> unescapedTileandELAttributes;
 
@@ -98,27 +103,70 @@ public class XSSEscapeXmlELResolver extends ELResolver {
 				return null;
 			}
 
-			if (property == null || unescapedTileandELAttributes.contains(property.toString())) {
+			Object skipEscapeReqAttrib = RequestContextHolder.getRequestAttributes().getAttribute(
+					SKIP_XSS_ESCAPE_REQ_ATTRIB, RequestAttributes.SCOPE_REQUEST);
+			if (property == null
+					// Tiles do not seem to have 'base' object in attrib. names.  By checking base == null,
+					// we avoid attribute collisions such as frame.id (EL) and id (tiles attrib).
+					|| (base == null && unescapedTileandELAttributes.contains(property.toString()))
+					|| skipEscapeReqAttrib != null) {
 				return null;
 			}
 
-			// This resolver is in the original resolver chain. To prevent
-			// infinite recursion, set a flag to prevent this resolver from
-			// invoking the original resolver chain again when its turn in the
-			// chain comes around.
+			// excludeMe.get() == false means that this is 1st invocation of the resolver
+			// chain by the parent CompositeResolver.  This class is part of this chain.
+			//
+			// context.getELResolver() returns the parent CompositeResolver, which
+			// invokes the ELResolver chain again inside getValue().  2nd invocation of
+			// the resolver chain finds excludeMe.set(Boolean.TRUE), which prevents the infinite loop.
 			excludeMe.set(Boolean.TRUE);
+
 			Object obj = context.getELResolver().getValue(context, base, property);
-			if (obj != null) {
-                if (obj instanceof Object[]) {
-                    obj = escapeXSSArray((Object[])obj, javaScriptEscape);
-                }
-                else
-                    obj = escapeXSS(obj, javaScriptEscape);
-			}
-			return obj;
+			return escapeObj(obj, javaScriptEscape);
 		} finally {
 		  excludeMe.remove();
 		}
+	}
+
+	@Override
+	public Object invoke(ELContext context, Object base, Object method, Class<?>[] paramTypes, Object[] params) {
+		JspContext pageContext = (JspContext) context.getContext(JspContext.class);
+		Boolean escapeScript = (Boolean) pageContext.getAttribute(ESCAPE_XSS_SCRIPT);
+		Boolean javaScriptEscape = (Boolean) pageContext.getAttribute(UTF8_ESCAPE_XSS_SCRIPT);
+
+		if (escapeScript != null && !escapeScript) {
+			return null;
+		}
+
+		try {
+			if (excludeMe.get()) {
+				return null;
+			}
+
+			// excludeMe.get() == false means that this is 1st invocation of the resolver
+			// chain by the parent CompositeResolver.  This class is part of this chain.
+			//
+			// context.getELResolver() returns the parent CompositeResolver, which
+			// invokes the ELResolver chain again inside getValue().  2nd invocation of
+			// the resolver chain finds excludeMe.set(Boolean.TRUE), which prevents the infinite loop.
+			excludeMe.set(Boolean.TRUE);
+
+			Object obj = context.getELResolver().invoke(context, base, method, paramTypes, params);
+			return escapeObj(obj, javaScriptEscape);
+		} finally {
+			excludeMe.remove();
+		}
+	}
+
+	private Object escapeObj(Object obj, Boolean javaScriptEscape) {
+		if (obj != null) {
+			if (obj instanceof Object[]) {
+				obj = escapeXSSArray((Object[])obj, javaScriptEscape);
+			}
+			else
+				obj = escapeXSS(obj, javaScriptEscape);
+		}
+		return obj;
 	}
 
     private Object escapeXSSArray(Object[] objArr, Boolean javaScriptEscape) {
@@ -132,8 +180,9 @@ public class XSSEscapeXmlELResolver extends ELResolver {
         if (isTypeSuitable(obj)) {
             if (javaScriptEscape != null && javaScriptEscape) {
                 return JavaScriptUtils.javaScriptEscape(obj.toString());
-            } else
-                return EscapeXssScript.escape(obj.toString());
+            }
+            else
+            	return EscapeXssScript.escape(obj.toString());
         }
         else
             return obj;

@@ -26,6 +26,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import net.sf.jasperreports.engine.JRParameter;
+import net.sf.jasperreports.engine.ReportContext;
 import net.sf.jasperreports.web.WebReportContext;
 
 import org.apache.commons.logging.Log;
@@ -37,7 +38,7 @@ import com.jaspersoft.jasperserver.war.util.SessionObjectSerieAccessor;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: WebflowReportContextAccessor.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: WebflowReportContextAccessor.java 65088 2016-11-03 23:22:01Z gbacon $
  */
 public class WebflowReportContextAccessor {
 
@@ -160,7 +161,11 @@ public class WebflowReportContextAccessor {
         }
         
         if (reportContextId != null) {
-        	getSessionAccessor().removeObject(request, reportContextId);
+        	ReportContext reportContext = (ReportContext) getSessionAccessor().removeObject(request, reportContextId);
+        	if (reportContext != null) {
+        		//safety measure to reduce the risk of objects from the report context not getting garbage collected
+        		reportContext.clearParameterValues();
+        	}
         }
 	}
 	

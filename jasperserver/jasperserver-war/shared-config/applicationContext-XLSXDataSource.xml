@@ -15,7 +15,8 @@
 			<map>
 				<entry key="xlsx" value="net.sf.jasperreports.engine.query.JRXlsxQueryExecuterFactory"/>
 			</map>
-		</property>			
+		</property>
+		<property name="customFactory" ref="customJDBCReportDataSourceServiceFactory"/>
 	</bean>
 	
     <bean class="com.jaspersoft.jasperserver.api.common.util.spring.GenericBeanUpdater">

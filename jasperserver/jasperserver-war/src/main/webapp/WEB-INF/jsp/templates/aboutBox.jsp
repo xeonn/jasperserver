@@ -34,7 +34,7 @@ Usage:
 <%@ taglib uri="/spring" prefix="spring"%>
 <%@ taglib prefix="t" uri="http://tiles.apache.org/tags-tiles" %>
 
-<!--/WEB-INF/jsp/templates/aboutBox.jsp revision A-->
+
 <t:useAttribute id="containerID" name="containerID" classname="java.lang.String" ignore="true"/>
 <t:useAttribute name="containerClass" id="containerClass" classname="java.lang.String" ignore="true"/>
 <t:useAttribute name="bodyContent" id="bodyContent" classname="java.lang.String" ignore="true"/>

@@ -20,33 +20,6 @@
  */
 package com.jaspersoft.jasperserver.api.engine.scheduling.quartz;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.TimeZone;
-import java.util.WeakHashMap;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.quartz.Job;
-import org.quartz.JobDataMap;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
-import org.quartz.SchedulerContext;
-import org.quartz.SchedulerException;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.mail.javamail.JavaMailSender;
-
 import com.jaspersoft.jasperserver.api.JSException;
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
 import com.jaspersoft.jasperserver.api.common.domain.LogEvent;
@@ -55,6 +28,7 @@ import com.jaspersoft.jasperserver.api.common.error.handling.SecureExceptionHand
 import com.jaspersoft.jasperserver.api.common.error.handling.SecureExceptionHandlerImpl;
 import com.jaspersoft.jasperserver.api.common.util.CharacterEncodingProvider;
 import com.jaspersoft.jasperserver.api.common.util.LocaleHelper;
+import com.jaspersoft.jasperserver.api.common.util.TimeZoneContextHolder;
 import com.jaspersoft.jasperserver.api.engine.common.service.EngineService;
 import com.jaspersoft.jasperserver.api.engine.common.service.LoggingService;
 import com.jaspersoft.jasperserver.api.engine.common.service.SecurityContextProvider;
@@ -84,23 +58,51 @@ import com.jaspersoft.jasperserver.api.metadata.data.cache.DataCacheSnapshot;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportUnit;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
 import com.jaspersoft.jasperserver.dto.common.ErrorDescriptor;
-
 import net.sf.jasperreports.engine.JRParameter;
 import net.sf.jasperreports.engine.JRPrintPage;
+import net.sf.jasperreports.engine.JRPropertiesUtil;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.JasperReportsContext;
 import net.sf.jasperreports.engine.ReportContext;
 import net.sf.jasperreports.engine.SimpleReportContext;
 import net.sf.jasperreports.engine.export.JRHyperlinkProducerFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.quartz.Job;
+import org.quartz.JobDataMap;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
+import org.quartz.SchedulerContext;
+import org.quartz.SchedulerException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.mail.javamail.JavaMailSender;
+
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.TimeZone;
+import java.util.WeakHashMap;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ReportExecutionJob.java 63530 2016-06-09 13:59:59Z tdanciu $
+ * @version $Id: ReportExecutionJob.java 66215 2017-02-28 08:58:26Z ykovalch $
  */
 public class ReportExecutionJob implements Job {
 
     private static final Log log = LogFactory.getLog(ReportExecutionJob.class);
+
+    public static final String PROPERTY_REPORT_EMPTY = "com.jaspersoft.jrs.export.report.empty";
 
     public static final String REPORT_PARAMETER_SCHEDULED_TIME = "_ScheduledTime";
 
@@ -307,8 +309,15 @@ public class ReportExecutionJob implements Job {
             LocaleContextHolder.setLocale(locale);
             context.setLocale(getLocale());
         }
-        // using default system timezone, and not job trigger timezone
-        context.setTimeZone(TimeZone.getDefault());
+        // using output timezone (or default system if output timezone is null), and not job trigger timezone
+        final String outputTimeZone = getJobDetails().getOutputTimeZone();
+        if(outputTimeZone != null){
+            final TimeZone timeZone = TimeZone.getTimeZone(outputTimeZone);
+            context.setTimeZone(timeZone);
+            TimeZoneContextHolder.setTimeZone(timeZone);
+        } else {
+            context.setTimeZone(TimeZone.getDefault());
+        }
     }
 
     protected Locale getJobLocale() {
@@ -1065,16 +1074,23 @@ public class ReportExecutionJob implements Job {
         }
         JasperPrint jasperPrint = result.getJasperPrint();
         List pages = jasperPrint.getPages();
-        boolean empty;
+        Boolean empty = null;
         if (pages == null || pages.isEmpty()) {
             empty = true;
         } else if (pages.size() == 1) {
             JRPrintPage page = (JRPrintPage) pages.get(0);
             List elements = page.getElements();
-            empty = elements == null || elements.isEmpty();
-        } else {
-            empty = false;
-        }
+            if (elements == null || elements.isEmpty()) {
+                empty = true;
+            }
+	    }
+        if (empty == null) {
+        	empty = 
+        		JRPropertiesUtil.asBoolean(
+    				JRPropertiesUtil.getOwnProperty(jasperPrint, PROPERTY_REPORT_EMPTY),
+    				false
+    				);
+	    }
         return empty;
     }
 

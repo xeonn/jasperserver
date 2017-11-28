@@ -22,7 +22,7 @@
 
 /**
  * @author: Yuriy Plakosh
- * @version: $Id: components.dialogs.js 10130 2016-05-06 21:42:35Z dlitvak $
+ * @version: $Id: components.dialogs.js 10533 2017-02-24 21:58:49Z schubar $
  */
 
 /**
@@ -222,6 +222,8 @@ dialogs.errorPopup = {
  * @param {Object} elem
  */
 dialogs.popup = {
+    OWNER_ATTR: "data-owner",
+
     show: function(elem, showDimmer, options) {
         require(['stdnav', 'jquery'], function(stdnav, jQuery){
             options = options || {};
@@ -348,6 +350,41 @@ dialogs.popup = {
             }
             $elem.stopObserving('click', dialogs.popup.zIndexHandler);
         });
+    },
+
+    showShared: function(elem, showDimmer, options) {
+        if (!elem) {
+            return;
+        }
+
+        $elem = $(elem);
+        options = options || {};
+
+        if (!options.owner) {
+            return;
+        }
+
+        $elem.writeAttribute(this.OWNER_ATTR, options.owner);
+
+        if ($elem.hasClassName(layoutModule.HIDDEN_CLASS)) {
+            this.show($elem, showDimmer, options);
+        }
+    },
+
+
+    hideShared: function (elem, ownerId) {
+        if (!elem) {
+            return;
+        }
+
+        $elem = $(elem);
+
+        var ownerAttr = $elem.readAttribute(this.OWNER_ATTR);
+
+        if (ownerAttr == ownerId) {
+            $elem.writeAttribute(this.OWNER_ATTR, false);
+            this.hide($elem);
+        }
     },
 
     /**

@@ -279,13 +279,26 @@
 			value = pageTokens[uri] != null ? pageTokens[uri] : tokenValue;
 		}
 
-		var hidden = document.createElement("input");
+        // The forms with enctype="multipart/form-data" append input elem. values to the form body
+        // instead of the request param. Fixing it by adding the token to the form action attribute.
+        if (form.enctype && form.enctype.toLowerCase() == "multipart/form-data") {
+            if (form.action.indexOf(tokenName) < 0) {
+                var tokenPairParam = tokenName + '=' + value;
+                form.action += (form.action.indexOf('?') < 0 ? '?' : '&') + tokenPairParam;
+            }
+        }
+        else {   // add token as input elem.
+            if (form.elements[tokenName]) //don't add the token elem twice
+                return;
 
-		hidden.setAttribute("type", "hidden");
-		hidden.setAttribute("name", tokenName);
-		hidden.setAttribute("value", value);
-		
-		form.appendChild(hidden);
+            var hidden = document.createElement("input");
+
+            hidden.setAttribute("type", "hidden");
+            hidden.setAttribute("name", tokenName);
+            hidden.setAttribute("value", value);
+
+            form.appendChild(hidden);
+        }
 	}
 
 	/** inject tokens as query string parameters into url **/
@@ -428,13 +441,12 @@
                     HTMLFormElement.prototype._submit = HTMLFormElement.prototype.submit;
                     HTMLFormElement.prototype.submit = function (data) {
                         // The forms are submitted synchronously; not likely to be submitted during page load.
-                        if (!this.elements[token_name]) {
-                            var pageTokens = {};
-                            if (%TOKENS_PER_PAGE% == true)
-                                pageTokens = requestPageTokens();
-                            var injectGetForms = %INJECT_GET_FORMS%;
-                            injectTokenForm(this, token_name, token_value, pageTokens, injectGetForms);
+                        var pageTokens = {};
+                        if (%TOKENS_PER_PAGE%) {        // %...% params coming from jrs.csrfguard.properties
+                            pageTokens = requestPageTokens();
                         }
+                        injectTokenForm(this, token_name, token_value, pageTokens, %INJECT_GET_FORMS%);
+
                         this._submit.apply(this, arguments);
                     };
                 }

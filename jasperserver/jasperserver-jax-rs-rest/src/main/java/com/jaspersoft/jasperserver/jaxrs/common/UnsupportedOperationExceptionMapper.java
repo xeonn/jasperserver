@@ -34,6 +34,6 @@ import javax.ws.rs.ext.Provider;
 @Component
 public class UnsupportedOperationExceptionMapper implements ExceptionMapper<UnsupportedOperationRemoteException> {
     public Response toResponse(UnsupportedOperationRemoteException exception) {
-        return Response.status(501).entity(exception.getErrorDescriptor()).build();
+        return Response.status(403).entity(exception.getErrorDescriptor()).build();
     }
 }

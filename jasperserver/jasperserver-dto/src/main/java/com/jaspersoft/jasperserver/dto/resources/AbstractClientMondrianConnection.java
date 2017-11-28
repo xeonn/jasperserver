@@ -27,9 +27,11 @@ import javax.xml.bind.annotation.XmlElements;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: AbstractClientMondrianConnection.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: AbstractClientMondrianConnection.java 63760 2016-07-05 18:59:28Z agodovan $
  */
-public abstract class AbstractClientMondrianConnection <BuilderType extends AbstractClientMondrianConnection<BuilderType>> extends AbstractClientDataSourceHolder<BuilderType> implements ClientReferenceableMondrianConnection, ClientReferenciableOlapConnection {
+public abstract class AbstractClientMondrianConnection <BuilderType extends AbstractClientMondrianConnection<BuilderType>>
+        extends AbstractClientDataSourceHolder<BuilderType>
+        implements ClientReferenceableMondrianConnection, ClientReferenciableOlapConnection, ClientReferenceableDataSource {
     private ClientReferenceableFile schema;
 
     public AbstractClientMondrianConnection(AbstractClientMondrianConnection other) {

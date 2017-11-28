@@ -47,4 +47,6 @@ public interface RepositorySearchResult<T> extends Cloneable {
     List<T> getItems();
 
     <U> RepositorySearchResult<U> transform(ItemProcessor<T, U> transformer);
+    
+    void append(RepositorySearchResult<T> r);
 }

@@ -54,7 +54,7 @@ import java.util.regex.Pattern;
 
 /**
  * @author Volodya Sabadosh
- * @version $Id: AttributesJaxrsService.java 61296 2016-02-25 21:53:37Z mchan $
+ * @version $Id: AttributesJaxrsService.java 65088 2016-11-03 23:22:01Z gbacon $
  */
 @Component("attributesJaxrsService")
 public class AttributesJaxrsService {
@@ -178,7 +178,7 @@ public class AttributesJaxrsService {
         HypermediaOptions hypermediaOptions = null;
         Set<Relation> relations = new HashSet<Relation>();
 
-        boolean isHypermediaFormat = accept.contains(HAL_FORMAT);
+        boolean isHypermediaFormat = accept != null && accept.contains(HAL_FORMAT);
         if (isHypermediaFormat && embeddedParam != null) {
             hypermediaOptions = new HypermediaOptions();
             Relation relation = Relation.fromString(embeddedParam.toLowerCase());

@@ -28,9 +28,13 @@ package com.jaspersoft.jasperserver.api.common.util.diagnostic;
 
 /**
  * @author Yakiv Tymoshenko
- * @version $Id: FilterBy.java 49926 2014-10-08 13:09:35Z ytymoshenko $
+ * @version $Id: FilterBy.java 65088 2016-11-03 23:22:01Z gbacon $
  * @since 16.06.14
  */
 public enum FilterBy {
-    USER_ID, SESSION_ID, RESOURCE_URI
+    USER_ID, SESSION_ID, RESOURCE_URI;
+
+    public boolean isResourceUri() {
+        return name().equals(RESOURCE_URI.name());
+    }
 }

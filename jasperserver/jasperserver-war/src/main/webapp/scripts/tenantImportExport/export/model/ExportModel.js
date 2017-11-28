@@ -32,6 +32,7 @@ define(function (require) {
         _ = require("underscore"),
         Backbone = require("backbone"),
         BackboneValidation = require("backbone.validation"),
+        jrsConfigs = require('jrs.configs'),
         i18n = require("bundle!ImportExportValidationBundle"),
         i18nMessage = require("common/util/i18nMessage").extend({bundle: i18n}),
         BaseModel = require("common/model/BaseModel"),
@@ -57,7 +58,9 @@ define(function (require) {
             "fileName": "export.zip",
             "encryptFile": false,
             "includeRepositoryPermissions": true,
-            "includeScheduledReportJobs": true
+            "includeScheduledReportJobs": true,
+            "includeDependencies": true,
+            "includeFullResourcePath": true
         },
 
        validation: {
@@ -145,8 +148,23 @@ define(function (require) {
             var repositoryExportOptions = {
                 uris: uris,
                 scheduledJobs: this.get("includeScheduledReportJobs") ? uris : null,
-                parameters: this.get("includeRepositoryPermissions") ? ["repository-permissions"] : []
+                parameters: []
             };
+
+            this.get("includeRepositoryPermissions") && repositoryExportOptions.parameters.push("repository-permissions");
+
+            !this.get("includeDependencies") && repositoryExportOptions.parameters.push("skip-dependent-resources");
+
+            // drop parent org prefix from paths, add required attributes if exporting from sub-org and includeFullResourcePath is unchecked
+            var matches = subOrgLevelMatches(uris && uris[0]);
+            if (matches && !this.get("includeFullResourcePath")) {
+                repositoryExportOptions.organization = matches.last();
+                repositoryExportOptions.parameters.push("skip-suborganizations", "skip-attribute-values");
+                repositoryExportOptions.uris = _.map(uris, function(uri) {
+                    return uri.replace(matches.first(),"");
+                });
+                repositoryExportOptions.scheduledJobs = this.get("includeScheduledReportJobs") ? repositoryExportOptions.uris : null;
+            }
 
             var tenantExportOptions = {
                 uris: someResourceIsChecked(this) ? uris : null,
@@ -234,4 +252,12 @@ define(function (require) {
             return exportModel.get(value);
         }).length;
     }
+
+    function subOrgLevelMatches(uri) {
+        var organizationsFolderUri = jrsConfigs.organizationsFolderUri || "/organizations";
+        var orgTemplateFolderUri = jrsConfigs.orgTemplateFolderUri || "/org_template";
+        var regExp = new RegExp("^(" + organizationsFolderUri + "(?!" + orgTemplateFolderUri + ")/([^/]+))+");
+        return regExp.exec(uri);
+    }
+
 });

@@ -29,12 +29,13 @@ import java.util.List;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: ClientReportUnitResourceListWrapper.java 62954 2016-05-01 09:49:23Z ykovalch $
+ * @version $Id: ClientReportUnitResourceListWrapper.java 64626 2016-09-26 13:25:24Z vzavadsk $
  */
 @XmlType(name = "resources")
 public class ClientReportUnitResourceListWrapper {
     private List<ClientReportUnitResource> files;
     public ClientReportUnitResourceListWrapper(){}
+
     public ClientReportUnitResourceListWrapper(List<ClientReportUnitResource> files){
         this.files = files;
     }

@@ -21,23 +21,21 @@
 
 package com.jaspersoft.jasperserver.dto.authority;
 
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotEquals;
-import static org.testng.Assert.assertTrue;
-
 /**
  * @author askorodumov
- * @version $Id: ClientAttributeTest.java 59477 2015-12-14 10:19:14Z askorodu $
+ * @version $Id: ClientAttributeTest.java 63760 2016-07-05 18:59:28Z agodovan $
  */
 public class ClientAttributeTest {
-    @BeforeClass
+    @Before
     public void init() {
         createDifferentAttributes();
     }

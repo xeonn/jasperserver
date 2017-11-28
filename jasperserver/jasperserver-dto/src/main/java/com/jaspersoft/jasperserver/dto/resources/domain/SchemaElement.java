@@ -21,13 +21,14 @@
 package com.jaspersoft.jasperserver.dto.resources.domain;
 
 import com.jaspersoft.jasperserver.dto.common.DeepCloneable;
+
 import java.lang.reflect.Constructor;
 
 /**
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: SchemaElement.java 61746 2016-03-14 13:23:04Z tiefimen $
+ * @version $Id: SchemaElement.java 65088 2016-11-03 23:22:01Z gbacon $
  */
 public class SchemaElement<T extends SchemaElement<T>> implements DeepCloneable<T> {
     private String name;
@@ -36,7 +37,6 @@ public class SchemaElement<T extends SchemaElement<T>> implements DeepCloneable<
     public SchemaElement(SchemaElement source){
         name = source.getName();
     }
-
     public String getName() {
         return name;
     }

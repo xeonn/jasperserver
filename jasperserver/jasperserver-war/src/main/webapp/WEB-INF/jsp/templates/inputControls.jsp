@@ -36,7 +36,7 @@ Usage:
 <%@ taglib prefix="c" uri="http://java.sun.com/jstl/core_rt" %>
 
 
-<!--/WEB-INF/jsp/templates/inputControls.jsp revision A-->
+
 <t:useAttribute name="containerClass" id="containerClass" classname="java.lang.String" ignore="true"/>
 <t:useAttribute name="bodyContent" id="bodyContent" classname="java.lang.String" ignore="false"/>
 <t:useAttribute name="hasReportOptions" id="hasReportOptions" classname="java.lang.String" ignore="true"/>

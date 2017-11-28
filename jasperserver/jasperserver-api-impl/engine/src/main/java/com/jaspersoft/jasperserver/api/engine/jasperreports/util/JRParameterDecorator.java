@@ -27,10 +27,11 @@ import net.sf.jasperreports.engine.JRExpression;
 import net.sf.jasperreports.engine.JRParameter;
 import net.sf.jasperreports.engine.JRPropertiesHolder;
 import net.sf.jasperreports.engine.JRPropertiesMap;
+import net.sf.jasperreports.engine.type.ParameterEvaluationTimeEnum;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: JRParameterDecorator.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: JRParameterDecorator.java 65088 2016-11-03 23:22:01Z gbacon $
  */
 public class JRParameterDecorator implements JRParameter {
 
@@ -98,6 +99,11 @@ public class JRParameterDecorator implements JRParameter {
 	
 	public Object clone() {
 		throw new JSException("Clone not supported");
+	}
+
+	@Override
+	public ParameterEvaluationTimeEnum getEvaluationTime() {
+		return decorated.getEvaluationTime();
 	}
 
 }

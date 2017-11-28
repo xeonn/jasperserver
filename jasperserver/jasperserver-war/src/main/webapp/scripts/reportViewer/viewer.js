@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: viewer.js 9599 2015-10-27 19:38:56Z yplakosh $
+ * @version: $Id: viewer.js 10224 2016-07-27 20:02:40Z inestere $
  */
 
 /* global dialogs, alert, console, buttonManager, Report */
@@ -29,9 +29,11 @@
 define(function(require) {
 
     var JReport = require("jasperreports-report"),
-        $ = require("jquery.ui"),
+        $ = require("jquery"),
         css = require("csslink!jive.vm.css"),
         browserDetection = require("common/util/browserDetection");
+
+    require("jquery-ui/jquery.ui.draggable");
 
     // i18n
     var jivei18nText = require("text!jive.i18n.tmpl"),
@@ -970,7 +972,7 @@ define(function(require) {
             // ARIA fixups
             $('table.jrPage').prop('tabindex', '"0"');
             // Prevent screen-readers from guessing that our table is used only for layout purposes,
-            // because of all the blank cells at the edges 
+            // because of all the blank cells at the edges
             $('table.jrPage').attr('role', 'grid');
             $('table.jrPage tr').attr('role', 'row');
             $('table.jrPage tbody tr').attr('role', 'row');
@@ -1036,7 +1038,7 @@ define(function(require) {
                         // Give the table a tabindex so that Standard Navigation can work with it.
                         $('table.jrPage').prop('tabindex', '"0"');
                         // Prevent screen-readers from guessing that our table is used only for layout purposes,
-                        // because of all the blank cells at the edges 
+                        // because of all the blank cells at the edges
                         $('table.jrPage').attr('role', 'grid');
                         $('table.jrPage tr').attr('role', 'row');
                         $('table.jrPage tbody tr').attr('role', 'row');
@@ -1053,7 +1055,7 @@ define(function(require) {
                     // Give the table a tabindex so that Standard Navigation can work with it.
                     $('table.jrPage').prop('tabindex', '"0"');
                     // Prevent screen-readers from guessing that our table is used only for layout purposes,
-                    // because of all the blank cells at the edges 
+                    // because of all the blank cells at the edges
                     $('table.jrPage').attr('role', 'grid');
                     $('table.jrPage tr').attr('role', 'row');
                     $('table.jrPage tbody tr').attr('role', 'row');

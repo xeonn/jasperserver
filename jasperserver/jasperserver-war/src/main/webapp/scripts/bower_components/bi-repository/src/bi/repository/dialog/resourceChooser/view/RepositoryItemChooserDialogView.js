@@ -21,7 +21,7 @@
 
 /**
  * @author: Dima Gorbenko
- * @version: $Id: RepositoryItemChooserDialogView.js 457 2016-05-25 11:47:16Z ztomchen $
+ * @version: $Id: RepositoryItemChooserDialogView.js 523 2016-11-03 21:25:29Z gbacon $
  */
 
 define(function (require) {
@@ -250,7 +250,8 @@ define(function (require) {
                     dataUriTemplate: this.prepareChooserDialogUrl(dataUriTemplateForResourceListView, this.options.resourcesTypeToSelect),
                     levelDataId: "uri",
                     cache: {
-                        searchKey: "searchString"
+                        searchKey: "searchString",
+                        pageSize: 100
                     },
 
                     processors: [

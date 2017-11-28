@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: report.view.base.js 9490 2015-10-05 16:46:54Z obobruyk $
+ * @version: $Id: report.view.base.js 10533 2017-02-24 21:58:49Z schubar $
  */
 
 /* global Template, ajax, layoutModule, Report, viewer, doNothing, dashboardViewFrame, dialogs, jaspersoft, _,
@@ -62,6 +62,8 @@
         DATA_TIMESTAMP_SPAN: "dataTimestampMessage",
         DATA_REFRESH_BUTTON: "dataRefreshButton",
         ASYNC_CANCEL_BUTTON: "asyncCancel",
+
+        REPORT_COMPONENT_ID: "report",
 
         getMessage: function (messageId, object) {
             var message = this._messages[messageId];
@@ -134,7 +136,7 @@
             var result = /(\?|&)output=([^&]*)/.exec(location.href);
             var output = result && result.length === 3 ? result[2] : '';
 
-            dialogs.popup.show($(ajax.LOADING_ID), true);
+            dialogs.popup.showShared($(ajax.LOADING_ID), true, {owner: this.REPORT_COMPONENT_ID});
 
             urlParams = urlParams || {};
 
@@ -193,7 +195,7 @@
          */
         cancelReportExecution: function () {
             document.body.style.cursor = "default";
-            dialogs.popup.hide($(ajax.LOADING_ID));
+            dialogs.popup.hideShared($(ajax.LOADING_ID), this.REPORT_COMPONENT_ID);
 
             if (viewer.reportInstance) {
                 viewer.reportInstance.cancelExecution().then(function() {
@@ -258,10 +260,10 @@
             Convenience method to show dialog, called from jasperreports-loader
          */
         showAjaxDialog: function() {
-            dialogs.popup.show($(ajax.LOADING_ID), true);
+            dialogs.popup.showShared($(ajax.LOADING_ID), true, {owner: this.REPORT_COMPONENT_ID});
         },
         hideAjaxDialog: function() {
-            dialogs.popup.hide($(ajax.LOADING_ID));
+            dialogs.popup.hideShared($(ajax.LOADING_ID), this.REPORT_COMPONENT_ID);
         }
     };
 })(

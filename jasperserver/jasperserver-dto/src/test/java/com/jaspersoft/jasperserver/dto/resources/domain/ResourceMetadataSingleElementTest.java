@@ -1,20 +1,17 @@
 package com.jaspersoft.jasperserver.dto.resources.domain;
 
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import com.jaspersoft.jasperserver.dto.adhoc.query.el.ClientExpressionContainer;
+import org.junit.Before;
+import org.junit.Test;
 
-
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * <p/>
  * <p/>
  *
  * @author tetiana.iefimenko
- * @version $Id: ResourceMetadataSingleElementTest.java 60548 2016-02-03 14:06:55Z tiefimen $
+ * @version $Id: ResourceMetadataSingleElementTest.java 64791 2016-10-12 15:08:37Z ykovalch $
  * @see
  */
 public class ResourceMetadataSingleElementTest {
@@ -22,12 +19,12 @@ public class ResourceMetadataSingleElementTest {
     public static final String SOURCE_NAME = "SourceName";
     public static final String ELEMENT_NAME = "name";
     public static final String TYPE = "Type";
-    public static final String EXPRESSION = "Expression";
+    public static final ClientExpressionContainer EXPRESSION = new ClientExpressionContainer().setString("Expression");
     public static final String REFERENCE = "Reference";
     ResourceMetadataSingleElement sourceElement;
     ResourceMetadataSingleElement clonedElement;
 
-    @BeforeMethod
+    @Before
     public void setUp() {
 
         sourceElement = new ResourceMetadataSingleElement()

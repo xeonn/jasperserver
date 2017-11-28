@@ -51,7 +51,7 @@ import static java.util.Collections.singletonList;
  * Unit tests for {@link ExceptionOutputManagerImpl} class.
  *
  * @author dlitvak
- * @version $Id$
+ * @version $Id: ExceptionOutputManagerImplTest.java 65088 2016-11-03 23:22:01Z gbacon $
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({

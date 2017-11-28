@@ -416,4 +416,6 @@ public interface EngineService
 	 */
 	public boolean isCustomDomainMetadataProvider(CustomReportDataSource customReportDataSource);
 
+    public boolean isJDBCDiscoverySupported(CustomReportDataSource customReportDataSource);
+
 }

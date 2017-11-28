@@ -21,7 +21,7 @@
 
 /**
  * @author: Yaroslav.Kovalchyk
- * @version: $Id: settings.js 9067 2015-07-10 16:35:42Z psavushc $
+ * @version: $Id: settings.js 10251 2016-08-24 17:18:48Z asokolni $
  */
 
 
@@ -32,7 +32,7 @@ define(function (require) {
         requestSettings = require("requestSettings"),
         _ = require("underscore"),
         configs = require("jrs.configs"),
-        urlRoot = configs.contextPath + "/rest_v2/settings/";
+        urlRoot = configs.runtimeContextPath + "/rest_v2/settings/";
 
     var settingsPluginFn = function(settingsGroup, callback) {
         var settings = _.extend({}, requestSettings, {
@@ -40,6 +40,11 @@ define(function (require) {
             dataType: "json",
             url: urlRoot + settingsGroup
         });
+
+        // Changing default Cache Control directive to have possibility to choose caching strategy on the server
+        // Default value was 'no-cache'
+        settings.headers["Cache-Control"] = "private";
+        delete settings.headers["Pragma"];
 
         request(settings).fail(function(){
             // settings group not found. Return null and let module solve the issue ;)

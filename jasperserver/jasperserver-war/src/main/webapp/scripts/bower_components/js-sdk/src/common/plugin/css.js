@@ -22,7 +22,7 @@
 
 /**
  * @author: Kostiantyn Tsaregradskyi
- * @version: $Id: css.js 1605 2015-09-23 17:55:32Z inestere $
+ * @version: $Id: css.js 2956 2016-07-27 19:22:11Z inestere $
  */
 
 define(function (require) {
@@ -34,23 +34,43 @@ define(function (require) {
     var customizedCssPlugin = _.clone(originalCssPlugin);
 
     customizedCssPlugin.load = function(cssId, req, load, config) {
-        if (!config.config.theme) {
+
+        var themeConfig = config.config ? config.config.theme : false;
+
+        if (!themeConfig || !themeConfig.href) {
+            // skipp CSS on-demand loading
+            // we assume that CSS loads in some other way
             load();
             return;
         }
 
-        var themeConf = config.config.theme || {},
-            base = themeConf.baseUrl || "/",
-            path = themeConf.path || "themes",
-            themeName = themeConf.name || "default";
+        cssId = [themeConfig.href, cssId].join("/");
 
+        var customReq = _.extend(_.clone(req),{
+             toUrl : function () {
+                 return cssId + ".css";
+             }
+        });
 
-        base.slice(-1) !== "/" && (base += "/");
-
-        cssId = base + [path, themeName, cssId].join("/");
-
-        originalCssPlugin.load.call(this, cssId, req, load, config);
+        originalCssPlugin.load.call(this, cssId, customReq, load, config);
     };
+
+    /*
+    * provided function allows to load css in case when current strategy is to not load css from this plugin
+    *
+    * */
+    customizedCssPlugin.manualLoad = function(cssId, theme) {
+        var callback  =  function() {};
+        customizedCssPlugin.load(cssId, require, callback, {
+            config: {
+                theme: theme
+            }
+        }, true);
+    };
+
+
+
+
 
     return customizedCssPlugin;
 });

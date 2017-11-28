@@ -69,6 +69,7 @@ import net.sf.jasperreports.export.SimpleJsonExporterConfiguration;
 import net.sf.jasperreports.export.SimpleJsonExporterOutput;
 import net.sf.jasperreports.export.SimpleJsonReportConfiguration;
 import net.sf.jasperreports.web.JRInteractiveException;
+import net.sf.jasperreports.web.WebReportContext;
 import net.sf.jasperreports.web.actions.AbstractAction;
 import net.sf.jasperreports.web.actions.Action;
 import net.sf.jasperreports.web.actions.MultiAction;
@@ -82,7 +83,7 @@ import net.sf.jasperreports.web.util.WebUtil;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ReportExecutionController.java 63484 2016-06-03 12:09:00Z tdanciu $
+ * @version $Id: ReportExecutionController.java 65088 2016-11-03 23:22:01Z gbacon $
  */
 public class ReportExecutionController extends MultiActionController {
 
@@ -270,10 +271,10 @@ public class ReportExecutionController extends MultiActionController {
                 Action action = getAction(req, reportContext, currentJasperReportsContext);
                 JSController controller = new JSController(currentJasperReportsContext);
 
-                if (reportContext.getParameterValue("net.sf.jasperreports.web.jasper_print.accessor") == null) {
+                if (reportContext.getParameterValue(WebReportContext.REPORT_CONTEXT_PARAMETER_JASPER_PRINT_ACCESSOR) == null) {
                     ReportUnitResult reportUnitResult = reportExecutionAccessor.getReportUnitResult(reportContextId);
                     if (reportUnitResult != null) {
-                        reportContext.setParameterValue("net.sf.jasperreports.web.jasper_print.accessor", reportUnitResult.getJasperPrintAccessor());
+                        reportContext.setParameterValue(WebReportContext.REPORT_CONTEXT_PARAMETER_JASPER_PRINT_ACCESSOR, reportUnitResult.getJasperPrintAccessor());
                     }
                 }
 

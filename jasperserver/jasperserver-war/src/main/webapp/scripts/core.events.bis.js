@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: core.events.bis.js 9551 2015-10-13 14:09:03Z dgorbenk $
+ * @version: $Id: core.events.bis.js 10348 2016-10-17 14:53:32Z ztomchen $
  */
 
 /* global isSupportsTouch, matchMeOrUp, layoutModule, isIPad, isRightClick, isIE, hasDisabledAttributeSet,
@@ -157,8 +157,12 @@ document.observe('contextmenu', function(event) {
 document.observe('dom:loaded', function(event) {
     isIE() && document.body.setAttribute('oncontextmenu', 'return false');
 
-    jQuery('body').on('mouseover mouseout',layoutModule.BUTTON_PATTERN,function(evt){
-        if(!hasDisabledAttributeSet(this)) evt.type == 'mouseover' ? buttonManager.over(this) : buttonManager.out(this);
+    jQuery('body').on('mouseover',layoutModule.BUTTON_PATTERN,function(evt){
+        if(!hasDisabledAttributeSet(this)) buttonManager.over(this);
+    });
+
+    jQuery('body').on('mouseout',layoutModule.BUTTON_PATTERN,function(evt){
+        buttonManager.out(this);
     });
 
     jQuery('body').on('focus',layoutModule.BUTTON_PATTERN,function(evt){

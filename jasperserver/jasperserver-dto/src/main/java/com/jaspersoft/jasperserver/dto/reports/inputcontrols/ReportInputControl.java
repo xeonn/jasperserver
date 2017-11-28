@@ -36,7 +36,7 @@ import java.util.List;
 
 /**
  * @author akasych
- * @version $Id: ReportInputControl.java 58870 2015-10-27 22:30:55Z esytnik $
+ * @version $Id: ReportInputControl.java 63760 2016-07-05 18:59:28Z agodovan $
  */
 @XmlRootElement
 public class ReportInputControl {
@@ -196,13 +196,13 @@ public class ReportInputControl {
     }
 
     @XmlElementWrapper(name = "masterDependencies")
-    @XmlElement(name = "controlId")
+    @XmlElements(@XmlElement(name = "controlId"))
     public List<String> getMasterDependencies() {
         return masterDependencies;
     }
 
     @XmlElementWrapper(name = "slaveDependencies")
-    @XmlElement(name = "controlId")
+    @XmlElements(@XmlElement(name = "controlId"))
     public List<String> getSlaveDependencies() {
         return slaveDependencies;
     }
