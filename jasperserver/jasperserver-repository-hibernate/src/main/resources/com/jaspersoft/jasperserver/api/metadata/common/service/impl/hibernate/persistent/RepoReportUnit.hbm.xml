@@ -26,4 +26,52 @@
 		<property name="controlsLayout" column="controlslayout"/>
 		<property name="dataSnapshotId" column="data_snapshot_id" type="long"/>
 	</joined-subclass>
+
+<!-- create index JIReportUnit_mainReport_index on JIReportUnit (mainReport); -->
+<database-object>
+	<create>create index JIReportUnit_mainReport_index on JIReportUnit (mainReport)</create>
+	<drop>DROP INDEX JIReportUnit_mainReport_index ON JIReportUnit</drop>
+</database-object>
+
+<!-- create index JIReportUnit_query_index on JIReportUnit (query); -->
+<database-object>
+	<create>create index JIReportUnit_query_index on JIReportUnit (query)</create>
+	<drop>DROP INDEX JIReportUnit_query_index ON JIReportUnit</drop>
+</database-object>
+
+<!-- create index JIReportUnit_reportDataSource_index on JIReportUnit (reportDataSource); -->
+<!-- replacing JIReportUnit_reportDataSource_index with idx29_reportDataSource_idx -->
+<database-object>
+	<create>create index idx29_reportDataSource_idx on JIReportUnit (reportDataSource)</create>
+	<drop>DROP INDEX idx29_reportDataSource_idx ON JIReportUnit</drop>
+</database-object>
+
+<!-- create index JIReportUnitInputControl_input_control_id_index on JIReportUnitInputControl (input_control_id); -->
+<!-- replacing JIReportUnitInputControl_input_control_id_index with idx30_input_ctrl_id_idx -->
+<database-object>
+	<create>create index idx30_input_ctrl_id_idx on JIReportUnitInputControl (input_control_id)</create>
+	<drop>DROP INDEX idx30_input_ctrl_id_idx ON JIReportUnitInputControl</drop>
+</database-object>
+
+<!-- create index JIReportUnitInputControl_report_unit_id_index on JIReportUnitInputControl (report_unit_id); -->
+<!-- replacing JIReportUnitInputControl_report_unit_id_index with idx31_report_unit_id_idx -->
+<database-object>
+	<create>create index idx31_report_unit_id_idx on JIReportUnitInputControl (report_unit_id)</create>
+	<drop>DROP INDEX idx31_report_unit_id_idx ON JIReportUnitInputControl</drop>
+</database-object>
+
+<!-- create index JIReportUnitResource_report_unit_id_index on JIReportUnitResource (report_unit_id); -->
+<!-- replacing JIReportUnitResource_report_unit_id_index with idx32_report_unit_id_idx -->
+<database-object>
+	<create>create index idx32_report_unit_id_idx on JIReportUnitResource (report_unit_id)</create>
+	<drop>DROP INDEX idx32_report_unit_id_idx ON JIReportUnitResource</drop>
+</database-object>
+
+<!-- create index JIReportUnitResource_resource_id_index on JIReportUnitResource (resource_id); -->
+<!-- replacing JIReportUnitResource_resource_id_index with idx33_resource_id_idx -->
+<database-object>
+	<create>create index idx33_resource_id_idx on JIReportUnitResource (resource_id)</create>
+	<drop>DROP INDEX idx33_resource_id_idx ON JIReportUnitResource</drop>
+</database-object>
+
 </hibernate-mapping>

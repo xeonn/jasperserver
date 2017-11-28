@@ -53,6 +53,11 @@ public class QueryParameterInformation implements ReportInputControlInformation 
     }
 
     @Override
+    public String getDescription() {
+        return paramName;
+    }
+
+    @Override
     public String getParameterName() {
         return paramName;
     }

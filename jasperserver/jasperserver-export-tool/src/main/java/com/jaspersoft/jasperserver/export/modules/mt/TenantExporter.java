@@ -121,6 +121,7 @@ public class TenantExporter extends BaseExporterModule
         tenant = getTenantService().getTenant(executionContext, tenant.getId());
         TenantBean tenantBean = new TenantBean();
         tenantBean.copyFrom(tenant);
+		tenantBean.setAttributes(prepareAttributesBeans(tenant.getAttributes()));
 
 		// serialize the tenant to XML
 		serialize(tenantBean,

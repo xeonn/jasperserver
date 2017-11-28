@@ -22,6 +22,7 @@
 package com.jaspersoft.jasperserver.api.engine.jasperreports.util;
 
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
+import com.jaspersoft.jasperserver.api.common.domain.impl.ExecutionContextImpl;
 import com.jaspersoft.jasperserver.api.engine.common.service.BuiltInParameterProvider;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.ProfileAttribute;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.Role;
@@ -29,17 +30,27 @@ import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.impl.client.MetadataUserDetails;
 import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributeCategory;
 import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributeService;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 
-import java.io.*;
-import java.util.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 
 /**
  * Parameters for reports and queries from the user profile are injected.
  *
  * @author Sherman Wood (sgwood@users.sourceforge.net)
- * @version $Id: UserProfileBuiltInParameterProvider.java 51947 2014-12-11 14:38:38Z ogavavka $
+ * @version $Id: UserProfileBuiltInParameterProvider.java 54590 2015-04-22 17:55:42Z vzavadsk $
  */
 public class UserProfileBuiltInParameterProvider implements BuiltInParameterProvider, Serializable {
     /*
@@ -65,7 +76,7 @@ public class UserProfileBuiltInParameterProvider implements BuiltInParameterProv
      *
      * $P{LoggedInTenantAttribute_attr1}
      *
-     * Attribute is retrieved from the Server level (GlobalPropertiesList file).
+     * Attribute is retrieved from the Server level
      *
      * $P{ServerAttribute_attr1}
      *
@@ -80,6 +91,12 @@ public class UserProfileBuiltInParameterProvider implements BuiltInParameterProv
     };
 
     public static final String ATTRIBUTE_DELIMITER = "_";
+
+    private static final Map<Class<?>, Object> DEFAULT_VALUES = new HashMap<Class<?>, Object>() {{
+        put(String.class, "");
+        put(Collection.class, new ArrayList<Object>());
+        put(Boolean.class, false);
+    }};
 
     /**
      * Represents all available parameters that can be used in reports and queries
@@ -126,7 +143,8 @@ public class UserProfileBuiltInParameterProvider implements BuiltInParameterProv
     // List of all available categories that can be use
     private List<ProfileAttributeCategory> profileAttributeCategories;
     private ProfileAttributeService profileAttributeService;
-    private Map<String, ParameterCallback> availableParameters = new HashMap<String, ParameterCallback>();
+    private Map<String, ParameterCallback> availableParameters =
+            new TreeMap<String, ParameterCallback>(String.CASE_INSENSITIVE_ORDER);
 
     public void setProfileAttributeService(ProfileAttributeService profileAttributeService) {
         this.profileAttributeService = profileAttributeService;
@@ -343,13 +361,18 @@ public class UserProfileBuiltInParameterProvider implements BuiltInParameterProv
     }
 
     protected Object[] makeParameter(String name, Class<?> type, Object value) {
+        if (value == null && DEFAULT_VALUES.containsKey(type)) {
+            value = DEFAULT_VALUES.get(type);
+        }
+
         return new Object[]{JRQueryExecuterAdapter.makeParameter(name, type), value};
     }
 
     protected Collection<ProfileAttribute> getProfileAttributes(ProfileAttributeCategory category) {
         // Check if we can use this category, or retrieving attributes hierarchically
         if (category == ProfileAttributeCategory.HIERARCHICAL || profileAttributeCategories.contains(category)) {
-            return profileAttributeService.getCurrentUserProfileAttributes(category);
+            return profileAttributeService.
+                    getCurrentUserProfileAttributes(ExecutionContextImpl.getRuntimeExecutionContext(), category);
         }
 
         return new ArrayList<ProfileAttribute>();
@@ -377,7 +400,7 @@ public class UserProfileBuiltInParameterProvider implements BuiltInParameterProv
         String attrName = name.split(ATTRIBUTE_DELIMITER, 2)[1];
 
         for (ProfileAttribute attribute : attributes) {
-            if (attribute.getAttrName().equalsIgnoreCase(attrName)) {
+            if (attribute.getAttrName().equals(attrName)) {
                 return attribute.getAttrValue();
             }
         }

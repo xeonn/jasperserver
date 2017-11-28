@@ -22,7 +22,7 @@
 
 /**
  * @author Sergey Prilukin
- * @version: $Id: AvailableItemsListWithTrueAll.js 172 2014-09-23 11:45:30Z sergey.prilukin $
+ * @version: $Id: AvailableItemsListWithTrueAll.js 1180 2015-05-07 13:15:15Z spriluki $
  */
 
 /**
@@ -34,18 +34,12 @@ define(function (require) {
 
     var $ = require("jquery"),
         _ = require("underscore"),
-        availableItemsListDropdownTemplate = require("text!common/component/multiSelect/templates/availableItemsListDropdownWithTrueAllTemplate.htm"),
-        AvailableItemsList = require("common/component/multiSelect/view/AvailableItemsList");
+        AvailableItemsList = require("common/component/multiSelect/view/AvailableItemsList"),
+        listWithTrueAllSelectionTrait = require("common/component/multiSelect/mixin/listWithTrueAllSelectionTrait");
 
     var AvailableItemsListWithTrueAll = AvailableItemsList.extend({
 
         initialize: function(options) {
-            _.bindAll(this, "onSetTrueAll");
-
-            options = _.extend({
-                dropDownTemplate: availableItemsListDropdownTemplate
-            }, options);
-
             if (options.trueAll) {
                 delete options.value;
             }
@@ -55,100 +49,95 @@ define(function (require) {
             this.setTrueAll(options.trueAll);
         },
 
+        _createListView: function(options) {
+            var listView = AvailableItemsList.prototype._createListView.call(this, options);
+
+            return _.extend(listView, listWithTrueAllSelectionTrait);
+        },
+
         initListeners: function() {
             AvailableItemsList.prototype.initListeners.call(this);
 
             this.listenTo(this.model, "change:isTrueAll", this.changeTrueAll, this);
+        },
 
-            this.$dropDownEl.on("change", ".mSelect-footer input[type='checkbox']", this.onSetTrueAll);
+        selectionAdd: function(selection) {
+            if (this.model.get("isTrueAll")) {
+                this.model.set("isTrueAll", false, {silent: true});
+
+                //we have to select all visible items except selection
+                //in order to get rid of blink
+                //which happen after set trueAll until selectAll will be executed
+                //because selectAll could be a time consuming operation
+                var visibleItems = _.chain(this.listViewModel.get("items")).map(function(item) {
+                    return item.value;
+                }).reject(function(item) {
+                    return item === selection.value
+                }).value();
+
+                this.listView.setTrueAll(false, {silent: true});
+                this.listView.setValue(visibleItems, {silent: true});
+
+                this.listViewModel.once("selection:change", function() {
+                    this.listViewModel.once("selection:remove", function() {
+                        this.processSelectionThroughApi(this.listView.getValue());
+                    }, this);
+                    this.listViewModel.toggleSelection(selection.value, selection.index);
+                }, this);
+
+                this.listView.selectAll({silent: true});
+            } else {
+                this.model.get("value")[selection.value] = true;
+                this.model.trigger("change:value");
+            }
         },
 
         /* Event Handlers */
 
         onSelectAll: function() {
-            if (!this.model.get("disabled")) {
-                var checkbox = this.$dropDownEl.find(".mSelect-footer input[type='checkbox']");
-                checkbox.prop("checked", !checkbox.prop("checked"));
-                this.model.set("isTrueAll", checkbox.is(":checked"));
+            if (!this.model.get("isTrueAll")) {
+                this.model.set("isTrueAll", true);
             }
         },
 
         onSelectNone: function() {
-            if (!this.model.get("isTrueAll")) {
-                AvailableItemsList.prototype.onSelectNone.call(this);
-            }
+            this.model.set("isTrueAll", false);
+            AvailableItemsList.prototype.onSelectNone.call(this);
         },
 
         onInvertSelection: function() {
-            if (!this.model.get("isTrueAll")) {
+            if (this.model.get("isTrueAll")) {
+                this.onSelectNone();
+            } else if (_.isEmpty(this.model.get("value"))) {
+                this.onSelectAll();
+            } else {
                 AvailableItemsList.prototype.onInvertSelection.call(this);
             }
-        },
-
-        onSetTrueAll: function(event) {
-            var value = $(event.target).is(":checked");
-            this.model.set("isTrueAll", value);
         },
 
         changeTrueAll: function() {
             var isTrueAll = this.model.get("isTrueAll");
 
-            var checkbox = this.$dropDownEl.find(".mSelect-footer input[type='checkbox']");
-            if (isTrueAll !== checkbox.is(":checked")) {
-                checkbox.prop("checked", isTrueAll);
-            }
-
             if (isTrueAll) {
-                this.$dropDownEl.find("a.none, a.invert").addClass("disabled");
                 this.listView.activate(undefined);
                 this.listView.reset({silent: true});
 
-                var that = this;
-                this.clearFilterForTrueAll(function() {
-                    that.listView.once("selection:change", that.processSelectionThroughApi, that);
-                    that.setTrueAllForListView(true);
+                var self = this;
+                this.clearFilter(function() {
+                    self.listView.once("selection:change", self.processSelectionThroughApi, self);
+                    self.listView.setTrueAll(true);
                 });
             } else {
-                this.$dropDownEl.find("a.none, a.invert").removeClass("disabled");
                 this.model.trigger("change:value");
-                this.setTrueAllForListView(false);
+                this.listView.setTrueAll(false);
             }
-        },
-
-        setTrueAllForListView: function(all) {
-            if (all) {
-                this.listView.selectAll();
-            }
-
-            this.listView.setDisabled(all);
-        },
-
-        clearFilterForTrueAll: function(callback) {
-            if (this.model.get("criteria")) {
-                this.$el.find("input").val("");
-                this.model.set("criteria", "", {silent: true});
-
-                this.changeFilter(callback);
-            } else {
-                callback && callback();
-            }
-        },
-
-        changeDisabled: function() {
-            var disabled = this.model.get("disabled");
-
-            if (disabled) {
-                this.$dropDownEl.find(".mSelect-footer input[type='checkbox']").attr("disabled", "disabled");
-            } else {
-                this.$dropDownEl.find(".mSelect-footer input[type='checkbox']").removeAttr("disabled");
-            }
-
-            AvailableItemsList.prototype.changeDisabled.call(this);
         },
 
         /* Internal methods */
 
         getModelForRendering: function() {
+            //model extended with trueAll flag info
+            //so it could be visualized
             return _.extend(AvailableItemsList.prototype.getModelForRendering.call(this), {
                 isTrueAll: this.model.get("isTrueAll")
             });
@@ -162,14 +151,7 @@ define(function (require) {
 
         getTrueAll: function() {
             return this.model.get("isTrueAll");
-        },
-
-        remove: function() {
-            AvailableItemsList.prototype.remove.call(this);
-
-            this.$dropDownEl.off("change", this.onSetTrueAll);
         }
-
     });
 
     return AvailableItemsListWithTrueAll;

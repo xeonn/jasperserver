@@ -1,7 +1,30 @@
-<ul class="mSelect-list mSelect-avList" style="top: {{=top}}px;">
-    {{ _.each(items, function(item) { }}
-    <li class="{{ if (item.selected) print('selected'); }} {{ if (item.active) print(' active'); }}" data-index="{{= item.index}}" title="{{ print(item.label && item.label ? _.escape(item.label) : '&nbsp;')}}">
-        <div><a title="{{ print(item.label && item.label ? _.escape(item.label) : '&nbsp;')}}">{{ print(item.label && item.label ? item.label : '&nbsp;')}}</a></div>
+<div class="m-Multiselect-searchContainer jrs">
+    <input class="m-Multiselect-search jrs j-search" placeholder="{{- i18n['sic.multiselect.search']}}" type="text">
+</div>
+<div class="j-available-list jrs" style="top: 0;"></div>
+<ul class="m-Multiselect-buttonContainer j-bulk-buttons jrs">
+    <li class="m-Multiselect-button u-width-r30 jrs j-select-all" title="{{- i18n['sic.multiselect.selectAll'] }}">
+        <i class="m-Icon m-Multiselect-button-icon all jrs"></i>
+        <a class="m-Multiselect-button-label jrs">
+            <span class="j-button-text">
+                {{- i18n['sic.multiselect.selectAll'] }}
+            </span>
+        </a>
     </li>
-    {{ }); }}
+    <li class="m-Multiselect-button u-width-r40 jrs j-select-none" title="{{- i18n['sic.multiselect.deselectAll'] }}">
+        <i class="m-Icon m-Multiselect-button-icon none jrs"></i>
+        <a class="m-Multiselect-button-label jrs">
+            <span class="j-button-text">
+                {{- i18n['sic.multiselect.deselectAll'] }}
+            </span>
+        </a>
+    </li>
+    <li class="m-Multiselect-button u-width-r30 jrs j-invert" title="{{- i18n['sic.multiselect.inverse'] }}">
+        <i class="m-Icon m-Multiselect-button-icon invert jrs"></i>
+        <a class="m-Multiselect-button-label jrs" >
+            <span class="j-button-text">
+                {{- i18n['sic.multiselect.inverse'] }}
+            </span>
+        </a>
+    </li>
 </ul>

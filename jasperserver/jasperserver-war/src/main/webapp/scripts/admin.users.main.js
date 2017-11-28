@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: admin.users.main.js 7788 2014-09-19 13:11:20Z sergey.prilukin $
+ * @version: $Id: admin.users.main.js 8790 2015-04-22 21:28:09Z obobruyk $
  */
 
 define(function(require){
@@ -30,13 +30,20 @@ define(function(require){
     var domReady = require("!domReady"),
         _ = require("underscore"),
         orgModule = require("org.user.mng.actions"),
-        jrsConfigs = require("jrs.configs");
+        jrsConfigs = require("jrs.configs"),
+        i18n = require("bundle!AttributesBundle"),
+        i18n2 = require("bundle!CommonBundle"),
+        treeFactory = require("common/component/tree/treeFactory"),
+        attributesTypesEnum = require("attributes/enum/attributesTypesEnum"),
+        ConfirmationDialog = require("common/component/dialog/ConfirmationDialog"),
+        attributesViewOptionsFactory = require("attributes/factory/attributesViewOptionsFactory"),
+        scrollEventTrait = require("attributes/trait/attributesViewScrollEventTrait"),
+        AttributesViewFacade = require("attributes/AttributesViewFacade");
 
     require("mng.common.actions");
     require("xregexp");
     require("json2");
     require("backbone");
-    require("attributes.view");
     require("org.user.mng.components");
     require("common/util/encrypter");
     require("utils.common");
@@ -55,6 +62,16 @@ define(function(require){
         _.extend(orgModule.messages, jrsConfigs.userManagement.orgModule.messages);
         _.extend(orgModule.Configuration, jrsConfigs.userManagement.orgModule.Configuration);
 
-        orgModule.userManager.initialize();
+        orgModule.userManager.initialize({
+            _: _,
+            i18n: i18n,
+            i18n2: i18n2,
+            treeFactory: treeFactory,
+            attributesViewOptionsFactory: attributesViewOptionsFactory,
+            AttributesViewFacade: AttributesViewFacade,
+            scrollEventTrait: scrollEventTrait,
+            attributesTypesEnum: attributesTypesEnum,
+            ConfirmationDialog: ConfirmationDialog
+        });
     });
 });

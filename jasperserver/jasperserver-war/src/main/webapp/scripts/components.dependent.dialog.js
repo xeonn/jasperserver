@@ -21,8 +21,10 @@
 
 
 /**
- * @version: $Id: components.dependent.dialog.js 7762 2014-09-19 10:16:02Z sergey.prilukin $
+ * @version: $Id: components.dependent.dialog.js 8685 2015-04-10 14:06:42Z bkolesni $
  */
+
+/* global dialogs, _, dynamicList, layoutModule */
 
 dialogs.dependentResources = {
     dependenciesPanel: null,
@@ -107,7 +109,7 @@ dialogs.dependentResources = {
                         uri = this.getValue().URIString;
                     }
 
-                    uriElement.update(uri.escapeHTML());
+                    uriElement.update(xssUtil.escape(uri));
                     return element;
                 };
                 return resourceItem;

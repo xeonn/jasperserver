@@ -21,8 +21,10 @@
 
 
 /**
- * @version: $Id: create.report.js 7762 2014-09-19 10:16:02Z sergey.prilukin $
+ * @version: $Id: create.report.js 8179 2015-01-27 12:34:21Z psavushchik $
  */
+
+/* global JRS, __jrsConfigs__ */
 
 /**
  * Module for creating report from Adhoc Data View
@@ -31,7 +33,7 @@ JRS.CreateReport = (function(jQuery, jrsConfigs) {
     var advSelDialog = null;
 
     //this module needs some scripts from PRO in order to run
-    getDialog = function(advUri) {
+    var getDialog = function(advUri) {
         if(!advSelDialog) {
             advSelDialog = new JRS.GeneratorPropertiesDialog({
                 advUri: advUri,
@@ -67,7 +69,7 @@ JRS.CreateReport = (function(jQuery, jrsConfigs) {
 
 jQuery(function() {
     //make sure ajaxbuffer is available
-    if(jQuery("#ajaxbuffer").length == 0) {
+    if(jQuery("#ajaxbuffer").length === 0) {
         jQuery("body").append(jQuery('<div id="ajaxbuffer" style="display:none"></div>'));
     }
 });

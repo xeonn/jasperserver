@@ -21,8 +21,10 @@
 
 
 /**
- * @version: $Id: messageDetails.js 7748 2014-07-18 09:13:06Z kklein $
+ * @version: $Id: messageDetails.js 8685 2015-04-10 14:06:42Z bkolesni $
  */
+
+/* global toolbarButtonModule, layoutModule, toolbarButtonModule, matchAny, localContext */
 
 var messageDetailModule = {
     _flowExecutionKey: null,
@@ -62,10 +64,10 @@ var messageDetailModule = {
     },
 
     _process: function() {
-        $('subject').update(this._message.subject.escapeHTML());
-        $('date').update(this._message.date.escapeHTML());
-        $('component').update(this._message.component.escapeHTML());
-        $('message').update(this._message.message.escapeHTML());
+        $('subject').update(xssUtil.escape(this._message.subject));
+        $('date').update(xssUtil.escape(this._message.date));
+        $('component').update(xssUtil.escape(this._message.component));
+        $('message').update(xssUtil.escape(this._message.message));
     }
 };
 

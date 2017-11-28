@@ -21,7 +21,16 @@
 
 
 /**
- * @version: $Id: repository.search.components.js 7762 2014-09-19 10:16:02Z sergey.prilukin $
+ * @version: $Id: repository.search.components.js 8900 2015-05-06 20:57:14Z yplakosh $
+ */
+
+/* global repositorySearch, SearchBox, toolbarButtonModule, toFunction, getAsFunction, localContext, isArray, JSCookie,
+ dynamicTree, disableSelectionWithoutCursorStyle, getBoxOffsets, actionModel, Folder, isMetaHeld, canFolderBeCopied,
+ invokeFolderAction, layoutModule, canFolderBeMoved, Droppables, canFolderBeCopiedOrMovedToFolder,
+ canAllBeCopiedOrMovedToFolder, Draggables, alert, dynamicList, isIPad, isSupportsTouch, TouchController, InfiniteScroll,
+ canBeRun, canBeOpened, JSTooltip, invokeBulkAction, invokeRedirectAction, canBeScheduled, matchAny, centerElement,
+ tooltipModule, $break, baseList, orgModule, dialogs, buttonManager, ValidationModule, ResourcesUtils,
+ accessibilityModule, confirm, fileSender
  */
 
 ///////////////////////////////
@@ -109,7 +118,7 @@ repositorySearch.foldersPanel =  {
         if (options.isFolderSet) {
             this._uri = options.state.folderUri;
         } else {
-            var storedUri = new JSCookie(this._cookieName).value;
+            var storedUri = window.localStorage ? localStorage.getItem(this._cookieName) : undefined;
             this._uri = storedUri && storedUri.length > 0 ? storedUri : "/";
         }
         this._container = $(this.getTreeId()).up(1);
@@ -240,7 +249,7 @@ repositorySearch.foldersPanel =  {
         this.tree.observe('node:selected', function(event) {
             this._uri = event.memo.node.param.uri;
 
-            new JSCookie(this._cookieName, this._uri);
+            window.localStorage && localStorage.setItem(this._cookieName, this._uri);
             repositorySearch.model.setSelectedFolder(new Folder(event.memo.node));
 
             this.doBrowse();
@@ -421,7 +430,7 @@ repositorySearch.resultsPanel =  {
         if (value.hasChildren) {
             resourceItem = new dynamicList.CompositeItem({
                 cssClassName: layoutModule.NODE_CLASS,
-                label: value.label.escapeHTML(),
+                label: value.label,
                 value: value,
                 openHandlerPattern: ".disclosure.icon",
                 closeHandlerPattern: ".disclosure.icon",
@@ -442,7 +451,7 @@ repositorySearch.resultsPanel =  {
         } else {
             resourceItem = new dynamicList.ListItem({
                 cssClassName: layoutModule.LEAF_CLASS,
-                label: value.label.escapeHTML(),
+                label: value.label,
                 value: value
             });
         }
@@ -457,18 +466,18 @@ repositorySearch.resultsPanel =  {
             var nameTitleElement = element.select(repositorySearch.resultsPanel.NAME_PATTERN)[0];
             var desc = element.select(".resourceDescription")[0];
 
-            name.update(this.getValue().label.escapeHTML());
+            name.update(xssUtil.escape(this.getValue().label));
             var that = this;
             new JSTooltip(nameTitleElement, {
-                text: [this.getValue().label.escapeHTML(), repositorySearch.messages['loading']],
+                text: [xssUtil.escape(this.getValue().label), xssUtil.escape(repositorySearch.messages['loading'])],
                 templateId: repositorySearch.resultsPanel.RESOURCE_NAME_TOOLTIP_ID,
                 loadTextCallback: function(tooltip) {
                     var folderPath = that.getValue().parentFolder;
                     var folderDisplayPath = repositorySearch.resultsPanel._folderDisplayPathCache[folderPath];
 
                     if (repositorySearch.resultsPanel._folderDisplayPathCache[folderPath]) {
-                        tooltip.updateText([that.getValue().label.escapeHTML(),
-                            folderDisplayPath + repositorySearch.model.getFolderSeparator() + that.getValue().label]);
+                        tooltip.updateText([xssUtil.escape(that.getValue().label),
+                            xssUtil.escape(folderDisplayPath + repositorySearch.model.getFolderSeparator() + that.getValue().label)]);
                     } else {
                         var action = new repositorySearch.ServerAction(repositorySearch.InfoAction.GET_DISPLAY_PATH, {
                             data: {
@@ -481,8 +490,8 @@ repositorySearch.resultsPanel =  {
                             // Cache the display path of the folder.
                             repositorySearch.resultsPanel._folderDisplayPathCache[folderPath] = data;
 
-                            tooltip.updateText([that.getValue().label.escapeHTML(),
-                                data + repositorySearch.model.getFolderSeparator() + that.getValue().label]);
+                            tooltip.updateText([xssUtil.escape(that.getValue().label),
+                                xssUtil.escape(data + repositorySearch.model.getFolderSeparator() + that.getValue().label)]);
                         };
                         action.onError = repositorySearch.defaultErrorHandler;
 
@@ -491,9 +500,9 @@ repositorySearch.resultsPanel =  {
                 }
             });
 
-            desc.update(this.getValue().description.escapeHTML());
+            desc.update(xssUtil.escape(this.getValue().description));
             new JSTooltip(desc, {
-                text: this.getValue().description.escapeHTML()
+                text: this.getValue().description
             });
 
 
@@ -504,12 +513,12 @@ repositorySearch.resultsPanel =  {
             type.update(this.getValue().type);
             modifiedDate.update(this.getValue().updateDate);
             new JSTooltip(modifiedDate, {
-                text: this.getValue().updateDateTime.escapeHTML()
+                text: this.getValue().updateDateTime
             });
 
             createdDate.update(this.getValue().date);
             new JSTooltip(createdDate, {
-                text: this.getValue().dateTime.escapeHTML()
+                text: this.getValue().dateTime
             });
 
             return element;
@@ -650,7 +659,7 @@ repositorySearch.resultsPanel =  {
 
     _refreshEmptyListMessage: function() {
         var nothingToDisplay = $(this.NOTHING_TO_DISPLAY_ID);
-        if (this._list.getItems().length == 0) {
+        if (this._list.getItems().length === 0) {
             nothingToDisplay.removeClassName(layoutModule.HIDDEN_CLASS);
             centerElement(nothingToDisplay, {horz: true, vert: true});
         } else {
@@ -844,8 +853,6 @@ repositorySearch.filtersPanel =  {
 
             if (item.getValue().isSeparator || item.getValue().isMore || this._ignoreFilterEvent) { return; }
 
-            this._increasePopularity(list.getId(), item.getValue().id);
-
             repositorySearch.fire(repositorySearch.Event.SEARCH_FILTER, {
                 filterId: list.getId(),
                 optionId: item.getValue().id
@@ -853,28 +860,6 @@ repositorySearch.filtersPanel =  {
         }.bindAsEventListener(this));
 
         return list;
-    },
-
-    _increasePopularity: function(filterId, optionId) {
-        var cookie = new JSCookie(this._cookieName);
-        var storedJson = (cookie.value) ? cookie.value.evalJSON() : {};
-
-        var list = this._filtersLists[filterId], listId = list.getId();
-
-        if (!storedJson[listId]) {
-            storedJson[listId] = {};
-        }
-
-        list.getItems().each(function(item) {
-            var itemId = item.getValue().id;
-
-            var p = (storedJson[listId][itemId]) ? storedJson[listId][itemId] : 0;
-
-            storedJson[listId][itemId] = (listId === filterId && itemId === optionId) ? p + 1 : p;
-        });
-
-//        console.log(storedJson);
-        new JSCookie(this._cookieName, Object.toJSON(storedJson));
     },
 
     select: function(filterId, optionId, isRestore) {
@@ -1089,8 +1074,8 @@ ResourcePermissions.addMethod("_processTemplate", function() {
     this._dom.down(".body").writeAttribute('id', "");
 
     var path = this._dom.select(this.PATH_PATTERN)[0];
-    path.update(this._resource.URIString.truncate(50).escapeHTML());
-    path.writeAttribute("title", this._resource.URIString.escapeHTML());
+    path.update(xssUtil.escape(this._resource.URIString.truncate(50)));
+    path.writeAttribute("title", this._resource.URIString);
 
     this._viewByTabSet = this._dom.select(this.VIEW_BY_TAB_SET_PATTERN)[0];
     this._byUsersButton = this._dom.select(this.TAB_PATTERN)[0];
@@ -1377,7 +1362,7 @@ ResourcePermissions.addMethod("disable", function() {
 
 ResourcePermissions.addMethod("_createItem", function(value) {
     var item = new dynamicList.ListItem({
-            label: value.getDisplayName().escapeHTML(),
+            label: value.getDisplayName(),
             value: value
         });
 
@@ -1400,10 +1385,10 @@ ResourcePermissions.addMethod("_createItem", function(value) {
         } else {
             name.removeClassName(layoutModule.EMPHASIS_CLASS);
         }
-        name.update(this.getValue().getDisplayName().escapeHTML());
+        name.update(xssUtil.escape(this.getValue().getDisplayName()));
 
         if(tenantId && tenantId.length > 0) {
-            new JSTooltip(nameTooltip, { text: tenantId, templateId: template });
+            new JSTooltip(nameTooltip, { text: xssUtil.escape(tenantId), templateId: template });
             var origRemove = element.remove;
             element.remove = function() {
                 tooltipModule.hideJSTooltip(nameTooltip);
@@ -1421,7 +1406,7 @@ ResourcePermissions.addMethod("_createItem", function(value) {
             var option = new Element('option', { value: permissionsConfig[i].name });
 
             permissions.insert(option.update(permission.inheritedPermission == permissionsConfig[i].name
-                    ? label + " *" : label));
+                    ? xssUtil.escape(label + " *") : xssUtil.escape(label)));
 
             if (permission.newPermission) {
                 permission.newPermission == permissionsConfig[i].name && (index = i);
@@ -1609,13 +1594,13 @@ ResourceProperties.addMethod("_processTemplate", function() {
 	this._dom.addClassName('_activeResourcePropertiesDialog');
 
     var title = this._dom.select('.title')[0];
-    title.update(title.innerHTML.strip().escapeHTML() + ": " +  this._resource.label.truncate(50));
+    title.update(title.innerHTML.strip() + ": " + xssUtil.escape(this._resource.label).truncate(50));
 
-    this._label = this._updateValueAndLabel(this._dom, 'input#displayName', this._resource.label.unescapeHTML(),
+    this._label = this._updateValueAndLabel(this._dom, 'input#displayName', this._resource.label,
             'label[for="displayName"]');
-    this._description = this._updateContentAndLabel(this._dom, 'textarea#description', this._resource.description,
+    this._description = this._updateContentAndLabel(this._dom, 'textarea#description', xssUtil.escape(this._resource.description),
             'label[for="description"]');
-    this._path = this._updateValueAndLabel(this._dom, 'input#path', this._resource.URIString,
+    this._path = this._updateValueAndLabel(this._dom, 'input#path', xssUtil.escape(this._resource.URIString),
             'label[for="path"]');
 
     if (this._showMode) {
@@ -1624,10 +1609,10 @@ ResourceProperties.addMethod("_processTemplate", function() {
         this._label.writeAttribute('readonly', 'readonly');
         this._description.writeAttribute('readonly', 'readonly');
     }
-    this._updateValueAndLabel(this._dom, 'div#resourceID', this._resource.name, 'label[for="resourceID"]');
-    this._updateValueAndLabel(this._dom, 'input#type', this._resource.type, 'label[for="type"]');
-    this._updateValueAndLabel(this._dom, 'input#createdDate', this._resource.date, 'label[for="createdDate"]');
-    this._updateValueAndLabel(this._dom, 'input#userAccess', this._resource.permissionsToString(), 'label[for="userAccess"]');
+    this._updateValueAndLabel(this._dom, 'div#resourceID', xssUtil.escape(this._resource.name), 'label[for="resourceID"]');
+    this._updateValueAndLabel(this._dom, 'input#type', xssUtil.escape(this._resource.type), 'label[for="type"]');
+    this._updateValueAndLabel(this._dom, 'input#createdDate', xssUtil.escape(this._resource.date), 'label[for="createdDate"]');
+    this._updateValueAndLabel(this._dom, 'input#userAccess', xssUtil.escape(this._resource.permissionsToString()), 'label[for="userAccess"]');
 
     this._submitButton = this._dom.select('button.submit')[0];
     this._cancelButton = this._dom.select('button.cancel')[0];
@@ -1952,12 +1937,12 @@ repositorySearch.showUploadThemeConfirm = function(folder, reupload) {
             options._eventId = 'reuploadTheme';
         }
         var callback = function(responseBody) {
+            var respObj;
             //zip var should be refreshed to point to correct file input
             zip = $('themeZip');
             if (responseBody) {
                 try {
-                    var respObj = responseBody.evalJSON();
-                    var respObj = responseBody.evalJSON();
+                    respObj = responseBody.evalJSON();
                     if (respObj && respObj.status == 'OK') {
                         if (respObj.data.themeExist) {
                             var ovewrite = confirm(repositorySearch.messages["SEARCH_OVERWRITE_THEME_CONFIRM_MSG"]);
@@ -2031,7 +2016,7 @@ GenerateResource.addMethod("_processTemplate", function(options) {
     var title = this._dom.select('.title')[0];
     if (!this.TEMPLATE_TITLE_TEXT)
         GenerateResource.prototype.TEMPLATE_TITLE_TEXT = title.innerHTML.strip();
-    title.update((this.TEMPLATE_TITLE_TEXT + " " + this._resource.label.truncate(50)).escapeHTML());
+    title.update(this.TEMPLATE_TITLE_TEXT + " " + xssUtil.escape(this._resource.label.truncate(50)));
 
     var label = options.useDefaultLabel ?
         this._resource.label + " " + repositorySearch.messages['dialog.generateResource.defaultNameSuffix'] : "";

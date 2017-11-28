@@ -21,12 +21,12 @@
 
 
 /**
- * @author Sergey Prilukin
- * @version: $Id: AvailableItemsList.js 380 2014-11-09 15:04:25Z ktsaregradskyi $
+ * @author Sergey Prilukin; modified by Ken Penn
+ * @version: $Id: AvailableItemsList.js 812 2015-01-27 11:01:30Z psavushchik $
  */
 
 /**
- * AvailableItems list. Part of MultiSelect.
+ * AvailableItems list -  Part of Tabbed MultiSelect
  */
 
 define(function (require) {
@@ -39,27 +39,56 @@ define(function (require) {
         ListWithNavigation = require("common/component/list/view/ListWithNavigation"),
         ListWithSelectionModel = require("common/component/list/model/ListWithSelectionModel"),
         listWithNavigationModelTrait = require("common/component/list/model/listWithNavigationModelTrait"),
-        SearcheableDataProvider = require("common/component/singleSelect/dataprovider/SearcheableDataProvider"),
-        DropDownManager = require("common/component/singleSelect/manager/DropDownManager"),
-        availableItemsListTemplate = require("text!common/component/multiSelect/templates/availableItemsListTemplate.htm"),
-        availableItemsListDropdownTemplate = require("text!common/component/multiSelect/templates/availableItemsListDropdownTemplate.htm"),
-        itemsTemplate = require("text!common/component/multiSelect/templates/availableItemsTemplate.htm"),
+        ListWithSelectionAsObjectHashModel = require("common/component/list/model/ListWithSelectionAsObjectHashModel"),
+        scalableListItemHeightCalculationTrait = require("common/component/multiSelect/mixin/scalableListItemHeightCalculationTrait"),
+        availableItemsTabTemplate = require("text!common/component/multiSelect/templates/availableItemsTemplate.htm"),
+        itemsTemplate = require("text!common/component/multiSelect/templates/availableItemsListTemplate.htm"),
         listTemplate = require("text!common/component/multiSelect/templates/listTemplate.htm"),
-        i18n = require("bundle!ScalableInputControlsBundle");
+        browserDetection = require("common/util/browserDetection"),
+        i18n = require("bundle!ScalableInputControlsBundle"),
+        xssUtil = require("common/util/xssUtil"),
+        doCalcOnVisibleNodeClone = require("common/component/list/util/domAndCssUtil").doCalcOnVisibleNodeClone;
 
-    var CONTROL_NORMAL_WIDTH_LIMIT = 200;
-
-	var $body = $("body");
+    var BUTTON_TESTS = [
+        {
+            selector: ".j-select-all",
+            strings: [
+                i18n["sic.multiselect.selectAll"],
+                i18n["sic.multiselect.all"],
+                ""
+            ]
+        },
+        {
+            selector: ".j-select-none",
+            strings: [
+                i18n["sic.multiselect.deselectAll"],
+                i18n["sic.multiselect.none"],
+                ""
+            ]
+        },
+        {
+            selector: ".j-invert",
+            strings: [
+                i18n["sic.multiselect.inverse"],
+                ""
+            ]
+        }
+    ];
 
     var AvailableItemsList = Backbone.View.extend({
 
+        className: "m-Multiselect-listContainer j-toggle-panel j-available jrs j-active",
+
         events: function() {
             return {
-                "keydown input.mSelect-input": this.keyboardManager.onKeydown,
-                "focus input.mSelect-input": "onFocus",
-                "blur input.mSelect-input": "onBlur",
-                "click input.mSelect-input": "onClickOnInput",
-                "touchend input.mSelect-input": "onClickOnInput",
+                "keydown input.j-search": this.keyboardManager.onKeydown,
+                "focus input.j-search": "onFocus",
+                "blur input.j-search": "onBlur",
+                "click .j-select-all": "onSelectAll",
+                "click .j-select-none": "onSelectNone",
+                "click .j-invert": "onInvertSelection",
+                "click input.j-search": "onClickOnInput",
+                "touchend input.j-search": "onClickOnInput",
                 "mousedown": "onMousedown",
                 "mouseup": "onMouseup"
             };
@@ -70,20 +99,20 @@ define(function (require) {
         }, KeyboardManager.prototype.keydownHandlers),
 
         initialize: function(options) {
-            _.bindAll(this, "onGlobalMouseup", "onGlobalMousedown", "onGlobalMousemove",
-                "onMousedown", "onMouseup", "onDropdownMouseup", "onEscKey", "onSelectAll", "onSelectNone",
-                "onInvertSelection", "calcOffsetForDropDown", "collapse");
+            _.bindAll(this, "onGlobalMouseup", "onGlobalMousedown", "onResize", "onGlobalMousemove",
+                "onMousedown", "onMouseup", "onEscKey", "onSelectAll", "onSelectNone",
+                "onInvertSelection");
+
+            this._debouncedOnResize = _.debounce(this.onResize, 500);
 
             if (!this.model) {
                 this.model = new Backbone.Model();
             }
 
-            this.model.set("expanded", false, {silent: true});
             this.model.set("criteria", "", {silent: true});
 
             this.label = options.label;
-            this.template = _.template(options.availableItemsListTemplate || availableItemsListTemplate);
-            this.dropDownTemplate = _.template(options.dropDownTemplate || availableItemsListDropdownTemplate);
+            this.template = _.template(options.availableItemsTemplate || availableItemsTabTemplate);
 
             this.keyboardManager = new KeyboardManager({
                 keydownHandlers: this.keydownHandlers,
@@ -103,93 +132,108 @@ define(function (require) {
 
             this.render();
 
-            this.dropDownManager = new DropDownManager({
-                dropDownEl: this.$dropDownEl,
-                calcOffset: this.calcOffsetForDropDown,
-                onOffsetChanged: this.collapse
-            });
-
             this.initListeners();
         },
 
         _createListViewModel: function(options) {
-            this.searcheableDataProvider = new SearcheableDataProvider({getData: options.getData});
+            this.getData = options.getData;
 
-            var ListWithNavigationModel = ListWithSelectionModel.extend(listWithNavigationModelTrait);
-            return options.listViewModel || new ListWithNavigationModel({
-                getData: this.searcheableDataProvider.getData,
+            var Model = ListWithSelectionAsObjectHashModel.extend(listWithNavigationModelTrait);
+            return options.listViewModel || new Model({
+                getData: options.getData,
                 bufferSize: options.bufferSize,
                 loadFactor: options.loadFactor
             });
         },
 
         _createListView: function(options) {
-            return options.listView || new ListWithNavigation({
+            var list = options.listView || new ListWithNavigation({
                 el: options.listElement || $(listTemplate),
                 model: this.listViewModel,
                 chunksTemplate: options.chunksTemplate,
                 itemsTemplate: options.itemsTemplate || itemsTemplate,
                 scrollTimeout: options.scrollTimeout,
                 lazy: true,
+                selectedClass: "is-selected",
                 selection: {
                     allowed: true,
                     multiple: true
                 }
             });
+
+            _.extend(list, scalableListItemHeightCalculationTrait);
+
+            return list;
         },
 
         initListeners: function() {
             this.listenTo(this.listView, "active:changed", this.activeChange, this);
-            //this.listenTo(this.listView, "mousedown", this.onMousedown, this);
+            this.listenTo(this.listView, "mousedown", this.onMousedown, this);
+            this.listenTo(this.listView, "render:data", this.onRenderData, this);
+            this.listenTo(this.listViewModel, "change", this.onListViewModelChanged, this);
             this.listenTo(this.listViewModel, "selection:clear", this.selectionClear, this);
             this.listenTo(this.listViewModel, "selection:add", this.selectionAdd, this);
             this.listenTo(this.listViewModel, "selection:addRange", this.selectionAddRange, this);
             this.listenTo(this.listViewModel, "selection:remove", this.selectionRemove, this);
 
-            this.listenTo(this.model, "change:expanded", this.changeExpandedState, this);
+            this.listenTo(this.model, "change:totalValue", this.onChangeTotalValue, this);
             this.listenTo(this.model, "change:value", this.changeValue, this);
             this.listenTo(this.model, "change:disabled", this.changeDisabled, this);
             this.listenTo(this.model, "change:criteria", this.changeFilter, this);
 
-            this.$dropDownEl.on("mousedown", this.onMousedown)
-                .on("mouseup", this.onDropdownMouseup)
-                .on("click", ".mSelect-footer-button", this.onEscKey)
-                .on("click", "a.all", this.onSelectAll)
-                .on("click", "a.none", this.onSelectNone)
-                .on("click", "a.invert", this.onInvertSelection);
-
             $("body").on("mousedown", this.onGlobalMousedown)
-                .on("dataavailable", this.onGlobalMousedown) /* hack to handle prototype custom events */
                 .on("mouseup", this.onGlobalMouseup)
                 .on("mousemove", this.onGlobalMousemove);
+
+            $(window).on("resize", this._debouncedOnResize);
         },
 
         render: function() {
-            this.renderDropdownPart();
 
             this.$el.empty();
             this.$el.append($(this.template(this.getModelForRendering())));
 
-            this.changeDisabled();
+            this.listView.undelegateEvents();
+
+            this.$el.find('.j-available-list').append(this.listView.el);
+
+            this.listView.render();
+
+            this.listView.fetch(_.bind(this.listView.resize, this.listView));
+
+            this.listView.delegateEvents();
+
+            this._tuneCSS();
+
+            this.setBulkSelectionText();
 
             return this;
         },
 
-        renderDropdownPart: function() {
-            if (!this.$dropDownEl) {
-                this.listView.undelegateEvents();
+        _tuneCSS: function() {
+            var self = this;
 
-                this.$dropDownEl = $(this.dropDownTemplate(this.getModelForRendering()));
-                this.$dropDownEl.prepend(this.listView.el);
+            // only need to do this once
+            if (!this._paddingHeightsSet) {
 
-                $("body").append(this.$dropDownEl);
+                doCalcOnVisibleNodeClone({
+                    el: this.$el,
+                    css: {"width": "500px"},
+                    classes: browserDetection.isIPad() ? "ipad" : "",
+                    callback: function($el) {
+                        self.searchBarHeight = $el.find(".m-Multiselect-searchContainer").outerHeight();
+                        self.buttonsContainerHeight = $el.find(".m-Multiselect-buttonContainer").outerHeight();
+                    }
+                });
 
-                this.listView.delegateEvents();
+                this._paddingHeightsSet = true;
             }
 
-            this.model.get("expanded")
-                ? this.$dropDownEl.show()
-                : this.$dropDownEl.hide();
+            this.$el.find(".j-available-list").css({
+                "height": "100%",
+                "padding-top": this.searchBarHeight,
+                "padding-bottom": this.buttonsContainerHeight
+            });
         },
 
         renderData: function() {
@@ -211,65 +255,123 @@ define(function (require) {
         },
 
         selectionAdd: function(selection) {
-            var indexMapping = this.searcheableDataProvider.getIndexMapping();
-            var index = indexMapping ? indexMapping[selection.index] : selection.index;
-
-            this.model.get("value")[index] = selection.value;
+            this.model.get("value")[selection.value] = true;
             this.model.trigger("change:value");
         },
 
         selectionAddRange: function(range) {
-            var indexMapping = this.searcheableDataProvider.getIndexMapping();
-            var value = this.model.get("value");
+            var selection = range.selection,
+                value     = this.model.get("value"),
+                sx        = 0,
+                sLen      = selection.length;
 
-            for (var i = range.start; i <= range.end; i++) {
-                var index = indexMapping ? indexMapping[i] : i;
-
-                this.model.get("value")[index] = range.selection[i];
+            for ( sx; sx < sLen; sx +=1 ) {
+                value[selection[sx]] = true;
             }
 
             this.model.trigger("change:value");
         },
 
         selectionRemove: function(selection) {
-            var indexMapping = this.searcheableDataProvider.getIndexMapping();
-            var index = indexMapping ? indexMapping[selection.index] : selection.index;
+            delete this.model.get("value")[selection.value];
 
-            this.model.get("value")[index] = undefined;
             this.model.trigger("change:value");
         },
 
         selectionClear: function() {
-            this.model.attributes.value = [];
+            this.model.attributes.value = {};
         },
 
         onSelectAll: function() {
             if (!this.model.get("disabled")) {
                 this.listView.once("selection:change", this.processSelectionThroughApi, this);
-                this.listView.selectAll();
+                this.clearFilter(_.bind(this.listView.selectAll, this.listView));
             }
         },
 
         onSelectNone: function() {
             if (!this.model.get("disabled")) {
                 this.listView.once("selection:change", this.processSelectionThroughApi, this);
-                this.listView.selectNone();
+                this.clearFilter(_.bind(this.listView.selectNone, this.listView));
             }
         },
 
         onInvertSelection: function() {
             if (!this.model.get("disabled")) {
                 this.listView.once("selection:change", this.processSelectionThroughApi, this);
-                this.listView.invertSelection();
+                this.clearFilter(_.bind(this.listView.invertSelection, this.listView));
             }
         },
 
-        changeExpandedState: function(model) {
-            if (model.get("expanded")) {
-                this.doExpand();
-            } else {
-                this.doCollapse();
+        onRenderData: function() {
+            this.trigger("render:data");
+        },
+
+        onListViewModelChanged: function() {
+            if (typeof this.model.get("totalValues") == "undefined") {
+                var total = this.listViewModel.get("total");
+
+                if (total > 0) {
+                    this.model.set("totalValues", total);
+                }
             }
+        },
+
+        onChangeTotalValue: function() {
+            this.listView.resize();
+        },
+
+        setBulkSelectionText: function() {
+            if (!this.$el.is(":visible")) {
+                //We can not measure bulk buttons width
+                //so no text will be changed
+                return;
+            }
+
+            var componentWidth = this.$el.outerWidth();
+
+            if (componentWidth === this._componentWidth) {
+                //no need to check text since size was not changed since last check
+                return;
+            } else {
+                this._componentWidth = componentWidth;
+            }
+
+            var $bulkButtonsBar = this.$el.find(".j-bulk-buttons"),
+                bulkButtonsBarWidth = $bulkButtonsBar.outerWidth();
+
+            doCalcOnVisibleNodeClone({
+                el: $bulkButtonsBar,
+                css: {
+                    "left" : (0 - (bulkButtonsBarWidth * 2)) + "px",
+                    "width" : bulkButtonsBarWidth + "px"
+                },
+                classes: browserDetection.isIPad() ? "ipad" : "", //add additional classes to parent container of cloned node
+                alwaysClone: true,
+                callback: function($clone) {
+                    _.each(BUTTON_TESTS, function(buttonTest) {
+                        var widthOk = false;
+
+                        _.each(buttonTest.strings, function(buttonString) {
+                            if (widthOk) {
+                                return;
+                            }
+
+                            var $button = $clone.find(buttonTest.selector),
+                                $buttonText = $button.find(".j-button-text")
+                                    .text(buttonString),
+                                btnRight = $button[0].getBoundingClientRect().right,
+                                txtRight = $buttonText[0].getBoundingClientRect().right;
+
+                            if (btnRight - txtRight >= 3 || buttonString === "") {
+                                widthOk = true;
+                                $bulkButtonsBar.find(buttonTest.selector + " .j-button-text")
+                                    .text(buttonString);
+                            }
+                        });
+                    });
+                }
+            });
         },
 
         changeValue: function() {
@@ -281,10 +383,8 @@ define(function (require) {
 
             if (disabled) {
                 this.$el.addClass("disabled").find("input[type='text']").attr("disabled", "disabled");
-                this.$dropDownEl.addClass("disabled").find(".mSelect-footer a").attr("disabled", "disabled");
             } else {
                 this.$el.removeClass("disabled").find("input[type='text']").removeAttr("disabled");
-                this.$dropDownEl.removeClass("disabled").find(".mSelect-footer a").removeAttr("disabled");
             }
 
             this.listView.setDisabled(disabled);
@@ -295,9 +395,6 @@ define(function (require) {
         },
 
         onFocus: function() {
-            if (!this.model.get("expanded")) {
-                this.model.set("expanded", true);
-            }
 
             //Workaround for input's HTML5 placeholder attribute
             var input = this.$el.find("input");
@@ -310,28 +407,20 @@ define(function (require) {
         onBlur: function() {
             //Workaround for input's HTML5 placeholder attribute
             var input = this.$el.find("input");
-            if (input.val() == '' || input.val() == input.attr('placeholder')) {
+            if (input.val() === '' || input.val() === input.attr('placeholder')) {
                 input.addClass('placeholder');
                 input.val(input.attr('placeholder'));
             }
             // End of workaround
 
-            if (!this.preventBlur) {
-                this.collapse();
-            } else {
+            if (this.preventBlur) {
                 return false;
             }
         },
 
         onMousedown: function() {
-            this.preventBlur = true;
-        },
-
-        onDropdownMouseup: function(event) {
-            if (!$(event.target).hasClass("mSelect-footer-button")) {
-                this.onMouseup();
-            } else {
-                delete this.preventBlur;
+            if (!browserDetection.isIPad()) {
+                this.preventBlur = true;
             }
         },
 
@@ -339,22 +428,16 @@ define(function (require) {
             if (this.preventBlur) {
                 delete this.preventBlur;
 
-                if (this.model.get("expanded")) {
-                    this.$el.find("input.mSelect-input").focus();
-                }
+                this.$el.find("input.j-search").focus();
             }
         },
 
         onGlobalMousedown: function(event) {
-            if (this.model.get("expanded")) {
-                if (event.target === this.el || this.$el.find(event.target).length > 0 ||
-                    event.target === this.$dropDownEl[0] || this.$dropDownEl.find(event.target).length > 0) {
-                    //Do not collapse if mousedown performed on this component
-                    return;
+            if (this.preventBlur) {
+                if (event.target !== this.el && this.$el.find(event.target).length === 0) {
+                    delete this.preventBlur;
+                    this.onBlur();
                 }
-
-                delete this.preventBlur;
-                this.onBlur();
             }
         },
 
@@ -368,47 +451,44 @@ define(function (require) {
             }
         },
 
+        onResize: function() {
+            this.resize();
+        },
+
         /* Key handlers for KeyboardManager */
 
         onUpKey: function(event) {
-            if (!this.model.get("expanded")) {
-                this.expand();
-            } else {
+
+            if (event.shiftKey) {
+                this.activeChangedWithShift = true;
+            }
+
+            this.listView.activatePrevious();
+        },
+
+        onDownKey: function(event) {
+
+            var active = this.listView.getActiveValue();
+
+            if (active) {
                 if (event.shiftKey) {
                     this.activeChangedWithShift = true;
                 }
 
-                this.listView.activatePrevious();
-            }
-        },
-
-        onDownKey: function(event) {
-            if (!this.model.get("expanded")) {
-                this.expand();
+                this.listView.activateNext()
             } else {
-                var active = this.listView.getActiveValue();
-
-                if (active) {
-                    if (event.shiftKey) {
-                        this.activeChangedWithShift = true;
-                    }
-
-                    this.listView.activateNext()
-                } else {
-                    this.listView.activateFirst();
-                }
+                this.listView.activateFirst();
             }
+
         },
 
         onEnterKey: function(event) {
             event.preventDefault();
 
-            if (!this.model.get("expanded")) {
-                this.expand();
+            var active = this.listView.getActiveValue();
+            if (!active) {
                 return;
             }
-
-            var active = this.listView.getActiveValue();
 
             if (event.shiftKey) {
                 this.listViewModel.addRangeToSelection(active.value, active.index);
@@ -421,57 +501,43 @@ define(function (require) {
         },
 
         onEscKey: function() {
-            if (this.model.get("expanded")) {
-                this.collapse();
-            }
+            /* do nothing */
         },
 
         onHomeKey: function(event) {
-            if (!this.model.get("expanded")) {
-                this.expand();
-            } else {
-                if (event.shiftKey) {
-                    this.activeChangedWithShift = true;
-                }
 
-                this.listView.activateFirst();
+            if (event.shiftKey) {
+                this.activeChangedWithShift = true;
             }
+
+            this.listView.activateFirst();
         },
 
         onEndKey: function(event) {
-            if (!this.model.get("expanded")) {
-                this.expand();
-            } else {
-                if (event.shiftKey) {
-                    this.activeChangedWithShift = true;
-                }
 
-                this.listView.activateLast();
+            if (event.shiftKey) {
+                this.activeChangedWithShift = true;
             }
+
+            this.listView.activateLast();
         },
 
         onPageUpKey: function(event) {
-            if (!this.model.get("expanded")) {
-                this.expand();
-            } else {
-                if (event.shiftKey) {
-                    this.activeChangedWithShift = true;
-                }
 
-                this.listView.pageUp();
+            if (event.shiftKey) {
+                this.activeChangedWithShift = true;
             }
+
+            this.listView.pageUp();
         },
 
         onPageDownKey: function(event) {
-            if (!this.model.get("expanded")) {
-                this.expand();
-            } else {
-                if (event.shiftKey) {
-                    this.activeChangedWithShift = true;
-                }
 
-                this.listView.pageDown();
+            if (event.shiftKey) {
+                this.activeChangedWithShift = true;
             }
+
+            this.listView.pageDown();
         },
 
         onTabKey: function() {
@@ -489,105 +555,68 @@ define(function (require) {
 
         /* Internal helper methods */
 
-        doExpand: function() {
-            this.$el.find(".mSelect-avListPlaceholder").removeClass("collapsed").addClass("expanded");
-            this.expandDropdownPart();
-            if (this.listView.lazy) {
-                this.listView.fetch(_.bind(this.listView.resize, this.listView));
-            } else {
-                this.listView.resize();
-            }
-
-            this.trigger("expand");
-        },
-
-        expandDropdownPart: function() {
-            //If control width is too small we have to add special class to dropdown part
-            if (this.$el.width() < CONTROL_NORMAL_WIDTH_LIMIT) {
-                this.$dropDownEl.find(".mSelect-footer").addClass("mSelect-footer-narrow");
-            }
-
-            this.$dropDownEl.show();
-            this.dropDownManager.startCalc();
-        },
-
-        doCollapse: function() {
-            this.$el.find(".mSelect-avListPlaceholder").removeClass("expanded").addClass("collapsed");
-            this.$el.find("input").val("");
-            this.$dropDownEl.hide().find(".mSelect-footer").removeClass("mSelect-footer-narrow");
-            this.model.set("criteria", "");
-            this.dropDownManager.stopCalc();
-            this.trigger("collapse");
-        },
-
-	    calcOffsetForDropDown: function() {
-            var offset = this.$el.offset();
-            var top = $body.offset().top + offset.top + this.$el.height();
-		    var left = $body.offset().left + offset.left;
-
-            return {
-                top: top,
-                left: left,
-                width: this.$el.width()
-            }
-        },
-
         processKeydown: function() {
-            this.model.set("criteria", this.$el.find("input").val());
+            this.model.set("criteria", this.$el.find("input.j-search").val());
         },
 
         changeFilter: function(callback) {
-            var that = this;
-            this.searcheableDataProvider.getData({criteria: this.model.get("criteria")}).done(
-                callback && typeof callback === "function" ? callback : function() {
-                that.listView.fetch(function () {
-                    that.listView.setValue(that.model.get("value"), {silent: true});
-                });
-            });
-        },
+            var self = this,
+                criteria = this.model.get("criteria");
 
-        processSelectionThroughApi: function(selection) {
-            var indexMapping = this.searcheableDataProvider.getIndexMapping();
-            var total = this.listViewModel.get("total");
-
-            var newValue = [];
-
-            for (var i in selection) {
-                if (selection.hasOwnProperty(i)) {
-                    var index = indexMapping ? indexMapping[i] : i;
-                    var value = selection[i];
-
-                    if (value !== undefined) {
-                        newValue[index] = value;
-                    }
-                }
+            if (typeof criteria == "undefined" || criteria === "") {
+                this.model.unset("totalValues", {silent: true});
             }
 
-            this.model.attributes.value = newValue;
-            this.model.trigger("change:value");
+            this.listView.scrollTo(0);
+            self.listView.activate(null, {silent: true}); //we have to drop active element before filter change
+
+            this.getData({
+                criteria: criteria,
+                offset: 0,
+                limit: 1
+            }).done(
+                function() {
+                    self.listViewModel.once("change", callback && typeof callback === "function" ? callback : function() {
+                        //need to set selected values again after change search criteria
+                        self.listView.setValue(_.keys(self.model.get("value")), {silent: true});
+                        self.listView.activate(0);
+                    });
+                    self.listView.fetch();
+                }
+            );
+        },
+
+        clearFilter: function(callback) {
+            if (this.model.get("criteria")) {
+                this.$el.find("input").val("");
+                this.model.set("criteria", "", {silent: true});
+
+                this.changeFilter(callback);
+            } else {
+                this.model.unset("totalValues", {silent: true});
+                callback && callback();
+            }
+        },
+
+        processSelectionThroughApi: function(selection, options) {
+            var value = {},
+                sx    = 0,
+                sLen  = selection.length;
+
+            this.selectionClear();
+
+            for (sx; sx < sLen; sx += 1) {
+                value[selection[sx]] = true;
+            }
+
+            this.model.attributes.value = value;
+            if (!options || !options.silent) {
+                this.model.trigger("change:value");
+            }
         },
 
         convertSelectionForListViewModel: function(selection) {
-            var indexMapping = this.searcheableDataProvider.getReverseIndexMapping();
-            if (!indexMapping) {
-                return selection;
-            }
-
-            var newSelection = {};
-            for (var i in selection) {
-                if (selection.hasOwnProperty(i)) {
-                    var index = indexMapping[i];
-
-                    if (index) {
-                        var value = selection[i];
-                        if (value !== undefined) {
-                            newSelection[index] = value;
-                        }
-                    }
-                }
-            }
-
-            return newSelection;
+            return selection;
         },
 
         /* Internal methods */
@@ -595,8 +624,7 @@ define(function (require) {
         getModelForRendering: function() {
             return {
                 label: this.label,
-                isIPad: navigator.platform === "iPad",
-                expanded: this.model.get("expanded"),
+                isIPad: browserDetection.isIPad(),
                 disabled: this.model.get("disabled"),
                 i18n: i18n
             }
@@ -605,41 +633,53 @@ define(function (require) {
         /* API */
 
         fetch: function(callback, options) {
-            this.listView.fetch(callback, options);
+            var self = this;
+
+            this.clearFilter(function() {
+                self.listView.fetch(callback, options);
+            });
+        },
+
+        resize: function() {
+            this.listView.resize();
+            this.setBulkSelectionText();
         },
 
         reset: function(options) {
-            this.listView.reset(options);
-        },
+            var self = this;
 
-        expand: function() {
-            this.model.set("expanded", true);
-            return this;
-        },
-
-        collapse: function() {
-            this.model.set("expanded", false);
-            return this;
+            this.clearFilter(function() {
+                self.listView.reset(options);
+            });
         },
 
         getValue: function() {
-            return this.model.get("value");
+            return _.keys(this.model.get("value"));
         },
 
         setValue: function(value, options) {
-            this.listViewModel.once("selection:change", function() {
-                this.model.attributes.value = this.listViewModel.getSelection();
+            options = options || {};
+
+            this.listViewModel.once("selection:change", function () {
+                this.selectionClear();
+                var selection = this.listViewModel.getSelection(),
+                    i = 0,
+                    length = selection.length;
+
+                for (i; i < length; i++) {
+                    this.model.attributes.value[selection[i]] = true;
+                }
+
                 if (!options || !options.silent) {
                     this.changeValue();
                 }
             }, this);
 
-
-            if (!_.isArray(value) && !(typeof value === "string")) {
+            if (!_.isArray(value) && typeof value !== "string") {
                 value = this.convertSelectionForListViewModel(value);
             }
 
-            this.listViewModel.select(value);
+            this.listViewModel.select(value, options.modelOptions);
         },
 
         setDisabled: function(disabled) {
@@ -654,18 +694,13 @@ define(function (require) {
             this.listView.remove();
             Backbone.View.prototype.remove.call(this);
 
-            this.$dropDownEl.off("mousedown", this.onMousedown)
-                .off("mouseup", this.onDropdownMouseup)
-                .off("click", this.onEscKey)
-                .off("click", this.onSelectAll)
-                .off("click", this.onSelectNone)
-                .off("click", this.onInvertSelection).remove();
-
             $("body").off("mousedown", this.onGlobalMousedown)
-                .off("dataavailable", this.onGlobalMousedown)
                 .off("mouseup", this.onGlobalMouseup)
                 .off("mousemove", this.onGlobalMousemove);
+
+            $(window).off("resize", this._debouncedOnResize);
         }
+
     });
 
     return AvailableItemsList;

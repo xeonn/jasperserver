@@ -153,6 +153,16 @@
             </li>
 
 
+            <!--
+            <li class="leaf">
+                <div class="control checkBox">
+                     <label class="wrap" for="scheduler_box_15" title="<spring:message code="report.output.json.label.tooltip"/>"><spring:message code="report.output.json.label"/></label>
+                     <input id="scheduler_box_15" name="outputFormats" value="JSON" type="checkbox">
+                </div>
+            </li>
+            -->
+
+
             <c:if test="${enableDataSnapshot}">
                 <li class="leaf">
                     <div class="control checkBox">

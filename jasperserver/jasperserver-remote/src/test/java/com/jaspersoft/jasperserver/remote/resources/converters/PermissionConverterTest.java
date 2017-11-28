@@ -26,8 +26,8 @@ import com.jaspersoft.jasperserver.api.metadata.user.domain.client.ObjectPermiss
 import com.jaspersoft.jasperserver.api.metadata.user.domain.client.UserImpl;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.impl.client.MetadataUserDetails;
 import com.jaspersoft.jasperserver.dto.permissions.RepositoryPermission;
-import com.jaspersoft.jasperserver.remote.helpers.PermissionsRecipientIdentity;
-import com.jaspersoft.jasperserver.remote.helpers.PermissionsRecipientIdentityResolver;
+import com.jaspersoft.jasperserver.remote.helpers.RecipientIdentity;
+import com.jaspersoft.jasperserver.remote.helpers.RecipientIdentityResolver;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -47,13 +47,14 @@ public class PermissionConverterTest {
     @InjectMocks
     private PermissionConverter converter;
 
-    @Mock PermissionsRecipientIdentityResolver resolver;
+    @Mock
+    RecipientIdentityResolver resolver;
 
     private final String clientUri = "/public";
     private final String repoUri = "repo:/public";
 
     private final String userUri = "user:/me";
-    private final PermissionsRecipientIdentity userIdentity = new PermissionsRecipientIdentity(User.class, "me");
+    private final RecipientIdentity userIdentity = new RecipientIdentity(User.class, "me");
     private final User user = new UserImpl();
 
     private final ObjectPermission server = new ObjectPermissionImpl();

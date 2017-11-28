@@ -20,8 +20,9 @@
  */
 package com.jaspersoft.jasperserver.api.metadata.user.domain.client;
 
+import com.jaspersoft.jasperserver.api.metadata.common.domain.PermissionUriProtocol;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.ProfileAttribute;
-import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributeCategory;
+import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributeLevel;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
@@ -38,8 +39,12 @@ import java.io.Serializable;
 public class ProfileAttributeImpl implements ProfileAttribute, Serializable {
     private String attrName;
     private String attrValue;
-    private ProfileAttributeCategory category;
+    private String group;
     private boolean secure = false;
+    private String description;
+    private ProfileAttributeLevel level;
+    @XmlTransient
+    private String uri = "/";
 
     @XmlTransient
     private Object principal;
@@ -66,13 +71,12 @@ public class ProfileAttributeImpl implements ProfileAttribute, Serializable {
     }
 
     @Override
-    public ProfileAttributeCategory getCategory() {
-        return category;
+    public String getGroup() {
+        return group;
     }
 
-    @Override
-    public void setCategory(ProfileAttributeCategory category) {
-        this.category = category;
+    public void setGroup(String group) {
+        this.group = group;
     }
 
     public void setPrincipal(Object o) {
@@ -87,13 +91,79 @@ public class ProfileAttributeImpl implements ProfileAttribute, Serializable {
         this.secure = secure;
     }
 
+    @Override
+    public ProfileAttributeLevel getLevel() {
+        return level;
+    }
+
+    @Override
+    public void setLevel(ProfileAttributeLevel level) {
+        this.level = level;
+    }
+
+    @Override
+    public String getDescription() {
+        return description;
+    }
+
+    @Override
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    @XmlTransient
+    public String getUri() {
+        return this.uri;
+    }
+
+    public void setUri(String attrName, String holderUri) {
+        this.uri = holderUri.concat("/attributes/").concat(attrName);
+    }
+
+    @Override
+    public String getURI() {
+        return PermissionUriProtocol.ATTRIBUTE.addPrefix(getPath());
+    }
+
+    @Override
+    public String getPath() {
+        return getUri();
+    }
+
+    @Override
+    public String getProtocol() {
+        return PermissionUriProtocol.ATTRIBUTE.toString();
+    }
+
+    @Override
+    public String getParentURI() {
+        String parentPath = getParentPath();
+        return parentPath == null ? null : PermissionUriProtocol.ATTRIBUTE.addPrefix(parentPath);
+    }
+
+    @Override
+    public String getParentPath() {
+        return PermissionUriProtocol.ATTRIBUTE.getParentUri(getUri());
+    }
+
+    @Override
+    public Serializable getIdentifier() {
+        return getURI();
+    }
+
+    @Override
+    public String getType() {
+        return null;
+    }
+
     public String toString() {
         return new ToStringBuilder(this)
                 .append("attrName", getAttrName())
                 .append("attrValue", getAttrValue())
                 .append("principal", getPrincipal())
                 .append("secure", Boolean.valueOf(isSecure()))
-                .append("category", getCategory())
+                .append("group", getGroup())
+                .append("description", getDescription())
                 .toString();
     }
 
@@ -103,7 +173,7 @@ public class ProfileAttributeImpl implements ProfileAttribute, Serializable {
         return new EqualsBuilder()
                 .append(this.getAttrName(), castOther.getAttrName())
                 .append(this.getPrincipal(), castOther.getPrincipal())
-                .append(this.getCategory(), castOther.getCategory())
+                .append(this.getGroup(), castOther.getGroup())
                 .isEquals();
     }
 
@@ -111,7 +181,7 @@ public class ProfileAttributeImpl implements ProfileAttribute, Serializable {
         return new HashCodeBuilder()
                 .append(getAttrName())
                 .append(getPrincipal())
-                .append(getCategory())
+                .append(getGroup())
                 .toHashCode();
     }
 }

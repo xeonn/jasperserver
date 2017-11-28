@@ -1,11 +1,14 @@
 package com.jaspersoft.jasperserver.api.engine.jasperreports.util;
 
 
+import com.jaspersoft.jasperserver.api.common.domain.impl.ExecutionContextImpl;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceReference;
+import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.CustomReportDataSource;
 import org.springframework.validation.Errors;
-
+import javax.annotation.Resource;
+import java.io.File;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 /**
  * Created by IntelliJ IDEA.
@@ -16,6 +19,9 @@ import java.util.regex.Pattern;
  */
 public class XlsDataSourceValidator implements CustomDataSourceValidator {
 
+    @Resource(name = "concreteRepository")
+    private RepositoryService repositoryService;
+
 	public void validatePropertyValues(CustomReportDataSource ds, Errors errors) {
 		String filePath = null;
         String useFirstRowAsHeader = null;
@@ -25,21 +31,38 @@ public class XlsDataSourceValidator implements CustomDataSourceValidator {
 			filePath = (String) ds.getPropertyMap().get("fileName");
             useFirstRowAsHeader = (String) ds.getPropertyMap().get("useFirstRowAsHeader");
 		}
-		if (filePath == null || filePath.length() == 0) {
-			reject(errors, "fileName", "Please enter file path");
-		} else {
-            if (filePath.toLowerCase().startsWith("repo:/")) {
-                // organization token is optional in regexp below because organization is null for superuser
-                if(!Pattern.matches("repo:/([^|]+)(\\|.+)?", filePath)) {
-                    reject(errors, "fileName", "Missing file path.  Please follow REPO syntax for REPO path:  repo:/[PATH]/[FILENAME]|[ORGANIZATION] eg. \"repo:/reports/interactive/CsvData|organization_1\"");
-                }
+        final ResourceReference dataFileReference = ds.getResources() != null
+                ? ds.getResources().get(TextDataSourceDefinition.DATA_FILE_RESOURCE_ALIAS) : null;
+        if(dataFileReference != null){
+            if(filePath != null) reject(errors, "fileName", "File path is redundant if data file reference is specified");
+            final String targetURI = dataFileReference.getTargetURI();
+            if(repositoryService.getResource(
+                    ExecutionContextImpl.getRuntimeExecutionContext(), targetURI) == null){
+                reject(errors, "fileName", "Data file isn't found by URI " + targetURI);
             }
+        }
+		if (filePath == null || filePath.length() == 0) {
+            // file path can be null if data file resources is linked to the data source
+            if(dataFileReference == null) reject(errors, "fileName", "Please enter file path");
+		} else {
             if (filePath.toLowerCase().startsWith("ftp://")) {
                 int idx1 = filePath.indexOf(":", 6);
                 int idx2 = filePath.indexOf("@", 6);
                 int idx3 = filePath.indexOf("/", idx1);
                 if ((idx1 <= 0) || (idx2 <= 0) || (idx3 <= 0) || (idx3 == (idx2 + 1))) {
-                    reject(errors, "fileName", "Please follow FTP syntax for FTP path: ftp://[USRNAME]:[PASSWORD]@[HOST]:[PORT]/[PATH]/[FILENAME]");
+                    reject(errors, "fileName", "Please follow FTP syntax for FTP path: ftp://[USERNAME]:[PASSWORD]@[HOST]:[PORT]/[PATH]/[FILENAME]");
+                }
+            } else if  (filePath.toLowerCase().startsWith("repo:")) {
+            } else if  (filePath.toLowerCase().startsWith("http:")) {
+            } else if  (filePath.toLowerCase().startsWith("https:")) {
+            } else {
+                try {
+                    File f = new File(filePath);
+                    if (!(f.exists() && !f.isDirectory())) {
+                        reject(errors, "fileName", "Invalid Server file system path");
+                    }
+                } catch (Exception ex) {
+                    reject(errors, "fileName", "Invalid Server file system path");
                 }
             }
         }

@@ -30,6 +30,7 @@ public class ReportUnitWrapper extends BaseDTO {
 	private List suggestedResources;
 	private List suggestedControls;
 	private List reusableJrxmls;	
+	private boolean anyJrxmlAvailable;
 	private String source;
 	private byte[] jrxmlData;
 	private String jrxmlUri;
@@ -88,10 +89,12 @@ public class ReportUnitWrapper extends BaseDTO {
 	public void setSource(String source) {
 		this.source = source;
 	}
+    @Deprecated
 	public List getReusableJrxmls() {
 		return reusableJrxmls;
 	}
-	public void setReusableJrxmls(List reusableJrxmls) {
+    @Deprecated
+    public void setReusableJrxmls(List reusableJrxmls) {
 		this.reusableJrxmls = reusableJrxmls;
 	}
 	public ReportUnit getReportUnit() {
@@ -172,9 +175,11 @@ public class ReportUnitWrapper extends BaseDTO {
 	public void setValidationMessage(String validationMessage) {
 		this.validationMessage = validationMessage;
 	}
-	public List getExistingResources() {
+	@Deprecated
+    public List getExistingResources() {
 		return existingResources;
 	}
+    @Deprecated
 	public void setExistingResources(List existingResources) {
 		this.existingResources = existingResources;
 	}
@@ -208,4 +213,12 @@ public class ReportUnitWrapper extends BaseDTO {
 	{
 		this.inputControlSource = inputControlSource;
 	}
+
+    public boolean isAnyJrxmlAvailable() {
+        return anyJrxmlAvailable;
+    }
+
+    public void setAnyJrxmlAvailable(boolean anyJrxmlAvailable) {
+        this.anyJrxmlAvailable = anyJrxmlAvailable;
+    }
 }

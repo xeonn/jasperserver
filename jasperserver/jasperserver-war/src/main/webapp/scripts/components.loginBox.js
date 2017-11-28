@@ -21,9 +21,10 @@
 
 
 /**
- * @version: $Id: components.loginBox.js 7762 2014-09-19 10:16:02Z sergey.prilukin $
+ * @version: $Id: components.loginBox.js 8179 2015-01-27 12:34:21Z psavushchik $
  */
 
+/* global webHelpModule, dialogs, layoutModule, ValidationModule */
 
 var loginBox = {
     LOGIN_BOX_TEMPLATE_DOM_ID: "login",
@@ -136,7 +137,7 @@ var loginBox = {
         this.gotoJasperForge && this.gotoJasperForge.observe("click", function(e) {
             var url = "http://jasperforge.org";
             window.name = "";
-            runPopup=window.open(url, "jasperforge.org");
+            var runPopup=window.open(url, "jasperforge.org");
             runPopup.focus();
         }.bindAsEventListener(this));
 

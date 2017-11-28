@@ -29,6 +29,7 @@ import com.jaspersoft.jasperserver.remote.exception.ResourceNotFoundException;
 import com.jaspersoft.jasperserver.remote.services.AttributesRemoteService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -70,7 +71,12 @@ public class AttributesRemoteServiceImpl implements AttributesRemoteService {
         for (ProfileAttribute att:l ){
             if (att.getAttrName().equals(pa.getAttrName())){
                 att.setPrincipal(user);
-                profileAttributeService.deleteProfileAttribute(null, att);
+                try {
+                    att.setUri(pa.getAttrName(), profileAttributeService.generateAttributeHolderUri(user));
+                    profileAttributeService.deleteProfileAttribute(null, att);
+                } catch (AccessDeniedException ex) {
+                    throw new ServiceException(ServiceException.FORBIDDEN, "Access denied for attribute " + pa.getAttrName());
+                }
                 if (log.isDebugEnabled()) {
                     log.debug("attribute "+pa.getAttrName()+" was deleted successfully from "+ userName);
                 }
@@ -98,16 +104,20 @@ public class AttributesRemoteServiceImpl implements AttributesRemoteService {
 
     public void putAttribute(String userName, ProfileAttribute pa) {
         User user = userAuthorityService.getUser(null, userName);
-        if ( user==null) {
-            throw new IllegalArgumentException("could not find user: "+ userName);
-
+        if (user==null) {
+            throw new ServiceException(404, ResourceNotFoundException.ERROR_CODE_RESOURCE_NOT_FOUND);
         }
         else {
             if (log.isDebugEnabled()) {
                 log.debug("user "+user.getUsername()+" was found");
             }
             pa.setPrincipal(user);
-            profileAttributeService.putProfileAttribute(null, pa);
+            try {
+                pa.setUri(pa.getAttrName(), profileAttributeService.generateAttributeHolderUri(user));
+                profileAttributeService.putProfileAttribute(null, pa);
+            } catch (AccessDeniedException ex) {
+                throw new ServiceException(ServiceException.FORBIDDEN, "Access denied for attribute " + pa.getAttrName());
+            }
             if (log.isDebugEnabled()) {
                 log.debug("attribute was set successfully");
             }

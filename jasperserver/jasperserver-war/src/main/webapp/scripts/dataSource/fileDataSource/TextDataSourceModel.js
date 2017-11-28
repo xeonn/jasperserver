@@ -22,13 +22,13 @@
 
 /**
  * @author: Dima Gorbenko
- * @version: $Id: TextDataSourceModel.js 7872 2014-10-04 09:08:52Z inesterenko $
+ * @version: $Id: TextDataSourceModel.js 8179 2015-01-27 12:34:21Z psavushchik $
  */
 
 define(function (require) {
     "use strict";
 
-    var
+    var _ = require("underscore"),
         i18n = require("bundle!jasperserver_messages"),
         jrsConfigs = require('jrs.configs'),
         request = require("common/transport/request"),

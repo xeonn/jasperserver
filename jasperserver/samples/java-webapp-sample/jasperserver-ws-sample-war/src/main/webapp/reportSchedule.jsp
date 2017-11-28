@@ -57,7 +57,7 @@
 <center><h1>JasperServer Web Services Sample</h1></center>
 <hr/>
 <h3>List report jobs</h3>
-Report: <c:out value="${reportUri}"/><br>
+Report: ${reportUri}<br>
 <br/>
 <table id="mainTable" border="2" cellpadding="2" cellspacing="2" height="100%" valign="top">
     <tr>
@@ -70,9 +70,9 @@ Report: <c:out value="${reportUri}"/><br>
     <tr>
         <c:forEach items="${jobs}" var="job">
     <tr>
-        <td><c:out value="${job.id}"/></td>
-        <td><c:out value="${job.label}"/></td>
-        <td><c:out value="${job.state}"/></td>
+        <td>${job.id}</td>
+        <td>${job.label}</td>
+        <td>${job.state}</td>
         <td><fmt:formatDate type="both" value="${job.previousFireTime.time}"/></td>
         <td><fmt:formatDate type="both" value="${job.nextFireTime.time}"/></td>
         <td>

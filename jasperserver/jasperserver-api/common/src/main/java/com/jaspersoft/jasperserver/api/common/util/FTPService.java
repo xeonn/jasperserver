@@ -22,11 +22,12 @@
 package com.jaspersoft.jasperserver.api.common.util;
 
 
+import javax.net.ssl.TrustManager;
 import java.io.InputStream;
 
 /**
  * @author Ivan Chan (ichan@jaspersoft.com)
- * @version $Id: FTPService.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: FTPService.java 55164 2015-05-06 20:54:37Z mchan $
  */
 public interface FTPService {
 
@@ -77,6 +78,23 @@ public interface FTPService {
      * @return FTPServiceClient interface to access ftp server
      */
     FTPServiceClient connectFTPS(String host, int port, String protocol, boolean isImplicit, long pbsz, String prot, String userName, String password) throws Exception;
+
+    /*
+     * Establishes a data connection with the FTPS server
+     *
+     * @param host ftp server host name
+     * @param port ftp server port number
+     * @param protocol ftp protocol
+     * @param isImplicit the security mode for FTPS (Implicit/ Explicit)
+     * @param pbsz pbsz value: 0 to (2^32)-1 decimal integer.
+     * @param prot PROT command
+     * @param userName login user name
+     * @param password login password
+     * @param useDefaultTrustManager - only do date validation if using default trust manager. Otherwise, use the value in trust manager parameter
+     * @param Trust Manager - set to NULL to use JVM trust manager (if useDefaultTrustManager is set to true, this value will be ignored)
+     * @return FTPServiceClient interface to access ftp server
+     */
+    FTPServiceClient connectFTPS(String host, int port, String protocol, boolean isImplicit, long pbsz, String prot, String userName, String password, boolean useDefaultTrustManager, TrustManager trustManager) throws Exception;
 
     public interface FTPServiceClient {
 

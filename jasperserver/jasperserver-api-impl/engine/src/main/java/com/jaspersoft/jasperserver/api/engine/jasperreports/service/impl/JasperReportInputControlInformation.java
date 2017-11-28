@@ -29,7 +29,7 @@ import java.io.Serializable;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: JasperReportInputControlInformation.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: JasperReportInputControlInformation.java 55164 2015-05-06 20:54:37Z mchan $
  */
 public class JasperReportInputControlInformation implements
 		ReportInputControlInformation, Serializable {
@@ -38,6 +38,7 @@ public class JasperReportInputControlInformation implements
 	
 	private JRParameter reportParameter;
 	private String promptLabel;
+	private String description;
 	private Object defaultValue;
 	private ReportInputControlValuesInformation reportInputControlValuesInformation;
 
@@ -49,7 +50,12 @@ public class JasperReportInputControlInformation implements
 		return promptLabel;
 	}
 
-    public String getParameterName() {
+	@Override
+	public String getDescription() {
+		return description;
+	}
+
+	public String getParameterName() {
         return reportParameter.getName();
     }
 
@@ -71,6 +77,10 @@ public class JasperReportInputControlInformation implements
 
 	public void setPromptLabel(String promptLabel) {
 		this.promptLabel = promptLabel;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
 	public void setDefaultValue(Object defaultValue) {

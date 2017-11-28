@@ -25,6 +25,7 @@ import com.jaspersoft.jasperserver.api.logging.context.LoggableEvent;
 import com.jaspersoft.jasperserver.api.logging.context.LoggingContext;
 import com.jaspersoft.jasperserver.api.logging.context.LoggingContextProvider;
 
+import java.io.Serializable;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -34,11 +35,12 @@ import org.apache.commons.logging.LogFactory;
  * @author Sergey Prilukin
  * @version $Id$
  */
-public abstract class BasicLoggingContextProvider implements LoggingContextProvider {
+public abstract class BasicLoggingContextProvider implements LoggingContextProvider, Serializable
+{
     private static final Log log = LogFactory.getLog(BasicLoggingContextProvider.class);
 
-    private LoggingService loggingService;
-    private Map<Class<? extends LoggableEvent>, Boolean> enabledLoggingTypesMap;
+    private transient LoggingService loggingService;
+    private transient Map<Class<? extends LoggableEvent>, Boolean> enabledLoggingTypesMap;
 
     private final ThreadLocal<LoggingContext> threadLocalContext = new ThreadLocal<LoggingContext>() {
         @Override

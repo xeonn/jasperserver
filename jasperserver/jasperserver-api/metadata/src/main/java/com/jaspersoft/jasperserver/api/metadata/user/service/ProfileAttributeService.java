@@ -33,7 +33,7 @@ import com.jaspersoft.jasperserver.api.metadata.user.domain.ProfileAttribute;
  * Manage attributes for principals - Users, Roles
  *
  * @author sbirney
- * @version $Id: ProfileAttributeService.java 50011 2014-10-09 16:57:26Z vzavadskii $
+ * @version $Id: ProfileAttributeService.java 54590 2015-04-22 17:55:42Z vzavadsk $
  */
 @JasperServerAPI
 public interface ProfileAttributeService {
@@ -55,7 +55,7 @@ public interface ProfileAttributeService {
      * @param category The category to find attributes or null to move trough all categories
      * @return The List of found profile attributes
      */
-    public List<ProfileAttribute> getCurrentUserProfileAttributes(ProfileAttributeCategory category);
+    public List<ProfileAttribute> getCurrentUserProfileAttributes(ExecutionContext executionContext, ProfileAttributeCategory category);
 
     /**
      * Find all matching attributes for the passed in principals
@@ -74,8 +74,8 @@ public interface ProfileAttributeService {
      * @param effectiveAttributes indicates if attributes should be resolved hierarchically, from principal up to system level
      * @return List of found profile attributes
      */
-    public List<ProfileAttribute> getProfileAttributesForPrincipal(ExecutionContext context, Object principal,
-                                                                   boolean effectiveAttributes);
+    public AttributesSearchResult<ProfileAttribute> getProfileAttributesForPrincipal(ExecutionContext context, Object principal,
+                                                                   AttributesSearchCriteria searchCriteria);
 
     /**
      * Find all matching attributes for the principal extracted from
@@ -166,4 +166,16 @@ public interface ProfileAttributeService {
      * @return UserAuthorityService
      */
     public UserAuthorityService getUserAuthorityService();
+
+    /**
+     * Applies SERVER profile attributes for all registered property changers
+     */
+    public void applyProfileAttributes();
+
+    /**
+     * Returns PropertyChanger name by a profile attribute name
+     */
+    public String getChangerName(String propertyName);
+
+    public String generateAttributeHolderUri(Object holder);
 }

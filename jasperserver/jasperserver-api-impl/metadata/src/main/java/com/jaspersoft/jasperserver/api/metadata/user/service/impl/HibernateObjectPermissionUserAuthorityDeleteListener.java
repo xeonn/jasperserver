@@ -29,13 +29,13 @@ import org.springframework.context.ApplicationContextAware;
 
 import com.jaspersoft.jasperserver.api.metadata.common.domain.impl.IdedObject;
 import com.jaspersoft.jasperserver.api.metadata.common.service.impl.HibernateDeleteListener;
-import com.jaspersoft.jasperserver.api.metadata.user.domain.impl.ObjectPermissionRecipientIdentity;
+import com.jaspersoft.jasperserver.api.metadata.user.domain.impl.ObjectRecipientIdentity;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.impl.hibernate.RepoRole;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.impl.hibernate.RepoUser;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: HibernateObjectPermissionUserAuthorityDeleteListener.java 51947 2014-12-11 14:38:38Z ogavavka $
+ * @version $Id: HibernateObjectPermissionUserAuthorityDeleteListener.java 54590 2015-04-22 17:55:42Z vzavadsk $
  */
 public class HibernateObjectPermissionUserAuthorityDeleteListener implements
 		HibernateDeleteListener, ApplicationContextAware {
@@ -63,7 +63,7 @@ public class HibernateObjectPermissionUserAuthorityDeleteListener implements
 	}
 	
 	protected void deleteObjectPermissions(IdedObject recipient) {
-		ObjectPermissionRecipientIdentity recipientIdentity = new ObjectPermissionRecipientIdentity(recipient);
+		ObjectRecipientIdentity recipientIdentity = new ObjectRecipientIdentity(recipient);
         ExecutionContext executionContext = new ExecutionContextImpl();
         executionContext.getAttributes().add(ObjectPermissionService.PRIVILEGED_OPERATION);
 		getObjectPermissionService().deleteObjectPermissionsForRecipient(executionContext, recipientIdentity);

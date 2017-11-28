@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: ListWithSelectionModel.js 172 2014-09-23 11:45:30Z sergey.prilukin $
+ * @version: $Id: ListWithSelectionModel.js 812 2015-01-27 11:01:30Z psavushchik $
  */
 
 /*global window, Backbone, _, jaspersoft.components */
@@ -100,7 +100,7 @@ define(function (require) {
         _isSelectionEmpty: function(selection) {
             if (!selection) {
                 return true;
-            } else if (_.isArray(selection) && selection.length == 0) {
+            } else if (_.isArray(selection) && selection.length === 0) {
                 return true;
             } else if (_.isArray(selection) || typeof selection === "string") {
                 return false;
@@ -116,7 +116,7 @@ define(function (require) {
         },
 
         _selectPendingSelection: function(pendingSelection, options) {
-            if (this.get("bufferStartIndex") == 0 && this.get("bufferEndIndex") == this.get("total") - 1) {
+            if (this.get("bufferStartIndex") === 0 && this.get("bufferEndIndex") == this.get("total") - 1) {
                 //All data from this range already fetched
                 this._convertInitialArrayToSelection(this.get("items"), pendingSelection, options);
             } else {

@@ -34,6 +34,7 @@ Containers
 -->
 <link rel="stylesheet" href="${pageContext.request.contextPath}/themes/dev/containers/frame.css" type="text/css" media="screen,print"/>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/themes/dev/containers/containers.css" type="text/css" media="screen,print"/>
+<link rel="stylesheet" href="${pageContext.request.contextPath}/themes/dev/containers/dialog.css" type="text/css" media="screen,print"/>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/themes/dev/containers/columns.css" type="text/css" media="screen,print"/>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/themes/dev/containers/decorated_column.css" type="text/css" media="screen,print"/>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/themes/dev/containers/panels.css" type="text/css" media="screen,print"/>

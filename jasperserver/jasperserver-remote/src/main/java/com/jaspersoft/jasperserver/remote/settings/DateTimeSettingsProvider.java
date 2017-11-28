@@ -23,7 +23,7 @@ package com.jaspersoft.jasperserver.remote.settings;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -31,8 +31,8 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
-import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -44,14 +44,16 @@ import java.util.regex.Pattern;
  * <p></p>
  *
  * @author Sergey Prilukin
- * @version $Id: DateTimeSettingsProvider.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: DateTimeSettingsProvider.java 55357 2015-05-15 12:07:43Z spriluki $
  */
 public class DateTimeSettingsProvider implements SettingsProvider {
 
     private Pattern datePickerSettingsPattern;
+    private Pattern timePickerSettingsPattern;
     private Integer datePickerSettingsPatternGroup;
     private String datePickerDefaultLocale;
     private String datePickerSettingsPathTemplate;
+    private String timePickerSettingsPathTemplate;
     private Map<String, String> datePickerPropertiesMapping;
     private Map<String, String> timePickerPropertiesMapping;
     private Boolean enableCache;
@@ -61,6 +63,10 @@ public class DateTimeSettingsProvider implements SettingsProvider {
 
     public void setDatePickerSettingsPattern(Pattern datePickerSettingsPattern) {
         this.datePickerSettingsPattern = datePickerSettingsPattern;
+    }
+
+    public void setTimePickerSettingsPattern(Pattern timePickerSettingsPattern) {
+        this.timePickerSettingsPattern = timePickerSettingsPattern;
     }
 
     public void setDatePickerSettingsPatternGroup(Integer datePickerSettingsPatternGroup) {
@@ -83,6 +89,10 @@ public class DateTimeSettingsProvider implements SettingsProvider {
         this.datePickerSettingsPathTemplate = datePickerSettingsPathTemplate;
     }
 
+    public void setTimePickerSettingsPathTemplate(String timePickerSettingsPathTemplate) {
+        this.timePickerSettingsPathTemplate = timePickerSettingsPathTemplate;
+    }
+
     public void setDatePickerDefaultLocale(String datePickerDefaultLocale) {
         this.datePickerDefaultLocale = datePickerDefaultLocale;
     }
@@ -99,7 +109,7 @@ public class DateTimeSettingsProvider implements SettingsProvider {
         if (result == null) {
             result = new HashMap<String, Object>();
             result.put("datepicker", getDatePickerSettings(locale));
-            result.put("timepicker", getTimePickerSettings());
+            result.put("timepicker", getTimePickerSettings(locale));
 
             if (enableCache) {
                 settingsCache.put(locale, result);
@@ -116,51 +126,60 @@ public class DateTimeSettingsProvider implements SettingsProvider {
     /* DatePicker settings */
 
     private Map<String, Object> getDatePickerSettings(String locale) {
-        String content = getFileContentOrDefault(locale);
-        String settingsJSON = getSettingsFromFileContent(content);
+        String content = getSettingsContentOrDefault(datePickerSettingsPathTemplate, locale);
+        String settingsJSON = getSettingsFromFileContent(datePickerSettingsPattern, content);
         Map<String, Object> result = convertToJSONObject(settingsJSON);
-        customizeSettings(result);
+        customizeSettings(datePickerPropertiesMapping, result);
 
         return result;
     }
 
-    private File getSettingsFile(String path) {
+	/* TimePicker settings */
+
+    private Map<String, Object> getTimePickerSettings(String locale) {
+        String content = getSettingsContentOrDefault(timePickerSettingsPathTemplate, locale);
+        String settingsJSON = getSettingsFromFileContent(timePickerSettingsPattern, content);
+        Map<String, Object> result = convertToJSONObject(settingsJSON);
+        customizeSettings(timePickerPropertiesMapping, result);
+
+        return result;
+    }
+
+    private InputStream getPathAsStream(String path) {
         ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
         HttpServletRequest request = attr.getRequest();
         ServletContext servletContext = request.getSession().getServletContext();
-        String realPath = servletContext.getRealPath(path);
-
-        return new File(realPath);
+        return servletContext.getResourceAsStream(path);
     }
 
-    private String getFileContentOrDefault(String locale) {
-        String settingsFile = String.format(datePickerSettingsPathTemplate, locale);
-        String fileContent = getFileContent(settingsFile);
-        if (fileContent == null) {
-            fileContent = getFileContent(String.format(datePickerSettingsPathTemplate, datePickerDefaultLocale));
-            if (fileContent == null) {
+    private String getSettingsContentOrDefault(String template, String locale) {
+        String settingsFile = String.format(template, locale);
+        String settingsContent = getSettingsContent(settingsFile);
+        if (settingsContent == null) {
+            settingsContent = getSettingsContent(String.format(template, datePickerDefaultLocale));
+            if (settingsContent == null) {
                 throw new RuntimeException("No default settings present");
             }
         }
 
-        return fileContent;
+        return settingsContent;
     }
 
-    private String getFileContent(String path) {
-        File file = getSettingsFile(path);
-        if (file == null || !file.exists()) {
+    private String getSettingsContent(String path) {
+        InputStream stream = getPathAsStream(path);
+        if (stream == null) {
             return null;
         }
 
         try {
-            return FileUtils.readFileToString(file, "UTF-8");
+            return IOUtils.toString(stream, "UTF-8");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private String getSettingsFromFileContent(String content) {
-        Matcher regexMatcher = datePickerSettingsPattern.matcher(content);
+    private String getSettingsFromFileContent(Pattern pattern, String content) {
+        Matcher regexMatcher = pattern.matcher(content);
         if (regexMatcher.find()) {
             return regexMatcher.group(datePickerSettingsPatternGroup);
         } else {
@@ -179,28 +198,13 @@ public class DateTimeSettingsProvider implements SettingsProvider {
         }
     }
 
-    private void customizeSettings(Map<String, Object> settings) {
+    private void customizeSettings(Map<String, String> mapping, Map<String, Object> settings) {
         Locale locale = LocaleContextHolder.getLocale();
 
-        for (Map.Entry<String, String> entry: datePickerPropertiesMapping.entrySet()) {
+        for (Map.Entry<String, String> entry: mapping.entrySet()) {
             String propertyValue = messageSource.getMessage(entry.getValue(),
                     new Object[] {}, locale);
             settings.put(entry.getKey(), propertyValue);
         }
-    }
-
-    /* TimePicker settings */
-
-    private Map<String, Object> getTimePickerSettings() {
-        Map<String, Object> result = new HashMap<String, Object>();
-        Locale locale = LocaleContextHolder.getLocale();
-
-        for (Map.Entry<String, String> entry: timePickerPropertiesMapping.entrySet()) {
-            String propertyValue = messageSource.getMessage(entry.getValue(),
-                    new Object[] {}, locale);
-            result.put(entry.getKey(), propertyValue);
-        }
-
-        return result;
     }
 }

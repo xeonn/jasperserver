@@ -36,6 +36,7 @@ import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService
 import com.jaspersoft.jasperserver.api.metadata.common.util.LockHandle;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.commons.net.util.TrustManagerUtils;
 
 import java.io.*;
 import java.util.*;
@@ -44,7 +45,7 @@ import java.util.zip.ZipOutputStream;
 
 /**
  * @author Ivan Chan (ichan@jaspersoft.com)
- * @version $Id: ReportExecutionJobFileSavingImpl.java 51369 2014-11-12 13:59:41Z sergey.prilukin $
+ * @version $Id: ReportExecutionJobFileSavingImpl.java 55164 2015-05-06 20:54:37Z mchan $
  */
 public class ReportExecutionJobFileSavingImpl implements ReportExecutionJobFileSaving {
 
@@ -198,7 +199,8 @@ public class ReportExecutionJobFileSavingImpl implements ReportExecutionJobFileS
             if (ftpInfo.getType().equals(FTPInfo.TYPE_FTP))
                 ftpServiceClient = ftpService.connectFTP(ftpInfo.getServerName(), ftpInfo.getPort(), ftpInfo.getUserName(), ftpInfo.getPassword());
             else
-                ftpServiceClient = ftpService.connectFTPS(ftpInfo.getServerName(), ftpInfo.getPort(), ftpInfo.getProtocol(), ftpInfo.isImplicit(), ftpInfo.getPbsz(), ftpInfo.getProt(), ftpInfo.getUserName(), ftpInfo.getPassword());
+                ftpServiceClient = ftpService.connectFTPS(ftpInfo.getServerName(), ftpInfo.getPort(), ftpInfo.getProtocol(), ftpInfo.isImplicit(), ftpInfo.getPbsz(), ftpInfo.getProt(), ftpInfo.getUserName(), ftpInfo.getPassword(),
+                        false, TrustManagerUtils.getAcceptAllTrustManager());
             ftpServiceClient.changeDirectory(ftpInfo.getFolderPath());
             if (!jobDetails.getContentRepositoryDestination().isOverwriteFiles() && ftpServiceClient.exists(fileName)) {
                throw new JSException("jsexception.report.resource.already.exists.no.overwrite", new Object[] {ftpInfo.getServerName() + ftpInfo.getFolderPath() + "/" + fileName});

@@ -21,14 +21,16 @@
 
 
 /**
- * @version: $Id: org.rootObjectModifier.js 7762 2014-09-19 10:16:02Z sergey.prilukin $
+ * @version: $Id: org.rootObjectModifier.js 8179 2015-01-27 12:34:21Z psavushchik $
  */
+
+/* global organizationId, publicFolderUri */
 
 // To use this script organizationId and publicFolderUri variables should be predefined and initialized.
 var rom_orgMode = null;
 var rom_showRoot = null;
 function rom_init() {
-    rom_orgMode = organizationId != null && organizationId != "";
+    rom_orgMode = organizationId !== null && organizationId !== "";
     rom_showRoot = !rom_orgMode;
 }
 var rom_repositoryModifier = function (rootObj, isChildrenCallback) {

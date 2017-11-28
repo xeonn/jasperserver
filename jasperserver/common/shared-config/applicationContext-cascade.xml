@@ -13,6 +13,7 @@
     <alias name="${bean.controlLogicRegestry}" alias="controlLogicRegestry"/>
     <alias name="${bean.controlLogicReportTypeMapping}" alias="controlLogicReportTypeMapping"/>
     <alias name="${bean.filterResolver}" alias="filterResolver"/>
+    <alias name="${bean.auditContext}" alias="concreteAuditContext"/>
 
     <alias name="${bean.securityContextProvider}" alias="concreteSecurityContextProvider"/>
 

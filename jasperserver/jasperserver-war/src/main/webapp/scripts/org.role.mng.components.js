@@ -21,8 +21,13 @@
 
 
 /**
- * @version: $Id: org.role.mng.components.js 7762 2014-09-19 10:16:02Z sergey.prilukin $
+ * @version: $Id: org.role.mng.components.js 8900 2015-05-06 20:57:14Z yplakosh $
  */
+
+/* global orgModule, layoutModule, webHelpModule, localContext, isProVersion, invokeClientAction,
+ dynamicList, RegExpRepresenter, dialogs, invokeServerAction, ValidationModule, matchAny, canDeleteRole, canEditRole,
+
+  */
 
 /////////////////////////////////
 // Panel which shows roles list
@@ -46,18 +51,18 @@ orgModule.roleManager.roleList = {
 
         orgModule.entityList._createEntityItem = function(value) {
             var item = new dynamicList.ListItem({
-                label: value.roleName.escapeHTML(),
+                label: value.roleName,
                 value: value
             });
 
             item.processTemplate = function(element) {
                 var id = element.select(orgModule.roleManager.roleList.ROLE_ID_PATTERN)[0];
-                id.update(this.getValue().roleName.escapeHTML());
+                id.update(xssUtil.escape(this.getValue().roleName));
 
                 var tenantId = this.getValue().tenantId;
                 if (isProVersion() && tenantId) {
                     var org = element.select(orgModule.roleManager.roleList.ROLE_ORGANIZATION_PATTERN)[0];
-                    org.update(tenantId.escapeHTML());
+                    org.update(xssUtil.escape(tenantId));
                 }
 
                 return element;
@@ -181,7 +186,9 @@ orgModule.roleManager.properties = {
         };
 
         orgModule.properties.cancel = function() {
+            var dfd = new jQuery.Deferred();
             this.setProperties(this._value);
+            return dfd.resolve();
         };
 
         orgModule.properties.canEdit = function() {
@@ -203,7 +210,10 @@ orgModule.roleManager.properties = {
     },
 
     _initCustomEvents: function(roles) {
-        var panel = $(orgModule.properties._id);
+        var panel = $(orgModule.properties._id),
+            $activeElements = jQuery("#moveButtons, #userEnable"),
+            $availableAndAssignedEl = jQuery("#editUsers").find("#assigned, #available");
+
 
         panel.observe('keyup', function(event) {
             var input = event.element();
@@ -212,7 +222,18 @@ orgModule.roleManager.properties = {
                 ValidationModule.validateLegacy([input.inputValidator]);
                 event.stop();
             }
+
+            orgModule.properties._toggleButton();
+
         }.bindAsEventListener(this));
+
+        $activeElements.on('click', function(e) {
+            orgModule.properties._toggleButton();
+        });
+
+        $availableAndAssignedEl.on('dblclick', function() {
+            orgModule.properties._toggleButton();
+        });
     },
 
     _toRole: function(tenantId) {

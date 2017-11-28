@@ -26,12 +26,13 @@ import java.io.OutputStream;
 import java.util.Locale;
 
 import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JRExporterParameter;
 import net.sf.jasperreports.engine.JRPropertiesHolder;
 import net.sf.jasperreports.engine.JRPropertiesUtil;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.export.JRHyperlinkProducerFactory;
 import net.sf.jasperreports.engine.export.JRRtfExporter;
+import net.sf.jasperreports.export.SimpleExporterInput;
+import net.sf.jasperreports.export.SimpleWriterExporterOutput;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -40,7 +41,6 @@ import org.quartz.JobExecutionException;
 import com.jaspersoft.jasperserver.api.JSExceptionWrapper;
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
 import com.jaspersoft.jasperserver.api.engine.common.service.EngineService;
-import com.jaspersoft.jasperserver.api.engine.jasperreports.common.DocxExportParametersBean;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.common.RtfExportParametersBean;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ContentResource;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.DataContainer;
@@ -49,7 +49,7 @@ import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService
 
 /**
  * @author sanda zaharia (shertage@users.sourceforge.net)
- * @version $Id: RtfReportOutput.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: RtfReportOutput.java 54728 2015-04-24 15:28:20Z tdanciu $
  */
 public class RtfReportOutput extends AbstractReportOutput
 {
@@ -77,13 +77,15 @@ public class RtfReportOutput extends AbstractReportOutput
 	{
 		try {
 			JRRtfExporter exporter = new JRRtfExporter(getJasperReportsContext());
-			exporter.setParameter(JRExporterParameter.JASPER_PRINT, jasperPrint);
+            exporter.setExporterInput(new SimpleExporterInput(jasperPrint));
 			
 			boolean close = false;
 			OutputStream rtfDataOut = rtfData.getOutputStream();
 			try {
-				exporter.setParameter(JRExporterParameter.OUTPUT_STREAM, rtfDataOut);
-				exporter.exportReport();
+	            SimpleWriterExporterOutput exporterOutput = new SimpleWriterExporterOutput(rtfDataOut);
+	            exporter.setExporterOutput(exporterOutput);
+
+	            exporter.exportReport();
 				
 				close = false;
 				rtfDataOut.close();

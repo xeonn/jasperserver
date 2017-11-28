@@ -22,7 +22,7 @@
 
 /**
  * @author: Olesya Bobruyko
- * @version: $Id: resizablePanelTrait.js 408 2014-11-13 20:12:29Z obobruyko $
+ * @version: $Id: resizablePanelTrait.js 812 2015-01-27 11:01:30Z psavushchik $
  */
 
 define(function(require){
@@ -32,7 +32,21 @@ define(function(require){
         $ = require("jquery"),
         abstractPanelTrait = require("./abstractPanelTrait");
 
+    /**
+     * @mixin resizablePanelTrait
+     * @description Mixin that adds methods to Panel.
+     * @augments abstractPanelTrait
+     */
     return _.extend({}, abstractPanelTrait, {
+        /**
+         * Sets properties.
+         * @memberof resizablePanelTrait
+         * @param {object} options
+         * @param {string} [options.handles="e, s, se"] - jQuery ui resizable handles.
+         * @param {number} [options.minWidth=10] - jQuery ui minWidth.
+         * @param {number} [options.maxWidth=null] - jQuery ui maxWidth.
+         * @param {selector} options.resizableEl - selector of resizable element.
+         */
         onConstructor: function(options) {
             this.handles = options.handles || "e, s, se";
             this.minWidth = options.minWidth || 10;
@@ -42,6 +56,11 @@ define(function(require){
             this.resizableEl = options.resizableEl;
         },
 
+        /**
+         * Initializes jQuery UI Resizable for element.
+         * @memberof resizablePanelTrait
+         * @param el
+         */
         afterSetElement: function(el){
             this.$resizableEl = this.$el.find(this.resizableEl).length ? this.$el.find(this.resizableEl) : this.$el;
 
@@ -57,6 +76,10 @@ define(function(require){
             });
         },
 
+        /**
+         * Destroys jQuery UI Resizable.
+         * @memberof resizablePanelTrait
+         */
         onRemove: function() {
             try {
                 this.$el.resizable("destroy");
@@ -65,15 +88,46 @@ define(function(require){
             }
         },
 
+        /**
+         * Additional methods of trait.
+         * @memberof resizablePanelTrait
+         */
         extension: {
+            /**
+             * Resize handler.
+             * @fires "resize"
+             * @param {object} e - jQuery event.
+             * @param {object} ui - ui object.
+             * @alias extension._onResize
+             * @memberof! resizablePanelTrait
+             * @private
+             */
             _onResize: function(e, ui) {
                 this.trigger("resize", e, ui);
             },
 
+            /**
+             * Resize start handler.
+             * @fires "resizeStart"
+             * @param {object} e - jQuery event.
+             * @param {object} ui - ui object.
+             * @alias extension._onStart
+             * @memberof! resizablePanelTrait
+             * @private
+             */
             _onStart: function(e, ui){
                 this.trigger("resizeStart", e, ui);
             },
 
+            /**
+             * Resize stop handler.
+             * @fires "resizeStop"
+             * @param {object} e - jQuery event.
+             * @param {object} ui - ui object.
+             * @alias extension._onStop
+             * @memberof! resizablePanelTrait
+             * @private
+             */
             _onStop: function(e, ui){
                 this.trigger("resizeStop", e, ui);
             }

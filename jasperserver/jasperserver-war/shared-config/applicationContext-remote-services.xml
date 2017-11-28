@@ -6,7 +6,7 @@
        xmlns:util="http://www.springframework.org/schema/util"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
         http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
-       	http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd">
+        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd">
     <context:component-scan base-package="com.jaspersoft.jasperserver.remote"/>
     <alias name="${bean.auditContext}" alias="concreteAuditContext"/>
     <alias name="${bean.repositoryService}" alias="concreteRepository"/>
@@ -162,18 +162,30 @@
     <!--The set of file types, which must be created as FileResource.
     All other type, not specified here will be created as ContentResource-->
     <util:set id="fileResourceTypes">
-       <value>font</value>
-       <value>jrxml</value>
-       <value>jar</value>
-       <value>prop</value>
-       <value>jrtx</value>
-       <value>xml</value>
-       <value>json</value>
-       <value>css</value>
-       <value>accessGrantSchema</value>
-       <value>olapMondrianSchema</value>
-       <value>dashboardComponent</value>
-       <value>img</value>
+        <value>font</value>
+        <value>jrxml</value>
+        <value>jar</value>
+        <value>prop</value>
+        <value>jrtx</value>
+        <value>xml</value>
+        <value>json</value>
+        <value>css</value>
+        <value>accessGrantSchema</value>
+        <value>olapMondrianSchema</value>
+        <value>dashboardComponent</value>
+        <value>img</value>
+    </util:set>
+
+    <util:set id="customDataSourcesToHide">
+        <value>xmlaQueryDataSource</value>
+        <value>sparkQueryDataSource</value>
+        <value>remoteXmlDataSource</value>
+        <value>mongoDBQueryDataSource</value>
+        <value>jsonDataSource</value>
+        <value>jdbcQueryDataSource</value>
+        <value>cassandraQueryDataSource</value>
+        <value>myCustomDataSourceWithMetadata</value>
+        <value>JsonSeriesDataSource</value>
     </util:set>
 
     <bean name="waitForFinalJasperPrintMs" class="java.lang.Integer">

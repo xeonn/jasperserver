@@ -72,7 +72,7 @@ import java.util.TimeZone;
  * JAX-RS service "jobs" implementation
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: JobsJaxrsService.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: JobsJaxrsService.java 55164 2015-05-06 20:54:37Z mchan $
  */
 @Component
 @Scope("prototype")
@@ -487,8 +487,16 @@ public class JobsJaxrsService extends RemoteServiceWrapper<JobsService> {
     public Response deleteCalendar(@PathParam("calendarName") final String calendarName) {
         return callRemoteService(new ConcreteCaller<Response>() {
             public Response call(JobsService remoteService) throws RemoteException {
-                remoteService.deleteCalendar(calendarName);
-                return Response.ok(calendarName).build();
+                final ReportJobCalendar calendar = remoteService.getCalendar(calendarName);
+                //Bug 42132
+                if (calendar != null) {
+                    remoteService.deleteCalendar(calendarName);
+                    return Response.ok(calendarName).build();
+                }
+                else {
+                    return Response.status(Response.Status.NOT_FOUND).build();
+                }
+
             }
         });
     }

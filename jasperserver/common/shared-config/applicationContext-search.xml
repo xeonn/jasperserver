@@ -136,6 +136,7 @@
         <ref bean="${bean.search.textFilter}"/>
         <ref bean="${bean.excludeFolderFilter}"/>
         <ref bean="hiddenFilter"/>
+        <ref bean="${bean.search.resourceContainerTypeFilter}"/>
     </util:list>
 
     <bean id="searchCriteriaFactory" class="com.jaspersoft.jasperserver.search.filter.ResourceTypeSearchCriteriaFactory">
@@ -507,6 +508,9 @@
     </bean>
 
     <bean id="hiddenFilter" class="com.jaspersoft.jasperserver.search.filter.HiddenFilter" parent="baseSearchFilter">
+    </bean>
+
+    <bean id="resourceContainerTypeFilter" class="com.jaspersoft.jasperserver.search.filter.ResourceContainerTypeFilter" parent="baseSearchFilter">
     </bean>
 
     <bean id="ceExcludeFolderFilter" class="com.jaspersoft.jasperserver.search.filter.ExcludeFolderFilter">

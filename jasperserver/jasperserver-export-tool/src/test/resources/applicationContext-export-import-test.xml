@@ -223,4 +223,11 @@
         <property name="keyAlgorithm"><value>AES</value></property>
         <property name="cipherTransformation"><value>AES/CBC/PKCS5Padding</value></property>
     </bean>
+
+    <bean id="globalPropertiesListUpgradeExecutor" class="com.jaspersoft.jasperserver.api.metadata.common.service.impl.GlobalPropertiesListUpgradeExecutor">
+        <property name="repositoryService" ref="repositoryService"/>
+        <property name="profileAttributeService" ref="profileAttributeService"/>
+        <property name="resourceFactory" ref="mappingResourceFactory"/>
+        <property name="userAuthorityPersistenceService" ref="userAuthorityService"/>
+    </bean>
 </beans>

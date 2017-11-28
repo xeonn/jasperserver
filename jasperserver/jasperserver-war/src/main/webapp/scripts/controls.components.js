@@ -22,8 +22,10 @@
 
 /**
  * @author: afomin, inesterenko
- * @version: $Id: controls.components.js 8032 2014-11-14 15:41:52Z psavushchik $
+ * @version: $Id: controls.components.js 8840 2015-04-28 13:57:03Z spriluki $
  */
+
+/* global JRS, require, updateYearMonth, ControlsBase, _ */
 
 JRS.Controls = (function (jQuery, _, Controls) {
 
@@ -55,21 +57,26 @@ JRS.Controls = (function (jQuery, _, Controls) {
 
     var SingleSelect,
         MultiSelect,
-        CacheableDataProvider;
+        CacheableDataProvider,
+        DataProviderWithLabelHash,
+        SearcheableDataProvider,
+        resizableMultiSelectTrait;
 
-    require(["common/component/singleSelect/view/SingleSelect"],
-        function(SingleSelectModule){
-            SingleSelect = SingleSelectModule;
-        });
-    require(["common/component/multiSelect/view/MultiSelect"],
-        function(MultiSelectModule){
-            MultiSelect = MultiSelectModule;
-        });
-    require(["common/component/singleSelect/dataprovider/CacheableDataProvider"],
-        function(cacheableDataProviderModule){
-            CacheableDataProvider = cacheableDataProviderModule;
-        });
-
+    require([
+        "common/component/singleSelect/view/SingleSelect",
+        "common/component/multiSelect/view/MultiSelect",
+        "common/component/singleSelect/dataprovider/CacheableDataProvider",
+        "common/component/multiSelect/dataprovider/DataProviderWithLabelHash",
+        "common/component/singleSelect/dataprovider/SearcheableDataProvider",
+        "common/component/multiSelect/mixin/resizableMultiSelectTrait"
+    ], function (SingleSelectModule, MultiSelectModule, CacheableDataProviderModule, DataProviderWithLabelHashModule, SearcheableDataProviderModule, resizableMultiSelectMixinModule) {
+        SingleSelect = SingleSelectModule;
+        MultiSelect = MultiSelectModule;
+        CacheableDataProvider = CacheableDataProviderModule;
+        DataProviderWithLabelHash = DataProviderWithLabelHashModule;
+        SearcheableDataProvider = SearcheableDataProviderModule;
+        resizableMultiSelectTrait = resizableMultiSelectMixinModule;
+    });
 
     function changeDateFunc(dateText) {
         this.set({selection:dateText});
@@ -377,14 +384,26 @@ JRS.Controls = (function (jQuery, _, Controls) {
         }),
 
         MultiSelect:Controls.BaseControl.extend({
-            INITIAL_MAX_HEIGHT: "240px",
 
             baseRender:function (controlStructure) {
+                var self = this;
+
                 if (!this.multiSelect) {
-                    this.dataProvider = new CacheableDataProvider();
+
+                    this.dataProvider = new DataProviderWithLabelHash();
+
                     this.multiSelect = new MultiSelect({
-                        getData: this.dataProvider.getData
+                        getData: new SearcheableDataProvider({
+                            getData: this.dataProvider.getData
+                        }).getData,
+                        selectedListOptions: {
+                            formatLabel: function(value) {
+                                return self.dataProvider.getDataLabelHash()[value];
+                            }
+                        }
                     }).setDisabled(controlStructure.readOnly);
+
+                    this._resize = _.debounce(_.bind(this.multiSelect.resize, this.multiSelect), 500);
                 }
 
                 controlStructure && _.extend(this, controlStructure);
@@ -409,14 +428,13 @@ JRS.Controls = (function (jQuery, _, Controls) {
                     var selection = extractSelection(controlData);
 
                     that.multiSelect.setValue(selection, {silent: true});
-                    that.checkSelectionSize(selection);
+                    that._resize();
                 });
             },
 
             bindCustomEventListeners:function () {
                 this.multiSelect.off("selection:change").on("selection:change", function (selection) {
                     this.set({selection:selection});
-                    this.checkSelectionSize(selection);
                 }, this);
             },
 
@@ -429,46 +447,15 @@ JRS.Controls = (function (jQuery, _, Controls) {
                 }
             },
 
-            checkSelectionSize: function(selection) {
-
-                var i = 0;
-                for (var index in selection) {
-                    if (selection.hasOwnProperty(index) && i++ >= 4) {
-                        break;
-                    }
-                }
-
-                if (i < 5 && this.getElem()[0].clientHeight < 125) {
-                    this.getElem().find('.sizer').addClass('hidden');
-                    this.getElem().find('.inputSet').removeClass('sizable').attr('style', false);
-                } else {
-                    if (this.resizable) {
-                        this.getElem().find('.sizer').removeClass('hidden');
-                        this.getElem().find('.inputSet').addClass('sizable');
-                    }
-                }
-            },
-
             //TODO move to decorator
             makeResizable:function () {
-                this.resizable = true;
-                var list = this.getElem().find('.sList');
-                var sizer = list.parents(".leaf").find('.sizer').removeClass('hidden'); // FF 3.6
-                sizer.addClass("ui-resizable-handle ui-resizable-s");
+                _.extend(this.multiSelect, resizableMultiSelectTrait);
 
-                list.resizable({
-                    handles:{
-                        's': sizer
-                    }
+                this.multiSelect.makeResizable({
+                    el: this.getElem().find('.msPlaceholder'),
+                    sizer: this.getElem().find('.msPlaceholder').parents(".leaf").find('.sizer').removeClass('hidden'),
+                    sizerClass: "ui-resizable-handle ui-resizable-s"
                 });
-
-                list.one("resize", function(){
-                    var height = jQuery(this).height();
-                    jQuery(this).css("max-height", "").css("height", height);
-                });
-
-                //set max-height until resize will be done first time.
-                list.css("max-height", this.INITIAL_MAX_HEIGHT);
             }
         }),
 

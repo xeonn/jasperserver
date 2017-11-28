@@ -1,1 +1,1 @@
-define(["require","prototype","!domReady"],function(e){e("prototype"),e("!domReady")});
+define(["require","prototype","!domReady"],function(e){"use strict";e("prototype"),e("!domReady")});

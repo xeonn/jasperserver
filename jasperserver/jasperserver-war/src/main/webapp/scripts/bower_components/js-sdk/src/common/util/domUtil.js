@@ -22,10 +22,10 @@
 
 /**
  * @author: Kostiantyn Tsaregradskyi
- * @version: $Id: domUtil.js 270 2014-10-13 19:58:03Z agodovanets $
+ * @version: $Id: domUtil.js 898 2015-03-02 16:57:01Z psavushchik $
  */
 
-define(function () {
+define(function (require) {
     "use strict";
 
     var scrollbarWidth = 0;
@@ -70,12 +70,33 @@ define(function () {
             // TODO use polyfill
             var style = window.getComputedStyle ? window.getComputedStyle(el) : el.currentStyle;
 
+            if (!style) {
+                return;
+            }
+
             return style.overflow == 'scroll'
                 || style.overflow == 'auto'
                 || style.overflowX == 'scroll'
                 || style.overflowX == 'auto'
                 || style.overflowY == 'scroll'
                 || style.overflowY == 'auto';
+        },
+
+        getElementOffset: function (el) {
+            var left = 0,
+                top = 0;
+
+            if (el.offsetParent) {
+                left = el.offsetLeft;
+                top  = el.offsetTop;
+
+                while (el = el.offsetParent) { // jshint ignore: line
+                    left += el.offsetLeft;
+                    top  += el.offsetTop;
+                }
+            }
+
+            return { left : left,  top : top };
         }
     }
 });

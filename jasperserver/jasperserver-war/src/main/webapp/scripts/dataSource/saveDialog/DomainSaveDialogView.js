@@ -22,8 +22,10 @@
 
 /**
  * @author: Dima Gorbenko
- * @version: $Id: DomainSaveDialogView.js 7872 2014-10-04 09:08:52Z inesterenko $
+ * @version: $Id: DomainSaveDialogView.js 8179 2015-01-27 12:34:21Z psavushchik $
  */
+
+/* global dialogs */
 
 define(function (require){
 

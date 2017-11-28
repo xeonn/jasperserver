@@ -28,18 +28,18 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import net.sf.jasperreports.engine.JRElement;
 import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JRImage;
-import net.sf.jasperreports.engine.JRImageRenderer;
 import net.sf.jasperreports.engine.JRPrintImage;
-import net.sf.jasperreports.engine.JRRenderable;
 import net.sf.jasperreports.engine.JRWrappingSvgRenderer;
 import net.sf.jasperreports.engine.JasperPrint;
-import net.sf.jasperreports.engine.export.JRHtmlExporter;
-import net.sf.jasperreports.engine.util.JRTypeSniffer;
-import net.sf.jasperreports.engine.type.OnErrorTypeEnum;
+import net.sf.jasperreports.engine.JasperReportsContext;
+import net.sf.jasperreports.engine.Renderable;
+import net.sf.jasperreports.engine.RenderableUtil;
+import net.sf.jasperreports.engine.export.HtmlExporter;
+import net.sf.jasperreports.engine.type.ImageTypeEnum;
 import net.sf.jasperreports.engine.type.ModeEnum;
+import net.sf.jasperreports.engine.type.OnErrorTypeEnum;
+import net.sf.jasperreports.engine.type.RenderableTypeEnum;
 
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
@@ -54,10 +54,11 @@ import com.jaspersoft.jasperserver.war.util.SessionObjectSerieAccessor;
  * Controller for JasperServer report images.
  * 
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ReportImageController.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: ReportImageController.java 54728 2015-04-24 15:28:20Z tdanciu $
  */
 public class ReportImageController  implements Controller
 {
+	private JasperReportsContext jasperReportsContext;
 
 	private SessionObjectSerieAccessor jasperPrintAccessor;
 	private String jasperPrintNameParameter;
@@ -105,20 +106,20 @@ public class ReportImageController  implements Controller
 		String imageName = request.getParameter(getImageNameParameter());
 		if ("px".equals(imageName))
 		{
-			JRRenderable pxRenderer = 
-				JRImageRenderer.getInstance(
+			Renderable pxRenderer = 
+				RenderableUtil.getInstance(getJasperReportsContext()).getRenderable(
 					"net/sf/jasperreports/engine/images/pixel.GIF",
 					OnErrorTypeEnum.ERROR
 					);
-			imageMimeType = JRRenderable.MIME_TYPE_GIF;
-			imageData = pxRenderer.getImageData();
+			imageMimeType = ImageTypeEnum.GIF.getMimeType();
+			imageData = pxRenderer.getImageData(getJasperReportsContext());
 		}
 		else
 		{
-			JRPrintImage image = JRHtmlExporter.getImage(Arrays.asList(new JasperPrint[]{jasperPrint}), imageName);
+			JRPrintImage image = HtmlExporter.getImage(Arrays.asList(new JasperPrint[]{jasperPrint}), imageName);
 			
-			JRRenderable renderer = image.getRenderer();
-			if (renderer.getType() == JRRenderable.TYPE_SVG)
+			Renderable renderer = image.getRenderable();
+			if (renderer.getTypeValue() == RenderableTypeEnum.SVG)
 			{
 				renderer = 
 					new JRWrappingSvgRenderer(
@@ -128,8 +129,8 @@ public class ReportImageController  implements Controller
 						);
 			}
 
-			imageMimeType = JRTypeSniffer.getImageMimeType(renderer.getImageType());
-			imageData = renderer.getImageData();
+			imageMimeType = renderer.getImageTypeValue() == null ? null : renderer.getImageTypeValue().getMimeType();
+			imageData = renderer.getImageData(getJasperReportsContext());
 		}
 
 		View view = new ImageView(imageMimeType, imageData);
@@ -161,4 +162,11 @@ public class ReportImageController  implements Controller
 		this.imageNameParameter = imageNameParameter;
 	}
 
+	public JasperReportsContext getJasperReportsContext() {
+		return jasperReportsContext;
+	}
+
+	public void setJasperReportsContext(JasperReportsContext jasperReportsContext) {
+		this.jasperReportsContext = jasperReportsContext;
+	}
 }

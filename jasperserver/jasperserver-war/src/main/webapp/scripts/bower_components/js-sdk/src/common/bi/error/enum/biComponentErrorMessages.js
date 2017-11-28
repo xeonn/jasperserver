@@ -22,7 +22,7 @@
 
 /**
  * @author: Kostiantyn Tsaregradskyi
- * @version: $Id: biComponentErrorMessages.js 270 2014-10-13 19:58:03Z agodovanets $
+ * @version: $Id: biComponentErrorMessages.js 1184 2015-05-12 11:57:30Z psavushc $
  */
 
 define(function(require) {
@@ -42,7 +42,10 @@ define(function(require) {
     messages[errorCodes.REPORT_EXECUTION_CANCELLED] = "Report execution was cancelled";
     messages[errorCodes.REPORT_EXPORT_FAILED] = "Report export failed";
     messages[errorCodes.REPORT_EXPORT_CANCELLED] = "Report export was cancelled";
-    messages[errorCodes.ALREADY_DESTROYED_ERROR] = "Component was already destroyed";
+    messages[errorCodes.REPORT_RENDER_ERROR] = "Report render error";
+    messages[errorCodes.REPORT_RENDER_HIGHCHARTS_ERROR] = "Highcharts render error";
+    messages[errorCodes.ALREADY_DESTROYED_ERROR] = "Component has been already destroyed";
+    messages[errorCodes.NOT_YET_RENDERED_ERROR] = "Component has not yet been rendered";
 
     return messages;
 });

@@ -1,1 +1,1 @@
-define({JDBC:"jdbcDataSource",AWS:"awsDataSource",JNDI:"jndiJdbcDataSource",VIRTUAL:"virtualDataSource",CUSTOM:"customDataSource",BEAN:"beanDataSource"});
+define({JDBC:"jdbcDataSource",AWS:"awsDataSource",JNDI:"jndiJdbcDataSource",VIRTUAL:"virtualDataSource",CUSTOM:"customDataSource",BEAN:"beanDataSource",MONGODBJDBC:"mongoDbJDBCDataSource"});

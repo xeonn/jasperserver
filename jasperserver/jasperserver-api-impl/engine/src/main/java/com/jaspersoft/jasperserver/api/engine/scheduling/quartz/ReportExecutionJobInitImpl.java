@@ -20,27 +20,15 @@
  */
 package com.jaspersoft.jasperserver.api.engine.scheduling.quartz;
 
-import com.jaspersoft.jasperserver.api.JSExceptionWrapper;
 import com.jaspersoft.jasperserver.api.engine.scheduling.domain.ReportJob;
-import com.jaspersoft.jasperserver.api.engine.scheduling.domain.ReportJobAlert;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.quartz.Job;
 import org.quartz.JobExecutionException;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
-
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-import java.util.Iterator;
-import java.util.List;
 
 /**
  * @author Ivan Chan (ichan@jaspersoft.com)
- * @version $Id: ReportExecutionJobInitImpl.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: ReportExecutionJobInitImpl.java 55164 2015-05-06 20:54:37Z mchan $
  */
 public class ReportExecutionJobInitImpl implements ReportExecutionJobInit {
 
@@ -53,6 +41,16 @@ public class ReportExecutionJobInitImpl implements ReportExecutionJobInit {
 		/*
 		 * plugin last minute customer's logic before starting repeort job execution
 		 */
-        return jobDetails;
+
+		if(log.isDebugEnabled()){
+	        	log.debug("**** ReportExecutionJobInitImpl.initJob ********: " + 
+        			"  job =" + job.toString() +
+        			", job id=" +  jobDetails.getId() + 
+        			", job creation date=" + jobDetails.getCreationDate() +
+        			", version=" + jobDetails.getVersion() + 
+        			", trigger id=" + jobDetails.getTrigger().getId() + 
+        			", start date=" + jobDetails.getTrigger().getStartDate());
+        	}
+		return jobDetails;
 	}
 }

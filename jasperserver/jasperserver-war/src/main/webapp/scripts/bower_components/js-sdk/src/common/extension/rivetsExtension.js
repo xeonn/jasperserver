@@ -9,7 +9,7 @@
  * Various extensions for Rivets library.
  *
  * @author: Kostiantyn Tsaregradskyi
- * @version: $Id: rivetsExtension.js 380 2014-11-09 15:04:25Z ktsaregradskyi $
+ * @version: $Id: rivetsExtension.js 1154 2015-04-25 17:52:53Z ktsaregr $
  */
 
 define(function (require) {
@@ -20,7 +20,10 @@ define(function (require) {
         _ = require("underscore"),
         Observable = require("iota-observable"),
         $ = require("jquery"),
+        json3 = require("json3"),
         AttachableColorPicker = require("common/component/colorPicker/SimpleAttachableColorPicker");
+
+    var booleanValues = ["true", "false"];
 
     if(browserDetection.isIE8()){
         rivets.adapters['.'] = {
@@ -178,6 +181,42 @@ define(function (require) {
     };
 
     /**
+     * @type {function}
+     * @description Rivets binder for slideDown/slideUp jQuery effects
+     * @example
+     *  <input type='text' rv-slide='model:myAttr'></span>
+     */
+    rivets.binders["slide"] = function(el, value) {
+        return $(el)[value ? "slideDown" : "slideUp"]({
+            complete: function() {
+                !value && $(el).hide();
+            }
+        });
+    };
+
+    /**
+     * @type {function}
+     * @description Rivets binder for enabled element state
+     * @example
+     *  <input type='text' rv-enabled='model:myAttr'></span>
+     */
+    rivets.binders["enabled"] = function(el, value) {
+        return value
+            ? $(el).removeAttr("disabled")
+            : $(el).attr("disabled", "disabled");
+    };
+
+    /**
+     * @type {function}
+     * @description Rivets binder for disabled element state
+     * @example
+     *  <input type='text' rv-disabled='model:myAttr'></span>
+     */
+    rivets.binders["disabled"] = function(el, value) {
+        rivets.binders["enabled"](el, !value);
+    };
+
+    /**
      * @type {object}
      * @description Rivets formatter to escape any special characters, before set into model.
      * @example
@@ -201,6 +240,25 @@ define(function (require) {
     rivets.formatters.toInteger = {
         publish: function(value) {
             return (isNaN(value * 1) || value === "") ? value : value*1;
+        }
+    };
+
+    /**
+     * @type {object}
+     * @description Rivets formatter to convert string values of input to integer, before set into model.
+     * @example
+     *  <input type="text" rv-input="model:myAttr | toBoolean" >
+     */
+    rivets.formatters.toBoolean = {
+        read: function(value) {
+            return value.toString();
+        },
+
+        publish: function(value) {
+            if (_.indexOf(booleanValues, value) !== -1) {
+                return json3.parse(value);
+            }
+            return value;
         }
     };
 

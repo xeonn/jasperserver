@@ -73,7 +73,11 @@ public class ImportRunnable extends BaseImportExportTaskRunnable<StateDto> {
         FileOutputStream fileStream = new FileOutputStream(tmp);
 
         byte[] buff = new byte[512];
-        int read = input.read(buff);
+        int read = input.read(buff, 0, "jsEncrypted".getBytes().length);
+        if ((new String(buff, "UTF-8")).startsWith("jsEncrypted")) {
+            parameters.put("isEncrypted", true);
+            read = input.read(buff);
+        }
         while (read > 0){
             fileStream.write(buff, 0, read);
             read = input.read(buff);

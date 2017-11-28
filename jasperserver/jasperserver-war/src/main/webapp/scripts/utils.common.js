@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: utils.common.js 7871 2014-10-03 15:07:22Z sergey.prilukin $
+ * @version: $Id: utils.common.js 8900 2015-05-06 20:57:14Z yplakosh $
  */
 
 /**
@@ -333,7 +333,7 @@ function getTZOffset(timezoneLabel, targetDateStr) {
         "america\/cambridge_bay": { utc: -7, utc_dst: -6 },
         "america\/campo_grande": { utc: -4, utc_dst: -3 },
         "america\/cancun": { utc: -6, utc_dst: -5 },
-        "america\/caracas": { utc: -4, utc_dst: -4 },
+        "america\/caracas": { utc: -4.5, utc_dst: -4.5 },
         "america\/catamarca": { utc: -3, utc_dst: -3 },
         "america\/cayenne": { utc: -3, utc_dst: -3 },
         "america\/cayman": { utc: -5, utc_dst: -5 },
@@ -444,7 +444,7 @@ function getTZOffset(timezoneLabel, targetDateStr) {
         "america\/shiprock": { utc: -7, utc_dst: -6 },
         "america\/sitka": { utc: -9, utc_dst: -8 },
         "america\/st_barthelemy": { utc: -4, utc_dst: -4 },
-        "america\/st_johns": { utc: -3, utc_dst: -2 },
+        "america\/st_johns": { utc: -3.5, utc_dst: -2.5 },
         "america\/st_kitts": { utc: -4, utc_dst: -4 },
         "america\/st_lucia": { utc: -4, utc_dst: -4 },
         "america\/st_thomas": { utc: -4, utc_dst: -4 },
@@ -489,11 +489,11 @@ function getTZOffset(timezoneLabel, targetDateStr) {
         "asia\/beirut": { utc: 2, utc_dst: 3 },
         "asia\/bishkek": { utc: 6, utc_dst: 6 },
         "asia\/brunei": { utc: 8, utc_dst: 8 },
-        "asia\/calcutta": { utc: 5, utc_dst: 5 },
+        "asia\/calcutta": { utc: 5.5, utc_dst: 5.5 },
         "asia\/choibalsan": { utc: 8, utc_dst: 8 },
         "asia\/chongqing": { utc: 8, utc_dst: 8 },
         "asia\/chungking": { utc: 8, utc_dst: 8 },
-        "asia\/colombo": { utc: 5, utc_dst: 5 },
+        "asia\/colombo": { utc: 5.5, utc_dst: 5.5 },
         "asia\/dacca": { utc: 6, utc_dst: 6 },
         "asia\/damascus": { utc: 2, utc_dst: 3 },
         "asia\/dhaka": { utc: 6, utc_dst: 6 },
@@ -511,13 +511,13 @@ function getTZOffset(timezoneLabel, targetDateStr) {
         "asia\/jakarta": { utc: 7, utc_dst: 7 },
         "asia\/jayapura": { utc: 9, utc_dst: 9 },
         "asia\/jerusalem": { utc: 2, utc_dst: 3 },
-        "asia\/kabul": { utc: 4, utc_dst: 4 },
+        "asia\/kabul": { utc: 4.5, utc_dst: 4.5 },
         "asia\/kamchatka": { utc: 12, utc_dst: 12 },
         "asia\/karachi": { utc: 5, utc_dst: 5 },
         "asia\/kashgar": { utc: 8, utc_dst: 8 },
-        "asia\/kathmandu": { utc: 5, utc_dst: 5 },
-        "asia\/katmandu": { utc: 5, utc_dst: 5 },
-        "asia\/kolkata": { utc: 5, utc_dst: 5 },
+        "asia\/kathmandu": { utc: 5.75, utc_dst: 5.75 },
+        "asia\/katmandu": { utc: 5.75, utc_dst: 5.75 },
+        "asia\/kolkata": { utc: 5.5, utc_dst: 5.5 },
         "asia\/krasnoyarsk": { utc: 8, utc_dst: 8 },
         "asia\/kuala_lumpur": { utc: 8, utc_dst: 8 },
         "asia\/kuching": { utc: 8, utc_dst: 8 },
@@ -538,7 +538,7 @@ function getTZOffset(timezoneLabel, targetDateStr) {
         "asia\/pyongyang": { utc: 9, utc_dst: 9 },
         "asia\/qatar": { utc: 3, utc_dst: 3 },
         "asia\/qyzylorda": { utc: 6, utc_dst: 6 },
-        "asia\/rangoon": { utc: 6, utc_dst: 6 },
+        "asia\/rangoon": { utc: 6.5, utc_dst: 6.5 },
         "asia\/riyadh": { utc: 3, utc_dst: 3 },
         "asia\/saigon": { utc: 7, utc_dst: 7 },
         "asia\/sakhalin": { utc: 11, utc_dst: 11 },
@@ -549,7 +549,7 @@ function getTZOffset(timezoneLabel, targetDateStr) {
         "asia\/taipei": { utc: 8, utc_dst: 8 },
         "asia\/tashkent": { utc: 5, utc_dst: 5 },
         "asia\/tbilisi": { utc: 4, utc_dst: 4 },
-        "asia\/tehran": { utc: 3, utc_dst: 4 },
+        "asia\/tehran": { utc: 3.5, utc_dst: 4.5 },
         "asia\/tel_aviv": { utc: 2, utc_dst: 3 },
         "asia\/thimbu": { utc: 6, utc_dst: 6 },
         "asia\/thimphu": { utc: 6, utc_dst: 6 },
@@ -576,28 +576,28 @@ function getTZOffset(timezoneLabel, targetDateStr) {
         "atlantic\/st_helena": { utc: 0, utc_dst: 0 },
         "atlantic\/stanley": { utc: -3, utc_dst: -3 },
         "australia\/act": { utc: 10, utc_dst: 11 },
-        "australia\/adelaide": { utc: 9, utc_dst: 10 },
+        "australia\/adelaide": { utc: 9.5, utc_dst: 10.5 },
         "australia\/brisbane": { utc: 10, utc_dst: 10 },
-        "australia\/broken_hill": { utc: 9, utc_dst: 10 },
+        "australia\/broken_hill": { utc: 9.5, utc_dst: 10.5 },
         "australia\/canberra": { utc: 10, utc_dst: 11 },
         "australia\/currie": { utc: 10, utc_dst: 11 },
-        "australia\/darwin": { utc: 9, utc_dst: 9 },
-        "australia\/eucla": { utc: 8, utc_dst: 8 },
+        "australia\/darwin": { utc: 9.5, utc_dst: 9.5 },
+        "australia\/eucla": { utc: 8.75, utc_dst: 8.75 },
         "australia\/hobart": { utc: 10, utc_dst: 11 },
-        "australia\/lhi": { utc: 10, utc_dst: 11 },
+        "australia\/lhi": { utc: 10.5, utc_dst: 11 },
         "australia\/lindeman": { utc: 10, utc_dst: 10 },
-        "australia\/lord_howe": { utc: 10, utc_dst: 11 },
+        "australia\/lord_howe": { utc: 10.5, utc_dst: 11 },
         "australia\/melbourne": { utc: 10, utc_dst: 11 },
-        "australia\/north": { utc: 9, utc_dst: 9 },
+        "australia\/north": { utc: 9.5, utc_dst: 9.5 },
         "australia\/nsw": { utc: 10, utc_dst: 11 },
         "australia\/perth": { utc: 8, utc_dst: 8 },
         "australia\/queensland": { utc: 10, utc_dst: 10 },
-        "australia\/south": { utc: 9, utc_dst: 10 },
+        "australia\/south": { utc: 9.5, utc_dst: 10.5 },
         "australia\/sydney": { utc: 10, utc_dst: 11 },
         "australia\/tasmania": { utc: 10, utc_dst: 11 },
         "australia\/victoria": { utc: 10, utc_dst: 11 },
         "australia\/west": { utc: 8, utc_dst: 8 },
-        "australia\/yancowinna": { utc: 9, utc_dst: 10 },
+        "australia\/yancowinna": { utc: 9.5, utc_dst: 10.5 },
         "brazil\/acre": { utc: -4, utc_dst: -4 },
         "brazil\/denoronha": { utc: -2, utc_dst: -2 },
         "brazil\/east": { utc: -3, utc_dst: -2 },
@@ -607,7 +607,7 @@ function getTZOffset(timezoneLabel, targetDateStr) {
         "canada\/eastern": { utc: -5, utc_dst: -4 },
         "canada\/east-saskatchewan": { utc: -6, utc_dst: -6 },
         "canada\/mountain": { utc: -7, utc_dst: -6 },
-        "canada\/newfoundland": { utc: -3, utc_dst: -2 },
+        "canada\/newfoundland": { utc: -3.5, utc_dst: -2.5 },
         "canada\/pacific": { utc: -8, utc_dst: -7 },
         "canada\/saskatchewan": { utc: -6, utc_dst: -6 },
         "canada\/yukon": { utc: -8, utc_dst: -7 },
@@ -698,7 +698,7 @@ function getTZOffset(timezoneLabel, targetDateStr) {
         "indian\/antananarivo": { utc: 3, utc_dst: 3 },
         "indian\/chagos": { utc: 6, utc_dst: 6 },
         "indian\/christmas": { utc: 7, utc_dst: 7 },
-        "indian\/cocos": { utc: 6, utc_dst: 6 },
+        "indian\/cocos": { utc: 6.5, utc_dst: 6.5 },
         "indian\/comoro": { utc: 3, utc_dst: 3 },
         "indian\/kerguelen": { utc: 5, utc_dst: 5 },
         "indian\/mahe": { utc: 4, utc_dst: 4 },
@@ -706,7 +706,7 @@ function getTZOffset(timezoneLabel, targetDateStr) {
         "indian\/mauritius": { utc: 4, utc_dst: 4 },
         "indian\/mayotte": { utc: 3, utc_dst: 3 },
         "indian\/reunion": { utc: 4, utc_dst: 4 },
-        "iran": { utc: 3, utc_dst: 4 },
+        "iran": { utc: 3.5, utc_dst: 4.5 },
         "israel": { utc: 2, utc_dst: 3 },
         "jamaica": { utc: -5, utc_dst: -5 },
         "japan": { utc: 9, utc_dst: 9 },
@@ -721,10 +721,10 @@ function getTZOffset(timezoneLabel, targetDateStr) {
         "mst7mdt": { utc: -7, utc_dst: -6 },
         "navajo": { utc: -7, utc_dst: -6 },
         "nz": { utc: 12, utc_dst: 13 },
-        "nz-chat": { utc: 12, utc_dst: 13 },
+        "nz-chat": { utc: 12.75, utc_dst: 13.75 },
         "pacific\/apia": { utc: 13, utc_dst: 14 },
         "pacific\/auckland": { utc: 12, utc_dst: 13 },
-        "pacific\/chatham": { utc: 12, utc_dst: 13 },
+        "pacific\/chatham": { utc: 12.75, utc_dst: 13.75 },
         "pacific\/chuuk": { utc: 10, utc_dst: 10 },
         "pacific\/easter": { utc: -6, utc_dst: -5 },
         "pacific\/efate": { utc: 11, utc_dst: 11 },
@@ -742,11 +742,11 @@ function getTZOffset(timezoneLabel, targetDateStr) {
         "pacific\/kosrae": { utc: 11, utc_dst: 11 },
         "pacific\/kwajalein": { utc: 12, utc_dst: 12 },
         "pacific\/majuro": { utc: 12, utc_dst: 12 },
-        "pacific\/marquesas": { utc: -9, utc_dst: -9 },
+        "pacific\/marquesas": { utc: -9.5, utc_dst: -9.5 },
         "pacific\/midway": { utc: -11, utc_dst: -11 },
         "pacific\/nauru": { utc: 12, utc_dst: 12 },
         "pacific\/niue": { utc: -11, utc_dst: -11 },
-        "pacific\/norfolk": { utc: 11, utc_dst: 11 },
+        "pacific\/norfolk": { utc: 11.5, utc_dst: 11.5 },
         "pacific\/noumea": { utc: 11, utc_dst: 11 },
         "pacific\/pago_pago": { utc: -11, utc_dst: -11 },
         "pacific\/palau": { utc: 9, utc_dst: 9 },
@@ -2318,10 +2318,6 @@ function splitText(text, splitPosition) {
 	return ret;
 }
 
-function escapeTags(text) {
-    return text.replace(/</g, '&lt');
-}
-
 ///////////////////////////////////////////////////
 // URL utils
 ///////////////////////////////////////////////////
@@ -2597,7 +2593,7 @@ function InPlaceEditor(elem){
 InPlaceEditor.prototype.makeEditable = function(options){
     var self = this;
     var inputId = this.elem.id + "Input";
-    var inputValue = this.value.strip();
+    var inputValue = this.value;
     var inputBox = Builder.node("input", {className: "control input text", id: inputId, value: inputValue});
     this.elem.update(inputBox);
 
@@ -2684,18 +2680,10 @@ InPlaceEditor.prototype.makeEditable = function(options){
 };
 
 
-InPlaceEditor.prototype.makeNonEditable = function(purge){
+InPlaceEditor.prototype.makeNonEditable = function(){
     if (this.elem && this.elem.firstDescendant() && this.editing) {
-        //we want to replace double quotes with single quotes
         var text = this.elem.firstDescendant().value;
-        text = text.replace(/"/g,'\'');
-        //this means remove all html tags or script tags
-        if(purge){
-            text = text.replace(/<\/?[^>]+(>|$)/g, "");
-            //little hack
-            text = text.replace("<>", "");
-        }
-        this.elem.update(text);
+        this.elem.update(xssUtil.escape(text));
         this.editing = false;
     }
 };
@@ -2710,7 +2698,7 @@ InPlaceEditor.prototype.revertEdit = function(){
 //////////////////////////////////////////
 // <Script> utils
 //////////////////////////////////////////
-
+//@Deprecated Do not use because of XSS issues
 function evaluateScripts(containerObj){
     var root;
     if (!containerObj) {
@@ -2729,6 +2717,7 @@ function evaluateScripts(containerObj){
     }
 }
 
+//@Deprecated Do not use because of XSS issues
 function evaluateScript(scriptId){
     var script = $(scriptId);
     if (script && script.text) {
@@ -2736,7 +2725,7 @@ function evaluateScript(scriptId){
     }
 }
 
-
+//@Deprecated Do not use because of XSS issues
 function globalEval(scriptText){
     window.eval.call(window, scriptText);
 }
@@ -3529,7 +3518,7 @@ var JSCookie = function(name, value, days) {
 
 JSCookie.addVar('daysToExpiration', 30);
 JSCookie.addVar('getCookieTemplate', function() {
-    return _.template('{{= name}}={{= value}}; expires={{= expires}}; path=/;')
+    return _.template('{{- name}}={{- value}}; expires={{- expires}}; path=/;')
 });
 
 JSCookie.addMethod('_getCookies', function() {

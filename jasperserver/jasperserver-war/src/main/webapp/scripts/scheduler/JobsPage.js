@@ -21,7 +21,7 @@
 
 /**
  * @author: Igor.Nesterenko
- * @version: $Id: JobsPage.js 7748 2014-07-18 09:13:06Z kklein $
+ * @version: $Id: JobsPage.js 8179 2015-01-27 12:34:21Z psavushchik $
  */
 
 define(function (require) {
@@ -30,7 +30,7 @@ define(function (require) {
         domReady = require("domReady");
 
     domReady(function(){
-        new app;
+        new app();
     });
 
 });

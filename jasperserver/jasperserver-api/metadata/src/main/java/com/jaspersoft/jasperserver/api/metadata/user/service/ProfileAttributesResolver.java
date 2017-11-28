@@ -28,13 +28,12 @@ import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
  *
  * @author Volodya Sabadosh
  * @author Vlad Zavadskii
- *
- * @version $Id: ProfileAttributesResolver.java 51908 2014-12-09 23:53:22Z nthapa $
+ * @version $Id: ProfileAttributesResolver.java 54590 2015-04-22 17:55:42Z vzavadsk $
  */
 public interface ProfileAttributesResolver {
 
     /**
-     * Substitutes attributes of parametrized resource, by:
+     * Substitutes attributes for parametrized resource, by:
      * <ul>
      * <li>serialization to String
      * <li>resolving attributes
@@ -56,15 +55,34 @@ public interface ProfileAttributesResolver {
     boolean containsAttribute(String str);
 
     /**
+     * Substitutes attributes for parametrized string.
+     *
+     * @param templateString The parametrized string
+     * @param identifier     A short brief what type of resource, field or other object <code>templateString</code> represents.
+     *                       Can be <code>null</code>
+     * @return string with attribute substitution.
+     */
+    String merge(String templateString, String identifier);
+
+    /**
+     * Substitutes attributes for parametrized string.
+     *
+     * @param templateString The parametrized string
+     * @param identifier     A short brief what type of resource, field or other object <code>templateString</code> represents.
+     *                       Can be <code>null</code>
+     * @param escapeStrategy Used to escape special characters in attribute. Can be <code>null</code>
+     * @return string with attribute substitution.
+     */
+    String merge(String templateString, String identifier, ProfileAttributeEscapeStrategy escapeStrategy);
+
+    /**
      * Checks whether test resource parametrized ONLY with the profile attributes of given <code>categories</code>.
      * If categories is not specified check whether test resource is parametrized at all.
      *
-     * @param resource The parametrized resource
+     * @param resource   The parametrized resource
      * @param categories list of profile attributes. If it specified checks whether test resource parametrized ONLY with
-     * the attributes of given categories. If categories is not specified check whether test resource is parametrized.
-     * @param <T> resource type
-     *
+     *                   the attributes of given categories. If categories is not specified check whether test resource is parametrized.
      * @return @return true if <code>resource</code> contains an attribute.
      */
-    <T extends Resource> boolean isParametrizedResource(T resource, ProfileAttributeCategory... categories);
+    boolean isParametrizedResource(Object resource, ProfileAttributeCategory... categories);
 }

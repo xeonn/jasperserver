@@ -185,6 +185,12 @@
                     </c:choose>
 
 					<ul class="list buttonSet">
+
+	                    <c:if test="${param.decorate != \"no\"}">
+	                        <ul class="list buttonSet">
+	                            <li class="leaf"><button id="back" class="button capsule text up"><span class="wrap"><spring:message code="button.back"/><span class="icon"></span></span></button></li>
+	                        </ul>
+	                    </c:if>
                         <li class="node">
                             <ul class="list buttonSet">
 		                        <c:if test="${isPro}">
@@ -204,17 +210,11 @@
 		                        <li class="leaf"><button id="undoAll" class="button capsule up last" disabled="disabled" title="<spring:message code="button.undoAll"/>"><span class="wrap"><span class="icon"></span></span></button></li>
 							</ul>
 						</li>
-						<li class="node"><ul class="list buttonSet"><li id="controls" class="leaf ${controlsHidden}"><button id="ICDialog" class="button capsule ${controlToggle} ${controlUp}" title="<spring:message code="button.controls"/>"><span class="wrap"><span class="icon"></span></span></button></li></ul>
-						</li>
-						<li class="node"><ul class="list buttonSet"><li class="leaf"><button id="bookmarksDialog" style="display: none;" class="button capsule up" title="<spring:message code="button.bookmarks"/>"><span class="wrap"><span class="icon"></span></span></button></li></ul>
-						</li>
+						<li class="node conditional first">
+							<ul class="list buttonSet">
+								<li id="controls" class="leaf ${controlsHidden}"><button id="ICDialog" class="button capsule ${controlToggle} ${controlUp}" title="<spring:message code="button.controls"/>"><span class="wrap"><span class="icon"></span></span></button><span class="divider"></span></li></ul></li>
+								<li class="node conditional second"><ul class="list buttonSet"><li class="leaf"><button id="bookmarksDialog" style="display: none;" class="button capsule up" title="<spring:message code="button.bookmarks"/>"><span class="wrap"><span class="icon"></span></span></button></li></ul></li>
                     </ul>
-
-                    <c:if test="${param.decorate != \"no\"}">
-                        <ul class="list buttonSet">
-                            <li class="leaf"><button id="back" class="button capsule text up"><span class="wrap"><spring:message code="button.back"/><span class="icon"></span></span></button></li>
-                        </ul>
-                    </c:if>
 
                     <div id="reportSearch" class="control search">
                         <span class="divider first"></span>

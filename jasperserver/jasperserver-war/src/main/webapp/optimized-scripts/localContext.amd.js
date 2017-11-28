@@ -1,1 +1,1 @@
-define(["require","!domReady"],function(e){return e("!domReady"),localContext});
+define(["require","!domReady"],function(e){"use strict";return e("!domReady"),localContext});

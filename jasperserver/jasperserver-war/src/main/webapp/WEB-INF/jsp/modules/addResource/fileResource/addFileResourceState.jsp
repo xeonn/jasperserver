@@ -20,7 +20,9 @@
   --%>
 
 <%@ taglib uri="/spring" prefix="spring"%>
+<%@ taglib prefix="js" uri="/WEB-INF/jasperserver.tld" %>
 
+<js:out javaScriptEscape="true">
 <script type="text/javascript">
     if (typeof localContext === "undefined") {
         localContext = {};
@@ -32,7 +34,7 @@
         expectedType: "${expectedFileType}",
         folderURI: "${fileResource.fileResource.parentFolder}",
         isEditMode: ${fileResource.editMode},
-        resourceIdNotSupportedSymbols: "<spring:message code="${resourceIdNotSupportedSymbols}" javaScriptEscape="true"/>"
+        resourceIdNotSupportedSymbols: "${resourceIdNotSupportedSymbols}"
     };
 
     if (typeof resource === "undefined") {
@@ -61,3 +63,4 @@
     __jrsConfigs__.addFileResource.resource = resource;
 
 </script>
+</js:out>

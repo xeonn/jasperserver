@@ -23,6 +23,7 @@ package com.jaspersoft.jasperserver.api.metadata.user.service.impl;
 
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Folder;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.InternalURI;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.PermissionUriProtocol;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 
 import java.io.Serializable;
@@ -32,49 +33,36 @@ import java.io.Serializable;
  *
  */
 public class InternalURIDefinition implements InternalURI {
-	
+
 	private String uri;
-	private String folderUri;
-	
+	private PermissionUriProtocol protocol;
+
 	public InternalURIDefinition(String uri) {
-        this.uri = uri;
-		
-		if (uri == null || uri.length() == 0) {
-			this.folderUri = null;
-		} else {
-            if (uri.startsWith(getProtocol().concat(":"))) {
-                this.uri=uri.substring(getProtocol().length()+1);
-            }
+		this.uri = PermissionUriProtocol.removePrefix(uri);
+		this.protocol = PermissionUriProtocol.getProtocol(uri);
+	}
 
-            int lastSeparator = this.uri.lastIndexOf(Folder.SEPARATOR);
-
-			if (lastSeparator <= 0) {
-				this.folderUri = null;
-			} else {
-				this.folderUri = this.uri.substring(0, lastSeparator);
-			}
-		}
+	public InternalURIDefinition(String uri, PermissionUriProtocol protocol) {
+		this.uri = PermissionUriProtocol.removePrefix(uri);
+		this.protocol = protocol;
 	}
 
 	/* (non-Javadoc)
 	 * @see com.jaspersoft.jasperserver.api.metadata.common.domain.InternalURI#getParentPath()
 	 */
 	public String getParentPath() {
-        if (getParentFolder()==null && uri.lastIndexOf(Folder.SEPARATOR)==0 && uri.length()>1) {
-            return Folder.SEPARATOR;
-        }
-		return getParentFolder() == null ? null : getParentFolder();
+		return protocol.getParentUri(uri);
 	}
 
 	/* (non-Javadoc)
 	 * @see com.jaspersoft.jasperserver.api.metadata.common.domain.InternalURI#getParentURI()
 	 */
 	public String getParentURI() {
-		return getParentPath() == null ? null : getProtocol() + ":" + getParentPath();
+		return getParentPath() == null ? null : protocol.addPrefix(getParentPath());
 	}
 
 	public String getParentFolder() {
-		return folderUri;
+		return protocol.getParentUri(uri);
 	}
 
 	/* (non-Javadoc)
@@ -88,28 +76,48 @@ public class InternalURIDefinition implements InternalURI {
 	 * @see com.jaspersoft.jasperserver.api.metadata.common.domain.InternalURI#getProtocol()
 	 */
 	public String getProtocol() {
-		return Resource.URI_PROTOCOL;
+		return protocol.toString();
 	}
 
 	/* (non-Javadoc)
 	 * @see com.jaspersoft.jasperserver.api.metadata.common.domain.InternalURI#getURI()
 	 */
 	public String getURI() {
-		return getProtocol() + ":" + getPath();
+		return protocol.addPrefix(getPath());
 	}
 
-    @Override
-    public Serializable getIdentifier() {
-        return getURI();
-    }
+	@Override
+	public Serializable getIdentifier() {
+		return getURI();
+	}
 
-    @Override
-    public String getType() {
-        return Folder.class.getName();
-    }
+	@Override
+	public String getType() {
+		return Folder.class.getName();
+	}
 
-    @Override
-    public String toString() {
-        return getURI();
-    }
+	@Override
+	public String toString() {
+		return getURI();
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+
+		InternalURIDefinition that = (InternalURIDefinition) o;
+
+		if (protocol != that.protocol) return false;
+		if (uri != null ? !uri.equals(that.uri) : that.uri != null) return false;
+
+		return true;
+	}
+
+	@Override
+	public int hashCode() {
+		int result = uri != null ? uri.hashCode() : 0;
+		result = 31 * result + (protocol != null ? protocol.hashCode() : 0);
+		return result;
+	}
 }

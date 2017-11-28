@@ -22,8 +22,10 @@
 
 /**
  * @author: Dima Gorbenko <dgorbenko@jaspersoft.com>
- * @version: $Id$
+ * @version: $Id: encrypt.page.js 8790 2015-04-22 21:28:09Z obobruyk $
  */
+
+/* global isEncryptionOn */
 
 define(function (require) {
 

@@ -1,6 +1,12 @@
 /*
  * From: theme.css
  */
+ 
+* {
+	-moz-box-sizing: border-box; 	/* NEW */
+	-webkit-box-sizing: border-box;	/* NEW */
+	box-sizing: border-box;			/* NEW */
+}
 
 html,body {
 	width:100%;
@@ -29,10 +35,6 @@ and (orientation: portrait) {
 body.dashboardViewFrame, body.noDecoration {
 	background:none;
 	min-width:0;
-}
-
-body.dashboardViewFrame {
-	overflow: scroll;
 }
 
 /* 
@@ -207,9 +209,8 @@ h6,
 button,
 .buttons>.tab>.button,
 .title,
-.menu.primaryNav,
 #metaLinks #userID,
-.fields .node>.wrap,
+/* .fields .node>.wrap, */ /* DELETE IF NO PROBLEMS */
 .panel.info.system .message,
 .wrapper.table .caption .placeholder,
 .data.table .header,
@@ -221,10 +222,11 @@ button,
 .filters .fieldName,
 .tabSet.horizontal.buttons .selected .button,
 .list.folders .node.activeTheme,
-.tabSet.text .selected.tab>.wrap,
+.tabSet.text .selected.tab > .wrap,
 #reportContainer a {
 	font-weight: bold;
 }
+
 #reportContainer .inputControls a {
     font-weight: normal;
 }
@@ -243,8 +245,8 @@ button,
 .button.down.pressed,
 .button.capsule.down.over,
 .button.capsule.down.pressed,
-.tabSet.horizontal.buttons .button.over,
-.tabSet.horizontal.buttons .button.pressed,
+#loginPage #rotating .list.decorated,
+#loginPage .launcher,
 .menu .wrap.over,
 .menu .wrap.pressed,
 .button.up.primary,
@@ -263,6 +265,8 @@ button,
 #metaLinks a:active,
 #selectedSubDataSourcesList .leaf.selected .dataSourceName,
 .list.collapsible>li>.selected>.wrap,
+.list.filters>.leaf>.wrap.pressed,
+.list.type_basic .wrap.pressed > .jrbookmark,
 .selected>.wrap .resourceName,
 .selected>.wrap .resourceDescription,
 .selected>.wrap .resourcePath,
@@ -303,7 +307,6 @@ button,
 .sub.header,
 .control.path,
 .tabSet.buttons .disabled .button,
-.list.twoColumn>.node>.wrap,
 .hint,
 .filters .fieldName,
 .filters .condition {
@@ -312,8 +315,8 @@ button,
 
 /* .gray60 */
 .palette05,
-.tabSet.text>.tab>.wrap,
-.tabSet.text>.tab>.wrap.over,
+.tabSet.text>.tab > .wrap,
+.tabSet.text>.tab > .wrap.over,
 .tabSet.text>.label>.wrap,
 .button,
 .header,
@@ -335,25 +338,36 @@ legend.label>.wrap,
 #serverError h3,
 #addResource_locateDataSource #newDataSourceLink.disabled,
 #addResource_locateQuery #newQueryLink.disabled,
+#addResource_inputControl_information .list.twoColumn > .node > .wrap,
 ul.decorated,
-.resourceBlock-title,
 .resourceBlock .fileType,
 .workflow-description,
 .workflow-description a:link,
 .workflow-description a:visited,
-.workflow-description a:active {
+.workflow-description a:active,
+#resultsContainer p,
+#resultsListHeader h3,
+#resultsListHeader p,
+.list.twoColumn>.node>.wrap,
+.list.collapsible > li > .header.wrap,
+.LogCollectors .collectorsList tr td,
+.attributesTable > .thead .table-column,
+.attributesTable > .tbody .table-row {
 	color:#666;
 }
 
 /* .gray80 */
 .palette06,
 body,
-.title>.path,
-.menu li,
 *[readonly=readonly],
-.group>legend,
-.resourceDescription {
-	color:#333;
+.title > .path,
+.group > legend,
+.menu li {
+	color: #333;
+}
+
+.list.settings .node > .wrap .title {
+	color: #444;
 }
 
 /* .black */
@@ -373,7 +387,6 @@ body,
 
 /* .sky */
 .palette09,
-.launcher,
 .button.action.jumbo {
 	color:#4698be;
 }
@@ -384,37 +397,29 @@ a#about:active {
 	color:#8CD9FE;
 }
 
-/* dark blue in gradient */
-.content .header > .title,
-.panel > .header > .title,
-.column.decorated.minimized .vtitle,
-.tabSet.horizontal.buttons .selected>.button>.wrap,
-#filter-container .filterName,
-#expression-container .filterName {
-	color: #0872A4;
-}
 
 /* footer color */
 a#about,
 a#about:hover,
 a#about:active,
 #frameFooter{
-	color:#75b6d6;
+	color:#666;
 }
 
-/* .royal */
+/* .new theme dark blue */
 .palette11,
 .textAccent02,
-.tabSet.text .selected.tab>.wrap,
-.tabSet.text .selected.tab>.wrap.over,
-.tabSet.text .selected.tab>.wrap.pressed,
-.list.filters>li.selected>.wrap,
-.list.filters>.leaf>.wrap.pressed,
+.tabSet.text .selected.tab > .wrap,
+.tabSet.text .selected.tab > .wrap.over,
+.tabSet.text .selected.tab > .wrap.pressed,
+.list.filters > li.selected>.wrap,
+.list.filters > li.selected>.wrap.pressed,
 .list.stepIndicator .selected>.wrap,
 .panel.info.system .message,
 .list.type_basic .wrap a,
 .resourceName,
 .fsection,
+.launcher, /* moved from #fff */
 #reportContainer a,
 #scheduler_editor #stepDisplay > fieldset > legend,
 .homeSidebar-title,
@@ -424,9 +429,27 @@ a#about:active,
 .resourceBlock a:hover,
 .resourceBlock a:active,
 .workflow-description a:hover,
-.plusminus .node>.wrap>.jrbookmark {
-	color:#217EB5;
+.workflow-buttonContainer .button,
+.plusminus .node > .wrap > .jrbookmark,
+.list.settings .panel.pane.settings .header > .title,
+.tabSet.horizontal.buttons .selected > .button > .wrap,
+.tabSet.horizontal.buttons .button.over,
+.tabSet.horizontal.buttons .button.pressed,
+/* START moved from palette 6 */
+.content .header > .title,
+.resourceBlock-title,
+.column.decorated.minimized .vtitle,
+.flow #stepDisplay .column.primary .header .title,
+.flow #stepDisplay .column.secondary .header .title,
+/* END moved from palette 6 */
+#loginPage #metaLinks li,
+#loginPage #metaLinks a,
+#loginPage #metaLinks a:hover,
+#loginPage #metaLinks a:active,
+#needHelp {
+	color: #195b8a;
 }
+
 
 #reportContainer .inputControls a {
     color: inherit;
@@ -435,7 +458,7 @@ a#about:active,
 
 /* .cerulean */
 .palette12,
-.tabSet.text>.tab>.wrap.pressed,
+.tabSet.text >.tab > .wrap.pressed,
 .control.path .step .wrap.pressed,
 a:active,
 #reportContainer a:active {
@@ -445,8 +468,7 @@ a:active,
 /* .orange */
 .palette13,
 .textAccent,
-.button.action.jumbo.over,
-#needHelp {
+.button.action.jumbo.over {
 	color:#FC870E;
 }
 
@@ -733,10 +755,6 @@ Others are the selectors that are assigned to objects automatically.
 	position:relative;
 }
 
-#fromLocal #fileUpload {
-	margin-left:20px;
-}
-
 #sortMode {
 	position:absolute;
 	right:1em;
@@ -748,31 +766,44 @@ Others are the selectors that are assigned to objects automatically.
  */
 
 #logo {
-	width:156px;
-	height:20px;
-	background:url(images/logo.png) no-repeat 0 0 transparent;
-	border:none;
-	margin:6px 4px 0 8px;
+	background: url(images/logo.png) no-repeat 0 0 transparent;
+	border: none;
+	height: 22px;
+	width: 176px;
+	margin: 6px 4px 0 8px;
 }
 
 /* ----------- */
 /*	Meta Links */
 /* ----------- */
 #metaLinks {
-	height:26px;
+	height: 32px;
 }
 
 #metaLinks li {
 	border-color: #fff;
 	border-right: 1px solid #eef8fc;
-	float:left;
-	margin: 8px .4em 0 0;
-	padding: 0 7px 2px 7px;
-	line-height:9px;
+	float: left;
+	font-size: 12px;
+	margin: 10px 0;
+	padding: 0 8px 2px 7px;
+	line-height: 12px;
 }
 
 #metaLinks li.last {
 	border-right: none;
+}
+
+/* iPads (portrait and landscape) */
+@media only screen
+and (min-device-width : 768px)
+and (max-device-width : 1024px)
+and (orientation:portrait) {
+	#metaLinks #userID,
+	#metaLinks #help {
+		display: none;
+		
+	}
 }
 
 /* -------------- */
@@ -810,11 +841,19 @@ Others are the selectors that are assigned to objects automatically.
 	color#333;
 }
 
-#copyright {
+#copyright,
+#about {
+	font-family: Lucida Grande, Verdana, Arial, Helvetica, sans-serif;
+	line-height: 17px;
 	position:absolute;
+}
+
+#copyright {
 	right:10px;
-	top:1px;
-	font-weight:bold;
+}
+
+#about {
+	left:10px;
 }
 
 #license,
@@ -822,13 +861,6 @@ Others are the selectors that are assigned to objects automatically.
 	font-weight:bold;
     color:#FEEF97;
 	padding-left:20px;
-}
-
-#about {
-	position:absolute;
-	left:10px;
-	top:1px;
-	font-weight:bold;
 }
 
 #userName {

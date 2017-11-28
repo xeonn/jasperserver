@@ -57,6 +57,7 @@ import com.jaspersoft.jasperserver.war.cascade.CascadeResourceNotFoundException;
 import com.jaspersoft.jasperserver.war.cascade.InputControlsLogicService;
 import com.jaspersoft.jasperserver.war.cascade.InputControlsValidationException;
 import net.sf.jasperreports.engine.JRExporterParameter;
+import net.sf.jasperreports.engine.JRPrintAnchorIndex;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.export.GenericElementReportTransformer;
 import net.sf.jasperreports.engine.util.JRSaver;
@@ -99,7 +100,7 @@ import java.util.regex.Pattern;
  * Run a report unit using the passing in parameters and options
  *
  * @author ykovalchyk
- * @version $Id: RunReportServiceImpl.java 51947 2014-12-11 14:38:38Z ogavavka $
+ * @version $Id: RunReportServiceImpl.java 55351 2015-05-15 08:20:01Z ykovalch $
  */
 @Service("runReportService")
 @Scope(value = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)
@@ -295,6 +296,17 @@ public class RunReportServiceImpl implements RunReportService, Serializable, Dis
         executions.put(requestId, execution);
         startReportExecution(execution);
         if (exportOptions != null && exportOptions.getOutputFormat() != null && !exportOptions.getOutputFormat().isEmpty()) {
+            if(!options.isAsync()){
+                // wait till report execution is complete
+                try{
+                    execution.getFinalReportUnitResult().getJasperPrintAccessor().getFinalJasperPrint();
+                } catch (RemoteException e){
+                    throw e;
+                } catch (Exception e){
+                    // if report fails in non async mode, then send error immediately
+                    throw new IllegalParameterValueException(new RemoteException(e).getErrorDescriptor());
+                }
+            }
             final ExportExecution exportExecution = executeExport(exportOptions, execution);
             if (!options.isAsync()) {
                 // wait till export is complete
@@ -375,6 +387,15 @@ public class RunReportServiceImpl implements RunReportService, Serializable, Dis
                 jasperPrint = jasperPrintAccessor.getJasperPrint();
             } else {
                 jasperPrint = jasperPrintAccessor.getFinalJasperPrint();
+                final String anchor = exportOptions.getAnchor();
+                if(anchor != null && !anchor.isEmpty()){
+                    final JRPrintAnchorIndex jrPrintAnchorIndex = jasperPrint.getAnchorIndexes().get(anchor);
+                    if(jrPrintAnchorIndex != null){
+                        exportOptions.setPages(new ReportOutputPages().setPage(jrPrintAnchorIndex.getPageIndex() + 1));
+                    } else {
+                        throw new IllegalParameterValueException("anchor", anchor);
+                    }
+                }
             }
             final ReportExecutionStatus.Status status = jasperPrintAccessor.getReportStatus().getStatus();
             switch (status){
@@ -474,7 +495,7 @@ public class RunReportServiceImpl implements RunReportService, Serializable, Dis
                     GenericElementReportTransformer.transformGenericElements(reportExecutor.getJasperReportsContext(reportExecutionOptions.isInteractive()), jasperPrint, reportExecutionOptions.getTransformerKey());
                 }
                 JRSaver.saveObject(jasperPrint, bos);
-                exportExecution.setOutputResource(new ReportOutputResource("application/octet-stream", bos.toByteArray()));
+                exportExecution.setOutputResource(new ReportOutputResource().setContentType("application/octet-stream").setData(bos.toByteArray()));
             } else {
                 HashMap<String, Object> exportParameters = new HashMap<String, Object>(reportExecution.getRawParameters());
                 if (pages != null) exportParameters.put(Argument.RUN_OUTPUT_PAGES, pages);
@@ -505,8 +526,11 @@ public class RunReportServiceImpl implements RunReportService, Serializable, Dis
                     }
                 }
                 final Matcher matcher = FILE_NAME_PATTERN.matcher(reportURI);
-                exportExecution.setOutputResource(new ReportOutputResource(reportExecutor.getContentType(outputFormat),
-                        bos.toByteArray(), (matcher.find() ? matcher.group(1) : "report") + "." + outputFormat.toLowerCase()));
+                exportExecution.setOutputResource(new ReportOutputResource()
+                        .setContentType(reportExecutor.getContentType(outputFormat))
+                        .setData(bos.toByteArray())
+                        .setFileName((matcher.find() ? matcher.group(1) : "report") + "." + outputFormat.toLowerCase())
+                        .setPages(pages != null ? pages.toString() : null));
             }
         } catch (RemoteException e) {
             throw e;

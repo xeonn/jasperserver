@@ -23,6 +23,7 @@ package com.jaspersoft.jasperserver.war.common;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -32,7 +33,7 @@ import javax.servlet.http.HttpSession;
 
 /**
  * @author Sergey Prilukin
- * @version $Id: JavascriptOptimizationSettings.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: JavascriptOptimizationSettings.java 55510 2015-05-22 22:46:39Z ohavavka $
  */
 public class JavascriptOptimizationSettings {
     public static final String OPTIMIZE_JAVASCRIPT_SESSION_PARAM = "optimizeJavascript";
@@ -42,7 +43,11 @@ public class JavascriptOptimizationSettings {
     private String optimizedJavascriptPath = "optimized-scripts";
 
     public Boolean getUseOptimizedJavascript() {
-        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+        RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+        if (requestAttributes==null) {
+            return useOptimizedJavascript;
+        }
+        HttpServletRequest request = ((ServletRequestAttributes) requestAttributes).getRequest();
         HttpSession session = request.getSession();
 
         Boolean optimize = (Boolean)session.getAttribute(OPTIMIZE_JAVASCRIPT_SESSION_PARAM);

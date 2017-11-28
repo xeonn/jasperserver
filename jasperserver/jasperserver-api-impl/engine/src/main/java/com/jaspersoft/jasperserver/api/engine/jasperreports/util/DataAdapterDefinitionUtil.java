@@ -175,16 +175,17 @@ public class DataAdapterDefinitionUtil {
      **/
     public static String getDataSourceUri(CustomReportDataSource customDataSource, TenantService tenantService) {
         String fileName = (String) customDataSource.getPropertyMap().get(FILE_NAME_PROP);
-        if (fileName == null) return null;
-        int sepIndex = fileName.lastIndexOf("|");
-        if (fileName.startsWith("repo:/") && (sepIndex > 0) && (!fileName.endsWith("|"))) {
+        if (fileName != null) {
+            int sepIndex = fileName.lastIndexOf("|");
+            if (fileName.startsWith("repo:/") && (sepIndex > 0) && (!fileName.endsWith("|"))) {
 
-            final String tenantId = fileName.substring(sepIndex + 1);
-            final Tenant tenant = tenantService.getTenant(null, tenantId);
-            if(tenant != null) {
-                return tenant.getTenantUri();
-            } else {
-                throw new IllegalStateException("Invalid tenant ID: " + tenantId);
+                final String tenantId = fileName.substring(sepIndex + 1);
+                final Tenant tenant = tenantService.getTenant(null, tenantId);
+                if (tenant != null) {
+                    return tenant.getTenantUri();
+                } else {
+                    throw new IllegalStateException("Invalid tenant ID: " + tenantId);
+                }
             }
         }
 

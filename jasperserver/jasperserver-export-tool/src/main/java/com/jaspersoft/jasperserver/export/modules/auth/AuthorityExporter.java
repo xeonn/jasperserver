@@ -38,7 +38,7 @@ import com.jaspersoft.jasperserver.export.modules.auth.beans.UserBean;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: AuthorityExporter.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: AuthorityExporter.java 54590 2015-04-22 17:55:42Z vzavadsk $
  */
 public class AuthorityExporter extends BaseExporterModule {
 
@@ -266,6 +266,7 @@ public class AuthorityExporter extends BaseExporterModule {
 
 		UserBean userBean = new UserBean();
 		userBean.copyFrom(user);
+		userBean.setAttributes(prepareAttributesBeans(user.getAttributes()));
 		
 		serialize(userBean, configuration.getUsersDirName(), getUserFile(user), configuration.getSerializer());
 		

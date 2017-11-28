@@ -1,1 +1,1 @@
-define(["require","backbone.original","common/transport/request"],function(r){var n=r("backbone.original"),e=r("common/transport/request");return n.ajax=e,n});
+define(["require","backbone.original","common/transport/request"],function(r){"use strict";var e=r("backbone.original"),n=r("common/transport/request");return e.ajax=n,e});

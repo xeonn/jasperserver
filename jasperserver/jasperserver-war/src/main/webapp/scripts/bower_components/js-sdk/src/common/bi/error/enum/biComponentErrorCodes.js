@@ -22,7 +22,7 @@
 
 /**
  * @author: Kostiantyn Tsaregradskyi
- * @version: $Id: biComponentErrorCodes.js 270 2014-10-13 19:58:03Z agodovanets $
+ * @version: $Id: biComponentErrorCodes.js 1184 2015-05-12 11:57:30Z psavushc $
  */
 
 define({
@@ -36,5 +36,8 @@ define({
     REPORT_EXECUTION_CANCELLED: "report.execution.cancelled",
     REPORT_EXPORT_FAILED: "report.export.failed",
     REPORT_EXPORT_CANCELLED: "report.export.cancelled",
-    ALREADY_DESTROYED_ERROR: "already.destroyed.error"
+    REPORT_RENDER_ERROR: "report.render.error",
+    REPORT_RENDER_HIGHCHARTS_ERROR: "report.render.highcharts.error",
+    ALREADY_DESTROYED_ERROR: "already.destroyed.error",
+    NOT_YET_RENDERED_ERROR: "not.yet.rendered.error"
 });

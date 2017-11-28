@@ -20,7 +20,9 @@
   --%>
 
 <%@ taglib uri="/spring" prefix="spring"%>
+<%@ taglib prefix="js" uri="/WEB-INF/jasperserver.tld" %>
 
+<js:out javaScriptEscape="true">
 <script type="text/javascript">
     if (typeof localContext === "undefined") {
         localContext = {};
@@ -29,7 +31,7 @@
     localContext.initOptions = {
         ParentFolderUri: "${parentFolder}",
         isEditMode: ${mondrianXmlaSource.editMode},
-        resourceIdNotSupportedSymbols: "<spring:message code="${resourceIdNotSupportedSymbols}" javaScriptEscape="true"/>"
+        resourceIdNotSupportedSymbols: "${resourceIdNotSupportedSymbols}"
     };
 
     if (typeof resource === "undefined") {
@@ -56,3 +58,4 @@
     __jrsConfigs__.addMondrianXML.localContext = localContext;
     __jrsConfigs__.addMondrianXML.resource = resource;
 </script>
+</js:out>

@@ -22,7 +22,7 @@
 
 /**
  * @author: Sergii Kylypko, Kostiantyn Tsaregradskyi
- * @version: $Id: Tooltip.js 399 2014-11-12 12:02:18Z ktsaregradskyi $
+ * @version: $Id: Tooltip.js 1178 2015-05-06 20:40:12Z yplakosh $
  */
 
 define(function(require){
@@ -72,32 +72,43 @@ define(function(require){
             options.offset && (this.offset = options.offset);
             options.attribute && (this.attribute = options.attribute);
             options.cssClasses && (this.cssClasses = options.cssClasses);
+
+            this.contentTemplate = options.contentTemplate;
+            this.i18n = options.i18n || {};
+
             !_.isUndefined(options.triggerEvents) && (this.triggerEvents = options.triggerEvents);
 
             this.selector = '[' + this.attribute + ']';
 
-            _.bindAll(this, 'show', '_onMouseMove', '_onMouseEnter', '_onMouseLeave');
+            _.bindAll(this, 'show', '_onMouseMove', '_onMouseLeave');
 
             this.$attachTo.delegate(this.selector, 'mousemove touchmove', this._onMouseMove);
-            this.$attachTo.delegate(this.selector, 'mouseenter touchstart', this._onMouseEnter);
             this.$attachTo.delegate(this.selector, 'mouseleave touchend', this._onMouseLeave);
 
             Backbone.View.prototype.constructor.apply(this, arguments);
         },
 
-        render: function(){
-            if (!this._event) {
-                return this;
+        render: function(model, options, dfd){
+            if(this._event){
+                model = model instanceof Backbone.Model ? model.toJSON() : model;
+
+                var content = _.template(this.contentTemplate)({model: model, i18n: this.i18n, options: options || {}});
+
+                this.$el.find(".body").empty().append(content);
+
+                this._showTooltip();
             }
 
-            var content = $(this._event.currentTarget).attr(this.attribute);
-            this.$(this.contentSelector).html(content);
-            return this;
+            dfd.resolve();
         },
 
-        show: function(){
-            this.render();
+        show: function(model, options){
+            var dfd = new $.Deferred();
+            this._timer = setTimeout(_.bind(this.render, this, model, options, dfd), this.delay);
+            return dfd;
+        },
 
+        _showTooltip: function(){
             $('body').append(this.$el);
             this._updatePosition();
             this._shown = true;
@@ -105,7 +116,10 @@ define(function(require){
         },
 
         hide: function(){
+            this.contentTemplate && this._timer && clearTimeout(this._timer);
+
             this.$el.detach();
+
             this._shown = false;
             this.triggerEvents && this.trigger('hide', this);
         },
@@ -135,13 +149,10 @@ define(function(require){
             this._event = event;
         },
 
-        _onMouseEnter: function(){
-            this._timer = setTimeout(this.show, this.delay);
-        },
-
         _onMouseLeave: function(){
-            this._timer && clearTimeout(this._timer);
             this._shown && this.hide();
+            this._timer && clearTimeout(this._timer);
+            this._event = null;
         },
 
         remove: function(){
@@ -149,7 +160,6 @@ define(function(require){
             this._timer && clearTimeout(this._timer);
 
             this.$attachTo.undelegate(this.selector, 'mousemove touchmove', this._onMouseMove);
-            this.$attachTo.undelegate(this.selector, 'mouseenter touchstart', this._onMouseEnter);
             this.$attachTo.undelegate(this.selector, 'mouseleave touchend', this._onMouseLeave);
 
             Backbone.View.prototype.remove.apply(this, arguments);

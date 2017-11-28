@@ -228,22 +228,25 @@ public class OlapClientConnectionAction extends FormAction {
 			}
 			wrapper.setSource(constants.FIELD_CHOICE_CONT_REPO);
 		}
+		/**
+		 * TODO(stas): Remove next block. I didn't find any usage of it
+		 */
 		// get reusable resources
 		if (!wrapper.isSubflowMode()) {
-			getAllConnections(context, wrapper);
-			findAllSchemas(context, wrapper);
-			getAllXmlaSources(context, wrapper);
+//			getAllConnections(context, wrapper);
+//			findAllSchemas(context, wrapper);
+//			getAllXmlaSources(context, wrapper);
 		} else {
 			// get resource from main flow
-			wrapper.setReusableMondrianConnections(parentWrapper
-					.getReusableMondrianConnections());
-			wrapper.setReusableXmlaConnections(parentWrapper
-					.getReusableXmlaConnections());
-			wrapper.setReusableSchemas(parentWrapper.getReusableSchemas());
-			wrapper.setReusableXmlaDefinitions(parentWrapper
-					.getReusableXmlaDefinitions());
+//			wrapper.setReusableMondrianConnections(parentWrapper
+//					.getReusableMondrianConnections());
+//			wrapper.setReusableXmlaConnections(parentWrapper
+//					.getReusableXmlaConnections());
+//			wrapper.setReusableSchemas(parentWrapper.getReusableSchemas());
+//			wrapper.setReusableXmlaDefinitions(parentWrapper
+//					.getReusableXmlaDefinitions());
 		}
-		getAllFolders(wrapper);
+//		getAllFolders(wrapper);
 		String parentFolder = (String)context.getFlowScope().get(PARENT_FOLDER_ATTR);
 		if (parentFolder == null) {
 			parentFolder = context.getRequestParameters().get("ParentFolderUri");
@@ -272,7 +275,8 @@ public class OlapClientConnectionAction extends FormAction {
 	 * @param context 
 	 * @param wrapper
 	 */
-	protected void findAllSchemas(RequestContext context,
+    @Deprecated
+    protected void findAllSchemas(RequestContext context,
 			OlapClientConnectionWrapper wrapper) {
 		FilterCriteria filterCriteria = FilterCriteria
 				.createFilter(FileResource.class);
@@ -287,8 +291,12 @@ public class OlapClientConnectionAction extends FormAction {
 			allSources = new ArrayList(resourceLookup.length);
 			for (int i = 0; i < resourceLookup.length; i++) {
 				Resource resource = (Resource) resourceLookup[i];
-				Object resourceObj = repository.getResource(null, resource
-						.getURIString());
+				Object resourceObj;
+				try {
+					resourceObj = repository.getResource(null, resource.getURIString());
+				} catch (JSException ex) {
+					continue;
+				}
 				if (!allSources.contains(((FileResource) resourceObj)
 						.getURIString())) {
 					allSources.add(((FileResource) resourceObj).getURIString());
@@ -305,6 +313,7 @@ public class OlapClientConnectionAction extends FormAction {
 	 * 
 	 * @param wrapper
 	 */
+    @Deprecated
 	protected void getAllConnections(RequestContext context,
 			OlapClientConnectionWrapper wrapper) {
 		FilterCriteria filterCriteria = FilterCriteria
@@ -320,8 +329,12 @@ public class OlapClientConnectionAction extends FormAction {
 			for (int i = 0; i < resourceLookup.length; i++) {
 				Resource resource = (Resource) resourceLookup[i];
                                 
-				Object resourceObj = 
-					repository.getResource(null, resource.getURIString());
+				Object resourceObj;
+				try {
+					resourceObj = repository.getResource(null, resource.getURIString());
+				} catch (JSException ex) {
+					continue;
+				}
 				if (resourceObj instanceof MondrianConnection) {
 					if (!allMondrianConnections.contains(
 							((OlapClientConnection) resourceObj).getURIString())) {
@@ -342,7 +355,7 @@ public class OlapClientConnectionAction extends FormAction {
 			}
 			wrapper.setReusableMondrianConnections(allMondrianConnections);
 			wrapper.setReusableXmlaConnections(allXmlaConnections);
-		} 
+		}
 	}
 	
 	/**
@@ -351,6 +364,7 @@ public class OlapClientConnectionAction extends FormAction {
 	 * 
 	 * @param wrapper
 	 */
+    @Deprecated
 	protected void getAllXmlaSources(RequestContext context,
 			OlapClientConnectionWrapper wrapper) {
 		FilterCriteria filterCriteria = FilterCriteria
@@ -363,7 +377,14 @@ public class OlapClientConnectionAction extends FormAction {
 			allXmlaDefinitions = new ArrayList(resourceLookup.length);
 			for (int i = 0; i < resourceLookup.length; i++) {
 				Resource resource = (Resource) resourceLookup[i];
-				Object resourceObj = repository.getResource(null, resource.getURIString());
+
+				Object resourceObj;
+				try {
+					resourceObj = repository.getResource(null, resource.getURIString());
+				} catch (JSException ex) {
+					continue;
+				}
+
 				if (!allXmlaDefinitions.contains(
 						((MondrianXMLADefinition) resourceObj).getURIString())) {
 					allXmlaDefinitions.add(
@@ -371,7 +392,7 @@ public class OlapClientConnectionAction extends FormAction {
 				}
 			}
 			wrapper.setReusableXmlaDefinitions(allXmlaDefinitions);
-		} 	
+		}
 	}
 
 	/**
@@ -379,6 +400,7 @@ public class OlapClientConnectionAction extends FormAction {
 	 * 
 	 * @param wrapper
 	 */
+    @Deprecated
 	protected void getAllFolders(OlapClientConnectionWrapper wrapper) {
 		List allFolders = repository.getAllFolders(null);
 		wrapper.setAllFolders(new ArrayList());

@@ -31,6 +31,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dom4j.Element;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -44,9 +45,12 @@ public class TenantImporter extends BaseImporterModule
 	
 	private TenantModuleConfiguration moduleConfiguration;
     private String updateArg;
+    private String includeServerSettings;
 
     public List<String> process()
 	{
+        initProcess();
+
 		for (Iterator it = indexElement.elementIterator(moduleConfiguration.getTenantIndexElement());
 				it.hasNext(); ) {
 			Element tenantElement = (Element) it.next();
@@ -141,7 +145,16 @@ public class TenantImporter extends BaseImporterModule
             existing.setTheme(newTenant.getTheme());
         }
         getTenantService().putTenant(executionContext, existing);
-        saveTenantAttributes(existing, newTenant.getAttributes());
+
+        ProfileAttributeBean[] profileAttributes = newTenant.getAttributes();
+        if (profileAttributes != null &&
+                !hasParameter(includeServerSettings) &&
+                (newTenant.getId() == null ||
+                        newTenant.getId().equals(TenantService.ORGANIZATIONS))) {
+            profileAttributes = getCustomProfileAttributes(profileAttributes);
+        }
+
+        saveTenantAttributes(existing, profileAttributes);
 
         commandOut.info("Updated tenant " + existing.getId());
     }
@@ -159,9 +172,24 @@ public class TenantImporter extends BaseImporterModule
         ProfileAttribute attribute = attributeService.newProfileAttribute(executionContext);
         attribute.setPrincipal(tenant);
         attributeBean.copyTo(attribute);
+        attribute.setUri(attribute.getAttrName(), attributeService.generateAttributeHolderUri(attribute.getPrincipal()));
+        setPermissions(attribute, attributeBean.getPermissions(), false);
         attributeService.putProfileAttribute(executionContext, attribute);
     }
 
+    protected ProfileAttributeBean[] getCustomProfileAttributes(ProfileAttributeBean[] profileAttributes) {
+        ProfileAttributeService attributeService = moduleConfiguration.getAttributeService();
+        List<ProfileAttributeBean> profileAttributesToSave = new ArrayList<ProfileAttributeBean>();
+        for (ProfileAttributeBean profileAttributeBean : profileAttributes) {
+            // TODO: re-implement without getting changer names, remove "getChangerName" method
+            String changerName = attributeService.getChangerName(profileAttributeBean.getName());
+            if (changerName == null || changerName.equals("custom")) {
+                    profileAttributesToSave.add(profileAttributeBean);
+            }
+        }
+
+        return profileAttributesToSave.toArray(new ProfileAttributeBean[profileAttributesToSave.size()]);
+    }
 
     public TenantModuleConfiguration getModuleConfiguration() {
         return moduleConfiguration;
@@ -177,5 +205,9 @@ public class TenantImporter extends BaseImporterModule
 
     public void setUpdateArg(String updateArg) {
         this.updateArg = updateArg;
+    }
+
+    public void setIncludeServerSettings(String includeServerSettings) {
+        this.includeServerSettings = includeServerSettings;
     }
 }

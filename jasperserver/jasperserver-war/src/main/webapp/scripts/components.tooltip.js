@@ -21,8 +21,11 @@
 
 
 /**
- * @version: $Id: components.tooltip.js 7762 2014-09-19 10:16:02Z sergey.prilukin $
+ * @version: $Id: components.tooltip.js 8900 2015-05-06 20:57:14Z yplakosh $
  */
+
+/* global isArray, _, getBoxOffsets, getScrollLeft, getScrollTop, layoutModule
+*/
 
 /**
  * Usage:
@@ -89,6 +92,12 @@ function JSTooltip(element, options) {
             this.text = this._fromAttribute(this.TOOLTIP_TEXT);
         }
 
+        // escape against XSS
+        if (this.label)
+            this.label = this._escapeText(this.label);
+        if (this.text)
+            this.text = this._escapeText(this.text);
+
         this.srcElement.jsTooltip = this;
 
         tooltipModule.tooltips.push(this);
@@ -105,6 +114,7 @@ JSTooltip.addVar("TEXT_PATTERN", ".message:not(.label)");
 
 JSTooltip.addMethod("_toAttribute", function(attrName, value) {
     if(this.srcElement) {
+        value = xssUtil.escape(value);
         this.srcElement.writeAttribute(attrName, isArray(value) ? value.join(this.SEPARATOR) : value);
     }
 });
@@ -121,7 +131,7 @@ JSTooltip.addMethod("_fromAttribute", function(attrName) {
 JSTooltip.addMethod("_setValues", function(elements, values) {
     elements.each(function (element, index) {
         if (values[index]) {
-            element.update(values[index]);
+            element.update(xssUtil.escape(values[index]));
         }
     });
 });
@@ -151,6 +161,12 @@ JSTooltip.addMethod("_calculateZIndex", function(element) {
     }, initialZIndex);
 
     return maxZIndex + 1;
+});
+
+JSTooltip.addMethod("_escapeText", function(text) {
+    return _.isArray(text)
+                ? _.map(text, function (txt) { return xssUtil.escape(txt)})
+                : xssUtil.escape(text);
 });
 
 JSTooltip.addMethod("show", function(offsets) {
@@ -212,7 +228,7 @@ JSTooltip.addMethod("show", function(offsets) {
 });
 
 JSTooltip.addMethod("updateText", function(text) {
-    this.text = text;
+    this.text = this._escapeText(text);
 
     this.show();
 });

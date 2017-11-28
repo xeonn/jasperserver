@@ -29,7 +29,9 @@ define(function (require) {
 
     "use strict";
 
-    var _ = require("lodash.custom");
+    var _ = require("lodash.custom"),
+        xssUtil = require("common/util/xssUtil");
+
 
     _.str = require('underscore.string');
 
@@ -42,6 +44,24 @@ define(function (require) {
 
     // Mix in non-conflict functions to Underscore namespace if you want
     _.mixin(_.str.exports());
+
+    _.xssEscape = xssUtil.escape;
+
+    var originalTemplate = _.template;
+
+    _.template = function(text, data, options) {
+        var settings = _.templateSettings,
+            reNoMatch = /($^)/;
+
+        text = String(text || '');
+        options = _.defaults({}, options, settings);
+
+        var reDelimiters = RegExp((options.escape || reNoMatch).source + '|$', 'g');
+
+        text = text.replace(reDelimiters, '{{ print(_.xssEscape($1)); }}');
+
+        return originalTemplate.call(_, text, data, options);
+    };
 
     return _;
 });

@@ -131,6 +131,7 @@
 
     <bean name="joinableDsTreeDataProvider" class="com.jaspersoft.jasperserver.war.model.impl.TypedTreeDataProvider">
         <property name="repositoryService" ref="${bean.repositoryService}" />
+        <property name="engineService" ref="engineService"/>
         <property name="supportedClasses">
             <list>
                 <!-- Types of DS which can be joined to virtual DS -->

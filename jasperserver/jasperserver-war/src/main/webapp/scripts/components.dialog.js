@@ -22,10 +22,12 @@
 
 /**
  * @author: inesterenko
- * @version: $Id: components.dialog.js 7762 2014-09-19 10:16:02Z sergey.prilukin $
+ * @version: $Id: components.dialog.js 8179 2015-01-27 12:34:21Z psavushchik $
  */
 
-jaspersoft || (jaspersoft = {components:{}});
+/* global jaspersoft, _, Backbone, dialogs */
+
+jaspersoft || (jaspersoft = {components:{}}); // jshint ignore: line
 jaspersoft.components || (jaspersoft.components = {});
 
 (function(exports, $, _, Backbone, templateEngine, dialogs) {

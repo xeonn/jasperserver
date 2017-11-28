@@ -21,8 +21,10 @@
 
 
 /**
- * @version: $Id: app.js 8025 2014-11-12 13:10:12Z ktsaregradskyi $
+ * @version: $Id: app.js 8179 2015-01-27 12:34:21Z psavushchik $
  */
+
+/* global console */
 
 define('scheduler/router/app', ['backbone'], function(Backbone){
 
@@ -95,15 +97,18 @@ define('scheduler/router/app', ['backbone'], function(Backbone){
             }
 
             // private variables
-            var match;
+            var match = location.search.match(/\?reportUnitURI=(.*)/);
 
             // add hash from query params
-            if (match = location.search.match(/\?reportUnitURI=(.*)/))
+            if (match) {
                 location.hash = 'list' + match[1];
+            }
 
             // default actions
-            if (this.app.current)
+            if (this.app.current) {
                 this.app.current.$el.addClass('hidden');
+            }
+
         }
 
     });

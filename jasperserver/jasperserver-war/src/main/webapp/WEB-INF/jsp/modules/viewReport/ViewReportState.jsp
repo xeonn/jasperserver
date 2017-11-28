@@ -18,8 +18,8 @@
   ~ You should have received a copy of the GNU Affero General Public  License
   ~ along with this program. If not, see <http://www.gnu.org/licenses/>.
   --%>
+<%@ taglib prefix="js" uri="/WEB-INF/jasperserver.tld" %>
 <%@ page import="com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportUnit" %>
-<%@ page import="org.apache.commons.lang.StringEscapeUtils" %>
 
 <c:if test="${!pageContext.request.requestedSessionIdValid and pageContext.request.method == 'GET'}">
 <script type="text/javascript">
@@ -81,22 +81,24 @@
         '<spring:message code="ADH_1214_ICHARTS_NO_DATA_GAUGE" javaScriptEscape="true"/>'
     ];
 
+    <js:out javaScriptEscape="true">
     Report.flowExecutionKey = '${flowExecutionKey}';
     Report.reportUnitURI = '${requestScope.reportUnit}';
-    Report.reportOptionsURI = '${requestScope.reportOptionsURI}';
-    Report.reportLabel = '<%= StringEscapeUtils.escapeJavaScript(((ReportUnit) pageContext.findAttribute("reportUnitObject")).getLabel()) %>';
-    Report.reportDescription = '<c:out value="${escapedReportDescription}"/>';
+    Report.reportOptionsURI = '${requestScope.reportOptionsURI}';    
+    Report.reportLabel = '${reportUnitObject.label}';
+    Report.reportDescription = '${reportUnitObject.description}';
     Report.reportForceControls = ${reportForceControls};
     Report.hasInputControls = ${hasInputControls};
     Report.isReportReadOnly = ${isReportReadOnly};
     Report.reportControlsLayout = ${reportControlsLayout};
     Report.icReorderEnabled = ${isIcReorderingEnabled};
-    Report.organizationId = '<c:out value="${organizationId}"/>';
-    Report.publicFolderUri = '<c:out value="${publicFolderUri}"/>';
-    Report.reportParameterValues = ${reportParameterValues};
-    Report.allRequestParameters = JSON.parse('<%= StringEscapeUtils.escapeJavaScript( String.valueOf(pageContext.findAttribute("allRequestParameters"))) %>');
-    Report.parametersWithoutDefaultValues = ${parametersWithoutDefaultValues};
-    Report.tempFolderUri = '<c:out value="${tempFolderUri}"/>';
+    Report.organizationId = '${organizationId}';
+    Report.publicFolderUri = '${publicFolderUri}';
+    Report.reportParameterValues = JSON.parse('${reportParameterValues}');
+    Report.allRequestParameters = JSON.parse('${allRequestParameters}');
+    Report.parametersWithoutDefaultValues = JSON.parse('${parametersWithoutDefaultValues}');
+    Report.tempFolderUri = '${tempFolderUri}';
+    </js:out>
 
     if (typeof __jrsConfigs__.reportViewer === "undefined") {
         __jrsConfigs__.reportViewer  = {};

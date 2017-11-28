@@ -24,6 +24,7 @@ package com.jaspersoft.jasperserver.export.modules.repository;
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceReference;
+import com.jaspersoft.jasperserver.export.modules.ImporterModuleContext;
 import com.jaspersoft.jasperserver.export.modules.repository.beans.ResourceBean;
 import com.jaspersoft.jasperserver.export.modules.repository.beans.ResourceReferenceBean;
 
@@ -31,7 +32,7 @@ import java.util.Map;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ResourceImportHandler.java 51369 2014-11-12 13:59:41Z sergey.prilukin $
+ * @version $Id: ResourceImportHandler.java 54483 2015-04-21 03:18:31Z ytymoshe $
  */
 public interface ResourceImportHandler {
 
@@ -52,6 +53,8 @@ public interface ResourceImportHandler {
     String getSourceJsVersion();
 
     String getTargetJsVersion();
+    
+    ImporterModuleContext getImportContext();
 
     Resource getHandledResource(String uri);
     

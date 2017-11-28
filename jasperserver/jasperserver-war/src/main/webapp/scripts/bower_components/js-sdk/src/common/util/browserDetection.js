@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: browserDetection.js 270 2014-10-13 19:58:03Z agodovanets $
+ * @version: $Id: browserDetection.js 888 2015-02-25 12:09:07Z ktsaregradskyi $
  */
 
 define(function (require) {
@@ -45,6 +45,9 @@ define(function (require) {
 		isIPad: function () {
 			return navigator.platform == "iPad";
 		},
+        isIOS: function() {
+            return navigator.userAgent.match(/(iPad|iPhone|iPod)/g);
+        },
 		isAndroid: function () {
 			return navigator.userAgent.toLowerCase().indexOf('android');
 		},
@@ -84,7 +87,7 @@ define(function (require) {
 			if (this.isIE()) {
 				if (navigator.appName === "Netscape") {
 					var ua = navigator.userAgent;
-					var re = new RegExp("Trident/.*rv:([0-9]{1,}[\.0-9]{0,})");
+					var re = new RegExp("Trident/.*rv:([0-9]{1,}[\\.0-9]{0,})");
 					if (re.exec(ua) != null) {
 						version = parseFloat(RegExp.$1);
 					}

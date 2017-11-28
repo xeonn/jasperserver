@@ -53,7 +53,7 @@
                 <t:putAttribute name="bodyContent">
                     <div id="flowControls"></div>
                     <div id="stepDisplay">
-                        <input type="hidden" id="ParentFolderUri" value='<%= request.getParameter("ParentFolderUri") %>'>
+                        <input type="hidden" id="ParentFolderUri" value='${param.ParentFolderUri}'>
                         <input type="submit" name="_eventId_changeCombo" id="changeCombo" style="display:none;"/>
                         <input type="hidden" name="_flowExecutionKey" value="${flowExecutionKey}"/>
 
@@ -113,7 +113,7 @@
                                             <spring:bind path="dataType.dataType.description">
                                                 <label class="control textArea <c:if test="${status.error}">error</c:if>" for="${status.expression}">
                                                     <span class="wrap"><spring:message code="jsp.editDataTypeForm.description"/>:</span>
-                                                    <textarea id="${status.expression}" name="${status.expression}" type="text"><c:out value="${status.value}"/></textarea>
+                                                    <textarea id="${status.expression}" name="${status.expression}" type="text">${status.value}</textarea>
                                                     <span class="message warning"><c:if test="${status.error}">${status.errorMessage}</c:if></span>
                                                 </label>
                                             </spring:bind>
@@ -128,7 +128,7 @@
                                                         <input class="" id="${status.expression}" name="${status.expression}" type="text" value="${status.value}" size="40"/>
                                                         <c:if test="${status.error}">
                                                             <c:forEach items="${status.errorMessages}" var="error">
-                                                                <span class="message warning"><c:out value="${error}"/></span>
+                                                                <span class="message warning">${error}</span>
                                                             </c:forEach>
                                                         </c:if>
                                                     </label>
@@ -159,6 +159,7 @@
                                                                 </c:otherwise>
                                                             </c:choose>
 
+                                                            <js:out javaScriptEscape="true">
                                                             <script type="text/javascript">
                                                                 __jrsConfigs__.addDataType.minValueText = {
                                                                     name: "${status.expression}",
@@ -167,10 +168,11 @@
                                                                     time: "${time}"
                                                                 };
                                                             </script>
+                                                            </js:out>
 
                                                             <c:if test="${status.error}">
                                                                 <c:forEach items="${status.errorMessages}" var="error">
-                                                                    <span class="message warning"><c:out value="${error}"/></span>
+                                                                    <span class="message warning">${error}</span>
                                                                 </c:forEach>
                                                             </c:if>
                                                         </label>
@@ -183,7 +185,7 @@
                                                             <input type="text" name="${status.expression}" value="${status.value}" size="40"/>
                                                             <c:if test="${status.error}">
                                                                 <c:forEach items="${status.errorMessages}" var="error">
-                                                                    <span class="message warning"><c:out value="${error}"/></span>
+                                                                    <span class="message warning">${error}</span>
                                                                 </c:forEach>
                                                             </c:if>
                                                         </label>
@@ -214,7 +216,8 @@
                                                                     <c:set var="time" value="true"/>
                                                                 </c:otherwise>
                                                             </c:choose>
-
+                                                            
+                                                            <js:out javaScriptEscape="true">
                                                             <script type="text/javascript">
                                                                 __jrsConfigs__.addDataType.maxValueText = {
                                                                     name: "${status.expression}",
@@ -223,10 +226,10 @@
                                                                     time: "${time}"
                                                                 };
                                                             </script>
+                                                            </js:out>
 
                                                             <c:if test="${status.error}">
-                                                                <c:forEach items="${status.errorMessages}" var="error"> <span class="message warning"><c:out
-                                                                            value="${error}"/></span>
+                                                                <c:forEach items="${status.errorMessages}" var="error"> <span class="message warning">${error}</span>
                                                                 </c:forEach>
                                                             </c:if>
                                                         </label>
@@ -263,7 +266,7 @@
                                                             </c:choose>
                                                             <c:if test="${status.error}">
                                                                 <c:forEach items="${status.errorMessages}" var="error">
-                                                                    <span class="message warning"><c:out value="${error}"/></span>
+                                                                    <span class="message warning">${error}</span>
                                                                 </c:forEach>
                                                             </c:if>
                                                         </label>

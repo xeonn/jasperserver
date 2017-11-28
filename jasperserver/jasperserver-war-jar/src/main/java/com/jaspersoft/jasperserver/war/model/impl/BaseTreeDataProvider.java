@@ -22,11 +22,13 @@
 package com.jaspersoft.jasperserver.war.model.impl;
 
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
+import com.jaspersoft.jasperserver.api.common.domain.impl.ExecutionContextImpl;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Folder;
 import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
 import com.jaspersoft.jasperserver.war.model.JSONObject;
 import com.jaspersoft.jasperserver.war.model.TreeDataProvider;
 import com.jaspersoft.jasperserver.war.model.TreeNode;
+import org.springframework.security.access.AccessDeniedException;
 
 import java.util.List;
 
@@ -99,6 +101,7 @@ public abstract class BaseTreeDataProvider implements TreeDataProvider {
     protected TreeNode getParentFolderNode(TreeNode parent, String uri) {
         String[] pathParts = uri.split("/");
         StringBuffer curPath = new StringBuffer();
+        ExecutionContext context = ExecutionContextImpl.getRuntimeExecutionContext();
         for (int i = 1; i < pathParts.length - 1; i++) {
             boolean found = false;
             curPath.append("/").append(pathParts[i]);
@@ -110,11 +113,16 @@ public abstract class BaseTreeDataProvider implements TreeDataProvider {
                 }
             }
             if (!found) {
-                Folder f = repositoryService.getFolder(null, curPath.toString());
-                TreeNode n = new TreeNodeImpl(this,
-                        f.getName(), f.getLabel(), f.getResourceType(), f.getURIString(), 1);
-                parent.getChildren().add(n);
-                parent = n;
+                try {
+                    Folder f = repositoryService.getFolder(context, curPath.toString());
+                    TreeNode n = new TreeNodeImpl(this,
+                            f.getName(), f.getLabel(), f.getResourceType(), f.getURIString(), 1);
+                    parent.getChildren().add(n);
+                    parent = n;
+                } catch (AccessDeniedException e){
+                    // dummy node to be disposed (not  part of the tree)
+                    return new TreeNodeImpl(this,   "", "", "", "", 1);
+                }
             }
         }
         return parent;

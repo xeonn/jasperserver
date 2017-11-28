@@ -21,6 +21,8 @@
 package com.jaspersoft.jasperserver.api.metadata.user.domain.impl.hibernate;
 
 import com.jaspersoft.jasperserver.api.common.crypto.PasswordCipherer;
+import com.jaspersoft.jasperserver.api.metadata.user.domain.TenantQualified;
+import com.jaspersoft.jasperserver.api.metadata.user.service.TenantService;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
@@ -29,6 +31,10 @@ import com.jaspersoft.jasperserver.api.metadata.common.domain.impl.IdedObject;
 import com.jaspersoft.jasperserver.api.metadata.common.service.ResourceFactory;
 import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.PersistentObjectResolver;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.ProfileAttribute;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+
+import java.util.regex.Pattern;
 
 /**
  * @author sbirney
@@ -40,6 +46,10 @@ public class RepoProfileAttribute implements IdedObject {
     private String attrName;
     private String attrValue;
     private Object principal;
+    private String description;
+    private String owner;
+
+    protected static final Pattern PATTERN_RESOURCE_NAME_REPLACE = Pattern.compile("[/\\\\]");
 
     /**
      * @return
@@ -76,7 +86,7 @@ public class RepoProfileAttribute implements IdedObject {
     }
 
     /**
-     * This is a User or a Role
+     * This is a User, Tenant or a Role
      *
      * @hibernate.any id-type="long"
      * @hibernate.any-column name="principalobjectclass" length="100"
@@ -84,6 +94,7 @@ public class RepoProfileAttribute implements IdedObject {
      *
      * hibernate.meta-value class="RepoRole" value="RepoRole"
      * hibernate.meta-value class="RepoUser" value="RepoUser"
+     * hibernate.meta-value class="RepoTenant" value="RepoTenant"
      */
 
     public Object getPrincipal() {
@@ -95,6 +106,36 @@ public class RepoProfileAttribute implements IdedObject {
     }
 
     /**
+     * @hibernate.property column="description" type="string" length="255"
+     */
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    /**
+     * @hibernate.property column="owner" type="string" length="255"
+     */
+    public String getOwner() {
+        if (owner == null || owner.isEmpty()) {
+            if (getPrincipal() instanceof RepoUser) {
+                return ((RepoUser) getPrincipal()).getTenantId();
+            } else if (getPrincipal() instanceof RepoTenant) {
+                return ((RepoTenant) getPrincipal()).getTenantId();
+            }
+        }
+
+        return owner;
+    }
+
+    public void setOwner(String owner) {
+        this.owner = owner;
+    }
+
+    /**
      * Copy from a client object into this one
      *
      * @param obj
@@ -102,7 +143,7 @@ public class RepoProfileAttribute implements IdedObject {
      */
     public void copyFromClient(Object obj, PersistentObjectResolver resolver) {
         ProfileAttribute other = (ProfileAttribute) obj;
-        setAttrName(other.getAttrName());
+        setAttrName(makeAttributeName(other.getAttrName()));
         String attrValue = other.getAttrValue();
         if (other.isSecure()) {
             attrValue =  PasswordCipherer.getInstance().encryptSecureAttribute(attrValue);
@@ -113,6 +154,8 @@ public class RepoProfileAttribute implements IdedObject {
         } else {
             setPrincipal(null);
         }
+        setDescription(other.getDescription());
+        setOwner(getAuthenticatedTenantId());
     }
 
     /**
@@ -124,8 +167,10 @@ public class RepoProfileAttribute implements IdedObject {
         ProfileAttribute other = (ProfileAttribute) clientMappingFactory.newObject(ProfileAttribute.class);
 
         other.setAttrName(getAttrName());
-        String attrValue = getAttrValue();
-        if (PasswordCipherer.getInstance().isEncrypted(getAttrValue())) {
+        // Temp fix: Oracle database translates empty string as null value,
+        // so return empty string to avoid possible NPE exceptions
+        String attrValue = (getAttrValue() != null) ? getAttrValue() : "";
+        if (PasswordCipherer.getInstance().isEncrypted(attrValue)) {
             attrValue = PasswordCipherer.getInstance().decryptSecureAttribute(attrValue);
             other.setSecure(true);
         }
@@ -135,10 +180,29 @@ public class RepoProfileAttribute implements IdedObject {
             IdedObject thisPrincipal = (IdedObject) getPrincipal();
             Object clientPrincipal = thisPrincipal.toClient(clientMappingFactory);
             other.setPrincipal(clientPrincipal);
+            other.setUri(getAttrName(), getAttributeHolderUri(getPrincipal()));
         } else {
             other.setPrincipal(null);
         }
+        other.setDescription(getDescription());
+
         return other;
+    }
+
+    public String getAttributeHolderUri(Object repoAttrHolder) {
+        StringBuilder builder = new StringBuilder();
+        String tenantFolderUri = "";
+        if (repoAttrHolder instanceof RepoUser) {
+            RepoUser user = (RepoUser)repoAttrHolder;
+            builder.append("/users/").append(user.getUsername());
+            tenantFolderUri = user.getTenant().getTenantFolderUri();
+        } else if (repoAttrHolder instanceof RepoTenant) {
+            tenantFolderUri = ((RepoTenant) repoAttrHolder).getTenantFolderUri();
+        }
+        String parentPath = tenantFolderUri.equals("/")? "" : tenantFolderUri;
+        builder.insert(0, parentPath);
+
+        return builder.toString();
     }
 
     public String toString() {
@@ -147,6 +211,7 @@ public class RepoProfileAttribute implements IdedObject {
                 .append("attrName", getAttrName())
                 .append("attrValue", getAttrValue())
                 .append("principal", getPrincipal())
+                .append("description", getDescription())
                 .toString();
     }
 
@@ -164,4 +229,23 @@ public class RepoProfileAttribute implements IdedObject {
                 .toHashCode();
     }
 
+    protected String makeAttributeName(String attrName) {
+        return PATTERN_RESOURCE_NAME_REPLACE.matcher(attrName).replaceAll("_");
+    }
+
+    private String getAuthenticatedTenantId() {
+        String result = null;
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null) {
+            if (auth.getPrincipal() instanceof TenantQualified) {
+                result = ((TenantQualified) auth.getPrincipal()).getTenantId();
+            }
+        }
+
+        if (result == null) {
+            return TenantService.ORGANIZATIONS;
+        }
+
+        return result;
+    }
 }

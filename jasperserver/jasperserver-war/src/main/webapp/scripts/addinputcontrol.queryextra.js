@@ -21,17 +21,19 @@
 
 
 /**
- * @version: $Id: addinputcontrol.queryextra.js 7762 2014-09-19 10:16:02Z sergey.prilukin $
+ * @version: $Id: addinputcontrol.queryextra.js 8179 2015-01-27 12:34:21Z psavushchik $
  */
+
+/* global matchAny, buttonManager, layoutModule */
 
 var STEP_DISPLAY_ID = "stepDisplay";
 var WIZARD_NAV_ID = "wizardNav";
 var FRAME_ID = "frame";
-var VALUE_ID_PATTERN = "#value"
+var VALUE_ID_PATTERN = "#value";
 var LABEL_ID_PATTERN = "#labelID";
 var ADD_PATTERN = "#add";
-var REMOVE_PATTERN = "#remove"
-var CONTROLS_PATTERN = "#controls"
+var REMOVE_PATTERN = "#remove";
+var CONTROLS_PATTERN = "#controls";
 
 var addListOfValues = {
     flowExecutionKey: '',

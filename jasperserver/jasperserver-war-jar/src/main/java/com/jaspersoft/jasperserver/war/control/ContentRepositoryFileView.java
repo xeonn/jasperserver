@@ -64,9 +64,17 @@ public class ContentRepositoryFileView extends AbstractView
 		}
 		
 		String fileType = file.getFileType();
+		String name = file.getName();
 
 		if (fileType == null)
 			throw new JSException("jsexception.undefined.file.type");
+
+		if (fileType.equals(ContentResource.TYPE_UNSPECIFIED) && name.contains(".") && !name.endsWith(".")) {
+			fileType = name.substring(name.lastIndexOf(".") + 1);
+			if (fileType.contains("_")){
+				fileType = fileType.substring(0, fileType.indexOf("_"));
+			}
+		}
 
 		FileResourceData fileData = repository.getContentResourceData(null, repoPath);
 		try {

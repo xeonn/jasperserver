@@ -20,21 +20,25 @@
  */
 package com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.util.Pair;
+import net.sf.jasperreports.types.date.DateRange;
 
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.domain.impl.ReportUnitRequestBase;
+import com.jaspersoft.jasperserver.api.engine.jasperreports.util.MaterializedDataParameter;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceReference;
 import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.util.RepositoryUtils;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportUnit;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ReportInputDataParameterContributors.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: ReportInputDataParameterContributors.java 55164 2015-05-06 20:54:37Z mchan $
  */
 public class ReportInputDataParameterContributors implements ReportDataParameterContributor {
 	
@@ -52,13 +56,34 @@ public class ReportInputDataParameterContributors implements ReportDataParameter
 				String paramName = getInputControlParameterName(ref);
 				if (paramName != null) {
 					Object value = params == null ? null : params.get(paramName);
-					inputParams.put(paramName, value);
+					Object dataValue = toDataValue(value);
+					inputParams.put(paramName, dataValue);
 				}
 			}
 		}
 		return inputParams;
 	}
 	
+	protected Object toDataValue(Object value) {
+		if (value == null) {
+			return null;
+		}
+		
+		// at some point we could introduce configurable handlers for specific types
+		// for now we have builtin check for date ranges
+		Object dataValue;
+		if (value instanceof DateRange) {
+			DateRange date = (DateRange) value;
+			Pair<Date, Date> effectiveValue = new Pair<Date, Date>(date.getStart(), date.getEnd());
+			// storing both the original date range object and the effective value
+			// the original value could be used in EngineServiceImpl.setSnapshotParameterValues
+			dataValue = new MaterializedDataParameter(value, effectiveValue);
+		} else {
+			dataValue = value;
+		}
+		return dataValue;
+	}
+
 	protected String getInputControlParameterName(ResourceReference inputControlRef) {
 		// we only need the input control name
 		String name = null;

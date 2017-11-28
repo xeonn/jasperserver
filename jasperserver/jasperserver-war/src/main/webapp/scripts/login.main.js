@@ -21,8 +21,10 @@
 
 
 /**
- * @version: $Id: login.main.js 8012 2014-11-09 16:08:03Z ktsaregradskyi $
+ * @version: $Id: login.main.js 8179 2015-01-27 12:34:21Z psavushchik $
  */
+
+/* global isIPad */
 
 define(function(require) {
 

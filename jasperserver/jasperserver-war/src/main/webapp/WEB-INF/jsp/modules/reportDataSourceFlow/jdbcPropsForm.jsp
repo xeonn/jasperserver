@@ -135,7 +135,7 @@
                 <spring:bind path="dataResource.reportDataSource.description">
 					<tr>
 						<td align="right" valign="top"><spring:message code="label.description"/>&nbsp;</td>
-						<td align="left"><textarea name="${status.expression}" rows="5" cols="28" class="fnormal"><c:out value='${status.value}'/></textarea></td>
+						<td align="left"><textarea name="${status.expression}" rows="5" cols="28" class="fnormal">${status.value}</textarea></td>
 					</tr>
 					<c:if test="${status.error}">
 					<tr>
@@ -150,7 +150,7 @@
                 <spring:bind path="dataResource.reportDataSource.driverClass">
                 <tr>
                     <td align="right">* <spring:message code="jsp.jdbcPropsForm.driver"/>&nbsp;</td>
-                    <td><input maxlength="100" name="${status.expression}" type="text" class="fnormal" size="40" value="<c:out value='${status.value}'/>">&nbsp;<spring:message code="JS_sample.jdbc.driver"/></td>
+                    <td><input maxlength="100" name="${status.expression}" type="text" class="fnormal" size="40" value="${status.value}">&nbsp;<spring:message code="JS_sample.jdbc.driver"/></td>
                 </tr>
                     <c:if test="${status.error}">
                     <tr>
@@ -162,7 +162,7 @@
                 <spring:bind path="dataResource.reportDataSource.connectionUrl">
                 <tr>
                     <td align="right">* <spring:message code="jsp.jdbcPropsForm.url"/>&nbsp;</td>
-                    <td><input maxlength="500" name="${status.expression}" type="text" class="fnormal" size="40" value="<c:out value='${status.value}'/>">&nbsp;<spring:message code="JS_sample.jdbc.url"/></td>
+                    <td><input maxlength="500" name="${status.expression}" type="text" class="fnormal" size="40" value="${status.value}">&nbsp;<spring:message code="JS_sample.jdbc.url"/></td>
                 </tr>
                     <c:if test="${status.error}">
                     <tr>
@@ -174,7 +174,7 @@
                 <spring:bind path="dataResource.reportDataSource.username">
                 <tr>
                     <td align="right">* <spring:message code="jsp.jdbcPropsForm.username"/>&nbsp;</td>
-                    <td><input maxlength="100" name="${status.expression}" type="text" class="fnormal" size="40" value="<c:out value='${status.value}'/>"></td>
+                    <td><input maxlength="100" name="${status.expression}" type="text" class="fnormal" size="40" value="${status.value}"></td>
                 </tr>
                     <c:if test="${status.error}">
                     <tr>
@@ -186,7 +186,7 @@
                 <spring:bind path="dataResource.reportDataSource.password">
                 <tr>
                     <td align="right"><spring:message code="jsp.jdbcPropsForm.password"/>&nbsp;</td>
-                    <td><input maxlength="100" name="${status.expression}" type="password" class="fnormal" size="40" value="<c:out value='${status.value}'/>"></td>
+                    <td><input maxlength="100" name="${status.expression}" type="password" class="fnormal" size="40" value="${status.value}"></td>
                 </tr>
                     <c:if test="${status.error}">
                     <tr>

@@ -22,8 +22,10 @@
 
 /**
  * @author: Yuriy Plakosh
- * @version: $Id: components.about.js 7808 2014-09-19 13:18:27Z sergey.prilukin $
+ * @version: $Id: components.about.js 8179 2015-01-27 12:34:21Z psavushchik $
  */
+
+/* global dialogs */
 
 var about = {
 

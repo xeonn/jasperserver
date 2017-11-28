@@ -22,7 +22,7 @@
 
 /**
  * @author: Sergey Prilukin
- * @version: $Id: ScalableList.js 417 2014-11-18 19:47:47Z sergey.prilukin $
+ * @version: $Id: ScalableList.js 1160 2015-04-28 12:46:42Z spriluki $
  */
 
 /**
@@ -63,7 +63,7 @@
  * ViewPortChunks template example (usually it's not necessary to override it so this template is loaded as a dependency):
  *
  * {{#chunks}}
- *    <div class="viewPortChunk" style="height: {{height}}px"></div>
+ *    <div class="j-view-port-chunk" style="height: {{height}}px"></div>
  * {{/chunks}}
  *
  *
@@ -95,10 +95,22 @@ define(function (require) {
         defaultChunksTemplate = require("text!common/component/list/templates/viewPortChunksTemplate.htm");
 
     // ListView constants with default values
-    var DEFAULT_VIEW_PORT_CHUNK_HEIGHT = 1000000; //default height in pixels of viewPort (this is max value for IE)
-    var DEFAULT_SCROLL_TIMEOUT = 50; //scroll activation timeout in millis
-    var DEFAULT_MANUAL_SCROLL_INTERVAL = 50; //interval in millis for timer which will scroll view port
-    var DEFAULT_LIST_ITEM_HEIGHT = 20; //default height of list item
+
+        //default height in pixels of viewPort (this is max value for IE)
+    var DEFAULT_VIEW_PORT_CHUNK_HEIGHT = 1000000,
+
+        //scroll activation timeout in millis
+        DEFAULT_SCROLL_TIMEOUT = 50,
+
+        //interval in millis for timer which will scroll view port
+        DEFAULT_MANUAL_SCROLL_INTERVAL = 50,
+
+        //default height of list item
+        DEFAULT_LIST_ITEM_HEIGHT = 21,
+
+        //item height calculation includes margins which could be > 0 even when dom el
+        // isn't wisible, so we have to add some treshold to disregard margins-only height
+        MIN_ITEM_HEIGHT_TRESHOLD = 2;
 
     /**
      View for View Port List component.
@@ -149,14 +161,13 @@ define(function (require) {
             this.scrollTimeout = typeof options.scrollTimeout !== "undefined"? options.scrollTimeout : DEFAULT_SCROLL_TIMEOUT;
             this.manualScrollInterval = options.manualScrollInterval || DEFAULT_MANUAL_SCROLL_INTERVAL;
             this.lazy = options.lazy;
-            this.defaultVisibleItemsCount = options.visibleItemsCount;
             this.defaultItemHeight = options.listItemHeight || DEFAULT_LIST_ITEM_HEIGHT;
-
-            //attach listeners
-            this.initListeners();
 
             //Renders container
             this.render();
+
+            //attach listeners
+            this.initListeners();
 
             //Fire data loading and thus rendering
             //use all buffer size as bottom.
@@ -219,7 +230,7 @@ define(function (require) {
 
         postProcessChunkModelItem: function(item, i) {
             item.index = this.model.get("bufferStartIndex") + i;
-            if (item.label == undefined) {
+            if (item.label === undefined) {
                 item.label = item.value;
             }
 
@@ -240,7 +251,7 @@ define(function (require) {
             var lastChunkWithData = this.itemsPerChunk ? Math.ceil((bufferEnd + 1) / this.itemsPerChunk) : 1;
             var that = this;
 
-            this.$el.find(".viewPortChunk").each(function(index, chunk) {
+            this.$el.find(".j-view-port-chunk").each(function(index, chunk) {
 
                 //Calculate chunksModel for this chunk
                 var chunkModel = that._getChunkModel({
@@ -272,7 +283,7 @@ define(function (require) {
                 this.totalItems = this.model.get("total");
 
                 this.$el.html(this.chunksTemplate({_: _, chunks: this._getViewChunksModel()}));
-                this.$firstViewChunk = this.$el.find(".viewPortChunk:first");
+                this.$firstViewChunk = this.$el.find(".j-view-port-chunk:first");
             }
         },
 
@@ -312,9 +323,9 @@ define(function (require) {
                 if (this.$firstViewChunk) {
                     //item height could be calculated only after it is present in DOM and visible
                     //this.itemHeight = this.$firstViewChunk.find("li:first").height();
-                    this.itemHeight = this.$el.find("li:first").height();
+                    this.itemHeight = this.$el.find("li:first").outerHeight(true);
 
-                    if (!this.itemHeight) {
+                    if (!this.itemHeight || this.itemHeight <= MIN_ITEM_HEIGHT_TRESHOLD) {
                         //Ok, we still can not find height of one item, not a problem, use default value
                         this.itemHeight = this.defaultItemHeight;
                         this.viewPortConstantsInitialized = false;
@@ -333,11 +344,6 @@ define(function (require) {
                 //We have to rerender list with new dimensions
                 this._renderViewChunks(true);
                 this._renderItems();
-
-                if (this.defaultVisibleItemsCount) {
-                    this.$el.height(this.itemHeight * this.defaultVisibleItemsCount);
-                    delete this.defaultVisibleItemsCount;
-                }
             }
         },
 
@@ -465,6 +471,20 @@ define(function (require) {
          It recalculates dimensions and re-renders itself.
          */
         resize: function() {
+            if (!this.$el.is(":visible")) {
+                //We can not do measurements
+                return;
+            }
+
+            var componentHeight = this.$el.outerHeight();
+
+            if (componentHeight === this._componentHeight) {
+                //no need to check text since size was not changed since last check
+                return;
+            } else {
+                this._componentHeight = componentHeight;
+            }
+
             this.viewPortConstantsInitialized = false;
             this._calcViewPortConstants();
         },

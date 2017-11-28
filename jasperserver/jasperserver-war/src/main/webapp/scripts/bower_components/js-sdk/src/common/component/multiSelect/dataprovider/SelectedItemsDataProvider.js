@@ -21,7 +21,7 @@
 
 /**
  * @author Sergey Prilukin
- * @version: $Id: SelectedItemsDataProvider.js 172 2014-09-23 11:45:30Z sergey.prilukin $
+ * @version: $Id: SelectedItemsDataProvider.js 1160 2015-04-28 12:46:42Z spriluki $
  */
 
 /**
@@ -32,62 +32,56 @@ define(function (require) {
     'use strict';
 
     var _ = require("underscore"),
-        SearcheableDataProvider = require("common/component/singleSelect/dataprovider/SearcheableDataProvider");
+        CacheableDataProvider = require("common/component/singleSelect/dataprovider/CacheableDataProvider");
 
     var SelectedItemsDataProvider = function(options) {
-        this.selectedData = options.selectedData || [];
-        SearcheableDataProvider.call(this, options);
+        options = options || {};
+
+        _.defaults(options, {
+            sortFunc: this._sortFunc,
+            formatLabel: this._formatLabel
+        });
+
+        this.sortFunc = options.sortFunc;
+        this.formatLabel = options.formatLabel;
+
+        CacheableDataProvider.call(this, options);
     };
 
-    _.extend(SelectedItemsDataProvider.prototype, SearcheableDataProvider.prototype);
+    _.extend(SelectedItemsDataProvider.prototype, CacheableDataProvider.prototype);
 
     _.extend(SelectedItemsDataProvider.prototype, {
 
         /* API */
+        setData: function(data) {
+            data = this._convertToStandardData(data);
+            data = this._sortData(data);
 
-        getData: function(options) {
-            if (options && options.criteria) {
-                delete options.criteria;
-            }
-
-            return SearcheableDataProvider.prototype.getData.call(this, options);
+            CacheableDataProvider.prototype.setData.call(this, data);
         },
 
-        setSelectedData: function(selectedData) {
-            this.dataCache = null;
-            this.selectedData = selectedData;
+        /* internal methods */
+        _sortFunc: function(el) {
+            return el.label;
         },
 
-        getIndexMapping: function() {
-            return SearcheableDataProvider.prototype.getIndexMapping.call(this);
+        _formatLabel: function(value) {
+            return value;
         },
 
-        getReverseIndexMapping: function() {
-            return SearcheableDataProvider.prototype.getReverseIndexMapping.call(this);
+        _sortData: function(data) {
+            return _.sortBy(data, this.sortFunc);
         },
 
-        /* Internal methods */
+        _convertToStandardData: function(data) {
+            var self = this;
 
-        _shouldFilter: function() {
-            return true;
-        },
-
-        _filterValues: function(data) {
-            var filteredData = [];
-
-            var j = 0;
-            for (var i = 0; i < data.length; i++) {
-                var value = data[i];
-
-                if (this.selectedData[i] !== undefined) {
-                    filteredData[j] = value;
-                    this.indexMapping[j] = i;
-                    this.reverseIndexMapping[i] = j;
-                    j += 1;
+            return _.map(data, function(value) {
+                return {
+                    value: value,
+                    label: self.formatLabel(value)
                 }
-            }
-
-            return filteredData;
+            });
         }
     });
 

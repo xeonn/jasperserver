@@ -39,6 +39,6 @@
         --%><spring:message code="jsp.defaultParametersForm.star.input.label" argumentSeparator="\\\\" arguments="${controlLabel}"/><%--
     --%></c:when><%--
 	--%><c:otherwise><%--
-		--%><c:out value="${controlLabel}"/><%--
+		--%>${controlLabel}<%--
 	--%></c:otherwise><%--
 --%></c:choose>

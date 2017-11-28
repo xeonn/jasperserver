@@ -21,8 +21,10 @@
 
 
 /**
- * @version: $Id: addListOfValues.main.js 7762 2014-09-19 10:16:02Z sergey.prilukin $
+ * @version: $Id: addListOfValues.main.js 8179 2015-01-27 12:34:21Z psavushchik $
  */
+
+/* global isIPad */
 
 define(function(require) {
     "use strict";

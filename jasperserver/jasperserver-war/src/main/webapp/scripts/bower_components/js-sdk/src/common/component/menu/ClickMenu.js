@@ -24,7 +24,7 @@
  * Context menu that is invoked when user clicks on an element.
  *
  * @author: Kostiantyn Tsaregradskyi
- * @version: $Id: ClickMenu.js 380 2014-11-09 15:04:25Z ktsaregradskyi $
+ * @version: $Id: ClickMenu.js 812 2015-01-27 11:01:30Z psavushchik $
  */
 
 define(function (require) {
@@ -34,7 +34,9 @@ define(function (require) {
         ClickComponent = require("common/component/base/ClickComponent"),
         _ = require("underscore");
 
-    return Menu.extend(ClickComponent.extend({
+    return Menu.extend(ClickComponent.extend(
+        /** @lends ClickMenu.prototype */
+        {
 
         /**
          * @constructor ClickMenu
@@ -43,8 +45,9 @@ define(function (require) {
          * @param {array} options - Array containing objects with "label" and "action" properties, e.g. [ { label: "Save Dashboard", action: "save" } ].
          * @param {jQuery|HTMLElement|selector} attachTo - Element to attach menu to.
          * @param {object} [additionalSettings] - Additional settings object.
+         * @throws "AttachableComponent should be attached to an element" error if attachTo is missing.
          * @throws "Menu should have options" error if no menu options were passed to constructor.
-         * @fires option:<action> events when menu option is selected.
+         * @fires option:action events when menu option is selected.
          * @example
          *  var clickMenu = new ClickMenu([ { label: "Save Dashboard", action: "save" } ], "#someElement", { toggle: true });
          */
@@ -59,12 +62,15 @@ define(function (require) {
             }
         },
 
+        /**
+         * @description Shows menu.
+         */
         show: function(){
             ClickComponent.prototype.show.apply(this, arguments);
             return Menu.prototype.show.apply(this, arguments);
         },
+
         /**
-         * @method remove
          * @description Removes menu from DOM and unsubscribes from all event handlers.
          */
         remove: function() {

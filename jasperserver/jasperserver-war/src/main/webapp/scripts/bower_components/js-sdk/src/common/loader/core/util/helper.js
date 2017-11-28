@@ -31,13 +31,17 @@ define(function () {
 
         serverSettings : function(htmlContent){
             var jsContent = htmlContent.match(/<script[^>]*>([^<]*)<\/script>/)[1],
+                /* jshint evil: true */
                 //run 'safe' eval
                 func = new Function(jsContent + "return __jrsConfigs__;");
+                /* jshint evil: false */
             return func();
         },
 
         loaderConfig: function(javascript){
+            /* jshint evil: true */
             return (new Function("requirejs", "return " + javascript))({ config: function(opts) { return opts; } });
+            /* jshint evil: false */
         }
 
     };

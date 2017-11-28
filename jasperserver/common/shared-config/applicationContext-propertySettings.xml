@@ -9,22 +9,21 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
 
     <!-- resources beans for configuration settings persistence service -->
 	<bean id="propertiesManagementService" class="com.jaspersoft.jasperserver.api.common.properties.PropertiesManagementServiceImpl">
-        <property name="repository">
-            <ref bean="hibernateRepositoryService"/> <!-- use unsecured repo service to load gloabl-property-list -->
-        </property>
-        <!-- ce version only supports logging properties -->
-        <property name="changers">
-            <map>
-		        <!-- to eliminate circular dependencies, 
-		             service changers refs are passed by reference (as Strings)
-		             and not by value (as Beans)-->
-                <entry key="log4j" value="log4jPropertyChanger"/>
-				<entry key="mondrian" value="mondrianPropertyChanger" />
-				<entry key="aws" value="awsPropertyChanger" />
-				<entry key="jdbc" value="jdbcDriverServicePropertyChanger" />
-            </map>
-        </property>
+        <!-- use unsecured profile attributes service to load -->
+        <property name="profileAttributeService" ref="profileAttributeServiceTarget"/>
+        <property name="resourceFactory" ref="mappingResourceFactory"/>
 	</bean>
+
+    <bean id="propertyChangersCe" class="java.util.HashMap">
+        <constructor-arg index="0" type="java.util.Map">
+            <map>
+                <entry key="log4j" value="log4jPropertyChanger"/>
+                <entry key="mondrian" value="mondrianPropertyChanger"/>
+                <entry key="aws" value="awsPropertyChanger"/>
+                <entry key="jdbc" value="jdbcDriverServicePropertyChanger"/>
+            </map>
+        </constructor-arg>
+    </bean>
 
 	<!-- log4j changers manages settings read and apply from and to log4j subsystem -->
 	<bean id="log4jPropertyChanger"
@@ -58,22 +57,20 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
         <property name="jdbcDriverService" ref="jdbcDriverService"/>
     </bean>
 
- 	<!-- propertiesSaveOrUpdateListener had bean setup, but not initialized with a propertiesManagementServiceName
-	     to prevent it from working in the import/export context. here, in war context, it is initialized via an updater
-	     -->
+    <bean id="globalPropertiesListUpgradeListener" class="com.jaspersoft.jasperserver.api.metadata.common.service.impl.GlobalPropertiesListUpgradeListener">
+        <property name="globalPropertiesListUpgradeExecutor" ref="globalPropertiesListUpgradeExecutor"/>
+    </bean>
 
-	<bean id="propertiesSaveOrUpdateListenerUpdater"
-		class="com.jaspersoft.jasperserver.api.common.util.spring.GenericBeanUpdater">
-		<property name="definition" ref="propertiesSaveOrUpdateListenerUpdaterDefinition" />
-		<property name="value" value="propertiesManagementService"/>
-		<property name="valueType" value="string" />
-	</bean>
-	
-	<bean id="propertiesSaveOrUpdateListenerUpdaterDefinition" class="com.jaspersoft.jasperserver.api.common.util.spring.GenericBeanUpdaterDefinition">
-	    <property name="order" value="10"/>
-	    <property name="beanName" value="propertiesSaveOrUpdateListener"/>
-	    <property name="propertyName" value="propertiesManagementServiceName"/>
-	    <property name="operation" value="set"/>
-	</bean>
-	  
+    <bean id="serverSettings" class="com.jaspersoft.jasperserver.api.metadata.common.service.impl.ServerSettingsInitialization">
+        <property name="profileAttributeService" ref="profileAttributeServiceTarget"/>
+    </bean>
+
+    <bean id="globalPropertiesListUpgradeExecutor" class="com.jaspersoft.jasperserver.api.metadata.common.service.impl.GlobalPropertiesListUpgradeExecutor">
+        <property name="repositoryService" ref="${bean.unsecureRepositoryService}"/>
+        <property name="profileAttributeService" ref="profileAttributeServiceTarget"/>
+        <property name="resourceFactory" ref="mappingResourceFactory"/>
+        <property name="objectPermissionService" ref="objectPermissionServiceTarget"/>
+        <property name="defaultAttributesRootPermission" ref="defaultAttributePermissions"/>
+        <property name="userAuthorityPersistenceService" ref="${bean.internalUserAuthorityService}"/>
+    </bean>
 </beans>

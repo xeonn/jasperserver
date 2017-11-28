@@ -22,6 +22,7 @@
 package com.jaspersoft.jasperserver.search.util;
 
 import com.jaspersoft.jasperserver.api.common.util.DateUtils;
+import com.jaspersoft.jasperserver.api.common.util.TimeZoneContextHolder;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.util.CustomDataSourceDefinition;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceLookup;
 import com.jaspersoft.jasperserver.search.action.RepositorySearchAction;
@@ -154,21 +155,28 @@ public class JSONConverter extends JSONConverterBase implements Serializable {
 
         jsonObject.put(RESOURCE_DATE, getFormattedDate(resource.getCreationDate()));
         jsonObject.put(RESOURCE_DATE_TIMESTAMP,
-                new SimpleDateFormat(configurationBean.getTimestampFormat()).format(resource.getCreationDate()));
+                getDateFormat(configurationBean.getTimestampFormat()).format(resource.getCreationDate()));
         jsonObject.put(RESOURCE_DATE_TIME,
-                new SimpleDateFormat(configurationBean.getTimeFormat()).format(resource.getCreationDate()));
+                getDateFormat(configurationBean.getTimeFormat()).format(resource.getCreationDate()));
         jsonObject.put(RESOURCE_UPDATE_DATE, getFormattedDate(resource.getUpdateDate()));
         jsonObject.put(RESOURCE_UPDATE_DATE_TIMESTAMP,
-                new SimpleDateFormat(configurationBean.getTimestampFormat()).format(resource.getUpdateDate()));
+                getDateFormat(configurationBean.getTimestampFormat()).format(resource.getUpdateDate()));
         jsonObject.put(RESOURCE_UPDATE_DATE_TIME,
-                new SimpleDateFormat(configurationBean.getTimeFormat()).format(resource.getUpdateDate()));
+                getDateFormat(configurationBean.getTimeFormat()).format(resource.getUpdateDate()));
         jsonObject.put(RESOURCE_NUMBER, resource.getResourceNumber());
 
         return jsonObject;
     }
 
+    private DateFormat getDateFormat(String pattern) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat(pattern, LocaleContextHolder.getLocale());
+        dateFormat.setTimeZone(TimeZoneContextHolder.getTimeZone());
+
+        return dateFormat;
+    }
+
     private String getFormattedDate(Date date) {
-        String formattedDate = new SimpleDateFormat(configurationBean.getDateFormat()).format(date);
+        String formattedDate = getDateFormat(configurationBean.getDateFormat()).format(date);
 
         if (DateUtils.isToday(date)) {
             formattedDate = messages.getMessage("SEARCH_DATE_TODAY", null, formattedDate,

@@ -21,7 +21,17 @@
 
 
 /**
- * @version: $Id: mng.common.js 7762 2014-09-19 10:16:02Z sergey.prilukin $
+ * @version: $Id: mng.common.js 8929 2015-05-22 14:15:10Z obobruyk $
+ */
+
+/* global repositorySearch, SearchBox, toolbarButtonModule, toFunction, getAsFunction, localContext, isArray, JSCookie,
+ dynamicTree, disableSelectionWithoutCursorStyle, getBoxOffsets, actionModel, Folder, isMetaHeld, canFolderBeCopied,
+ invokeFolderAction, layoutModule, canFolderBeMoved, Droppables, canFolderBeCopiedOrMovedToFolder,
+ canAllBeCopiedOrMovedToFolder, Draggables, alert, dynamicList, isIPad, isSupportsTouch, TouchController, InfiniteScroll,
+ canBeRun, canBeOpened, JSTooltip, invokeBulkAction, invokeRedirectAction, canBeScheduled, matchAny, centerElement,
+ tooltipModule, $break, baseList, dialogs, buttonManager, ValidationModule, ResourcesUtils,
+ accessibilityModule, confirm, fileSender, Template, primaryNavModule, deepClone, invokeClientAction, invokeServerAction,
+ jaspersoft, $$, doNothing, ajaxTargettedUpdate, baseErrorHandler, AjaxRequester, XRegExp, $A
  */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -102,14 +112,14 @@ var orgModule = {
     },
 
     Configuration: {
-        nameSeparator : "|",
-        userDefaultRole : "ROLE_USER",
-        userNameNotSupportedSymbols : "[\|]",
-        roleNameNotSupportedSymbols : "[\|]",
-        emailRegExpPattern : "^[\\p{L}\\p{M}\\p{N}._%'-\\@\\,\\;\\s]+$",
-        superuserRole : "ROLE_SUPERUSER",
-        adminRole : "ROLE_ADMINISTRATOR",
-        anonymousRole : "ROLE_ANONYMOUS"
+        nameSeparator: "|",
+        userDefaultRole: "ROLE_USER",
+        userNameNotSupportedSymbols: "[\|]", // jshint ignore: line
+        roleNameNotSupportedSymbols: "[\|]", // jshint ignore: line
+        emailRegExpPattern: "^[\\p{L}\\p{M}\\p{N}._%'-\\@\\,\\;\\s]+$",
+        superuserRole: "ROLE_SUPERUSER",
+        adminRole: "ROLE_ADMINISTRATOR",
+        anonymousRole: "ROLE_ANONYMOUS"
     }
 };
 
@@ -146,7 +156,7 @@ orgModule.Organization = function(jsonOrNode) {
     }
 };
 
-orgModule.Organization.addMethod('isRoot', function() {
+orgModule.Organization.addMethod('isRoot', function(level) {
     // TODO: load name of root organization from configuration.
     return this.id == 'organizations';
 });
@@ -219,29 +229,21 @@ orgModule.User = function(options) {
     if (options) {
         this.userName = options.userName;
         this.fullName = options.fullName;
-        this.password = options.password;
+        this.password = options.password || "";
+        this.confirmPassword = options.confirmPassword || "";
         this.tenantId = options.tenantId;
         this.email = options.email;
         this.enabled = options.enabled;
         this.external = options.external;
 
         this.roles = [];
-        this.attributes = [];
 
         if (options.roles) {
-            options.roles.each(function (role) {
+            options.roles.each(function(role) {
                 this.roles.push(new orgModule.Role(role));
             }.bind(this));
         }
 
-        if (options.attributes) {
-            options.attributes.each(function (attribute) {
-                this.attributes.push({
-                    name: attribute.name,
-                    value: attribute.value
-                });
-            }.bind(this));
-        }
         if (options.permissionToDisplay) {
             this.permission = new orgModule.Permission(options.permissionToDisplay);
         }
@@ -265,7 +267,6 @@ orgModule.User.addMethod('getNameWithTenant', function() {
 orgModule.User.addMethod('getManagerURL', function() {
     return 'flow.html?' + Object.toQueryString({
         _flowId: this.FLOW_ID,
-        // Object.toQueryString already does encodeURIComponent() once, so we have double encoding here
         text: typeof(this.userName) !== 'undefined' ? encodeURIComponent(this.userName) : this.userName,
         tenantId: typeof(this.tenantId) !== 'undefined' ? encodeURIComponent(this.tenantId) : this.tenantId
     });
@@ -321,7 +322,7 @@ orgModule.Role.addMethod('getNameWithTenant', function() {
 orgModule.Role.addMethod('getManagerURL', function() {
     return 'flow.html?' + Object.toQueryString({
         _flowId: this.FLOW_ID,
-       // Object.toQueryString already does encodeURIComponent() once, so we have double encoding here
+        // Object.toQueryString already does encodeURIComponent() once, so we have double encoding here
         text: typeof(this.roleName) !== 'undefined' ? encodeURIComponent(this.roleName) : this.roleName,
         tenantId: typeof(this.tenantId) !== 'undefined' ? encodeURIComponent(this.tenantId) : this.tenantId
     });
@@ -360,7 +361,7 @@ orgModule.createOrganizationsTree = function(options) {
         dynamicTree.TreeNode.call(this, options);
 
         this.Types = {
-            Folder : new dynamicTree.TreeNode.Type('com.jaspersoft.jasperserver.api.metadata.common.domain.Folder')
+            Folder: new dynamicTree.TreeNode.Type('com.jaspersoft.jasperserver.api.metadata.common.domain.Folder')
         };
         this.nodeHeaderTemplateDomId = "list_responsive_collapsible_folders:folders";
     };
@@ -376,25 +377,38 @@ orgModule.createOrganizationsTree = function(options) {
     }, options ? options : {}));
 
     tree.observe('node:selected', function(event) {
-        var node = event.memo.node;
-        var uri = node.param.uri;
+        var node = event.memo.node,
+            uri = node.param.uri,
+            properties = orgModule.properties;
 
-        new JSCookie(orgModule.COOKIE_NAME, uri);
+        window.localStorage && localStorage.setItem(orgModule.COOKIE_NAME, uri);
 
         orgModule.fire(orgModule.Event.ORG_BROWSE, {
-            organization: new orgModule.Organization(node)
+            organization: new orgModule.Organization(node),
+            entityEvent: false
         });
+
+        if (orgModule.orgManager) {
+            properties.changeDisable(false, ['#' + properties._EDIT_BUTTON_ID]);
+
+            orgModule.fire(orgModule.Event.ENTITY_SELECT_AND_GET_DETAILS, {
+                entity: new orgModule.Organization(node),
+                entityEvent: false
+            });
+        }
+
+        (orgModule.userManager || orgModule.roleManager) && properties.hide();
     });
 
-    tree.showOrganizations = function(selectedTenantUri){
-        var uri = new JSCookie(orgModule.COOKIE_NAME).value;
+    tree.showOrganizations = function(selectedTenantUri) {
+        var uri = window.localStorage ? localStorage.getItem(orgModule.COOKIE_NAME) : undefined;
 
         uri = selectedTenantUri || uri || "/";
 
         this.showTreePrefetchNodes(uri, function() {
             uri == "/" ?
-                    this.getRootNode().select() :
-                    this.openAndSelectNode(uri);
+                this.getRootNode().select() :
+                this.openAndSelectNode(uri);
 
         }.bind(this));
     };
@@ -404,9 +418,9 @@ orgModule.createOrganizationsTree = function(options) {
         return (node) ? new orgModule.Organization(node) : null;
     };
 
-    tree.selectOrganization = function(org) {
+    tree.selectOrganization = function(org, options) {
         var node = org.treeNode;
-        this.openAndSelectNode(node.param.uri);
+        this.openAndSelectNode(node.param.uri, false, false, options);
     };
 
     tree.updateOrganization = function(org, parentOrg) {
@@ -444,7 +458,7 @@ orgModule.entityList = {
             listTemplateDomId: options.listTemplateId,
             itemTemplateDomId: options.itemTemplateId,
             multiSelect: true,
-            comparator: function (item1, item2) {
+            comparator: function(item1, item2) {
                 var l1 = item1.getLabel();
                 var l2 = item2.getLabel();
 
@@ -482,22 +496,39 @@ orgModule.entityList = {
 
     _initEvents: function() {
         this.list.observe('item:selected', function(event) {
-            var item = event.memo.item;
+            var item = event.memo.item,
+                properties = orgModule.properties;
 
             this.lastSelectedName = item.getValue().getNameWithTenant();
 
-            orgModule.fire(orgModule.Event.ENTITY_SELECT_AND_GET_DETAILS, {entity: item.getValue()});
-            this.toolbar.refresh();
+            orgModule.fire(orgModule.Event.ENTITY_SELECT_AND_GET_DETAILS, {entity: item.getValue(), entityEvent: true});
+
+            properties.changeDisable(false, ['#' + properties._EDIT_BUTTON_ID]);
         }.bindAsEventListener(this));
 
         this.list.observe('item:unselected', function(event) {
-            orgModule.properties.hide();
-            this.toolbar.refresh();
+            var tree = orgModule.manager.tree,
+                properties = orgModule.properties;
+
+            properties.changeDisable(false, ['#' + properties._EDIT_BUTTON_ID]);
+            // Due to complexity of code in mng.common (event flow) there is need to handle some cases in such inappropriate manner
+            // This need to by refactored once mng.common will be refactored in new AMD way + new tree.
+            if (!properties.locked && tree) {
+                orgModule.fire(orgModule.Event.ENTITY_SELECT_AND_GET_DETAILS, {
+                    entity: new orgModule.Organization(tree.getSelectedNode()),
+                    entityEvent: true,
+                    isCtrlHeld: event.memo.isCtrlHeld
+                });
+            } else {
+                properties.hide();
+                this.toolbar.refresh();
+            }
+
         }.bindAsEventListener(this));
 
         this.list.observe('item:beforeSelectOrUnselect', function(event) {
             var item = event.memo.item;
-            event.stopSelectOrUnselect = !invokeClientAction("cancelIfEdit", {entity: item.getValue()});
+            event.stopSelectOrUnselect = !invokeClientAction("cancelIfEdit", {entity: item.getValue(), showConfirm: event.memo.showConfirm});
         }.bindAsEventListener(this));
     },
 
@@ -511,14 +542,14 @@ orgModule.entityList = {
 
     _createEntityItem: function(value) {
         var item = new dynamicList.ListItem({
-                label: value.getDisplayName().escapeHTML(),
-                value: value
-            });
+            label: value.getDisplayName(),
+            value: value
+        });
 
         var entityList = this;
         item.processTemplate = function(element) {
             var id = element.select(entityList.ID_PATTERN)[0];
-            id.update(this.getValue().getDisplayName().escapeHTML());
+            id.update(xssUtil.escape(this.getValue().getDisplayName()));
             return element;
         };
 
@@ -554,6 +585,15 @@ orgModule.entityList = {
         this.toolbar.refresh();
     },
 
+    findEntity: function(name) {
+        var items = this.list.getItems(),
+            options = orgModule.properties.options || orgModule.userManager.options;
+
+        return options._.find(items, function(item) {
+            return item.getValue().fullName === name;
+        });
+    },
+
     addEntities: function(entities) {
         var items = entities.collect(this._createEntityItem.bind(this));
 
@@ -570,7 +610,7 @@ orgModule.entityList = {
             return item.getValue().getNameWithTenant() == entityName;
         });
 
-        if(matched) {
+        if (matched) {
             matched.isSelected() && matched.deselect();
             matched.select();
             this.lastSelectedName = matched.getValue().getNameWithTenant();
@@ -651,30 +691,71 @@ orgModule.properties = {
     buttonsFunctions: {},
 
     initialize: function(options) {
+        var attributesTypesEnum = options.attributesTypesEnum;
+
         this.options = options;
 
-        if (options.attributes){
-            this.attributesView = new jaspersoft.attributes.MainView({
-                el:$("attributesTab"),
-                collection: jaspersoft.attributes.Attributes.instance(options.attributes.context),
-                quiet: false
-            });
-            this.attributesView.render();
-        }
+        this.locked = false;
 
         this.hide();
         this.processTemplate(options);
+        this._toggleButton();
+
+        if (options.attributes) {
+            var attributesType = !orgModule.userManager && orgModule.orgManager ? attributesTypesEnum.TENANT : attributesTypesEnum.USER,
+                optionsFactory = options.attributesViewOptionsFactory,
+                scrollEventTrait = options.scrollEventTrait,
+                AttributesViewFacade = options.AttributesViewFacade;
+
+            this.options._.extend(this, scrollEventTrait);
+
+            this.attributesFacade = new AttributesViewFacade(optionsFactory({context: options.attributes.context,
+                container: jQuery("#attributesTab"), type: attributesType}));
+        }
+
         if (this.options.showAssigned) {
             this.initDnD();
         }
         this.initEvents();
         this.initButtonsFunctions();
+        this.options.ConfirmationDialog && this._initConfirmationDialog();
+    },
+
+    _initConfirmationDialog: function() {
+        var self = this,
+            i18n = this.options.i18n,
+            i18n2 = this.options.i18n2;
+
+        this.confirmationDialog = new this.options.ConfirmationDialog({
+            title: i18n["attributes.confirm.dialog.title"],
+            text: i18n["attributes.confirm.cancel.dialog.text"]
+        });
+
+        this.confirmationDialog.on("button:yes", function() {
+            self.cancelOnEdit();
+        });
+    },
+
+    _toggleButton: function() {
+        var propertiesIsChanged = this.isChanged(),
+            attributesAndPropertiesChanged = this.attributesFacade && this.attributesFacade.containsUnsavedItems() || propertiesIsChanged;
+
+        attributesAndPropertiesChanged
+            ? this.saveButton.removeAttribute("disabled")
+            : this.saveButton.removeClassName("over").setAttribute("disabled", "disabled");
     },
 
     show: function(value) {
-//        if (!this.locked) {
-            if (this.attributesView){
-                this.attributesView.setContext(value);
+        if (!this.locked) {
+            if (this.attributesFacade) {
+                var self = this,
+                    isRoot = value.isRoot && value.isRoot(),
+                    context = !isRoot ? value : this.options._.extend({}, value, {id: null});
+
+                this.attributesFacade.getCurrentView().setContext(context)
+                    .done(function() {
+                        self.attributesFacade.render(isRoot);
+                    });
             }
 
             var nothingToDisplay = $(this._NOTHING_TO_DISPLAY_ID);
@@ -683,11 +764,11 @@ orgModule.properties = {
 
             this._value = value;
             this.changeMode(false);
-//        }
+        }
     },
 
     hide: function() {
-//        if (!this.locked) {
+        if (!this.locked) {
             var nothingToDisplay = $(this._NOTHING_TO_DISPLAY_ID);
             nothingToDisplay.removeClassName(layoutModule.HIDDEN_CLASS);
             centerElement(nothingToDisplay, {horz: true, vert: true});
@@ -695,7 +776,23 @@ orgModule.properties = {
 
             this._value = null;
             this.changeMode(false);
-//        }
+        }
+    },
+
+    lock: function() {
+        this.locked = true;
+    },
+
+    unlock: function() {
+        this.locked = false;
+    },
+
+    setDetailsLoadedEntity: function(entity) {
+        this.detailsLoadedEntity = entity;
+    },
+
+    getDetailsLoadedEntity: function() {
+        return this.detailsLoadedEntity;
     },
 
     processTemplate: function(options) {
@@ -792,7 +889,7 @@ orgModule.properties = {
         Droppables.add($(this._ASSIGNED_LIST_ID).up(), {
             accept: [this._DROP_CLASS],
             hoverclass: layoutModule.DROP_TARGET_CLASS,
-            onDrop: (function(dragged, dropped, event){
+            onDrop: (function(dragged, dropped, event) {
                 if (dragged.items) {
                     this._addToAssigned();
                 }
@@ -801,7 +898,7 @@ orgModule.properties = {
         Droppables.add($(this._AVAILABLE_LIST_ID).up(), {
             accept: [this._DROP_CLASS],
             hoverclass: layoutModule.DROP_TARGET_CLASS,
-            onDrop: (function(dragged, dropped, event){
+            onDrop: (function(dragged, dropped, event) {
                 if (dragged.items) {
                     this._removeFromAssigned();
                 }
@@ -810,6 +907,17 @@ orgModule.properties = {
     },
 
     initEvents: function() {
+
+        function assignedSelectionHandler() {
+            ((this.assignedList.getSelectedItems().length > 0) ?
+                buttonManager.enable : buttonManager.disable)(this.removeFromAssigned);
+        }
+
+        function availableSelectionHandler() {
+            ((this.availableList.getSelectedItems().length > 0) ?
+                buttonManager.enable : buttonManager.disable)(this.addToAssigned);
+        }
+
         $(this._BUTTONS_CONTAINER_ID).observe('click', function(event) {
             var element = event.element();
 
@@ -839,10 +947,6 @@ orgModule.properties = {
                 event.stop();
             }.bindAsEventListener(this));
 
-            function assignedSelectionHandler() {
-                ((this.assignedList.getSelectedItems().length > 0) ?
-                        buttonManager.enable : buttonManager.disable)(this.removeFromAssigned);
-            }
 
             this.assignedList.observe("item:selected", assignedSelectionHandler.bindAsEventListener(this));
             this.assignedList.observe("item:unselected", assignedSelectionHandler.bindAsEventListener(this));
@@ -850,17 +954,17 @@ orgModule.properties = {
                 this._removeFromAssigned();
             }.bindAsEventListener(this));
 
-            function availableSelectionHandler() {
-                ((this.availableList.getSelectedItems().length > 0) ?
-                        buttonManager.enable : buttonManager.disable)(this.addToAssigned);
-            }
 
             this.availableList.observe("item:selected", availableSelectionHandler.bindAsEventListener(this));
             this.availableList.observe("item:unselected", availableSelectionHandler.bindAsEventListener(this));
             this.availableList.observe("item:dblclick", function(event) {
-                this._addToAssigned();                
+                this._addToAssigned();
             }.bindAsEventListener(this));
         }
+
+        this.attributesFacade &&
+        this.attributesFacade.on("change", this.options._.bind(this._toggleButton, this));
+
     },
 
     initButtonsFunctions: function() {
@@ -870,19 +974,32 @@ orgModule.properties = {
 
         this.buttonsFunctions[this._SAVE_BUTTON_ID] = function() {
             var extObj = this;
-            if (this.validate()){
-                if (this.attributesView) this.attributesView.save()
-                this.save(function() { extObj.changeMode(false); });
+            var dfd = new jQuery.Deferred();
+            if (this.validate()) {
+                this.attributesFacade ? this.attributesFacade.getCurrentView().saveChildren().done(function() {
+                    dfd.resolve()
+                }) : dfd.resolve();
+
+                dfd.done(function() {
+                    extObj.save(function() {
+                        extObj.changeMode(false);
+                    });
+                });
             }
         };
 
         this.buttonsFunctions[this._CANCEL_BUTTON_ID] = function() {
-            invokeClientAction("cancelIfEdit", {entity: this.getValue()});
+            if (this.attributesFacade) {
+                this.isChanged()
+                    ? this.confirmationDialog.open()
+                    : this.cancelOnEdit();
+            } else {
+                invokeClientAction("cancelIfEdit", {entity: this.getValue()});
+            }
         };
 
         this.buttonsFunctions[this._DELETE_BUTTON_ID] = function() {
             this._deleteEntity();
-            this.changeMode(false);
         };
 
         this.buttonsFunctions[this._REMOVE_FROM_ASSIGNED_BUTTON_ID] = function() {
@@ -894,26 +1011,48 @@ orgModule.properties = {
         };
     },
 
+    cancelOnEdit: function() {
+        var self = this;
+
+        if (this.isEditMode) {
+            this.cancel().done(function() {
+                self.unlock();
+                self.changeMode(false);
+                self._toggleButton();
+            });
+        }
+    },
+
     changeMode: function(edit) {
         this.isEditMode = edit;
 
-        var tabs, attributeTab, propertiesTab;
-        if (this.attributesView){
-            this.attributesView.setEditMode(edit);
-            tabs = $$(".tertiary")[0];
+        var tabs, attributeTab, propertiesTab, $anchor;
+        if (this.attributesFacade) {
             attributeTab = $("attributesTab");
-            propertiesTab = $("propertiesTab")
+
+            var hideFilters = !!this._value && this._value.id === "organizations";
+
+            this.detachScrollEvent(this.attributesFacade.getCurrentView().$container.parent());
+
+            this.attributesFacade.toggleMode(edit, hideFilters);
+
+            edit && this.initScrollEvent(this.attributesFacade.getCurrentView());
+
+            tabs = $$(".tertiary")[0];
+            propertiesTab = $("propertiesTab");
+            $anchor = jQuery(".control.tabSet.anchor");
         }
 
         if (edit) {
             $(this._id).addClassName(this._EDIT_MODE_CLASS);
 
-            if (tabs){
+            if (tabs) {
                 tabs.down(".selected").removeClassName("selected");
                 tabs.down("li", 0).addClassName("selected");
                 tabs.addClassName("tabbed");
                 attributeTab.addClassName("hidden");
                 propertiesTab.removeClassName("hidden");
+                $anchor.removeClass("attributesAnchor")
             }
 
             this._assigned = [];
@@ -943,10 +1082,12 @@ orgModule.properties = {
                 });
             }
             this._editEntity();
+
+            this._toggleButton();
         } else {
             $(this._id).removeClassName(this._EDIT_MODE_CLASS);
 
-            if (tabs){
+            if (tabs) {
                 attributeTab.removeClassName("hidden");
                 propertiesTab.removeClassName("hidden");
                 tabs.removeClassName("tabbed");
@@ -956,17 +1097,27 @@ orgModule.properties = {
                 this.assignedViewSearchBox.setText("");
             }
 
-            this.changeDisable(this.canEdit(),['#' + this._EDIT_BUTTON_ID]);
-            this.changeDisable(this.canDelete(),['#' + this._DELETE_BUTTON_ID]);
+            this.changeDisable(this.canEdit(), ['#' + this._EDIT_BUTTON_ID]);
+            this.changeDisable(this.canDelete(), ['#' + this._DELETE_BUTTON_ID]);
             this._showEntity();
             this._assigned = [];
             this._unassigned = [];
         }
     },
 
-    canEdit: function() { return true; },
+    canEdit: function() {
+        return true;
+    },
 
-    canDelete: function() { return true; },
+    canDelete: function() {
+        var org = orgModule.manager.tree && orgModule.manager.tree.getOrganization();
+
+        if (org && org.uri === "/" && !orgModule.entityList.getSelectedEntities().length) {
+            return false;
+        }
+
+        return true;
+    },
 
     getValue: function() {
         return this._value;
@@ -984,16 +1135,12 @@ orgModule.properties = {
         // Template method.
     },
 
-    cancel: function(properties) {
-        // Template method.
-    },
-
     validate: function() {
         // Template method.
         return true;
     },
 
-    assignedComparator: function (item1, item2) {
+    assignedComparator: function(item1, item2) {
         var l1 = item1.getLabel();
         var l2 = item2.getLabel();
 
@@ -1005,11 +1152,15 @@ orgModule.properties = {
         var from, to, fromList, toList;
 
         if (bToAssigned) {
-            from = this._unassigned; fromList = this.availableList;
-            to = this._assigned; toList = this.assignedList
+            from = this._unassigned;
+            fromList = this.availableList;
+            to = this._assigned;
+            toList = this.assignedList
         } else {
-            from = this._assigned; fromList = this.assignedList;
-            to = this._unassigned; toList = this.availableList;
+            from = this._assigned;
+            fromList = this.assignedList;
+            to = this._unassigned;
+            toList = this.availableList;
         }
 
         var items = fromList.getSelectedItems();
@@ -1033,9 +1184,11 @@ orgModule.properties = {
         toList.refresh();
 
         if (bToAssigned) {
-            this._unassigned = from; this._assigned = to;
+            this._unassigned = from;
+            this._assigned = to;
         } else {
-            this._assigned = from; this._unassigned = to;
+            this._assigned = from;
+            this._unassigned = to;
         }
 
     },
@@ -1056,21 +1209,21 @@ orgModule.properties = {
             var tooltipText = [], template = "orgTooltip";
 
             if (entity instanceof orgModule.User) {
-                label = entity.userName.escapeHTML();
+                label = entity.userName;
 
                 if (entity.fullName && entity.fullName.length > 0) {
-                    tooltipText = [entity.fullName.escapeHTML()];
+                    tooltipText = [entity.fullName];
                 }
 
-                template = (entity.tenantId) ? "fullNameAndOrgTooltip" :"fullNameTooltip" ;
+                template = (entity.tenantId) ? "fullNameAndOrgTooltip" : "fullNameTooltip";
             } else if (entity instanceof orgModule.Role) {
-                label = entity.roleName.escapeHTML();
+                label = entity.roleName;
 
                 template = (entity.tenantId) ? "orgTooltip" : undefined;
             }
 
             if (entity.tenantId && entity.tenantId.length > 0) {
-                tooltipText.push(entity.tenantId.escapeHTML());
+                tooltipText.push(entity.tenantId);
             }
 
             entity.available = !!isAvailable;
@@ -1084,7 +1237,7 @@ orgModule.properties = {
                 item.processTemplate = function(element) {
                     if (tooltipText.length > 0) {
                         new JSTooltip(element, {
-                            text: tooltipText,
+                            text: xssUtil.escape(tooltipText),
                             templateId: template
                         });
                     }
@@ -1095,12 +1248,12 @@ orgModule.properties = {
                 item.processTemplate = function(element) {
                     var nameAnchor = element.select("a")[0];
 
-                    nameAnchor.insert(this.getLabel());
+                    nameAnchor.insert(xssUtil.escape(this.getLabel()));
                     nameAnchor.writeAttribute('href', this.getValue().getManagerURL());
 
                     if (tooltipText.length > 0) {
                         new JSTooltip(element, {
-                            text: tooltipText,
+                            text: xssUtil.escape(tooltipText),
                             templateId: template
                         });
                     }
@@ -1127,7 +1280,7 @@ orgModule.properties = {
         var list = (this.isEditMode) ? this.assignedList : this.assignedViewList;
 
         var filteredEntities = this._filterEntities(entities, this._unassigned, this._assigned,
-                this.assignedSearchBox.getText());
+            this.assignedSearchBox.getText());
         list.setItems(this._entitiesToItems(filteredEntities));
 
         list.refresh();
@@ -1137,7 +1290,7 @@ orgModule.properties = {
         var list = (this.isEditMode) ? this.assignedList : this.assignedViewList;
 
         var filteredEntities = this._filterEntities(entities, this._unassigned, this._assigned,
-                this.assignedSearchBox.getText());
+            this.assignedSearchBox.getText());
         list.addItems(this._entitiesToItems(filteredEntities));
 
         list.refresh();
@@ -1147,7 +1300,7 @@ orgModule.properties = {
         this.availableInfiniteScroll.reset();
 
         var filteredEntities = this._filterEntities(entities, this._assigned, this._unassigned,
-                this.availableSearchBox.getText());
+            this.availableSearchBox.getText());
         this.availableList.setItems(this._entitiesToItems(filteredEntities, true));
 
         this.availableList.refresh();
@@ -1155,7 +1308,7 @@ orgModule.properties = {
 
     addAvailableEntities: function(entities) {
         var filteredEntities = this._filterEntities(entities, this._assigned, this._unassigned,
-                this.availableSearchBox.getText());
+            this.availableSearchBox.getText());
         this.availableList.addItems(this._entitiesToItems(filteredEntities, true));
 
         this.availableList.refresh();
@@ -1179,7 +1332,7 @@ orgModule.properties = {
     changeReadonly: function(edit, elementsPatterns) {
         elementsPatterns.each(function(elementPattern) {
             $(this._id).select(elementPattern)[0].writeAttribute(layoutModule.READONLY_ATTR_NAME,
-                    edit ? null : layoutModule.READONLY_ATTR_NAME);
+                edit ? null : layoutModule.READONLY_ATTR_NAME);
         }.bind(this));
     },
 
@@ -1229,7 +1382,7 @@ orgModule.Action = function(invokeFn, beforeInvoke) {
         beforeInvoke = beforeInvoke && Object.isFunction(beforeInvoke) ? beforeInvoke : this.beforeInvoke;
 
         this.invokeAction = function() {
-            if(beforeInvoke()) {
+            if (beforeInvoke()) {
                 return invokeFn.apply(this, arguments);
             }
         };
@@ -1305,7 +1458,7 @@ orgModule.toolbar = {
     },
 
     refresh: function() {
-        for(var name in this._actionModel) {
+        for (var name in this._actionModel) {
             var id = this._actionModel[name].buttonId;
             var testFn = toFunction(this._actionModel[name].test);
 
@@ -1316,7 +1469,7 @@ orgModule.toolbar = {
     _toActionMap: function(bulkActionModel) {
         var actionMap = {};
 
-        for(var name in bulkActionModel) {
+        for (var name in bulkActionModel) {
             var bulkAction = bulkActionModel[name];
             var id = bulkAction.buttonId;
 
@@ -1359,7 +1512,7 @@ orgModule.createInputRegExValidator = function(input) {
             var isValid = !matches;
 
             var errorMessage = (isValid) ? "" :
-                    orgModule.getMessage('unsupportedSymbols', {symbols: input.unsupportedSymbols});
+                orgModule.getMessage('unsupportedSymbols', {symbols: input.unsupportedSymbols});
 
             input.isValid = isValid;
 
@@ -1447,7 +1600,7 @@ orgModule.createRegExpValidator = function(element, messageKey, regExp) {
         validator: function(value) {
             var matches = regExp.exec(value);
 
-            var isValid = (!matches && value.length == 0) || (matches && value == matches[0]);
+            var isValid = (!matches && value.length === 0) || (matches && value == matches[0]);
             var errorMessage = (isValid) ? "" : orgModule.getMessage(messageKey);
 
             return { isValid: isValid, errorMessage: errorMessage };
@@ -1478,7 +1631,7 @@ RegExpRepresenter.addMethod("__parse", function(expression) {
 
         if (ch == '\\') {
 
-            ch += expression.charAt(++ i);
+            ch += expression.charAt(++i);
         }
 
         if (ch == '\\u') {
@@ -1493,14 +1646,14 @@ RegExpRepresenter.addMethod("__parse", function(expression) {
     return result;
 });
 
-RegExpRepresenter.addMethod("getCharacters", function () {
+RegExpRepresenter.addMethod("getCharacters", function() {
     var result = $A();
 
     this.expressionTokens.each(function(token) {
 
         if (token.startsWith('\\u')) {
 
-            result.push(eval('"' + token + '"'));
+            result.push(eval('"' + token + '"')); // jshint ignore: line
         } else if (token.startsWith('\\')) {
 
             var ch = this.charMap[token];
@@ -1520,7 +1673,7 @@ RegExpRepresenter.addMethod("getRepresentedString", function() {
     var chars = this.getCharacters();
 
     var len = chars.length;
-    for(var i = 0; i < len; i ++) {
+    for (var i = 0; i < len; i++) {
         var ch = chars[i];
 
         if (ch == ' ' || ch == '.' || ch == ',') {

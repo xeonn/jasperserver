@@ -60,7 +60,7 @@
         <property name="configuration" ref="authorityModuleConfiguration"/>
     </bean>
 
-    <bean id="authorityImporterModule" class="com.jaspersoft.jasperserver.export.modules.auth.AuthorityImporter" scope="prototype">
+    <bean id="authorityImporterModule" class="com.jaspersoft.jasperserver.export.modules.auth.AuthorityImporter" parent="baseImporterModule" scope="prototype">
         <property name="id" value="authority"/>
         <property name="configuration" ref="authorityModuleConfiguration"/>
         <property name="updateArg" value="update"/>
@@ -85,6 +85,7 @@
                 <value>classpath:com/jaspersoft/jasperserver/export/mapping/auth/Role.xml</value>
                 <value>classpath:com/jaspersoft/jasperserver/export/mapping/common/ProfileAttribute.xml</value>
                 <value>classpath:com/jaspersoft/jasperserver/export/mapping/common/TenantQualifiedName.xml</value>
+                <value>classpath:com/jaspersoft/jasperserver/export/mapping/repository/ObjectPermission.xml</value>
             </list>
         </property>
     </bean>
@@ -101,7 +102,7 @@
         <property name="includeSettingsArg" value="include-server-settings"/>
     </bean>
 
-    <bean id="resourceImporterModule" class="com.jaspersoft.jasperserver.export.modules.repository.ResourceImporter" scope="prototype">
+    <bean id="resourceImporterModule" class="com.jaspersoft.jasperserver.export.modules.repository.ResourceImporter" parent="baseImporterModule" scope="prototype">
         <property name="id" value="repositoryResources"/>
         <property name="configuration" ref="resourceModuleConfiguration"/>
         <property name="tenantService" ref="tenantService"/>
@@ -109,6 +110,7 @@
         <property name="updateArg" value="update"/>
         <property name="includeSettingsArg" value="include-server-settings"/>
         <property name="skipThemesArgument" value="skip-themes"/>
+        <property name="globalPropertiesListUpgradeExecutor" ref="globalPropertiesListUpgradeExecutor"/>
     </bean>
 
     <bean id="resourceModuleConfiguration" class="com.jaspersoft.jasperserver.export.modules.repository.ResourceModuleConfiguration">
@@ -226,10 +228,12 @@
     </bean>
 
     <bean name="tenantImporterModule"
-          class="com.jaspersoft.jasperserver.export.modules.mt.TenantImporter" scope="prototype">
+          class="com.jaspersoft.jasperserver.export.modules.mt.TenantImporter"
+          parent="baseImporterModule" scope="prototype">
         <property name="id"><value>tenants</value></property>
         <property name="updateArg" value="update"/>
         <property name="moduleConfiguration"><ref bean="tenantModuleConfiguration"/></property>
+        <property name="includeServerSettings" value="include-server-settings"/>
     </bean>
 
     <bean name="tenantModuleConfiguration"
@@ -260,6 +264,10 @@
         <property name="castorMappings">
             <list>
                 <value>classpath:com/jaspersoft/jasperserver/export/mapping/mt/Tenant.xml</value>
+                <value>classpath:com/jaspersoft/jasperserver/export/mapping/common/TenantQualifiedName.xml</value>
+                <value>classpath:com/jaspersoft/jasperserver/export/mapping/repository/ObjectPermission.xml</value>
+                <value>classpath:com/jaspersoft/jasperserver/export/mapping/auth/User.xml</value>
+                <value>classpath:com/jaspersoft/jasperserver/export/mapping/auth/Role.xml</value>
             </list>
         </property>
     </bean>
@@ -411,6 +419,16 @@
 
     <bean id="baseExporterModule" class="com.jaspersoft.jasperserver.export.modules.BaseExporterModule" abstract="true">
         <property name="everythingArg" value="everything"/>
+        <property name="permissionService" ref="objectPermissionServiceUnsecure"/>
+        <property name="permissionRecipientRole" value="role"/>
+        <property name="permissionRecipientUser" value="user"/>
+    </bean>
+
+    <bean id="baseImporterModule" class="com.jaspersoft.jasperserver.export.modules.BaseImporterModule" abstract="true">
+        <property name="permissionService" ref="objectPermissionServiceUnsecure"/>
+        <property name="authorityService" ref="${bean.userAuthorityService}"/>
+        <property name="permissionRecipientRole" value="role"/>
+        <property name="permissionRecipientUser" value="user"/>
     </bean>
 
     <bean id="defaultReportParametersTranslator" class="com.jaspersoft.jasperserver.export.modules.common.DefaultReportParametersTranslator">
@@ -439,4 +457,5 @@
         <property name="jdbcDriversFolder" value="/jdbc"/>
     </bean>
 
+    <bean id="diagnosticDataCipherer" class="com.jaspersoft.jasperserver.api.common.crypto.DiagnosticDataCipherer"/>
 </beans>

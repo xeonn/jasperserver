@@ -22,7 +22,7 @@
 
 /**
  * @author: Zakhar Tomchenko
- * @version: $Id: HideEmptyNodesPlugin.js 270 2014-10-13 19:58:03Z agodovanets $
+ * @version: $Id: HideEmptyNodesPlugin.js 1160 2015-04-28 12:46:42Z spriluki $
  */
 
 define(function(require){
@@ -37,7 +37,7 @@ define(function(require){
 
         itemsRendered: function(model) {
             if (this.$el.hasClass("node")) {
-                if (this.$("> .subcontainer > .viewPortChunk > ul > li").length) {
+                if (this.$("> .subcontainer > .j-view-port-chunk > ul > li").length) {
                     this.$el.show();
                 } else {
                     this.$el.hide();

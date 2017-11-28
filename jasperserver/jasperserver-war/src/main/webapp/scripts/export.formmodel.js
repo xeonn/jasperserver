@@ -22,8 +22,10 @@
 
 /**
  * @author: inesterenko
- * @version: $Id: export.formmodel.js 7762 2014-09-19 10:16:02Z sergey.prilukin $
+ * @version: $Id: export.formmodel.js 8179 2015-01-27 12:34:21Z psavushchik $
  */
+
+/* global JRS, _, Backbone, jaspersoft, __jrsConfigs__ */
 
 JRS.Export.FormModel = (function (Export, jQuery, _, Backbone, exportErrorHandlerTrait, State) {
 

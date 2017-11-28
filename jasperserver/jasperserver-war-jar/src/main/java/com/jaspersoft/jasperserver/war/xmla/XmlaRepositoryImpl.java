@@ -57,7 +57,7 @@ import static org.apache.commons.lang.StringUtils.isNotEmpty;
  * Implementation of {@link mondrian.server.Repository} that reads from JRS databases.
  *
  * @author vsabadosh
- * @version $Id: XmlaRepositoryImpl.java 51947 2014-12-11 14:38:38Z ogavavka $
+ * @version $Id: XmlaRepositoryImpl.java 55193 2015-05-07 12:43:36Z svnaskorodu $
  */
 public class XmlaRepositoryImpl implements Repository, UpdatableXMLAContainer {
 
@@ -171,8 +171,13 @@ public class XmlaRepositoryImpl implements Repository, UpdatableXMLAContainer {
                     catalogInfo = catalogInfoIterator.next();
                 }
 
+                // The holder for a LockBox.Entry instance
+                // LockBox.Entry requires a holder since it is used as key in the WeakHashMap inside LockBox class
+                Set<LockBox.Entry> referenceHolder = new LinkedHashSet<LockBox.Entry>();
+
                 // Now create the connection
-                return getOlapConnection(getMondrianConnectionProperties(server, databaseInfo, catalogInfo, roleName, props));
+                return getOlapConnection(getMondrianConnectionProperties(
+                        server, databaseInfo, catalogInfo, roleName, props, referenceHolder));
             } catch (Exception ex) {
                 if ((isNotEmpty(catalogName)) || !catalogInfoIterator.hasNext()) {
                     throw new RuntimeException(ex.getMessage(), ex);
@@ -190,7 +195,8 @@ public class XmlaRepositoryImpl implements Repository, UpdatableXMLAContainer {
     }
 
     private Properties getMondrianConnectionProperties(MondrianServer server, DatabaseInfo databaseInfo,
-            CatalogInfo catalogInfo, String roleName, Properties props) throws SQLException {
+            CatalogInfo catalogInfo, String roleName,
+            Properties props, Set<LockBox.Entry> referenceHolder) throws SQLException {
         //Get current session id
         String currentSessionId = getCurrentUserSessionId();
         //Generated cached key based on authorized session id, datasource, catalog name and tenant id.
@@ -213,6 +219,7 @@ public class XmlaRepositoryImpl implements Repository, UpdatableXMLAContainer {
 
             // Save the server for the duration of the call to 'getConnection'.
             final LockBox.Entry entry = JsMondrianServerRegistry.INSTANCE.getLockBox().register(server);
+            referenceHolder.add(entry);
             properties.setProperty(RolapConnectionProperties.Instance.name(), entry.getMoniker());
 
             // Make sure we load the Mondrian driver into the ClassLoader.

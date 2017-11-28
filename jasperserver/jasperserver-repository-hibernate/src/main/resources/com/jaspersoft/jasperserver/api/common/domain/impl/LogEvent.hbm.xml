@@ -16,4 +16,11 @@
     <property name="state" column="event_state" type="byte"/>
     <many-to-one name="user" column="userId" class="com.jaspersoft.jasperserver.api.metadata.user.domain.impl.hibernate.RepoUser"/>
   </class>
+
+<!-- create index JILogEvent_userId_index on JILogEvent (userId); -->
+<database-object>
+	<create>create index JILogEvent_userId_index on JILogEvent (userId)</create>
+	<drop>DROP INDEX JILogEvent_userId_index ON JILogEvent</drop>
+</database-object>
+
 </hibernate-mapping>

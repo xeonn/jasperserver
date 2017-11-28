@@ -104,11 +104,9 @@
                                                                 <div class="wrap">
                                                                     <b class="icon" title=""></b>
 
-                                                                    <p class="column one" title="${item.label}"><c:out
-                                                                            value="${item.label}"/></p>
+                                                                    <p class="column one" title="${item.label}">${item.label}</p>
 
-                                                                    <p class="column two" title="${item.value}"><c:out
-                                                                            value="${item.value}"/></p>
+                                                                    <p class="column two" title="${item.value}">${item.value}</p>
 
                                                                     <p class="column three"><a class="launcher"
                                                                                                id="${item.label}"><spring:message
@@ -192,8 +190,7 @@
                                                    for="description">
                                                 <span class="wrap"><spring:message code='resource.lov.desc'/></span>
                                                 <textarea id="description" type="text"
-                                                          name="${status.expression}"><c:out
-                                                        value='${status.value}'/></textarea>
+                                                          name="${status.expression}">${status.value}</textarea>
                                                 <span class="message warning"><c:if test="${status.error}">${status.errorMessage}</c:if></span>
                                             </label>
                                         </spring:bind>

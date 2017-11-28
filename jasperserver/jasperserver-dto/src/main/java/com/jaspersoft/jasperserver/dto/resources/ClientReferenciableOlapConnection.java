@@ -24,7 +24,7 @@ package com.jaspersoft.jasperserver.dto.resources;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: ClientReferenciableOlapConnection.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: ClientReferenciableOlapConnection.java 55164 2015-05-06 20:54:37Z mchan $
  */
-public interface ClientReferenciableOlapConnection extends ClientReferenceable {
+public interface ClientReferenciableOlapConnection extends ClientReferenceableDataSource {
 }

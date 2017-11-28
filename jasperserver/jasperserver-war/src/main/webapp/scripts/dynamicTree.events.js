@@ -21,8 +21,12 @@
 
 
 /**
- * @version: $Id: dynamicTree.events.js 7762 2014-09-19 10:16:02Z sergey.prilukin $
+ * @version: $Id: dynamicTree.events.js 8179 2015-01-27 12:34:21Z psavushchik $
  */
+
+/* global dynamicTree, matchMeOrUp, layoutModule, isSupportsTouch, isIPad, JRS, isMetaHeld, isShiftHeld, isRightClick,
+ designerBase, alert, Draggables, isIE7, Droppables, isIE, Template, TouchController, matchAny, Draggable
+*/
 
 dynamicTree.Tree.
         addVar('NODE_PATTERN', ".node").                //node itself

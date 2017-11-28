@@ -21,8 +21,10 @@
 
 
 /**
- * @version: $Id: home.simple.js 7790 2014-09-19 13:11:59Z sergey.prilukin $
+ * @version: $Id: home.simple.js 8179 2015-01-27 12:34:21Z psavushchik $
  */
+
+/* global webHelpModule, _ */
 
 var home = {
     _locationMap: {},

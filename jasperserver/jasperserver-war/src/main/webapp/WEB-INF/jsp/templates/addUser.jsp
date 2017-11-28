@@ -48,7 +48,7 @@ Usage:
     </t:putAttribute>
     <t:putAttribute name="headerClass" value="mover"/>
     <t:putAttribute name="bodyContent">
-            <fieldset class="group">
+            <fieldset class="group first">
                 <legend class="offLeft"><span><spring:message code="DIALOG_PROPERTIES_RESOURCE_COLUMN_PRIMARY_LEGEND" javaScriptEscape="true"/></span></legend>
                 <label class="control input text" for="addUserFullName" title="<spring:message code="jsp.userManager.userCreator.fullName.title" javaScriptEscape="true"/>">
                     <span class="wrap"><spring:message code="jsp.userManager.userCreator.fullName" javaScriptEscape="true"/>:</span>

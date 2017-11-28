@@ -22,7 +22,7 @@
 
 /**
  * @author: Zakhar Tomchenko
- * @version: $Id: DragAndDropPlugin.js 270 2014-10-13 19:58:03Z agodovanets $
+ * @version: $Id: DragAndDropPlugin.js 1160 2015-04-28 12:46:42Z spriluki $
  */
 
 define(function(require){
@@ -46,7 +46,7 @@ define(function(require){
         itemsRendered: function(model){
             var self = this;
 
-            this.$draggableElements = this.$("> .subcontainer > .viewPortChunk > ul > li > .draggable");
+            this.$draggableElements = this.$("> .subcontainer > .j-view-port-chunk > ul > li > .draggable");
 
             this.$draggableElements.draggable({
                 cursor: "move",

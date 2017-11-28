@@ -2,6 +2,7 @@ package com.jaspersoft.jasperserver.export.modules.mt.beans;
 
 import com.jaspersoft.jasperserver.api.metadata.user.domain.ProfileAttribute;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.Tenant;
+import com.jaspersoft.jasperserver.export.modules.BaseExporterModule;
 import com.jaspersoft.jasperserver.export.modules.common.ProfileAttributeBean;
 
 import java.util.Iterator;
@@ -9,7 +10,7 @@ import java.util.List;
 
 /**
  * @author Voloyda Sabadosh
- * @version $Id: TenantBean.java 48958 2014-09-11 09:45:34Z vsabadosh $
+ * @version $Id: TenantBean.java 54590 2015-04-22 17:55:42Z vzavadsk $
  */
 public class TenantBean {
     private String id = null;
@@ -33,7 +34,6 @@ public class TenantBean {
         setTenantUri(tenant.getTenantUri());
         setTenantFolderUri(tenant.getTenantFolderUri());
         setTheme(tenant.getTheme());
-        copyAttributesFrom(tenant);
     }
 
     public void copyTo(Tenant tenant) {
@@ -46,22 +46,6 @@ public class TenantBean {
         tenant.setTenantUri(getTenantUri());
         tenant.setTenantFolderUri(getTenantFolderUri());
         tenant.setTheme(getTheme());
-    }
-
-    public void copyAttributesFrom(Tenant tenant) {
-        List userAttributes = tenant.getAttributes();
-        if (userAttributes == null || userAttributes.isEmpty()) {
-            attributes = null;
-        } else {
-            attributes = new ProfileAttributeBean[userAttributes.size()];
-            int idx = 0;
-            for (Iterator it = userAttributes.iterator(); it
-                    .hasNext(); ++idx) {
-                ProfileAttribute attr = (ProfileAttribute) it.next();
-                attributes[idx] = new ProfileAttributeBean();
-                attributes[idx].copyFrom(attr);
-            }
-        }
     }
 
 

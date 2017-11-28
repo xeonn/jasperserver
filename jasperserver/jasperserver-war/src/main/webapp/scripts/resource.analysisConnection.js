@@ -21,8 +21,10 @@
 
 
 /**
- * @version: $Id: resource.analysisConnection.js 7762 2014-09-19 10:16:02Z sergey.prilukin $
+ * @version: $Id: resource.analysisConnection.js 8179 2015-01-27 12:34:21Z psavushchik $
  */
+
+/* global resource, picker, ValidationModule, ajaxTargettedUpdate, dialogs, baseErrorHandler, localContext */
 
 var resourceAnalysisConnection = {
     TYPE_ID: "analysisConnection.type",

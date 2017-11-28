@@ -46,7 +46,16 @@ public class ReportExecutionRequest {
     private String pages;
     private String baseUrl;
     private String markupType;
+    private String anchor;
     private ReportParameters parameters;
+
+    public String getAnchor() {
+        return anchor;
+    }
+
+    public void setAnchor(String anchor) {
+        this.anchor = anchor;
+    }
 
     public String getMarkupType() {
         return markupType;

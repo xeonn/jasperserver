@@ -69,14 +69,14 @@
     <!-- load dev targets, if available -->
     <import file="bin/dev.xml" optional="true"/>
 
-    <!-- load code coverage targets, if available -->
-    <import file="bin/code-coverage.xml" optional="true"/>
-
     <!-- load module manager, if available -->
     <import file="bin/module-manager.xml" optional="true"/>
 
     <!-- load targets which build separate modules -->
     <import file="bin/restart-build.xml" optional="true"/>
+
+    <!-- load FTP targets (OPTIONAL) -->
+    <import file="../jasperserver-ftp/build.xml" optional="true"/>
 
     <!-- ======================================================================= -->
     <!--                                                                         -->
@@ -607,7 +607,13 @@
         <zip destfile="${basedir}/dist/buildomatic.zip" basedir="${basedir}/dist" includes="buildomatic/**"/>
     </target>
 
+    <target name="encrypt-diagnostics-data">
+        <encrypt-zip inFile="${inFile}"
+                     encProps="${encProps}" />
+    </target>
 
-
-    
+    <target name="decrypt-diagnostics-data">
+        <decrypt-zip inFile="${inFile}"
+                     encProps="${encProps}" />
+    </target>
 </project>

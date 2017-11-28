@@ -29,7 +29,7 @@
         <classpath>
             <pathelement location="${basedir}/target/buildomatic.jar" />
             <pathelement location="${basedir}/target/commons-lang3-3.0.jar" />
-            <pathelement location="${basedir}/target/js-crypto-1.0.5.jar" />
+            <pathelement location="${basedir}/target/js-crypto-1.0.6.jar" />
             <pathelement location="${basedir}/target/log4j-1.2.16.jar" />
             <pathelement location="${basedir}/target/commons-codec-1.5.jar" />
         </classpath>
@@ -45,7 +45,7 @@
     <taskdef resource="tasks.properties" onerror="report">
         <classpath>
             <pathelement location="${basedir}/target/buildomatic.jar" />
-            <pathelement location="${basedir}/target/js-crypto-1.0.5.jar" />
+            <pathelement location="${basedir}/target/js-crypto-1.0.6.jar" />
             <pathelement location="${basedir}/target/commons-codec-1.5.jar" />
             <pathelement location="${basedir}/target/commons-configuration-1.9.jar" />
             <pathelement location="${basedir}/target/commons-lang-2.5.jar" />
@@ -643,6 +643,12 @@
                                     <echo>dbSidOrServiceName = ${dbSidOrServiceName}</echo>
                                     <var name="dbSidOrServiceNameProp" value="ServiceName=${serviceName}"/>
                                     <echo>dbSidOrServiceNameProp = ${dbSidOrServiceNameProp}</echo>
+                                	<!--
+                                	Bug 40326
+                                	sidOrSnParam and sidOrSnValue are used in /buildomatic/conf_source/templates/js-glassfish-oracle-ds.xml
+                                	-->
+                                	<var name="sidOrSnParam" value="serviceName"/>                                                                                                                                                            
+                                	<var name="sidOrSnValue" value="${serviceName}"/>
                                 </then>
                                 <else>
                                     <if>
@@ -652,6 +658,12 @@
                                             <echo>dbSidOrServiceName = ${dbSidOrServiceName}</echo>
                                             <var name="dbSidOrServiceNameProp" value="SID=${sid}"/>
                                             <echo>dbSidOrServiceNameProp = ${dbSidOrServiceNameProp}</echo>
+                                        	<!--
+                                        	Bug 40326
+                                        	sidOrSnParam and sidOrSnValue are used in /buildomatic/conf_source/templates/js-glassfish-oracle-ds.xml
+                                        	-->
+                                            <var name="sidOrSnParam" value="sid"/>
+      	                                    <var name="sidOrSnValue" value="${sid}"/>
                                         </then>
                                     </if>
                                 </else>
@@ -695,11 +707,12 @@
                     <property name="appServerJdbcDir" value="${fixedAppServerDir}/common/lib"/>
                 </then>
             </if>
-            <!-- tomcat 6 and 7 -->
+            <!-- tomcat 6, 7, 8 -->
             <if>
                 <or>
                     <equals arg1="${appServerType}" arg2="tomcat6"/>
                     <equals arg1="${appServerType}" arg2="tomcat7"/>
+                    <equals arg1="${appServerType}" arg2="tomcat8"/>
                 </or>
                 <then>
                     <chkIfPackageManagedTomcat />
@@ -748,6 +761,7 @@
     <!-- Set App Server properties                                -->
     <!--                                                          -->
     <!-- valid values for appServerType:                          -->
+    <!--   tomcat8                                                -->
     <!--   tomcat7                                                -->
     <!--   tomcat6                                                -->
     <!--   tomcat5                                                -->
@@ -791,6 +805,7 @@
         <or>
           <equals arg1="${appServerType}" arg2="tomcat6"/>
           <equals arg1="${appServerType}" arg2="tomcat7"/>
+          <equals arg1="${appServerType}" arg2="tomcat8"/>
         </or>
         <then>
             <!-- check for linux package-management installed instance of tomcat -->

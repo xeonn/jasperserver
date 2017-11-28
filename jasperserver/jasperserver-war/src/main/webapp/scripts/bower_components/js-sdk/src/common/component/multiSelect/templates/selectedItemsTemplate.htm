@@ -1,10 +1,11 @@
-<ul class="mSelect-list mSelect-svList" style="top: {{=top}}px;">
-    {{_.each(items, function(item) { }}
-    <li class="{{ if (item.selected) print('selected'); }} {{ if (item.active) print(' active'); }}" data-index="{{=item.index}}" title="{{ print(item.label && item.label ? _.escape(item.label) : '&nbsp;')}}">
-        <div>
-            <div class="button mSelect-svList-button"></div>
-            <a title="{{ print(item.label && item.label ? _.escape(item.label) : '&nbsp;')}}">{{ print(item.label && item.label ? item.label : '&nbsp;')}}</a>
-        </div>
-    </li>
-    {{ }); }}
-</ul>
+<!--
+this input only for technical purposes:
+it allows selected items list to get focus
+and have proper tab position
+(simple tabindex="0" on DOM element will broke tab index sequence)
+-->
+<input type="text" style="position: absolute; left: -9999px" {{ if (disabled) { }}disabled="disabled"{{ } }}>
+<!-- list position -->
+<div class="m-Multiselect-listContainer-message jrs j-no-selection" style="display:none">
+    {{- i18n['sic.multiselect.noSelection'] }}
+</div>

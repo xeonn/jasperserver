@@ -1,10 +1,20 @@
+@media screen and (min-width:0\0) { /* IE9 and above to fix bug 41632 */
+	.dashboardToolbar .toolbar .list.buttonSet {
+		min-width: 600px;
+	}
+}
+
 .dashboardToolbar .toolbar .buttonSet .node {
     padding: 0 2px;
 }
 
 .dashboardToolbar .toolbar .buttonSet .node.separator {
-    width: 12px;
-    height: 1px;
+    height: 100%;
+    border-left: 1px solid #cdcdcd;
+    border-right: 1px solid #fff;
+    margin-left: 6px;
+    margin-right: 6px;
+    width: 2px;
 }
 
 .dashboardToolbar .toolbar .button .icon {
@@ -27,36 +37,99 @@
     width: 56px;
 }
 
+.dashboardToolbar .toolbar .button {
+	margin-left: 2px;
+	margin-right: 2px;
+}
+
+.dashboardToolbar .toolbar > .buttonSet {
+	margin-left: 16px;
+}
+
+.dashboardToolbar .toolbar.previewMode > .list.buttonSet {
+	height: 27px; /* needs to be 1px shorter because these button are located in header */
+}
+
+.dashboardToolbar .toolbar.previewMode .buttonSet .node.separator {
+	display: none;
+}
+
+/* preview */
 .dashboardToolbar .toolbar #presentation .icon {
     background-position: 3px 3px;
 }
-
-.dashboardToolbar .toolbar #grid .icon {
-    background-position: 3px -276px;
+.dashboardToolbar .toolbar #presentation.over .icon,
+.dashboardToolbar .toolbar #presentation.down .icon,
+.dashboardToolbar .toolbar #presentation.pressed .icon {
+    background-position: -67px 3px;
 }
 
+/* save */
 .dashboardToolbar .toolbar #save .icon {
     background-position: 3px -37px;
 }
+.dashboardToolbar .toolbar #save.over .icon,
+.dashboardToolbar .toolbar #save.pressed .icon {
+    background-position: -67px -36px;
+}
+.dashboardToolbar .toolbar #save.over .indicator, 
+.dashboardToolbar .toolbar #save.pressed .indicator {
+    background-position: -2px -80px;
+}
 
+/* undo */
 .dashboardToolbar .toolbar #undo .icon {
-    background-position: 3px -76px;
+    background-position: 4px -75px;
+}
+.dashboardToolbar .toolbar #undo.over .icon, 
+.dashboardToolbar .toolbar #undo.pressed .icon {
+    background-position: -66px -75px;
 }
 
-.dashboardToolbar .toolbar #undoAll .icon {
-    background-position: 3px -156px;
-}
-
+/* redo */
 .dashboardToolbar .toolbar #redo .icon {
-    background-position: 3px -116px;
+    background-position: 4px -115px;
+}
+.dashboardToolbar .toolbar #redo.over .icon, 
+.dashboardToolbar .toolbar #redo.pressed .icon {
+    background-position: -65px -115px;
 }
 
+/* undo all */
+.dashboardToolbar .toolbar #undoAll .icon {
+    background-position: 4px -155px;
+}
+.dashboardToolbar .toolbar #undoAll.over .icon, 
+.dashboardToolbar .toolbar #undoAll.pressed .icon {
+    background-position: -65px -155px;
+}
+
+/* filter manager */
+.dashboardToolbar .toolbar #filterManager .icon {
+    background-position: 4px -195px;
+}
+.dashboardToolbar .toolbar #filterManager.over .icon, 
+.dashboardToolbar .toolbar #filterManager.pressed .icon {
+    background-position: -63px -194px;
+}
+
+/* properties */
 .dashboardToolbar .toolbar #properties .icon {
     background-position: 3px -236px;
 }
+.dashboardToolbar .toolbar #properties.over .icon, 
+.dashboardToolbar .toolbar #properties.pressed .icon {
+    background-position: -67px -236px;
+}
 
-.dashboardToolbar .toolbar #filterManager .icon {
-    background-position: 3px -196px;
+/* grid */
+.dashboardToolbar .toolbar #grid .icon {
+    background-position: 4px -275px;
+}
+.dashboardToolbar .toolbar #grid.over .icon, 
+.dashboardToolbar .toolbar #grid.down .icon,
+.dashboardToolbar .toolbar #grid.pressed .icon {
+    background-position: -65px -275px;
 }
 
 .dashboardToolbar .toolbar .disabledButton .icon {
@@ -76,19 +149,19 @@
 }
 
 .dashboardToolbar .toolbar .disabledButton#undo .icon {
-    background-position: -31px -76px;
+    background-position: -31px -75px;
 }
 
 .dashboardToolbar .toolbar .disabledButton#redo .icon {
-    background-position: -31px -116px;
+    background-position: -31px -115px;
 }
 
 .dashboardToolbar .toolbar .disabledButton#undoAll .icon {
-    background-position: -31px -156px;
+    background-position: -29px -155px;
 }
 
 .dashboardToolbar .toolbar .disabledButton#filterManager .icon {
-    background-position: -31px -196px;
+    background-position: -30px -195px;
 }
 
 .dashboardToolbar .toolbar .disabledButton#properties .icon {
@@ -96,7 +169,7 @@
 }
 
 .dashboardToolbar .toolbar .disabledButton#grid .icon {
-    background-position: -31px -276px;
+    background-position: -30px -275px;
 }
 
 .dashboardToolbar .toolbar .button .wrap {

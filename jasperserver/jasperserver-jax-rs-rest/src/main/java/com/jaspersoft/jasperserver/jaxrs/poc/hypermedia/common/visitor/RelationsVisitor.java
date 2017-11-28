@@ -20,8 +20,6 @@
  */
 package com.jaspersoft.jasperserver.jaxrs.poc.hypermedia.common.visitor;
 
-import com.amazonaws.services.autoscaling.model.Activity;
-
 /**
  * @author: Igor.Nesterenko
  * @version: ${Id}

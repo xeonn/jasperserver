@@ -21,32 +21,31 @@
 package com.jaspersoft.jasperserver.war.action;
 
 import java.io.OutputStream;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
-import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JRExporterParameter;
 import net.sf.jasperreports.engine.JRPropertiesHolder;
 import net.sf.jasperreports.engine.JRPropertiesUtil;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.export.ooxml.JRPptxExporter;
 import net.sf.jasperreports.export.SimpleExporterInput;
 import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
 import net.sf.jasperreports.export.SimplePptxReportConfiguration;
-import net.sf.jasperreports.engine.export.ooxml.JRPptxExporter;
 
 import org.springframework.webflow.execution.RequestContext;
 
-import com.jaspersoft.jasperserver.api.JSException;
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.common.ExportParameters;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.common.PptxExportParametersBean;
 
+
 /**
  * @author sanda zaharia (shertage@users.sourceforge.net)
- * @version $Id: ReportPptxExporter.java 48468 2014-08-21 07:47:20Z yuriy.plakosh $
+ * @version $Id: ReportPptxExporter.java 54728 2015-04-24 15:28:20Z tdanciu $
  */
-public class ReportPptxExporter extends AbstractReportExporter{
+public class ReportPptxExporter extends AbstractReportExporter
+{
 
 	private static final String DIALOG_NAME = "pptxExportParams";
 	
@@ -73,21 +72,24 @@ public class ReportPptxExporter extends AbstractReportExporter{
 		this.exportParameters = exportParameters;
 	}
 
-	public void export(RequestContext context, ExecutionContext executionContext, String reportUnitURI, Map baseParameters) throws JRException {
+	public void export(RequestContext context, ExecutionContext executionContext, JasperPrint jasperPrint, OutputStream outputStream) throws JRException
+	{
 		JRPptxExporter exporter = new JRPptxExporter(getJasperReportsContext());
-		JasperPrint jasperPrint = (JasperPrint)baseParameters.get(JRExporterParameter.JASPER_PRINT);
+
 		exporter.setExporterInput(new SimpleExporterInput(jasperPrint));
-		OutputStream os = (OutputStream)baseParameters.get(JRExporterParameter.OUTPUT_STREAM);
-		exporter.setExporterOutput(new SimpleOutputStreamExporterOutput(os));
+		exporter.setExporterOutput(new SimpleOutputStreamExporterOutput(outputStream));
+
 		PptxExportParametersBean exportParams = (PptxExportParametersBean)getExportParameters(context);
-		if(exportParams != null)
+		if (exportParams != null)
 		{
-			if(exportParams.getIgnoreHyperlink() != null) {
+			if (exportParams.getIgnoreHyperlink() != null) 
+			{
 				SimplePptxReportConfiguration configuration = new SimplePptxReportConfiguration();
 				configuration.setIgnoreHyperlink(exportParams.getIgnoreHyperlink());
 				exporter.setConfiguration(configuration);
 			}
 		}	
+
 		exporter.exportReport();
 	}
 

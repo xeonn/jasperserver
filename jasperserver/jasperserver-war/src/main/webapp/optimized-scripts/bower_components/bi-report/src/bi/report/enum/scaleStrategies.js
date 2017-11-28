@@ -1,1 +1,0 @@
-define({CONTAINER:"container",WIDTH:"width",HEIGHT:"height"});

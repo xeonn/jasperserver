@@ -21,8 +21,13 @@
 
 
 /**
- * @version: $Id: list.base.js 7762 2014-09-19 10:16:02Z sergey.prilukin $
+ * @version: $Id: list.base.js 8790 2015-04-22 21:28:09Z obobruyk $
  */
+
+/* global layoutModule, buttonManager, isNotNullORUndefined, matchAny, deepClone, Mustache, JSTooltip, _,
+ isArray, isShiftHeld, disableSelectionWithoutCursorStyle, cloneCustomAttributes, Draggable, matchMeOrUp, isMetaHeld,
+ isShiftHeld, isRightClick, TouchController, isSupportsTouch, isIPad, Draggables, Template
+*/
 
 var baseList = {
     isResponsive: function(item) { return $(item.up(0)).hasClassName(layoutModule.RESPONSIVE_CLASS); },
@@ -156,7 +161,7 @@ dynamicList.ListItem.addMethod('getList', function() { return this._list; });
  *
  * @param {String}
  */
-dynamicList.ListItem.addMethod('setValue', function(value) { return this._value = value; });
+dynamicList.ListItem.addMethod('setValue', function(value) { return this._value = value; }); // jshint ignore: line
 
 /**
  * Gets value of the item.
@@ -170,7 +175,7 @@ dynamicList.ListItem.addMethod('getValue', function() { return this._value; });
  *
  * @param {Object}
  */
-dynamicList.ListItem.addMethod('setLabel', function(label) { return this._label = label; });
+dynamicList.ListItem.addMethod('setLabel', function(label) { return this._label = label; }); // jshint ignore: line
 
 
 /**
@@ -292,7 +297,7 @@ dynamicList.ListItem.addMethod('processTemplate', function(element) {
 
     var elementsCount = wrapper.childElements().length;
     if (elementsCount == wrapper.childNodes.length) {
-        wrapper.insert(this.getLabel().escapeHTML());
+        wrapper.insert(xssUtil.escape(this.getLabel()));
     } else {
         wrapper.childNodes[elementsCount].data = this.getLabel();
     }
@@ -509,9 +514,9 @@ dynamicList.TemplatedListItem.prototype.constructor = dynamicList.TemplatedListI
 
 dynamicList.TemplatedListItem.prototype.processTemplate = function(element) {
     var filled = Mustache.to_html(element.innerHTML, this.getValue());
-    element.innerHTML = filled;
+    element.innerHTML = xssUtil.escape(filled);
     if(this.tooltipText != null) {
-        new JSTooltip(element, {text: this.tooltipText});
+        new JSTooltip(element, {text: xssUtil.escape(this.tooltipText)});
     }
 
     return element;
@@ -533,12 +538,12 @@ dynamicList.UnderscoreTemplatedListItem.prototype._getTemplate = function() {
 };
 
 dynamicList.UnderscoreTemplatedListItem.prototype.processTemplate = function() {
-    var element = jQuery(_.template(this._template, this.getValue()))[0];
+    var element = jQuery(_.template(this._template, xssUtil.escape(this.getValue())))[0];
 
     element.templateClassName = element.className;
 
     if(this.tooltipText != null) {
-        new JSTooltip(element, {text: this.tooltipText});
+        new JSTooltip(element, {text: xssUtil.escape(this.tooltipText)});
     }
 
     return element;
@@ -751,7 +756,7 @@ dynamicList.List.addMethod('isItemSelected', function(item) {
 dynamicList.List.addMethod('selectItem', function(item, isCtrlHeld, isShiftHeld, isContextMenu) {
     var event = this.fire(this.Event.ITEM_BEFORE_SELECT_OR_UNSELECT, {item: item});
     if (event.stopSelectOrUnselect) {
-        return;
+        return false;
     }
 
     // Fix for multiple DnD.
@@ -759,7 +764,7 @@ dynamicList.List.addMethod('selectItem', function(item, isCtrlHeld, isShiftHeld,
     // we need deselect items on mouse up to be able Drag them.
     if (this._multiSelect && this._selectedItems.length > 1 && this.isItemSelected(item)
             && !(isCtrlHeld || isShiftHeld || isContextMenu)) {
-        return;
+        return false;
     }
 
     var isContextMenuOnSelected = this.isItemSelected(item) && isContextMenu;
@@ -773,7 +778,7 @@ dynamicList.List.addMethod('selectItem', function(item, isCtrlHeld, isShiftHeld,
     }
 
     if (deselect && !reset) {
-        this._removeItemFromSelected(item);
+        this._removeItemFromSelected(item, isCtrlHeld);
     }
 
     if (selectRange) {
@@ -795,6 +800,8 @@ dynamicList.List.addMethod('selectItem', function(item, isCtrlHeld, isShiftHeld,
         this._addItemToSelected(item, !isShiftHeld);
         this.cursor = item;
     }
+
+    return true;
     
 });
 
@@ -805,8 +812,8 @@ dynamicList.List.addMethod('deselectItem', function(item) {
     this._removeItemFromSelected(item);
 });
 
-dynamicList.List.addMethod('deselectOthers', function(item, isCtrlHeld, isShiftHeld, isContextMenu) {
-    var event = this.fire(this.Event.ITEM_BEFORE_SELECT_OR_UNSELECT, {item: item});
+dynamicList.List.addMethod('deselectOthers', function(item, isCtrlHeld, isShiftHeld, isContextMenu, options) {
+    var event = this.fire(this.Event.ITEM_BEFORE_SELECT_OR_UNSELECT, {item: item, showConfirm: options && options.showConfirm});
     if (event.stopSelectOrUnselect) {
         return;
     }
@@ -1037,7 +1044,7 @@ dynamicList.List.addMethod('observe', function(eventName, handler) {
 /**
  * @param eventName
  */
-dynamicList.List.addMethod('stopObserving', function(eventName, memo) {
+dynamicList.List.addMethod('stopObserving', function(eventName, handler) {
     this._getElement().stopObserving(eventName, handler);
 });
 
@@ -1071,6 +1078,7 @@ dynamicList.List.addMethod('getItemByEvent', function(event) {
             var item = element.listItem;
 //            if (item && item.getList() != null && item.getList().getId() == this.getId()) {
             if (item && item.getList() != null) {
+                item._label = xssUtil.unescape(item._label);
                 return item;
             } else {
                 element = $(element.parentNode);
@@ -1135,7 +1143,7 @@ dynamicList.List.addMethod('_addItemToSelected', function(item, remember) {
     }
 });
 
-dynamicList.List.addMethod('_removeItemFromSelected', function(item) {
+dynamicList.List.addMethod('_removeItemFromSelected', function(item, isCtrlHeld) {
     if (item && this.isItemSelected(item)) {
         this._selectedItems = this._selectedItems.without(item);
         item.refreshStyle();
@@ -1143,7 +1151,7 @@ dynamicList.List.addMethod('_removeItemFromSelected', function(item) {
         if (this._parentList) {
             this._parentList._removeItemFromSelected(item);
         } else {
-            this.fire(this.Event.ITEM_UNSELECTED, {item: item});
+            this.fire(this.Event.ITEM_UNSELECTED, {item: item, isCtrlHeld: isCtrlHeld});
         }
     }
 });
@@ -1157,7 +1165,7 @@ dynamicList.List.addMethod('_buildDnDOverlay', function(element) {
     if (element.items.length > 1) {
         element.update(this._msgNItemsSelected.evaluate({count: element.items.length}));
     } else if (element.items.length == 1) {
-        element.update(element.items[0].getLabel());
+        element.update(xssUtil.escape(element.items[0].getLabel()));
     }
 });
 
@@ -1239,7 +1247,7 @@ dynamicList.List.addMethod('_mouseupHandler', function(event) {
                 isContextMenuValue = isRightClick(event);
                 
             var isSelect = !this.selectOnMousedown && !TouchController.element_scrolled && (!isSupportsTouch() || event.changedTouches.length >= 1);
-            isSelect && item.getList().selectItem(item, isCtrlHeldValue, isShiftHeldValue, isContextMenuValue);
+            var showConfirm = isSelect && item.getList().selectItem(item, isCtrlHeldValue, isShiftHeldValue, isContextMenuValue);
             
             // Fix for Shift key multiple selection if we change selection inside selected range.
             // We need to remember the position of current item as last selected even if selectItem method
@@ -1249,7 +1257,7 @@ dynamicList.List.addMethod('_mouseupHandler', function(event) {
                 this._lastSelectedItem = item;
             }
             
-            item.getList().deselectOthers(item, isMetaHeld(event), isShiftHeld(event), isRightClick(event));
+            item.getList().deselectOthers(item, isMetaHeld(event), isShiftHeld(event), isRightClick(event), {showConfirm: showConfirm});
             
             if(this.twofingers){
             	this.twofingers = false;

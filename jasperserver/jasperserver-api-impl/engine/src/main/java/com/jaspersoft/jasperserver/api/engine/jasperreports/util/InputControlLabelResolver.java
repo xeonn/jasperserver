@@ -34,7 +34,7 @@ import java.util.regex.Pattern;
  * in the following precedence: report-specific bundles, server-wide bundles.
  *
  * @author Yuriy Plakosh
- * @version $Id: InputControlLabelResolver.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: InputControlLabelResolver.java 55164 2015-05-06 20:54:37Z mchan $
  */
 public class InputControlLabelResolver {
     private static Pattern LABEL_KEY_PATTERN = Pattern.compile("^\\$R\\{(.+)\\}(.*)$");
@@ -66,6 +66,10 @@ public class InputControlLabelResolver {
     }
 
     private static String resolve(String key, LabelResolver reportLabelResolver, LabelResolver serverLabelResolver) {
+        if (key == null) {
+            return null;
+        }
+
         String label = key;
 
         Matcher m = LABEL_KEY_PATTERN.matcher(key);

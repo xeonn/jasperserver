@@ -113,17 +113,21 @@
 		                        <li class="leaf"><button id="run" class="button capsule text up first"><span class="wrap"><spring:message code="RM_BUTTON_RUN" javaScriptEscape="true"/></span><span class="icon"></span></button></li>
 		                        <li class="leaf"><button id="edit" class="button capsule text up middle"><span class="wrap"><spring:message code="RM_BUTTON_WIZARD" javaScriptEscape="true"/></span><span class="icon"></span></button></li>
 		                        <li class="leaf"><button id="open" class="button capsule text up last"><span class="wrap"><spring:message code="RM_BUTTON_OPEN" javaScriptEscape="true"/></span><span class="icon"></span></button></li>
+<!--
 							</ul>
 						</li>
                     	<li class="node open">
                    			 <ul class="list buttonSet">
+-->
 		                        <li class="leaf"><button id="copy" class="button capsule text up first"><span class="wrap"><spring:message code="RM_BUTTON_COPY_RESOURCE" javaScriptEscape="true"/></span><span class="icon"></span></button></li>
 		                        <li class="leaf"><button id="cut" class="button capsule text up middle"><span class="wrap"><spring:message code="RM_BUTTON_MOVE_RESOURCE" javaScriptEscape="true"/></span><span class="icon"></span></button></li>
 		                        <li class="leaf"><button id="paste" class="button capsule text up last"><span class="wrap"><spring:message code="RM_BUTTON_COPY_HERE" javaScriptEscape="true"/></span><span class="icon"></span></button></li>
+<!--
 							</ul>
 						</li>
                     	<li class="node open">
                    			 <ul class="list buttonSet">
+-->
 		                        <li class="leaf"><button id="remove" class="button capsule text up"><span class="wrap"><spring:message code="SEARCH_BULK_DELETE" javaScriptEscape="true"/></span><span class="icon"></span></button></li>
 							</ul>
 						</li>

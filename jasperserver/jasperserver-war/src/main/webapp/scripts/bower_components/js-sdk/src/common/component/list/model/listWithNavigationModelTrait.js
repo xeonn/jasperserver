@@ -22,7 +22,7 @@
 
 /**
  * @author: Sergey Prilukin
- * @version: $Id: listWithNavigationModelTrait.js 172 2014-09-23 11:45:30Z sergey.prilukin $
+ * @version: $Id: listWithNavigationModelTrait.js 1178 2015-05-06 20:40:12Z yplakosh $
  */
 
 /**
@@ -49,7 +49,7 @@ define(function (require) {
         activate: function(index, options) {
 
             if (typeof index !== "number") {
-                this.setActive({});
+                this.setActive(_.extend({}, options));
                 return;
             }
 

@@ -20,6 +20,7 @@
  */
 package com.jaspersoft.jasperserver.api.metadata.common.service.impl;
 
+import java.util.Collection;
 import java.util.Date;
 
 import org.apache.commons.logging.Log;
@@ -29,15 +30,20 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.orm.hibernate3.HibernateAccessor;
 import org.springframework.orm.hibernate3.HibernateTemplate;
 import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
+import org.hibernate.LockMode;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Propagation;
 
 import com.jaspersoft.jasperserver.api.JSExceptionWrapper;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.ContentResource;
 
 /**
  * @author swood
- * @version $Id: HibernateDaoImpl.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: HibernateDaoImpl.java 55164 2015-05-06 20:54:37Z mchan $
  */
 public class HibernateDaoImpl extends HibernateDaoSupport {
 	
+    	
 	private static final Log log = LogFactory.getLog(HibernateDaoImpl.class);
 	
 	private final ThreadLocal operationDate;
@@ -53,6 +59,7 @@ public class HibernateDaoImpl extends HibernateDaoSupport {
 
 	protected final Object executeCallback(final DaoCallback callback) {
 		try {
+			getHibernateTemplate();
 			Object ret = callback.execute();
 			return ret;
 		} catch (DataAccessException e) {
@@ -67,6 +74,7 @@ public class HibernateDaoImpl extends HibernateDaoSupport {
 		return executeWriteCallback(callback, true);
 	}
 
+	@Transactional(propagation = Propagation.REQUIRED)
 	protected final Object executeWriteCallback(final DaoCallback callback, boolean flush) {
 		startOperation();
 		HibernateTemplate hibernateTemplate = getHibernateTemplate();
@@ -75,17 +83,38 @@ public class HibernateDaoImpl extends HibernateDaoSupport {
 			flushModeHandle.setFlushMode(HibernateAccessor.FLUSH_COMMIT);
 			Object ret = callback.execute();
 			if (flush) {
-				hibernateTemplate.flush();
+				boolean doMerge = (ret!=null && ContentResource.class.isAssignableFrom(ret.getClass()));
+				try{
+					if(doMerge){
+						if(log.isDebugEnabled()){
+							log.debug("***** locking and merging object ***** " + ret);
+						}
+						hibernateTemplate.lock(ret, LockMode.UPGRADE_NOWAIT);
+						if(log.isDebugEnabled()){
+							log.debug("***** merging after acquired lock ***** " + ret);
+						}
+						hibernateTemplate.merge(ret);
+					}
+				} catch(RuntimeException e){
+					if(log.isDebugEnabled()){
+						log.debug("******* RECOVERING FROM .flush() error! *****");
+					}
+					if(doMerge){
+						hibernateTemplate.refresh(ret);
+					}	
+				} finally {
+					hibernateTemplate.flush();
+				}
+				
 			}
 			return ret;
-		} catch (DataAccessException e) {
-            // Logging of error was commented because it causes double error logging which is confusing.
-            // Uncomment if it is still necessary for reason I do not imagine at the moment.
-            //log.error("Hibernate DataAccessException", e);
+		} catch (RuntimeException e){
+			log.error("************** HibernateDaoImpl.executeWriteCallback EXCEPTION ********** ", e);
 			throw new JSExceptionWrapper(e);
-		}
+		} 
 		finally {
 			flushModeHandle.revert();
+			hibernateTemplate = null;
 			endOperation();
 		}
 	}

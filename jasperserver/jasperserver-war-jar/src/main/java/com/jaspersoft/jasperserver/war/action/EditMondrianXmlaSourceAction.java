@@ -154,8 +154,13 @@ public class EditMondrianXmlaSourceAction extends FormAction {
 			allMondrianConnections = new ArrayList(resourceLookup.length);
 			for (int i = 0; i < resourceLookup.length; i++) {
 				Resource resource = resourceLookup[i];
-				Object resourceObj = repository.getResource(null, resource
-						.getURIString());
+				Object resourceObj;
+				try {
+					resourceObj = repository.getResource(null, resource.getURIString());
+				} catch (JSException ex) {
+					continue;
+				}
+
 				if (!allMondrianConnections
 						.contains(((OlapClientConnection) resourceObj)
 								.getURIString())) {

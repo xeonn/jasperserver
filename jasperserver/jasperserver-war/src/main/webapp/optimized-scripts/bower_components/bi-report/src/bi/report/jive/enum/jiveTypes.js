@@ -1,1 +1,0 @@
-define({FUSION_MAP:"fusionMap",FUSION_CHART:"fusionChart",FUSION_WIDGET:"fusionWidget",CHART:"chart",TABLE:"table",COLUMN:"column",GOOGLEMAP:"googlemap",CROSSTAB:"crosstab",WEBFONTS:"webfonts",BOOKMARKS:"bookmarks",HYPERLINKS:"hyperlinks"});

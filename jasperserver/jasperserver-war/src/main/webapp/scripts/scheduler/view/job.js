@@ -21,8 +21,10 @@
 
 
 /**
- * @version: $Id: job.js 7748 2014-07-18 09:13:06Z kklein $
+ * @version: $Id: job.js 8685 2015-04-10 14:06:42Z bkolesni $
  */
+
+/* global getTZOffset */
 
 define('scheduler/view/job', function(require){
 
@@ -32,7 +34,8 @@ define('scheduler/view/job', function(require){
         template = require('text!scheduler/template/job.htm'),
         i18n = require('bundle!jasperserver_messages'),
         config = require('jrs.configs'),
-        moment = require("moment");
+        moment = require("moment"),
+        xssUtil = require("common/util/xssUtil");
 
     return Backbone.View.extend({
 
@@ -81,7 +84,7 @@ define('scheduler/view/job', function(require){
             var t = this, text;
 
             text = i18n['report.scheduling.delete.label'].
-                replace('{label}', t.model.get('label')).
+                replace('{label}', xssUtil.escape(t.model.get('label'))).
                 replace('{newline}', '<br><br>');
 
             this.app.handleTwoButtonDialog(text, function(){

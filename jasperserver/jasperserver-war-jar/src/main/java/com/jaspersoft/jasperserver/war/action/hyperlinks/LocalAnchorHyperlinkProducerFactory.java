@@ -21,25 +21,23 @@
 
 package com.jaspersoft.jasperserver.war.action.hyperlinks;
 
-import java.io.Serializable;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import com.jaspersoft.jasperserver.api.JSException;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.domain.impl.ReportUnitResult;
 import com.jaspersoft.jasperserver.war.util.SessionObjectSerieAccessor;
-
 import net.sf.jasperreports.engine.JRPrintAnchorIndex;
 import net.sf.jasperreports.engine.JRPrintHyperlink;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.export.JRHyperlinkProducer;
 import net.sf.jasperreports.web.servlets.JasperPrintAccessor;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.Serializable;
+import java.util.Map;
+
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: LocalAnchorHyperlinkProducerFactory.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: LocalAnchorHyperlinkProducerFactory.java 52527 2015-02-25 13:53:01Z ktsaregradskyi $
  */
 public class LocalAnchorHyperlinkProducerFactory implements HyperlinkProducerFlowFactory, Serializable {
 
@@ -68,8 +66,13 @@ public class LocalAnchorHyperlinkProducerFactory implements HyperlinkProducerFlo
 			this.flowExecutionKey = (String) request.getAttribute("flowExecutionKey");
 
 			String jasperPrintName = (String) request.getAttribute(getJasperPrintNameRequestAttribute());
-			ReportUnitResult result = (ReportUnitResult) getJasperPrintAccessor().getObject(request, jasperPrintName);
-            if (result == null){
+			ReportUnitResult result = null;
+			try {
+				result = (ReportUnitResult) getJasperPrintAccessor().getObject(request, jasperPrintName);
+			} catch (Exception e) {
+				// not able to get report unit result from session. Do nothing.
+			}
+			if (result == null){
                 result = (ReportUnitResult) request.getAttribute("reportResult");
             }
 			this.jasperPrintAccessor = (result == null ? null : result.getJasperPrintAccessor());
@@ -114,7 +117,7 @@ public class LocalAnchorHyperlinkProducerFactory implements HyperlinkProducerFlo
                 uri.append("#");
                 uri.append(anchor);
             }
-			return response.encodeURL(uri.toString());
+			return response != null ? response.encodeURL(uri.toString()) : uri.toString();
 		}
 	}
 

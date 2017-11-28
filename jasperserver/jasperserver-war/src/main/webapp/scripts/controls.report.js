@@ -21,10 +21,20 @@
 
 
 /**
- * @version: $Id: controls.report.js 7762 2014-09-19 10:16:02Z sergey.prilukin $
+ * @version: $Id: controls.report.js 8900 2015-05-06 20:57:14Z yplakosh $
+ */
+
+/* global require, JRS, viewer, layoutModule, centerElement, ControlsBase, ControlDialog, matchAny, isProVersion, dialogs, OptionsDialog,
+ confirm, $$, triggerNativeEvent, alert, isIPad, _, Report, selectAndFocusOn
  */
 
 var Controls = (function (jQuery, _, Controls, Report) {
+
+    //workaround to get AMD module in non-AMD styled module.
+    var inputControlsSettings = null;
+    require(["settings!inputControls"], function(inputControls) {
+        inputControlsSettings = inputControls;
+    });
 
     return _.extend(Controls,{
 
@@ -88,7 +98,7 @@ var Controls = (function (jQuery, _, Controls, Report) {
                     "viewmodel:selection:changed":function () {
                         Controls.selectionChanged = true;
                     },
-                    "reportoptions:selection:changed":function (event, selection) {
+                    "reportoptions:selection:changed":function (event, data) {
                         Controls.selectionChanged = true;
                     }
                 });
@@ -144,31 +154,33 @@ var Controls = (function (jQuery, _, Controls, Report) {
         },
 
         initializeOptions:function () {
+            function showSubHeader() {
+                var parent;
+                if (Controls.layouts.LAYOUT_POPUP_SCREEN == Report.reportControlsLayout) {
+                    parent = jQuery("#" + ControlsBase.INPUT_CONTROLS_DIALOG);
+                } else {
+                    parent = jQuery("#" + ControlsBase.INPUT_CONTROLS_FORM);
+                }
+                if (parent && parent.length > 0) {
+                    parent.addClass("showingSubHeader")
+                }
+            }
+
+            function hideSubHeader() {
+                var parent;
+                if (Controls.layouts.LAYOUT_POPUP_SCREEN == Report.reportControlsLayout) {
+                    parent = jQuery("#" + ControlsBase.INPUT_CONTROLS_DIALOG);
+                } else {
+                    parent = jQuery("#" + ControlsBase.INPUT_CONTROLS_FORM);
+                }
+                if (parent && parent.length > 0) {
+                    parent.removeClass("showingSubHeader")
+                }
+            }
+
             if ((isProVersion())) {
 
-                function showSubHeader() {
-                    var parent;
-                    if (Controls.layouts.LAYOUT_POPUP_SCREEN == Report.reportControlsLayout) {
-                        parent = jQuery("#" + ControlsBase.INPUT_CONTROLS_DIALOG);
-                    } else {
-                        parent = jQuery("#" + ControlsBase.INPUT_CONTROLS_FORM);
-                    }
-                    if (parent && parent.length > 0) {
-                        parent.addClass("showingSubHeader")
-                    }
-                }
 
-                function hideSubHeader() {
-                    var parent;
-                    if (Controls.layouts.LAYOUT_POPUP_SCREEN == Report.reportControlsLayout) {
-                        parent = jQuery("#" + ControlsBase.INPUT_CONTROLS_DIALOG);
-                    } else {
-                        parent = jQuery("#" + ControlsBase.INPUT_CONTROLS_FORM);
-                    }
-                    if (parent && parent.length > 0) {
-                        parent.removeClass("showingSubHeader")
-                    }
-                }
 
                 var optionsContainerSelector;
 
@@ -266,7 +278,7 @@ var Controls = (function (jQuery, _, Controls, Report) {
                 this.remove = function () {
                     var optionName = reportOptions.get('selection').label;
                     if (confirm(ControlsBase.getMessage("report.options.option.confirm.remove", {option: optionName}))) {
-                        reportOptions.removeOption(Report.reportUnitURI, optionName)
+                        reportOptions.removeOption(Report.reportUnitURI, reportOptions.get('selection').id)
                             .done(function () {
                                 if (!reportOptions.get('values')) {
                                     hideSubHeader();
@@ -326,23 +338,31 @@ var Controls = (function (jQuery, _, Controls, Report) {
         },
 
         refreshReport:function (checkOnChangedSelection) {
+            var deferred = new jQuery.Deferred(),
+                promise = deferred.promise();
+
             var selectedData = Controls.viewModel.get("selection");
             if (checkOnChangedSelection){
                 var isSelectionChanged = JRS.Controls.ViewModel.isSelectionChanged(Controls.lastSelection, selectedData);
-                if (!isSelectionChanged) return;
+                if (!isSelectionChanged) {
+                    deferred.resolve();
+                    return promise();
+                }
             }
             try {
                 if (selectedData && !_.isEmpty(selectedData)) {
-                    Report.refreshReport(null, null, ControlsBase.buildSelectedDataUri(selectedData));
+                    promise = Report.refreshReport(null, null, ControlsBase.buildSelectedDataUri(selectedData));
                     Controls.lastSelection = selectedData;
                 } else {
-                    Report.refreshReport();
+                    promise = Report.refreshReport();
                     Controls.lastSelection = {};
                 }
             } catch(ex) {
                 alert(ex);
+                deferred.reject(ex);
             }
 
+            return promise;
         },
 
         applyInputValues:function (hideControls) {
@@ -350,13 +370,39 @@ var Controls = (function (jQuery, _, Controls, Report) {
             if (Controls.selectionChanged) {
                 Controls.controller.validate().then(function (areAllControlsValid) {
                     if (areAllControlsValid){
-                        Controls.refreshReport();
-                        hideControls && Controls.hide();
+                        var lastSuccessfulSelection = Controls.lastSelection,
+                            lastSuccessfulReportOption;
+
+                        if (Controls.reportOptions) {
+                            lastSuccessfulReportOption = Controls.lastReportOptionsSelection;
+                        }
+
+                        // Fix for bug #42128 - jive must be hidden before applying input controls values
+                        viewer && viewer.jive && viewer.jive.hide();
+
+                        Controls.refreshReport().then(
+                            function() {
+                                Controls.selectionChanged = false;
+                            },
+                            function() {
+                                //application of input controls was failed probably because of
+                                //report cancellation
+                                //in this case if hideControls is true we have to set values to
+                                //latest successfull value
+                                Controls.lastSelection = lastSuccessfulSelection;
+                                Controls.lastReportOptionsSelection = lastSuccessfulReportOption;
+
+                                if (hideControls) {
+                                    Controls.cancel();
+                                    Controls.selectionChanged = false;
+                                }
+                            });
+
                         if (Controls.reportOptions){
                             Controls.lastReportOptionsSelection = Controls.reportOptions.get("selection");
                         }
+                        hideControls && Controls.hide();
                     }
-                    Controls.selectionChanged = false;
                 });
             }else if (viewModel.areAllControlsValid()) {
                 hideControls && Controls.hide();
@@ -375,7 +421,14 @@ var Controls = (function (jQuery, _, Controls, Report) {
                     return;
                 }
             }
-            Controls.controller.reset();
+
+            var finalInitialParameters = null;
+            if (inputControlsSettings.useUrlParametersOnReset === "true") {
+                //use params passed through url as defaults
+                finalInitialParameters = _.extend(Report.getAllRequestParameters(), Report.reportParameterValues);
+            }
+
+            Controls.controller.reset(null, finalInitialParameters);
         },
 
         show:function () {

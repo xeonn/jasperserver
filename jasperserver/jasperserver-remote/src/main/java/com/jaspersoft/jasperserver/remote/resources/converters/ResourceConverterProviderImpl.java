@@ -38,7 +38,7 @@ import java.util.Map;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: ResourceConverterProviderImpl.java 50525 2014-10-22 15:00:43Z psavushchik $
+ * @version $Id: ResourceConverterProviderImpl.java 55164 2015-05-06 20:54:37Z mchan $
  */
 @Service("resourceConverterProvider")
 public class ResourceConverterProviderImpl implements ResourceConverterProvider {
@@ -105,8 +105,6 @@ public class ResourceConverterProviderImpl implements ResourceConverterProvider 
                         }
                     }
                     toServerConverters.put(binaryDataResourceConverter.getClientResourceType(), (ToServerConverter)binaryDataResourceConverter);
-                    TopicResourceConverter fakeTopicTypeConverter = new TopicResourceConverter();
-                    toServerConverters.put(fakeTopicTypeConverter.getClientResourceType(), (ToServerConverter)fakeTopicTypeConverter);
                     initialized = true;
                 }
             }

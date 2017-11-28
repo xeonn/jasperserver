@@ -21,7 +21,7 @@
 
 /**
  * @author: Kostiantyn Tsaregradskyi, Sergii Kylypko
- * @version: $Id: RepositoryResourceModel.js 380 2014-11-09 15:04:25Z ktsaregradskyi $
+ * @version: $Id: RepositoryResourceModel.js 1178 2015-05-06 20:40:12Z yplakosh $
  */
 
 define(function(require) {
@@ -40,8 +40,6 @@ define(function(require) {
         NAME_MAX_LENGTH = 100,
         DESCRIPTION_MAX_LENGTH = 250,
         EXTRACT_RESOURCE_TYPE_EXPRESSION = /application\/repository\.([^\+]+)\+json/,
-        LABEL_NOT_SUPPORTED_SYMBOLS = "<>",
-        DESCRIPTION_NOT_SUPPORTED_SYMBOLS = "<>",
         NAME_NOT_SUPPORTED_SYMBOLS = globalConfiguration.resourceIdNotSupportedSymbols.slice(1, globalConfiguration.resourceIdNotSupportedSymbols.length-1);
 
     function doRepoOperation(model, type, destinationUri, overwrite, createFolders ){
@@ -124,10 +122,6 @@ define(function(require) {
                 {
                     maxLength: LABEL_MAX_LENGTH,
                     msg: new ValidationError("error.field.max.length", "label", LABEL_MAX_LENGTH)
-                },
-                {
-                    doesNotContainSymbols: LABEL_NOT_SUPPORTED_SYMBOLS,
-                    msg: new ValidationError("error.field.bad.symbols", "label", LABEL_NOT_SUPPORTED_SYMBOLS)
                 }
             ],
 
@@ -138,10 +132,6 @@ define(function(require) {
                 {
                     maxLength: DESCRIPTION_MAX_LENGTH,
                     msg: new ValidationError("error.field.max.length", "description", DESCRIPTION_MAX_LENGTH)
-                },
-                {
-                    doesNotContainSymbols: DESCRIPTION_NOT_SUPPORTED_SYMBOLS,
-                    msg: new ValidationError("error.field.bad.symbols", "description", DESCRIPTION_NOT_SUPPORTED_SYMBOLS)
                 }
             ],
 
@@ -340,10 +330,13 @@ define(function(require) {
             options.url = this.url() + "?createFolders=" + (options.createFolders === true);
             options.url += "&overwrite=" + (options.overwrite === true);
             options.url += "&expanded=" + (options.expanded === true);
+            options.url += "&dry-run=" + (options.dryRun === true);
 
             delete options.createFolders;
             delete options.overwrite;
             delete options.expanded;
+            delete options.expanded;
+            delete options.dryRun;
 
             return BaseModel.prototype.save.call(this, attrs, options);
         },
@@ -374,8 +367,6 @@ define(function(require) {
         LABEL_MAX_LENGTH: LABEL_MAX_LENGTH,
         NAME_MAX_LENGTH: NAME_MAX_LENGTH,
         DESCRIPTION_MAX_LENGTH: DESCRIPTION_MAX_LENGTH,
-        LABEL_NOT_SUPPORTED_SYMBOLS: LABEL_NOT_SUPPORTED_SYMBOLS,
-        DESCRIPTION_NOT_SUPPORTED_SYMBOLS: DESCRIPTION_NOT_SUPPORTED_SYMBOLS,
         NAME_NOT_SUPPORTED_SYMBOLS: NAME_NOT_SUPPORTED_SYMBOLS,
 
         /*

@@ -163,7 +163,7 @@ public class BatchRepositoryServicePeganatedSearchTest {
     @Test(expectedExceptions = ResourceNotFoundException.class)
     public void shouldFailToSearch() throws ResourceNotFoundException, IllegalParameterValueException {
         reset(repositoryService);
-        service.getResources(null, "/doesnt/exist", null, null, null, null, null, null, null, null, null, null);
+        service.getResources(null, "/doesnt/exist", null, null, null, null, null, null, null, null, null, null, null);
     }
 
     @Test(groups = {"All lookups"})

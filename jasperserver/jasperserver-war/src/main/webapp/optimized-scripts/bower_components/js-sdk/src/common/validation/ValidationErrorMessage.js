@@ -1,1 +1,1 @@
-define(["require","common/util/i18nMessage","bundle!ValidationBundle"],function(e){var n=e("common/util/i18nMessage");return n.extend({bundle:e("bundle!ValidationBundle")})});
+define(["require","common/util/i18nMessage","bundle!ValidationBundle"],function(e){"use strict";var n=e("common/util/i18nMessage");return n.extend({bundle:e("bundle!ValidationBundle")})});

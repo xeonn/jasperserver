@@ -30,6 +30,7 @@ define(function(require) {
         AwsDataSourceView = require("dataSource/view/AwsDataSourceView"),
         VirtualDataSourceView = require("dataSource/view/VirtualDataSourceView"),
         BeanDataSourceView = require("dataSource/view/BeanDataSourceView"),
+	    MongoDbJdbcDataSourceView = require("dataSource/view/MongoDbJdbcDataSourceView"),
         DiagnosticCustomDataSourceView = require("dataSource/view/DiagnosticCustomDataSourceView");
         //TextDataSourceView = require("dataSource/fileDataSource/TextDataSourceView");
 
@@ -40,6 +41,7 @@ define(function(require) {
     registeredViews[dataSourceResourceTypes.AWS.toLowerCase()] = AwsDataSourceView;
     registeredViews[dataSourceResourceTypes.VIRTUAL.toLowerCase()] = VirtualDataSourceView;
     registeredViews[dataSourceResourceTypes.BEAN.toLowerCase()] = BeanDataSourceView;
+	registeredViews[dataSourceResourceTypes.MONGODBJDBC] = MongoDbJdbcDataSourceView;
 	// next, we pre-define the custom views for some of the custom data sources
 	// you also can define your own views here
     registeredViews[customDataSourceTypes.DIAGNOSTIC] = DiagnosticCustomDataSourceView;

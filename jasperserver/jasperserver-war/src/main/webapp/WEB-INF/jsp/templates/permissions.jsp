@@ -52,7 +52,7 @@ Usage:
     <t:putAttribute name="containerTitle"><spring:message code="permissionsDialog.title" javaScriptEscape="true"/>:&nbsp;<span class="path">the/path/to/the/object/here</span></t:putAttribute>
     <t:putAttribute name="bodyContent">
         <ul id="permissionsViewBy" class="list tabSet text control horizontal responsive">
-            <li class="label first disabled" disabled="disabled"><p class="wrap"><spring:message code="permissionsDialog.viewBy" javaScriptEscape="true"/>:</p></li>
+            <li class="label first"><p class="wrap"><spring:message code="permissionsDialog.viewBy" javaScriptEscape="true"/>:</p></li>
             <li class="tab"><p class="wrap button"><spring:message code="permissionsDialog.byUser" javaScriptEscape="true"/></p></li>
             <li class="tab last selected"><p class="wrap button"><spring:message code="permissionsDialog.byRole" javaScriptEscape="true"/></p></li>
         </ul>

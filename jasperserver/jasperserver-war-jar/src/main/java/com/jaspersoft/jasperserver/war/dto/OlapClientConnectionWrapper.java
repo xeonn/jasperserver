@@ -45,7 +45,8 @@ public class OlapClientConnectionWrapper extends BaseDTO {
 	private boolean accessGrant; // used to distinguish olap schema vs access grant
 	private List suggestedResources;
 	private List suggestedControls;
-	private List reusableSchemas;	
+    @Deprecated
+	private List reusableSchemas;
 	private String source;
 	private byte[] schemaData;
 	private String schemaUri;
@@ -66,9 +67,12 @@ public class OlapClientConnectionWrapper extends BaseDTO {
 	private String connectionUri;
 	private String oldConnectionUri;
 	private String originalConnectionUri;
-	private List reusableMondrianConnections;	
-	private List reusableXmlaConnections;	
-	private List reusableXmlaDefinitions;	
+    @Deprecated
+	private List reusableMondrianConnections;
+    @Deprecated
+	private List reusableXmlaConnections;
+    @Deprecated
+	private List reusableXmlaDefinitions;
 	private boolean connectionModified;
 	private boolean datasourceAdded;
 	private String connectionName;
@@ -82,6 +86,7 @@ public class OlapClientConnectionWrapper extends BaseDTO {
 	private List allTypes;
 	private String type;
 	private Object parentFlowObject;
+    @Deprecated
 	private List allFolders;
 	private String parentFolder;
 	
@@ -154,9 +159,11 @@ public class OlapClientConnectionWrapper extends BaseDTO {
 	public void setSource(String source) {
 		this.source = source;
 	}
+    @Deprecated
 	public List getReusableSchemas() {
 		return reusableSchemas;
 	}
+    @Deprecated
 	public void setReusableSchemas(List reusableSchemas) {
 		this.reusableSchemas = reusableSchemas;
 	}
@@ -298,21 +305,27 @@ public class OlapClientConnectionWrapper extends BaseDTO {
 	public void setOriginalConnectionUri(String originalConnectionUri) {
 		this.originalConnectionUri = originalConnectionUri;
 	}
+    @Deprecated
 	public List getReusableMondrianConnections() {
 		return reusableMondrianConnections;
 	}
+    @Deprecated
 	public void setReusableMondrianConnections(List reusableMondrianConnections) {
 		this.reusableMondrianConnections = reusableMondrianConnections;
 	}
+    @Deprecated
 	public List getReusableXmlaConnections() {
 		return reusableXmlaConnections;
 	}
+    @Deprecated
 	public void setReusableXmlaConnections(List reusableXmlaConnections) {
 		this.reusableXmlaConnections = reusableXmlaConnections;
 	}
+    @Deprecated
 	public List getReusableXmlaDefinitions() {
 		return reusableXmlaDefinitions;
 	}
+    @Deprecated
 	public void setReusableXmlaDefinitions(List reusableXmlaDefinitions) {
 		this.reusableXmlaDefinitions = reusableXmlaDefinitions;
 	}
@@ -381,14 +394,16 @@ public class OlapClientConnectionWrapper extends BaseDTO {
 	public void setParentFlowObject(Object parentFlowObject) {
 		this.parentFlowObject = parentFlowObject;
 	}
+    @Deprecated
 	public List getAllFolders() {
 		return allFolders;
 	}
-	
+
+    @Deprecated
 	public void setAllFolders(List allFolders) {
 		this.allFolders = allFolders;
 	}
-	
+
 	public String getParentFolder() {
 		return parentFolder;
 	}

@@ -27,7 +27,7 @@ import java.util.List;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: ResourceMediaType.java 51276 2014-11-09 17:44:57Z ktsaregradskyi $
+ * @version $Id: ResourceMediaType.java 55164 2015-05-06 20:54:37Z mchan $
  */
 public interface ResourceMediaType {
     public static final String RESOURCE_MEDIA_TYPE_PREFIX = "application/repository.";
@@ -152,6 +152,11 @@ public interface ResourceMediaType {
     //not exist as string representation of resource type
     //used as defenition of any datasource type
     public static final String ANY_DATASOURCE_TYPE = "anyDatasource";
+
+    //Topic - resouces, which can be used as datasource for Ad Hoc
+    //not exist as string representation of resource type
+    //used as defenition of topic type
+    public static final String TOPIC_TYPE = "topic";
 }
 
 

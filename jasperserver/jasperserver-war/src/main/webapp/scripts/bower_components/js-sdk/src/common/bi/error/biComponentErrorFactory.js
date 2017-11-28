@@ -22,7 +22,7 @@
 
 /**
  * @author: Kostiantyn Tsaregradskyi
- * @version: $Id: biComponentErrorFactory.js 270 2014-10-13 19:58:03Z agodovanets $
+ * @version: $Id: biComponentErrorFactory.js 1011 2015-04-01 19:34:14Z ktsaregr $
  */
 
 define(function (require) {
@@ -33,7 +33,8 @@ define(function (require) {
         SchemaValidationBiComponentError = require("../error/SchemaValidationBiComponentError"),
         ContainerNotFoundBiComponentError = require("../error/ContainerNotFoundBiComponentError"),
         AlreadyDestroyedBiComponentError = require("../error/AlreadyDestroyedBiComponentError"),
-        RequestBiComponentError = require("../error/RequestBiComponentError");
+        RequestBiComponentError = require("../error/RequestBiComponentError"),
+        NotYetRenderedBiComponentError = require("../error/NotYetRenderedBiComponentError");
 
     return {
         genericError: function(errorCode, message, parameters) {
@@ -53,6 +54,9 @@ define(function (require) {
         },
         alreadyDestroyedError: function() {
             return new AlreadyDestroyedBiComponentError();
+        },
+        notYetRenderedError: function() {
+            return new NotYetRenderedBiComponentError();
         }
     };
 });

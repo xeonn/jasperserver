@@ -26,6 +26,7 @@ import com.jaspersoft.jasperserver.dto.connection.FtpConnection;
 import com.jaspersoft.jasperserver.remote.exception.IllegalParameterValueException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.commons.net.util.TrustManagerUtils;
 import org.springframework.stereotype.Service;
 
 import java.net.UnknownHostException;
@@ -35,7 +36,7 @@ import java.util.Map;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: FtpConnectionStrategy.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: FtpConnectionStrategy.java 55164 2015-05-06 20:54:37Z mchan $
  */
 @Service
 public class FtpConnectionStrategy implements ConnectionManagementStrategy<FtpConnection> {
@@ -53,7 +54,7 @@ public class FtpConnectionStrategy implements ConnectionManagementStrategy<FtpCo
                 client = ftpService.connectFTPS(connectionDescription.getHost(), connectionDescription.getPort(),
                         connectionDescription.getProtocol(), connectionDescription.getImplicit(),
                         connectionDescription.getPbsz(), connectionDescription.getProt(),
-                        connectionDescription.getUserName(), connectionDescription.getPassword());
+                        connectionDescription.getUserName(), connectionDescription.getPassword(), false, TrustManagerUtils.getAcceptAllTrustManager());
             }
             client.changeDirectory(connectionDescription.getFolderPath());
         } catch (UnknownHostException e) {

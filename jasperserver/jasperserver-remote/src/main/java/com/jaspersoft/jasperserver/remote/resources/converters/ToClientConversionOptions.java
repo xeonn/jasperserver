@@ -26,11 +26,10 @@ package com.jaspersoft.jasperserver.remote.resources.converters;
  * For instance it can specify what exactly fields are required and what fields should be excluded.
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: ToClientConversionOptions.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: ToClientConversionOptions.java 54590 2015-04-22 17:55:42Z vzavadsk $
  */
 public class ToClientConversionOptions {
     private boolean expanded;
-
     public static ToClientConversionOptions getDefault(){
         return new ToClientConversionOptions();
     }

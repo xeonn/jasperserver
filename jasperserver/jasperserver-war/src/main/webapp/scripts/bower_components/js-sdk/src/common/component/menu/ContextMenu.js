@@ -24,7 +24,7 @@
  * Context menu.
  *
  * @author: Andriy Godovanets
- * @version: $Id: ContextMenu.js 270 2014-10-13 19:58:03Z agodovanets $
+ * @version: $Id: ContextMenu.js 812 2015-01-27 11:01:30Z psavushchik $
  */
 
 define(function (require) {
@@ -35,15 +35,19 @@ define(function (require) {
         json3 = require("json3"),
         _ = require("underscore");
 
-    return Menu.extend({
+    return Menu.extend(
+        /** @lends ContextMenu.prototype */
+        {
         /**
          * @constructor ContextMenu
          * @classdesc Context menu that is shown at specified position.
          * @extends Menu
          * @param {array} options - Array containing objects with "label" and "action" properties, e.g. [ { label: "Save Dashboard", action: "save" } ].
          * @param {object} [additionalSettings] - Additional settings object. @see {@link Menu.js} for more information.
+         * @param {number} [additionalSettings.topPadding=5] - Top padding of context menu.
+         * @param {nubmer} [additionalSettings.leftPadding=5] - Left padding of context menu.
          * @throws "Menu should have options" error if no menu options were passed to constructor.
-         * @fires option:<action> events when menu option is selected.
+         * @fires option:action events when menu option is selected.
          * @example
          *  var contextMenu = new ContextMenu([ { label: "Save Dashboard", action: "save" } ]);
          */
@@ -56,6 +60,10 @@ define(function (require) {
             _.bindAll(this, "_tryHide");
         },
 
+        /**
+         * @description Hides context menu on another context menu event
+         * @access protected
+         */
         _tryHide: function() {
             this.hide();
 
@@ -111,7 +119,6 @@ define(function (require) {
         },
 
         /**
-         * @method remove
          * @description Removes ContextMenu from DOM and removes events handlers from BODY.
          */
         remove: function() {

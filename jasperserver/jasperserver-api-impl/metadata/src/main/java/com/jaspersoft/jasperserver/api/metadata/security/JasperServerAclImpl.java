@@ -95,7 +95,6 @@ public class JasperServerAclImpl implements Acl {
 */
 
         return permissionGrantingStrategy.isGranted(this, permission, sids, administrativeMode);
-
     }
 
     @Override

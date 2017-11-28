@@ -21,8 +21,10 @@
 
 /**
  * @author: Igor Nesterenko
- * @version $Id: Root.js 270 2014-10-13 19:58:03Z agodovanets $
+ * @version $Id: Root.js 812 2015-01-27 11:01:30Z psavushchik $
  */
+
+/*global __jrsConfigs__ */
 
 define(function (require) {
     "use strict";

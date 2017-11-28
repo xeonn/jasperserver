@@ -21,6 +21,7 @@
 package com.jaspersoft.jasperserver.api.metadata.jasperreports.domain;
 
 import com.jaspersoft.jasperserver.api.JasperServerAPI;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceReference;
 
 import java.util.Map;
 
@@ -33,7 +34,7 @@ import java.util.Map;
  * 
  * 
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: CustomReportDataSource.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: CustomReportDataSource.java 53873 2015-04-07 18:59:44Z mchan $
  */
 @JasperServerAPI
 public interface CustomReportDataSource extends ReportDataSource {
@@ -69,4 +70,7 @@ public interface CustomReportDataSource extends ReportDataSource {
 	public String getDataSourceName();
 	
 	public void setDataSourceName(String dataSourceName);
+
+	Map<String, ResourceReference> getResources();
+	void setResources(Map<String, ResourceReference> resources);
 }

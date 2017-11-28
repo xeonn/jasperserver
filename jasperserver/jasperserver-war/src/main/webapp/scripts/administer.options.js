@@ -21,8 +21,11 @@
 
 
 /**
- * @version: $Id: administer.options.js 8025 2014-11-12 13:10:12Z ktsaregradskyi $
+ * @version: $Id: administer.options.js 8900 2015-05-06 20:57:14Z yplakosh $
  */
+
+/* global layoutModule, webHelpModule, Administer, matchAny, matchMeOrUp, buttonManager, dialogs,
+*/
 
 var Options = {
 
@@ -125,8 +128,10 @@ var Options = {
     },
 
     flushCache: function() {
-        var url = 'flow.html?_flowExecutionKey=' + Administer.flowExecutionKey + '&_eventId=flushCache';
-        Administer._sendRequest(url,null,Options._flushCallback);
+        var url = window.isProVersion() ?
+            'flow.html?_flowExecutionKey=' + Administer.flowExecutionKey + '&_eventId=flushCache' : 'flush.html';
+
+        Administer._sendRequest(url, null, Options._flushCallback);
     },
 
 

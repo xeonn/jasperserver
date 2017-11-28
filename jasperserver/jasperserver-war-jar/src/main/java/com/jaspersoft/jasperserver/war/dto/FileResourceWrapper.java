@@ -131,6 +131,8 @@ public class FileResourceWrapper extends BaseDTO implements Serializable {
 					JasperServerConst.TYPE_RSRC_XML_FILE);
             allTypes.put(FileResource.TYPE_CSS,
                     JasperServerConst.TYPE_RSRC_CSS_FILE);
+            allTypes.put(FileResource.TYPE_MONGODB_JDBC_CONFIG,
+                    JasperServerConst.TYPE_RSRC_MONGODB_JDBC_CONFIG);
 		}
 		return allTypes;
 	}
@@ -185,10 +187,12 @@ public class FileResourceWrapper extends BaseDTO implements Serializable {
 		this.resource = resource;
 	}
 
+    @Deprecated
 	public List getExistingResources() {
 		return existingResources;
 	}
 
+    @Deprecated
 	public void setExistingResources(List existingResources) {
 		this.existingResources = existingResources;
 	}

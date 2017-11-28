@@ -20,15 +20,17 @@
  */
 package com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.impl.datasource;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
-import com.jaspersoft.jasperserver.api.metadata.common.service.ResourceFactory;
 import com.jaspersoft.jasperserver.api.common.crypto.PasswordCipherer;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceReference;
+import com.jaspersoft.jasperserver.api.metadata.common.service.ResourceFactory;
 import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.ReferenceResolver;
 import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.persistent.RepoDataSource;
+import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.persistent.RepoResource;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.CustomReportDataSource;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author swood
@@ -45,6 +47,8 @@ public class RepoCustomDataSource extends RepoDataSource implements
 
 	private Map propertyMap;
 
+	private Map<String, RepoResource> resources;
+
 	public RepoCustomDataSource() {
 		super();
 	}
@@ -59,6 +63,14 @@ public class RepoCustomDataSource extends RepoDataSource implements
 
 	public void setPropertyMap(Map propertyMap) {
 		this.propertyMap = propertyMap;
+	}
+
+	public Map<String, RepoResource> getResources() {
+		return resources;
+	}
+
+	public void setResources(Map<String, RepoResource> resources) {
+		this.resources = resources;
 	}
 
 	public String getServiceClass() {
@@ -84,6 +96,14 @@ public class RepoCustomDataSource extends RepoDataSource implements
 		ds.setDataSourceName((String) aPropertyMap.get(CDS_NAME_PROPERTY));
 		ds.setPropertyMap(aPropertyMap);
 		ds.setServiceClass(getServiceClass());
+		final Map<String, RepoResource> resourcesMap = getResources();
+		if(resourcesMap != null && !resourcesMap.isEmpty()){
+			final HashMap<String, ResourceReference> clientResources = new HashMap<String, ResourceReference>(resourcesMap.size());
+			for(String key : resourcesMap.keySet()){
+				clientResources.put(key, getClientReference(resourcesMap.get(key), resourceFactory));
+			}
+			ds.setResources(clientResources);
+		}
 	}
 
 	protected void copyFrom(Resource clientRes,
@@ -105,5 +125,13 @@ public class RepoCustomDataSource extends RepoDataSource implements
 
 		setPropertyMap(properties);
 		setServiceClass(ds.getServiceClass());
+		final Map<String, ResourceReference> clientResources = ds.getResources();
+		if(clientResources != null && !clientResources.isEmpty()){
+			Map<String, RepoResource> serverResources = new HashMap<String, RepoResource>(clientResources.size());
+			for(String key : clientResources.keySet()){
+				serverResources.put(key, getReference(clientResources.get(key), RepoResource.class, referenceResolver));
+			}
+			setResources(serverResources);
+		}
 	}
 }

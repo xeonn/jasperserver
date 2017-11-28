@@ -74,29 +74,29 @@
 }
 
 .button::-moz-focus-inner {
-	padding:0;
 	border: none; /* overrides extra padding in Firefox */
+	padding: 0;
 }
 /*
  * From: action.css
  */
 .action {
-	padding:0 15px 0 0;
-	margin-right:5px;
+	display: inline-block;
+	*height: 28px; /* IE7 */
+	margin-right: 5px;
+	min-height: 28px;
+	padding :0 15px 0 0;
 	text-align: center;
-	display:inline-block;
 	text-decoration: none;
-	min-height:28px;
-	*height:28px; /* IE7 */
 }
 
 .action>.wrap {
-	padding-left:15px;
-	font-size: 11px;
-	*margin-top:0; /* IE7 */
-	*margin-bottom:0; /* IE7 */
 	background-position: left 0;
-	line-height:28px;
+	font: bold 11px lucida grande,Verdana,Arial,Helvetica,sans-serif;
+	line-height: 28px;
+	*margin-top: 0; /* IE7 */
+	*margin-bottom: 0; /* IE7 */
+	padding-left: 15px;
 }
 
 .action.square >.wrap {
@@ -105,16 +105,17 @@
 }
 
 .footer .action {
-	margin-top:2px;
+	/* margin-top: 2px; */ /* DELETE IF NO PROBLEMS */
+	margin-top: 4px;
 }
 
 /* action square small, new buttons introduced October 2014 */
 /* occurs in redesigned Select Data dialog box (formerly Data Chooser) */
 .action.square.small {
-	width:auto;
-	min-height:24px;
-	padding:0;
-	margin:0;
+	margin: 0;
+	min-height: 24px;
+	padding: 0;
+	width: auto;
 }
 
 .action.square.small > .wrap {
@@ -136,35 +137,40 @@
 }
 
 /* button background color, states */
-.action.small.down {
-    background-position: 0 -150px;
+.action.small.up {
+    background-color: #e4e4e4;
 }
 
-.action.small.down.over {
-    background-position: 0 -200px;
+.action.small.up.over,
+.action.small.up.pressed {
+    background-color: #9b9a9a;
 }
 
+.action.small.down,
+.action.small.down.over,
 .action.small.down.pressed {
-    background-position: 0 -250px;
+    background-color: #fc870e;
 }
+
 
 /* button icon positions, states */
-.action.small.tree.up .icon,
-.action.small.tree.up.over .icon {
+.action.small.tree.up .icon {
     background-position: 7px 4px;
 }
 
-.action.small.list.up .icon,
-.action.small.list.up.over .icon {
-    background-position: 4px -25px;
-}
-
-
+.action.small.tree.up.over .icon,
+.action.small.tree.up.pressed .icon,
 .action.small.tree.down .icon,
 .action.small.tree.down.over .icon {
     background-position: -33px 4px;
 }
+ 
+.action.small.list.up .icon {
+    background-position: 4px -25px;
+}
 
+.action.small.list.up.over .icon,
+.action.small.list.up.pressed .icon,
 .action.small.list.down .icon,
 .action.small.list.down.over .icon {
     background-position: -36px -25px;
@@ -187,7 +193,8 @@
 	height:100%;
 }
 
-.action.simple.button.delete {
+.action.simple.button.delete,
+.action.simple.button.cancel {
 	background-position:4px -33px;
 	height:100%;
 }
@@ -528,16 +535,18 @@
 
 /* button capsule general */
 button.capsule {
-	background-image:url(images/button_capsule_sprite.png); 
-	background-repeat: repeat-x;
-	width:32px;
-	height:24px;
-	border:1px solid #c5c5c5;
-	margin-right:-1px;
+	/* background-color: #f9f9f9; */
+	/* background-color: #f5f5f5; */
+	/* border: 1px solid #dedede; */
+	/* border-top: none;
+	border-bottom: none;
+	border-right: 1px solid #fff;
+	border-left: 1px solid #dedede; */ /* REMOVE ALL BORDERS IF NO PROBLEMS */
+	display: inline-block;
+	height: 24px;
+	margin-right: -1px;
 	text-decoration: none;
-	display:inline-block;
-	*filter:chroma(color=#000000); /* IE7 */
-	*outline:none; /* IE7 */
+	width: 32px;
 }
 
 .button.capsule.mutton {
@@ -579,35 +588,44 @@ button.capsule {
 
 /* mini capsule */
 button.capsule.mini {
-	width:24px;
-	*width:25px; /* IE7 */
-	height:20px;
+	height: 20px;
+	width: 24px;
+	*width: 25px; /* IE7 */
 }
 
 button.capsule.mini .wrap {
-	height:20px;
-	line-height:18px;
+	height: 20px;
+	line-height: 18px;
 }
 
 /* capsule text */
 .button.capsule.text {
-	width:auto;
+	border-left: 1px solid #cecece;
+	border-right: 1px solid #fff;
+	margin: 0;
+	width: auto;
+	
+	/* background-color: #f5f5f5; */
 	/* text-align: center; */
 }
 
+.button.capsule.text.first {
+	border-left: none;
+}
+
 .button.capsule.text .wrap {
-	padding:5px 12px 2px 12px;
-	height:15px;
-	line-height:12px;
+	height: 100%;
+	line-height: 28px;
+	padding: 0 12px;
 }
 
 .button.capsule.text .indicator {
-	margin-right:5px;
 	background-position: 0px -47px;
+	margin-right: 5px;
 }
 
 .button.capsule.text.mutton .wrap {
-	padding-right:16px;
+	padding-right: 16px;
 }
 
 .button.capsule.text.over .indicator,
@@ -622,40 +640,35 @@ button.capsule.mini .wrap {
 
 .header #flushOLAPCache.button.capsule.text,
 .header #clearAllCache.button.capsule.text {
+	height: 27px;
 	position: absolute;
-	right: 20px;
-	top: 2px
+	right: 1px;
 }
 
 
-/* capsule button state positions */
+/* START capsule button state positions */
 
-/*
-.button.capsule.disabled {
-	background-position: right -46px;
-}
-*/
+.button.capsule.disabled {}
 
-.button.capsule.up {
-	background-position: 0 0;
-}
+.button.capsule.up {}
 
-.button.capsule.up.over {
-	background-position: 0 -74px;
-	*background-color:#ffac0b; /* IE7 */
-}
-
+.button.capsule.up.over,
 .button.capsule.up.pressed,
 .button.capsule.down,
-.button.capsule.down.over {
-	background-position: 0 -148px;
+.button.capsule.down.over,
+.button.capsule.down.pressed {
+	/* TIBCO orange 
+	background-color: #f58426;*/
+	background-color: #195b8a;
 }
 
-.button.capsule.down.pressed {
-	background-position: 0 -222px;
-}
+.button.capsule.down,
+.button.capsule.down.over {}
+
+.button.capsule.down.pressed {}
 
 /* targets Chrome and Safari only */
+/*
 @media screen and (-webkit-min-device-pixel-ratio:0) {
 	
 	.button.capsule.text.first, 
@@ -666,12 +679,13 @@ button.capsule.mini .wrap {
 	.toolbar > .buttonSet {
 		margin-top:3px !important;
 	}
-}
-/* end Chrome and Safari styles */
+} REMOVE AS PART OF AMBER 2 THEME PROJECT IF NO PROBLEMS
+*/ /* end Chrome and Safari styles */
 
-/*
- * From: button.disclosure.css
- */
+/* END capsule button state positions */
+
+
+/* disclosure buttons */
 .button.disclosure {
 	height: 16px;
 	width: 16px;
@@ -730,6 +744,12 @@ button.capsule.mini .wrap {
 	/*text-indent: -9999px;*/
 }
 
+.column.decorated.minimized.secondary > .button.minimize,
+.column.decorated.minimized.tertiary > .button.minimize {
+	background-position: 4px -480px;
+	width: 24px;
+}
+
 .button.minimize.over {
 	background-position: 0 -513px;
 }
@@ -767,37 +787,25 @@ button.capsule.mini .wrap {
 /*
  * From: button.picker.css
  */
+ 
 .button.picker {
-	height: 16px;
-	*height:20px; /* IE7 */
-	height:20px/9; /* IE8 and IE9 */
-	width: 16px;
-	margin-left:2px;
-	display: inline;
-	background-image: url(images/disclosure_indicators_sprite.png);
+	background-image: url(images/control_icons_sprite.png);
 	background-repeat: no-repeat;
-	background-position: -1px -589px;
-	/* *background-position: -1px -588px; /* IE7 */
-	/* background-position: -1px -588px \9; /* IE8 and IE9 */
+	background-position: 0 6px;
+	display: inline;
+	height: 27px;
+	margin-left:2px;
+    top: 0px \9; /* IE8 and IE9 */
+    vertical-align: top;
+	width: 17px;
 	z-index: 10;
 }
 
-/*@media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) {  
-	.button.picker {
-		background-position: -1px -584px;
-	}  
-}  /* IE10 */
-
-.button.picker.over {
-	background-position: -1px -618px;
-	/* *background-position: -1px -6137px; /* IE7 */
-	/* background-position: -1px -617px\9; /* IE8 and IE9 */
-}
+.button.picker.over {}
 
 .button.picker.pressed {
-	background-position: -1px -653px;
-	/* *background-position: -1px -653px; /* IE7 */
-	/* background-position: -1px -653px\9; /* IE8 and IE9 */
+	background-position: -40px 6px;
+	background-position: -39px 7px \9; /* IE8 and IE9 */
 }
 
 /*
@@ -826,42 +834,38 @@ button.capsule.mini .wrap {
  * From: button.search.css
  */
 .button.search {
-	height:20px;
-	width: 22px;
-	border-left:2px solid #aaaaaa;
+	height: 24px;
+	width: 24px;
+	border-left: none;
 	background-image: url(images/search_sprite.png);
 	background-repeat: no-repeat;
 }
 
 .button.search.up,
+.button.search.over,
+.button.search.pressed,
 .button.search.disabled {
-	background-position: -6px -125px;
+	background-position: 0px -58px;
 }
 
-.button.search.over {
-	background-position: -70px -125px;
-}
-
-.button.search.pressed {
-	background-position: -138px -125px;
+#secondarySearchBox .button.search.up,
+#secondarySearchBox .button.search.over,
+#secondarySearchBox .button.search.pressed,
+#secondarySearchBox .button.search.disabled {
+	background-position: 0px -28px;
 }
 
 #globalSearch .button.search {
-	border-left:2px solid #1887b8;
+	border-left:none;
 }
 
 #globalSearch .button.search.up,
+#globalSearch .button.search.over,
+#globalSearch .button.search.pressed,
 #globalSearch .button.search.disabled {
-	background-position: -10px -79px;
+	background-position: 1px 2px;
 }
 
-#globalSearch .button.search.over {
-	background-position: -73px -79px;
-}
-
-#globalSearch .button.search.pressed {
-	background-position: -141px -79px;
-}
 
 /*
  * From: move.css
@@ -1003,38 +1007,33 @@ button.capsule.mini .wrap {
  */
 .action {
 	/* gradient end values are #eaeaea to #d8dad7 */
-	background: url("images/button_action_sprite.png") repeat-x scroll 0 0 #d8dad7;
+	/* background: url("images/button_action_sprite.png") repeat-x scroll 0 0 #d8dad7; */
+	background-color: #e4e4e4; /* or #d8dad7 - old solid value */
 }
 
 .action.over,
 .action.square.over {
 	/* gradient end values are #c1c1c1 to #9b9a9a */
-	background-position: 0 -50px;
+	/* background-position: 0 -50px; */
 	background-color: #9b9a9a;
 }
 
 .action.pressed,
 .action.square.pressed {
 	/* gradient end values are #c1c1c1 to #9b9a9a with a top inner shadow */
-	background-position: 0 -100px;
+	/* background-position: 0 -100px */;
 	background-color: #9b9a9a;
 }
 
 .action.primary {
-	/* gradient end values are #3fb8fa to #i */
-	background: url("images/button_action_primary_sprite.png") repeat-x scroll 0 0 #2881bb;
+	background-color: #1388d8;
+	background-image: none;
 }
 
-.action.primary.over {
-	/* gradient end values are #faac1f to #f9771d */
-	background-position: 0 -50px;
-	background-color: #f9771d;
-}
-
+.action.primary.over,
 .action.primary.pressed {
-	/* gradient end values are #faac1f to #f9771d with a top inner shadow */
-	background-position: 0 -100px;
-	background-color: #fa961f;
+	background-color: #195b8a;
+	/* background-color: #f9771d; */
 }
 
 .action.checking {

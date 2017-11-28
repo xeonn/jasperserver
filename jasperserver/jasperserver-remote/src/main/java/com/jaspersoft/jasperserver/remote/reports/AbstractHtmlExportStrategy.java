@@ -20,18 +20,19 @@
 */
 package com.jaspersoft.jasperserver.remote.reports;
 
-import com.jaspersoft.jasperserver.api.engine.jasperreports.util.HtmlExportUtil;
-import com.jaspersoft.jasperserver.remote.exception.RemoteException;
-import com.jaspersoft.jasperserver.remote.exception.xml.ErrorDescriptor;
-import com.jaspersoft.jasperserver.remote.services.ExportExecution;
-import com.jaspersoft.jasperserver.remote.services.ExportExecutionOptions;
-import com.jaspersoft.jasperserver.remote.services.ReportExecution;
-import com.jaspersoft.jasperserver.remote.services.ReportExecutionOptions;
-import com.jaspersoft.jasperserver.remote.services.ReportOutputPages;
-import com.jaspersoft.jasperserver.remote.services.ReportOutputResource;
-import com.jaspersoft.jasperserver.remote.services.RunReportService;
-import com.jaspersoft.jasperserver.remote.utils.AuditHelper;
-import com.jaspersoft.jasperserver.war.util.JRHtmlExportUtils;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+
+import net.sf.jasperreports.engine.JRAbstractExporter;
 import net.sf.jasperreports.engine.JRExporterParameter;
 import net.sf.jasperreports.engine.JRRuntimeException;
 import net.sf.jasperreports.engine.JasperPrint;
@@ -43,26 +44,29 @@ import net.sf.jasperreports.engine.export.JRHtmlExporterParameter;
 import net.sf.jasperreports.engine.export.MapHtmlResourceHandler;
 import net.sf.jasperreports.engine.util.JRTypeSniffer;
 import net.sf.jasperreports.web.util.WebHtmlResourceHandler;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Value;
 
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import com.jaspersoft.jasperserver.api.engine.jasperreports.util.ExportUtil;
+import com.jaspersoft.jasperserver.remote.exception.RemoteException;
+import com.jaspersoft.jasperserver.remote.exception.xml.ErrorDescriptor;
+import com.jaspersoft.jasperserver.remote.services.ExportExecution;
+import com.jaspersoft.jasperserver.remote.services.ExportExecutionOptions;
+import com.jaspersoft.jasperserver.remote.services.ReportExecution;
+import com.jaspersoft.jasperserver.remote.services.ReportExecutionOptions;
+import com.jaspersoft.jasperserver.remote.services.ReportOutputPages;
+import com.jaspersoft.jasperserver.remote.services.ReportOutputResource;
+import com.jaspersoft.jasperserver.remote.services.RunReportService;
+import com.jaspersoft.jasperserver.remote.utils.AuditHelper;
+import com.jaspersoft.jasperserver.war.util.JRHtmlExportUtils;
 
 /**
  * <p></p>
  *
  * @author yaroslav.kovalchyk
- * @version $Id: AbstractHtmlExportStrategy.java 51369 2014-11-12 13:59:41Z sergey.prilukin $
+ * @version $Id: AbstractHtmlExportStrategy.java 55164 2015-05-06 20:54:37Z mchan $
  */
 public abstract class AbstractHtmlExportStrategy implements HtmlExportStrategy {
     private final static Log log = LogFactory.getLog(FullHtmlExportStrategy.class);
@@ -77,7 +81,8 @@ public abstract class AbstractHtmlExportStrategy implements HtmlExportStrategy {
     public void export(ReportExecution reportExecution, ExportExecution exportExecution, JasperPrint jasperPrint) {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         final String contextPath;
-        String baseUrl = exportExecution.getOptions().getBaseUrl();
+        final ExportExecutionOptions exportExecutionOptions = exportExecution.getOptions();
+        String baseUrl = exportExecutionOptions.getBaseUrl();
         final ReportExecutionOptions reportExecutionOptions = reportExecution.getOptions();
         if (baseUrl != null) {
             // if baseUrl is specified fro this export execution, then use it first
@@ -96,8 +101,8 @@ public abstract class AbstractHtmlExportStrategy implements HtmlExportStrategy {
         Map<String, byte[]> imagesMap = new LinkedHashMap<String, byte[]>();
         exporter.setParameter(JRHtmlExporterParameter.IMAGES_MAP, imagesMap);
 
-        String attachmentsPrefix = exportExecution.getOptions().getAttachmentsPrefix() != null ?
-                exportExecution.getOptions().getAttachmentsPrefix() : reportExecutionOptions.getDefaultAttachmentsPrefixTemplate();
+        String attachmentsPrefix = exportExecutionOptions.getAttachmentsPrefix() != null ?
+                exportExecutionOptions.getAttachmentsPrefix() : reportExecutionOptions.getDefaultAttachmentsPrefixTemplate();
         if (attachmentsPrefix != null) {
             attachmentsPrefix = attachmentsPrefix
                     .replace(RunReportService.CONTEXT_PATH_ATTACHMENTS_PREFIX_TEMPLATE_PLACEHOLDER, reportExecutionOptions.getContextPath() != null ? reportExecutionOptions.getContextPath() : "")
@@ -113,19 +118,23 @@ public abstract class AbstractHtmlExportStrategy implements HtmlExportStrategy {
                 );
         exporter.setImageHandler(resourceHandler);
         exporter.setResourceHandler(resourceHandler);
+        final ReportOutputPages pages = exportExecutionOptions.getPages();
         try {
             exporter.exportReport();
         } catch (RemoteException e) {
             auditHelper.addExceptionToAllAuditEvents(e);
             throw e;
         } catch (JRRuntimeException e) {
-            if ("net.sf.jasperreports.engine.JRAbstractExporter.start.page.index.out.of.range".equals(e.getMessageKey())
-                    || e.getMessage().contains("index out of range : ") || e.getMessage().contains("out.of.range")) {
+            if (JRAbstractExporter.EXCEPTION_MESSAGE_KEY_PAGE_INDEX_OUT_OF_RANGE.equals(e.getMessageKey())
+            		|| JRAbstractExporter.EXCEPTION_MESSAGE_KEY_START_PAGE_INDEX_OUT_OF_RANGE.equals(e.getMessageKey())
+            		|| JRAbstractExporter.EXCEPTION_MESSAGE_KEY_END_PAGE_INDEX_OUT_OF_RANGE.equals(e.getMessageKey())) {
+                final String pagesString = pages.toString();
                 throw new RemoteException(new ErrorDescriptor.Builder().setMessage(
                         "Page out of range. Requested: "
-                                + exportExecution.getOptions().getPages().toString()
-                                + (reportExecution.getTotalPages() != null ? " Total pages: " + reportExecution.getTotalPages() : ""))
-                        .setErrorCode("export.pages.out.of.range").getErrorDescriptor());
+                                + pagesString + (reportExecution.getTotalPages() != null
+                                ? " Total pages: " + reportExecution.getTotalPages() : ""))
+                        .setErrorCode("export.pages.out.of.range")
+                        .setParameters(pagesString, reportExecution.getTotalPages()).getErrorDescriptor());
             } else {
                 throw new RemoteException(e);
             }
@@ -144,7 +153,8 @@ public abstract class AbstractHtmlExportStrategy implements HtmlExportStrategy {
                 log.error("caught exception: " + ex.getMessage(), ex);
             }
         }
-        exportExecution.setOutputResource(new ReportOutputResource("text/html", outputStream.toByteArray()));
+        exportExecution.setOutputResource(new ReportOutputResource().setContentType("text/html")
+                .setData(outputStream.toByteArray()).setPages(pages != null ? pages.toString() : null));
         putImages(exporter.getParameters(), exportExecution.getAttachments());
     }
 
@@ -152,7 +162,7 @@ public abstract class AbstractHtmlExportStrategy implements HtmlExportStrategy {
         // use new instance of jasper reports context to allow modifications
         SimpleJasperReportsContext context = new SimpleJasperReportsContext();
         context.setParent(jasperReportsContext);
-        final AbstractHtmlExporter exporter = HtmlExportUtil.getHtmlExporter(context);
+        final AbstractHtmlExporter exporter = ExportUtil.getInstance(context).createHtmlExporter();
         final ExportExecutionOptions exportExecutionOptions = exportExecution.getOptions();
         ReportOutputPages pages = exportExecutionOptions.getPages();
         if(pages != null) {
@@ -207,7 +217,8 @@ public abstract class AbstractHtmlExportStrategy implements HtmlExportStrategy {
                     if (log.isDebugEnabled()) {
                         log.debug("Adding image for HTML: " + name);
                     }
-                    outputContainer.put(name, new ReportOutputResource(JRTypeSniffer.getImageTypeValue(data).getMimeType(), data, name));
+                    outputContainer.put(name, new ReportOutputResource()
+                            .setContentType(JRTypeSniffer.getImageTypeValue(data).getMimeType()).setData(data).setFileName(name));
                 }
             }
         } catch (Throwable e) {

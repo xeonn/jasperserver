@@ -1,6 +1,7 @@
 package com.jaspersoft.jasperserver.api.metadata.user.service.impl;
 
 import com.jaspersoft.jasperserver.api.metadata.common.domain.InternalURI;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.PermissionUriProtocol;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 import org.springframework.security.acls.domain.ObjectIdentityImpl;
 import org.springframework.security.acls.model.ObjectIdentity;
@@ -14,9 +15,14 @@ public class ResourceObjectIdentityRetrievalStrategyImpl implements ObjectIdenti
 
     @Override
     public ObjectIdentity getObjectIdentity(Object domainObject) {
+        if (domainObject instanceof InternalURIDefinition) {
+            return (InternalURIDefinition) domainObject;
+        }
+
         // Creating new InternalURI for object because we have many implementations of InternalURI which are not consistent
         if (domainObject instanceof InternalURI) {
-            return new InternalURIDefinition(((InternalURI) domainObject).getPath());
+            PermissionUriProtocol protocol = PermissionUriProtocol.fromString(((InternalURI) domainObject).getProtocol());
+            return new InternalURIDefinition(((InternalURI) domainObject).getPath(), protocol);
         }
         if (domainObject instanceof String) {
             return new InternalURIDefinition((String)domainObject);

@@ -71,6 +71,7 @@ import org.quartz.JobExecutionException;
 import org.quartz.SchedulerContext;
 import org.quartz.SchedulerException;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.mail.javamail.JavaMailSender;
 
 import java.io.PrintWriter;
@@ -91,7 +92,7 @@ import java.util.WeakHashMap;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ReportExecutionJob.java 51369 2014-11-12 13:59:41Z sergey.prilukin $
+ * @version $Id: ReportExecutionJob.java 55164 2015-05-06 20:54:37Z mchan $
  */
 public class ReportExecutionJob implements Job {
 	
@@ -161,6 +162,8 @@ public class ReportExecutionJob implements Job {
 	private ReportUnitResult paginatedReportResult;
 	private ReportUnitResult nonPaginatedReportResult;
 	
+	private String logId=null;
+	
 	private final WeakHashMap<DataContainer, Boolean> dataContainers = new WeakHashMap<DataContainer, Boolean>();
     
     public static void setAuditContext(AuditContext auditContext) {
@@ -212,26 +215,37 @@ public class ReportExecutionJob implements Job {
     }
 
     public void execute(JobExecutionContext context) throws JobExecutionException {
+    	SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+		SecurityContextProvider securityContextProvider=null;
 		try {
-            this.jobContext = context;
+			if(logId==null){
+				logId = "Instance: " + context.getScheduler().getSchedulerInstanceId() + ", trigger: "  +
+					context.getTrigger().getKey() + ", scheduled fire time: " + format.format(context.getScheduledFireTime()) +
+					", fired at: " + format.format(context.getFireTime()) + " on " + context.getFireInstanceId();
+			}
+			this.jobContext = context;
 			this.schedulerContext = jobContext.getScheduler().getContext();
 			this.applicationContext = (ApplicationContext) schedulerContext.get(SCHEDULER_CONTEXT_KEY_APPLICATION_CONTEXT);
 			this.username = getUsername();
-			SecurityContextProvider securityContextProvider = getSecurityContextProvider();
+			securityContextProvider = getSecurityContextProvider();
 			securityContextProvider.setAuthenticatedUser(this.username);
             createAuditEvent();
-			try {
-				executeAndSendReport();
-			} finally {
-				securityContextProvider.revertAuthenticatedUser();
+			if(log.isDebugEnabled()){
+				log.debug("*** about to execute job ***\n" + logId);
 			}
+			executeAndSendReport();
 		} catch (JobExecutionException e) {
             addExceptionToAuditEvent(e);
 			throw e;
 		} catch (SchedulerException e) {
             addExceptionToAuditEvent(e);
 			throw new JobExecutionException(e);
+		} catch(RuntimeException e){
+			log.error("*** ReportExecutionJob.execute EXCEPTION *** for \n" + logId, e);
 		} finally {
+			if(securityContextProvider!=null){
+				securityContextProvider.revertAuthenticatedUser();
+			}
             closeAuditEvent();
 			clear();
 		}
@@ -277,7 +291,12 @@ public class ReportExecutionJob implements Job {
 
 	protected void updateExecutionContextDetails() {
 		ExecutionContextImpl context = (ExecutionContextImpl) executionContext;
-		context.setLocale(getLocale());
+        final Locale locale = getLocale();
+        if(locale != null){
+            // make scheduled job locale default for this thread
+            LocaleContextHolder.setLocale(locale);
+            context.setLocale(getLocale());
+        }
 		// using default system timezone, and not job trigger timezone
 		context.setTimeZone(TimeZone.getDefault());
 	}
@@ -963,6 +982,10 @@ public class ReportExecutionJob implements Job {
 			baseFilename = jobDetails.getBaseOutputFilename() + REPOSITORY_FILENAME_SEQUENCE_SEPARATOR + format.format(scheduledTime);
 		} else {
 			baseFilename = jobDetails.getBaseOutputFilename();
+		}
+		// baseFilename += jobDetails.getTrigger().getId();
+		if(log.isDebugEnabled()){
+			log.debug("generated baseFileName: *****" + baseFilename + "******* for " + jobDetails.getTrigger().getId());
 		}
 		return baseFilename;
 	}

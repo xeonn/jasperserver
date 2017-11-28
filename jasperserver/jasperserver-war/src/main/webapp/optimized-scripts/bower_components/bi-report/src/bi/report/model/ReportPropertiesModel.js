@@ -1,1 +1,0 @@
-define(["require","backbone","underscore"],function(e){var n=e("backbone"),i=e("underscore"),d=n.Model.extend({isDefaultJiveUiEnabled:function(){var e=this.get("defaultJiveUi");return i.isUndefined(e)||i.isUndefined(e.enabled)||e.enabled}});return d});

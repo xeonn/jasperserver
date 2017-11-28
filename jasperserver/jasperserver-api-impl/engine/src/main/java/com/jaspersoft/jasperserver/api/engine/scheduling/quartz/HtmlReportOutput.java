@@ -32,13 +32,16 @@ import java.util.Locale;
 import javax.servlet.http.HttpServletRequest;
 
 import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JRExporterParameter;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.export.AbstractHtmlExporter;
 import net.sf.jasperreports.engine.export.HtmlExporter;
 import net.sf.jasperreports.engine.export.HtmlResourceHandler;
-import net.sf.jasperreports.engine.export.JRHtmlExporterParameter;
 import net.sf.jasperreports.engine.export.JRHyperlinkProducerFactory;
+import net.sf.jasperreports.export.HtmlExporterConfiguration;
+import net.sf.jasperreports.export.HtmlReportConfiguration;
+import net.sf.jasperreports.export.SimpleExporterInput;
+import net.sf.jasperreports.export.SimpleHtmlExporterOutput;
+import net.sf.jasperreports.export.SimpleHtmlReportConfiguration;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -48,7 +51,7 @@ import com.jaspersoft.jasperserver.api.JSExceptionWrapper;
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
 import com.jaspersoft.jasperserver.api.engine.common.service.EngineService;
 import com.jaspersoft.jasperserver.api.engine.common.service.impl.WebDeploymentInformation;
-import com.jaspersoft.jasperserver.api.engine.jasperreports.util.HtmlExportUtil;
+import com.jaspersoft.jasperserver.api.engine.jasperreports.util.ExportUtil;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ContentResource;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.DataContainer;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.MemoryDataContainer;
@@ -56,7 +59,7 @@ import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService
 
 /**
  * @author sanda zaharia (shertage@users.sourceforge.net)
- * @version $Id: HtmlReportOutput.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: HtmlReportOutput.java 54728 2015-04-24 15:28:20Z tdanciu $
  */
 public class HtmlReportOutput extends AbstractReportOutput 
 {
@@ -107,16 +110,15 @@ public class HtmlReportOutput extends AbstractReportOutput
 
             if (repositoryService != null) childrenFolderName = repositoryService.getChildrenFolderName(filename);
 			else childrenFolderName = "";
-            AbstractHtmlExporter exporter = null;
+            AbstractHtmlExporter<HtmlReportConfiguration, HtmlExporterConfiguration> exporter = null;
 
             if (isForceToUseHTMLExporter()) {
                 // enforce to use grid-base exporter (only use for embedded report in email)
                 exporter = new HtmlExporter();
             } else {
-                exporter = HtmlExportUtil.getHtmlExporter(getJasperReportsContext());
+                exporter = ExportUtil.getInstance(getJasperReportsContext()).createHtmlExporter();
             }
-		    exporter.setParameter(JRExporterParameter.JASPER_PRINT, jasperPrint);
-			exporter.setParameter(JRExporterParameter.CHARACTER_ENCODING, characterEncoding);
+		    exporter.setExporterInput(new SimpleExporterInput(jasperPrint));
 
 			HttpServletRequest proxy = (HttpServletRequest) Proxy.newProxyInstance(this.getClass().getClassLoader(),
 					new Class<?>[]{HttpServletRequest.class}, new InvocationHandler() {
@@ -129,29 +131,36 @@ public class HtmlReportOutput extends AbstractReportOutput
 					return result;
 				}
 			});
-			exporter.setParameter(new JRHtmlExporterParameter("HttpServletRequest"), proxy);
+			exporter.getExporterContext().setValue(ExportUtil.HTTP_SERVLET_REQUEST, proxy);//key does not really matter here, as first value of type request is taken, regardless of key
 
 			boolean close = true;
 			OutputStream htmlDataOut = htmlData.getOutputStream();
-			
+
 			try {
+				SimpleHtmlExporterOutput exporterOutput = new SimpleHtmlExporterOutput(htmlDataOut, characterEncoding);
+
 				ReportOutput htmlOutput = new ReportOutput(htmlData,
 						ContentResource.TYPE_HTML, filename);
 
-				exporter.setParameter(JRExporterParameter.OUTPUT_STREAM, htmlDataOut);
 				if (!childrenFolderName.equals("")) {
-                    exporter.setImageHandler(new RepoHtmlResourceHandler(htmlOutput, childrenFolderName + "/{0}"));
-                	exporter.setResourceHandler(new RepoHtmlResourceHandler(htmlOutput, null));
-                	exporter.setFontHandler(new RepoHtmlResourceHandler(htmlOutput, childrenFolderName + "/{0}"));
+                    exporterOutput.setImageHandler(new RepoHtmlResourceHandler(htmlOutput, childrenFolderName + "/{0}"));
+                    exporterOutput.setResourceHandler(new RepoHtmlResourceHandler(htmlOutput, null));
+                    exporterOutput.setFontHandler(new RepoHtmlResourceHandler(htmlOutput, childrenFolderName + "/{0}"));
                 } else {
-                    exporter.setImageHandler(new RepoHtmlResourceHandler(htmlOutput, childrenFolderName + "{0}"));
-                	exporter.setResourceHandler(new RepoHtmlResourceHandler(htmlOutput, null));
-                	exporter.setFontHandler(new RepoHtmlResourceHandler(htmlOutput, childrenFolderName + "{0}"));
+                	exporterOutput.setImageHandler(new RepoHtmlResourceHandler(htmlOutput, childrenFolderName + "{0}"));
+                	exporterOutput.setResourceHandler(new RepoHtmlResourceHandler(htmlOutput, null));
+                	exporterOutput.setFontHandler(new RepoHtmlResourceHandler(htmlOutput, childrenFolderName + "{0}"));
                 }
-				if (hyperlinkProducerFactory != null) {
-					exporter.setParameter(JRExporterParameter.HYPERLINK_PRODUCER_FACTORY, hyperlinkProducerFactory);
-				}
 				
+				exporter.setExporterOutput(exporterOutput);
+
+				if (hyperlinkProducerFactory != null) 
+				{
+					SimpleHtmlReportConfiguration htmlReportConfig = new SimpleHtmlReportConfiguration();
+					htmlReportConfig.setHyperlinkProducerFactory(hyperlinkProducerFactory);
+					exporter.setConfiguration(htmlReportConfig);
+				}
+
 				exporter.exportReport();
 
 				close = false;

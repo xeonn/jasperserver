@@ -28,7 +28,17 @@ define(function (require) {
         _ = require("underscore");
 
 
-    return AttachableComponent.extend({
+    return AttachableComponent.extend(
+        /** @lends ClickComponent.prototype */
+        {
+
+        /**
+         * @constructor ClickComponent
+         * @classdesc ClickComponent
+         * @extends AttachableComponent
+         * @param {object} attachTo - HTML DOM or jQuery object
+         * @throws {Error} AttachableComponent should be attached to an element if attachTo is missing.
+         */
         constructor: function(attachTo){
             AttachableComponent.apply(this, arguments);
 
@@ -38,16 +48,27 @@ define(function (require) {
             $("body").on("mousedown",this._onDocumentMousedown);
         },
 
+        /**
+         * @description on attached element click handler. Shows component.
+         * @access protected
+         */
         _onElementClick: function() {
             this.show();
         },
 
+        /**
+         * @description on dicument mouse down handler. Hides component.
+         * @access protected
+         */
         _onDocumentMousedown: function(e) {
             if (!$.contains(this.$el[0], e.target) && !this.$el.is(e.target) && !$.contains(this.$attachTo[0], e.target) && !this.$attachTo.is(e.target)) {
                 this.hide();
             }
         },
 
+        /**
+         * @description removes component.
+         */
         remove: function() {
             this.$attachTo.off("click", this._onElementClick);
             $("body").off("mousedown", this._onDocumentMousedown);

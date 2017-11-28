@@ -27,13 +27,12 @@
     <jdbc-connection-pool 
         name="jasperserver_pool" 
         datasource-classname="${jdbcDataSourceClass}"
-        res-type="javax.sql.ConnectionPoolDataSource" is-connection-validation-required="true">
+        res-type="javax.sql.ConnectionPoolDataSource">
         <property name="serverName" value="${dbHost}"/>
         <property name="user" value="${js.dbUsername}"/>
         <property name="password" value="${escapeXML:js.dbPassword}"/>
         <property name="url" value="${js.jdbcUrl}"/>
-        <property name="sid" value="${sid}"/>
-        <property name="defaultAutoCommit" value="false"/>
+        <property name="${sidOrSnParam}" value="${sidOrSnValue}"/>
         <property name="portNumber" value="${dbPort}"/>
 		<property name="JDBC30DataSource" value="true"/>
     </jdbc-connection-pool>
@@ -44,13 +43,12 @@
     <jdbc-connection-pool 
         name="sugarcrm_pool" 
         datasource-classname="${jdbcDataSourceClass}"
-        res-type="javax.sql.ConnectionPoolDataSource" is-connection-validation-required="true">
+        res-type="javax.sql.ConnectionPoolDataSource">
         <property name="serverName" value="${dbHost}"/>
         <property name="user" value="${sugarcrm.dbUsername}"/>
         <property name="password" value="${escapeXML:sugarcrm.dbPassword}"/>
         <property name="url" value="${sugarcrm.jdbcUrl}"/>
-        <property name="sid" value="${sid}"/>
-        <property name="defaultAutoCommit" value="false"/>
+        <property name="${sidOrSnParam}" value="${sidOrSnValue}"/>
         <property name="portNumber" value="${dbPort}"/>
 		 <property name="JDBC30DataSource" value="true"/>
     </jdbc-connection-pool>
@@ -61,13 +59,12 @@
     <jdbc-connection-pool 
         name="foodmart_pool" 
         datasource-classname="${jdbcDataSourceClass}"
-        res-type="javax.sql.ConnectionPoolDataSource" is-connection-validation-required="true">
+        res-type="javax.sql.ConnectionPoolDataSource">
         <property name="serverName" value="${dbHost}"/>
         <property name="user" value="${foodmart.dbUsername}"/>
         <property name="password" value="${escapeXML:foodmart.dbPassword}"/>
         <property name="url" value="${foodmart.jdbcUrl}"/>
-        <property name="sid" value="${sid}"/>
-        <property name="defaultAutoCommit" value="false"/>
+        <property name="${sidOrSnParam}" value="${sidOrSnValue}"/>
         <property name="portNumber" value="${dbPort}"/>
 		<property name="JDBC30DataSource" value="true"/>
     </jdbc-connection-pool>

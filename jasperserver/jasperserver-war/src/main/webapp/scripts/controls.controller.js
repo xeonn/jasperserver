@@ -22,8 +22,10 @@
 
 /**
  * @author: afomin, inesterenko
- * @version: $Id: controls.controller.js 7762 2014-09-19 10:16:02Z sergey.prilukin $
+ * @version: $Id: controls.controller.js 8900 2015-05-06 20:57:14Z yplakosh $
  */
+
+/* global JRS, _ */
 
 ;(function(jQuery,_, Controls) {
 
@@ -77,8 +79,11 @@
                         }
                     }, this),
 
-                    "reportoptions:selection:changed" : _.bind(function(event,reportOption){
-                            this.reset(reportOption && reportOption.uri);
+                    "reportoptions:selection:changed" : _.bind(function(event, data){
+                        var reportOption = data && data.reportOption,
+                            selectedData = data && data.selectedData;
+
+                        this.reset(reportOption && reportOption.uri, selectedData);
                     }, this)
                 });
 
@@ -87,6 +92,12 @@
                 }, this);
 
                 _.bindAll(this);
+
+                // Triggered right after controller is initialized but before
+                // first fetchControlsStructure is called.
+                // this allows custom code to listen when controls are actually initialized
+                // and override draw method of viewModel
+                jQuery(document).trigger('controls:initialized', [this.getViewModel()]);
             },
 
             /**
@@ -152,8 +163,8 @@
             },
 
             //Resets input controls values to initial for current report
-            reset:function (uri) {
-                return this.getDataTransfer().fetchInitialControlValues(uri || this.getReportUri()).
+            reset:function (uri, selectedData) {
+                return this.getDataTransfer().fetchInitialControlValues(uri || this.getReportUri(), selectedData).
                     done(this.getViewModel().set);
             },
 

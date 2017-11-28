@@ -22,6 +22,7 @@
 <%@ taglib prefix="t" uri="http://tiles.apache.org/tags-tiles" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jstl/core_rt" %>
 <%@ taglib uri="/spring" prefix="spring"%>
+<%@ taglib prefix="js" uri="/WEB-INF/jasperserver.tld" %>
 
 <t:insertTemplate template="/WEB-INF/jsp/templates/page.jsp">
     <t:putAttribute name="pageTitle"><spring:message code="messages.messageDetail.page.title"/></t:putAttribute>
@@ -29,11 +30,13 @@
     <t:putAttribute name="bodyClass" value="oneColumn"/>
     <t:putAttribute name="moduleName" value="messages/details/messageDetails.page"/>
     <t:putAttribute name="headerContent" >
+        <js:out javaScriptEscape="true">
         <script type="text/javascript">
             __jrsConfigs__.messageDetailsInitOptions = {
                 flowExecutionKey: "${flowExecutionKey}",
-                message: ${message}
+                message: JSON.parse('${message}')
             };
+        </js:out>
         </script>
     </t:putAttribute>
 

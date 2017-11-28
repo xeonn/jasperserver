@@ -66,7 +66,7 @@
                                         <spring:bind path="wrapper.olapUnitMdxQuery">
                                             <label class="control textArea <c:if test="${status.error}"> error </c:if>" for="queryString">
                                                 <span class="wrap"><spring:message code="jsp.editQueryTextForm.queryString"/>:</span>
-                                                <textarea id="queryString" type="text" name="${status.expression}"><c:out value='${status.value}'/></textarea>
+                                                <textarea id="queryString" type="text" name="${status.expression}">${status.value}</textarea>
                                                 <c:if test="${status.error}"><span
                                                         class="message warning">${status.errorMessage}</span></c:if>
                                             </label>

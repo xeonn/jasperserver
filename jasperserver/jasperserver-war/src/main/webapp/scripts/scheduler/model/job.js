@@ -21,22 +21,41 @@
 
 
 /**
- * @version: $Id: job.js 7787 2014-09-19 13:11:00Z sergey.prilukin $
+ * @version: $Id: job.js 8900 2015-05-06 20:57:14Z yplakosh $
  */
+
+/* global getTZOffset, isIE8 */
 
 define('scheduler/model/job', function (require) {
 
     var EMAIL_SEPARATOR = ",";
-    var SERVICE_DATE_PATTERN = "YYYY-MM-DD HH:mm";
-    var UI_DATE_PATTERN = "YYYY-MM-DD HH:mm";
+    var SERVICE_DATE_PATTERN_MOMENTJS_FORMAT = "YYYY-MM-DD HH:mm";
     var ftpIsProcessings = false;
 
     var $ = require('jquery'),
+        _ = require("underscore"),
         Backbone = require('backbone'),
+	    Encoding = require("encoding"),
         timepicker = require('common/jquery/extension/timepickerExt'),
         datepicker = require('common/jquery/extension/datepickerExt'),
         config = require('jrs.configs'),
         moment = require("moment");
+
+	// prepare a pattern for momentjs library for date validation based on our i18n settings
+	// 'calendar.timepicker.dateFormat' is referencing 'calendar.date.format' from jasperserver_config.properties file
+	var momentDateFormat = config.calendar.timepicker.dateFormat
+		.replace("yy", "yyyy")// momentjs uses four "y" instead of one "y" for full year code
+		.replace("yyyy", "YYYY")// momentjs uses capital "Y" instead of letter "y" for years
+		.replace("mm", "MM")// momentjs uses capital "M" instead of letter "m" for "Month number: 1..12"
+		.replace("dd", "DD");// momentjs uses capital "D" instead of letter "d" for "Day of month: 1..31"
+	
+	// time format is the same for moemntjs which we use
+	// 'calendar.timepicker.timeFormat' is referencing 'calendar.time.format' from jasperserver_config.properties file
+	var momentTimeFormat = config.calendar.timepicker.timeFormat
+		.replace(":ss", ""); // in Scheduler we don't use "seconds", so momentjs should not take seconds into consideration
+	// now, compose date and time into one pattern
+	var MOMENTJS_PARSE_UI_DATE_PATTERN = momentDateFormat + " " + momentTimeFormat;
+
 
     return Backbone.Model.extend({
 
@@ -65,7 +84,7 @@ define('scheduler/model/job', function (require) {
                         });
                     } else {
                         // check if the date is valid
-                        if (!(moment(model.trigger.startDate, UI_DATE_PATTERN, true).isValid())) {
+                        if (!(moment(model.trigger.startDate, MOMENTJS_PARSE_UI_DATE_PATTERN, true).isValid())) {
                             results.push({
                                 field: 'startDate',
                                 errorCode: 'error.invalid.date'
@@ -122,7 +141,7 @@ define('scheduler/model/job', function (require) {
                             });
                         } else {
                             // check if the date is valid
-                            if (!(moment(model.trigger.endDate, UI_DATE_PATTERN, true).isValid())) {
+                            if (!(moment(model.trigger.endDate, MOMENTJS_PARSE_UI_DATE_PATTERN, true).isValid())) {
                                 results.push({
                                     field: 'simpleEndDate',
                                     errorCode: 'error.invalid.date'
@@ -154,7 +173,7 @@ define('scheduler/model/job', function (require) {
                 else if (model.trigger.type === "calendar") {
 
                     if (model.trigger.radioWhichMonth === "selectedMonths") {
-                        if (model.trigger.months.month.length == 0) {
+                        if (model.trigger.months.month.length === 0) {
                             results.push({
                                 field: 'monthSelector',
                                 errorCode: 'report.scheduling.job.edit.specify.monthswhenjobshouldrun'
@@ -163,7 +182,7 @@ define('scheduler/model/job', function (require) {
                     }
 
                     if (model.trigger.endDate) {
-                        if (!(moment(model.trigger.endDate, UI_DATE_PATTERN, true).isValid())) {
+                        if (!(moment(model.trigger.endDate, MOMENTJS_PARSE_UI_DATE_PATTERN, true).isValid())) {
                             results.push({
                                 field: 'calendarEndDate',
                                 errorCode: 'error.invalid.date'
@@ -190,7 +209,7 @@ define('scheduler/model/job', function (require) {
                     }
 
                     if (model.trigger.radioWhichDay === "selectedDays") {
-                        if (model.trigger.weekDays.day.length == 0) {
+                        if (model.trigger.weekDays.day.length === 0) {
                             results.push({
                                 field: 'daySelector',
                                 errorCode: 'report.scheduling.job.edit.specify.dayswhenjobshouldrun'
@@ -324,14 +343,13 @@ define('scheduler/model/job', function (require) {
 
                 // check the left side of the Notification tab
 
-                var
-                    toAddress = (model.mailNotification.toAddresses && model.mailNotification.toAddresses.address) || "",
+                var toAddressNotification = (model.mailNotification.toAddresses && model.mailNotification.toAddresses.address) || "",
                     ccAddress = (model.mailNotification.ccAddresses && model.mailNotification.ccAddresses.address) || "",
                     bccAddress = (model.mailNotification.bccAddresses && model.mailNotification.bccAddresses.address) || "",
-                    subject = model.mailNotification.subject || "",
+                    subjectNotification = model.mailNotification.subject || "",
                     message = model.mailNotification.messageText || "";
 
-                if (toAddress && !this.validateEmails(toAddress)) {
+                if (toAddressNotification && !this.validateEmails(toAddressNotification)) {
                     results.push({
                         field: 'to_suc',
                         errorCode: 'error.invalid.mailNotification.invalidEmailaddresses'
@@ -353,14 +371,14 @@ define('scheduler/model/job', function (require) {
                 }
 
                 // subject must be valid if TO has been specified and vice versa
-                if (toAddress || subject) {
-                    if (!toAddress) {
+                if (toAddressNotification || subjectNotification) {
+                    if (!toAddressNotification) {
                         results.push({
                             field: 'to_suc',
                             errorCode: 'error.invalid.mailNotification.specify.oneaddresses'
                         });
                     }
-                    if (!subject) {
+                    if (!subjectNotification) {
                         results.push({
                             field: 'subject_suc',
                             errorCode: 'report.scheduling.job.edit.specify.messagesubject'
@@ -370,13 +388,13 @@ define('scheduler/model/job', function (require) {
 
                 if (message) {
                     // if user has entered message, when he need to enter subject and TO
-                    if (!toAddress) {
+                    if (!toAddressNotification) {
                         results.push({
                             field: 'to_suc',
                             errorCode: 'error.invalid.mailNotification.specify.oneaddresses'
                         });
                     }
-                    if (!subject) {
+                    if (!subjectNotification) {
                         results.push({
                             field: 'subject_suc',
                             errorCode: 'report.scheduling.job.edit.specify.messagesubject'
@@ -388,14 +406,12 @@ define('scheduler/model/job', function (require) {
             // now, check the right side of the Notification tab
 
             if (model.alert) {
-                toAddress = (model.alert.toAddresses && model.alert.toAddresses.address) || "";
-                subject = model.alert.subject || "";
-
-                var
+                var toAddressAlert = (model.alert.toAddresses && model.alert.toAddresses.address) || "",
+                    subjectAlert = model.alert.subject || "",
                     sucMessage = model.alert.messageText || "",
                     failMessage = model.alert.messageTextWhenJobFails || "";
 
-                if (toAddress && !this.validateEmails(toAddress)) {
+                if (toAddressAlert && !this.validateEmails(toAddressAlert)) {
                     results.push({
                         field: 'job_status_to',
                         errorCode: 'error.invalid.mailNotification.invalidEmailaddresses'
@@ -403,14 +419,14 @@ define('scheduler/model/job', function (require) {
                 }
     
                 // subject must be valid if TO has been specified and vice versa
-                if (toAddress || subject) {
-                    if (!toAddress) {
+                if (toAddressAlert || subjectAlert) {
+                    if (!toAddressAlert) {
                         results.push({
                             field: 'job_status_to',
                             errorCode: 'error.invalid.mailNotification.specify.oneaddresses'
                         });
                     }
-                    if (!subject) {
+                    if (!subjectAlert) {
                         results.push({
                             field: 'job_status_subject',
                             errorCode: 'report.scheduling.job.edit.specify.messagesubject'
@@ -420,13 +436,13 @@ define('scheduler/model/job', function (require) {
 
                 // if user has decided to success send message, when he need to enter subject and TO
                 if (model.alert.jobState.indexOf("SUCCESS_ONLY") !== -1 || model.alert.jobState.indexOf("ALL") !== -1) {
-                    if (!toAddress) {
+                    if (!toAddressAlert) {
                         results.push({
                             field: 'job_status_to',
                             errorCode: 'error.invalid.mailNotification.specify.oneaddresses'
                         });
                     }
-                    if (!subject) {
+                    if (!subjectAlert) {
                         results.push({
                             field: 'job_status_subject',
                             errorCode: 'report.scheduling.job.edit.specify.messagesubject'
@@ -436,13 +452,13 @@ define('scheduler/model/job', function (require) {
 
                 // if user has decided to send failure message, when he need to enter subject and TO
                 if (model.alert.jobState.indexOf("FAIL_ONLY") !== -1 || model.alert.jobState.indexOf("ALL") !== -1) {
-                    if (!toAddress) {
+                    if (!toAddressAlert) {
                         results.push({
                             field: 'job_status_to',
                             errorCode: 'error.invalid.mailNotification.specify.oneaddresses'
                         });
                     }
-                    if (!subject) {
+                    if (!subjectAlert) {
                         results.push({
                             field: 'job_status_subject',
                             errorCode: 'report.scheduling.job.edit.specify.messagesubject'
@@ -788,7 +804,7 @@ define('scheduler/model/job', function (require) {
                 if (data.trigger.startType === 1) {
                     data.trigger.startDate = null;
                 } else {
-                    data.trigger.startDate = moment(data.trigger.startDate).format(SERVICE_DATE_PATTERN);
+                    data.trigger.startDate = moment(data.trigger.startDate, MOMENTJS_PARSE_UI_DATE_PATTERN, true).format(SERVICE_DATE_PATTERN_MOMENTJS_FORMAT);
                 }
 
                 // set recurrenceType
@@ -820,7 +836,7 @@ define('scheduler/model/job', function (require) {
                     // specific date selected
                     if (data.trigger.radioEndDate == 'specificDate') {
                         data.trigger.occurrenceCount = -1;
-                        data.trigger.endDate = moment(data.trigger.endDate).format(SERVICE_DATE_PATTERN);
+                        data.trigger.endDate = moment(data.trigger.endDate, MOMENTJS_PARSE_UI_DATE_PATTERN, true).format(SERVICE_DATE_PATTERN_MOMENTJS_FORMAT);
                     }
                     // indefinitely selected
                     if (data.trigger.radioEndDate == 'indefinitely') {
@@ -831,7 +847,7 @@ define('scheduler/model/job', function (require) {
                     data.trigger.recurrenceInterval = parseInt(data.trigger.recurrenceInterval, 10);
                     data.trigger.recurrenceIntervalUnit = data.trigger.recurrenceIntervalUnit.toUpperCase();
 
-                    if (data.trigger.calendarName == "") {
+                    if (data.trigger.calendarName === "") {
                         data.trigger.calendarName = null;
                     }
 
@@ -871,13 +887,13 @@ define('scheduler/model/job', function (require) {
                     if (data.trigger.endDate === "") {
                         delete data.trigger.endDate;
                     } else {
-                        data.trigger.endDate = moment(data.trigger.endDate).format(SERVICE_DATE_PATTERN);
+                        data.trigger.endDate = moment(data.trigger.endDate, MOMENTJS_PARSE_UI_DATE_PATTERN, true).format(SERVICE_DATE_PATTERN_MOMENTJS_FORMAT);
                     }
 
                     data.trigger.hours = data.trigger.hours.replace(/ /g, "");
                     data.trigger.minutes = data.trigger.minutes.replace(/ /g, "");
 
-                    if (data.trigger.calendarName == "") {
+                    if (data.trigger.calendarName === "") {
                         data.trigger.calendarName = null;
                     }
 
@@ -1178,6 +1194,14 @@ define('scheduler/model/job', function (require) {
         permission: function(callback){
             var path = this.get('repositoryDestination').folderURI;
 
+	        if (config.userLocale == "ja" && isIE8()) {
+		        path = Encoding.convert(path, {
+                    to: 'SJIS',
+                    from: 'UNICODE',
+                    type: 'string'
+                });
+	        }
+
             // call backbone sync method manually
             return Backbone.sync.call(this, 'read', new Backbone.Model(), {
                 url: config.contextPath + '/rest_v2/resources' + path,
@@ -1278,7 +1302,7 @@ define('scheduler/model/job', function (require) {
         // format date from timestamp
         formatDate: function (timestamp) {
             if (!timestamp) return '';
-            return moment(timestamp, SERVICE_DATE_PATTERN).format(UI_DATE_PATTERN);
+            return moment(timestamp, SERVICE_DATE_PATTERN_MOMENTJS_FORMAT).format(MOMENTJS_PARSE_UI_DATE_PATTERN);
         },
 
         parseIntervals: function (str, type) {
@@ -1347,7 +1371,7 @@ define('scheduler/model/job', function (require) {
             tz_diff = my_tz - target_tz;
 
             currentTime = +moment().format("X");
-            selectedTime = +moment(date).add("minute", 1).format("X") + 3600 * (tz_diff);
+            selectedTime = +moment(date, MOMENTJS_PARSE_UI_DATE_PATTERN, true).add("minute", 1).format("X") + 3600 * (tz_diff);
 
             return selectedTime < currentTime;
         },
@@ -1383,7 +1407,7 @@ define('scheduler/model/job', function (require) {
         },
 
         isNumeric: function(val, cfg) {
-
+            var i;
             if (!val) return false;
 
             cfg = cfg || {};
@@ -1397,11 +1421,10 @@ define('scheduler/model/job', function (require) {
                 // check for any characters expect digits
                 if (val.match(/\D/)) return false;
 
-                var i = parseInt(val, 10);
+                i = parseInt(val, 10);
                 if (_.isNaN(i)) return false;
             }
 
-            val = i;
 
             if (cfg.allowNegative === false && i < 0) return false;
             if (cfg.allowZero === false && i === 0) return false;
@@ -1416,8 +1439,7 @@ define('scheduler/model/job', function (require) {
             var sign = (offset > 0) ? "+" : "-";
             offset = Math.abs(offset);
             if (offset < 10) offset = "0" + offset;
-            var str = date.replace(" ", "T") + ":00" + sign + offset + ":00";
-            return str;
+            return date.replace(" ", "T") + ":00" + sign + offset + ":00";
         }
 
     });

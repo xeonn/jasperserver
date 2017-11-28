@@ -22,7 +22,6 @@ package com.jaspersoft.jasperserver.export.modules.auth.beans;
 
 import com.jaspersoft.jasperserver.api.common.crypto.Cipherer;
 import com.jaspersoft.jasperserver.api.common.util.spring.StaticApplicationContext;
-import com.jaspersoft.jasperserver.api.metadata.user.domain.ProfileAttribute;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.Role;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
 import com.jaspersoft.jasperserver.export.modules.auth.AuthorityImportHandler;
@@ -33,7 +32,6 @@ import com.jaspersoft.jasperserver.export.util.CommandOut;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
 import static com.jaspersoft.jasperserver.export.modules.repository.beans.ResourceBean.ENCRYPTION_PREFIX;
@@ -41,7 +39,7 @@ import static com.jaspersoft.jasperserver.export.modules.repository.beans.Resour
 
 /**
  * @author tkavanagh
- * @version $Id: UserBean.java 51858 2014-12-06 20:46:19Z vsabadosh $
+ * @version $Id: UserBean.java 54590 2015-04-22 17:55:42Z vzavadsk $
  */
 public class UserBean {
 
@@ -76,7 +74,6 @@ public class UserBean {
 		setPreviousPasswordChangeTime(user.getPreviousPasswordChangeTime());
 		setTenantId(user.getTenantId());
 		copyRolesFrom(user);
-		copyAttributesFrom(user);
 	}
 
 	protected void copyRolesFrom(User user) {
@@ -94,22 +91,6 @@ public class UserBean {
 			names = null;
 		}
 		setRoleNames(names);
-	}
-
-	public void copyAttributesFrom(User user) {
-		List userAttributes = user.getAttributes();
-		if (userAttributes == null || userAttributes.isEmpty()) {
-			attributes = null;
-		} else {
-			attributes = new ProfileAttributeBean[userAttributes.size()];
-			int idx = 0;
-			for (Iterator it = userAttributes.iterator(); it
-					.hasNext(); ++idx) {
-				ProfileAttribute attr = (ProfileAttribute) it.next();
-				attributes[idx] = new ProfileAttributeBean();
-				attributes[idx].copyFrom(attr);
-			}
-		}
 	}
 
 	public void copyTo(User user, AuthorityImportHandler importHandler) {

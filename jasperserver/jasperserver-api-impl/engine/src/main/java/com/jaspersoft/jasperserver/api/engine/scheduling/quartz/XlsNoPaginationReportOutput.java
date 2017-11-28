@@ -21,38 +21,12 @@
 
 package com.jaspersoft.jasperserver.api.engine.scheduling.quartz;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Locale;
-import java.util.Map;
+import net.sf.jasperreports.engine.JasperPrint;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.quartz.JobExecutionException;
 
-import net.sf.jasperreports.engine.JasperPrint;
-import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JRExporterParameter;
-import net.sf.jasperreports.engine.export.JExcelApiExporter;
-import net.sf.jasperreports.engine.export.JExcelApiExporterParameter;
-import net.sf.jasperreports.engine.export.JRXlsExporterParameter;
-import net.sf.jasperreports.engine.export.JRHyperlinkProducerFactory;
-
-import com.jaspersoft.jasperserver.api.JSExceptionWrapper;
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
-import com.jaspersoft.jasperserver.api.engine.common.service.EngineService;
-import com.jaspersoft.jasperserver.api.engine.jasperreports.common.CsvExportParametersBean;
-import com.jaspersoft.jasperserver.api.engine.jasperreports.common.ExportParameters;
-import com.jaspersoft.jasperserver.api.engine.jasperreports.common.XlsExportParametersBean;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.domain.impl.ReportUnitResult;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.ContentResource;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.DataContainer;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.MemoryDataContainer;
-import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
 
 
 /**
@@ -62,9 +36,6 @@ import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService
 public class XlsNoPaginationReportOutput extends XlsReportOutput
 {
 
-	private static final Log log = LogFactory.getLog(XlsNoPaginationReportOutput.class);
-
-	private XlsExportParametersBean exportParams;
 	public XlsNoPaginationReportOutput()
 	{
 	}

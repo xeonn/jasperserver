@@ -25,6 +25,7 @@
 --%>
 
 <%@ taglib prefix="c" uri="http://java.sun.com/jstl/core_rt" %>
+<%@ taglib prefix="js" uri="/WEB-INF/jasperserver.tld" %>
 
 <%@ page import="net.sf.jasperreports.engine.export.*" %>
 <%@ page import="net.sf.jasperreports.engine.*" %>
@@ -39,6 +40,7 @@
 <%@ page import="org.springframework.context.i18n.LocaleContextHolder" %>
 
 <textarea class="hidden" style="display:none" name="_evalScript">
+    <js:out javaScriptEscape="true">
     Report.jasperPrintName = '${jasperPrintName}';
     Report.pageIndex = ${empty pageIndex ? 0 : pageIndex};
     Report.lastPageIndex = ${empty lastPageIndex ? "null" : lastPageIndex};
@@ -50,6 +52,7 @@
     Report.hasInputControls = ${hasInputControls};
 
     Report.dataTimestampMessage = '<spring:message code="jasper.report.view.data.snapshot.message" arguments="${dataTimestamp}" javaScriptEscape="true"/>';
+    </js:out>
 </textarea>
 
 <%
@@ -95,5 +98,7 @@
 %>
 
 <script type="text/json" id="toolbarText">
+<js:out escapeScript="false">
     {"toolbar_export":${exportersList}, <%= GenericActionModelBuilder.getEmbeddableActionModelDocument("viewReport")%>}
+</js:out>
 </script>

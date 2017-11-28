@@ -23,7 +23,9 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jstl/core_rt" %>
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 <%@ taglib prefix="authz" uri="http://www.springframework.org/security/tags" %>
+<%@ taglib prefix="js" uri="/WEB-INF/jasperserver.tld" %>
 
+<js:out javaScriptEscape="true">
 <script type="text/javascript">
 
     __jrsConfigs__.repositorySearch = {};
@@ -75,14 +77,18 @@
         messages['loading'] = "<spring:message code='jsp.loading' javaScriptEscape='true'/>";
 
         <c:forEach var="customFilter" items="${configuration.customFilters}">
-            <c:forEach var="option" items="${customFilter.options}">messages["${option.labelId}"] = '<spring:message code="${option.labelId}" javaScriptEscape="true"/>';</c:forEach>
+            <c:forEach var="option" items="${customFilter.options}">
+                messages["${option.labelId}"] = '<spring:message code="${option.labelId}" javaScriptEscape="true"/>';
+            </c:forEach>
         </c:forEach>
 
         <c:forEach var="permission" items="${permissions}">
            messages["${permission.labelId}"] = '<spring:message code="${permission.labelId}" javaScriptEscape="true"/>';
         </c:forEach>
 
-        <c:forEach var="sorter" items="${configuration.customSorters}">messages["${sorter.labelId}"] = '<spring:message code="${sorter.labelId}" javaScriptEscape="true"/>';</c:forEach>
+        <c:forEach var="sorter" items="${configuration.customSorters}">
+            messages["${sorter.labelId}"] = '<spring:message code="${sorter.labelId}" javaScriptEscape="true"/>';
+        </c:forEach>
 
         return messages;
 
@@ -93,9 +99,9 @@
     // Initialization of repository search init object.
     __jrsConfigs__.repositorySearch.localContext["rsInitOptions"] = {
         flowExecutionKey: '${flowExecutionKey}',
-        state: ${state},
-        configuration: ${jsonConfiguration},
-        organizationId: "<spring:message code='${organizationId}' javaScriptEscape="true"/>",
+        state: JSON.parse('${state}'),
+        configuration: JSON.parse('${jsonConfiguration}'),
+        organizationId: "${organizationId}",
         publicFolderUri: "${publicFolderUri}",
         tempFolderUri: "${tempFolderUri}",
         rootFolderUri: "${rootFolderUri}",
@@ -107,7 +113,7 @@
         isDashboardFeatureEnabled: ${isDashboardFeatureEnabled},
         isAdHocFeatureEnabled: ${isAdHocFeatureEnabled},
         isAdministrator: false,
-        errorPopupMessage: "<spring:message code='${requestScope.errorPopupMessage}' javaScriptEscape="true"/>",
+        errorPopupMessage: "${requestScope.errorPopupMessage}",
         isFolderSet: ${isFolderSet == 'true'},
         isAdHoReportDisabled: true
     };
@@ -125,5 +131,6 @@
         return messages;
     })({});
 </script>
+</js:out>
 <%-- Insert CSRF script here, which is responsible for sending CSRF security token --%>
 <%--<script src="<c:url value="/JavaScriptServlet"/>"></script>--%>

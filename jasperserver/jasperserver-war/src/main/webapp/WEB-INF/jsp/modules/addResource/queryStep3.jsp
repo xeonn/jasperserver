@@ -76,7 +76,7 @@
                                                 </select>
                                                 <c:if test="${status.error}">
                                                     <c:forEach items="${status.errorMessages}" var="error">
-                                                        <span class="message warning"><c:out value="${error}"/></span>
+                                                        <span class="message warning">${error}</span>
                                                     </c:forEach>
                                                 </c:if>
                                             </label>
@@ -88,10 +88,10 @@
                                             <fieldset class="group">
                                                 <label class="control textArea" for="${status.expression}">
                                                     <span class="wrap"><spring:message code="jsp.editQueryTextForm.queryString"/>:</span>
-                                                    <textarea name="${status.expression}" id="${status.expression}" type="text"><c:out value='${status.value}'/></textarea>
+                                                    <textarea name="${status.expression}" id="${status.expression}" type="text">${status.value}</textarea>
                                                     <c:if test="${status.error}">
                                                         <c:forEach items="${status.errorMessages}" var="error">
-                                                            <span class="message warning"><c:out value="${error}"/></span>
+                                                            <span class="message warning">${error}</span>
                                                         </c:forEach>
                                                     </c:if>
                                                 </label>

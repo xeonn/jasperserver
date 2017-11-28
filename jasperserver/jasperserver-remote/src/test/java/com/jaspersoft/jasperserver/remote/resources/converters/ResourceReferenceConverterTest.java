@@ -54,7 +54,7 @@ import static org.testng.Assert.*;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: ResourceReferenceConverterTest.java 51276 2014-11-09 17:44:57Z ktsaregradskyi $
+ * @version $Id: ResourceReferenceConverterTest.java 55164 2015-05-06 20:54:37Z mchan $
  */
 public class ResourceReferenceConverterTest {
     private ResourceReferenceConverter converter;
@@ -176,7 +176,7 @@ public class ResourceReferenceConverterTest {
         final String referenceUri = "/test/resource/uri";
         final DataType resource = new DataTypeImpl();
         final ClientDataType clientTargetResource = new ClientDataType();
-        when(repositoryService.getResource(null, referenceUri)).thenReturn(resource);
+        when(repositoryService.getResource(any(ExecutionContext.class), eq(referenceUri))).thenReturn(resource);
         when(resourceConverterProvider.getToClientConverter(resource)).thenReturn(new ToClientConverter() {
             @Override
             public Object toClient(Object serverObject, ToClientConversionOptions options) {
@@ -234,7 +234,7 @@ public class ResourceReferenceConverterTest {
         final ClientReference clientObject = new ClientReference();
         clientObject.setUri(expectedResourceUri);
         // let repository mock find resource with our test URI
-        when(repositoryService.getResource(isNull(ExecutionContext.class), eq(expectedResourceUri))).thenReturn(mock(Resource.class));
+        when(repositoryService.getResource(any(ExecutionContext.class), eq(expectedResourceUri))).thenReturn(mock(Resource.class));
         // new ResourceReference is created if initially is null and client object contains referenceUri
         ResourceReference result = converter.toServerReference(clientObject, null, options);
         assertNotNull(result);
@@ -248,7 +248,7 @@ public class ResourceReferenceConverterTest {
         final ClientReference clientObject = new ClientReference();
         clientObject.setUri(expectedResourceUri);
         // let repository mock find resource with our test URI
-        when(repositoryService.getResource(isNull(ExecutionContext.class), eq(expectedResourceUri))).thenReturn(mock(Resource.class));
+        when(repositoryService.getResource(any(ExecutionContext.class), eq(expectedResourceUri))).thenReturn(mock(Resource.class));
         final ResourceReference resultToUpdate = new ResourceReference("/another/resource/uri");
         ResourceReference result = converter.toServerReference(clientObject, resultToUpdate, options);
         assertSame(result, resultToUpdate);
@@ -280,7 +280,7 @@ public class ResourceReferenceConverterTest {
         clientObject.setUri(expectedResourceUri);
         Resource testResource = mock(Resource.class);
         // let repository mock find resource with our test URI
-        when(repositoryService.getResource(isNull(ExecutionContext.class), eq(expectedResourceUri))).thenReturn(testResource);
+        when(repositoryService.getResource(any(ExecutionContext.class), eq(expectedResourceUri))).thenReturn(testResource);
         // reference some another resource
         final ResourceReference resultToUpdate = new ResourceReference(new DataTypeImpl());
         resultToUpdate.getLocalResource().setURIString("/some/another/resource");
@@ -298,7 +298,7 @@ public class ResourceReferenceConverterTest {
         Resource testResource = new DataTypeImpl();
         testResource.setURIString(expectedResourceUri);
         // let repository mock find resource with our test URI
-        when(repositoryService.getResource(isNull(ExecutionContext.class), eq(expectedResourceUri))).thenReturn(testResource);
+        when(repositoryService.getResource(any(ExecutionContext.class), eq(expectedResourceUri))).thenReturn(testResource);
         ResourceReference result = converter.toServerReference(clientObject, null, options);
         assertEquals(result.getTargetURI(), expectedResourceUri);
         assertFalse(result.isLocal());
@@ -313,7 +313,7 @@ public class ResourceReferenceConverterTest {
         Resource testResource = new DataTypeImpl();
         testResource.setURIString(expectedResourceUri);
         // let repository mock find resource with our test URI
-        when(repositoryService.getResource(isNull(ExecutionContext.class), eq(expectedResourceUri))).thenReturn(testResource);
+        when(repositoryService.getResource(any(ExecutionContext.class), eq(expectedResourceUri))).thenReturn(testResource);
         // reference some another resource
         final ResourceReference resultToUpdate = new ResourceReference(new DataTypeImpl());
         resultToUpdate.getLocalResource().setURIString("/some/another/resource");
@@ -331,7 +331,7 @@ public class ResourceReferenceConverterTest {
         Resource testResource = new DataTypeImpl();
         testResource.setURIString(expectedResourceUri);
         // let repository mock find resource with our test URI
-        when(repositoryService.getResource(isNull(ExecutionContext.class), eq(expectedResourceUri))).thenReturn(testResource);
+        when(repositoryService.getResource(any(ExecutionContext.class), eq(expectedResourceUri))).thenReturn(testResource);
         // reference some another resource
         final ResourceReference resultToUpdate = new ResourceReference(new DataTypeImpl());
         resultToUpdate.getLocalResource().setURIString("/some/another/resource");

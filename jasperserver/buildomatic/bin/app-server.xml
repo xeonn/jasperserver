@@ -353,6 +353,10 @@
                     <var name="warTargetDir" value="${fixedAppServerDir}/webapps/${webAppName}"/>
                     <var name="warTargetDirDel" value="${fixedAppServerDir}/webapps/${webAppNameDel}"/>
                 </case>
+                <case value="tomcat8">
+                    <var name="warTargetDir" value="${fixedAppServerDir}/webapps/${webAppName}"/>
+                    <var name="warTargetDirDel" value="${fixedAppServerDir}/webapps/${webAppNameDel}"/>
+                </case>
                 <case value="jboss">
                     <var name="warTargetDir" value="${fixedAppServerDir}/server/${jboss.profile}/deploy/${webAppName}.war"/>
                     <var name="warTargetDirDel" value="${fixedAppServerDir}/server/${jboss.profile}/deploy/${webAppNameDel}.war"/>
@@ -1468,9 +1472,10 @@ tomcat copies to this location from the jasperserver war file META-INF/context.x
                             <equals arg1="${appServerType}" arg2="tomcat5"/>
                             <equals arg1="${appServerType}" arg2="tomcat6"/>
                             <equals arg1="${appServerType}" arg2="tomcat7"/>
+                            <equals arg1="${appServerType}" arg2="tomcat8"/>
                         </or>
                         <then>
-                            <echo>  Note: ji*-driver*.jar files are for internal use only.  Those jar files won't get copied to app server jdbc directory</echo>
+                            <echo>  Note: ji*-driver*.jar files are for internal use in JasperReports Server web application only.  Those jar files won't get copied to app server jdbc directory</echo>
                             <delete verbose="true">
                                 <fileset dir="${appServerJdbcDir}" includes="ji-*-driver-*.jar"/>
                             </delete>

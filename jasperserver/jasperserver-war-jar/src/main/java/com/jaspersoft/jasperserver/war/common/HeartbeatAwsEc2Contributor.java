@@ -23,7 +23,6 @@ package com.jaspersoft.jasperserver.war.common;
 
 import com.jaspersoft.jasperserver.api.engine.jasperreports.util.AwsEc2MetadataClient;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.util.InstanceProductTypeResolver;
-import org.apache.commons.httpclient.methods.PostMethod;
 
 
 /**
@@ -35,13 +34,13 @@ public class HeartbeatAwsEc2Contributor implements HeartbeatContributor {
     private InstanceProductTypeResolver instanceProductTypeResolver;
 
     @Override
-    public void contributeToHttpCall(PostMethod post) {
+    public void contributeToHttpCall(HeartbeatCall call) {
         String awsEc2InstanceType;
         if (awsEc2MetadataClient.isEc2Instance()) {
             awsEc2InstanceType = awsEc2MetadataClient.getEc2InstanceMetadataItem(AwsEc2MetadataClient.INSTANCE_TYPE_RESOURCE);
-            post.addParameter("ec2InstanceType", awsEc2InstanceType);
+            call.addParameter("ec2InstanceType", awsEc2InstanceType);
         }
-        post.addParameter("ec2Instance", instanceProductTypeResolver.getAwsProductNameForHeartBeat());
+        call.addParameter("ec2Instance", instanceProductTypeResolver.getAwsProductNameForHeartBeat());
     }
     
 

@@ -21,8 +21,10 @@
 
 
 /**
- * @version: $Id: resource.locate.js 7882 2014-10-06 11:29:52Z sergey.prilukin $
+ * @version: $Id: resource.locate.js 8179 2015-01-27 12:34:21Z psavushchik $
  */
+
+/* global _, resource, picker*/
 
 var resourceLocator = {
     CONTENT_REPOSITORY : 'CONTENT_REPOSITORY',

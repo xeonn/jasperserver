@@ -140,7 +140,7 @@
                                     <spring:bind path="control.inputControl.description">
                                         <label class="control textArea<c:if test="${status.error}"> error</c:if>" for="description">
                                             <span class="wrap"><spring:message code='addResources.addInputControle.descrioption' javaScriptEscape="true"/></span>
-                                            <textarea id="description" type="text" name="${status.expression}" ><c:out value='${status.value}'/></textarea>
+                                            <textarea id="description" type="text" name="${status.expression}" >${status.value}</textarea>
                                            <span class="message warning"><c:if test="${status.error}">${status.errorMessage}</c:if></span>
                                         </label>
                                     </spring:bind>

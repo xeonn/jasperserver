@@ -21,7 +21,16 @@
 
 
 /**
- * @version: $Id: mng.common.actions.js 7762 2014-09-19 10:16:02Z sergey.prilukin $
+ * @version: $Id: mng.common.actions.js 8900 2015-05-06 20:57:14Z yplakosh $
+ */
+
+/* global repositorySearch, SearchBox, toolbarButtonModule, toFunction, getAsFunction, localContext, isArray, JSCookie,
+ dynamicTree, disableSelectionWithoutCursorStyle, getBoxOffsets, actionModel, Folder, isMetaHeld, canFolderBeCopied,
+ invokeFolderAction, layoutModule, canFolderBeMoved, Droppables, canFolderBeCopiedOrMovedToFolder,
+ canAllBeCopiedOrMovedToFolder, Draggables, alert, dynamicList, isIPad, isSupportsTouch, TouchController, InfiniteScroll,
+ canBeRun, canBeOpened, JSTooltip, invokeBulkAction, invokeRedirectAction, canBeScheduled, matchAny, centerElement,
+ tooltipModule, $break, baseList, orgModule, dialogs, buttonManager, ValidationModule, ResourcesUtils,
+ accessibilityModule, confirm, fileSender, invokeClientAction, invokeServerAction, require
  */
 
 orgModule.serverActionFactory = {
@@ -88,8 +97,10 @@ orgModule.serverActionFactory = {
     },
 
     'delete': function(options) {
-        var entity = options.entity;
-        var data = {'entity' : entity.getNameWithTenant()};
+        var entity = options.entity,
+            entityEvent = options.entityEvent;
+
+        var data = {'entity' : entity.getNameWithTenant(), 'entityEvent': entityEvent};
 
         return this.createAction(orgModule.ActionMap.DELETE, data);
     },
@@ -196,38 +207,81 @@ orgModule.clientActionFactory = {
         };
 
         return new orgModule.Action(function() {
-            if (confirm(orgModule.getMessage("deleteAllMessage", { count: entities.length }))) {
-                invokeServerAction(orgModule.ActionMap.DELETE_ALL, {
-                    entities: entities
+
+	        var text = orgModule.getMessage("deleteAllMessage", { count: entities.length });
+
+            // Has been changed from simple require("Module name") due to http://requirejs.org/docs/errors.html#notloaded error
+	        require(["common/component/dialog/ConfirmationDialog"], function(ConfirmationDialog){
+                var dialog = new ConfirmationDialog({text: text});
+
+                dialog.on("button:yes", function() {
+                    invokeServerAction(orgModule.ActionMap.DELETE_ALL, {
+                        entities: entities
+                    });
                 });
-            }
+
+                dialog.open();
+            });
+
         }, cancelEditBeforeInvoke);
     },
 
     'delete': function (options) {
-        var entity = options.entity;
+        var entity = options.entity,
+            entityEvent = options.entityEvent;
 
         return new orgModule.Action(function() {
-            if (confirm(orgModule.getMessage("deleteMessage", { entity: entity.getDisplayName() }))) {
-                invokeServerAction(orgModule.ActionMap.DELETE, {
-                    entity: entity
+
+	        var text = orgModule.getMessage("deleteMessage", { entity: entity.getDisplayName() });
+
+            // Has been changed from simple require("Module name") due to http://requirejs.org/docs/errors.html#notloaded error
+            require(["common/component/dialog/ConfirmationDialog"], function(ConfirmationDialog){
+                var dialog = new ConfirmationDialog({text: text});
+                dialog.on("button:yes", function(){
+                    invokeServerAction(orgModule.ActionMap.DELETE, {
+                        entity: entity,
+                        entityEvent: entityEvent
+                    });
                 });
-            }
+                dialog.open();
+            });
+
         });
     },
 
     'cancelIfEdit': function (options) {
-        var entity = options.entity;
+        options = options || {};
+
+        var entity = options.entity,
+            showConfirm = typeof options.showConfirm === "undefined" ? true : options.showConfirm,
+            entityEvent = typeof options.entityEvent === "undefined" ? true : options.entityEvent,
+            properties = orgModule.properties;
 
         return new orgModule.Action(function() {
-            if (!orgModule.properties.isChanged() || confirm(orgModule.getMessage("cancelEdit", { entity: entity.getDisplayName() }))) {
-                if (orgModule.properties.isEditMode) {
-                    orgModule.properties.cancel();
-                    orgModule.properties.changeMode(false);
-                }
+            if ((!properties.locked || !entityEvent) &&
+                (!properties.isChanged() || (showConfirm && confirm(orgModule.getMessage("cancelEdit", { entity: entity.getDisplayName() }))))) {
+                if (properties.isEditMode) {
+                    properties.lock();
+                    properties.cancel().done(function(){
+                        var entity = properties.getDetailsLoadedEntity(),
+                            showProperties = orgModule.userManager ? orgModule.entityList.findEntity(entity.fullName) : true;
 
+                        properties.unlock();
+
+                        if(showProperties){
+                            orgModule.fire(orgModule.Event.ENTITY_SELECT_AND_GET_DETAILS, {
+                                entity: entity,
+                                cancelIfEdit: true,
+                                entityEvent: true
+                            });
+                        }else{
+                            properties.hide();
+                        }
+                    });
+                }
                 return true;
             } else {
+                !entityEvent && properties.lock();
                 return false;
             }
         });

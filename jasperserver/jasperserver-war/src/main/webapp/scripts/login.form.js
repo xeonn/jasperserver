@@ -20,8 +20,10 @@
  */
 
 /**
- * @version: $Id: login.form.js 7792 2014-09-19 13:12:36Z sergey.prilukin $
+ * @version: $Id: login.form.js 8179 2015-01-27 12:34:21Z psavushchik $
  */
+
+/* global webHelpModule, doesAllowUserPasswordChange */
 
 /*
  * Requires: jquery 1.4+ and jcryption 1.2

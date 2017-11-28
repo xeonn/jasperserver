@@ -60,7 +60,7 @@
                         <li class="node open">
                             <ul class="list buttonSet">
                                 <%--bug 18939: &#8230 changed to "..." --%>
-                                <li class="leaf"><button id="addNewRoleBtn" class="button capsule text up"><span class="wrap"><spring:message code="jsp.roleManager.addRole" javaScriptEscape="true"/>...</span><span class="icon"></span></button></li>
+                                <li class="leaf"><button id="addNewRoleBtn" class="button capsule text first up"><span class="wrap"><spring:message code="jsp.roleManager.addRole" javaScriptEscape="true"/>...</span><span class="icon"></span></button></li>
                             </ul>
                         </li>
                         <li class="node open">

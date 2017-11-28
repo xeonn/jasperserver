@@ -72,7 +72,7 @@ import java.util.regex.Pattern;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: ResourceDetailsJaxrsService.java 51276 2014-11-09 17:44:57Z ktsaregradskyi $
+ * @version $Id: ResourceDetailsJaxrsService.java 55164 2015-05-06 20:54:37Z mchan $
  */
 @Component
 public class ResourceDetailsJaxrsService {
@@ -138,7 +138,7 @@ public class ResourceDetailsJaxrsService {
                 partsMap.put(currentPartName, multiPart.getField(currentPartName).getEntityAs(InputStream.class));
             }
 
-            return createResource(clientObject, parentUri, createFolders, partsMap);
+            return createResource(clientObject, parentUri, createFolders, partsMap, false);
         } else {
             ClientResource result = createFileViaForm(
                     multiPart.getField("data") != null ? multiPart.getField("data").getEntityAs(InputStream.class) : null, parentUri,
@@ -311,17 +311,19 @@ public class ResourceDetailsJaxrsService {
         return Response.ok(clientResource).build();
     }
 
-    public ClientResource createResource(ClientResource resourceLookup, String parentUri, boolean createFolders) throws RemoteException {
-        return createResource(resourceLookup, parentUri, createFolders, null);
+    public ClientResource createResource(ClientResource resourceLookup, String parentUri, boolean createFolders, boolean dryRun) throws RemoteException {
+        return createResource(resourceLookup, parentUri, createFolders, null, dryRun);
     }
 
-    public ClientResource createResource(ClientResource resourceLookup, String parentUri, boolean createFolders, Map<String, InputStream> attachments) throws RemoteException {
+    public ClientResource createResource(ClientResource resourceLookup, String parentUri, boolean createFolders, Map<String, InputStream> attachments, boolean dryRun) throws RemoteException {
         String uniqueName = singleRepositoryService.getUniqueName(parentUri, resourceLookup.getLabel());
         String ownersUri = (Folder.SEPARATOR.equals(parentUri) ? parentUri : parentUri + Folder.SEPARATOR) + uniqueName;
         resourceLookup.setUri(ownersUri);
         ToServerConversionOptions serverConversionOptions = ToServerConversionOptions.getDefault().setOwnersUri(ownersUri).setResetVersion(true).setAttachments(attachments);
         Resource serverResource = resourceConverterProvider.getToServerConverter(resourceLookup).toServer(resourceLookup, serverConversionOptions);
-        serverResource = singleRepositoryService.createResource(serverResource, parentUri, createFolders);
+        if(!dryRun) {
+            serverResource = singleRepositoryService.createResource(serverResource, parentUri, createFolders);
+        }
         return resourceConverterProvider.getToClientConverter(serverResource).toClient(serverResource, null);
     }
 
@@ -355,7 +357,7 @@ public class ResourceDetailsJaxrsService {
         String contentType = contentTypeMapping.get(fileType);
         if (contentType == null) {
             if (name.contains(".") && !name.endsWith(".")) {
-                contentType = contentTypeMapping.get(name.substring(name.indexOf(".") + 1));
+                contentType = contentTypeMapping.get(name.substring(name.lastIndexOf(".") + 1));
             }
         }
 

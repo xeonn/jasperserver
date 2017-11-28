@@ -29,7 +29,7 @@ import java.util.List;
 
 /**
  * @author Yaroslav.Kovalchyk
- * @version $Id: RepositorySearchCriteria.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: RepositorySearchCriteria.java 55164 2015-05-06 20:54:37Z mchan $
  */
 public interface RepositorySearchCriteria extends Cloneable {
     SearchMode getSearchMode();
@@ -46,6 +46,8 @@ public interface RepositorySearchCriteria extends Cloneable {
     void setFolderUri(String folderUri);
     List<String> getResourceTypes();
     void setResourceTypes(List<String> resourceTypes);
+    List<String> getContainerResourceTypes();
+    void setContainerResourceTypes(List<String> resourceTypes);
     List<SearchFilter> getCustomFilters();
     void setShowHidden(boolean show);
     boolean isShowHidden();

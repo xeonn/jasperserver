@@ -31,6 +31,8 @@
     <mvc:view-controller path="/awsconfiguration.html" view-name="modules/administer/awsConfiguration"/>
     <mvc:view-controller path="/xdm.html" view-name="modules/xdm"/>
 
+    <mvc:view-controller path="/logCollectors.html" view-name="modules/administer/logCollectors"/>
+
     <!-- Handler for URL Mapping in the JS Application -->
     <bean id="handlerMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
         <property name="mappings">
@@ -98,8 +100,6 @@
                 <prop key="/mods/**">bifController</prop>
 
                 <!--scheduler-->
-                <prop key="/scheduler/jobsummary.html">schedulerController</prop>
-                <prop key="/scheduler/jobdetails.html">schedulerController</prop>
                 <prop key="/scheduler/main.html">schedulerController</prop>
 
                 <!-- System error pages -->
@@ -127,13 +127,13 @@
         </property>
     </bean>
 
-    <util:map id="commonProperties" scope="request">
+    <util:map id="commonProperties" scope="prototype">
         <entry key="organizationId" value="#{${bean.securityContextProvider}.contextUser.tenantId}"/>
         <entry key="publicFolderUri" value="#{configurationBean.publicFolderUri}"/>
         <entry key="tempFolderUri" value="#{configurationBean.tempFolderUri}"/>
     </util:map>
 
-    <util:map id="jsOptimizationProperties" scope="request">
+    <util:map id="jsOptimizationProperties" scope="singleton">
         <entry key="useOptimizedJavascript" value="#{javascriptOptimizationSettings.useOptimizedJavascript}"/>
         <entry key="optimizedJavascriptPath" value="#{javascriptOptimizationSettings.optimizedJavascriptPath}"/>
     </util:map>
@@ -233,6 +233,8 @@
                 <prop key="/log_settings.html">logSettingsController</prop>
                 <prop key="/adminImport.html">adminImportController</prop>
                 <prop key="/adminExport.html">adminExportController</prop>
+                <prop key="/customAttributes.html">customAttributesController</prop>
+                <prop key="/resetSettings.html">resetSettingsController</prop>
 			</props>
 		</property>
 	</bean>
@@ -242,7 +244,8 @@
         <property name="propertiesManagementService" ref="propertiesManagementService"/>
 	</bean>
 
-
+    <bean id="resetSettingsController" class="com.jaspersoft.jasperserver.war.control.ResetSettingsController"/>
+    <bean id="customAttributesController" class="com.jaspersoft.jasperserver.war.control.CustomAttributesController"/>
     <bean id="adminImportController" class="com.jaspersoft.jasperserver.war.control.AdminImportController"/>
     <bean id="adminExportController" class="com.jaspersoft.jasperserver.war.control.AdminExportController"/>
 
@@ -280,8 +283,6 @@
                 <prop key="/runReportAction.html">runReportAction</prop>
 
                 <!--scheduler-->
-                <prop key="/scheduler/jobsummary.html">schedulerController</prop>
-                <prop key="/scheduler/jobdetails.html">schedulerController</prop>
                 <prop key="/scheduler/main.html">schedulerController</prop>
             </props>
         </property>
@@ -380,6 +381,7 @@
 
 
     <bean id="reportImageController" class="com.jaspersoft.jasperserver.war.control.ReportImageController">
+    	<property name="jasperReportsContext" ref="${bean.jasperReportsContext}"/>
     	<property name="jasperPrintAccessor" ref="jasperPrintAccessor"/>
     	<property name="jasperPrintNameParameter" value="jrprint"/>
     	<property name="imageNameParameter" value="image"/>
@@ -397,6 +399,7 @@
 
         <property name="enableSaveToHostFS" value="#{configurationBean.enableSaveToHostFS}"/>
         <property name="enableDataSnapshot" value="#{dataSnapshotService.snapshotPersistenceEnabled}"/>
+        <property name="repository" ref="${bean.repositoryService}"/>
     </bean>
     
     <bean id="xmlExportController" class="com.jaspersoft.jasperserver.war.control.XmlExportController">

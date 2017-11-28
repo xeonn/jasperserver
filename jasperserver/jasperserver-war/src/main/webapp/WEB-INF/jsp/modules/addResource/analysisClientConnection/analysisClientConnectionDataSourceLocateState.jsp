@@ -22,7 +22,9 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jstl/core_rt" %>
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 <%@ taglib prefix="authz" uri="http://www.springframework.org/security/tags" %>
+<%@ taglib prefix="js" uri="/WEB-INF/jasperserver.tld" %>
 
+<js:out javaScriptEscape="true">
 <script type="text/javascript">
 
     if (typeof localContext === "undefined") {
@@ -46,3 +48,4 @@
     __jrsConfigs__.locateDataSource.localContext = localContext;
 
 </script>
+</js:out>

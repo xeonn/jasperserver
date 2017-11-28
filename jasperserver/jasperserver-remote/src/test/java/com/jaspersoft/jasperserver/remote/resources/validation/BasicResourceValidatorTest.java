@@ -65,22 +65,6 @@ public class BasicResourceValidatorTest {
     }
 
     @Test(expectedExceptions = {JSValidationException.class})
-    public void testValidate_xss_label() throws Exception {
-        resource.setLabel("<Label>");
-        resource.setDescription("description");
-
-        validator.validate(resource);
-    }
-
-    @Test(expectedExceptions = {JSValidationException.class})
-    public void testValidate_xss_description() throws Exception {
-        resource.setLabel("Label");
-        resource.setDescription("<description>");
-
-        validator.validate(resource);
-    }
-
-    @Test(expectedExceptions = {JSValidationException.class})
     public void testValidate_long_description() throws Exception {
         resource.setLabel("Label");
         resource.setDescription("LabelLabelLabelLabelLabelLabelLabelLabelLabelLabelLabelLabelLabelLabelLabelLabelLabelLabelLabelLabelLabelLabelLabelLabelLabelLabelLabelLabelLabelLabelLabelLabel1LabelLabelLabelLabelLabelLabelLabelLabelLabelLabelLabelLabelLabelLabelLabelLabel12345678901234567890-");

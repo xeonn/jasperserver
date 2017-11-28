@@ -22,7 +22,7 @@
 
 /**
  * @author: Angus Croll
- * @version: $Id: tools.drag.js 7762 2014-09-19 10:16:02Z sergey.prilukin $
+ * @version: $Id: tools.drag.js 8179 2015-01-27 12:34:21Z psavushchik $
  */
 
 //////////////////////////////////////////////////////////
@@ -54,8 +54,8 @@ DragListener.DRAGGING = 'dragging';
  * This allows us to segregate event actions according to type of drag 
  */
 DragListener.prototype.registerAgent = function(agentName) {
-    this.agents[agentName] = new Array();
-}
+    this.agents[agentName] = [];
+};
 
 /**
  * Register the event with an action
@@ -65,7 +65,7 @@ DragListener.prototype.registerAgent = function(agentName) {
  */
 DragListener.prototype.publishEvent = function(agentName,event,action) {
     this.agents[agentName][event] = action;
-}
+};
 
 /**
  * Trigger the event
@@ -81,22 +81,22 @@ DragListener.prototype.notify = function(dragListenerEvent,browserEvent) {
             thisAction(browserEvent,draggingObjs);
         }
     }
-}
+};
 
 /**
  * any dragging going on right now?
  */
 DragListener.prototype.isDragging = function() {
     return this.currentAgentName != null;
-}
+};
 
 DragListener.prototype.setCurrentAgentName = function(agentName) {
     this.currentAgentName = agentName;
-}
+};
 
 DragListener.prototype.getCurrentAgentName = function() {
     return this.currentAgentName;
-}
+};
 
 /**
  * Dragger
@@ -111,10 +111,10 @@ DragListener.prototype.getCurrentAgentName = function() {
  */
 function Dragger(evt,draggingObjs,dragsX,dragsY,sigMove,dragListener,cleanUpUtil) {
 
-    var evt = evt?evt:event;
+    evt = evt ? evt : event;
 
-    this.originalX = new Array();
-    this.originalY = new Array();
+    this.originalX = [];
+    this.originalY = [];
 
     this.draggingObjs = draggingObjs;
     this.dragsX = dragsX;
@@ -144,13 +144,13 @@ var invokeDragging = function(dragger) {
     return function(event) {
         dragger.dragging(event);
     }
-}
+};
 
 var invokeDraggingFinished = function(dragger) {
     return function(event) {
         dragger.draggingFinished(event);
     }
-}
+};
 
 /**
  * Add an additional Element to the collection of dragging objects already defined in an existing Dragger
@@ -158,7 +158,7 @@ var invokeDraggingFinished = function(dragger) {
  * @param {Element} draggingObj An HTML element
  */
 Dragger.prototype.addAnotherDraggingObject = function(evt,draggingObj) {
-    var evt = evt?evt:event;
+    evt = evt ? evt : event;
 
     this.draggingObjs[this.draggingObjs.length] = draggingObj;
     this.originalX[this.originalX.length]  = parseInt(draggingObj.style.left);
@@ -166,7 +166,7 @@ Dragger.prototype.addAnotherDraggingObject = function(evt,draggingObj) {
 
     this.initDragger(evt);
 
-}
+};
 
 Dragger.prototype.initDragger = function(evt) {
     this.isDragging=false;
@@ -176,23 +176,23 @@ Dragger.prototype.initDragger = function(evt) {
 
     document.onmousemove = invokeDragging(this);
     document.onmouseup = invokeDraggingFinished(this);
-}
+};
 
 Dragger.prototype.dragging = function(evt) {
 
     var e = evt?evt:event;
 
     var movedSignificantly = false;
-    var xDiff=0;
-    var yDiff=0;
+    var xDiff = 0;
+    var yDiff = 0;
 
     if (this.dragsX) {
-        var xDiff = e.clientX-this.mouseX;
+        xDiff = e.clientX-this.mouseX;
         movedSignificantly = Math.abs(xDiff)>this.sigMove;
     }
 
     if (this.dragsY) {
-        var yDiff = e.clientY-this.mouseY;
+        yDiff = e.clientY-this.mouseY;
         movedSignificantly = movedSignificantly || Math.abs(yDiff)>this.sigMove;
     }
 
@@ -201,14 +201,14 @@ Dragger.prototype.dragging = function(evt) {
         if (this.dragListener) {
             this.dragListener.notify(DragListener.DRAGGING_STARTED,evt);
         }
-        for (i=0; i<this.draggingObjs.length; i++) {
+        for (var i=0; i<this.draggingObjs.length; i++) {
             this.draggingObjs[i].style.display="block";
         }
     }
 
     if (this.isDragging) {
         if (xDiff) {
-            for (i=0; i<this.draggingObjs.length; i++) {
+            for (var i=0; i<this.draggingObjs.length; i++) {
                 var left = parseInt(this.originalX[i] + xDiff);
 //                if (left < 0 || left + $(this.draggingObjs[i]).getWidth() > document.body.clientWidth) {
 //                    xDiff = false;
@@ -216,13 +216,13 @@ Dragger.prototype.dragging = function(evt) {
 //                }
             }
             if (xDiff) {
-                for (i=0; i<this.draggingObjs.length; i++) {
+                for (var i=0; i<this.draggingObjs.length; i++) {
                     this.draggingObjs[i].style.left=parseInt(this.originalX[i] + xDiff) + "px";
                 }
             }
         }
         if (yDiff) {
-            for (i=0; i<this.draggingObjs.length; i++) {
+            for (var i=0; i<this.draggingObjs.length; i++) {
                 var top = parseInt(this.originalY[i] + yDiff);
 //                if (top < 0 || top + $(this.draggingObjs[i]).getHeight() > document.body.clientHeight) {
 //                    yDiff = false;
@@ -230,7 +230,7 @@ Dragger.prototype.dragging = function(evt) {
 //                }
             }
             if (yDiff) {
-                for (i=0; i<this.draggingObjs.length; i++) {
+                for (var i=0; i<this.draggingObjs.length; i++) {
                     this.draggingObjs[i].style.top=parseInt(this.originalY[i] + yDiff) + "px";
                 }
             }
@@ -239,7 +239,7 @@ Dragger.prototype.dragging = function(evt) {
             this.dragListener.notify(DragListener.DRAGGING,evt);
         }
     }
-}
+};
 
 Dragger.prototype.draggingFinished = function(evt) {
 
@@ -263,7 +263,7 @@ Dragger.prototype.draggingFinished = function(evt) {
             this.dragListener.setCurrentAgentName(null);
         }
     }
-}
+};
 
 Dragger.prototype.clearDraggingObjects = function() {
     for (var i=0; i<this.draggingObjs.length; i++) {
@@ -275,5 +275,5 @@ Dragger.prototype.clearDraggingObjects = function() {
             thisOne = null;
         }
     }
-}
+};
 

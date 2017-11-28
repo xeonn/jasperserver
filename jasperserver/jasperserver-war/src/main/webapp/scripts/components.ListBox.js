@@ -21,22 +21,24 @@
 
 
 /**
- * @version: $Id: components.ListBox.js 7762 2014-09-19 10:16:02Z sergey.prilukin $
+ * @version: $Id: components.ListBox.js 8179 2015-01-27 12:34:21Z psavushchik $
  */
+
+/* global showCustomTooltip, hideCustomTooltip, Class, LinkButton */
 
 function ListBox(id, listBoxModel) {
     this.id = id;
 
     this.listBoxModel = listBoxModel;
 
-    this.options = new Array();
-    this.selected = new Array();
+    this.options = [];
+    this.selected = [];
     this.selectedIndex = -1;
     this.multiple = true;
-    this.onclick = function (e) {/*do Nothing*/}
-    this.ondblclick = function (e) {/*do Nothing*/}
-    this.onselect = function (e) {/*do Nothing*/}
-    this.ondeselect = function (e) {/*do Nothing*/}
+    this.onclick = function (e) {/*do Nothing*/};
+    this.ondblclick = function (e) {/*do Nothing*/};
+    this.onselect = function (e) {/*do Nothing*/};
+    this.ondeselect = function (e) {/*do Nothing*/};
     this._container = document.getElementById(id);
     this._table = null;
     this.selectionClass = 'optionSelected';
@@ -53,11 +55,11 @@ function ListBox(id, listBoxModel) {
 
 ListBox.prototype.setSelectedClassName = function(className) {
     this.selectionClass = className;
-}
+};
 
 ListBox.prototype.setOptionClassName = function(className) {
     this.optionClassName = className;
-}
+};
 
 ListBox._LIST_TABLE_ID = 'ListBoxTable';
 ListBox._LIST_TEMPLATE = '<table id="' + ListBox._LIST_TABLE_ID + '" style="width:100%;" cellspacing="0" cellpadding="0" border="0"><tbody></tbody></table>';
@@ -71,24 +73,24 @@ ListBox.prototype._init = function () {
     var _this = this;
     this._table.onclick = function (e) {
         var event = window.event ? window.event : e;
-    }
+    };
 
     this._table.onmousemove = function (e) {
         var event = window.event ? window.event : e;
 
         ListBox.cursorEvent = {clientX : event.clientX, clientY : event.clientY};
     }
-}
+};
 
 ListBox.prototype._getHtmlTemplate = function () {
     var html = ListBox._LIST_TEMPLATE.replace(new RegExp(ListBox._LIST_TABLE_ID), this._getListTableId());
 
     return html;
-}
+};
 
 ListBox.prototype._getListTableId = function () {
     return this.id + ListBox._LIST_TABLE_ID;
-}
+};
 
 ListBox.prototype.addOption = function (value, html, styleClass, tooltip) {
     var row = this._table.insertRow(-1);
@@ -112,13 +114,13 @@ ListBox.prototype.addOption = function (value, html, styleClass, tooltip) {
     cell.ondblclick = function (e) {
         var event = window.event ? window.event : e;
         _this.ondblclick(event);
-    }
+    };
     this._addSelectionSupport(cell);
     this._addTooltipSupport(cell);
 
     this.options.push(cell);
     return cell;
-}
+};
 
 ListBox.prototype.removeOption = function (index) {
     if (index > -1 && index < this.options.length) {
@@ -130,17 +132,17 @@ ListBox.prototype.removeOption = function (index) {
         }
         this._removeFromSelected(index);
     }
-}
+};
 
 ListBox.prototype.clear = function () {
     var len = this._table.rows.length;
     for(var i = 0; i < len; i ++) {
         this._table.deleteRow(0);
     }
-    this.options = new Array();
+    this.options = [];
     this.selectedIndex = -1;
-    this.selected = new Array();
-}
+    this.selected = [];
+};
 
 ListBox.prototype._addSelectionSupport = function (option) {
     var _this = this;
@@ -163,7 +165,7 @@ ListBox.prototype._addSelectionSupport = function (option) {
             if (!option.selected) {
                 if (!_this.multiple) {
                     _this.deselectAll();
-                    _this.selected = new Array();
+                    _this.selected = [];
                 }
                 option.className = _this.selectionClass;
                 option.selected = true;
@@ -189,7 +191,7 @@ ListBox.prototype._addSelectionSupport = function (option) {
             option.className = _this.selectionClass;
             option.selected = true;
             _this.selectedIndex = option.optionIndex;
-            _this.selected = new Array();
+            _this.selected = [];
             _this.selected.push(option.optionIndex);
             if (callOnclick) {
                 _this.onselect(option);
@@ -199,19 +201,19 @@ ListBox.prototype._addSelectionSupport = function (option) {
             _this.onclick(event);
         }
     }
-}
+};
 
 ListBox.prototype.selectOption = function (index) {
     if (index > -1) {
         this.options[index].onclick();
     }
-}
+};
 
 ListBox.prototype.selectOptionMulti = function (index) {
     if (index > -1) {
         this.options[index].onclick({ctrlKey : true});
     }
-}
+};
 
 ListBox.prototype.deselectAll = function () {
     for(var i = 0; i < this.options.length; i ++) {
@@ -221,13 +223,13 @@ ListBox.prototype.deselectAll = function () {
             this.options[i].className = this.options[i].defaultClass;
         }
     }
-}
+};
 
 ListBox.prototype._updateIndexes = function () {
     for(var i = 0; i < this.options.length; i ++) {
         this.options[i].optionIndex = this.options[i].parentNode.rowIndex;
     }
-}
+};
 
 ListBox.prototype._addToSelected = function (index) {
     var isInSelected = false;
@@ -239,7 +241,7 @@ ListBox.prototype._addToSelected = function (index) {
     if(!isInSelected) {
         this.selected.push(index);
     }
-}
+};
 
 ListBox.prototype._removeFromSelected = function (index) {
     for(var i = 0; i < this.selected.length; i ++) {
@@ -247,7 +249,7 @@ ListBox.prototype._removeFromSelected = function (index) {
             this.selected.splice(i, 1);
         }
     }
-}
+};
 
 ListBox.prototype.getSelectedValues = function() {
     var values = [];
@@ -256,23 +258,23 @@ ListBox.prototype.getSelectedValues = function() {
     }
 
     return values;
-}
+};
 
 ListBox.prototype.getSelected = function() {
 
     return this.selected;
-}
+};
 
 ListBox.prototype.getModel = function() {
 
     return this.listBoxModel;
-},
+};
 
 ListBox.prototype.setModel = function(listBoxModel) {
 
     this.listBoxModel = listBoxModel;
     this.refresh();
-},
+};
 
 ListBox.prototype.refresh = function() {
     this.clear();
@@ -289,11 +291,11 @@ ListBox.prototype.refresh = function() {
             this.addOption(value, valueHtml, className, tooltip);
         }
     }
-}
+};
 
 ListBox.prototype.setTooltipDelay = function (tooltipDelay) {
     this.tooltipDelay = tooltipDelay;
-}
+};
 
 ListBox.prototype._addTooltipSupport = function (option) {
     var _this = this;
@@ -322,7 +324,7 @@ ListBox.prototype._addTooltipSupport = function (option) {
 
                 getShowCustomTooltip(event)();
             }
-        }
+        };
 
         option.onmouseout = function (e) {
             var event = window.event ? window.event : e;
@@ -335,7 +337,7 @@ ListBox.prototype._addTooltipSupport = function (option) {
             }
         }
     }
-}
+};
 
 var ListBoxModel = Class.create({
     initialize: function(values) {
@@ -508,7 +510,7 @@ var PaginatedListBox = Class.create({
 
             this.status.innerHTML = this.getStatus();
 
-            this.prevLink.setDisabled(this.getModel().getFirstResult() == 0);
+            this.prevLink.setDisabled(this.getModel().getFirstResult() === 0);
 
             this.nextLink.setDisabled(this.getShowingResult() == this.getModel().getTotalResult());
 
@@ -638,11 +640,11 @@ var PaginatedListBox = Class.create({
 
         this.prevLink.onclick = function () {
             inst.onprev(inst.getModel().getFirstResult() - inst.getModel().getMaxResult());
-        }
+        };
 
         this.nextLink.onclick = function () {
             inst.onnext(inst.getShowingResult());
-        }
+        };
     }
 
 });

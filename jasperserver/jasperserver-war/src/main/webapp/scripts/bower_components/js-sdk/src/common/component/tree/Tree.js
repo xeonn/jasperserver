@@ -22,7 +22,7 @@
 
 /**
  * @author: Zakhar Tomchenko
- * @version: $Id: Tree.js 399 2014-11-12 12:02:18Z ktsaregradskyi $
+ * @version: $Id: Tree.js 1178 2015-05-06 20:40:12Z yplakosh $
  */
 
 define(function(require){
@@ -31,7 +31,6 @@ define(function(require){
     require("jquery.ui");
 
     var _ = require('underscore'),
-        $ = require('jquery'),
         Backbone = require('backbone'),
         TreeLevel = require("./TreeLevel"),
         TreeDataLayer = require("./TreeDataLayer"),
@@ -260,7 +259,7 @@ define(function(require){
 
                 parentLevel.items[levelName].render();
             }
-        }).length &&  parentLevel.$(".viewPortChunk").css({height: "auto"});
+        }).length &&  parentLevel.$(".j-view-port-chunk").css({height: "auto"});
     }
 });
 

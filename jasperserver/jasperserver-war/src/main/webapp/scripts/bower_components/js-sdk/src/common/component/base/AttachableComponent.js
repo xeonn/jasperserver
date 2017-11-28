@@ -27,7 +27,17 @@ define(function (require) {
         _ = require("underscore"),
         ClassUtil = require('common/util/classUtil');
 
-    return ClassUtil.extend({
+    return ClassUtil.extend(
+        /** @lends AttachableComponent.prototype */
+        {
+
+        /**
+         * @constructor AttachableComponent
+         * @classdesc AttachableComponent
+         * @params {object} attachTo - element to attach to
+         * @params {object} [padding={top: 5, left: 5}] - attachable component padding
+         * @throws {Error} AttachableComponent should be attached to an element if attachTo is missing
+         */
         constructor: function(attachTo, padding){
 
             this.padding = padding ? padding : {top: 5, left: 5};
@@ -40,7 +50,6 @@ define(function (require) {
         },
 
         /**
-         * @method show
          * @description Shows component near element.
          */
         show: function(){
@@ -73,6 +82,10 @@ define(function (require) {
             this.$el.show();
         },
 
+        /**
+         * @description hides component
+         * @returns {AttachableComponent}
+         */
         hide: function() {
             this.$el.hide();
 

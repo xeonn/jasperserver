@@ -49,7 +49,7 @@ FINALLY
  Do not include these notes, or any HTML comment below that begins 'NOTE: ...' in the production page
 -->
 <t:insertTemplate template="/WEB-INF/jsp/templates/page.jsp">
-    <c:set var="editMode" value='<%= request.getParameter("isEdit") %>'/>
+    <c:set var="editMode" value='${param.isEdit}'/>
     <t:putAttribute name="pageTitle"><c:choose><c:when test="${masterFlow=='olapClientConnection' and editMode=='edit'}"><spring:message code="addResources.schemaResource.edit"/></c:when><c:when test="${masterFlow=='olapClientConnection'}"><spring:message code="addResources.schemaResource.add"/></c:when><c:when test="${masterFlow!='reportUnit'}"><spring:message code="addResources.accessGrantResource.add"/></c:when><c:when test="${masterFlow!='reportUnit' and editMode=='edit'}"><spring:message code="addResources.schemaResource.edit"/></c:when><c:when test="${masterFlow=='reportUnit' and fileResource.parentFlowObject.editMode}"><spring:message code="resource.report.titleEdit"/></c:when><c:otherwise><spring:message code="resource.report.title"/></c:otherwise></c:choose></t:putAttribute>
     <t:putAttribute name="bodyID" value="addResource_locateResource"/>
     <!-- NOTE:
@@ -65,7 +65,7 @@ FINALLY
         <form action="flow.html" method="post" enctype="multipart/form-data">
             <t:insertTemplate template="/WEB-INF/jsp/templates/container.jsp">
                 <t:putAttribute name="containerClass" value="column decorated primary"/>
-                <c:set var="editMode" value='<%= request.getParameter("isEdit") %>'/>
+                <c:set var="editMode" value='${param.isEdit}'/>
                 <t:putAttribute name="containerTitle">
                     <c:choose>
                         <c:when test="${masterFlow!='reportUnit' and editMode=='edit'}"><spring:message code="addResources.schemaResource.edit"/></c:when>

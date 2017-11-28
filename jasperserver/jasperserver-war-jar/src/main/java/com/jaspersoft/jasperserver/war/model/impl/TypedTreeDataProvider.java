@@ -22,8 +22,8 @@
 package com.jaspersoft.jasperserver.war.model.impl;
 
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
+import com.jaspersoft.jasperserver.api.engine.common.service.EngineService;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Folder;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceLookup;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.CustomReportDataSource;
 import com.jaspersoft.jasperserver.api.metadata.view.domain.FilterCriteria;
@@ -47,6 +47,7 @@ public class TypedTreeDataProvider extends BaseTreeDataProvider {
     private TreeDataFilter filter;
     private List<String> supportedCustomReportDataSourceServices;
     private final String customReportDataSourceClass = "com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.CustomReportDataSource";
+    private EngineService engineService;
 
     public TreeDataFilter getFilter() {
         return filter;
@@ -69,7 +70,8 @@ public class TypedTreeDataProvider extends BaseTreeDataProvider {
                         for (ResourceLookup resourceLookup : lookupsArray) {
                             if (resourceLookup.getResourceType().equals(customReportDataSourceClass)) {
                                 CustomReportDataSource customReportDataSource = (CustomReportDataSource) getRepositoryService().getResource(executionContext, resourceLookup.getURI());
-                                if (supportedCustomReportDataSourceServices.contains(customReportDataSource.getServiceClass())) {
+                                if (supportedCustomReportDataSourceServices.contains(customReportDataSource.getServiceClass()) ||
+                                		isCustomDomainMetadataProvider(customReportDataSource)) {
                                     lookups.add(resourceLookup);
                                 }
                             } else {
@@ -94,6 +96,16 @@ public class TypedTreeDataProvider extends BaseTreeDataProvider {
                     new TreeNodeImpl(this, lookup.getName(), lookup.getLabel(), lookup.getResourceType(), lookup.getURIString()));
         }
         return filterTree(root);
+    }
+
+    /**
+     * Checks if the datasource provides metadata.
+     */
+    private boolean isCustomDomainMetadataProvider(CustomReportDataSource customReportDataSource) {
+        if (engineService == null) {
+            return false;
+        }
+        return engineService.isCustomDomainMetadataProvider(customReportDataSource);
     }
 
     private TreeNode filterTree(TreeNode tree) {
@@ -123,4 +135,8 @@ public class TypedTreeDataProvider extends BaseTreeDataProvider {
     public void setSupportedCustomReportDataSourceServices(List<String> supportedCustomReportDataSourceServices) {
         this.supportedCustomReportDataSourceServices = supportedCustomReportDataSourceServices;
     }
+
+	public void setEngineService(EngineService engineService) {
+		this.engineService = engineService;
+	}
 }

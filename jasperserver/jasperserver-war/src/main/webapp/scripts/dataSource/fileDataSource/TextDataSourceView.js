@@ -22,7 +22,7 @@
 
 /**
  * @author: Dima Gorbenko
- * @version: $Id: TextDataSourceView.js 7872 2014-10-04 09:08:52Z inesterenko $
+ * @version: $Id: TextDataSourceView.js 8179 2015-01-27 12:34:21Z psavushchik $
  */
 
 define(function(require) {
@@ -213,7 +213,7 @@ define(function(require) {
 			var self = this;
 			_.each(elementsInSectionToAdjust, function(elementName, valueItShouldHaveToBeEnabled) {
 				var section = self.$el.find("[name=" + elementName + "]");
-				section.toggleClass("hidden", !(self.model.get(modelAttrId) === valueItShouldHaveToBeEnabled));
+				section.toggleClass("hidden", self.model.get(modelAttrId) !== valueItShouldHaveToBeEnabled);
 			});
 		},
 

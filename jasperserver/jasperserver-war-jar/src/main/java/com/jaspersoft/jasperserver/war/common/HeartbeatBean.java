@@ -45,12 +45,28 @@ import net.sf.jasperreports.engine.JRParameter;
 import net.sf.jasperreports.engine.util.JRLoader;
 import net.sf.jasperreports.engine.util.JRSaver;
 
-import org.apache.commons.httpclient.Header;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpStatus;
-import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.Header;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.ProtocolException;
+import org.apache.http.client.config.CookieSpecs;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.methods.RequestBuilder;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.client.LaxRedirectStrategy;
+import org.apache.http.impl.conn.BasicHttpClientConnectionManager;
+import org.apache.http.protocol.HttpContext;
+import org.apache.http.util.EntityUtils;
 import org.springframework.web.context.ServletContextAware;
 
 import com.jaspersoft.jasperserver.api.engine.common.service.EngineService;
@@ -80,9 +96,9 @@ public class HeartbeatBean implements ServletContextAware, HeartbeatContributor
 	private static final HeartbeatContributor OPTOUT_HEARTBEAT_CONTRIBUTOR = 
 		new HeartbeatContributor()
 		{
-			public void contributeToHttpCall(PostMethod post) 
+			public void contributeToHttpCall(HeartbeatCall call) 
 			{
-				post.addParameter("callCount", "-1");
+				call.addParameter("callCount", "-1");
 			}
 		};
 	
@@ -492,94 +508,147 @@ public class HeartbeatBean implements ServletContextAware, HeartbeatContributor
 		if (log.isDebugEnabled())
 			log.debug("Heartbeat calling: " + url);
 		
-		HttpClient httpClient = new HttpClient();
-
-		PostMethod post = new PostMethod(url);
-
-		try 
+		CloseableHttpClient client = createHttpClient();
+		try
 		{
-			if (heartbeatId != null)
+			HttpPost postRequest = new HttpPost(url);
+			try
 			{
-				post.addParameter("id", heartbeatId);
-			}
-
-			if (contributor != null)
-			{
-				contributor.contributeToHttpCall(post);
-			}
-			
-			int statusCode = httpClient.executeMethod(post);
-			if (statusCode == HttpStatus.SC_OK)
-			{
-				if (heartbeatId == null)
+				StandardHeartbeatCall call = new StandardHeartbeatCall();
+				if (heartbeatId != null)
 				{
-					heartbeatId = post.getResponseBodyAsString();
-					heartbeatId = heartbeatId == null ? null : heartbeatId.trim();
-					
-					localIdProperties.setProperty(PROPERTY_HEARTBEAT_ID, heartbeatId);
+					call.addParameter("id", heartbeatId);
+				}
 
-					saveLocalIdProperties();
+				if (contributor != null)
+				{
+					contributor.contributeToHttpCall(call);
+				}
+				
+				UrlEncodedFormEntity postData = new UrlEncodedFormEntity(call.getParameters(), "UTF-8");
+				postRequest.setEntity(postData);
+				
+				CloseableHttpResponse response = client.execute(postRequest);
+				try
+				{
+					int statusCode = response.getStatusLine().getStatusCode();
+					if (statusCode == HttpStatus.SC_OK)
+					{
+						String responseString = EntityUtils.toString(response.getEntity());
+						if (heartbeatId == null)
+						{
+							heartbeatId = responseString == null ? null : responseString.trim();
+							
+							localIdProperties.setProperty(PROPERTY_HEARTBEAT_ID, heartbeatId);
+
+							saveLocalIdProperties();
+						}
+					}
+					else
+					{
+						EntityUtils.consume(response.getEntity());
+						if (log.isDebugEnabled())
+							log.debug("Connecting to heartbeat listener URL failed. Status code: " + statusCode);
+					}
+				}
+				finally
+				{
+					response.close();
 				}
 			}
-			else if ( 
-				//supported types of redirect
-				statusCode == HttpStatus.SC_MOVED_PERMANENTLY
-				|| statusCode == HttpStatus.SC_MOVED_TEMPORARILY
-				|| statusCode == HttpStatus.SC_SEE_OTHER
-				|| statusCode == HttpStatus.SC_TEMPORARY_REDIRECT
-				)
-			{
-				Header header = post.getResponseHeader("location");
-				if (header != null)
-				{
-					if (log.isDebugEnabled())
-						log.debug("Heartbeat listener redirected.");
-
-					httpCall(header.getValue(), contributor);
-				}
-				else
-				{
-					if (log.isDebugEnabled())
-						log.debug("Heartbeat listener redirected to unknown destination.");
-				}
-			}
-			else
+			catch (IOException e)
 			{
 				if (log.isDebugEnabled())
-					log.debug("Connecting to heartbeat listener URL failed. Status code: " + statusCode);
+					log.debug("Connecting to heartbeat listener URL failed.", e);
 			}
-		}
-		catch (IOException e)
-		{
-			if (log.isDebugEnabled())
-				log.debug("Connecting to heartbeat listener URL failed.", e);
+			finally
+			{
+				clearCache();
+			}
 		}
 		finally
 		{
-			// Release current connection to the connection pool once you are done
-			post.releaseConnection();
-			
-			clearCache();
+			try
+			{
+				client.close();
+			}
+			catch (IOException e)
+			{
+				if (log.isWarnEnabled())
+				{
+					log.warn("Error while closing the heartbeat client", e);
+				}
+			}
 		}
 	}
-	
-	public void contributeToHttpCall(PostMethod post)
+
+	protected CloseableHttpClient createHttpClient()
 	{
-		post.addParameter("callCount", String.valueOf(callCount));
-		post.addParameter("osName", osName);
-		post.addParameter("osVersion", osVersion);
-		post.addParameter("javaVendor", javaVendor);
-		post.addParameter("javaVersion", javaVersion);
-		post.addParameter("serverInfo", serverInfo);
-		post.addParameter("productName", productName);
-		post.addParameter("productVersion", productVersion);
-		post.addParameter("dbName", dbName);
-		post.addParameter("dbVersion", dbVersion);
-		post.addParameter("serverLocale", Locale.getDefault().toString());
+		HttpClientBuilder clientBuilder = HttpClients.custom();
+		// https://www.jaspersoft.com/heartbeat/heartbeat.php redirects with 301, we want to redirect the POST
+		clientBuilder.setRedirectStrategy(new LaxRedirectStrategy()
+		{
+			@Override
+			public HttpUriRequest getRedirect(HttpRequest request,
+					HttpResponse response, HttpContext context) throws ProtocolException
+			{
+				HttpUriRequest defaultRedirect = super.getRedirect(request, response, context);
+				HttpUriRequest redirect = defaultRedirect;
+				
+		        String origMethod = request.getRequestLine().getMethod();
+	            int status = response.getStatusLine().getStatusCode();
+				// LaxRedirectStrategy changes to GET all POST redirects other than 307, see https://issues.apache.org/jira/browse/HTTPCLIENT-1248
+				// what we want is reposting on redirect 
+				if (origMethod.equalsIgnoreCase(HttpPost.METHOD_NAME))
+				{
+					if (defaultRedirect.getRequestLine().getMethod().equalsIgnoreCase(HttpGet.METHOD_NAME)
+							&& (status == HttpStatus.SC_MOVED_PERMANENTLY || status == HttpStatus.SC_MOVED_TEMPORARILY
+							|| status == HttpStatus.SC_SEE_OTHER || status == HttpStatus.SC_TEMPORARY_REDIRECT))
+					{
+						// create a repost request
+						HttpUriRequest repostRequest = RequestBuilder.copy(request).setUri(defaultRedirect.getURI()).build();
+						redirect = repostRequest;
+					}
+					
+					// there's a bug in apache httpclient where a redirected POST preserves its generated headers,
+					// causing org.apache.http.protocol.RequestContent.process to throw new ProtocolException("Content-Length header already present")
+					// in theory we should restore original request headers here (via HttpRequestWrapper.getOriginal), but it our case there are none so we'll simply remove all headers
+					redirect.setHeaders(new Header[0]);
+				}
+				
+				return redirect;
+			}
+		});
+		
+		// single connection
+		BasicHttpClientConnectionManager connManager = new BasicHttpClientConnectionManager();
+		clientBuilder.setConnectionManager(connManager);
+		
+		// ignore cookies
+		RequestConfig requestConfig = RequestConfig.custom().setCookieSpec(CookieSpecs.IGNORE_COOKIES).build();
+		clientBuilder.setDefaultRequestConfig(requestConfig);
+		
+		CloseableHttpClient client = clientBuilder.build();
+		return client;
+	}
+	
+	public void contributeToHttpCall(HeartbeatCall call)
+	{
+		call.addParameter("callCount", String.valueOf(callCount));
+		call.addParameter("osName", osName);
+		call.addParameter("osVersion", osVersion);
+		call.addParameter("javaVendor", javaVendor);
+		call.addParameter("javaVersion", javaVersion);
+		call.addParameter("serverInfo", serverInfo);
+		call.addParameter("productName", productName);
+		call.addParameter("productVersion", productVersion);
+		call.addParameter("dbName", dbName);
+		call.addParameter("dbVersion", dbVersion);
+		call.addParameter("serverLocale", Locale.getDefault().toString());
 
 		try
 		{
-			post.addParameter("tenants", String.valueOf(tenantService.getNumberOfTenants(null)));
+			call.addParameter("tenants", String.valueOf(tenantService.getNumberOfTenants(null)));
 		}
 		catch (Exception e)
 		{
@@ -597,7 +666,7 @@ public class HeartbeatBean implements ServletContextAware, HeartbeatContributor
 				{
 					sbuffer.append(", " + userLocales[i].getCode());
 				}
-				post.addParameter("userLocales", sbuffer.substring(2));
+				call.addParameter("userLocales", sbuffer.substring(2));
 			}
 		}
 		catch (Exception e)
@@ -606,16 +675,16 @@ public class HeartbeatBean implements ServletContextAware, HeartbeatContributor
 				log.debug("Getting user locales failed.", e);
 		}
 		
-		clientInfoCache.contributeToHttpCall(post);
+		clientInfoCache.contributeToHttpCall(call);
 
-		databaseInfoCache.contributeToHttpCall(post);
-		customDSInfoCache.contributeToHttpCall(post);
+		databaseInfoCache.contributeToHttpCall(call);
+		customDSInfoCache.contributeToHttpCall(call);
 
-        awsEc2Contributor.contributeToHttpCall(post);
+        awsEc2Contributor.contributeToHttpCall(call);
 
         if (optionalContributor != null)
 		{
-			optionalContributor.contributeToHttpCall(post);
+			optionalContributor.contributeToHttpCall(call);
 		}
 	}
 	

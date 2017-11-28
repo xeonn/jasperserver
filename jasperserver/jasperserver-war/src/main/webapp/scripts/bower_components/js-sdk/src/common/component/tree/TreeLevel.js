@@ -22,7 +22,7 @@
 
 /**
  * @author: Zakhar Tomchenko
- * @version: $Id: TreeLevel.js 399 2014-11-12 12:02:18Z ktsaregradskyi $
+ * @version: $Id: TreeLevel.js 1178 2015-05-06 20:40:12Z yplakosh $
  */
 
 define(function (require) {
@@ -66,11 +66,10 @@ define(function (require) {
             this.plugins = [];
 
             var defaults = {el: this.el, model: this.model};
+
             for (var i = 0, l = options.plugins.length; i<l; i++){
                 var plugin = options.plugins[i].constr;
-                if(!(plugin === TooltipPlugin && this.parent)) {
-                    this.plugins.push(new plugin(_.extend({}, defaults, options.plugins[i].options)));
-                }
+                this.plugins.push(new plugin(_.extend({}, defaults, options.plugins[i].options)));
             }
 
             this.dataLayer = this.owner.getDataLayer(this);
@@ -209,7 +208,7 @@ define(function (require) {
         },
 
         hasItems: function() {
-            return !!this.$("> .subcontainer > .viewPortChunk > ul > li").length;
+            return !!this.$("> .subcontainer > .j-view-port-chunk > ul > li").length;
         },
 
         clearCache: function() {
@@ -263,7 +262,7 @@ define(function (require) {
         this.$el.removeClass(this.loadingClass).addClass(this.openClass);
         _.invoke(this.plugins, "itemsRendered", this.list.model, this.list);
 
-        var count = this.list.$("> .viewPortChunk > ul > li").addClass(this.cid).length,
+        var count = this.list.$("> .j-view-port-chunk > ul > li").addClass(this.cid).length,
             height = _.isFunction(this.levelHeight) ? this.levelHeight() : this.levelHeight;
 
         if (height && (count * this.listItemHeight) > height) {

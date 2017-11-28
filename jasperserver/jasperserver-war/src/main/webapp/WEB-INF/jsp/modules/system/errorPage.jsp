@@ -33,6 +33,7 @@
 <%@ page import="net.sf.jasperreports.engine.JRRuntimeException" %>
 <%@ page import="com.jaspersoft.jasperserver.api.SessionAttribMissingException" %>
 <%@ page import="org.apache.commons.lang.exception.ExceptionUtils" %>
+<%@ page import="com.jaspersoft.jasperserver.api.engine.jasperreports.common.JSReportExecutionRequestCancelledException" %>
 <%@ taglib prefix="t" uri="http://tiles.apache.org/tags-tiles" %>
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 
@@ -77,7 +78,7 @@
                             ex = securityEx;
                         }
                     }
-                    if (ex != null && ex instanceof ReportCanceledException) {
+                    if (ex != null && (ex instanceof ReportCanceledException || ex instanceof JSReportExecutionRequestCancelledException)) {
                         response.setHeader("SuppressError", "true");
                     }
 
@@ -127,8 +128,8 @@
                     <%  } %>
                     
                     	<c:set var="showLocalizedJRRuntimeException" value="${false}" />
-                    <%	if ((ex instanceof JRRuntimeException && ex != null && ((JRRuntimeException)ex).hasLocalizedMessage())
-                            || (ex != null && ex.getCause() != null &&  (ex.getCause() instanceof JRRuntimeException && ((JRRuntimeException)ex.getCause()).hasLocalizedMessage()))) { %>
+                    <%	if ((ex instanceof JRRuntimeException && ((JRRuntimeException)ex).getMessageKey() != null)
+                            || (ex != null && (ex.getCause() instanceof JRRuntimeException && ((JRRuntimeException)ex.getCause()).getMessageKey() != null))) { %>
                     	<c:set var="showLocalizedJRRuntimeException" value="${true}" />
                     <%	} %>
 
@@ -157,7 +158,7 @@
                                 pageContext.setAttribute("exceptionMessage", ex.getMessage());
                             %>
                             <p id="clarification" class="message">
-                            	<c:out value="${exceptionMessage}" />
+                            	${exceptionMessage}
                             </p>
                         </c:when>
                         <c:otherwise>
@@ -199,14 +200,14 @@
                                         %>
 	                                            <div id="errorMessages">
 	                                                <h3><spring:message code="jsp.JSErrorPage.errorMsg"/></h3>
-	                                                <p class="large"><c:out value="${exceptionMessage}"/></p>
+	                                                <p class="large">${exceptionMessage}</p>
 	                                            </div>
 
                                         <c:if test="${sessionScope.showStacktraceMessage}">
 	                                            <c:if test="${isIPad}"><div class="swipeScroll" style="height:480px;overflow:hidden;border-top:solid 1px #ccc;padding-top:12px;"></c:if>                                           
 		                                            <div id="completeStackTrace" style="padding-bottom:350px;">
 		                                                <h3><spring:message code="jsp.JSErrorPage.errorTrace"/></h3>
-		                                                <p style="white-space:normal;"><c:out value="${exceptionStackTrace}"/></p>
+		                                                <p style="white-space:normal;">${exceptionStackTrace}</p>
 		                                            </div>
 	                                            <c:if test="${isIPad}"></div></c:if>
                                         </c:if>

@@ -21,8 +21,10 @@
 
 
 /**
- * @version: $Id: dynamicTree.utils.js 7872 2014-10-04 09:08:52Z inesterenko $
+ * @version: $Id: dynamicTree.utils.js 8179 2015-01-27 12:34:21Z psavushchik $
  */
+
+/* global dynamicTree, deepClone, isIPad, TouchController */
 
     // Creating RepositoryFolder class.
 dynamicTree.RepositoryFolder = function(options) {

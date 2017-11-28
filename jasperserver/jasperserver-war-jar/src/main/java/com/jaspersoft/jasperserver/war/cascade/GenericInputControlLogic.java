@@ -105,7 +105,16 @@ public class GenericInputControlLogic<T extends InputControlsContainer> implemen
             ReportInputControlInformation controlInfo = infos.getInputControlInformation(inputControl.getName());
             if (controlInfo != null) // in cases where there is IC that does not have a matching IC in the jrxml
             {
+                //Technically inputControl already contains correct label and description
+                //but they could be not i18n-ized.
+                //since we need to use Report bundles for this it should be done during
+                //creation of ReportInputControlInformation object.
+                //currently the flow is the following:
+                //inputControl.label -> ReportInputControlInformation.label -> i18n -> inputControl.label
+                //latest step is done right here.
                 inputControl.setLabel(controlInfo.getPromptLabel());
+                inputControl.setDescription(controlInfo.getDescription());
+
                 ReportInputControlValuesInformation controlValueInfos = controlInfo.getReportInputControlValuesInformation();
 
                 if (controlValueInfos != null) {

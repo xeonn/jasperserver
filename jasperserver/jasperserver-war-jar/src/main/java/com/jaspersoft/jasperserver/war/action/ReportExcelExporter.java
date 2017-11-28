@@ -20,32 +20,37 @@
  */
 package com.jaspersoft.jasperserver.war.action;
 
-import java.util.Map;
+import java.io.OutputStream;
 
 import javax.servlet.http.HttpServletResponse;
 
-import jxl.write.biff.RowsExceededException;
 import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JRExporterParameter;
 import net.sf.jasperreports.engine.JRPropertiesHolder;
 import net.sf.jasperreports.engine.JRPropertiesUtil;
-import net.sf.jasperreports.engine.export.JExcelApiExporter;
-import net.sf.jasperreports.engine.export.JExcelApiExporterParameter;
-import net.sf.jasperreports.engine.export.JRXlsExporterParameter;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.export.JRExporterContext;
+import net.sf.jasperreports.engine.export.JRXlsAbstractExporter;
+import net.sf.jasperreports.export.AbstractXlsExporterConfiguration;
+import net.sf.jasperreports.export.AbstractXlsReportConfiguration;
+import net.sf.jasperreports.export.SimpleExporterInput;
+import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
+import net.sf.jasperreports.export.XlsExporterConfiguration;
+import net.sf.jasperreports.export.XlsReportConfiguration;
 
 import org.springframework.webflow.execution.RequestContext;
 
-import com.jaspersoft.jasperserver.api.JSException;
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.common.ExportParameters;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.common.XlsExportParametersBean;
+import com.jaspersoft.jasperserver.api.engine.jasperreports.util.ExportUtil;
 
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ReportExcelExporter.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: ReportExcelExporter.java 54728 2015-04-24 15:28:20Z tdanciu $
  */
-public class ReportExcelExporter extends AbstractReportExporter{
+public class ReportExcelExporter extends AbstractReportExporter
+{
 
 	private static final String DIALOG_NAME = "excelExportParams";
 	
@@ -72,46 +77,53 @@ public class ReportExcelExporter extends AbstractReportExporter{
 		this.exportParameters = exportParameters;
 	}
 
-	public void export(RequestContext context, ExecutionContext executionContext, String reportUnitURI, Map baseParameters) throws JRException,JSException {
-		JExcelApiExporter exporter = new JExcelApiExporter(getJasperReportsContext());
-		exporter.setParameters(baseParameters);
+	public void export(RequestContext context, ExecutionContext executionContext, JasperPrint jasperPrint, OutputStream outputStream) throws JRException
+	{
+		ExportUtil exportUtil = ExportUtil.getInstance(getJasperReportsContext());
+		JRXlsAbstractExporter<? extends XlsReportConfiguration, ? extends XlsExporterConfiguration, ? extends JRExporterContext> exporter = 
+				exportUtil.createXlsExporter();
+
+		exporter.setExporterInput(new SimpleExporterInput(jasperPrint));
+		exporter.setExporterOutput(new SimpleOutputStreamExporterOutput(outputStream));
+
 		XlsExportParametersBean exportParams = (XlsExportParametersBean)getExportParameters(context);
 		
+		AbstractXlsReportConfiguration xlsReportConfig = exportUtil.createXlsReportConfiguration();
+		
 		if (exportParams.isOverrideReportHints()) {
-			exporter.setParameter(JRExporterParameter.PARAMETERS_OVERRIDE_REPORT_HINTS, Boolean.TRUE);
+			xlsReportConfig.setOverrideHints(Boolean.TRUE);
 		}
 		
 		if (exportParams.getOnePagePerSheet() != null)
-			exporter.setParameter(JRXlsExporterParameter.IS_ONE_PAGE_PER_SHEET, exportParams.getOnePagePerSheet());
+			xlsReportConfig.setOnePagePerSheet(exportParams.getOnePagePerSheet());
 		if (exportParams.getDetectCellType() != null)
-			exporter.setParameter(JRXlsExporterParameter.IS_DETECT_CELL_TYPE, exportParams.getDetectCellType());
+			xlsReportConfig.setDetectCellType(exportParams.getDetectCellType());
 		if (exportParams.getRemoveEmptySpaceBetweenRows() != null)
-			exporter.setParameter(JRXlsExporterParameter.IS_REMOVE_EMPTY_SPACE_BETWEEN_ROWS, exportParams.getRemoveEmptySpaceBetweenRows());
+			xlsReportConfig.setRemoveEmptySpaceBetweenRows(exportParams.getRemoveEmptySpaceBetweenRows());
 		if (exportParams.getRemoveEmptySpaceBetweenColumns() != null)
-			exporter.setParameter(JRXlsExporterParameter.IS_REMOVE_EMPTY_SPACE_BETWEEN_COLUMNS, exportParams.getRemoveEmptySpaceBetweenColumns());
+			xlsReportConfig.setRemoveEmptySpaceBetweenColumns(exportParams.getRemoveEmptySpaceBetweenColumns());
 		if (exportParams.getWhitePageBackground() != null)
-			exporter.setParameter(JRXlsExporterParameter.IS_WHITE_PAGE_BACKGROUND, exportParams.getWhitePageBackground());
+			xlsReportConfig.setWhitePageBackground(exportParams.getWhitePageBackground());
 		if (exportParams.getIgnoreGraphics() != null)
-			exporter.setParameter(JRXlsExporterParameter.IS_IGNORE_GRAPHICS, exportParams.getIgnoreGraphics());
+			xlsReportConfig.setIgnoreGraphics(exportParams.getIgnoreGraphics());
 		if (exportParams.getCollapseRowSpan() != null)
-			exporter.setParameter(JRXlsExporterParameter.IS_COLLAPSE_ROW_SPAN, exportParams.getCollapseRowSpan());
+			xlsReportConfig.setCollapseRowSpan(exportParams.getCollapseRowSpan());
 		if (exportParams.getIgnoreCellBorder() != null)
-			exporter.setParameter(JRXlsExporterParameter.IS_IGNORE_CELL_BORDER, exportParams.getIgnoreCellBorder());
+			xlsReportConfig.setIgnoreCellBorder(exportParams.getIgnoreCellBorder());
 		if (exportParams.getFontSizeFixEnabled() != null)
-			exporter.setParameter(JRXlsExporterParameter.IS_FONT_SIZE_FIX_ENABLED, exportParams.getFontSizeFixEnabled());
+			xlsReportConfig.setFontSizeFixEnabled(exportParams.getFontSizeFixEnabled());
 		if (exportParams.getMaximumRowsPerSheet() != null)
-			exporter.setParameter(JRXlsExporterParameter.MAXIMUM_ROWS_PER_SHEET, exportParams.getMaximumRowsPerSheet());
+			xlsReportConfig.setMaxRowsPerSheet(exportParams.getMaximumRowsPerSheet());
 		if(exportParams.getXlsFormatPatternsMap() != null && !exportParams.getXlsFormatPatternsMap().isEmpty())
-			exporter.setParameter(JRXlsExporterParameter.FORMAT_PATTERNS_MAP, exportParams.getXlsFormatPatternsMap());
-		exporter.setParameter(JExcelApiExporterParameter.CREATE_CUSTOM_PALETTE, Boolean.TRUE);
-		try{
-			exporter.exportReport();
-		}catch(JRException e){
-			if(e.getCause() instanceof RowsExceededException)
-				throw new JSException("jsexception.too.many.data.rows");
-			else
-				throw e;
-		}
+			xlsReportConfig.setFormatPatternsMap(exportParams.getXlsFormatPatternsMap());
+		
+		exportUtil.setConfiguration(exporter, xlsReportConfig);
+
+		AbstractXlsExporterConfiguration xlsExporterConfig = exportUtil.createXlsExporterConfiguration();
+		xlsExporterConfig.setCreateCustomPalette(Boolean.TRUE);
+		exportUtil.setConfiguration(exporter, xlsExporterConfig);
+		
+		exporter.exportReport();
 	}
 
 	protected String getContentType(RequestContext context) {

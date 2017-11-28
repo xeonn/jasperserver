@@ -1,1 +1,0 @@
-define(["jquery"],function(n){return{load:function(e,r){return n.ajax(e,r)}}});

@@ -22,7 +22,7 @@
 
 /**
  * @author Sergey Prilukin
- * @version: $Id: CacheableDataProvider.js 411 2014-11-14 14:20:31Z psavushchik $
+ * @version: $Id: CacheableDataProvider.js 1160 2015-04-28 12:46:42Z spriluki $
  */
 
 /**
@@ -36,10 +36,10 @@ define(function (require) {
     var $ = require("jquery"),
         _ = require("underscore");
 
-    var CacheableDataProvider = function() {
+    var CacheableDataProvider = function(data) {
         _.bindAll(this, "getData");
 
-        this.data = [];
+        this.data = data || [];
     };
 
     _.extend(CacheableDataProvider.prototype, {

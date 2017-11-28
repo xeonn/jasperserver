@@ -31,22 +31,11 @@ import java.io.InputStream;
  * It extends {@link com.jaspersoft.jasperserver.api.metadata.common.domain.Resource}
  * 
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: FileResource.java 51276 2014-11-09 17:44:57Z ktsaregradskyi $
+ * @version $Id: FileResource.java 53873 2015-04-07 18:59:44Z mchan $
  */
 @JasperServerAPI
-public interface FileResource extends Resource
+public interface FileResource extends Resource, FileResourceBase
 {
-	String TYPE_IMAGE = "img";
-	String TYPE_FONT = "font";
-	String TYPE_JRXML = "jrxml";
-	String TYPE_JAR = "jar";
-	String TYPE_RESOURCE_BUNDLE = "prop";
-	String TYPE_STYLE_TEMPLATE = "jrtx";
-	String TYPE_XML = "xml";
-	String TYPE_JSON = "json";
-    String TYPE_CSS = "css";
-    String TYPE_ACCESS_GRANT_SCHEMA = "accessGrantSchema";
-    String TYPE_DASHBOARD_COMPONENTS_SCHEMA = "dashboardComponent";
 
     /**
      * Returns <code>true</code> if the resource has some file.

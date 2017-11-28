@@ -22,7 +22,7 @@ package com.jaspersoft.jasperserver.export.modules.repository.beans;
 
 /**
  * @author tkavanagh
- * @version $Id: ResourceBean.java 51858 2014-12-06 20:46:19Z vsabadosh $
+ * @version $Id: ResourceBean.java 55164 2015-05-06 20:54:37Z mchan $
  */
 
 import com.jaspersoft.jasperserver.api.common.util.spring.StaticApplicationContext;
@@ -210,6 +210,11 @@ public abstract class ResourceBean{
 		return refBeans;
 	}
 
+    /**
+     *
+     * @deprecated Use ResourceBean#handleReferences(Resource, ResourceReferenceBean[], ResourceImportHandler) instead
+     */
+    @Deprecated
 	protected List<ResourceReference> handleReferences(ResourceReferenceBean[] beanReferences,
 													   ResourceImportHandler importHandler) {
 		List<ResourceReference> references;
@@ -224,6 +229,29 @@ public abstract class ResourceBean{
 		}
 		return references;
 	}
+
+    protected List<ResourceReference> handleReferences(Resource parentResource,
+                                                       ResourceReferenceBean[] beanReferences,
+                                                       ResourceImportHandler importHandler) {
+        List<ResourceReference> references;
+        if (beanReferences == null) {
+            references = null;
+        } else {
+            references = new ArrayList<ResourceReference>(beanReferences.length);
+            for (ResourceReferenceBean beanReference : beanReferences) {
+                ResourceReference reference;
+                String externalURI = beanReference.getExternalURI();
+                if (externalURI != null && externalURI.equals(parentResource.getURIString())){
+                    reference = new ResourceReference(externalURI);
+                } else {
+                    reference = importHandler.handleReference(beanReference);
+                }
+
+                references.add(reference);
+            }
+        }
+        return references;
+    }
 
 	/*
 		 * getters and setters
@@ -299,5 +327,13 @@ public abstract class ResourceBean{
 
 	public void setExportedWithPermissions(boolean exportedWithPermissions) {
 		this.exportedWithPermissions = exportedWithPermissions;
+	}
+
+	public boolean isDiagnostic() {
+		return false; // default behavior is none
+}
+
+	public void setDiagnostic(boolean value) {
+		// default behavior is none
 	}
 }

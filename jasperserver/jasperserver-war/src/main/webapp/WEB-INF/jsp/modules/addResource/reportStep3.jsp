@@ -22,6 +22,7 @@
 <%@ taglib prefix="t" uri="http://tiles.apache.org/tags-tiles" %>
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="js" uri="/WEB-INF/jasperserver.tld" %>
 <!--
 *** DEVELOPMENT NOTES ***
 
@@ -67,6 +68,7 @@ FINALLY
         <jsp:include page="/WEB-INF/jsp/templates/addJasperReportResourcesAndControls.jsp"/>
 
         <script type="text/javascript">
+            <js:out javaScriptEscape="true">
             if (typeof __jrsConfigs__.addJasperReport === "undefined") {
                 __jrsConfigs__.addJasperReport = {};
             }
@@ -145,6 +147,7 @@ FINALLY
         </c:forEach>
         __jrsConfigs__.addJasperReport.suggestedControls = suggestedControls;
 
+            </js:out>
         </script>
     </t:putAttribute>
     <t:putAttribute name="bodyContent">

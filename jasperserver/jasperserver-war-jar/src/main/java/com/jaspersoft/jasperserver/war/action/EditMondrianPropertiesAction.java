@@ -104,6 +104,15 @@ public class EditMondrianPropertiesAction extends MultiAction {
                 || option.equals("mondrian.result.highCardChunkSize")
                 || option.equals("mondrian.rolap.SparseSegmentValueThreshold")
                 || option.equals("mondrian.rolap.maxConstraints")
+                || option.equals("adhoc.olap.maxFilterValues")
+                || option.equals("mondrian.rolap.maxQueryThreads")
+                || option.equals("mondrian.rolap.evaluate.MaxEvalDepth")
+                || option.equals("mondrian.result.highCardChunkSize")
+                || option.equals("mondrian.rolap.SparseSegmentValueThreshold")
+                || option.equals("mondrian.rolap.maxCacheThreads")
+                || option.equals("mondrian.rolap.maxSqlThreads")
+                || option.equals("mondrian.rolap.maxConstraints")
+                || option.equals("mondrian.server.monitor.executionHistorySize")
                 ) {
             try {
                 test = new Integer(value);
@@ -115,6 +124,13 @@ public class EditMondrianPropertiesAction extends MultiAction {
                 return "JAM_019_WHOLE_NUMBER_ERROR";
             }
 
+        } else if (option.equals("mondrian.rolap.cellBatchSize")) {
+            try {
+                test = new Integer(value);
+            } catch (Exception e) {
+                log.debug(option + " invalid input");
+                return "JAM_019_WHOLE_NUMBER_ERROR";
+            }
         } else if (option.equals("mondrian.xmla.drillthroughMaxRows")
                 || option.equals("mondrian.result.limit")
                 || option.equals("mondrian.rolap.iterationLimit")
@@ -132,6 +148,7 @@ public class EditMondrianPropertiesAction extends MultiAction {
             }
 
         } else if (option.equals("mondrian.rolap.SparseSegmentDensityThreshold")) {
+            // TODO: Check if this parameter is still valid
             try {
                 Double d = new Double(value);
                 if (d.doubleValue() > 1.0 || d.doubleValue() < 0.0) {

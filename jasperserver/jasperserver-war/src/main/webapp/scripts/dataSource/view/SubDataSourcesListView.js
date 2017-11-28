@@ -19,6 +19,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+
+/**
+ * @version: $Id: SubDataSourcesListView.js 8790 2015-04-22 21:28:09Z obobruyk $
+ */
+
+/* global disableSelectionWithoutCursorStyle, enableSelection */
+
 define(function (require) {
     "use strict";
 

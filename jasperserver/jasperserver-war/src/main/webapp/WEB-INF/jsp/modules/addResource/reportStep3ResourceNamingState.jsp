@@ -22,20 +22,24 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jstl/core_rt" %>
 <%@ taglib uri="/spring" prefix="spring"%>
 <%@ taglib prefix="authz" uri="http://www.springframework.org/security/tags" %>
+<%@ taglib prefix="js" uri="/WEB-INF/jasperserver.tld" %>
+
 <script type="text/javascript">
     if (typeof localContext === "undefined") {
         localContext = {};
     }
 
     localContext.initOptions = {
+        <js:out javaScriptEscape="true">
         organizationId: "${organizationId}",
         publicFolderUri: "${publicFolderUri}",
         expectedType: "${expectedFileType}",
         folderURI: "${fileResource.fileResource.parentFolder}",
         isEditMode: ${fileResource.editMode},
         type: "folder",
-        resourceIdNotSupportedSymbols: "<spring:message code="${resourceIdNotSupportedSymbols}" javaScriptEscape="true"/>",
+        resourceIdNotSupportedSymbols: "${resourceIdNotSupportedSymbols}",
         isBrowseActive: ${fileResource.subflowMode && (fileResource.fileResource.fileType == 'olapMondrianSchema' || fileResource.fileResource.fileType == 'accessGrantSchema')}
+        </js:out>
     };
 
     if (typeof resource === "undefined") {

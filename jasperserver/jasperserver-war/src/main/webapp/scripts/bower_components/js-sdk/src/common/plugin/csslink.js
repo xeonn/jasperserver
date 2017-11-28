@@ -22,7 +22,7 @@
 
 /**
  * @author nmarcu@jaspersoft.com
- * @version: $Id: csslink.js 270 2014-10-13 19:58:03Z agodovanets $
+ * @version: $Id: csslink.js 812 2015-01-27 11:01:30Z psavushchik $
  */
 
 /**
@@ -42,7 +42,7 @@ define({
         link.href = require.toUrl(name);
 
         // FIXME: probably webfonts could be better identified
-        if (link.href.indexOf('font') != 0) {
+        if (link.href.indexOf('font') !== 0) {
             link.className = 'jrWebFont';
         }
 

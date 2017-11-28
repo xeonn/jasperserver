@@ -71,6 +71,7 @@ public class ResourceDescriptor {
     public static final String TYPE_OLAP_MONDRIAN_CONNECTION = "olapMondrianCon";
     public static final String TYPE_OLAP_XMLA_CONNECTION = "olapXmlaCon";
     public static final String TYPE_MONDRIAN_SCHEMA = "olapMondrianSchema";
+  	public static final String TYPE_MONGODB_JDBC_CONFIG = FileResource.TYPE_MONGODB_JDBC_CONFIG;
 	public static final String TYPE_ACCESS_GRANT_SCHEMA = FileResource.TYPE_ACCESS_GRANT_SCHEMA; // Pro-only
     public static final String TYPE_UNKNOW = "unknow";
     public static final String TYPE_LOV = "lov"; // List of values...
@@ -582,7 +583,7 @@ public class ResourceDescriptor {
     public static boolean isFileType(String fileType){
         return CONTENT_TYPE_PDF.equals(fileType) || CONTENT_TYPE_HTML.equals(fileType) || CONTENT_TYPE_XLS.equals(fileType) || CONTENT_TYPE_RTF.equals(fileType) ||
                CONTENT_TYPE_CSV.equals(fileType) || CONTENT_TYPE_IMAGE.equals(fileType) || TYPE_RESOURCE_BUNDLE.equals(fileType) || TYPE_FONT.equals(fileType) ||
-               TYPE_CLASS_JAR.equals(fileType) || TYPE_JRXML.equals(fileType) || TYPE_STYLE_TEMPLATE.equals(fileType) || TYPE_XML_FILE.equals(fileType);
+               TYPE_CLASS_JAR.equals(fileType) || TYPE_JRXML.equals(fileType) || TYPE_STYLE_TEMPLATE.equals(fileType) || TYPE_XML_FILE.equals(fileType) || TYPE_MONGODB_JDBC_CONFIG.equals(fileType);
     }
 
     public void setStrictMin(boolean strictMin) {

@@ -310,9 +310,9 @@ public class UserManagerAction extends BaseManagerAction {
                 closeAuditEvent("deleteUser");
             }
             else if (userNames.size() > 0) {
-                createAuditEvent("deleteAllUsers");
+                createAuditEvent("deleteUsers");
                 managerService.deleteAll(null, userNames);
-                closeAuditEvent("deleteAllUsers");
+                closeAuditEvent("deleteUsers");
             } else {
                 throw new IllegalArgumentException("Username is empty.");
             }

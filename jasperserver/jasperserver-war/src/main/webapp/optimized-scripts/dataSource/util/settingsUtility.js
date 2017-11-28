@@ -1,1 +1,1 @@
-define(["require","underscore"],function(e){var r=e("underscore");return{deepDefaults:function(e,n){return r.reduce(n,function(n,u,t){return n[t]=e[t]?r.defaults(e[t],u):u,n},{})}}});
+define(["require","underscore"],function(e){"use strict";var r=e("underscore");return{deepDefaults:function(e,u){return r.reduce(u,function(u,n,t){return u[t]=e[t]?r.defaults(e[t],n):n,u},{})}}});

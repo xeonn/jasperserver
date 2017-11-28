@@ -21,8 +21,10 @@
 
 
 /**
- * @version: $Id: resource.add.files.js 7872 2014-10-04 09:08:52Z inesterenko $
+ * @version: $Id: resource.add.files.js 8653 2015-04-07 17:01:16Z dgorbenk $
  */
+
+/* global resource, Form, ValidationModule, localContext, buttonManager, matchAny, resourceLocator */
 
 var addFileResource = {
     PAGE_ID: "addResourceFile",
@@ -45,6 +47,7 @@ var addFileResource = {
         "prop": ["properties"],
         "jrtx": ["jrtx"],
         "xml": ["xml", "agxml"],
+	    "config": ["config"],
         "contentResource": ["docx", "doc", "ppt", "pptx", "xls", "xlsx", "ods", "odt", "odp", "pdf", "rtf", "html", "txt", "csv"]
     },
 
@@ -161,17 +164,25 @@ var addFileResource = {
     _typeValidator: function(value) {
         var isValid = true;
         var errorMessage = "";
+	    var result = {
+		    isValid: isValid,
+		    errorMessage: errorMessage
+	    };
 
         var extension = this._getExtension();
-        if (!extension.blank() && !this._getTypesForExtension(extension).include(value)) {
-            errorMessage = resource.messages['typeIsNotValid'];
-            isValid = false;
+	    
+	    if (extension.blank()) {
+		    return result;
+	    }
+	    
+	    var types = this._getTypesForExtension(extension);
+
+        if (!types.include(value)) {
+	        result.errorMessage = resource.messages['typeIsNotValid'];
+	        result.isValid = false;
         }
 
-        return {
-            isValid: isValid,
-            errorMessage: errorMessage
-        };
+        return result;
     },
 
     _pathValidator: function(value) {

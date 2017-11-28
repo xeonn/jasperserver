@@ -21,8 +21,10 @@
 package com.jaspersoft.jasperserver.api.security.externalAuth;
 
 import com.jaspersoft.jasperserver.api.security.internalAuth.InternalAuthenticationToken;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.util.Assert;
 
@@ -42,6 +44,19 @@ public class ExternalAuthBasicProcessingFilter extends BasicAuthenticationFilter
 		super.afterPropertiesSet();
 
 		Assert.notNull(externalDataSynchronizer, "externalDataSynchronizer cannot be null");
+	}
+
+	public ExternalAuthBasicProcessingFilter() {
+		super();
+	}
+
+	public ExternalAuthBasicProcessingFilter(AuthenticationManager authenticationManager) {
+		super(authenticationManager);
+	}
+
+	public ExternalAuthBasicProcessingFilter(AuthenticationManager authenticationManager,
+											 AuthenticationEntryPoint authenticationEntryPoint) {
+		super(authenticationManager, authenticationEntryPoint);
 	}
 
 	@Override

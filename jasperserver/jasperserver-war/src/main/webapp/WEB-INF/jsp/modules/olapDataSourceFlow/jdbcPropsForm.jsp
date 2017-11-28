@@ -96,7 +96,7 @@
                 <spring:bind path="dataResource.olapDataSource.driverClass">
                 <tr>
                     <td align="right">* <spring:message code="jsp.olapDS.jdbcPropsForm.driver"/>&nbsp;</td>
-                    <td><input maxlength="100" name="${status.expression}" type="text" class="fnormal" size="40" value="<c:out value='${status.value}'/>">&nbsp;<spring:message code="JS_sample.jdbc.driver"/></td>
+                    <td><input maxlength="100" name="${status.expression}" type="text" class="fnormal" size="40" value="${status.value}">&nbsp;<spring:message code="JS_sample.jdbc.driver"/></td>
                 </tr>
                     <c:if test="${status.error}">
                     <tr>
@@ -108,7 +108,7 @@
                 <spring:bind path="dataResource.olapDataSource.connectionUrl">
                 <tr>
                     <td align="right">* <spring:message code="jsp.olapDS.jdbcPropsForm.url"/>&nbsp;</td>
-                    <td><input maxlength="100" name="${status.expression}" type="text" class="fnormal" size="40" value="<c:out value='${status.value}'/>">&nbsp;<spring:message code="JS_sample.jdbc.url"/></td>
+                    <td><input maxlength="100" name="${status.expression}" type="text" class="fnormal" size="40" value="${status.value}">&nbsp;<spring:message code="JS_sample.jdbc.url"/></td>
                 </tr>
                     <c:if test="${status.error}">
                     <tr>
@@ -120,7 +120,7 @@
                 <spring:bind path="dataResource.olapDataSource.username">
                 <tr>
                     <td align="right">* <spring:message code="jsp.olapDS.jdbcPropsForm.username"/>&nbsp;</td>
-                    <td><input maxlength="100" name="${status.expression}" type="text" class="fnormal" size="40" value="<c:out value='${status.value}'/>"></td>
+                    <td><input maxlength="100" name="${status.expression}" type="text" class="fnormal" size="40" value="${status.value}"></td>
                 </tr>
                     <c:if test="${status.error}">
                     <tr>
@@ -132,7 +132,7 @@
                 <spring:bind path="dataResource.olapDataSource.password">
                 <tr>
                     <td align="right">* <spring:message code="jsp.olapDS.jdbcPropsForm.password"/>&nbsp;</td>
-                    <td><input maxlength="100" name="${status.expression}" type="password" class="fnormal" size="40" value="<c:out value='${status.value}'/>"></td>
+                    <td><input maxlength="100" name="${status.expression}" type="password" class="fnormal" size="40" value="${status.value}"></td>
                 </tr>
                     <c:if test="${status.error}">
                     <tr>

@@ -61,7 +61,12 @@ public class LoggingContextImpl implements LoggingContext {
     }
 
     public List<LoggableEvent> getAllEvents() {
-        return Collections.unmodifiableList(events);
+        //Warning: unmodifiableList is created from a copy of original
+        //events list which will silently bypass any concurrent modifications
+        //This was done because of unknown concurrent modification exception
+        //(despite the fact that events list always accessed in same thread
+        //so there should no be any concurrent modifications)
+        return Collections.unmodifiableList(new ArrayList<LoggableEvent>(events));
     }
 
     public void removeEvents(List<LoggableEvent> events) {

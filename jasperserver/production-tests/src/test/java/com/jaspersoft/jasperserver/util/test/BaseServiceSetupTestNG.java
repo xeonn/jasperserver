@@ -32,6 +32,7 @@ import com.jaspersoft.jasperserver.api.engine.scheduling.service.ReportJobsSched
 import com.jaspersoft.jasperserver.api.engine.scheduling.service.ReportSchedulingService;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.FileResource;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Folder;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.PermissionUriProtocol;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceReference;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.client.FolderImpl;
@@ -475,6 +476,7 @@ public class BaseServiceSetupTestNG extends AbstractTestNGSpringContextTests {
         TextDataSourceDefinition textDataSourceDefinition = (TextDataSourceDefinition) m_customReportDataSourceServiceFactory.getDefinitionByServiceClass("net.sf.jasperreports.data.csv.CsvDataAdapterImpl");
         if (textDataSourceDefinition == null) {
             textDataSourceDefinition = new TextDataSourceDefinition();
+            textDataSourceDefinition.setName("textDataSource");
             textDataSourceDefinition.setDataAdapterClassName("net.sf.jasperreports.data.csv.CsvDataAdapterImpl");
             textDataSourceDefinition.setValidator(new TextDataSourceValidator());
             HashMap<String, String> queryExecuterMap = new HashMap<String, String>();
@@ -482,6 +484,7 @@ public class BaseServiceSetupTestNG extends AbstractTestNGSpringContextTests {
             textDataSourceDefinition.setQueryExecuterMap(queryExecuterMap);
             m_customReportDataSourceServiceFactory.addDefinition(textDataSourceDefinition);
         }
+        cds.setDataSourceName(textDataSourceDefinition.getName());
         textDataSourceDefinition.setDefaultValues(cds);
         cds.setServiceClass(textDataSourceDefinition.getServiceClassName());
         cds.getPropertyMap().put("fileName", textFile);
@@ -964,8 +967,14 @@ public class BaseServiceSetupTestNG extends AbstractTestNGSpringContextTests {
     }
 
     protected ObjectPermission createObjectPermission(String targetPath, Object recipient, int permissionMask) {
+        return createObjectPermission(targetPath, recipient, permissionMask, PermissionUriProtocol.RESOURCE);
+    }
+
+
+    protected ObjectPermission createObjectPermission(String targetPath, Object recipient, int permissionMask,
+                PermissionUriProtocol protocol) {
         ObjectPermission permission = getObjectPermissionService().newObjectPermission(null);
-        permission.setURI("repo:" + targetPath);
+        permission.setURI(protocol.addPrefix(targetPath));
         permission.setPermissionRecipient(recipient);
         permission.setPermissionMask(permissionMask);
         logPermission(permission);

@@ -25,7 +25,7 @@
 
 <t:insertTemplate template="/WEB-INF/jsp/templates/page.jsp">
     <t:putAttribute name="pageTitle">
-        <c:set var="editMode" value='<%= request.getParameter("isEdit") %>'/>
+        <c:set var="editMode" value='${param.isEdit}'/>
         <c:if test="${editMode==null}"><spring:message code='resource.analysisConnection.title'/></c:if>
         <c:if test="${editMode!=null}"><spring:message code='resource.analysisConnection.edit.title'/></c:if>    
     </t:putAttribute>
@@ -56,7 +56,7 @@
             <t:insertTemplate template="/WEB-INF/jsp/templates/container.jsp">
                 <t:putAttribute name="containerClass" value="column decorated primary"/>
                 <t:putAttribute name="containerTitle">
-                    <c:set var="editMode" value='<%= request.getParameter("isEdit") %>'/>
+                    <c:set var="editMode" value='${param.isEdit}'/>
                     <c:if test="${editMode==null}"><spring:message code='resource.analysisConnection.title'/></c:if>
                     <c:if test="${editMode!=null}"><spring:message code='resource.analysisConnection.edit.title'/></c:if>
                 </t:putAttribute>
@@ -66,10 +66,10 @@
                 <t:putAttribute name="bodyContent">
                     <div id="flowControls"></div>
                     <div id="stepDisplay">
-                        <input type="hidden" id="ParentFolderUri" value='<%= request.getParameter("ParentFolderUri") %>'/>
+                        <input type="hidden" id="ParentFolderUri" value='${param.ParentFolderUri}'/>
                         <input type="submit" name="_eventId_changeCombo" id="changeCombo" style="visibility:hidden;"/>
                         <input type="hidden" name="_flowExecutionKey" value="${flowExecutionKey}"/>
-                        <input type="hidden" id="editMode" value='<%= request.getParameter("isEdit") %>'/>
+                        <input type="hidden" id="editMode" value='${param.isEdit}'/>
 
                         <fieldset class="row instructions">
                             <legend class="offLeft"><span><spring:message code="resource.analysisConnection.instructions"/></span></legend>

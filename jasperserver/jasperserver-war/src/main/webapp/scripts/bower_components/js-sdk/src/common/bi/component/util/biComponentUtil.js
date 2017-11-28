@@ -21,7 +21,7 @@
 
 /**
  * @author: Zakhar.Tomchenko
- * @version: $Id: biComponentUtil.js 380 2014-11-09 15:04:25Z ktsaregradskyi $
+ * @version: $Id: biComponentUtil.js 1011 2015-04-01 19:34:14Z ktsaregr $
  */
 
 define(function(require, exports, module) {
@@ -43,15 +43,24 @@ define(function(require, exports, module) {
     }
 
     var biComponentUtil = {
+        // shortcut function to not deep clone jquery objects
+        cloneDeep: function(obj) {
+            return _.cloneDeep(obj, function(o) {
+                if (o instanceof $) {
+                    return o;
+                }
+            });
+        },
+
         createField: function(object, propertyName, instanceData, readOnly, stateModel) {
             object[propertyName] = function(value) {
                 checkAlreadyDestroyed(stateModel);
 
                 if (!arguments.length) {
-                    return biComponentUtil.ES5Object(_.cloneDeep(instanceData[propertyName]));
+                    return biComponentUtil.ES5Object(biComponentUtil.cloneDeep(instanceData[propertyName]));
                 }
 
-                var func = _.cloneDeep(value);
+                var func = biComponentUtil.cloneDeep(value);
                 if (readOnly && readOnly.length) {
                     for (var i = 0; i < readOnly.length; i++) {
                         delete func[readOnly[i]];
@@ -59,7 +68,7 @@ define(function(require, exports, module) {
                 }
                 instanceData[propertyName] = _.extend({}, instanceData[propertyName], func);
                 if(stateModel !== undefined && propertyName == "properties"){
-                    stateModel.set(func);
+                    stateModel.set(biComponentUtil.cloneDeep(instanceData[propertyName]));
                 }
                 return object;
             }
@@ -70,7 +79,7 @@ define(function(require, exports, module) {
                 checkAlreadyDestroyed(stateModel);
 
                 if (!arguments.length) {
-                    return biComponentUtil.ES5Object(_.cloneDeep(instanceData[fieldName]));
+                    return biComponentUtil.ES5Object(biComponentUtil.cloneDeep(instanceData[fieldName]));
                 }
 
                 if (throwError){
@@ -91,7 +100,9 @@ define(function(require, exports, module) {
 
                 instanceData.properties[propertyName] = value;
 
-                stateModel && stateModel instanceof Backbone.Model && stateModel.set(propertyName, value);
+                if( stateModel && stateModel instanceof Backbone.Model) {
+                    stateModel.set(propertyName, biComponentUtil.cloneDeep(instanceData.properties[propertyName]));
+                }
 
                 return object;
             }

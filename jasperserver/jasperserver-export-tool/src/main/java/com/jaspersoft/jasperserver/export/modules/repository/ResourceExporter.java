@@ -58,7 +58,7 @@ import java.util.Set;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ResourceExporter.java 51369 2014-11-12 13:59:41Z sergey.prilukin $
+ * @version $Id: ResourceExporter.java 54590 2015-04-22 17:55:42Z vzavadsk $
  */
 public class ResourceExporter extends BaseExporterModule implements ResourceExportHandler {
     private TenantService tenantService;
@@ -66,6 +66,8 @@ public class ResourceExporter extends BaseExporterModule implements ResourceExpo
     private String unavailableExportOperationMessage;
 
 	private static final Log log = LogFactory.getLog(ResourceExporter.class);
+
+	public static final String DIAGNOSTIC = "diagnostic";
 
 	protected static class QueuedUri {
 		private final String uri;
@@ -349,9 +351,6 @@ public class ResourceExporter extends BaseExporterModule implements ResourceExpo
 		markExported(uri);
 	}
 
-
-
-
 	protected void writeResource(Resource resource) {
 		ResourceBean bean = handleResource(resource);
 		if (exportPermissions) {
@@ -378,6 +377,9 @@ public class ResourceExporter extends BaseExporterModule implements ResourceExpo
 
 	public ResourceBean handleResource(Resource resource) {
 		ResourceBean bean = (ResourceBean) configuration.getCastorBeanMappings().newObject(resource.getClass());
+
+		bean.setDiagnostic(hasParameter(DIAGNOSTIC));
+
 		bean.copyFrom(resource, this);
 		return bean;
 	}
@@ -459,51 +461,7 @@ public class ResourceExporter extends BaseExporterModule implements ResourceExpo
 		writeData(dataIn, folder, outDataFilename);
 	}
 
-	protected RepositoryObjectPermissionBean[] handlePermissions(InternalURI object) {
-		List permissions = configuration.getPermissionService().getObjectPermissionsForObject(executionContext, object);
-		RepositoryObjectPermissionBean[] permissionBeans;
-		if (permissions == null || permissions.isEmpty()) {
-			permissionBeans = null;
-		} else {
-			commandOut.debug("Found " + permissions.size() + " permissions for " + object.getURI());
 
-			permissionBeans = new RepositoryObjectPermissionBean[permissions.size()];
-			int c = 0;
-			for (Iterator i = permissions.iterator(); i.hasNext(); ++c) {
-				ObjectPermission permission = (ObjectPermission) i.next();
-				RepositoryObjectPermissionBean permissionBean = toPermissionBean(permission);
-				permissionBeans[c] = permissionBean;
-			}
-		}
-		return permissionBeans;
-	}
-
-	protected RepositoryObjectPermissionBean toPermissionBean(ObjectPermission permission) {
-		RepositoryObjectPermissionBean permissionBean = new RepositoryObjectPermissionBean();
-
-		Object permissionRecipient = permission.getPermissionRecipient();
-		if (permissionRecipient instanceof Role) {
-			Role role = (Role) permissionRecipient;
-			permissionBean.setRecipient(
-					new PermissionRecipient(configuration.getPermissionRecipientRole(),
-							role.getTenantId(), role.getRoleName()));
-		} else if (permissionRecipient instanceof User) {
-			User user = (User) permissionRecipient;
-			permissionBean.setRecipient(
-					new PermissionRecipient(configuration.getPermissionRecipientUser(),
-							user.getTenantId(), user.getUsername()));
-		} else {
-            // Adding non localized message cause import-export tool does not support localization.
-            StringBuilder message = new StringBuilder("Permission recipient type ");
-            message.append(permissionRecipient.getClass().getName());
-            message.append(" is not recognized.");
-			throw new JSException(message.toString());
-		}
-
-		permissionBean.setPermissionMask(permission.getPermissionMask());
-
-		return permissionBean;
-	}
 
 	public String getUrisArgument() {
 		return urisArgument;

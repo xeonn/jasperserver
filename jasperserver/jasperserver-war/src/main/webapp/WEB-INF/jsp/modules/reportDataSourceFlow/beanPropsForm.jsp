@@ -134,7 +134,7 @@
                 <spring:bind path="dataResource.reportDataSource.description">
 					<tr>
 						<td align="right" valign="top"><spring:message code="label.description"/>&nbsp;</td>
-						<td align="left"><textarea name="${status.expression}" rows="5" cols="28" class="fnormal"><c:out value='${status.value}'/></textarea></td>
+						<td align="left"><textarea name="${status.expression}" rows="5" cols="28" class="fnormal">${status.value}</textarea></td>
 					</tr>
 					<c:if test="${status.error}">
 					<tr>
@@ -149,7 +149,7 @@
                 <spring:bind path="dataResource.reportDataSource.beanName">
                 <tr>
                     <td align="right">* <spring:message code="jsp.beanPropsForm.beanName"/>&nbsp;</td>
-                    <td><input maxlength="100" name="${status.expression}" type="text" class="fnormal" size="40" value="<c:out value='${status.value}'/>">&nbsp;<spring:message code="jsp.beanPropsForm.configuredBeanName"/></td>
+                    <td><input maxlength="100" name="${status.expression}" type="text" class="fnormal" size="40" value="${status.value}">&nbsp;<spring:message code="jsp.beanPropsForm.configuredBeanName"/></td>
                 </tr>
                     <c:if test="${status.error}">
                     <tr>
@@ -161,7 +161,7 @@
                 <spring:bind path="dataResource.reportDataSource.beanMethod">
                 <tr>
                     <td align="right"><spring:message code="jsp.beanPropsForm.beanMethod"/>&nbsp;</td>
-                    <td><input maxlength="100" name="${status.expression}" type="text" class="fnormal" size="40" value="<c:out value='${status.value}'/>">&nbsp;<spring:message code="jsp.beanPropsForm.configuredBeanMethod"/></td>
+                    <td><input maxlength="100" name="${status.expression}" type="text" class="fnormal" size="40" value="${status.value}">&nbsp;<spring:message code="jsp.beanPropsForm.configuredBeanMethod"/></td>
                 </tr>
                     <c:if test="${status.error}">
                     <tr>

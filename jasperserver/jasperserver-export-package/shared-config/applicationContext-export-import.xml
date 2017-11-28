@@ -11,6 +11,16 @@
 
     <bean id="baseExporterModule" class="com.jaspersoft.jasperserver.export.modules.BaseExporterModule" abstract="true">
         <property name="everythingArg" value="everything"/>
+        <property name="permissionService" ref="objectPermissionServiceUnsecure"/>
+        <property name="permissionRecipientRole" value="role"/>
+        <property name="permissionRecipientUser" value="user"/>
+    </bean>
+
+    <bean id="baseImporterModule" class="com.jaspersoft.jasperserver.export.modules.BaseImporterModule" abstract="true">
+        <property name="permissionService" ref="objectPermissionServiceUnsecure"/>
+        <property name="authorityService" ref="${bean.userAuthorityService}"/>
+        <property name="permissionRecipientRole" value="role"/>
+        <property name="permissionRecipientUser" value="user"/>
     </bean>
 
     <bean id="repositorySerializer" class="com.jaspersoft.jasperserver.export.io.CastorSerializer">
@@ -141,7 +151,7 @@
         <property name="includeSettingsArg" value="include-server-settings"/>
     </bean>
 
-    <bean id="resourceImporter" class="com.jaspersoft.jasperserver.export.modules.repository.ResourceImporter" scope="prototype">
+    <bean id="resourceImporter" class="com.jaspersoft.jasperserver.export.modules.repository.ResourceImporter" parent="baseImporterModule" scope="prototype">
         <property name="id" value="repositoryResources"/>
         <property name="configuration" ref="resourceModuleConfiguration"/>
         <property name="tenantService" ref="tenantService"/>
@@ -149,6 +159,7 @@
         <property name="updateArg" value="update"/>
         <property name="includeSettingsArg" value="include-server-settings"/>
         <property name="skipThemesArgument" value="skip-themes"/>
+        <property name="globalPropertiesListUpgradeExecutor" ref="globalPropertiesListUpgradeExecutor"/>
     </bean>
 
     <bean id="authorityModuleConfiguration" class="com.jaspersoft.jasperserver.export.modules.auth.AuthorityModuleConfiguration">
@@ -166,6 +177,7 @@
                         <value>classpath:com/jaspersoft/jasperserver/export/mapping/auth/Role.xml</value>
                         <value>classpath:com/jaspersoft/jasperserver/export/mapping/common/ProfileAttribute.xml</value>
                         <value>classpath:com/jaspersoft/jasperserver/export/mapping/common/TenantQualifiedName.xml</value>
+                        <value>classpath:com/jaspersoft/jasperserver/export/mapping/repository/ObjectPermission.xml</value>
                     </list>
                 </property>
             </bean>
@@ -180,7 +192,7 @@
         <property name="configuration" ref="authorityModuleConfiguration"/>
     </bean>
 
-    <bean id="authorityImporter" class="com.jaspersoft.jasperserver.export.modules.auth.AuthorityImporter" scope="prototype">
+    <bean id="authorityImporter" class="com.jaspersoft.jasperserver.export.modules.auth.AuthorityImporter" parent="baseImporterModule" scope="prototype">
         <property name="id" value="authority"/>
         <property name="configuration" ref="authorityModuleConfiguration"/>
         <property name="updateArg" value="update"/>
@@ -196,10 +208,11 @@
     </bean>
 
     <bean name="tenantImporter"
-          class="com.jaspersoft.jasperserver.export.modules.mt.TenantImporter">
+          class="com.jaspersoft.jasperserver.export.modules.mt.TenantImporter" parent="baseImporterModule">
         <property name="id"><value>tenants</value></property>
         <property name="updateArg" value="update"/>
         <property name="moduleConfiguration"><ref bean="tenantModuleConfiguration"/></property>
+        <property name="includeServerSettings" value="include-server-settings"/>
     </bean>
 
     <bean name="tenantModuleConfiguration"
@@ -231,6 +244,10 @@
         <property name="castorMappings">
             <list>
                 <value>classpath:com/jaspersoft/jasperserver/export/mapping/mt/Tenant.xml</value>
+                <value>classpath:com/jaspersoft/jasperserver/export/mapping/common/TenantQualifiedName.xml</value>
+                <value>classpath:com/jaspersoft/jasperserver/export/mapping/repository/ObjectPermission.xml</value>
+                <value>classpath:com/jaspersoft/jasperserver/export/mapping/auth/User.xml</value>
+                <value>classpath:com/jaspersoft/jasperserver/export/mapping/auth/Role.xml</value>
             </list>
         </property>
     </bean>

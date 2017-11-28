@@ -22,7 +22,7 @@
 
 /**
  * @author: Zakhar Tomchenko, Kostiantyn Tsaregradskyi
- * @version: $Id: Dialog.js 380 2014-11-09 15:04:25Z ktsaregradskyi $
+ * @version: $Id: Dialog.js 1154 2015-04-25 17:52:53Z ktsaregr $
  */
 
 define(function(require){
@@ -40,6 +40,8 @@ define(function(require){
 
         dialogTemplate = require('text!./template/dialogTemplate.htm'),
         dialogButtonTemplate = require("text!./template/dialogButtonTemplate.htm");
+
+    require("css!dialog.css");
 
     var Dialog = Panel.extend({
         defaultTemplate: dialogTemplate,
@@ -104,23 +106,25 @@ define(function(require){
             return this;
         },
 
-        open: function(coordinates){
-            Panel.prototype.open.apply(this, arguments);
+        open: function(coordinates) {
+            if (!this.isVisible()) {
+                Panel.prototype.open.apply(this, arguments);
 
-            this.modal && this.dimmer.css({ zIndex : ++Dialog.highestIndex }).show();
+                this.modal && this.dimmer.css({ zIndex: ++Dialog.highestIndex }).show();
 
-            this._position(coordinates)._increaseZIndex();
+                this._position(coordinates)._increaseZIndex();
 
-            // Class "over" is added to buttons on mouseover by some old prototype code.
-            // Button may remain overed when dialog is closed and it will be displayed as overed when we will open
-            // dialog again. That's why we need to remove class "over" when dialog is opened.
-            this.buttons && this.buttons.$(".over").removeClass("over");
+                // Class "over" is added to buttons on mouseover by some old prototype code.
+                // Button may remain overed when dialog is closed and it will be displayed as overed when we will open
+                // dialog again. That's why we need to remove class "over" when dialog is opened.
+                this.buttons && this.buttons.$(".over").removeClass("over");
 
-            this.$el.show();
+                this.$el.show();
 
-            this.trigger("dialog:visible");
+                this.trigger("dialog:visible");
 
-            return this;
+                return this;
+            }
         },
 
         close: function(){

@@ -20,7 +20,9 @@
   --%>
 
 <%@ taglib prefix="spring" uri="/spring" %>
+<%@ taglib prefix="js" uri="/WEB-INF/jasperserver.tld" %>
 
+<js:out javaScriptEscape="true">
 <script type="text/javascript">
 
     __jrsConfigs__.isEncryptionOn=${isEncryptionOn};
@@ -37,5 +39,5 @@
     };
 
 </script>
-        
+</js:out>
        

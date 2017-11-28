@@ -46,10 +46,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.InputStream;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Pattern;
 
 @Component("singleRepositoryService")
@@ -120,7 +117,14 @@ public class SingleRepositoryServiceImpl implements SingleRepositoryService {
             Resource resource = repositoryService.getResource(null, uri);
             if (resource != null) {
                 List<ResourceLookup> dependentResources = repositoryService.getDependentResources(null, uri, searchCriteriaFactory, 0, 0);
-                if (dependentResources == null || dependentResources.isEmpty()){
+
+                if (dependentResources == null || dependentResources.isEmpty() || isAllTemporary(dependentResources)){
+                    if (dependentResources != null){
+                        for (ResourceLookup resourceLookup: dependentResources){
+                            repositoryService.deleteResource(null, resourceLookup.getURIString());
+                        }
+                    }
+
                     repositoryService.deleteResource(null, uri);
                 } else {
                     throw new ResourceInUseException(dependentResources);
@@ -385,6 +389,17 @@ public class SingleRepositoryServiceImpl implements SingleRepositoryService {
 
     private String transformLabelToName(String label){
         return label.replaceAll(configurationBean.getResourceIdNotSupportedSymbols(), "_");
+    }
+
+    private boolean isAllTemporary(Collection<ResourceLookup> resources){
+        String tempPrefix = (configurationBean.getTempFolderUri() == null ? "/temp" : configurationBean.getTempFolderUri()).concat(Folder.SEPARATOR);
+        boolean res = true;
+
+        for (Resource r: resources){
+            res &= r.getURIString().startsWith(tempPrefix);
+        }
+
+        return res;
     }
 
     private class DefaultCopyMoveStrategy implements CopyMoveOperationStrategy {

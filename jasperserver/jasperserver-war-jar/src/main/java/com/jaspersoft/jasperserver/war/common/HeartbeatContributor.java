@@ -20,8 +20,6 @@
  */
 package com.jaspersoft.jasperserver.war.common;
 
-import org.apache.commons.httpclient.methods.PostMethod;
-
 
 /**
  * @author Teodor Danciu (teodord@users.sourceforge.net)
@@ -29,5 +27,5 @@ import org.apache.commons.httpclient.methods.PostMethod;
  */
 public interface HeartbeatContributor 
 {
-	public void contributeToHttpCall(PostMethod post);
+	public void contributeToHttpCall(HeartbeatCall call);
 }

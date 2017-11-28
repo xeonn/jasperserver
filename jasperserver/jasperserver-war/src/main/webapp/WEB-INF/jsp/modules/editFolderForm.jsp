@@ -65,7 +65,7 @@
     <c:forEach items="${status.errorMessages}" var="error">
   <tr>
     <td>&nbsp;</td>
-	<td><span class="ferror"><c:out value="${error}"/></span></td>
+	<td><span class="ferror">${error}</span></td>
   </tr>
     </c:forEach>
   </c:if>
@@ -80,7 +80,7 @@
     <c:forEach items="${status.errorMessages}" var="error">
   <tr>
     <td>&nbsp;</td>
-    <td><span class="ferror"><c:out value="${error}"/></span></td>
+    <td><span class="ferror">${error}</span></td>
   </tr>
     </c:forEach>
   </c:if>
@@ -89,13 +89,13 @@
 <spring:bind path="folderWrapper.actualFolder.description">
   <tr>
     <td align="right" valign="top"><spring:message code='jsp.editFolderForm.description'/></td>
-    <td><textarea name="${status.expression}" cols="37" rows="4" class="fnormal"><c:out value="${status.value}"/></textarea></td>
+    <td><textarea name="${status.expression}" cols="37" rows="4" class="fnormal">${status.value}</textarea></td>
   </tr>
   <c:if test="${status.error}">
     <c:forEach items="${status.errorMessages}" var="error">
   <tr>
     <td>&nbsp;</td>
-    <td><span class="ferror"><c:out value="${error}"/></span></td>
+    <td><span class="ferror">${error}</span></td>
   </tr>
     </c:forEach>
   </c:if>

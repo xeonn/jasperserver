@@ -21,6 +21,7 @@
 package com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.util;
 
 import org.hibernate.criterion.*;
+import org.hibernate.type.Type;
 
 /**
  * Utilities for resource criterion creation.
@@ -57,5 +58,13 @@ public class ResourceCriterionUtils {
         }
 
         return wordsCriterion;
+    }
+
+    public static Criterion getSQLCriterion(String sql){
+        return new ConcatenationAwareSqlCriterion(sql);
+    }
+
+    public static Criterion getSQLCriterion(String sql, Object[] values, Type[] types){
+        return new ConcatenationAwareSqlCriterion(sql, values, types);
     }
 }

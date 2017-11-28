@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: heartbeat.js 7762 2014-09-19 10:16:02Z sergey.prilukin $
+ * @version: $Id: heartbeat.js 8179 2015-01-27 12:34:21Z psavushchik $
  */
 
 /*
@@ -34,7 +34,7 @@ jQuery(function(){
 });
 var lastime = 0;
 function checkHeartBeat() {
-    var time = (new Date).getTime();
+    var time = (new Date()).getTime();
     var diff = time - lastime;
     lastime = time;
     hb.html(diff);

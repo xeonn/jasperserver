@@ -24,6 +24,8 @@ package com.jaspersoft.jasperserver.export;
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.ProfileAttribute;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.client.ProfileAttributeImpl;
+import com.jaspersoft.jasperserver.api.metadata.user.service.AttributesSearchCriteria;
+import com.jaspersoft.jasperserver.api.metadata.user.service.AttributesSearchResult;
 import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributeCategory;
 import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributeService;
 import com.jaspersoft.jasperserver.api.metadata.user.service.UserAuthorityService;
@@ -50,12 +52,12 @@ public class ProfileAttributeServiceMock implements ProfileAttributeService {
     }
 
     @Override
-    public List<ProfileAttribute> getCurrentUserProfileAttributes(ProfileAttributeCategory category) {
+    public List<ProfileAttribute> getCurrentUserProfileAttributes(ExecutionContext executionContext, ProfileAttributeCategory category) {
         return null;
     }
 
     @Override
-    public List getProfileAttributesForPrincipal(ExecutionContext context, Object principal, boolean effectiveAttributes) {
+    public AttributesSearchResult<ProfileAttribute> getProfileAttributesForPrincipal(ExecutionContext context, Object principal, AttributesSearchCriteria searchCriteria) {
         return null;
     }
 
@@ -129,4 +131,18 @@ public class ProfileAttributeServiceMock implements ProfileAttributeService {
 	@Override
 	public void deleteProfileAttributes(Map<String, ProfileAttribute> attributeMapToDelete) {
 	}
+
+    @Override
+    public void applyProfileAttributes() {
+    }
+
+    @Override
+    public String getChangerName(String propertyName) {
+        return null;
+    }
+
+    @Override
+    public String generateAttributeHolderUri(Object holder) {
+        return null;
+    }
 }

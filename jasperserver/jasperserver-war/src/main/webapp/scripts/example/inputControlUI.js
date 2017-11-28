@@ -23,6 +23,9 @@
  * @author: Igor.Nesterenko
  * @version: ${Id}
  */
+
+/* global console */
+
 /**
  *  Usage of Input Controls
  */

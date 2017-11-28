@@ -21,15 +21,17 @@
 
 
 /**
- * @version: $Id: components.calendarInput.js 7787 2014-09-19 13:11:00Z sergey.prilukin $
+ * @version: $Id: components.calendarInput.js 8900 2015-05-06 20:57:14Z yplakosh $
  */
+
+/* global cancelEventBubbling */
 
 define(function(require) {
     "use strict";
 
     var jQuery = require("jquery"),
         _ = require("underscore"),
-        jrsConfigs = require("jrs.configs");
+        dateTimeSettings = require("settings!dateTimeSettings");
 
     require("utils.common");
     require("common/jquery/extension/timepickerExt");
@@ -47,8 +49,10 @@ define(function(require) {
         this.hasDate = typeof options.date !== "undefined" && options.date !== "" && options.date === "true";
         this.hasTime = typeof options.time !== "undefined" && options.time !== "" && options.time === "true";
 
-        this.pickerOptions = {};
-        _.extend(this.pickerOptions, this.defaultPickerOptions);
+        this.pickerOptions = _.extend({}, this.defaultPickerOptions);
+
+        this.hasDate && _.extend(this.pickerOptions, dateTimeSettings.datepicker);
+        this.hasTime && _.extend(this.pickerOptions, dateTimeSettings.timepicker);
 
         if (typeof options.picker !== "undefined" && _.isObject(options.picker)) {
             _.extend(this.pickerOptions, options.picker);
@@ -66,8 +70,6 @@ define(function(require) {
         onChangeMonthYear: null,
         beforeShow: jQuery.datepicker.movePickerRelativelyToTriggerIcon
     };
-
-    _.extend(CalendarInputComponent.prototype.defaultPickerOptions, jrsConfigs.calendar.timepicker);
 
     CalendarInputComponent.prototype.create = function() {
         var inputField = jQuery("<input type='text'/>").attr({

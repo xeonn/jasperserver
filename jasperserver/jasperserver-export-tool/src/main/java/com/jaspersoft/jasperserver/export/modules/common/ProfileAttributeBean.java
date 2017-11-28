@@ -22,18 +22,21 @@
 package com.jaspersoft.jasperserver.export.modules.common;
 
 import com.jaspersoft.jasperserver.api.metadata.user.domain.ProfileAttribute;
+import com.jaspersoft.jasperserver.export.modules.repository.beans.RepositoryObjectPermissionBean;
 import com.jaspersoft.jasperserver.export.modules.repository.beans.ResourceBean;
 
 import java.security.Key;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ProfileAttributeBean.java 51858 2014-12-06 20:46:19Z vsabadosh $
+ * @version $Id: ProfileAttributeBean.java 54590 2015-04-22 17:55:42Z vzavadsk $
  */
 public class ProfileAttributeBean {
 
 	private String name;
 	private String value;
+
+	private RepositoryObjectPermissionBean[] permissions;
 
 	public void copyFrom(ProfileAttribute attribute) {
 		setName(attribute.getAttrName());
@@ -71,5 +74,12 @@ public class ProfileAttributeBean {
 	public void setValue(String value) {
 		this.value = value;
 	}
-	
+
+	public RepositoryObjectPermissionBean[] getPermissions() {
+		return permissions;
+	}
+
+	public void setPermissions(RepositoryObjectPermissionBean[] permissions) {
+		this.permissions = permissions;
+	}
 }

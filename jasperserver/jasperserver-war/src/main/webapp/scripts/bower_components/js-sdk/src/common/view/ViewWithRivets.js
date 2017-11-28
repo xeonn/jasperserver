@@ -24,7 +24,7 @@
  * Basic Backbone.View with RivetsJS support.
  *
  * @author: Taras Bidyuk, Kostiantyn Tsaregradskyi
- * @version: $Id: ViewWithRivets.js 270 2014-10-13 19:58:03Z agodovanets $
+ * @version: $Id: ViewWithRivets.js 812 2015-01-27 11:01:30Z psavushchik $
  */
 
 define(function (require) {
@@ -34,9 +34,11 @@ define(function (require) {
         viewRivetsTrait = require("./trait/viewRivetsTrait"),
         _ = require("underscore");
 
-    var ViewWithRivets = Backbone.View.extend({
+    var ViewWithRivets = Backbone.View.extend(
+        /** @lends ViewWithRivets.prototype */
+        {
+
         /**
-         * @method el
          * @description Generates HTML for view's root element from template.
          * @returns {string}
          */
@@ -72,7 +74,6 @@ define(function (require) {
         },
 
         /**
-         * @method render
          * @description Binds RivetsJS to view. In most cases should be extended in child classes.
          * @returns {ViewWithRivets}
          */
@@ -83,7 +84,6 @@ define(function (require) {
         },
 
         /**
-         * @method remove
          * @description Unbinds RivetsJS from view and calls Backbone.View remove method.
          */
         remove: function() {

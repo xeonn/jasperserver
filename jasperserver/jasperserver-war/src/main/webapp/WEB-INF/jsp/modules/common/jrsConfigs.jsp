@@ -34,14 +34,14 @@
 
         i18n: {},
         localContext: {},
-        isIPad: "<c:out value="${isIPad}"/>",
-        contextPath: "<c:out value="${pageContext.request.contextPath}"/>",
-        publicFolderUri: "<c:out value="${not empty publicFolderUri ? publicFolderUri : commonProperties.publicFolderUri}"/>",
-        tempFolderUri: "<c:out value="${not empty tempFolderUri ? tempFolderUri : commonProperties.tempFolderUri}"/>",
-        organizationId: "<c:out value="${not empty organizationId ? organizationId : commonProperties.organizationId}"/>",
+        isIPad: "${isIPad}",
+        contextPath: "${pageContext.request.contextPath}",
+        publicFolderUri: "${not empty publicFolderUri ? publicFolderUri : commonProperties.publicFolderUri}",
+        tempFolderUri: "${not empty tempFolderUri ? tempFolderUri : commonProperties.tempFolderUri}",
+        organizationId: "${not empty organizationId ? organizationId : commonProperties.organizationId}",
         commonReportGeneratorsMetadata: ${not empty reportGenerators ? reportGenerators : '[]'},
-        templatesFolderUri: '<c:out value="${not empty templatesFolderUri ? templatesFolderUri : templateProperties.templatesFolderUri}"/>',
-        defaultTemplateUri: '<c:out value="${not empty defaultTemplateUri ? defaultTemplateUri : templateProperties.defaultTemplateUri}"/>',
+        templatesFolderUri: '${not empty templatesFolderUri ? templatesFolderUri : templateProperties.templatesFolderUri}',
+        defaultTemplateUri: '${not empty defaultTemplateUri ? defaultTemplateUri : templateProperties.defaultTemplateUri}',
         advNotSelected: "<spring:message code="ADH_162_NULL_SAVE_REPORT_SOURCE" javaScriptEscape="true"/>",
         templateNotSelected: "<spring:message code="ADH_162_NULL_SELECT_TEMPLATE_SOURCE" javaScriptEscape="true"/>",
         calendar: {
@@ -101,13 +101,13 @@
     //Heartbeat
 
     __jrsConfigs__.heartbeatInitOptions = {
-        baseUrl: "<c:out value="${pageContext.request.contextPath}"/>",
+        baseUrl: "${pageContext.request.contextPath}",
         showDialog: false,
         sendClientInfo: false
     };
 
     <c:choose>
-        <c:when test="${param['decorate'] == 'no' || param['sessionDecorator'] == 'no' || sessionScope['sessionDecorator'] == 'no'}">
+        <c:when test="${param['decorate'] == 'no' || param['viewAsDashboardFrame'] == 'true' || param['sessionDecorator'] == 'no' || sessionScope['sessionDecorator'] == 'no'}">
             __jrsConfigs__.initAdditionalUIComponents = false;
         </c:when>
         <c:otherwise>

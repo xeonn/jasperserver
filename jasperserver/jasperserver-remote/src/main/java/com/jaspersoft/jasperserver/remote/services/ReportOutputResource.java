@@ -33,34 +33,34 @@ public class ReportOutputResource {
     private String contentType;
     private byte[] data;
     private String fileName;
+    private String pages;
     private Boolean outputFinal;
 
-    public ReportOutputResource(){}
-
-    public ReportOutputResource(String contentType, byte[] data){
-        this(contentType, data, null);
+    public String getPages() {
+        return pages;
     }
 
-    public ReportOutputResource(String contentType, byte[] data, String fileName){
-        this.contentType = contentType;
-        this.data = data;
-        this.fileName = fileName;
+    public ReportOutputResource setPages(String pages) {
+        this.pages = pages;
+        return this;
     }
 
     public String getFileName() {
         return fileName;
     }
 
-    public void setFileName(String fileName) {
+    public ReportOutputResource setFileName(String fileName) {
         this.fileName = fileName;
+        return this;
     }
 
     public String getContentType() {
         return contentType;
     }
 
-    public void setContentType(String contentType) {
+    public ReportOutputResource setContentType(String contentType) {
         this.contentType = contentType;
+        return this;
     }
 
     @XmlTransient
@@ -68,15 +68,17 @@ public class ReportOutputResource {
         return data;
     }
 
-    public void setData(byte[] data) {
+    public ReportOutputResource setData(byte[] data) {
         this.data = data;
+        return this;
     }
 
     public Boolean getOutputFinal() {
         return outputFinal;
     }
 
-    public void setOutputFinal(Boolean outputFinal) {
+    public ReportOutputResource setOutputFinal(Boolean outputFinal) {
         this.outputFinal = outputFinal;
+        return this;
     }
 }

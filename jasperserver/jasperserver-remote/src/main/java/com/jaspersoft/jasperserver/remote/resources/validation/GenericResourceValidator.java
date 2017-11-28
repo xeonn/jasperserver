@@ -54,9 +54,6 @@ public abstract class GenericResourceValidator<ResourceType extends Resource> im
         if (empty(resource.getLabel())) {
             addMandatoryParameterNotFoundError(errors, "label");
         } else {
-            if (resource.getLabel().contains("<") || resource.getLabel().contains(">")) {
-                addIllegalParameterValueError(errors, "label", resource.getLabel(), "The label should not contain symbols '<' and '>'");
-            }
             if (resource.getLabel().length() > 100) {
                 addIllegalParameterValueError(errors, "label", resource.getLabel(), "The label must not be longer than 100 characters");
             }
@@ -66,9 +63,6 @@ public abstract class GenericResourceValidator<ResourceType extends Resource> im
         }
 
         if (!empty(resource.getDescription())) {
-            if (resource.getDescription().contains("<") || resource.getDescription().contains(">")) {
-                addIllegalParameterValueError(errors, "description", resource.getDescription(), "The description should not contain symbols '<' and '>'");
-            }
             if (resource.getDescription().length() > 250) {
                 addIllegalParameterValueError(errors, "description", resource.getLabel(), "The description must not be longer than 250 characters");
             }

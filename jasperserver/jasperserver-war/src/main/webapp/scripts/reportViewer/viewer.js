@@ -21,10 +21,31 @@
 
 
 /**
- * @version: $Id: viewer.js 8025 2014-11-12 13:10:12Z ktsaregradskyi $
+ * @version: $Id: viewer.js 8912 2015-05-13 10:07:04Z nmarcu $
  */
 
-define(['jasperreports-report', 'jquery.ui', 'csslink!jr.jive.vm.css', 'common/util/browserDetection'], function(JReport, $, css, browserDetection) {
+/* global dialogs, alert, console, buttonManager, Report */
+
+define(function(require) {
+
+    var JReport = require("jasperreports-report"),
+        $ = require("jquery.ui"),
+        css = require("csslink!jive.vm.css"),
+        browserDetection = require("common/util/browserDetection");
+
+    // i18n
+    var jivei18nText = require("text!jive.i18n.tmpl"),
+        jivei18n = JSON.parse(jivei18nText),
+        i18n = {
+            get: function (key) {
+                if (jivei18n.hasOwnProperty(key)) {
+                    return jivei18n[key];
+                } else {
+                    return key;
+                }
+            }
+        };
+
     var Viewer = function(options) {
         var it = this;
         it.reportInstance = null;
@@ -39,7 +60,7 @@ define(['jasperreports-report', 'jquery.ui', 'csslink!jr.jive.vm.css', 'common/u
         };
         it.dfds = {
             'jive.inactive': null
-        }
+        };
         it.loading = false;
         it.loaded = false;
         it.search = {
@@ -345,10 +366,10 @@ define(['jasperreports-report', 'jquery.ui', 'csslink!jr.jive.vm.css', 'common/u
 						"<div class='content hasFooter'>" +
 							"<div class='header mover'>" +
                                 "<div class='closeIcon'></div>" +
-                                "<div class='title'>Bookmarks</div>" +
+                                "<div class='title'>" + i18n.get("bookmarks.dialog.title") + "</div>" +
                             "</div>" +
 						    "<div class='body' style='top: 29px; bottom: 24px; padding: 0'></div>" +
-                            "<div class='footer' style='height: 14px'></div>" +
+                            "<div class='footer' style='height: 24px'></div>" +
 						"</div>" +
 					"</div>"
 				).appendTo('body');
@@ -563,7 +584,7 @@ define(['jasperreports-report', 'jquery.ui', 'csslink!jr.jive.vm.css', 'common/u
                     html = "";
 
                     var i = 0, j, min, partsForTabs;
-                    if (activePartIndex != 0) {
+                    if (activePartIndex !== 0) {
                         i = parseInt(parseInt(activePartIndex/maxParts) * maxParts);
                         partsForTabs = parts.slice(i, i + maxParts); // try to select maxParts parts
 
@@ -587,7 +608,7 @@ define(['jasperreports-report', 'jquery.ui', 'csslink!jr.jive.vm.css', 'common/u
                 btnPrev = it.reportPartsContainer.parent().find('#part_prev');
                 btnNext = it.reportPartsContainer.parent().find('#part_next');
 
-                if (activePartIndex == 0) {
+                if (activePartIndex === 0) {
                     btnPrev.prop('disabled', true);
                 } else {
                     btnPrev.prop('disabled', false);
@@ -643,7 +664,7 @@ define(['jasperreports-report', 'jquery.ui', 'csslink!jr.jive.vm.css', 'common/u
                 menu = $("div#templateElements > div#reportViewerMenuHolder > div#vwroptions > div.menu"),
                 optionsContainer, i, opt, buf, once = false;
 
-            if (menu.size() == 0) {
+            if (menu.size() === 0) {
                 buf = "<div id ='reportViewerMenuHolder'><div id='vwroptions'><div class='menu vertical dropDown fitable' style='display: none; z-index: 99999'><div class='content'><ul>";
                 buf += "</ul></div></div></div></div>";
                 menu = $("div#templateElements").append(buf).find('div#vwroptions div.menu');
@@ -692,17 +713,25 @@ define(['jasperreports-report', 'jquery.ui', 'csslink!jr.jive.vm.css', 'common/u
 		// zoom
 		getZoomByValue: function(val) {
 			var zf = this.features.zoom,
+                reportViewFrame = $('div#reportViewFrame div.body:first'),
+                jrPage = $('table.jrPage'),
 				zum;
 
+            // fix case when report is viewed with viewAsDashboardFrame=true
+            // JRS-4235 Bug 39573 - [case 54645] ReportViewer Zooming issue with viewAsDashboardFrame=true set in URI
+            if (!reportViewFrame.length) {
+                reportViewFrame = $('#reportContainer');
+            }
+
 			if (val === 'fit_width') {
-				zum = zf.containerWidth/$('table.jrPage').width();
+				zum = zf.containerWidth/jrPage.width();
 			} else if (val === 'fit_height') {
-				zum = $('div#reportViewFrame div.body:first').height()/$('table.jrPage').height();
+				zum = reportViewFrame.height()/jrPage.height();
 			} else if (val === 'fit_page') {
-				var availableHeight = $('div#reportViewFrame div.body:first').height(),
+				var availableHeight = reportViewFrame.height(),
 					availableWidth = zf.containerWidth,
-					pageHeight = $('table.jrPage').height(),
-					pageWidth = $('table.jrPage').width();
+					pageHeight = jrPage.height(),
+					pageWidth = jrPage.width();
 
 				zum = Math.min(availableWidth/pageWidth, availableHeight/pageHeight);
 			} else if (val === 'fit_actual') {
@@ -721,7 +750,7 @@ define(['jasperreports-report', 'jquery.ui', 'csslink!jr.jive.vm.css', 'common/u
 
 			if (typeof val === 'string') {
 				zum = it.getZoomByValue(val);
-				if (val.indexOf('fit_') == 0) {
+				if (val.indexOf('fit_') === 0) {
 					literalValue = val;
 				}
 			} else {
@@ -866,7 +895,7 @@ define(['jasperreports-report', 'jquery.ui', 'csslink!jr.jive.vm.css', 'common/u
                 it.features.zoom.levels.current.literal = literalValue || null;
 
                 // necessary for components that rely on zoom level
-                it.reportInstance.zoom && (it.reportInstance.zoom.level = zoomLevel);
+                it.reportInstance && it.reportInstance.zoom && (it.reportInstance.zoom.level = zoomLevel);
 
                 if (zoomLevel === 1) {
                     it.features.zoom.selectedKeys = ['1', 'fit_actual'];
@@ -952,7 +981,7 @@ define(['jasperreports-report', 'jquery.ui', 'csslink!jr.jive.vm.css', 'common/u
 
                 $.each(scripts, function(i, v) {
                     var $ = window.$;
-                    eval(v);
+                    eval(v); // jshint ignore: line
                     if(it.reportInstance.loader.jasperPrintName != Report.jasperPrintName) {
                         it.reportInstance.loader.jasperPrintName = Report.jasperPrintName;
                     }
@@ -1011,7 +1040,7 @@ define(['jasperreports-report', 'jquery.ui', 'csslink!jr.jive.vm.css', 'common/u
 					if (!isNaN(dflt)) {
 						currentZoom.value = parseFloat(dflt).toFixed(2);
 						currentZoom.literal = null;
-					} else if (typeof dflt === 'string' && dflt.indexOf('fit_') == 0) {
+					} else if (typeof dflt === 'string' && dflt.indexOf('fit_') === 0) {
 						currentZoom.literal = dflt;
 					}
 				}
@@ -1061,6 +1090,10 @@ define(['jasperreports-report', 'jquery.ui', 'csslink!jr.jive.vm.css', 'common/u
                     // TODO: replace with logger
                     console && console.log && typeof console.log === 'function' && console.log(evt.data.error);
                     dialogs.errorPopup.show(evt.data.message);
+                }
+                if (evt.type && evt.type === "highchartsInternalError") {
+                	buttonManager.disable($("#fileOptions")[0]);
+                	buttonManager.disable($("#export")[0]);
                 }
             });
             report.on("undo", function() {
@@ -1205,6 +1238,31 @@ define(['jasperreports-report', 'jquery.ui', 'csslink!jr.jive.vm.css', 'common/u
                 /*
                     If AdhocView based chart, resize report page to width of window.
                  */
+                function calculateHighchartsParentContainerHeight() {
+                    if (window.location.href.indexOf("viewAsDashboardFrame=true") > -1) {
+                        try {
+                            var iframes = parent.jQuery("iframe"),
+                                currentFrame;
+
+                            for (var i = 0; i < iframes.length; i++) {
+                                if (iframes[i].contentWindow === window) {
+                                    currentFrame = iframes[i];
+                                    break;
+                                }
+                            }
+
+                            if (currentFrame) {
+                                return $(currentFrame).parent().height() - hcParentContainer.position().top;
+                            }
+                        } catch(e) {
+                            return $(document).height()
+                                ? $(document).height() - hcParentContainer.position().top
+                                : 400;
+                        }
+                    }
+
+                    return Math.max(400, it.container.height() - hcParentContainer.position().top);
+                }
                 if(it.reportInstance.components && it.reportInstance.components.chart && it.reportInstance.components.chart.length && it.reportInstance.components.chart[0].config.hcinstancedata.services[0].service == 'adhocHighchartsSettingService') {
                     isAdhocView = true;
                     it.container.css({position:'absolute',top:0,right:0,bottom:0,left:0});
@@ -1217,6 +1275,7 @@ define(['jasperreports-report', 'jquery.ui', 'csslink!jr.jive.vm.css', 'common/u
 
                     hcParentContainer.css({"font-size": "11px"});
 
+
                     jrPage.find('tr:first td').each(function(i, td) {
                         var jo = $(td);
                         jo.css('width', (jo.width() / pageWidth) * 100 + '%');
@@ -1228,7 +1287,7 @@ define(['jasperreports-report', 'jquery.ui', 'csslink!jr.jive.vm.css', 'common/u
                     });
 
                     jrPage.css({width: '100%', height: '100%'});
-                    hcParentContainer.css('height', Math.max(400, it.container.height() - hcParentContainer.position().top) + 'px');
+                    hcParentContainer.css('height', calculateHighchartsParentContainerHeight() + 'px');
 
                     delete it.reportInstance.components.chart[0].hcConfig.chart.height;
                     delete it.reportInstance.components.chart[0].hcConfig.chart.width;
@@ -1245,7 +1304,7 @@ define(['jasperreports-report', 'jquery.ui', 'csslink!jr.jive.vm.css', 'common/u
                     });
 
                     $(window).on('customResizeEnd', function() {
-                        hcParentContainer.css('height', Math.max(400, it.container.height() - hcParentContainer.position().top));
+                        hcParentContainer.css('height', calculateHighchartsParentContainerHeight() + 'px');
                         $.each(it.reportInstance.components.chart, function(){
                             this.render();
                         });
@@ -1260,11 +1319,16 @@ define(['jasperreports-report', 'jquery.ui', 'csslink!jr.jive.vm.css', 'common/u
                  */
                 if(components.chart) {
                     $.each(components.chart, function(){
-                        var el = $('#'+this.config.hcinstancedata.renderto).length;
+                        var el = $('#'+this.config.hcinstancedata.renderto).length,
+                            self = this;
+
+                        // delay Hicharts rendering until container will be fully initialized with sizes
+                        // fixes JRS-4228 Bug 36977 - [Case #46447+1] Dashboard pie size incorrect in Firefox,
+                        // and JRS-4531 Bug 38264 - [case #51452+2]Overlapped HTML5 chart legend display in a dashboard in FF and IE browsers
                         if(isAdhocView) {
-                            el && it.container.height() && this.render();
+                            el && it.container.height() && setTimeout(function() { self.render(); }, 1);
                         } else {
-                            el && this.render();
+                            el && setTimeout(function() { self.render(); }, 1);
                         }
                     });
                 }
@@ -1327,7 +1391,7 @@ define(['jasperreports-report', 'jquery.ui', 'csslink!jr.jive.vm.css', 'common/u
 						webFontsConfig.paths[moduleName] = webfont.path;
 					});
 
-					require.config(webFontsConfig);
+					requirejs.config(webFontsConfig);
 					require(modules, function() {
 						/*
 							IE Webfonts fix

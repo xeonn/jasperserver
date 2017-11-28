@@ -37,7 +37,7 @@ define(function(require) {
 		i18n = require("bundle!all"),
         jasperserverConfig = require("bundle!jasperserver_config");
 
-    return BaseDataSourceModel.extend({
+    var CustomDataSourceModel = BaseDataSourceModel.extend({
         type: repositoryResourceTypes.CUSTOM_DATA_SOURCE,
 
 		constructor: function(attributes, options) {
@@ -77,6 +77,7 @@ define(function(require) {
             }).done(function(response) {
 
                 if (response && response.propertyDefinitions && _.isArray(response.propertyDefinitions)) {
+                    self.resetValidation(); // reset validation to initial state
 
                     self.testable = !!response.testable;
                     self.queryTypes = response.queryTypes ? response.queryTypes : null;
@@ -178,6 +179,12 @@ define(function(require) {
                 });
             }
             return data;
+        },
+
+        resetValidation: function() {
+            this.validation = _.clone(CustomDataSourceModel.prototype.validation);
         }
     });
+
+    return CustomDataSourceModel;
 });

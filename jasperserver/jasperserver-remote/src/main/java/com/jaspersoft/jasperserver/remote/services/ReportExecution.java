@@ -22,6 +22,7 @@ package com.jaspersoft.jasperserver.remote.services;
 
 import com.jaspersoft.jasperserver.api.JSException;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.domain.impl.ReportUnitResult;
+import com.jaspersoft.jasperserver.remote.exception.RemoteException;
 import com.jaspersoft.jasperserver.remote.exception.xml.ErrorDescriptor;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -84,15 +85,29 @@ public class ReportExecution {
     public ReportUnitResult getFinalReportUnitResult() {
         resultLock.lock();
         try {
-            while (reportUnitResult == null) {
+            while (reportUnitResult == null && status != ExecutionStatus.cancelled && status != ExecutionStatus.failed) {
                 resultExist.await();
             }
+            ErrorDescriptor descriptor = null;
+            switch (status){
+                case failed:{
+                    descriptor = errorDescriptor != null ? errorDescriptor :
+                            new ErrorDescriptor.Builder().setErrorCode("report.execution.failed").setMessage("Report execution failed")
+                                    .getErrorDescriptor();
+                }
+                break;
+                case cancelled:{
+                    descriptor = new ErrorDescriptor.Builder().setErrorCode("report.execution.cancelled")
+                            .setMessage("Report execution cancelled").getErrorDescriptor();
+                }
+                break;
+            }
+            if (descriptor != null) throw new RemoteException(descriptor);
         } catch (InterruptedException e) {
             throw new JSException(e);
         } finally {
             resultLock.unlock();
         }
-
         return reportUnitResult;
     }
 
@@ -156,16 +171,23 @@ public class ReportExecution {
     }
 
     public void setErrorDescriptor(ErrorDescriptor errorDescriptor) {
-        this.errorDescriptor = errorDescriptor;
-        if(errorDescriptor != null) {
-            this.status = ExecutionStatus.failed;
-            synchronized (this) {
-                if (!exports.isEmpty()) {
-                    for (ExportExecution exportExecution : exports.values()) {
-                        exportExecution.setErrorDescriptor(errorDescriptor);
+        resultLock.lock();
+        try {
+            this.errorDescriptor = errorDescriptor;
+            if(errorDescriptor != null) {
+                this.status = ExecutionStatus.failed;
+                synchronized (this) {
+                    if (!exports.isEmpty()) {
+                        for (ExportExecution exportExecution : exports.values()) {
+                            exportExecution.setErrorDescriptor(errorDescriptor);
+                        }
                     }
                 }
             }
+            // error happened. Let's signal to react.
+            resultExist.signalAll();
+        } finally {
+            resultLock.unlock();
         }
     }
 
@@ -182,29 +204,36 @@ public class ReportExecution {
     }
 
     public void setStatus(ExecutionStatus status) {
-        if (this.status != status) {
-            this.status = status;
-            if (status == ExecutionStatus.cancelled || status == ExecutionStatus.ready || status == ExecutionStatus.queued) {
-                synchronized (this) {
-                    if(status == ExecutionStatus.queued){
-                        setReportUnitResult(null);
-                        setErrorDescriptor(null);
-                    }
-                    if (!exports.isEmpty()) {
-                        for (ExportExecution exportExecution : exports.values()) {
-                            switch (status) {
-                                case queued:
-                                case ready:
-                                    exportExecution.reset();
-                                    break;
-                                case cancelled:
-                                    exportExecution.setStatus(ExecutionStatus.cancelled);
-                                    break;
+        resultLock.lock();
+        try {
+            if (this.status != status) {
+                this.status = status;
+                if (status == ExecutionStatus.cancelled || status == ExecutionStatus.ready || status == ExecutionStatus.queued) {
+                    synchronized (this) {
+                        if (status == ExecutionStatus.queued) {
+                            setReportUnitResult(null);
+                            setErrorDescriptor(null);
+                        }
+                        if (!exports.isEmpty()) {
+                            for (ExportExecution exportExecution : exports.values()) {
+                                switch (status) {
+                                    case queued:
+                                    case ready:
+                                        exportExecution.reset();
+                                        break;
+                                    case cancelled:
+                                        exportExecution.setStatus(ExecutionStatus.cancelled);
+                                        break;
+                                }
                             }
                         }
                     }
                 }
+                // status is changed, let's signal to react
+                resultExist.signalAll();
             }
+        } finally {
+            resultLock.unlock();
         }
     }
 

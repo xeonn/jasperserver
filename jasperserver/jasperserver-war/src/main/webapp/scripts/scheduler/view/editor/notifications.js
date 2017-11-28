@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: notifications.js 7748 2014-07-18 09:13:06Z kklein $
+ * @version: $Id: notifications.js 8179 2015-01-27 12:34:21Z psavushchik $
  */
 
 define('scheduler/view/editor/notifications', function(require){
@@ -264,10 +264,10 @@ define('scheduler/view/editor/notifications', function(require){
             if (v1) enumValue.push("SUCCESS_ONLY");
             if (v2) enumValue.push("FAIL_ONLY");
 
-            if (enumValue.length == 0) {
+            if (enumValue.length === 0) {
                 enumValue = ["NONE"];
             }
-            if (enumValue.length == 2) {
+            if (enumValue.length === 2) {
                 enumValue = ["ALL"];
             }
 

@@ -130,7 +130,7 @@
                 <spring:bind path="dataResource.reportDataSource.description">
 					<tr>
 						<td align="right" valign="top"><spring:message code="label.description"/>&nbsp;</td>
-						<td align="left"><textarea name="${status.expression}" rows="5" cols="28" class="fnormal"><c:out value='${status.value}'/></textarea></td>
+						<td align="left"><textarea name="${status.expression}" rows="5" cols="28" class="fnormal">${status.value}</textarea></td>
 					</tr>
 					<c:if test="${status.error}">
 					<tr>
@@ -155,7 +155,7 @@
                                 <c:choose>
                                     <c:when test="${prop.displayHeight != null}">
                                             <textarea name="${status.expression}" rows="${prop.displayHeight}" cols="<c:choose><c:when test="${prop.displayWidth != null}">${prop.displayWidth}</c:when><c:otherwise>40</c:otherwise></c:choose>"
-                                                      class="fnormal"><c:out value='${status.value}'/></textarea>
+                                                      class="fnormal">${status.value}</textarea>
                                     </c:when>
                                     <c:otherwise>
                                         <input name="${status.expression}" type="<c:choose><c:when test="${prop.name eq 'password'}">password</c:when><c:otherwise>text</c:otherwise></c:choose>" class="fnormal"

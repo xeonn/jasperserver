@@ -20,36 +20,6 @@
  */
 package com.jaspersoft.jasperserver.war.common;
 
-import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
-import com.jaspersoft.jasperserver.api.common.domain.impl.ExecutionContextImpl;
-import com.jaspersoft.jasperserver.api.common.util.TimeZoneContextHolder;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.DataType;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.Folder;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.client.FolderImpl;
-import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
-import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportUnit;
-import com.jaspersoft.jasperserver.api.metadata.user.domain.Role;
-import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
-import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JRExporterParameter;
-import net.sf.jasperreports.engine.JasperPrint;
-import net.sf.jasperreports.engine.export.JRHtmlExporter;
-import net.sf.jasperreports.engine.export.JRHtmlExporterParameter;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.context.MessageSource;
-import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.web.servlet.support.RequestContextUtils;
-import org.springframework.webflow.context.ExternalContext;
-import org.springframework.webflow.context.servlet.ServletExternalContext;
-import org.springframework.webflow.execution.RequestContext;
-
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.servlet.http.HttpServletRequest;
-import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -62,9 +32,36 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.servlet.http.HttpServletRequest;
+import javax.sql.DataSource;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.web.servlet.support.RequestContextUtils;
+import org.springframework.webflow.context.ExternalContext;
+import org.springframework.webflow.context.servlet.ServletExternalContext;
+import org.springframework.webflow.execution.RequestContext;
+
+import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
+import com.jaspersoft.jasperserver.api.common.domain.impl.ExecutionContextImpl;
+import com.jaspersoft.jasperserver.api.common.util.TimeZoneContextHolder;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.DataType;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.Folder;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.client.FolderImpl;
+import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
+import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportUnit;
+import com.jaspersoft.jasperserver.api.metadata.user.domain.Role;
+import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
+
 /**
  * @author aztec
- * @version $Id: JasperServerUtil.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: JasperServerUtil.java 54728 2015-04-24 15:28:20Z tdanciu $
  */
 public class JasperServerUtil {
 
@@ -102,26 +99,6 @@ public class JasperServerUtil {
 			}
 		}
 		return con;
-    }
-
-    /*
-     * method to export a Jasper Report to a Html type
-     * arguments: JasperPrint, StringBuffer
-     * retunrs: JRHtmlExporter
-     */
-    public static JRHtmlExporter exportJRToHtml(JasperPrint jasperPrint, StringBuffer reportContent) throws JRException//FIXME this method does not seem to be used anywhere. consider removing it 
-    {
-        JRHtmlExporter exporter = new JRHtmlExporter();
-        exporter.setParameter(JRExporterParameter.JASPER_PRINT, jasperPrint);
-        exporter.setParameter(JRExporterParameter.OUTPUT_STRING_BUFFER, reportContent);
-        //exporter.setParameter(JRHtmlExporterParameter.IMAGES_URI, "../servlets/image?image=");
-        exporter.setParameter(JRHtmlExporterParameter.IS_USING_IMAGES_TO_ALIGN, Boolean.FALSE);
-        exporter.setParameter(JRExporterParameter.PAGE_INDEX, new Integer(0));
-        exporter.setParameter(JRHtmlExporterParameter.HTML_HEADER, "");
-        exporter.setParameter(JRHtmlExporterParameter.BETWEEN_PAGES_HTML, "");
-        exporter.setParameter(JRHtmlExporterParameter.HTML_FOOTER, "");
-        exporter.exportReport();
-        return exporter;
     }
 
 	/*

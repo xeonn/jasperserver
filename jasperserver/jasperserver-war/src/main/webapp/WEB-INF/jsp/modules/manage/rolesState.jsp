@@ -22,7 +22,9 @@
 
 <%@ taglib prefix="c" uri="http://java.sun.com/jstl/core_rt" %>
 <%@ taglib uri="/spring" prefix="spring"%>
+<%@ taglib prefix="js" uri="/WEB-INF/jasperserver.tld" %>
 
+<js:out javaScriptEscape="true">
 <script type="text/javascript">
 
     if (typeof orgModule === "undefined") {
@@ -57,14 +59,14 @@
 
     // Initialization of repository search init object.
     localContext.roleMngInitOptions = {
-        state: ${state},
-        defaultRole: '<spring:message code="${defaultRole}" javaScriptEscape="true"/>',
-        defaultEntity: '<spring:message code="${defaultEntity}" javaScriptEscape="true"/>',
-        currentUser: '<spring:message code="${signedUser}" javaScriptEscape="true"/>',
-        currentUserRoles: ${currentUserRoles}
+        state: JSON.parse('${state}'),
+        defaultRole: '${defaultRole}',
+        defaultEntity: '${defaultEntity}',
+        currentUser: '${signedUser}',
+        currentUserRoles: JSON.parse('${currentUserRoles}')
     };
 
-    orgModule.Configuration = ${configuration};
+    orgModule.Configuration = JSON.parse('${configuration}');
 
 
     if (typeof __jrsConfigs__.roleManagement === "undefined") {
@@ -75,3 +77,4 @@
     __jrsConfigs__.roleManagement.localContext = localContext;
 
 </script>
+</js:out>

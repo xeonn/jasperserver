@@ -20,8 +20,8 @@
  */
 package com.jaspersoft.jasperserver.war.tags;
 
+import java.io.OutputStream;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -31,18 +31,19 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.BodyContent;
 
-import com.jaspersoft.jasperserver.api.SessionAttribMissingException;
-
-import net.sf.jasperreports.engine.JRExporter;
-import net.sf.jasperreports.engine.JRExporterParameter;
 import net.sf.jasperreports.engine.JRPropertiesUtil;
 import net.sf.jasperreports.engine.JasperReportsContext;
 import net.sf.jasperreports.engine.ReportContext;
 import net.sf.jasperreports.engine.export.AbstractHtmlExporter;
-import net.sf.jasperreports.engine.export.JRHtmlExporterParameter;
 import net.sf.jasperreports.engine.export.JRHyperlinkProducerFactory;
 import net.sf.jasperreports.engine.export.JsonExporter;
 import net.sf.jasperreports.engine.export.type.ZoomTypeEnum;
+import net.sf.jasperreports.export.HtmlExporterConfiguration;
+import net.sf.jasperreports.export.HtmlReportConfiguration;
+import net.sf.jasperreports.export.SimpleExporterInput;
+import net.sf.jasperreports.export.SimpleHtmlExporterConfiguration;
+import net.sf.jasperreports.export.SimpleHtmlExporterOutput;
+import net.sf.jasperreports.export.SimpleHtmlReportConfiguration;
 import net.sf.jasperreports.web.actions.SaveZoomCommand;
 import net.sf.jasperreports.web.servlets.JasperPrintAccessor;
 import net.sf.jasperreports.web.servlets.ReportExecutionStatus;
@@ -58,16 +59,16 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.tags.RequestContextAwareTag;
 
 import com.jaspersoft.jasperserver.api.JSException;
+import com.jaspersoft.jasperserver.api.SessionAttribMissingException;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.domain.impl.ReportUnitResult;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.service.DataCacheProvider;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.service.DataCacheProvider.SnapshotSaveStatus;
-import com.jaspersoft.jasperserver.api.engine.jasperreports.util.HtmlExportUtil;
+import com.jaspersoft.jasperserver.api.engine.jasperreports.util.ExportUtil;
 import com.jaspersoft.jasperserver.war.action.ReportExecutionController;
 import com.jaspersoft.jasperserver.war.action.ReportParametersAction;
 import com.jaspersoft.jasperserver.war.action.WebflowReportContext;
 import com.jaspersoft.jasperserver.war.action.WebflowReportContextAccessor;
 import com.jaspersoft.jasperserver.war.action.hyperlinks.HyperlinkProducerFactoryFlowFactory;
-import com.jaspersoft.jasperserver.war.util.JRHtmlExportUtils;
 import com.jaspersoft.jasperserver.war.util.SessionObjectSerieAccessor;
 
 
@@ -75,7 +76,7 @@ import com.jaspersoft.jasperserver.war.util.SessionObjectSerieAccessor;
  * renderJsp parameter allows override of default output format for HTML controls
  * 
  * @author Ionut Nedelcu (ionutned@users.sourceforge.net)
- * @version $Id: JasperViewerTag.java 51250 2014-11-07 19:36:11Z tdanciu $
+ * @version $Id: JasperViewerTag.java 55283 2015-05-12 12:32:47Z nmarcu $
  */
 public class JasperViewerTag extends RequestContextAwareTag
 {
@@ -98,10 +99,8 @@ public class JasperViewerTag extends RequestContextAwareTag
 	private String resourceServlet;
 	private String page;
 	private String renderJsp;
-	private String providedExporterClassName;
 	private boolean innerPagination;
     private boolean ignorePageMargins;
-	private Map exporterParameters;
 	private String jasperPrintAttribute = DEFAULT_JASPER_PRINT_ATTRIBUTE;
 	private String pageIndexAttribute = DEFAULT_PAGE_INDEX_ATTRIBUTE;
 	private String linkProducerFactoryAttribute = DEFAULT_LINK_PRODUCER_FACTORY_ATTRIBUTE;
@@ -181,13 +180,18 @@ public class JasperViewerTag extends RequestContextAwareTag
 				
 	            JasperReportsContext jasperReportsContext = getJasperReportsContext(applicationContext);
 				
-	            AbstractHtmlExporter exporter = HtmlExportUtil.getHtmlExporter(jasperReportsContext);
-				exporter.setParameter(JRExporterParameter.JASPER_PRINT, printAccessor.getJasperPrint());
-				exporter.setParameter(JRExporterParameter.PAGE_INDEX, pageIndex);
-				exporter.setImageHandler(new WebHtmlResourceHandler(response.encodeURL(imageServlet + "image={0}")));
-				exporter.setResourceHandler(new WebHtmlResourceHandler(response.encodeURL(resourceServlet + "/{0}")));
-				exporter.setFontHandler(new WebHtmlResourceHandler(response.encodeURL(resourceServlet + "&font={0}")));
+	            AbstractHtmlExporter<HtmlReportConfiguration, HtmlExporterConfiguration> exporter = ExportUtil.getInstance(jasperReportsContext).createHtmlExporter();
+	            exporter.setExporterInput(new SimpleExporterInput(printAccessor.getJasperPrint()));
+				
+				SimpleHtmlExporterOutput htmlExporterOutput = new SimpleHtmlExporterOutput((OutputStream)null);
+				htmlExporterOutput.setImageHandler(new WebHtmlResourceHandler(response.encodeURL(imageServlet + "image={0}")));
+				htmlExporterOutput.setResourceHandler(new WebHtmlResourceHandler(response.encodeURL(resourceServlet + "/{0}")));
+				htmlExporterOutput.setFontHandler(new WebHtmlResourceHandler(response.encodeURL(resourceServlet + "&font={0}")));
+				request.setAttribute("exporterOutput", htmlExporterOutput);
 
+				SimpleHtmlReportConfiguration htmlReportConfig = new SimpleHtmlReportConfiguration();
+				htmlReportConfig.setPageIndex(pageIndex);
+				
 				StringBuffer htmlHeader = new StringBuffer();
                 String contextPath = request.getContextPath();
 
@@ -195,11 +199,12 @@ public class JasperViewerTag extends RequestContextAwareTag
                 String referer = request.getHeader("Referer");
                 referer = referer.substring(0, referer.indexOf(contextPath) + contextPath.length());
                 // end fix
-				exporter.setParameter(JRHtmlExporterParameter.HTML_HEADER, htmlHeader.toString());
-				
-				exporter.setParameter(JRHtmlExporterParameter.HTML_FOOTER, "");
-				exporter.setParameter(JRHtmlExportUtils.PARAMETER_HTTP_REQUEST, request);
-				exporter.setParameter(JRExporterParameter.IGNORE_PAGE_MARGINS, ignorePageMargins);
+				SimpleHtmlExporterConfiguration htmlExporterConfig = new SimpleHtmlExporterConfiguration();
+				htmlExporterConfig.setHtmlHeader(htmlHeader.toString());
+				htmlExporterConfig.setHtmlFooter("");
+				exporter.setConfiguration(htmlExporterConfig);
+				exporter.getExporterContext().setValue(ExportUtil.HTTP_SERVLET_REQUEST, request);//key does not really matter here, as first value of type request is taken, regardless of key
+				htmlReportConfig.setIgnorePageMargins(ignorePageMargins);
                 WebflowReportContext webflowReportContext = getReportContextAccessor().getContext(request, reportContextMap);
                 webflowReportContext.setParameterValue("net.sf.jasperreports.web.app.context.path", contextPath);//FIXMEJIVE use constant
 //              webflowReportContext.setParameterValue(JRParameter.REPORT_CONTEXT, webflowReportContext);
@@ -212,27 +217,21 @@ public class JasperViewerTag extends RequestContextAwareTag
 				HyperlinkProducerFactoryFlowFactory linkProducerFactory = (HyperlinkProducerFactoryFlowFactory) request.getAttribute(getLinkProducerFactoryAttribute());
 				if (linkProducerFactory != null) {
 					JRHyperlinkProducerFactory hyperlinkProducerFactory = linkProducerFactory.getHyperlinkProducerFactory(request, response);
-					exporter.setParameter(JRExporterParameter.HYPERLINK_PRODUCER_FACTORY, hyperlinkProducerFactory);
+					htmlReportConfig.setHyperlinkProducerFactory(hyperlinkProducerFactory);
 				}
+				
+				exporter.setConfiguration(htmlReportConfig);
 
-/*
- * Future enhancement
- * 
- * 				JRExporter exporter = (providedExporterClassName != null)
-									? defaultExporter(jasperPrint, pageIndex) 
-									: providedExporter(jasperPrint, pageIndex);
-				setParameters(exporter);
-*/			
 				request.setAttribute("exporter", exporter);
 
+                JsonExporter jsonExporter = null;
                 boolean isComponentMetadataEmbedded = WebUtil.getInstance(jasperReportsContext).isComponentMetadataEmbedded();
-                request.setAttribute("isComponentMetadataEmbedded", isComponentMetadataEmbedded);
                 if (isComponentMetadataEmbedded) {
-                    JsonExporter jsonExporter = new JsonExporter(jasperReportsContext);
+                    jsonExporter = new JsonExporter(jasperReportsContext);
                     jsonExporter.setReportContext(webflowReportContext);
-                    jsonExporter.setParameter(JRExporterParameter.JASPER_PRINT, printAccessor.getJasperPrint());
-                    request.setAttribute("jsonExporter", jsonExporter);
+                    jsonExporter.setExporterInput(new SimpleExporterInput(printAccessor.getJasperPrint()));
                 }
+                request.setAttribute("jsonExporter", jsonExporter);
 
                 // set report status on response header
                 LinkedHashMap<String, Object> result = new LinkedHashMap<String, Object>();
@@ -240,6 +239,7 @@ public class JasperViewerTag extends RequestContextAwareTag
                 result.put("totalPages", reportStatus.getTotalPageCount());
                 result.put("partialPageCount", reportStatus.getCurrentPageCount());
                 result.put("pageFinal", pageStatus.isPageFinal());
+                result.put("pageIndex", pageIndex);
                 result.put("contextid", webflowReportContext.getId());
                 result.put("isComponentMetadataEmbedded", isComponentMetadataEmbedded);
                 result.put("jasperPrintName", request.getAttribute("jasperPrintName"));
@@ -399,63 +399,6 @@ public class JasperViewerTag extends RequestContextAwareTag
 
 	public void setRenderJsp(String renderJsp) {
 		this.renderJsp = renderJsp;
-	}
-
-	public String getExporterClassName()
-	{
-		return providedExporterClassName;
-	}
-
-	public void setExporterClassName(String exporterClassName)
-	{
-		this.providedExporterClassName = exporterClassName;
-	}
-	
-	/**
-	 * @return Returns the exporterParameters.
-	 */
-	public Map getExporterParameters()
-	{
-		return exporterParameters;
-	}
-
-	/**
-	 * @param exporterParameters The exporterParameters to set.
-	 */
-	public void setExporterParameters(Map exporterParameters)
-	{
-		this.exporterParameters = exporterParameters;
-	}
-
-//	private JRExporter defaultExporter(JasperPrint jasperPrint, Integer pageIndex) {
-//		JRHtmlExporter exporter = new JRHtmlExporter();
-//		exporter.setParameter(JRExporterParameter.JASPER_PRINT, jasperPrint);
-//		exporter.setParameter(JRExporterParameter.PAGE_INDEX, pageIndex);
-//		exporter.setParameter(JRHtmlExporterParameter.IMAGES_URI, imageServlet + "?image=");
-//		exporter.setParameter(JRHtmlExporterParameter.HTML_HEADER, "");
-//		exporter.setParameter(JRHtmlExporterParameter.HTML_FOOTER, "");
-//		return exporter;
-//	}
-	
-//	private JRExporter providedExporter(JasperPrint jasperPrint, Integer pageIndex) throws Exception {
-//		Class exporterClass = Class.forName(providedExporterClassName);
-//		
-//		JRExporter exporter = (JRExporter) exporterClass.newInstance();
-//		exporter.setParameter(JRExporterParameter.JASPER_PRINT, jasperPrint);
-//		exporter.setParameter(JRExporterParameter.PAGE_INDEX, pageIndex);
-//		return exporter;
-//	}
-	
-	private void setParameters(JRExporter exporter) {
-		if (exporterParameters == null || exporterParameters.size() == 0) {
-			return;
-		}
-		Iterator it =  exporterParameters.entrySet().iterator();
-		
-		while (it.hasNext()) {
-			Map.Entry entry = (Map.Entry) it.next();
-			exporter.setParameter((JRExporterParameter) entry.getKey(), entry.getValue());
-		}
 	}
 
 	public String getJasperPrintAttribute() {

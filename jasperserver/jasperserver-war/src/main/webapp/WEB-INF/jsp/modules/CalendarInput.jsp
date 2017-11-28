@@ -21,6 +21,7 @@
 
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/spring" prefix="spring" %>
+<%@ taglib prefix="js" uri="/WEB-INF/jasperserver.tld" %>
 
 <% request.setAttribute("id", ((String) request.getAttribute("name")).replace(".", "_"));%>
 
@@ -33,9 +34,11 @@
 
     <script type="text/javascript">
         jQuery('#${id}').${(hasDate == true) ? 'date' : ''}${(hasTime == true) ? 'time' : ''}picker({
+            <js:out javaScriptEscape="true">
             dateFormat:'${datePattern}',
             timeFormat:'${timePattern}',
             showSecond:'${showSecond}',
+            </js:out>
             showOn:"button",
             buttonText:"",
             changeYear:true,

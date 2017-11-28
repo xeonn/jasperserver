@@ -79,13 +79,13 @@
         <property name="service" ref="${bean.userAndRoleService}" />
     </bean>
 
-    <bean id="attributesConfig" class="com.jaspersoft.jasperserver.jaxrs.common.AttributesConfig">
+    <bean id="attributesConfig" class="com.jaspersoft.jasperserver.remote.helpers.AttributesConfig">
         <property name="maxLengthAttrName" value="255"/>
-        <property name="maxLengthAttrValue" value="255"/>
+        <property name="maxLengthAttrValue" value="2000"/>
     </bean>
 
     <alias name="${bean.permissionsRecipientIdentityResolver}" alias="concretePermissionsRecipientIdentityResolver"/>
-    <alias name="${bean.userAttributesService}" alias="concreteUserAttributesService"/>
+    <alias name="${bean.attributesRecipientIdentityResolver}" alias="concreteAttributesRecipientIdentityResolver"/>
 
     <util:map id="protocolMapping">
         <entry key="user">
@@ -94,7 +94,32 @@
         <entry key="role">
             <value type="java.lang.Class">com.jaspersoft.jasperserver.api.metadata.user.domain.Role</value>
         </entry>
+        <entry key="tenant">
+            <value type="java.lang.Class">com.jaspersoft.jasperserver.api.metadata.user.domain.Tenant</value>
+        </entry>
     </util:map>
+
+    <bean id="permissionsRecipientIdentityResolver" class="com.jaspersoft.jasperserver.remote.helpers.RecipientIdentityResolver">
+        <property name="map" ref="protocolMapping"/>
+        <property name="identifierLabel" value="recipientUri"/>
+        <property name="requiredProtocols">
+            <set>
+                <value>user</value>
+                <value>role</value>
+            </set>
+        </property>
+    </bean>
+
+    <bean id="attributesRecipientIdentityResolver" class="com.jaspersoft.jasperserver.remote.helpers.RecipientIdentityResolver">
+        <property name="map" ref="protocolMapping"/>
+        <property name="identifierLabel" value="holder"/>
+        <property name="requiredProtocols">
+            <set>
+                <value>user</value>
+                <value>tenant</value>
+            </set>
+        </property>
+    </bean>
 
     <util:map id="contentTypeMapping">
         <entry key="pdf" value="application/pdf"/>

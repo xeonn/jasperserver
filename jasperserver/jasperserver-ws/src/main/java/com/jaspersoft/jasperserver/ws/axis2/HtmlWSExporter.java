@@ -34,12 +34,12 @@ import net.sf.jasperreports.engine.export.JRHtmlExporterParameter;
 
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
 import com.jaspersoft.jasperserver.api.engine.common.service.EngineService;
-import com.jaspersoft.jasperserver.api.engine.jasperreports.util.HtmlExportUtil;
+import com.jaspersoft.jasperserver.api.engine.jasperreports.util.ExportUtil;
 import com.jaspersoft.jasperserver.api.metadata.xml.domain.impl.Argument;
 
 /**
  * @author sanda zaharia (shertage@users.sourceforge.net)
- * @@version $Id: HtmlWSExporter.java 47331 2014-07-18 09:13:06Z kklein $
+ * @@version $Id: HtmlWSExporter.java 54728 2015-04-24 15:28:20Z tdanciu $
  */
 public class HtmlWSExporter implements WSExporter {
 	
@@ -54,7 +54,7 @@ public class HtmlWSExporter implements WSExporter {
 			String reportUnitURI
 			) throws Exception
 	{
-		JRExporter exporter = HtmlExportUtil.getHtmlExporter(getJasperReportsContext());
+		JRExporter exporter = ExportUtil.getInstance(getJasperReportsContext()).createHtmlExporter();
 		exporter.setParameter(JRExporterParameter.JASPER_PRINT, jasperPrint);
 		exporter.setParameter(JRExporterParameter.OUTPUT_STREAM, output);
 		

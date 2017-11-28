@@ -29,11 +29,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JRExporterParameter;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReportsContext;
 import net.sf.jasperreports.engine.export.JRHyperlinkProducerFactory;
 import net.sf.jasperreports.engine.export.JRXml4SwfExporter;
+import net.sf.jasperreports.export.SimpleExporterInput;
+import net.sf.jasperreports.export.SimpleReportExportConfiguration;
+import net.sf.jasperreports.export.SimpleWriterExporterOutput;
 
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
@@ -95,16 +97,17 @@ public class XmlExportController  implements Controller
 		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		JRXml4SwfExporter exporter = new JRXml4SwfExporter(getJasperReportsContext());
-		exporter.setParameter(JRExporterParameter.JASPER_PRINT, jasperPrint);
-		exporter.setParameter(JRExporterParameter.OUTPUT_STREAM, baos);
-		exporter.setParameter(JRExporterParameter.CHARACTER_ENCODING, "UTF-8");
+		exporter.setExporterInput(new SimpleExporterInput(jasperPrint));
+		exporter.setExporterOutput(new SimpleWriterExporterOutput(baos, "UTF-8"));
 
+		SimpleReportExportConfiguration xmlReportConfig = new SimpleReportExportConfiguration();
+		
 		if (getHyperlinkProducerFactory() != null) 
 		{
 			JRHyperlinkProducerFactory factory = getHyperlinkProducerFactory().getHyperlinkProducerFactory(request, response);
 			if (factory != null)
 			{
-				exporter.setParameter(JRExporterParameter.HYPERLINK_PRODUCER_FACTORY, factory);
+				xmlReportConfig.setHyperlinkProducerFactory(factory);
 			}
 		}
 		
@@ -118,9 +121,11 @@ public class XmlExportController  implements Controller
 		}
 		if (pageIndex >= 0 && jasperPrint.getPages().size() > 0)
 		{
-			exporter.setParameter(JRExporterParameter.PAGE_INDEX, new Integer(pageIndex));
+			xmlReportConfig.setPageIndex(pageIndex);
 		}
 
+		exporter.setConfiguration(xmlReportConfig);
+		
 		try 
 		{
 			exporter.exportReport();

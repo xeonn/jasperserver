@@ -32,7 +32,7 @@ import java.util.List;
 
 /**
  * @author Volodya Sabadosh (vsabadosh@jaspersoft.com)
- * @version $Id: PermissionsService.java 51947 2014-12-11 14:38:38Z ogavavka $
+ * @version $Id: PermissionsService.java 54590 2015-04-22 17:55:42Z vzavadsk $
  */
 public interface PermissionsService {
     public String REPO_URI_PREFIX = Resource.URI_PROTOCOL + ":";
@@ -50,7 +50,7 @@ public interface PermissionsService {
 
     public ObjectPermission putPermission(ObjectPermission objectPermission) throws RemoteException;
 
-    public List<ObjectPermission> putPermissions(String uri, List<ObjectPermission> objectPermissions) throws RemoteException;
+    public List<ObjectPermission> putPermissions(InternalURI internalURI, List<ObjectPermission> objectPermissions) throws RemoteException;
 
     public List<ObjectPermission> createPermissions(List<ObjectPermission> objectPermissions) throws RemoteException;
 
@@ -60,9 +60,9 @@ public interface PermissionsService {
 
     public int getAppliedPermissionMaskForObjectAndCurrentUser(String targetURI) throws RemoteException;
 
-    public ObjectPermission getEffectivePermission(Resource resource, Role role);
+    public ObjectPermission getEffectivePermission(InternalURI internalURI, Role role);
 
-    public ObjectPermission getEffectivePermission(Resource resource, User user);
+    public ObjectPermission getEffectivePermission(InternalURI internalURI, User user);
 
-    public ObjectPermission getEffectivePermission(Resource resource, Authentication authentication);
+    public ObjectPermission getEffectivePermission(InternalURI internalURI, Authentication authentication);
 }

@@ -85,7 +85,7 @@ import java.util.Set;
 
 /**
  * @author Ionut Nedelcu (ionutned@users.sourceforge.net)	
- * @version $Id: ReportParametersAction.java 51947 2014-12-11 14:38:38Z ogavavka $
+ * @version $Id: ReportParametersAction.java 55164 2015-05-06 20:54:37Z mchan $
  */
 public abstract class ReportParametersAction extends FormAction implements ReportInputControlsAction
 {
@@ -322,7 +322,7 @@ public abstract class ReportParametersAction extends FormAction implements Repor
     private boolean isResourceReadOnly(RequestContext context, Object resource) {
         ExecutionContext exContext = getExecutionContext(context);
 
-        Set<Integer> allUserPermissions = null;
+        Set<Integer> allUserPermissions = Collections.emptySet();
         List<Object> currentUserRecipients = getCurrentUserRecipients();
         if (currentUserRecipients != null && currentUserRecipients.size() > 0) {
             allUserPermissions = new HashSet<Integer>();

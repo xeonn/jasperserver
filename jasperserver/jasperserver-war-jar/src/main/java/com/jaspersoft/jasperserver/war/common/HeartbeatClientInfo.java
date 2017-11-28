@@ -22,8 +22,6 @@ package com.jaspersoft.jasperserver.war.common;
 
 import java.util.Locale;
 
-import org.apache.commons.httpclient.methods.PostMethod;
-
 
 /**
  * @author Teodor Danciu (teodord@users.sourceforge.net)
@@ -142,17 +140,17 @@ public class HeartbeatClientInfo extends HeartbeatInfo
 		this.userAgent = userAgent;
 	}
 	
-	public void contributeToHttpCall(PostMethod post)
+	public void contributeToHttpCall(HeartbeatCall call)
 	{
-		post.addParameter("navAppName[]", getNavigatorAppName() == null ? "" : getNavigatorAppName());
-		post.addParameter("navAppVersion[]", getNavigatorAppVersion() == null ? "" : getNavigatorAppVersion());
-		post.addParameter("navLocale[]", getNavigatorLocale() == null ? "" : getNavigatorLocale().toString());
-		post.addParameter("userLocale[]", getUserLocale() == null ? "" : getUserLocale().toString());
-		post.addParameter("scrWidth[]", getScreenWidth() == null ? "" : getScreenWidth().toString());
-		post.addParameter("scrHeight[]", getScreenHeight() == null ? "" : getScreenHeight().toString());
-		post.addParameter("scrColorDepth[]", getScreenColorDepth() == null ? "" : getScreenColorDepth().toString());
-		post.addParameter("userAgent[]", getUserAgent() == null ? "" : getUserAgent());
-		post.addParameter("clientCount[]", String.valueOf(getCount()));
+		call.addParameter("navAppName[]", getNavigatorAppName() == null ? "" : getNavigatorAppName());
+		call.addParameter("navAppVersion[]", getNavigatorAppVersion() == null ? "" : getNavigatorAppVersion());
+		call.addParameter("navLocale[]", getNavigatorLocale() == null ? "" : getNavigatorLocale().toString());
+		call.addParameter("userLocale[]", getUserLocale() == null ? "" : getUserLocale().toString());
+		call.addParameter("scrWidth[]", getScreenWidth() == null ? "" : getScreenWidth().toString());
+		call.addParameter("scrHeight[]", getScreenHeight() == null ? "" : getScreenHeight().toString());
+		call.addParameter("scrColorDepth[]", getScreenColorDepth() == null ? "" : getScreenColorDepth().toString());
+		call.addParameter("userAgent[]", getUserAgent() == null ? "" : getUserAgent());
+		call.addParameter("clientCount[]", String.valueOf(getCount()));
 	}
 
 	public String getKey()

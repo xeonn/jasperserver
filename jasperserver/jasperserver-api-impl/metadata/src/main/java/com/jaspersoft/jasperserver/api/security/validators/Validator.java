@@ -22,6 +22,7 @@ package com.jaspersoft.jasperserver.api.security.validators;
 
 import com.jaspersoft.jasperserver.api.JSException;
 import com.jaspersoft.jasperserver.api.JSSecurityException;
+import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributesResolver;
 import com.jaspersoft.jasperserver.api.security.SecurityConfiguration;
 import com.jaspersoft.jasperserver.api.security.encryption.EncryptionFilter;
 import com.jaspersoft.jasperserver.core.util.JSONUtil;
@@ -69,7 +70,7 @@ import static com.jaspersoft.jasperserver.api.security.validators.Validator.Prop
  *
  * @author Normando Macaraeg
  * @author Anton Fomin
- * @version $Id: Validator.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: Validator.java 54590 2015-04-22 17:55:42Z vzavadsk $
  */
 public class Validator {
     private static final Logger log = Logger.getLogger(Validator.class);
@@ -92,6 +93,7 @@ public class Validator {
     private static final String UNKNOWN_KEY_OR_VALUE = "unknown";
 
     private static MessageSource messages;
+    private static ProfileAttributesResolver profileAttributesResolver;
 
     /* Input validationRules */
     private static Map<String, ValidatorRule> validationRules;
@@ -360,8 +362,13 @@ public class Validator {
                 return false;
         }
 
-        if (DEFAULT_CANONICALIZE.<Boolean>get())
+        if (DEFAULT_CANONICALIZE.<Boolean>get()) {
             paramValue = ESAPI.encoder().canonicalize(paramValue);
+        }
+
+        if (profileAttributesResolver.containsAttribute(paramValue)) {
+            return true;
+        }
 
         boolean doesInputSatisfyValidationRule = ESAPI.validator().isValidInput(rule.getContext(), paramValue, rule.getValueValidationKey(), rule.getMaxLength(), rule.isAllowNull(), false);
         // if the value passes ESAPI validation and the validation rule is a blacklist one, the input is invalid
@@ -369,8 +376,8 @@ public class Validator {
             logSecurityFailure(paramName, paramValue, rule);
             return false;
         }
-        else
-            return true;
+
+        return true;
     }
 
     /**
@@ -531,5 +538,9 @@ public class Validator {
 
     public MessageSource getMessages() {
         return messages;
+    }
+
+    public static void setProfileAttributesResolver(ProfileAttributesResolver profileAttributesResolver) {
+        Validator.profileAttributesResolver = profileAttributesResolver;
     }
 }

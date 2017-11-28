@@ -12,10 +12,40 @@ define(function (require) {
         ISO_8601_TIME_PATTERN = "hh:mm:ss";
 
     function toMomentDatePattern(dateFormat) {
-        var datePattern = dateFormat.toLowerCase();
+        var result = dateFormat;
 
-        return datePattern.replace(datePattern.indexOf("yyyy") > -1 ? "yyyy" : "yy", "YYYY")
-            .replace("mm", "MM").replace("dd", "DD");
+        //convert year part of the format
+        if (dateFormat.indexOf("yy") > -1) {
+            result = result.replace("yy", "YYYY"); // four digit year: 2015
+        } else {
+            result = result.replace("y", "YY"); // two digit year: 15
+        }
+
+
+        //convert month part of the format
+        if (dateFormat.indexOf("mm") > -1) {
+            result = result.replace("mm", "MM"); // two digit month with leading zero: 02
+        } else if (dateFormat.indexOf("MM") > -1) {
+            result = result.replace("MM", "MMMM"); // Long month name: February
+        } else if (dateFormat.indexOf("m") > -1) {
+            result = result.replace("m", "M"); // two digit month withoud leading zero: 2
+        } else if (dateFormat.indexOf("M") > -1) {
+            result = result.replace("M", "MMM"); // Short month name: Feb
+        }
+
+
+        //convert day part of the format
+        if (dateFormat.indexOf("dd") > -1) {
+            result = result.replace("dd", "DD"); // day of month (two digit): 02
+        } else if (dateFormat.indexOf("DD") > -1) {
+            result = result.replace("DD", "dddd"); // week day name long: Monday
+        } else if (dateFormat.indexOf("d") > -1) {
+            result = result.replace("d", "D"); // day of month (two digit) without leading zero: 2
+        } else if (dateFormat.indexOf("D") > -1) {
+            result = result.replace("D", "ddd"); // week day short day name: Mon
+        }
+
+        return result;
     }
 
     function toMomentTimePattern(timeFormat) {
@@ -149,7 +179,7 @@ define(function (require) {
             // return original value if it's relative date
             return value;
         }
-        var momentValue = moment(value, fromPattern);
+        var momentValue = moment(value, fromPattern, true);
         if (momentValue.isValid()) {
             // return formatted value if valid date
             return momentValue.format(toPattern);

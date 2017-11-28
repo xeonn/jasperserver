@@ -21,31 +21,29 @@
 
 package com.jaspersoft.jasperserver.remote.exporters;
 
-import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
-import com.jaspersoft.jasperserver.api.engine.common.service.EngineService;
-import com.jaspersoft.jasperserver.api.engine.jasperreports.common.XlsExportParametersBean;
-import com.jaspersoft.jasperserver.remote.exception.RemoteException;
-import com.jaspersoft.jasperserver.remote.exception.xml.ErrorDescriptor;
-import jxl.write.biff.RowsExceededException;
-import net.sf.jasperreports.engine.JRExporter;
-import net.sf.jasperreports.engine.JRExporterParameter;
-import net.sf.jasperreports.engine.JasperPrint;
-import net.sf.jasperreports.engine.export.JExcelApiExporter;
-import net.sf.jasperreports.engine.export.JExcelApiExporterParameter;
-import net.sf.jasperreports.engine.export.JRXlsExporterParameter;
-import org.springframework.context.MessageSource;
-import org.springframework.context.annotation.Scope;
-import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.stereotype.Service;
-
-import javax.annotation.Resource;
 import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.annotation.Resource;
+
+import net.sf.jasperreports.engine.JRExporter;
+import net.sf.jasperreports.engine.JRExporterParameter;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.export.JRXlsExporterParameter;
+
+import org.springframework.context.MessageSource;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Service;
+
+import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
+import com.jaspersoft.jasperserver.api.engine.common.service.EngineService;
+import com.jaspersoft.jasperserver.api.engine.jasperreports.common.XlsExportParametersBean;
+import com.jaspersoft.jasperserver.api.engine.jasperreports.util.ExportUtil;
+
 /**
  * @author Giulio Toffoli (original sanda zaharia (shertage@users.sourceforge.net))
- * @version $Id: XlsExporter.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: XlsExporter.java 54728 2015-04-24 15:28:20Z tdanciu $
  */
 @Service("remoteXlsExporter")
 @Scope("prototype")
@@ -60,7 +58,7 @@ public class XlsExporter extends AbstractExporter {
 
     @Override
     public JRExporter createExporter() throws Exception {
-        return new JExcelApiExporter(getJasperReportsContext());
+        return ExportUtil.getInstance(getJasperReportsContext()).createXlsExporter();
     }
 
     @Override
@@ -93,21 +91,12 @@ public class XlsExporter extends AbstractExporter {
             if (exportParams.getXlsFormatPatternsMap() != null && !exportParams.getXlsFormatPatternsMap().isEmpty())
                 exporter.setParameter(JRXlsExporterParameter.FORMAT_PATTERNS_MAP, exportParams.getXlsFormatPatternsMap());
         }
-        exporter.setParameter(JExcelApiExporterParameter.CREATE_CUSTOM_PALETTE, Boolean.TRUE);
+        exporter.setParameter(JRXlsExporterParameter.CREATE_CUSTOM_PALETTE, Boolean.TRUE);
     }
 
     @Override
     public Map<JRExporterParameter, Object> exportReport(JasperPrint jasperPrint, OutputStream output, EngineService engineService, HashMap exportParameters, ExecutionContext executionContext, String reportUnitURI) throws Exception {
-        try {
-            return super.exportReport(jasperPrint, output, engineService, exportParameters, executionContext, reportUnitURI);
-        } catch (Exception e) {
-            if (e.getCause() instanceof RowsExceededException)
-                throw new RemoteException(new ErrorDescriptor.Builder()
-                        .setErrorCode("jsexception.too.many.data.rows")
-                        .setMessage(messageSource.getMessage("jsexception.too.many.data.rows", null, LocaleContextHolder.getLocale()))
-                        .getErrorDescriptor());
-            else throw e;
-        }
+        return super.exportReport(jasperPrint, output, engineService, exportParameters, executionContext, reportUnitURI);
     }
 
     /**

@@ -42,7 +42,7 @@ import java.util.logging.Logger;
 
 /**
  * @author Ivan Chan (ichan@jaspersoft.com)
- * @version $Id: VirtualSQLDataSource.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: VirtualSQLDataSource.java 53873 2015-04-07 18:59:44Z mchan $
  */
 public class VirtualSQLDataSource implements javax.sql.DataSource {
 
@@ -191,13 +191,19 @@ public class VirtualSQLDataSource implements javax.sql.DataSource {
         }
     }
 
-    // find schemas from database metadata
-    public static Set<String> discoverNonEmptySchemas(Connection conn) throws SQLException {
+    /**
+     * Retrieves all nonempty schemas from the specified connection.
+     * @param conn a connection
+     * @param databaseObjectTypesFilter a list of table types, which must be from the list of table types
+     *         returned from {@link DatabaseMetaData#getTableTypes}, to include; <code>null</code> returns all types
+     * @return
+     */
+    public static Set<String> discoverNonEmptySchemas(Connection conn, Set<String> databaseObjectTypesFilter) throws SQLException {
         DatabaseMetaData dbMetaData = conn.getMetaData();
         try {
             Set<String> set = new LinkedHashSet<String>();
            Set<String> schemaList = getResult(dbMetaData.getSchemas(), TABLE_SCHEM);
-           String[] types = {"TABLE"};
+           String[] types = databaseObjectTypesFilter.toArray(new String[databaseObjectTypesFilter.size()]);
 
             for (String schema : schemaList) {
                 ResultSet rs2 = null;

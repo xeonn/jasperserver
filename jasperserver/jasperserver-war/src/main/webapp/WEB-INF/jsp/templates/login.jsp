@@ -57,90 +57,98 @@ Usage:
     <t:putAttribute name="containerID" value="login"/>
     <t:putAttribute name="containerTitle"><spring:message code='jsp.Login.title'/></t:putAttribute>
     <t:putAttribute name="bodyContent">
+		<div class="devices"></div>
+		<div class="inputSection">
+            ${warningMessages}
+            ${errorMessages}
 
-        ${warningMessages}
-        ${errorMessages}
-
-        <fieldset>
-            <legend class="offLeft"><span><spring:message code='jsp.Login.section'/></span></legend>
-            <c:if test="${jsEdition != 'community'}">
-                <label class="control input text hidden" accesskey="o" for="orgId">
-                    <span class="wrap"></span><spring:message code='MT_ORGANIZATION'/>:</span>
-                    <input id="orgId" name="orgId" type="text" autocapitalize="off"/>
-                    <span class="message warning">error message here</span>
-                </label>
-            </c:if>
-            <label class="control input text" for="j_username">
-                <span class="wrap"><spring:message code='jsp.Login.username'/>:</span>
-                <input id="j_username" name="j_username" type="text" autocapitalize="off" autofocus="autofocus"/>
-                <span class="message warning">error message here</span>
-            </label>
-            <label class="control input password" for="j_password">
-                <span class="wrap">
-                    <c:choose>
-                        <c:when test="${showPasswordChange eq 'true'}"><spring:message code='jsp.Login.password.old'/>:</c:when>
-                        <c:otherwise><spring:message code='jsp.Login.password'/>:</c:otherwise>
-                    </c:choose>
-                </span>
-                <input class="" id="j_password_pseudo" name="j_password_pseudo" type="password" maxlength="47"/>
-                <input class="" id="j_password" name="j_password" type="hidden"/>
-                <span class="message warning">error message here</span>
-            </label>
-        </fieldset>
-        <fieldset>
-            <legend><a id="showHideLocaleAndTimezone"><spring:message code="jsp.Login.link.showLocale"/></a></legend>
-            <div id="localeAndTimeZone" class="hidden">
-	            <label class="control select" for="userLocale">
-	            	<span class="wrap"><spring:message code='jsp.Login.locale'/>:</span>
-	                <select id="userLocale" name="userLocale">
-	                    ${localeOptions}
-	                </select>
-	            </label>
-	            <label class="control select" for="userTimezone"><spring:message code='jsp.Login.timezone'/>:</span>
-	                <select id="userTimezone" name="userTimezone">
-	                    ${timezoneOptions}
-	                </select>
-	            </label>
-            </div>
-        </fieldset>
-        <c:if test="${allowUserPasswordChange eq 'true'}">
-            <script type="text/javascript" language="JavaScript">
-                var doesAllowUserPasswordChange = true;
-            </script>
-            <fieldset>
-                <legend><a id="showHideChangePassword">
-                    <c:choose>
-                        <c:when test="${showPasswordChange eq 'true'}"><spring:message code="jsp.Login.link.cancelPassword"/></c:when>
-                        <c:otherwise><spring:message code="jsp.Login.link.changePassword"/></c:otherwise>
-                    </c:choose>
-                </a></legend>
-                <div id="changePassword" <c:if test="${not showPasswordChange eq 'true'}">class="hidden"</c:if>>
-	                <label class="control input password" for="j_newpassword1">
-	                	<span class="wrap"><spring:message code='jsp.Login.link.newPassaowrd'/>:</span>
-	                    <input id="j_newpassword1_pseudo" name="j_newpassword1_pseudo" type="password"/>
-	                    <input id="j_newpassword1" name="j_newpassword1" type="hidden"/>
+	        <fieldset>
+	            <legend class="offLeft"><span><spring:message code='jsp.Login.section'/></span></legend>
+	            <c:if test="${jsEdition != 'community'}">
+	                <label class="control input text hidden" accesskey="o" for="orgId">
+	                    <span class="wrap"></span><spring:message code='MT_ORGANIZATION'/>:</span>
+	                    <input id="orgId" name="orgId" type="text" autocapitalize="off"/>
 	                    <span class="message warning">error message here</span>
 	                </label>
-	                <label class="control input password" for="j_newpassword2">
-	                	<span class="wrap"><spring:message code='jsp.Login.link.repeatNewPassword'/>:</span>
-	                    <input id="j_newpassword2_pseudo" name="j_newpassword2_pseudo" type="password"/>
-	                    <input id="j_newpassword2" name="j_newpassword2" type="hidden"/>
-	                    <span class="message warning">error message here</span>
-	                </label>
-	                <input type="hidden" name="passwordExpiredDays"/>
-                </div>
-            </fieldset>
-        </c:if>
+	            </c:if>
+	            <label class="control input text" for="j_username">
+	                <span class="wrap"><spring:message code='jsp.Login.username'/>:</span>
+	                <input id="j_username" name="j_username" type="text" autocapitalize="off" autofocus="autofocus"/>
+	                <span class="message warning">error message here</span>
+	            </label>
+	            <label class="control input password" for="j_password">
+	                <span class="wrap">
+	                    <c:choose>
+	                        <c:when test="${showPasswordChange eq 'true'}"><spring:message code='jsp.Login.password.old'/>:</c:when>
+	                        <c:otherwise><spring:message code='jsp.Login.password'/>:</c:otherwise>
+	                    </c:choose>
+	                </span>
+	                <input class="" id="j_password_pseudo" name="j_password_pseudo" type="password" maxlength="47"/>
+	                <input class="" id="j_password" name="j_password" type="hidden"/>
+	                <span class="message warning">error message here</span>
+	            </label>
+	        </fieldset>
+	        <fieldset>
+	            <legend><a id="showHideLocaleAndTimezone"><spring:message code="jsp.Login.link.showLocale"/></a></legend>
+	            <div id="localeAndTimeZone" class="hidden">
+		            <label class="control select" for="userLocale">
+		            	<span class="wrap"><spring:message code='jsp.Login.locale'/>:</span>
+		                <select id="userLocale" name="userLocale">
+		                    ${localeOptions}
+		                </select>
+		            </label>
+		            <label class="control select" for="userTimezone"><spring:message code='jsp.Login.timezone'/>:</span>
+		                <select id="userTimezone" name="userTimezone">
+		                    ${timezoneOptions}
+		                </select>
+		            </label>
+	            </div>
+	        </fieldset>
+	        <c:if test="${allowUserPasswordChange eq 'true'}">
+	            <script type="text/javascript" language="JavaScript">
+	                var doesAllowUserPasswordChange = true;
+	            </script>
+	            <fieldset>
+	                <legend><a id="showHideChangePassword">
+	                    <c:choose>
+	                        <c:when test="${showPasswordChange eq 'true'}"><spring:message code="jsp.Login.link.cancelPassword"/></c:when>
+	                        <c:otherwise><spring:message code="jsp.Login.link.changePassword"/></c:otherwise>
+	                    </c:choose>
+	                </a></legend>
+	                <div id="changePassword" <c:if test="${not showPasswordChange eq 'true'}">class="hidden"</c:if>>
+		                <label class="control input password" for="j_newpassword1">
+		                	<span class="wrap"><spring:message code='jsp.Login.link.newPassaowrd'/>:</span>
+		                    <input id="j_newpassword1_pseudo" name="j_newpassword1_pseudo" type="password"/>
+		                    <input id="j_newpassword1" name="j_newpassword1" type="hidden"/>
+		                    <span class="message warning">error message here</span>
+		                </label>
+		                <label class="control input password" for="j_newpassword2">
+		                	<span class="wrap"><spring:message code='jsp.Login.link.repeatNewPassword'/>:</span>
+		                    <input id="j_newpassword2_pseudo" name="j_newpassword2_pseudo" type="password"/>
+		                    <input id="j_newpassword2" name="j_newpassword2" type="hidden"/>
+		                    <span class="message warning">error message here</span>
+		                </label>
+		                <input type="hidden" name="passwordExpiredDays"/>
+	                </div>
+	            </fieldset>
+	        </c:if>
+		</div>
     </t:putAttribute>
+
     <t:putAttribute name="footerContent">
-    	<button type="button" id="submitButton" class="button action primary up" disabled="disabled">
-    		<span class="wrap"><spring:message code='jsp.Login.button.login'/></span>
-    		<span class="icon"></span>
-    	</button>
-    	<h2><a id="needHelp"><spring:message code='LOGIN_NEED_HELP_LINK'/></a></h2>
-        <!--
-        <div class="cosmetic left"></div>
-        <div class="cosmetic right"></div>
-        -->
+    	<div class="inputSection">
+	    	<button type="button" id="submitButton" class="button action primary up" disabled="disabled">
+	    		<span class="wrap"><spring:message code='jsp.Login.button.login'/></span>
+	    		<span class="icon"></span>
+	    	</button>
+	    	<h2><a id="needHelp"><spring:message code='LOGIN_NEED_HELP_LINK'/></a></h2>
+            <c:if test="${isProVersion and isEC2}">
+                <div id="amazonLogo" class="row"></div>
+            </c:if>
+	        <!--
+	        <div class="cosmetic left"></div>
+	        <div class="cosmetic right"></div>
+	        -->
+	    </div>
     </t:putAttribute>
 </t:insertTemplate>

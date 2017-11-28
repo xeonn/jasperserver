@@ -197,6 +197,14 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
 				<value>report.output.pptx.label</value>
 			</property>
 		</bean>
+		<bean class="com.jaspersoft.jasperserver.war.dto.ByteEnum">
+			<property name="code">
+				<util:constant static-field="com.jaspersoft.jasperserver.api.engine.scheduling.domain.ReportJob.OUTPUT_FORMAT_JSON"/>
+			</property>
+			<property name="labelMessage">
+				<value>report.output.json.label</value>
+			</property>
+		</bean>
 		<!-- 
 		<bean class="com.jaspersoft.jasperserver.war.dto.ByteEnum">
 			<property name="code">

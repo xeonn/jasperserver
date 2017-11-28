@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: featureDetection.js 724 2014-12-11 09:34:00Z tbidyuk $
+ * @version: $Id: featureDetection.js 1178 2015-05-06 20:40:12Z yplakosh $
  */
 
 define(function () {
@@ -30,9 +30,6 @@ define(function () {
     return {
         supportsTouch: (function() {
             return 'ontouchstart' in window || navigator.msMaxTouchPoints;
-        })(),
-        supportsModernSelection: (function(){
-            return 'getSelection' in window.document;
         })()
     }
 });

@@ -21,7 +21,17 @@
 
 
 /**
- * @version: $Id: repository.search.actions.js 7978 2014-10-29 17:49:25Z bob $
+ * @version: $Id: repository.search.actions.js 8900 2015-05-06 20:57:14Z yplakosh $
+ */
+
+/* global repositorySearch, SearchBox, toolbarButtonModule, toFunction, getAsFunction, localContext, isArray, JSCookie,
+ dynamicTree, disableSelectionWithoutCursorStyle, getBoxOffsets, actionModel, Folder, isMetaHeld, canFolderBeCopied,
+ invokeFolderAction, layoutModule, canFolderBeMoved, Droppables, canFolderBeCopiedOrMovedToFolder,
+ canAllBeCopiedOrMovedToFolder, Draggables, alert, dynamicList, isIPad, isSupportsTouch, TouchController, InfiniteScroll,
+ canBeRun, canBeOpened, JSTooltip, invokeBulkAction, invokeRedirectAction, canBeScheduled, matchAny, centerElement,
+ tooltipModule, $break, baseList, orgModule, dialogs, buttonManager, ValidationModule, ResourcesUtils,
+ accessibilityModule, confirm, fileSender, JRS, invokeResourceAction, ajaxTargettedUpdate, AjaxRequester,
+ ajaxIframeDownload, baseErrorHandler, doNothing, _, redirectToUrl, isPropertiesChanged, isPermissionsChanged, ajax
  */
 
 /**
@@ -88,7 +98,7 @@ repositorySearch.folderActionFactory = {
             var toFolder = folder ? folder : repositorySearch.model.getContextFolder();
 
             var object = repositorySearch.CopyMoveController.object;
-            var resources = (repositorySearch.CopyMoveController.isBulkAction()) ? object : [object];
+            var resources = (repositorySearch.CopyMoveController.isBulkAction()) ? [].concat(object) : [object];
 
             if (repositorySearch.CopyMoveController.isCopyResource()) {
 
@@ -100,6 +110,17 @@ repositorySearch.folderActionFactory = {
 
             } else {
                 return;
+            }
+
+            for (var i = 0; i < resources.length; i++){
+                if (resources[i].parentResource){
+                    var uri = resources[i].parentResource.URI,
+                        contains = false;
+                    for (var j = 0; j < resources.length && !contains; j++){
+                        contains |= resources[j].URI == uri;
+                    }
+                    contains || resources.push(resources[i].parentResource);
+                }
             }
 
             var action = new repositorySearch.ServerAction.createResourceAction(actionName, {
@@ -275,7 +296,7 @@ repositorySearch.bulkActionFactory = {
     "Run": function(resources) {
         return new repositorySearch.Action(function() {
             resources.each(function(resource, index) {
-                var action = repositorySearch.RedirectAction.createRunResourceAction(resource, index != 0);
+                var action = repositorySearch.RedirectAction.createRunResourceAction(resource, index !== 0);
                 action.invokeAction();
             });
         });
@@ -284,7 +305,7 @@ repositorySearch.bulkActionFactory = {
     "Edit": function(resources) {
         return new repositorySearch.Action(function() {
             resources.each(function(resource, index) {
-                var action = repositorySearch.RedirectAction.createEditResourceAction(resource, index != 0);
+                var action = repositorySearch.RedirectAction.createEditResourceAction(resource, index !== 0);
                 action.invokeAction();
             });
         });
@@ -490,8 +511,8 @@ repositorySearch.ServerAction.createFolderAction = function(actionName, options)
             destFolderUri : options.toFolder.URI,
             folder: Object.toJSON({
                 URI: "",
-                label: options.label.stripScripts().escapeHTML(),
-                desc: options.desc.stripScripts().escapeHTML()
+                label: options.label,
+                desc: options.desc
             })
         };
         eventName = repositorySearch.FolderEvent.CREATED;
@@ -518,8 +539,8 @@ repositorySearch.ServerAction.createFolderAction = function(actionName, options)
         params = {
             folder: Object.toJSON({
                 URI: options.folder.URI,
-                label: options.folder.label.stripScripts().escapeHTML(),
-                desc: options.folder.description.stripScripts().escapeHTML()
+                label: options.folder.label,
+                desc: options.folder.description
             })
         };
         eventName = repositorySearch.FolderEvent.UPDATED;
@@ -680,7 +701,7 @@ repositorySearch.ServerAction.createResourceAction = function(actionName, option
         var filteredResources = _.filter(options.resources, function (item) {
             return dataObj.existingLabels.indexOf(item.label) == -1
         });
-        if(filteredResources.length == 0) {
+        if(filteredResources.length === 0) {
             return (dataObj.existingLabels.length == 1 ? repositorySearch.getMessage("dialog.resources.one.exists") :
                 repositorySearch.getMessage("dialog.resources.all.exist")) + " " + options.folder.URIString;
         }
@@ -688,10 +709,10 @@ repositorySearch.ServerAction.createResourceAction = function(actionName, option
         promptFilteredRetry(dataObj.existingLabels, filteredResources);
 
         return null;
-    };
+    }
 
     action.onError = function(data) {
-        var resp = convertErrorResponse(data)
+        var resp = convertErrorResponse(data);
         if(resp) {
             repositorySearch.fire(errorEventName, {
                 responseData: resp,
@@ -804,6 +825,7 @@ repositorySearch.RedirectAction = function(type, options) {
     this.flowId = options.flowId;
     this.url = options.url ? options.url : (this.flowId ? this.FLOW_URL : undefined);
     this.paramsMap = options.paramsMap || {};
+    this.hash = options.hash ? "#" + options.hash : ""; //part of the url which may come after parameters: "#someHash"
     this.encode = options.encode;
 
     if (this.type !== repositorySearch.RedirectType.FLOW_REDIRECT && this.url === this.FLOW_URL) {
@@ -840,7 +862,11 @@ repositorySearch.RedirectAction.addMethod('invokeAction', function() {
         var action = new repositorySearch.ServerAction("isServerAvailable", { data: {} });
 
         action.onSuccess = function(data) {
-            if(data.strip() == "Yes") {
+            if (data.strip() == "Yes") {
+                // increment ajax request counter to avoid closing of a loading dialogue by common ajax response handler
+                ++ajax.ajaxRequestCount;
+                // show loading popup. It will be shown till new page appears as a response for form submit below
+                dialogs.popup.show(ajax.LOADING_ID, true);
                 form.submit();
                 repositorySearch.fire(repositorySearch.Event.FLOW_REDIRECT_RUNNING, data);
             } else {
@@ -855,7 +881,10 @@ repositorySearch.RedirectAction.addMethod('invokeAction', function() {
         action.invokeAction();
 
     } else if(this.type === repositorySearch.RedirectType.LOCATION_REDIRECT) {
-        var url = this.url + (jQuery.isEmptyObject(this.paramsMap)? "" :('?' + this._serializeParams(this.paramsMap)));
+        var url = this.url +
+            (jQuery.isEmptyObject(this.paramsMap) ? "" : ('?' + this._serializeParams(this.paramsMap, this.encode))) +
+            this.hash;
+
         // because of this bug: http://stackoverflow.com/questions/13681156
         // so, we do this to overcome this issue
         redirectToUrl(url);
@@ -863,10 +892,10 @@ repositorySearch.RedirectAction.addMethod('invokeAction', function() {
     } else if(this.type === repositorySearch.RedirectType.WINDOW_REDIRECT) {
 
         var w = window.open(),
-            params = this._serializeParams(this.paramsMap);
+            params = this._serializeParams(this.paramsMap, this.encode);
 
         w.opener = null;
-        w.document.location = this.url + (params ? '?' + params : "");
+        w.document.location = this.url + (params ? '?' + params : "") + this.hash;
     }
 });
 
@@ -1340,7 +1369,15 @@ repositorySearch.RedirectAction.createRunInBackgroundResourceAction = function()
 		}
 
 		return new repositorySearch.RedirectAction(repositorySearch.RedirectType.LOCATION_REDIRECT, {
-			url: JRS.vars.contextPath+'/scheduler/main.html#create' + resource.URIString + '$fast' + reportUnitParentURI
+			url: JRS.vars.contextPath + '/scheduler/main.html',
+            //paramsMap is necessary for backend controller
+            //while hash is necessary for UI scheduler application
+            paramsMap: {
+                'reportUnitURI': resource.URIString,
+                'parentReportUnitURI': resource.parentResource ? resource.parentResource.URIString : ""
+            },
+            hash: 'create' + resource.URIString + '$fast' + reportUnitParentURI,
+            encode: true
 		});
     }
 };
@@ -1363,7 +1400,15 @@ repositorySearch.RedirectAction.createScheduleAction = function() {
 		}
 
 		return new repositorySearch.RedirectAction(repositorySearch.RedirectType.LOCATION_REDIRECT, {
-			url: JRS.vars.contextPath+'/scheduler/main.html#list' + resource.URIString + reportUnitParentURI
+			url: JRS.vars.contextPath+'/scheduler/main.html',
+            //paramsMap is necessary for backend controller
+            //while hash is necessary for UI scheduler application
+            paramsMap: {
+                'reportUnitURI': resource.URIString,
+                'parentReportUnitURI': resource.parentResource ? resource.parentResource.URIString : ""
+            },
+            hash: 'list' + resource.URIString + reportUnitParentURI,
+            encode: true
 		});
     }
 };

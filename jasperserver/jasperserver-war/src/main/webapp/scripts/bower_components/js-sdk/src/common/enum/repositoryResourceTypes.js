@@ -22,7 +22,7 @@
 
 /**
  * @author: Kostiantyn Tsaregradskyi
- * @version: $Id: repositoryResourceTypes.js 380 2014-11-09 15:04:25Z ktsaregradskyi $
+ * @version: $Id: repositoryResourceTypes.js 1137 2015-04-22 17:31:34Z obobruyk $
  */
 
 define({
@@ -51,5 +51,6 @@ define({
     SECURE_MONDRIAN_CONNECTION: "secureMondrianConnection",
     MONDRIAN_XMLA_DEFINITION: "mondrianXmlaDefinition",
     MONDRIAN_CONNECTION: "mondrianConnection",
-    INPUT_CONTROL: "inputControl"
+    INPUT_CONTROL: "inputControl",
+    ORGANIZATION: "organization"
 });

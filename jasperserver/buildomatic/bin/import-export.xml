@@ -165,6 +165,8 @@ Make sure you have compiled the jasperserver source code.
                 <jvmarg value="-Dfile.encoding=UTF-8"/>
 		<!-- disable ehcache -->
             	<jvmarg value="-Dnet.sf.ehcache.disabled=true"/>
+				<!-- set this var to avoid certain network exceptions in OS X -->
+            	<jvmarg value="-Djava.net.preferIPv4Stack=true"/>
                 <jvmarg value="-Xms512m"/>
                 <jvmarg value="-Xmx2048m"/>
                 <jvmarg value="-XX:PermSize=64m"/>
@@ -274,7 +276,7 @@ Make sure you have compiled the jasperserver source code.
     <target name="import-minimal-ce"
             description="do import of minimal resources">
 
-        <run-import-export type="import" archive="${exportDir}/js-catalog-minimal-ce.zip" edition="ce" checkDBMSConnection="true"/>
+        <run-import-export type="import" archive="${exportDir}/js-catalog-${dbType}-minimal-ce.zip" edition="ce" checkDBMSConnection="true"/>
     </target>
 
     <target name="import-minimal-for-upgrade-pro"
@@ -287,7 +289,7 @@ Make sure you have compiled the jasperserver source code.
 
     <target name="import-minimal-for-upgrade-ce"
             description="do import of minimal resources in upgrade context for CE">
-        <run-import-export type="import" archive="${exportDir}/js-catalog-minimal-ce.zip" edition="ce" checkDBMSConnection="true">
+        <run-import-export type="import" archive="${exportDir}/js-catalog-${dbType}-minimal-ce.zip" edition="ce" checkDBMSConnection="true">
             <arg value="--update" />
             <arg value="--skip-user-update" />
         </run-import-export>

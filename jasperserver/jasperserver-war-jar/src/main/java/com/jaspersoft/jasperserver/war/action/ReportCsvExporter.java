@@ -20,16 +20,19 @@
  */
 package com.jaspersoft.jasperserver.war.action;
 
-import java.util.Map;
+import java.io.OutputStream;
 
 import javax.servlet.http.HttpServletResponse;
 
 import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JRExporterParameter;
 import net.sf.jasperreports.engine.JRPropertiesHolder;
 import net.sf.jasperreports.engine.JRPropertiesUtil;
+import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.export.JRCsvExporter;
-import net.sf.jasperreports.engine.export.JRCsvExporterParameter;
+import net.sf.jasperreports.export.SimpleCsvExporterConfiguration;
+import net.sf.jasperreports.export.SimpleCsvReportConfiguration;
+import net.sf.jasperreports.export.SimpleExporterInput;
+import net.sf.jasperreports.export.SimpleWriterExporterOutput;
 
 import org.springframework.webflow.execution.RequestContext;
 
@@ -40,9 +43,10 @@ import com.jaspersoft.jasperserver.api.engine.jasperreports.common.ExportParamet
 
 /**
  * @author sanda zaharia (szaharia@users.sourceforge.net)
- * @version $Id: ReportCsvExporter.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: ReportCsvExporter.java 54728 2015-04-24 15:28:20Z tdanciu $
  */
-public class ReportCsvExporter extends AbstractReportExporter {
+public class ReportCsvExporter extends AbstractReportExporter 
+{
 	
 	private static final String DIALOG_NAME = "csvExportParams";
 
@@ -50,16 +54,25 @@ public class ReportCsvExporter extends AbstractReportExporter {
 	private String contentType = "application/octet-stream";
 	private String contentDisposition = "attachment";
 
-	public void export(RequestContext context, ExecutionContext executionContext, String reportUnitURI, Map baseParameters) throws JRException {
+	public void export(RequestContext context, ExecutionContext executionContext, JasperPrint jasperPrint, OutputStream outputStream) throws JRException
+	{
 		JRCsvExporter exporter = new JRCsvExporter(getJasperReportsContext());
-		exporter.setParameters(baseParameters);
+
+		exporter.setExporterInput(new SimpleExporterInput(jasperPrint));
+		exporter.setExporterOutput(new SimpleWriterExporterOutput(outputStream));
+		
 		CsvExportParametersBean exportParams = (CsvExportParametersBean)getExportParameters(context);
 		
+		SimpleCsvReportConfiguration csvReportConfig = new SimpleCsvReportConfiguration();
 		if (exportParams.isOverrideReportHints()) {
-			exporter.setParameter(JRExporterParameter.PARAMETERS_OVERRIDE_REPORT_HINTS, Boolean.TRUE);
+			csvReportConfig.setOverrideHints(Boolean.TRUE);
 		}
+		exporter.setConfiguration(csvReportConfig);
+
+		SimpleCsvExporterConfiguration csvExporterConfig = new SimpleCsvExporterConfiguration();
+		csvExporterConfig.setFieldDelimiter(exportParams.getFieldDelimiter());
+		exporter.setConfiguration(csvExporterConfig);
 		
-		exporter.setParameter(JRCsvExporterParameter.FIELD_DELIMITER, exportParams.getFieldDelimiter());
 		exporter.exportReport();
 	}
 
@@ -96,7 +109,7 @@ public class ReportCsvExporter extends AbstractReportExporter {
 	 */
 	public ExportParameters getExportParameters(RequestContext context) {
 		//if request 
-		return context.getFlowScope().get(ReportCsvExporter.DIALOG_NAME)== null? exportParameters : (ExportParameters)context.getFlowScope().get(ReportCsvExporter.DIALOG_NAME);
+		return context.getFlowScope().get(ReportCsvExporter.DIALOG_NAME) == null ? exportParameters : (ExportParameters)context.getFlowScope().get(ReportCsvExporter.DIALOG_NAME);
 	}
 	
 	public void setContentType(String contentType) {

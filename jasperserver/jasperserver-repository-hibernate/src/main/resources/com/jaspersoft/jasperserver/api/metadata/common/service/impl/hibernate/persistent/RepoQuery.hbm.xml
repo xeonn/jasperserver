@@ -11,4 +11,11 @@
 		<property name="language" column="query_language" type="string" not-null="true" length="40"/>
 		<property name="sql" column="sql_query" type="text"  not-null="true" length="400000" />
 	</joined-subclass>
+
+<!-- create index JIQuery_dataSource_index on JIQuery (dataSource); -->
+<database-object>
+        <create>create index JIQuery_dataSource_index on JIQuery (dataSource)</create>
+        <drop>DROP INDEX JIQuery_dataSource_index ON JIQuery</drop>
+</database-object>
+
 </hibernate-mapping>

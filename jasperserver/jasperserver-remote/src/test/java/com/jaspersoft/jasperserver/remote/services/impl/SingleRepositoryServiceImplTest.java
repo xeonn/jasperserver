@@ -289,6 +289,20 @@ public class SingleRepositoryServiceImplTest {
         service.deleteResource(uri);
     }
 
+    @Test(groups = "DELETE")
+    public void testDeleteResource_HasDependentTempResources() throws Exception{
+        List<ResourceLookup> dependencies = new LinkedList<ResourceLookup>();
+        dependencies.add(new ResourceLookupImpl());
+        dependencies.get(0).setURIString("/temp/uri");
+
+        Mockito.when(repositoryService.getResource(Mockito.any(ExecutionContext.class), Mockito.eq(uri))).thenReturn(resource);
+        Mockito.when(repositoryService.getDependentResources(Mockito.any(ExecutionContext.class), Mockito.anyString(), Mockito.same(searchCriteriaFactory), anyInt(), anyInt())).thenReturn(dependencies);
+
+        service.deleteResource(uri);
+
+        Mockito.verify(repositoryService).deleteResource(Mockito.any(ExecutionContext.class), Mockito.eq(uri));
+    }
+
     @Test(groups = "POST")
     public void testCreateResource_created() throws Exception{
         Mockito.doReturn(true).when(repositoryService).folderExists(any(ExecutionContext.class), anyString());

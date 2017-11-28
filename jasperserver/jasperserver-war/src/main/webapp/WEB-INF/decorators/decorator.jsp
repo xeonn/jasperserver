@@ -67,9 +67,9 @@
             <c:if test="${pageProperties['meta.noMenu']==null}">
                <div id="mainNavigation" class="menu horizontal primaryNav">
                    <ul id="navigationOptions" data-tab-index="2" data-component-type="navigation">
-                       <li id="main_home" tabIndex="-1" class="leaf"><p class="wrap button"><span class="icon"></span><spring:message code="menu.home"/></p></li>
+                       <li id="main_home" tabIndex="-1" class="leaf hidden"><p class="wrap button"><span class="icon"></span><spring:message code="menu.home"/></p></li>
                        <c:if test='<%= !((NavigationActionModelSupport)application.getAttribute("concreteNavigationActionModelSupport")).banUserRole() %>'>
-                           <li id="main_library" tabIndex="-1" class="leaf"><p class="wrap button"><span class="icon"></span><spring:message code="menu.library"/></p></li>
+                           <li id="main_library" tabIndex="-1" class="leaf hidden"><p class="wrap button"><span class="icon"></span><spring:message code="menu.library"/></p></li>
                        </c:if>
                    </ul>
                </div>
@@ -88,9 +88,10 @@
                 <authz:authorize ifNotGranted="ROLE_ANONYMOUS">
 			            <span id="casted">
 			                <c:if test="<%= com.jaspersoft.jasperserver.api.metadata.user.service.impl.UserAuthorityServiceImpl.isUserSwitched() %>">
-                                <%= ((com.jaspersoft.jasperserver.api.metadata.user.domain.User)
+                                <c:set var="principalUserFullName" value="<%= ((com.jaspersoft.jasperserver.api.metadata.user.domain.User)
                                         com.jaspersoft.jasperserver.api.metadata.user.service.impl.UserAuthorityServiceImpl.
-                                                getSourceAuthentication().getPrincipal()).getFullName() %>
+                                                getSourceAuthentication().getPrincipal()).getFullName() %>"/>
+                                ${principalUserFullName}
                                 <spring:message code="jsp.main.as"/>
                             </c:if>
 			            </span>

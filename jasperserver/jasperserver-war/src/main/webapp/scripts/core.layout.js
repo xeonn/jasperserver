@@ -22,8 +22,12 @@
 
 /**
  * @author: Angus Croll
- * @version: $Id: core.layout.js 8078 2014-12-12 14:43:53Z dgorbenko $
+ * @version: $Id: core.layout.js 8900 2015-05-06 20:57:14Z yplakosh $
  */
+
+/* global $H, Truncator, isIE7, parseFunc, centerElement, iScroll, matchMeOrUp, Draggable, isIPad, doNothing, $$,
+ getDimensionInPx, JSCookie, getActualDimension, matchMeOrUp, Effect, isIE8, isIE9
+*/
 
 var layoutModule = {
     ELEMENT_CONTEXTMENU: "element:contextmenu",
@@ -189,7 +193,7 @@ var layoutModule = {
 
         //make sure ajaxbuffer is available (for dynamicTree)
         jQuery(function() {
-            if(jQuery("#ajaxbuffer").length == 0) {
+            if(jQuery("#ajaxbuffer").length === 0) {
                 jQuery("body").append(jQuery('<div id="ajaxbuffer" style="display:none"></div>'));
             }
         });
@@ -365,6 +369,7 @@ var layoutModule = {
         });
         //fire custom event so that we can know when we have finished sizing
         document.fire("dragger:sizer", {targetEvent:event, element: dragger.element});
+        jQuery(window).trigger("resize", {targetEvent:event, element: dragger.element})
     },
 
     respondToDrag : function(dragger, event) {
@@ -421,23 +426,10 @@ var layoutModule = {
             }
         }
 
-        new JSCookie(dragger.resizeablePanel.identify() + layoutModule.PANEL_WIDTH, dragger.resizeablePanel.getWidth());
-//        //if resizeablePanel is folders panel then put resizeablePanel.width into cookie
-//        if (dragger.resizeablePanel.id == this.FOLDERS_RESIZABLE_PANEL_ID) {
-//            new JSCookie(this.FOLDERS_RESIZABLE_PANEL_COOKIE_NAME, dragger.resizeablePanel.getWidth());
-//        }
-//        //if resizeablePanel is filters panel then put resizeablePanel.width into cookie
-//        if (dragger.resizeablePanel.id == this.FILTERS_RESIZABLE_PANEL_ID) {
-//            new JSCookie(this.FILTERS_RESIZABLE_PANEL_COOKIE_NAME, dragger.resizeablePanel.getWidth());
-//        }
-//        //if resizeablePanel is properties panel then put resizeablePanel.width into cookie
-//        if (dragger.resizeablePanel.id == this.PROPERTIES_RESIZABLE_PANEL_ID) {
-//            new JSCookie(this.PROPERTIES_RESIZABLE_PANEL_COOKIE_NAME, dragger.resizeablePanel.getWidth());
-//        }
-//        //if resizeablePanel is fields panel then put resizeablePanel.width into cookie
-//        if (dragger.resizeablePanel.id == this.FIELDS_RESIZABLE_PANEL_ID) {
-//            new JSCookie(this.FIELDS_RESIZABLE_PANEL_COOKIE_NAME, dragger.resizeablePanel.getWidth());
-//        }
+        if (window.localStorage) {
+            localStorage.setItem(dragger.resizeablePanel.identify() + layoutModule.PANEL_WIDTH,
+                dragger.resizeablePanel.getWidth());
+        }
 
         //could not size the panel? restore position of sizer and style of panel
         if (!sizeTracker.changed(dragger.resizeablePanel[dragData.sizeProperty])) {
@@ -523,14 +515,14 @@ var layoutModule = {
     },
 
     getSizeTracker: function() {
-        lastSize = -1;
+        lastSize = -1; // jshint ignore: line
 
         return {
             checkpoint: function(size){
-                lastSize = size;
+                lastSize = size; // jshint ignore: line
             },
             changed: function(size){
-                return size != lastSize;
+                return size != lastSize; // jshint ignore: line
             }
         }
     },
@@ -583,8 +575,17 @@ var layoutModule = {
             return s.match('.primary')
         });
         var ppOffset;
-        if (primaryPanel) {
-            ppOffset = new JSCookie(toMaximize.identify() + layoutModule.PANEL_WIDTH).value;
+        if (primaryPanel && window.localStorage) {
+            ppOffset = localStorage.getItem(toMaximize.identify() + layoutModule.PANEL_WIDTH);
+        }
+
+        function saveState() {
+            toMaximize.removeClassName('minimized_if_vertical_orientation');
+            toMaximize.removeClassName('minimized');
+            toMaximize.addClassName("maximized");
+
+            window.localStorage && localStorage.setItem(toMaximize.identify() + layoutModule.MINIMIZED, false);
+            jQuery('div.content',toMaximize).show();
         }
 
         if (ppOffset && !isNaN(ppOffset)) {
@@ -598,18 +599,10 @@ var layoutModule = {
                 toMaximize.removeClassName('minimized');
                 toMaximize.addClassName("maximized");
 
-                new JSCookie(toMaximize.identify() + layoutModule.MINIMIZED, false);
+                window.localStorage && localStorage.setItem(toMaximize.identify() + layoutModule.MINIMIZED, false);
                 jQuery('div.content',toMaximize).show();
                 jQuery('div.vtitle',toMaximize).hide();
             } else {
-                function saveState() {
-                    toMaximize.removeClassName('minimized_if_vertical_orientation');
-                    toMaximize.removeClassName('minimized');
-                    toMaximize.addClassName("maximized");
-
-                    new JSCookie(toMaximize.identify() + layoutModule.MINIMIZED, false);
-                    jQuery('div.content',toMaximize).show();
-                }
                 //This...
                 new Effect.Morph(primaryPanel, {style: thisAlignment + ":" + ppOffset, duration: 0.6, afterFinish: function(){jQuery('body').trigger('layout_update');}});
                 //...runs parallel to these two...
@@ -629,9 +622,10 @@ var layoutModule = {
 
         var element = elem.hasClassName ? elem : $(elem);
         var toMinimize = element.hasClassName('column') ? element : element.up('.column');
-        var isMinimized = new JSCookie(toMinimize.identify() + layoutModule.MINIMIZED).value == 'true';
+        var isMinimized = window.localStorage && localStorage.getItem(toMinimize.identify() + layoutModule.MINIMIZED) == 'true';
 
-        !isMinimized && new JSCookie(toMinimize.identify() + layoutModule.PANEL_WIDTH, toMinimize.getWidth());
+        !isMinimized && window.localStorage && localStorage.setItem(toMinimize.identify() + layoutModule.PANEL_WIDTH,
+            toMinimize.getWidth());
 
         //figure out alignment (left or right)
         var aligments = layoutModule.alignmentModule.alignments[0];
@@ -642,6 +636,16 @@ var layoutModule = {
 
         primaryPanel = toMinimize.siblings().find(function(s) {return s.match('.primary')});
 
+        function saveState() {
+            toMinimize.addClassName("minimized");
+            toMinimize.removeClassName("maximized");
+            toMinimize.removeClassName('minimized_if_vertical_orientation');
+
+            window.localStorage && localStorage.setItem(toMinimize.identify() + layoutModule.MINIMIZED, true);
+
+            jQuery('div.content',toMinimize).hide();
+        }
+
         if (primaryPanel) {
             ppOffset = primaryPanel.getStyle(thisAlignment);
             if (noEffects) {
@@ -651,12 +655,12 @@ var layoutModule = {
                 var w = title.width();
                 w = jQuery.trim(title.text()).length * 7;
 
-            	primaryPanel.style[thisAlignment] = '12px';
+            	primaryPanel.style[thisAlignment] = '24px';
 
                 toMinimize.addClassName("minimized");
                 toMinimize.removeClassName("maximized");
                 toMinimize.removeClassName('minimized_if_vertical_orientation');
-                new JSCookie(toMinimize.identify() + layoutModule.MINIMIZED, true);
+                window.localStorage && localStorage.setItem(toMinimize.identify() + layoutModule.MINIMIZED, true);
 
                 if(!vTitle.length) {
                     vTitle = jQuery('<div class="vtitle"></div>').appendTo(toMinimize);
@@ -682,15 +686,6 @@ var layoutModule = {
 
                 jQuery('div.content',toMinimize).hide();
             } else {
-                function saveState() {
-                    toMinimize.addClassName("minimized");
-                    toMinimize.removeClassName("maximized");
-                    toMinimize.removeClassName('minimized_if_vertical_orientation');
-
-                    new JSCookie(toMinimize.identify() + layoutModule.MINIMIZED, true);
-
-                   jQuery('div.content',toMinimize).hide();
-                }
                 //This...
                 new Effect.Morph(primaryPanel, {style: thisAlignment + ':0px', duration: 0.6, afterFinish: function(){jQuery('body').trigger('layout_update');}});
                 //...runs parallel to these two...
@@ -713,9 +708,9 @@ var layoutModule = {
          */
         jQuery.each([leftPanelID,rightPanelID],function(i,v){
             if(v) {
-                panels.push({id: v, isLeft: i == 0 ? true : false,  jo: jQuery('#'+v), width: parseInt(new JSCookie(v + layoutModule.PANEL_WIDTH).value)});
+                panels.push({id: v, isLeft: i === 0,  jo: jQuery('#'+v), width: window.localStorage ? parseInt(localStorage.getItem(v + layoutModule.PANEL_WIDTH)) : 250 });
 
-                panels[i].minimized = new JSCookie(v + layoutModule.MINIMIZED).value;
+                panels[i].minimized = window.localStorage ? localStorage.getItem(v + layoutModule.MINIMIZED) : false;
                 panels[i].minimized = !Object.isUndefined(panels[i].minimized) ? (panels[i].minimized == "true") : panels[i].jo.hasClass("minimized");
 
                 minWidth = panels[i].jo[0].currentStyle ?
@@ -749,7 +744,7 @@ var layoutModule = {
                 }
             }
         });
-        if(diff != 0) {
+        if(diff !== 0) {
             panels[0].width += diff;
             panels[0].width = panels[0].width < panels[0].minWidth ? panels[0].minWidth : panels[0].width;
             jMainPanelElement.css('left', panels[0].width + 'px');
@@ -758,7 +753,7 @@ var layoutModule = {
     },
 
     autoMaximize: function(element) {
-        var minimized = new JSCookie(element.identify() + layoutModule.MINIMIZED).value;
+        var minimized = window.localStorage ? localStorage.getItem(element.identify() + layoutModule.MINIMIZED) : 'false';
 
         if (minimized == 'true') {
             element.hasClassName('minimized') && layoutModule.maximize(element, true);
@@ -768,7 +763,7 @@ var layoutModule = {
     },
 
     autoMinimize: function(element) {
-        var minimized = new JSCookie(element.identify() + layoutModule.MINIMIZED).value;
+        var minimized = window.localStorage ? localStorage.getItem(element.identify() + layoutModule.MINIMIZED) : 'false';
         if (minimized == 'false') {
             layoutModule.minimize(element, true);
         } else {
@@ -785,27 +780,29 @@ var layoutModule = {
 	},
 
     storePanelWidth: function(panelName, width) {
-        new JSCookie(panelName + layoutModule.PANEL_WIDTH, width);
+        window.localStorage && localStorage.setItem(panelName + layoutModule.PANEL_WIDTH, width);
     },
 
     getPanelWidth: function(panelName) {
-        return new JSCookie(panelName + layoutModule.PANEL_WIDTH).value;
+        return window.localStorage ? localStorage.getItem(panelName + layoutModule.PANEL_WIDTH) : undefined;
     },
 
     getPanelMinimizedState: function(panelName) {
-        return new JSCookie(panelName + layoutModule.MINIMIZED).value;
+        return window.localStorage ? localStorage.getItem(panelName + layoutModule.MINIMIZED) : undefined;
     },
 
     storePanelMinimizedState: function(panelName, value) {
-        new JSCookie(panelName + layoutModule.MINIMIZED, value.toString());
+        window.localStorage && localStorage.setItem(panelName + layoutModule.MINIMIZED, value.toString());
     },
 
     manuallyChangePanelState: function(panelName, clientKey, value) {
-        new JSCookie(panelName + layoutModule.PANEL_STATE_CHANGED_MANUALLY + clientKey, value);
+        window.localStorage && localStorage.setItem(panelName + layoutModule.PANEL_STATE_CHANGED_MANUALLY + clientKey,
+            value);
     },
 
     panelStateWasManuallyChanged: function(panelName, clientKey) {
-        return new JSCookie(panelName + layoutModule.PANEL_STATE_CHANGED_MANUALLY + clientKey).value === "true";
+        return window.localStorage ?
+            localStorage.getItem(panelName + layoutModule.PANEL_STATE_CHANGED_MANUALLY + clientKey) === "true" : false;
     }
 };
 

@@ -10,7 +10,7 @@
     <parent>
         <groupId>com.jaspersoft.jasperserver</groupId>
         <artifactId>server</artifactId>
-        <version>6.0.1</version>
+        <version>6.1.0</version>
     </parent>
     <dependencies>
         <dependency>
@@ -63,6 +63,10 @@
         </dependency>
         <dependency>
             <groupId>com.jaspersoft.jasperserver</groupId>
+            <artifactId>jasperserver-custom-datasources</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.jaspersoft.jasperserver</groupId>
             <artifactId>jasperserver-hive-connector</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
@@ -70,7 +74,6 @@
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
-            <version>4.2.1</version>
         </dependency>
         <dependency>
             <groupId>commons-lang</groupId>
@@ -109,8 +112,17 @@
         </dependency>
         <dependency>
             <groupId>org.codehaus.castor</groupId>
-            <artifactId>castor</artifactId>
-            <version>1.2</version>
+            <artifactId>castor-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.castor</groupId>
+            <artifactId>castor-xml</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework</groupId>
+                    <artifactId>spring-context</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>xerces</groupId>
@@ -121,6 +133,11 @@
             <artifactId>log4j</artifactId>
             <version>1.2.12</version>
             <scope>test</scope>
+        </dependency>
+	<dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <version>${spring.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
@@ -203,7 +220,7 @@
         <dependency>
             <groupId>com.jaspersoft.jasperserver</groupId>
             <artifactId>jasperserver-war</artifactId>
-            <version>6.0.1</version>
+            <version>6.1.0</version>
             <type>war</type>
             <scope>test</scope>
         </dependency>
@@ -229,7 +246,7 @@
         <dependency>
             <groupId>com.jaspersoft.connectors.hive</groupId>
             <artifactId>js-hive-datasource</artifactId>
-            <version>1.2.0-cdh5</version>
+            <version>1.2.1-cdh5</version>
             <scope>test</scope>
             <exclusions>
                 <exclusion>

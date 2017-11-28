@@ -69,8 +69,8 @@ public class HypermediaRepositoryJaxrsService {
             @QueryParam("excludeFolder") List<String> excludeFolders,
             @QueryParam("containerType") List<String> containerType,
             @QueryParam("accessType") String accessTypeString,
-            @QueryParam(RestConstants.QUERY_PARAM_OFFSET) Integer start,
-            @QueryParam(RestConstants.QUERY_PARAM_LIMIT) Integer limit,
+            @QueryParam(RestConstants.QUERY_PARAM_OFFSET)@DefaultValue("0") Integer start,
+            @QueryParam(RestConstants.QUERY_PARAM_LIMIT)@DefaultValue("100") Integer limit,
             @QueryParam("recursive") @DefaultValue("true") Boolean recursive,
             @QueryParam("showHiddenItems") @DefaultValue("false") Boolean showHiddenItems,
             @QueryParam("forceTotalCount") @DefaultValue("false") Boolean forceTotalCount,
@@ -95,7 +95,7 @@ public class HypermediaRepositoryJaxrsService {
 
             User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             RepositorySearchResult<ClientResourceLookup> searchResult =
-                    batchRepositoryService.getResources(q, folderUri, ListUtils.union(type, containerType), excludeFolders,
+                    batchRepositoryService.getResources(q, folderUri, ListUtils.union(type, containerType), null, excludeFolders,
                             start, limit,
                             recursive, showHiddenItems,
                             sortBy, accessType, user,
@@ -113,9 +113,8 @@ public class HypermediaRepositoryJaxrsService {
                         excludeFolders.add(configurationBean.getPublicFolderUri());
                     }
 
-                    int resourcesCount = batchRepositoryService.getResources(q, resourceLookup.getUri(), type, excludeFolders,
-                            0, 25, true, showHiddenItems,
-                            null, accessType, user, true).size();
+                    int resourcesCount = batchRepositoryService.getResourcesCount(q, resourceLookup.getUri(), type,
+                            excludeFolders, true,showHiddenItems, accessType, null);
 
                     if (resourcesCount > 0) {
                         //add links

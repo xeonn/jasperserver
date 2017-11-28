@@ -21,16 +21,19 @@
 
 <%@ taglib uri="/spring" prefix="spring"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jstl/core_rt" %>
+<%@ taglib prefix="js" uri="/WEB-INF/jasperserver.tld" %>
 
+<js:out javaScriptEscape="true">
 <script type="text/javascript">
     __jrsConfigs__.addDataSource = {};
 
     __jrsConfigs__.addDataSource.initOptions = {
         isEditMode: ${dataResource.editMode},
         parentFolderUri: "",
-        resourceIdNotSupportedSymbols: "<spring:message code="${resourceIdNotSupportedSymbols}" javaScriptEscape="true"/>",
-        dependentResources: <c:out value="${dataResource.namedProperties.dependentResources}" default="[]" escapeXml="false"/>
+        resourceIdNotSupportedSymbols: "${resourceIdNotSupportedSymbols}",
+        dependentResources: JSON.parse('${not empty dataResource.namedProperties.dependentResources ? dataResource.namedProperties.dependentResources : "[]" }')
     };
 
     __jrsConfigs__.addDataSource.initOptions.resourceUri = "${not dataResource.editMode ? "" : dataResource.reportDataSource.URIString}";
 </script>
+</js:out>

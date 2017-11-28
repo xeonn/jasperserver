@@ -7,7 +7,7 @@
 	var buildAttrs = function(attrs) {
 		return _.map(attrs, function(v, k){
 			v = v.toString().replace(/"/g, "\&quot\;");
-			return k + '="' + v + '"';
+			return k + '="' + _.xssEscape(v) + '"';
 		}).join(" ");
 	};
 
@@ -39,7 +39,7 @@
 						attrs.checked = "true";
 					}
 					}}
-					<input {{= buildAttrs(attrs) }} />
+					<input {{ print(buildAttrs(attrs)) }} />
 					{{
 				} else if (properties.displayHeight != null) {
 					attrs.name = field.name;
@@ -47,7 +47,7 @@
 					attrs.cols = properties.displayWidth != null ? properties.displayWidth : 40;
 					attrs["class"] = "fnormal";
 					}}
-					<textarea {{= buildAttrs(attrs) }} >{{- value }}</textarea>
+					<textarea {{ print(buildAttrs(attrs)) }} >{{- value }}</textarea>
 					{{
 				} else {
 					attrs.name = field.name;
@@ -56,7 +56,7 @@
 					attrs["class"] = "fnormal";
 					attrs.value = value;
 					}}
-					<input {{= buildAttrs(attrs) }} />
+					<input {{ print(buildAttrs(attrs)) }} />
 					{{
 				} }}
 

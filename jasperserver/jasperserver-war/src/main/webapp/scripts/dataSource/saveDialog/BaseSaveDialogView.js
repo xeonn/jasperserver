@@ -22,8 +22,10 @@
 
 /**
  * @author: Dima Gorbenko
- * @version: $Id: BaseSaveDialogView.js 8078 2014-12-12 14:43:53Z dgorbenko $
+ * @version: $Id: BaseSaveDialogView.js 8900 2015-05-06 20:57:14Z yplakosh $
  */
+
+/* global dialogs, dynamicTree */
 
 define(function (require){
 
@@ -31,6 +33,7 @@ define(function (require){
 
     var _ = require('underscore'),
         i18n = require('bundle!all'),
+	    browserDetection = require("common/util/browserDetection"),
         ResourceModel = require('common/model/RepositoryResourceModel'),
         DialogWithModelInputValidation = require("common/component/dialog/DialogWithModelInputValidation"),
         treeFactory = require("common/component/tree/treeFactory"),
@@ -44,7 +47,11 @@ define(function (require){
 		autoUpdateResourceID: true,
         saveDialogTemplate: baseSaveDialogTemplate,
 
-		constructor: function(options) {
+	    events: _.extend({
+		    "resize": "_onDialogResize"
+	    }, DialogWithModelInputValidation.prototype.events),
+
+	    constructor: function(options) {
             options || (options = {});
 			this.options = options;
 
@@ -237,6 +244,15 @@ define(function (require){
 			this.$contentContainer.find("[name=label]").focus();
 
 			this.theDialogIsOpen = true;
+
+			// set the initial size of the internal components of the dialog by calling function which
+			// reacts on resizing at a first time
+			var onDialogResize = _.bind(this._onDialogResize, this);
+			if (browserDetection.isIE8() || browserDetection.isIE9()) {
+				setTimeout(onDialogResize, 1);
+			} else {
+				onDialogResize();
+			}
 		},
 
 		_closeDialog: function() {
@@ -258,7 +274,21 @@ define(function (require){
 			return "resource.datasource.saveDialog.save";
 		},
 
-		_onDataSourceNameChange: function() {
+	    /*
+	     Because under IE it's very hard to maintain auto-resizable area by height (IE8 doesn't support
+	     calc() css property), we need to do resizing manually, each time reacting on resizing.
+	     Dirty, ugly hack, but it is what it is.
+	     */
+	    _onDialogResize: function() {
+		    var dialogSavingArea = this.$contentContainer.find(".control.groupBox.treeBox");
+		    var wholeDialog = this.$contentContainer.parent().parent();
+
+		    var newHeight = wholeDialog.height() - 313;
+
+		    dialogSavingArea.height(newHeight);
+	    },
+
+	    _onDataSourceNameChange: function() {
 			if (this.autoUpdateResourceID) {
 				var resourceId = ResourceModel.generateResourceName(this.model.get("label"));
 				this.model.set("name", resourceId);

@@ -20,10 +20,13 @@
  */
 package com.jaspersoft.jasperserver.api.common.properties;
 
-import org.springframework.context.MessageSource;
-import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.context.support.ReloadableResourceBundleMessageSource;
+import com.jaspersoft.jasperserver.api.common.util.diagnostic.Log4jVerbosityFilter;
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.MessageSource;
+import org.springframework.context.support.ReloadableResourceBundleMessageSource;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.util.LinkedHashMap;
@@ -36,6 +39,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author Volodya Sabadosh
  * @version $Id:$
  */
+@Component
 public class Log4jSettingsService extends ReloadableResourceBundleMessageSource{
     private List<String> loggerDescriptionFiles;
     private MessageSource messageSource;
@@ -43,6 +47,10 @@ public class Log4jSettingsService extends ReloadableResourceBundleMessageSource{
     private Map<Locale, Map<String, String>> loggerDescriptionsByLocale =
             new ConcurrentHashMap<Locale, Map<String, String>>();
     private Map<String, String> loggers = new ConcurrentHashMap<String, String>();
+
+    @Autowired(required = false)
+    @Qualifier("serverSettingsVerbosityFilter")
+    private Log4jVerbosityFilter serverSettingsVerbosityFilter;
 
     @PostConstruct
     public void init() {
@@ -95,6 +103,10 @@ public class Log4jSettingsService extends ReloadableResourceBundleMessageSource{
                             Logger log = Logger.getLogger((String)key);
                             String level = log.getEffectiveLevel().toString();
                             loggers.put((String)key, level);
+                            if (serverSettingsVerbosityFilter != null) {
+                                // PRO version
+                                serverSettingsVerbosityFilter.updateVerbosityThreshold(log, log.getEffectiveLevel());
+                            }
                     }
                 }
             }

@@ -4,7 +4,7 @@
 }
 
 .paginationControl {
-    width: 100%;
+    width: auto;
     height: 28px;
     min-width: 200px;
     max-width: 318px;
@@ -12,15 +12,17 @@
     border-spacing: 0;
     padding: 0;
     margin: 0;
+    /* width: 100%; */
 }
 
 .paginationControl > tbody > tr > td {
     width: 12%;
-    min-width: 24px;
-    max-width: 38px;
     text-align: center;
     vertical-align: middle;
     height: 28px;
+    width: 32px;
+    /* min-width: 24px; */
+    /* max-width: 38px; */
 }
 
 .paginationControl > tbody > tr > td.currentPageCell {
@@ -35,7 +37,7 @@
     border: 0;
     box-sizing: border-box;
     color: rgb(170, 170, 170);
-    cursor: default;
+    cursor: pointer;
     display: inline-block;
     font-family: 'Lucida Grande';
     font-size: 11px;
@@ -124,7 +126,7 @@
     font-family: Verdana, Arial, Helvetica, sans-serif;
     font-size: 11px;
     font-weight: normal;
-    height: 15px;
+    height: 22px;
     letter-spacing: normal;
     line-height: 13px;
     margin: 0px 0px -3px;
@@ -134,7 +136,7 @@
     text-shadow: none;
     text-transform: none;
     white-space: nowrap;
-    width: 30px;
+    width: 50px;
 }
 
 .paginationControl > tbody > tr > td > button.right > .wrap > .icon {
@@ -157,32 +159,40 @@
     *background-position: 8px -100px; /* IE7 */
 }
 
+/*
 .paginationControl > tbody > tr > td > button.right.over > .wrap > .icon,
 .paginationControl > tbody > tr > td > button.right:hover > .wrap > .icon,
-.paginationControl > tbody > tr > td > button.right.pressed > .wrap > .icon {
-    background-position: -46px 8px;
-    *background-position: -46px 6px; /* IE7 */
+*/
+.paginationControl > tbody > tr > td > button.right:active > .wrap > .icon {
+    background-position: -87px 8px;
+    *background-position: -87px 6px; /* IE7 */
 }
 
+/*
 .paginationControl > tbody > tr > td > button.left.over > .wrap > .icon,
 .paginationControl > tbody > tr > td > button.left:hover > .wrap > .icon,
-.paginationControl > tbody > tr > td > button.left.pressed > .wrap > .icon {
-    background-position: -46px -45px;
-    *background-position: -46px -47px; /* IE7 */
+*/
+.paginationControl > tbody > tr > td > button.left:active > .wrap > .icon {
+    background-position: -87px -45px;
+    *background-position: -87px -47px; /* IE7 */
 }
 
+/*
 .paginationControl > tbody > tr > td > button.toRight.over > .wrap > .icon,
 .paginationControl > tbody > tr > td > button.toRight:hover > .wrap > .icon,
-.paginationControl > tbody > tr > td > button.toRight.pressed > .wrap > .icon {
-    background-position: -46px -151px;
-    *background-position: -46px -153px; /* IE7 */
+*/
+.paginationControl > tbody > tr > td > button.toRight:active > .wrap > .icon {
+    background-position: -87px -151px;
+    *background-position: -87px -153px; /* IE7 */
 }
 
+/*
 .paginationControl > tbody > tr > td > button.toLeft.over > .wrap > .icon,
 .paginationControl > tbody > tr > td > button.toLeft:hover > .wrap > .icon,
-.paginationControl > tbody > tr > td > button.toLeft.pressed > .wrap > .icon {
-    background-position: -46px -98px;
-    *background-position: -46px -100px /* IE7 */
+*/
+.paginationControl > tbody > tr > td > button.toLeft:active > .wrap > .icon {
+    background-position: -87px -98px;
+    *background-position: -87px -100px; /* IE7 */
 }
 
 .paginationControl > tbody > tr > td > button[disabled] > .wrap > .icon {

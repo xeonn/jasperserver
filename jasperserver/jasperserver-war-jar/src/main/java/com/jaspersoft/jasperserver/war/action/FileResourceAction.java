@@ -127,32 +127,35 @@ public class FileResourceAction extends FormAction {
 			}
 			wrapper.setAllResources(allResources);
 		}
+		/**
+		 * TODO(stas): Remove next block. I didn't find any usage of getExistingResources
+		 */
 //		 In new Mode get a list of all resources already present in the chosen
 //		 * folder, to validate resource name's uniqueness
-		if (wrapper.isNewMode()) {
-			String folderURI = wrapper.getFileResource().getParentFolder();
-			if (folderURI == null)
-			{
-				folderURI = "/";
-			}
-			FilterCriteria resourcesInFolder = FilterCriteria.createFilter();
-			resourcesInFolder.addFilterElement(FilterCriteria
-					.createParentFolderFilter(folderURI));
-			log("Searching for resources in the chosen folder:"+folderURI);
-			ResourceLookup[] existingResources = repository.findResource(null,
-					resourcesInFolder);
-
-			if (existingResources != null && existingResources.length != 0) {
-				log("res lookup size="+existingResources.length);
-				List allResources = new ArrayList();
-				for (int i = 0; i < existingResources.length; i++) {
-					ResourceLookup rLookup = existingResources[i];
-					allResources.add(rLookup.getName());
-					log("adding resource: "+rLookup.getName()+ " to the list");
-				}
-				wrapper.setExistingResources(allResources);
-			}
-		}
+//		if (wrapper.isNewMode()) {
+//			String folderURI = wrapper.getFileResource().getParentFolder();
+//			if (folderURI == null)
+//			{
+//				folderURI = "/";
+//			}
+//			FilterCriteria resourcesInFolder = FilterCriteria.createFilter();
+//			resourcesInFolder.addFilterElement(FilterCriteria
+//					.createParentFolderFilter(folderURI));
+//			log("Searching for resources in the chosen folder:"+folderURI);
+//			ResourceLookup[] existingResources = repository.findResource(null,
+//					resourcesInFolder);
+//
+//			if (existingResources != null && existingResources.length != 0) {
+//				log("res lookup size="+existingResources.length);
+//				List allResources = new ArrayList();
+//				for (int i = 0; i < existingResources.length; i++) {
+//					ResourceLookup rLookup = existingResources[i];
+//					allResources.add(rLookup.getName());
+//					log("adding resource: "+rLookup.getName()+ " to the list");
+//				}
+//				wrapper.setExistingResources(allResources);
+//			}
+//		}
 
 		if (wrapper.isSubflowMode()) {
 			getAllFolders(wrapper); // TODO get this from main flow

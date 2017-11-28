@@ -20,8 +20,10 @@
  */
 
 /**
- * @version $Id: jasperreports-loader.js 8033 2014-11-14 16:17:31Z inesterenko $
+ * @version $Id: jasperreports-loader.js 8179 2015-01-27 12:34:21Z psavushchik $
  */
+
+/* global Report, alert, ajax, showErrorPopup, isIPad, JRS, buttonManager, viewer  */
 
 define(function(require) {
 

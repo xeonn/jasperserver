@@ -21,15 +21,28 @@
         <test.hibernate.jdbc.properties>${currentConf}/js.jdbc.properties</test.hibernate.jdbc.properties>
         <master.properties>${masterPropsSource}</master.properties>
         <!-- workaround src w/o tibco drivers -->
-        <tibco.driver.available>false</tibco.driver.available>
+        <tibco.driver.available>${deploy-tibco-drivers}</tibco.driver.available>
         <SKIP_TEST_ARG>skipTests</SKIP_TEST_ARG>
         <disable.fafj>false</disable.fafj>
       </properties>
       <repositories>
         <repository>
           <id>js-repo-svn</id>
-          <name>Internal dependencies from SVN</name>
+          <name>Repository for JasperReports Server dependencies</name>
           <url>file://${repo-path}</url>
+          <snapshots>
+            <enabled>true</enabled>
+            <updatePolicy>always</updatePolicy>
+          </snapshots>
+          <releases>
+            <enabled>true</enabled>
+            <updatePolicy>always</updatePolicy>
+          </releases>
+        </repository>
+        <repository>
+          <id>js-repo-tibco-drivers</id>
+          <name>Repository for JasperReports Server additional resources (tibci data connectivity drivers)</name>
+          <url>file://${tibco-driver-path}</url>
           <snapshots>
             <enabled>true</enabled>
             <updatePolicy>always</updatePolicy>
@@ -69,31 +82,22 @@
             <enabled>true</enabled>
           </releases>
         </repository>
+        <repository>
+          <id>jboss-eap-alpha</id>
+          <name>JBoss EAP 6.3.0.Alpha</name>
+          <url>https://maven.repository.redhat.com/earlyaccess/all/</url>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+          <snapshots>
+            <enabled>false</enabled>
+          </snapshots>
+        </repository>
       </repositories>
       <pluginRepositories>
         <pluginRepository>
           <id>js-repo-svn</id>
           <url>file://${repo-path}</url>
-          <snapshots>
-            <enabled>true</enabled>
-          </snapshots>
-          <releases>
-            <enabled>true</enabled>
-          </releases>
-        </pluginRepository>
-        <pluginRepository>
-          <id>codehaus-plugins</id>
-          <url>http://dist.codehaus.org/</url>
-          <snapshots>
-            <enabled>true</enabled>
-          </snapshots>
-          <releases>
-            <enabled>true</enabled>
-          </releases>
-        </pluginRepository>
-        <pluginRepository>
-          <id>codehaus-plugins-2</id>
-          <url>http://repository.codehaus.org/</url>
           <snapshots>
             <enabled>true</enabled>
           </snapshots>

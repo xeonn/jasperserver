@@ -60,7 +60,7 @@
 <h3>Job(s)
     <c:forEach items="${paramValues['jobId']}" var="jobId" varStatus="status">
         <c:if test="${status.count > 1}">,</c:if>
-        <c:out value="${jobId}"/>
+        ${jobId}
     </c:forEach>
     deleted.</h3>
 <hr/>

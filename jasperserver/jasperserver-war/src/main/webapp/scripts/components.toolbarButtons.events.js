@@ -21,8 +21,10 @@
 
 
 /**
- * @version: $Id: components.toolbarButtons.events.js 7762 2014-09-19 10:16:02Z sergey.prilukin $
+ * @version: $Id: components.toolbarButtons.events.js 8179 2015-01-27 12:34:21Z psavushchik $
  */
+
+/* global toolbarButtonModule, toolbarButtonModule, isFirefox, getAsFunction, buttonManager,  */
 
 toolbarButtonModule.initialize = function(actionMap){
     toolbarButtonModule.actionMap = actionMap;

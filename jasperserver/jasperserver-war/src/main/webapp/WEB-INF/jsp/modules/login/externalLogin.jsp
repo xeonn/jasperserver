@@ -21,6 +21,7 @@
   --%>
 
   <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+  <%@ taglib prefix="js" uri="/WEB-INF/jasperserver.tld" %>
 
    <%
        //force Ajax to reload the page during error handling in core.ajax.js
@@ -39,8 +40,10 @@
    %>
   <%-- This allows us to avoid crossdomain redirects from ajax --%>
   <c:if test="${not empty externalLoginUrl}">
+      <js:out javaScriptEscape="true">
       <script type="text/javascript">
           location='${externalLoginUrl}';
       </script>
+      </js:out>
   </c:if>
 

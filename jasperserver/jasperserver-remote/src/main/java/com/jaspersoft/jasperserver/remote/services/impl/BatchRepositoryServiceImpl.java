@@ -59,6 +59,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * @author Zakhar.Tomchenco
@@ -69,6 +70,7 @@ import java.util.List;
 public class BatchRepositoryServiceImpl implements BatchRepositoryService {
 
     protected static final Log log = LogFactory.getLog(BatchRepositoryServiceImpl.class);
+    protected static final Pattern ILLEGAL_URI_SYMBOL_PATTERN = Pattern.compile("[~!#\\$%^|\\s`@&*()\\-+={}\\[\\]:;\"',?\\|\\\\]");
 
 
     @javax.annotation.Resource(name = "concreteRepository")
@@ -87,7 +89,7 @@ public class BatchRepositoryServiceImpl implements BatchRepositoryService {
     private SearchModeSettingsResolver searchModeSettingsResolver;
 
     @Override
-    public RepositorySearchResult<ClientResourceLookup> getResources(String q, String folderUri, List<String> type, List<String> excludeFolders, Integer start, Integer limit, Boolean recursive, Boolean showHiddenItems, String sortBy, AccessType accessType, User user, Boolean forceFullPage) throws IllegalParameterValueException, ResourceNotFoundException {
+    public RepositorySearchResult<ClientResourceLookup> getResources(String q, String folderUri, List<String> type, List<String> containerType, List<String> excludeFolders, Integer start, Integer limit, Boolean recursive, Boolean showHiddenItems, String sortBy, AccessType accessType, User user, Boolean forceFullPage) throws IllegalParameterValueException, ResourceNotFoundException {
         SearchMode mode = (recursive == null || recursive) ? SearchMode.SEARCH : SearchMode.BROWSE;
         RepositorySearchConfiguration configuration = getConfiguration(mode);
 
@@ -95,6 +97,7 @@ public class BatchRepositoryServiceImpl implements BatchRepositoryService {
                 .setMaxCount(limit != null ? limit : configuration.getItemsPerPage())
                 .setForceFullPage(forceFullPage != null ? forceFullPage : false)
                 .setFolderUri(folderUri != null ? folderUri : Folder.SEPARATOR)
+                .setContainerResourceTypes(containerType)
                 .setStartIndex(start != null ? start : 0)
                 .setExcludeRelativePaths(excludeFolders)
                 .setShowHidden(showHiddenItems)
@@ -164,12 +167,15 @@ public class BatchRepositoryServiceImpl implements BatchRepositoryService {
     }
 
     @Override
-    public int getResourcesCount(String q, String folderUri, List<String> type, List<String> excludeFolders, Boolean recursive, Boolean showHiddenItems, AccessType accessType, User user) throws IllegalParameterValueException, ResourceNotFoundException {
+    public int getResourcesCount(String q, String folderUri, List<String> type, List<String> excludedFolders, Boolean recursive, Boolean showHiddenItems, AccessType accessType, User user) throws IllegalParameterValueException, ResourceNotFoundException {
+
+        boolean excludeFolders = !type.contains("folder");
 
         final RepositorySearchCriteriaImpl.Builder builder = new RepositorySearchCriteriaImpl.Builder()
                 .setSearchMode(recursive == null || recursive ? SearchMode.SEARCH : SearchMode.BROWSE)
                 .setFolderUri(folderUri != null ? folderUri : Folder.SEPARATOR)
-                .setExcludeRelativePaths(excludeFolders)
+                .setExcludeRelativePaths(excludedFolders)
+                .setExcludeFolders(excludeFolders)
                 .setShowHidden(showHiddenItems)
                 .setAccessType(accessType)
                 .setResourceTypes(type)
@@ -219,6 +225,19 @@ public class BatchRepositoryServiceImpl implements BatchRepositoryService {
                 searchCriteria.setResourceTypes(serverTypes);
                 // if all types incorrect - we should not search anything
                 searchSuitable = !serverTypes.isEmpty();
+
+                if (searchCriteria.getContainerResourceTypes() != null){
+                    List<String> containerServerTypes = new ArrayList<String>();
+                    for (String type : searchCriteria.getContainerResourceTypes()) {
+                        try {
+                            containerServerTypes.add(resourceConverterProvider.getToServerConverter(type).getServerResourceType());
+                        } catch (IllegalParameterValueException e) {
+                            // ignore wrong or unknown types
+                        }
+                    }
+                    searchCriteria.setContainerResourceTypes(containerServerTypes);
+                }
+
             }
         }
         return searchSuitable;
@@ -232,7 +251,7 @@ public class BatchRepositoryServiceImpl implements BatchRepositoryService {
      * @throws ResourceNotFoundException - in case if folder with given URI doesn't exist
      */
     protected void validateFolderUri(String folderUri) throws IllegalParameterValueException, ResourceNotFoundException {
-        if(!folderUri.startsWith(Folder.SEPARATOR)){
+        if(!folderUri.startsWith(Folder.SEPARATOR) || ILLEGAL_URI_SYMBOL_PATTERN.matcher(folderUri).find()){
             throw new IllegalParameterValueException("folderUri", folderUri);
         } else if(service.getFolder(null, folderUri) == null){
             throw new ResourceNotFoundException(folderUri);

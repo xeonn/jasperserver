@@ -23,6 +23,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jstl/core_rt" %>
 <%@ taglib uri="/spring" prefix="spring"%>
 <%@ taglib prefix="authz" uri="http://www.springframework.org/security/tags" %>
+<%@ taglib prefix="js" uri="/WEB-INF/jasperserver.tld" %>
 
 <script type="text/javascript">
     if (typeof localContext === "undefined") {
@@ -37,13 +38,17 @@
         <c:choose>
             <c:when test='${dataResource.dataSourceUri != null}'>
         ,
+        <js:out javaScriptEscape="true">
         dataSourceUri: "${dataResource.dataSourceUri}"
+        </js:out>
             </c:when>
         </c:choose>
         <c:choose>
             <c:when test='${dataResource.dataSourceJson != null}'>
         ,
-        dataSourceJson: ${dataResource.dataSourceJson}
+        <js:out javaScriptEscape="true">
+        dataSourceJson: JSON.parse('${dataResource.dataSourceJson}')
+        </js:out>
             </c:when>
         </c:choose>
 

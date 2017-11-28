@@ -6,6 +6,7 @@ import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.Hi
 import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.ReportThumbnailService;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
 import com.jaspersoft.jasperserver.dto.thumbnails.ResourceThumbnail;
+import com.jaspersoft.jasperserver.dto.thumbnails.ResourceThumbnailsListWrapper;
 import com.jaspersoft.jasperserver.remote.exception.RemoteException;
 import com.jaspersoft.jasperserver.remote.resources.converters.ResourceConverterProvider;
 import com.jaspersoft.jasperserver.remote.services.SingleRepositoryService;
@@ -22,10 +23,7 @@ import javax.ws.rs.core.*;
 import javax.ws.rs.ext.Providers;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
@@ -133,9 +131,10 @@ public class ThumbnailsJaxrsService {
      * @param authenticatedUser
      * @return Set<ResourceThumbnail>
      */
-    protected Set<ResourceThumbnail> getBatchThumbnails(final Set<String> uris, User authenticatedUser, boolean defaultAllowed)
-        throws JSException {
-        Set<ResourceThumbnail> thumbnailEntities = new HashSet<ResourceThumbnail> ();
+    protected List<ResourceThumbnail> getBatchThumbnails(final Set<String> uris, User authenticatedUser, boolean defaultAllowed)
+        throws JSException
+    {
+        List<ResourceThumbnail> thumbnailEntities = new ArrayList<ResourceThumbnail>();
 
         for (String uri : uris) {
             ByteArrayInputStream thumbnailData;
@@ -177,7 +176,8 @@ public class ThumbnailsJaxrsService {
     public Response getThumbnails(
             @HeaderParam(HttpHeaders.ACCEPT) String accept,
             @QueryParam(ThumbnailsJaxrsService.PATH_PARAM_DEFAULT_ALLOWED) Boolean defaultAllowed,
-            @QueryParam(QUERY_PARAM_URI) List<String> uris) throws RemoteException {
+            @QueryParam(QUERY_PARAM_URI) List<String> uris) throws RemoteException
+    {
 
         if (defaultAllowed == null)
             defaultAllowed = false;
@@ -186,7 +186,7 @@ public class ThumbnailsJaxrsService {
         if (uriSet.isEmpty())
             return Response.status(Response.Status.BAD_REQUEST).build();
 
-            // Remove illegal URIs
+        // Remove illegal URIs
         Iterator<String> uriIterator = uriSet.iterator();
         do {
             String uri = uriIterator.next();
@@ -205,15 +205,15 @@ public class ThumbnailsJaxrsService {
         if (uriSet.isEmpty()) return Response.status(Response.Status.BAD_REQUEST).build();
         Response.ResponseBuilder response = new ResponseBuilderImpl();
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Set<ResourceThumbnail> thumbnailEntities;
+        List<ResourceThumbnail> thumbnailEntities;
         try {
              thumbnailEntities = getBatchThumbnails(uriSet, user, defaultAllowed);
         } catch (JSException e) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
         if (thumbnailEntities.isEmpty()) return response.status(Response.Status.NO_CONTENT).build();
-
-        return response.entity(new GenericEntity<Set<ResourceThumbnail>> (thumbnailEntities) {}).status(Response.Status.OK).build();
+        ResourceThumbnailsListWrapper thumbnailsListWrapper = new ResourceThumbnailsListWrapper(thumbnailEntities);
+        return response.entity(thumbnailsListWrapper).status(Response.Status.OK).build();
     }
 
     /**
@@ -233,7 +233,8 @@ public class ThumbnailsJaxrsService {
     public Response getThumbnailsFormEncoded(
             @HeaderParam(HttpHeaders.ACCEPT) String accept,
             @QueryParam(ThumbnailsJaxrsService.PATH_PARAM_DEFAULT_ALLOWED) Boolean defaultAllowed,
-            @FormParam(QUERY_PARAM_URI) List<String> uris) throws RemoteException {
+            @FormParam(QUERY_PARAM_URI) List<String> uris) throws RemoteException
+    {
         return getThumbnails(accept, defaultAllowed, uris);
     }
 

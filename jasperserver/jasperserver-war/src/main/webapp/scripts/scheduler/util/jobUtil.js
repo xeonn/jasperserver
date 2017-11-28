@@ -22,8 +22,10 @@
 
 /**
  * @author yaroslav.kovalchyk
- * @version: $Id: jobUtil.js 7748 2014-07-18 09:13:06Z kklein $
+ * @version: $Id: jobUtil.js 8900 2015-05-06 20:57:14Z yplakosh $
  */
+
+/* global JSCookie, redirectToUrl */
 
 define("scheduler/util/jobUtil", function (require) {
 
@@ -37,7 +39,7 @@ define("scheduler/util/jobUtil", function (require) {
 
         back: function(cookieName){
 			var currentUrl = encodeURIComponent(document.location.href);
-            var lastUrl = new JSCookie(cookieName).value;
+            var lastUrl = window.localStorage ? localStorage.getItem(cookieName) : undefined;
 			if (lastUrl && lastUrl !== currentUrl) {
                 var url = decodeURIComponent(lastUrl);
                 if (url) {

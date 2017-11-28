@@ -22,7 +22,7 @@
 
 /**
  * @author Sergey Prilukin
- * @version: $Id: ListViewForSelectedItemsList.js 172 2014-09-23 11:45:30Z sergey.prilukin $
+ * @version: $Id: ListViewForSelectedItemsList.js 1160 2015-04-28 12:46:42Z spriluki $
  */
 
 /**
@@ -37,7 +37,7 @@ define(function (require) {
 
     var ListViewForSelectedItemsList = ListWithNavigation.extend({
         _multiSelect: function(event, value, index) {
-            if ($(event.target).hasClass("mSelect-svList-button")) {
+            if ($(event.target).hasClass("j-remove-selection")) {
                 if (this.model.selectionContains(value, index)) {
                     //in this case mousedown should not change anything
                 } else {

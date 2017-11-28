@@ -24,7 +24,7 @@
  * Menu that is shown near element when element is mouseovered.
  *
  * @author: Kostiantyn Tsaregradskyi
- * @version: $Id: HoverMenu.js 270 2014-10-13 19:58:03Z agodovanets $
+ * @version: $Id: HoverMenu.js 812 2015-01-27 11:01:30Z psavushchik $
  */
 
 define(function (require) {
@@ -35,7 +35,9 @@ define(function (require) {
 
     var TIME_BETWEEN_MOUSE_OVERS = 10;
 
-    return AttachableMenu.extend({
+    return AttachableMenu.extend(
+        /** @lends HoverMenu.prototype */
+        {
         events: {
             "mouseover": "_onMenuMouseOver",
             "mouseout": "_onMenuMouseOut"
@@ -49,7 +51,8 @@ define(function (require) {
         * @param {jQuery|HTMLElement|selector} attachTo - Element to attach menu to.
         * @param {object} [additionalSettings] - Additional settings object. For more details on this see Menu.js
         * @throws "Menu should have options" error if no menu options were passed to constructor.
-        * @fires option:<action> events when menu option is selected.
+        * @throws "AttachableComponent should be attached to an element" error if attachTo is missing.
+        * @fires option:action events when menu option is selected.
         * @example
         *  var hoverMenu = new HoverMenu([ { label: "Save Dashboard", action: "save" } ], $("#someElement"), { toggle: true });
         */
@@ -63,16 +66,29 @@ define(function (require) {
             this.$attachTo.on("mouseout", this._onElementMouseOut);
         },
 
+
+        /**
+         * @description on hover menu mouse over event handler.
+         * @access protected
+         */
         _onMenuMouseOver: function() {
             this._menuHovered = true;
         },
 
+        /**
+         * @description on hover menu mouse out event handler.
+         * @access protected
+         */
         _onMenuMouseOut: function() {
             this._menuHovered = false;
 
             this._tryHide();
         },
 
+        /**
+         * @description on attached element mouse over event handler.
+         * @access protected
+         */
         _onElementMouseOver: function() {
             if (this.$attachTo.is(":disabled")) {
                 return;
@@ -85,12 +101,21 @@ define(function (require) {
             }
         },
 
+        /**
+         * @description on attached element mouse out event handler.
+         * @access protected
+         */
         _onElementMouseOut: function() {
             this._elementHovered = false;
 
             this._tryHide();
         },
 
+
+        /**
+         * @description hides previous hover menu.
+         * @access protected
+         */
         _tryHide: function() {
             setTimeout(_.bind(function() {
                 if (!this._elementHovered && !this._menuHovered) {
@@ -100,7 +125,6 @@ define(function (require) {
         },
 
         /**
-         * @method remove
          * @description Removes HoverMenu from DOM and remove event handlers from element that menu is attached to.
          */
         remove: function() {

@@ -22,7 +22,7 @@
 
 /**
  * @author: Kostiantyn Tsaregradskyi
- * @version: $Id: WebPageView.js 380 2014-11-09 15:04:25Z ktsaregradskyi $
+ * @version: $Id: WebPageView.js 812 2015-01-27 11:01:30Z psavushchik $
  */
 
 define(function (require) {
@@ -295,10 +295,10 @@ define(function (require) {
          * @throws Error If callback was not specified and error occurred while initializing new instance of component.
          */
         open: function(settings, callback) {
-            var err;
+            var view, err;
 
             try {
-                var view = new WebPageView(_.isObject(settings) ? settings : { url: settings });
+                view = new WebPageView(_.isObject(settings) ? settings : { url: settings });
             } catch(ex) {
                 err = ex;
 

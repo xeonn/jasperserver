@@ -21,8 +21,12 @@
 
 
 /**
- * @version: $Id: core.key.events.js 7828 2014-09-19 13:34:25Z sergey.prilukin $
+ * @version: $Id: core.key.events.js 8179 2015-01-27 12:34:21Z psavushchik $
  */
+
+/* global Keys, isMetaHeld, isShiftHeld, actionModel, layoutModule, matchMeOrUp, primaryNavModule,
+ getNextNonMatchingSibling, buttonManager, matchAny, actionModel, getPreviousMatchingSibling, getNextMatchingSibling,
+ getPreviousNonMatchingSibling */
 
 /* 
  * event handler for generic key events  
@@ -206,7 +210,7 @@ document.observe('key:down', function(event){
     }
 
     //navigation button focused? move to first menu item
-    if (matched = matchAny(event.element(), [layoutModule.NAVIGATION_MUTTON_PATTERN ], true)) {
+    if (matched = matchAny(event.element(), [layoutModule.NAVIGATION_MUTTON_PATTERN ], true)) {  // jshint ignore: line
         //if mousedown on nav button navigate to top of menu (if any) 
         //alert('dufus');
         buttonManager.out(matched.down(layoutModule.BUTTON_PATTERN));

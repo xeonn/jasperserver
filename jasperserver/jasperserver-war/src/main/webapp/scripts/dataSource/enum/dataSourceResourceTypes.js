@@ -25,5 +25,6 @@ define({
     JNDI: "jndiJdbcDataSource",
     VIRTUAL: "virtualDataSource",
     CUSTOM: "customDataSource",
-    BEAN: "beanDataSource"
+    BEAN: "beanDataSource",
+	MONGODBJDBC: "mongoDbJDBCDataSource"
 });

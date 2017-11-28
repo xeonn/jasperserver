@@ -21,8 +21,12 @@
 
 
 /**
- * @version: $Id: core.events.bis.js 7762 2014-09-19 10:16:02Z sergey.prilukin $
+ * @version: $Id: core.events.bis.js 8790 2015-04-22 21:28:09Z obobruyk $
  */
+
+/* global isSupportsTouch, matchMeOrUp, layoutModule, isIPad, isRightClick, isIE, hasDisabledAttributeSet,
+ primaryNavModule, TouchController, tooltipModule
+*/
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Drag with MouseDown
@@ -185,6 +189,12 @@ document.observe('dom:loaded', function(event) {
             });
             jQuery(this).addClass(layoutModule.SELECTED_CLASS);
             jQuery(jQuery(this).attr("tabId")).removeClass("hidden");
+
+            // Dirty hack to make anchor bigger when attributes tab is selected.
+            var $anchor = jQuery(this).closest(".tabs").find(".control.tabSet.anchor");
+            jQuery(this).attr("tabId") === "#attributesTab"
+                ? $anchor.addClass("attributesAnchor")
+                : $anchor.removeClass("attributesAnchor")
         }
     });
 

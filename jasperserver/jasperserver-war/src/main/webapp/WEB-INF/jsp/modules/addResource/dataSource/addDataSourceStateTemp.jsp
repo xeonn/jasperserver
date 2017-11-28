@@ -21,7 +21,9 @@
 
 <%@ taglib uri="/spring" prefix="spring"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jstl/core_rt" %>
+<%@ taglib prefix="js" uri="/WEB-INF/jasperserver.tld" %>
 
+<js:out javaScriptEscape="true">
 <script type="text/javascript">
     if (typeof localContext === "undefined") {
         localContext = {};
@@ -31,11 +33,11 @@
         isEditMode: ${dataResource.editMode},
         type: "${type}",
         parentFolderUri: "${parentFolder}",
-        resourceIdNotSupportedSymbols: "<spring:message code="${resourceIdNotSupportedSymbols}" javaScriptEscape="true"/>",
-        dependentResources: <c:out value="${dataResource.namedProperties.dependentResources}" default="[]" escapeXml="false"/>,
-        jdbcDrivers: ${jdbcDriversJSON},
-        dynamicUrlPartPattern: ${dynamicUrlPartPattern},
-        validationPatterns: ${validationPatterns}
+        resourceIdNotSupportedSymbols: "${resourceIdNotSupportedSymbols}",
+        dependentResources: JSON.parse('${not empty dataResource.namedProperties.dependentResources ? dataResource.namedProperties.dependentResources : "[]" }'),
+        jdbcDrivers: JSON.parse('${jdbcDriversJSON}'),
+        dynamicUrlPartPattern: JSON.parse('${dynamicUrlPartPattern}'),
+        validationPatterns: JSON.parse('${validationPatterns}')
     };
 
     localContext.flowExecutionKey = "${flowExecutionKey}";
@@ -111,3 +113,4 @@
     __jrsConfigs__.addDataSource.resource = resource;
 
 </script>
+</js:out>

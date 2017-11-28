@@ -22,7 +22,7 @@
 
 /**
  * @author Sergey Prilukin
- * @version: $Id: MultiSelectWithTrueAll.js 172 2014-09-23 11:45:30Z sergey.prilukin $
+ * @version: $Id: MultiSelectWithTrueAllNew.js 47805 2014-08-05 08:57:58Z sergey.prilukin $
  */
 
 /**
@@ -33,48 +33,80 @@ define(function (require) {
     'use strict';
 
     var _ = require("underscore"),
+        DelegatingDataProvider = require("common/component/multiSelect/dataprovider/DelegatingDataProvider"),
+        SelectedItemsDataProvider = require("common/component/multiSelect/dataprovider/SelectedItemsDataProvider"),
         AvailableItemsListWithTrueAll = require("common/component/multiSelect/view/AvailableItemsListWithTrueAll"),
         MultiSelect = require("common/component/multiSelect/view/MultiSelect");
 
     var MultiSelectWithTrueAll = MultiSelect.extend({
-
-        initialize: function(options) {
-            if (options.trueAll) {
-                delete options.value;
-            }
-
-            MultiSelect.prototype.initialize.call(this, options);
-        },
-
         _createAvailableItemsList: function(options) {
+            this.availableItemsListDataProvider = options.getData;
+
             return options.availableItemsList || new AvailableItemsListWithTrueAll({
-                getData: options.getData,
-                bufferSize: options.bufferSize,
-                loadFactor: options.loadFactor,
-                chunksTemplate: options.chunksTemplate,
-                scrollTimeout: options.scrollTimeout,
-                trueAll: options.trueAll
-            });
+                    model: this.availableItemsListModel,
+                    getData: options.getData,
+                    bufferSize: options.bufferSize,
+                    loadFactor: options.loadFactor,
+                    chunksTemplate: options.chunksTemplate,
+                    scrollTimeout: options.scrollTimeout,
+                    trueAll: options.trueAll
+                });
         },
 
-        /* Event Handlers */
+        _createSelectedItemsListDataProvider: function(options) {
+            this.selectedListOptions = options ? options.selectedListOptions : {};
+            return new DelegatingDataProvider();
+        },
 
-        /* Internal helper methods */
+        selectionRemoved: function (selection) {
+            if (this.getTrueAll()) {
+                var selectionAsHash;
+
+                for (var index in selection) {
+                    if (selection.hasOwnProperty(index)) {
+                        selectionAsHash = {
+                            value: selection[index],
+                            index: index
+                        };
+
+                        break;
+                    }
+                }
+
+                this.availableItemsList.selectionAdd(selectionAsHash)
+            } else {
+                MultiSelect.prototype.selectionRemoved.call(this, selection);
+            }
+        },
 
         selectionChangeInternal: function(selection) {
-            this.selectedItemsList.setDisabled(this.getTrueAll());
+            var all = this.getTrueAll();
 
-            MultiSelect.prototype.selectionChangeInternal.call(this, selection);
+            if (all) {
+                this.selectedItemsDataProvider.setGetData(this.availableItemsListDataProvider);
+                this.selectedItemsDataProvider.setData = null;
+
+                var self = this;
+                this.selectedItemsList.fetch(function() {
+                    self._updateSelectedItemsCountLabel();
+                    self.selectedItemsList.resize();
+                });
+
+                if (!this.silent) {
+                    this.triggerSelectionChange();
+                } else {
+                    delete this.silent;
+                }
+            } else {
+                var dataProvider = new SelectedItemsDataProvider(this.selectedListOptions);
+                this.selectedItemsDataProvider.setGetData(dataProvider.getData);
+                this.selectedItemsDataProvider.setData = _.bind(dataProvider.setData, dataProvider);
+                MultiSelect.prototype.selectionChangeInternal.call(this, selection);
+            }
         },
 
         triggerSelectionChange: function() {
             this.trigger("selection:change", this.getValue(), {isTrueAll: this.getTrueAll()});
-        },
-
-        /* API */
-
-        getValue: function() {
-            return this.getTrueAll() ? [] : this.availableItemsList.getValue();
         },
 
         setTrueAll: function(all, options) {
@@ -92,9 +124,6 @@ define(function (require) {
             return this.availableItemsList.getTrueAll();
         }
     });
-
-    //Support for non-AMD modules
-    window.MultiSelectWithTrueAll = MultiSelectWithTrueAll;
 
     return MultiSelectWithTrueAll;
 });

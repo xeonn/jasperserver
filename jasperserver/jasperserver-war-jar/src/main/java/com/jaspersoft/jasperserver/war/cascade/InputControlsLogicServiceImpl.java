@@ -23,6 +23,7 @@ package com.jaspersoft.jasperserver.war.cascade;
 import com.jaspersoft.jasperserver.api.common.domain.ValidationErrors;
 import com.jaspersoft.jasperserver.api.common.domain.impl.ValidationErrorsImpl;
 import com.jaspersoft.jasperserver.api.engine.common.service.SecurityContextProvider;
+import com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl.EhcacheEngineService;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.InputControlsContainer;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceReference;
 import com.jaspersoft.jasperserver.dto.reports.inputcontrols.InputControlState;
@@ -178,10 +179,13 @@ public class InputControlsLogicServiceImpl implements InputControlsLogicService 
         return reordered;
     }
 
-    public List<InputControlState> getValuesForInputControls(String containerUri, final Set<String> inputControlIds, final Map<String, String[]> parameters, boolean freshData) throws CascadeResourceNotFoundException {
+    public List<InputControlState> getValuesForInputControls(String containerUri, final Set<String> inputControlIds,
+            Map<String, String[]> originalParameters, boolean freshData) throws CascadeResourceNotFoundException {
+        final Map<String, String[]> parameters = originalParameters != null ? new HashMap<String, String[]>(originalParameters) : new HashMap<String, String[]>();
         List<InputControlState> states;
         if(freshData){
             controlLogicCacheManager.clearCache();
+            parameters.put(EhcacheEngineService.IC_REFRESH_KEY, new String[]{"true"});
         }
         defaultEvaluationEventsHandler.beforeEvaluation(containerUri, parameters, securityContextProvider.getContextUser());
         try {

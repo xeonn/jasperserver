@@ -66,10 +66,6 @@
 							<ul class="list buttonSet">
 								<li class="leaf"><button id="markAsRead" class="button capsule text up first"><span class="wrap"><spring:message code="messages.messageList.toolbar.button.markAsRead"/></span><span class="icon"></span></button></li>
 								<li class="leaf"><button id="markAsUnread" class="button capsule text up last"><span class="wrap"><spring:message code="messages.messageList.toolbar.button.markAsUnread"/></span><span class="icon"></span></button></li>
-							</ul>
-						</li>
-						<li class="node open">
-							<ul class="list buttonSet">
 								<li class="leaf"><button id="delete" class="button capsule text up"><span class="wrap"><spring:message code="messages.messageList.toolbar.button.delete"/></span></button></li>
 							</ul>
 						</li>

@@ -23,19 +23,11 @@ package com.jaspersoft.jasperserver.export.service.impl;
 
 
 import com.jaspersoft.jasperserver.api.JSException;
+import com.jaspersoft.jasperserver.api.common.crypto.DiagnosticDataCipherer;
 import com.jaspersoft.jasperserver.api.common.domain.impl.ExecutionContextImpl;
 import com.jaspersoft.jasperserver.api.metadata.user.service.ObjectPermissionService;
-import com.jaspersoft.jasperserver.export.ExportTaskImpl;
-import com.jaspersoft.jasperserver.export.Exporter;
-import com.jaspersoft.jasperserver.export.ImportTaskImpl;
-import com.jaspersoft.jasperserver.export.Importer;
-import com.jaspersoft.jasperserver.export.Parameters;
-import com.jaspersoft.jasperserver.export.ParametersImpl;
-import com.jaspersoft.jasperserver.export.io.PathProcessor;
-import com.jaspersoft.jasperserver.export.io.PathProcessorFactory;
-import com.jaspersoft.jasperserver.export.io.ZipFileInput;
-import com.jaspersoft.jasperserver.export.io.ZipFileInputManager;
-import com.jaspersoft.jasperserver.export.io.ZipStreamOutput;
+import com.jaspersoft.jasperserver.export.*;
+import com.jaspersoft.jasperserver.export.io.*;
 import com.jaspersoft.jasperserver.export.service.ExportFailedException;
 import com.jaspersoft.jasperserver.export.service.ImportExportService;
 import com.jaspersoft.jasperserver.export.service.ImportFailedException;
@@ -43,16 +35,15 @@ import com.jaspersoft.jasperserver.export.util.CommandOut;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.MessageSource;
-import org.springframework.context.i18n.LocaleContextHolder;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.*;
 import javax.annotation.Resource;
+import javax.crypto.NoSuchPaddingException;
+import java.io.*;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.text.MessageFormat;
+import java.util.*;
 import java.util.zip.Deflater;
 import java.util.zip.ZipException;
 
@@ -72,6 +63,8 @@ public abstract class ImportExportServiceImpl implements ImportExportService, Zi
 
     @Resource(name = "messageSource")
     private MessageSource messageSource;
+    @Resource(name = "diagnosticDataCipherer")
+    private DiagnosticDataCipherer diagnosticDataCipherer;
 
     private PathProcessorFactory pathProcessorFactory;
     private String propertyPathProcessorId = "pathProcessorId"; // default value
@@ -96,7 +89,21 @@ public abstract class ImportExportServiceImpl implements ImportExportService, Zi
 
         task.setExecutionContext(makeExecutionContext(locale));
         task.setParameters(createImportParameters(importParams));
-        task.setInput(new ZipFileInput(input, processor, this));
+        Boolean isEncrypted = importParams != null ? importParams.get("isEncrypted") : null;
+        if (isEncrypted != null && isEncrypted) {
+            // Decrypt the file and put it into Importer
+            // input = decrypted zip
+            File decryptedInput = null;
+            try {
+                decryptedInput = diagnosticDataCipherer.decryptExportZip(input);
+            } catch (Exception e) {
+                log.error("Error while decrypting export.zip", e);
+                throw new ImportFailedException(e.getMessage());
+            }
+            task.setInput(new ZipFileInput(decryptedInput, processor, this));
+        } else {
+            task.setInput(new ZipFileInput(input, processor, this));
+        }
         task.setApplicationContext(getApplicationContext());
 
         startImport(importer, task);

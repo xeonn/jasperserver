@@ -39,14 +39,21 @@ define(function (require) {
         ListWithNavigation = require("common/component/multiSelect/view/ListViewForSelectedItemsList"),
         ListWithSelectionModel = require("common/component/list/model/ListWithSelectionModel"),
         listWithNavigationModelTrait = require("common/component/list/model/listWithNavigationModelTrait"),
-        selectedItemsListTemplate = require("text!common/component/multiSelect/templates/selectedItemsListTemplate.htm"),
-        itemsTemplate = require("text!common/component/multiSelect/templates/selectedItemsTemplate.htm"),
-        listTemplate = require("text!common/component/multiSelect/templates/listTemplate.htm");
+        scalableListItemHeightCalculationTrait = require("common/component/multiSelect/mixin/scalableListItemHeightCalculationTrait"),
+        selectedItemsListTemplate = require("text!common/component/multiSelect/templates/selectedItemsTemplate.htm"),
+        itemsTemplate = require("text!common/component/multiSelect/templates/selectedItemsListTemplate.htm"),
+        listTemplate = require("text!common/component/multiSelect/templates/listTemplate.htm"),
+        browserDetection = require("common/util/browserDetection"),
+        i18n = require("bundle!ScalableInputControlsBundle"),
+        xssUtil = require("common/util/xssUtil");
+
 
     var SelectedItemsList = Backbone.View.extend({
 
+        className: "m-Multiselect-listContainer j-toggle-panel j-selected j-inactive jrs",
+
         attributes: {
-            "class": "svList"
+            "style": "position: absolute; left: -9999px; top: 0"
         },
 
         events: function() {
@@ -54,7 +61,7 @@ define(function (require) {
                 "keydown input": this.keyboardManager.onKeydown,
                 "focus input": "onFocus",
                 "blur input": "onBlur",
-                "mouseup li .mSelect-svList-button": "onMouseupOnDeleteButton",
+                "mouseup li .j-remove-selection": "onMouseupOnDeleteButton",
                 "mousedown": "onMousedown",
                 "mouseup": "onMouseup"
             };
@@ -67,8 +74,6 @@ define(function (require) {
         }, KeyboardManager.prototype.keydownHandlers),
 
         initialize: function(options) {
-            _.bindAll(this, "onGlobalMouseup", "onGlobalMousedown", "onGlobalMousemove");
-
             if (!this.model) {
                 this.model = new Backbone.Model();
             }
@@ -94,20 +99,19 @@ define(function (require) {
                 loadFactor: options.loadFactor
             });
 
-            this.listView = options.listView || new ListWithNavigation({
+            this.listView = options.listView || _.extend(new ListWithNavigation({
                 el: options.listElement || $(listTemplate),
                 model: this.listViewModel,
                 chunksTemplate: options.chunksTemplate,
                 itemsTemplate: options.itemsTemplate || itemsTemplate,
                 scrollTimeout: options.scrollTimeout,
                 lazy: true,
-                visibleItemsCount: options.visibleItemsCount,
+                selectedClass: "is-selected",
                 selection: {
                     allowed: true,
-                    multiple: true
+                    multiple: false
                 }
-            });
-            this.listView.setCanActivate(false);
+            }), scalableListItemHeightCalculationTrait);
 
             this.initListeners();
             this.render().resize();
@@ -117,22 +121,23 @@ define(function (require) {
             this.listenTo(this.listView, "active:changed", this.activeChange, this);
             this.listenTo(this.model, "change:focused", this.focusStateChanged, this);
             this.listenTo(this.model, "change:disabled", this.changeDisabled, this);
-
-            $("body").on("mousedown", this.onGlobalMousedown).on("mouseup", this.onGlobalMouseup)
-                .on("mousemove", this.onGlobalMousemove);
+            this.listenTo(this.listViewModel, "change", this.onModelChange, this);
         },
 
         render: function() {
             this.listView.undelegateEvents();
 
             var selectedItemsList = $(this.template({
-                disabled: this.model.get("disabled")
+                disabled: this.model.get("disabled"),
+                i18n:     i18n
             }));
 
-            selectedItemsList.append(this.listView.el);
+            this.$el
+                .empty()
+                .append(selectedItemsList)
+                .append(this.listView.el);
 
-            this.$el.empty();
-            this.$el.append(selectedItemsList);
+            this.listView.render();
 
             this.listView.delegateEvents();
 
@@ -148,12 +153,10 @@ define(function (require) {
 
         activeChange: function(active) {
             if (active) {
-                if (this.activeChangedWithShift) {
-                    delete this.activeChangedWithShift;
-                    this.listViewModel.addRangeToSelection(active.value, active.index);
-                }
-
+                this.listViewModel.select(active.value, active.index);
                 this.listView.scrollTo(active.index);
+            } else {
+                this.listViewModel.clearSelection();
             }
         },
 
@@ -176,13 +179,16 @@ define(function (require) {
         focusStateChanged: function() {
             if (this.model.get("focused")) {
                 this.$el.find(".mSelect-svListPlaceholder").addClass("focused");
-                this.listView.setCanActivate(true);
-                this._activateFirstSelectedItem();
             } else {
                 this.$el.find(".mSelect-svListPlaceholder").removeClass("focused");
-                this.listView.setValue({});
-                this.listView.activate(undefined);
-                this.listView.setCanActivate(false);
+            }
+        },
+
+        onModelChange: function() {
+            if (!this.listViewModel.get("total")) {
+                this.listView.$el.hide();
+            } else {
+                this.listView.$el.show();
             }
         },
 
@@ -201,9 +207,11 @@ define(function (require) {
         },
 
         onMousedown: function() {
-            this.preventBlur = true;
-            if (!this.model.get("focused")) {
-                this.$el.find("input").focus();
+            if (!browserDetection.isIPad()) {
+                this.preventBlur = true;
+                if (!this.model.get("focused")) {
+                    this.$el.find("input").focus();
+                }
             }
         },
 
@@ -215,35 +223,9 @@ define(function (require) {
             }
         },
 
-        onGlobalMousedown: function(event) {
-            if (this.preventBlur) {
-                if (event.target === this.$el || this.$el.find(event.target).length > 0) {
-                    //Do not collapse if mousedown performed on this component
-                    return;
-                }
-
-                delete this.preventBlur;
-                this.onBlur();
-            }
-        },
-
-        onGlobalMouseup: function() {
-            this.onMouseup();
-        },
-
-        onGlobalMousemove: function(event) {
-            if (this.preventBlur) {
-                event.stopPropagation();
-            }
-        },
-
         /* Key handlers for KeyboardManager */
 
         onUpKey: function(event) {
-            if (event.shiftKey) {
-                this.activeChangedWithShift = true;
-            }
-
             this.listView.activatePrevious();
         },
 
@@ -251,10 +233,6 @@ define(function (require) {
             var active = this.listView.getActiveValue();
 
             if (active) {
-                if (event.shiftKey) {
-                    this.activeChangedWithShift = true;
-                }
-
                 this.listView.activateNext();
             } else {
                 this.listView.activateFirst();
@@ -262,49 +240,22 @@ define(function (require) {
         },
 
         onEnterKey: function(event) {
-            event.preventDefault();
-
-            var active = this.listView.getActiveValue();
-
-            if (event.shiftKey) {
-                this.listViewModel.addRangeToSelection(active.value, active.index);
-            } else if (event.ctrlKey || event.metaKey) {
-                this.listViewModel.clearSelection();
-                this.listViewModel.addValueToSelection(active.value, active.index);
-            } else {
-                this.listViewModel.toggleSelection(active.value, active.index);
-            }
+            /* do nothing */
         },
 
         onHomeKey: function(event) {
-            if (event.shiftKey) {
-                this.activeChangedWithShift = true;
-            }
-
             this.listView.activateFirst();
         },
 
         onEndKey: function(event) {
-            if (event.shiftKey) {
-                this.activeChangedWithShift = true;
-            }
-
             this.listView.activateLast();
         },
 
         onPageUpKey: function(event) {
-            if (event.shiftKey) {
-                this.activeChangedWithShift = true;
-            }
-
             this.listView.pageUp();
         },
 
         onPageDownKey: function(event) {
-            if (event.shiftKey) {
-                this.activeChangedWithShift = true;
-            }
-
             this.listView.pageDown();
         },
 
@@ -313,10 +264,7 @@ define(function (require) {
         },
 
         onAKey: function(event) {
-            if (event.ctrlKey || event.metaKey) {
-                event.stopPropagation();
-                this.listView.selectAll();
-            }
+            /* do nothing */
         },
 
         onDeleteKey: function(event) {
@@ -339,18 +287,6 @@ define(function (require) {
             }
         },
 
-        /* Internal helper methods */
-
-        _activateFirstSelectedItem: function() {
-            var selection = this.listView.getValue();
-            for (var index in selection) {
-                if (selection.hasOwnProperty(index) && selection[index] !== undefined) {
-                    this.listViewModel.activate(parseInt(index, 10), {silent: true});
-                    break;
-                }
-            }
-        },
-
         /* API */
 
         fetch: function(callback, options) {
@@ -360,12 +296,7 @@ define(function (require) {
         },
 
         resize: function() {
-            if (!this.listViewModel.get("items") || this.listViewModel.get("items").length === 0) {
-                this.$el.hide();
-            } else {
-                this.$el.show();
-                this.listView.resize();
-            }
+            this.listView.resize();
         },
 
         setDisabled: function(disabled) {
@@ -379,8 +310,6 @@ define(function (require) {
         remove: function() {
             this.listView.remove();
             Backbone.View.prototype.remove.call(this);
-            $("body").off("mousedown", this.onGlobalMousedown).off("mouseup", this.onGlobalMouseup)
-                .off("mousemove", this.onGlobalMousemove);
         }
     });
 

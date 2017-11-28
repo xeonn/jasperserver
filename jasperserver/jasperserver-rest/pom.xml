@@ -9,7 +9,7 @@
     <parent>
         <groupId>com.jaspersoft.jasperserver</groupId>
         <artifactId>server</artifactId>
-        <version>6.0.1</version>
+        <version>6.1.0</version>
     </parent>
     <dependencies>
         <dependency>
@@ -75,11 +75,6 @@
         </dependency>
 
         <!-- DEPENDENCY FOR JUNIT-->
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>4.1.1</version>
-        </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpmime</artifactId>

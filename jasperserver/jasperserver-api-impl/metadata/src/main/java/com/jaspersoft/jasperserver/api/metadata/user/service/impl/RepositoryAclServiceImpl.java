@@ -2,6 +2,7 @@ package com.jaspersoft.jasperserver.api.metadata.user.service.impl;
 
 import com.jaspersoft.jasperserver.api.common.util.ImportRunMonitor;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.InternalURI;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.PermissionUriProtocol;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 import com.jaspersoft.jasperserver.api.metadata.security.JasperServerAclImpl;
 import com.jaspersoft.jasperserver.api.metadata.security.JasperServerPermission;
@@ -53,10 +54,14 @@ public class RepositoryAclServiceImpl implements AclService {
     public Acl readAclById(ObjectIdentity object) throws NotFoundException {
         String identifier = object.getIdentifier().toString();
         InternalURI uri = object instanceof InternalURI ? (InternalURI) object : new InternalURIDefinition(identifier);
-        // cut "repo:" from internalURI, because getObjectPermissionsForObject always adds "repo:" to uri
-        if (uri.getPath().startsWith(RESOURCE_URI_PREFIX)) {
-            uri = new InternalURIDefinition(uri.getPath().substring(RESOURCE_URI_PREFIX_LENGTH));
+        // cut "repo:" or "attr:" from internalURI, because getObjectPermissionsForObject always adds "repo:" to uri
+        for (PermissionUriProtocol protocol : PermissionUriProtocol.values()) {
+            if (uri.getPath().startsWith(protocol.getProtocolPrefix())) {
+                uri = new InternalURIDefinition(PermissionUriProtocol.removePrefix(uri.getPath()),
+                        PermissionUriProtocol.getProtocol(uri.getPath()));
+            }
         }
+
         log.debug("trying to find ACL by Object for: "+ identifier);
         //temporary ACL to create ACE
         Acl result = new JasperServerAclImpl(uri,null);
@@ -92,7 +97,8 @@ public class RepositoryAclServiceImpl implements AclService {
         Acl parentAcl=null;
         if (parentPath!=null) {
             log.debug("Found parent, trying to get permissions for him");
-            InternalURI parentUri = new InternalURIDefinition(parentPath);
+            InternalURI parentUri = new InternalURIDefinition(parentPath,
+                    PermissionUriProtocol.fromString(uri.getProtocol()));
             parentAcl= getAclLookupStrategy().readAclById(parentUri);
         } else {
             log.debug("No parent found for URI "+uri.getURI());

@@ -13,4 +13,19 @@
     </any>
     <property name="permissionMask" not-null="true" type="integer" column="permissionMask"/>
   </class>
+
+<!-- create index JIObjectPermission_recipientobjectclass_index on JIObjectPermission (recipientobjectclass); -->
+<!-- replacing JIObjectPermission_recipientobjectclass_index with idx21_recipientobjclass_idx -->
+<database-object>
+	<create>create index idx21_recipientobjclass_idx on JIObjectPermission (recipientobjectclass)</create>
+	<drop>DROP INDEX idx21_recipientobjclass_idx ON JIObjectPermission</drop>
+</database-object>
+
+<!-- create index JIObjectPermission_recipientobjectid_index on JIObjectPermission (recipientobjectid); -->
+<!-- replacing JIObjectPermission_recipientobjectid_index with idx22_recipientobjid_idx -->
+<database-object>
+	<create>create index idx22_recipientobjid_idx on JIObjectPermission (recipientobjectid)</create>
+	<drop>DROP INDEX idx22_recipientobjid_idx ON JIObjectPermission</drop>
+</database-object>
+
 </hibernate-mapping>

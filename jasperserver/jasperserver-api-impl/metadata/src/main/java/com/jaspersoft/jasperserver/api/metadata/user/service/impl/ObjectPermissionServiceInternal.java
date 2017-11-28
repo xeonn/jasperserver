@@ -22,11 +22,11 @@
 package com.jaspersoft.jasperserver.api.metadata.user.service.impl;
 
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
-import com.jaspersoft.jasperserver.api.metadata.user.domain.impl.ObjectPermissionRecipientIdentity;
+import com.jaspersoft.jasperserver.api.metadata.user.domain.impl.ObjectRecipientIdentity;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ObjectPermissionServiceInternal.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: ObjectPermissionServiceInternal.java 54590 2015-04-22 17:55:42Z vzavadsk $
  */
 public interface ObjectPermissionServiceInternal {
 	
@@ -34,6 +34,6 @@ public interface ObjectPermissionServiceInternal {
 	
 	void updateObjectPermissionRepositoryPath(String oldPath, String newPath);
 	
-	void deleteObjectPermissionsForRecipient(ExecutionContext context, ObjectPermissionRecipientIdentity recipientIdentity);
+	void deleteObjectPermissionsForRecipient(ExecutionContext context, ObjectRecipientIdentity recipientIdentity);
 
 }

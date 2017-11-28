@@ -52,13 +52,6 @@
         <%@ include file="minimalDecorator.jsp" %>
     </c:when>
     <c:otherwise>
-        <c:choose>
-            <c:when test="${param['_flowId'] == 'sampleFlow' && param['page'] == 'newCss' }">
-                <%@ include file="newCssDecorator.jsp" %>
-            </c:when>
-            <c:otherwise>
-                <%@ include file="decorator.jsp" %>
-            </c:otherwise>
-        </c:choose>
+        <%@ include file="decorator.jsp" %>
     </c:otherwise>
 </c:choose>

@@ -21,8 +21,10 @@
 
 
 /**
- * @version: $Id: org.user.mng.main.js 7762 2014-09-19 10:16:02Z sergey.prilukin $
+ * @version: $Id: org.user.mng.main.js 8900 2015-05-06 20:57:14Z yplakosh $
  */
+
+/* global orgModule, webHelpModule, layoutModule, isProVersion, invokeClientAction, localContext */
 
 function invokeUserAction(actionName, options) {
     var action = orgModule.userActionFactory[actionName](options);
@@ -80,12 +82,12 @@ orgModule.userManager = {
         DISABLE_ALL: 'disableAll'
     },
 
-    initialize: function() {
+    initialize: function(opt) {
         webHelpModule.setCurrentContext("admin");
 
         layoutModule.resizeOnClient('folders', 'users', 'properties');
 
-        var options = localContext.userMngInitOptions;
+        var options = opt._.extend({}, opt, localContext.userMngInitOptions);
         orgModule.userManager.options = options;
 
         // Manager customization.
@@ -126,6 +128,13 @@ orgModule.userManager = {
 
         orgModule.observe("users:enabled", enabledOrDisabledHandler.bindAsEventListener(this));
         orgModule.observe("users:disabled", enabledOrDisabledHandler.bindAsEventListener(this));
+        orgModule.observe("entity:deleted", function(){
+            orgModule.properties.hide();
+        });
+
+        orgModule.observe("entities:deleted", function(){
+            orgModule.properties.hide();
+        });
 
         orgModule.observe("server:unavailable", function(event) {
             var tree = orgModule.manager.tree;

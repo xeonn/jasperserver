@@ -22,8 +22,12 @@
 
 /**
  *  @author: Angus Croll
- * @version: $Id: core.ajax.js 7762 2014-09-19 10:16:02Z sergey.prilukin $
+ * @version: $Id: core.ajax.js 8685 2015-04-10 14:06:42Z bkolesni $
  */
+
+/* global Hash, errorHandler, dialogs, confirm, serverIsNotResponding, JRS, alert, Builder, copyTable, console,
+ copyTableJquery, extraPostData, showMessageDialog, ajaxError, ajaxErrorHeader, isIPad, popOverlayObject
+*/
 
 /**
  *  Generic Ajax Utils
@@ -47,7 +51,7 @@ ajax.setCsrfHeaders = function(xmlhttp) {
     ajax.csrfRequestHeaders.each(function(pair) {
         xmlhttp.setRequestHeader(pair.key, pair.value);
     });
-}
+};
 
 /**
  *  @class Manages incoming Ajax requests and processes corresponding Ajax responses
@@ -69,7 +73,7 @@ function AjaxRequester(url, params, postData, synchronous) {
     this.xmlhttp.onreadystatechange = rsChangeFunction;
     this.postData = postData;
     this.async = !synchronous;
-    this.requestTime = +new Date; //(new Date).getTime()
+    this.requestTime = +new Date(); //(new Date).getTime()
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -237,8 +241,23 @@ function targettedResponseHandler(requester) {
         toLocation.innerHTML = "";
         updateUsingResponseSubset(xmlhttp, fromId, toLocation);
     } else {
-        //we want all the retrieved content - throw it all in
-        toLocation.innerHTML = xmlhttp.responseText;
+
+        var res = xmlhttp.responseText.trim();
+
+        //dirty solution for old dashboards because we haven't common format pattern for ajax response
+        if(res.indexOf("<div") === 0) {
+            var opentTag = res.substring(0, res.indexOf('>') + 1);
+            var body = res.substring(res.indexOf('>') + 1, res.lastIndexOf('</'));
+            var closeTag = res.substring(res.lastIndexOf('</'));
+
+            //we want all the retrieved content - throw it all in
+            var ajaxBuffer = jQuery(opentTag + closeTag);
+
+            ajaxBuffer.text(xssUtil.escape(body));
+            jQuery(toLocation).html(ajaxBuffer);
+        } else {
+            jQuery(toLocation).html(res);
+        }
     }
 
     invokeCallbacks(callback, toLocation);
@@ -333,10 +352,10 @@ var evalJSONResponseHandler = function(requester) {
 }
 
 function updateUsingResponseSubset(xmlhttp, fromLocation, toLoc) {
-	/** 
+	/**
 	 * This prevents the script tags inside responseText to be executed;
 	 * If we wanted them to be executed, we would have wrapped the responseText with a div like this:
-	 * 		var response = jQuery('<div/>').html(xmlhttp.responseText); 
+	 * 		var response = jQuery('<div/>').html(xmlhttp.responseText);
 	 */
 	var response = jQuery(xmlhttp.responseText);
 	var whatWeWant = response.filter('#' + fromLocation);
@@ -346,7 +365,67 @@ function updateUsingResponseSubset(xmlhttp, fromLocation, toLoc) {
 	} else {
 		jQuery(toLoc).append(whatWeWant.html());
 	}
+    function iterate() {
+        if (idx >= sz) {
+            return;
+        }
+        var scriptObj = jQuery(scriptTags.get(idx));
+        if (scriptObj.attr('src')) {
+            idx++;
+            loadScript(scriptObj.attr('data-custname'), scriptObj.attr('src'), iterate);
+        } else {
+            idx++;
+            executeScript(scriptObj.html(), iterate);
+        }
+    }
 
+    function loadScript(scriptName, scriptUrl, callbackFn) {
+        var gotCallback = callbackFn || false,
+            scriptElement = document.createElement('script');
+
+        // prevent the script tag from being created more than once
+        if (!window.jr_scripts) {
+            window.jr_scripts = {};
+        }
+        if (!window.jr_scripts[scriptName] && scriptName !== 'jr_jq_min') { // skips jQuery core script
+            scriptElement.setAttribute('type', 'text/javascript');
+
+            if (scriptElement.readyState){ // for IE
+                scriptElement.onreadystatechange = function(){
+                    if (scriptElement.readyState === 'loaded' || scriptElement.readyState === 'complete'){
+                        scriptElement.onreadystatechange = null;
+                        if (gotCallback) {
+                            callbackFn();
+                        }
+                    }
+                };
+            } else { // for Others - this is not supposed to work on Safari 2
+                scriptElement.onload = function(){
+                    if (gotCallback) {
+                        callbackFn();
+                    }
+                };
+            }
+
+            scriptElement.src = scriptUrl;
+            document.getElementsByTagName('head')[0].appendChild(scriptElement);
+            window.jr_scripts[scriptName] = scriptUrl;
+        } else if (gotCallback) {
+            callbackFn();
+        }
+    }
+
+    function executeScript(scriptString, callbackFn) {
+        var gotCallback = callbackFn || false;
+        if (scriptString) {
+            var lines = scriptString.match(/^.*((\r\n|\n|\r)|$)/gm);
+
+            window.eval(lines.join('\n')); // jshint ignore: line
+            if (gotCallback) {
+                callbackFn();
+            }
+        }
+    }
     /*
      * fusioncharts & jasperreports interactive: load JavaScript scripts synchronously
      */
@@ -355,75 +434,13 @@ function updateUsingResponseSubset(xmlhttp, fromLocation, toLoc) {
     		sz  = scriptTags.size(),
     		idx = 0;
 
-    	function iterate() {
-    		if (idx >= sz) {
-    			return;
-    		}
-    		var scriptObj = jQuery(scriptTags.get(idx));
-    		if (scriptObj.attr('src')) {
-    			idx++;
-    			loadScript(scriptObj.attr('data-custname'), scriptObj.attr('src'), iterate);
-    		} else {
-    			idx++;
-    			executeScript(scriptObj.html(), iterate);
-    		}
-    	}
-
-    	function loadScript(scriptName, scriptUrl, callbackFn) {
-    		var gotCallback = callbackFn || false,
-    			scriptElement = document.createElement('script');
-
-    		// prevent the script tag from being created more than once
-    		if (!window.jr_scripts) {
-    			window.jr_scripts = {};
-    		}
-    		if (!window.jr_scripts[scriptName] && scriptName !== 'jr_jq_min') { // skips jQuery core script
-				scriptElement.setAttribute('type', 'text/javascript');
-
-				if (scriptElement.readyState){ // for IE
-					scriptElement.onreadystatechange = function(){
-						if (scriptElement.readyState === 'loaded' || scriptElement.readyState === 'complete'){
-							scriptElement.onreadystatechange = null;
-							if (gotCallback) {
-								callbackFn();
-							}
-						}
-					};
-				} else { // for Others - this is not supposed to work on Safari 2
-					scriptElement.onload = function(){
-						if (gotCallback) {
-							callbackFn();
-						}
-					};
-				}
-
-				scriptElement.src = scriptUrl;
-				document.getElementsByTagName('head')[0].appendChild(scriptElement);
-				window.jr_scripts[scriptName] = scriptUrl;
-    		} else if (gotCallback) {
-    			callbackFn();
-    		}
-    	}
-
-    	function executeScript(scriptString, callbackFn) {
-    		var gotCallback = callbackFn || false;
-    		if (scriptString) {
-                var lines = scriptString.match(/^.*((\r\n|\n|\r)|$)/gm);
-
-    			window.eval(lines.join('\n'));
-    			if (gotCallback) {
-    				callbackFn();
-    			}
-    		}
-    	}
-
     	iterate();
     }
 }
 
 function invokeCallbacks(callback, customArg) {
     if (callback) {
-        typeof(callback) === 'string' ? eval(callback) : callback(customArg);
+        typeof(callback) === 'string' ? eval(callback) : callback(customArg); // jshint ignore: line
     }
 }
 
@@ -466,7 +483,7 @@ function ajaxTargettedUpdate(url,options) {
     options.responseHandler = function (requester, params) {
         if (options.preFillAction) {
             if (typeof(options.preFillAction) == 'string') {
-                eval(options.preFillAction);
+                eval(options.preFillAction); // jshint ignore: line
             } else {
                 options.preFillAction(responseHandler(requester, params));
             }
@@ -616,7 +633,7 @@ function getPostData(form, extraPostData)
  * @private
  */
 function appendPostData(postData, extraPostData){
-    for (name in extraPostData) {
+    for (var name in extraPostData) {
         postData = appendFormValue(postData, name, extraPostData[name]);
     }
     return postData;
@@ -643,7 +660,7 @@ function appendFormInput(data, element){
                 break;
             case "select-one":
             case "select-multiple":
-                value = new Array();
+                value = [];
                 for (var i = 0; i < element.options.length; ++i) {
                     var option = element.options[i];
                     if (option.selected) {

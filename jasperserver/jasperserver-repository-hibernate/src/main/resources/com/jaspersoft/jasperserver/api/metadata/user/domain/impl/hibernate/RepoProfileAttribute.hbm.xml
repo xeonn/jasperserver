@@ -9,7 +9,9 @@
             <generator class="native"/>
         </id>
         <property column="attrName" name="attrName" type="string" length="255" not-null="true"/>
-        <property column="attrValue" name="attrValue" type="string" length="255" not-null="true"/>
+        <property column="attrValue" name="attrValue" type="string" length="2000" not-null="false"/>
+        <property column="description" name="description" type="string" length="255" not-null="false"/>
+        <property column="owner" name="owner" type="string" length="255" not-null="false"/>
         <any name="principal" id-type="long">
             <column name="principalobjectclass" length="255" not-null="true"/>
             <column name="principalobjectid" not-null="true"/>

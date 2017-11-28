@@ -36,8 +36,18 @@ public class ExportExecutionOptions {
     private String attachmentsPrefix;
     private ReportOutputPages pages;
     private String baseUrl;
+    private String anchor;
     private boolean allowInlineScripts = true;
     private String markupType;
+
+    public String getAnchor() {
+        return anchor;
+    }
+
+    public ExportExecutionOptions setAnchor(String anchor) {
+        this.anchor = anchor;
+        return this;
+    }
 
     public String getMarkupType() {
         return markupType;

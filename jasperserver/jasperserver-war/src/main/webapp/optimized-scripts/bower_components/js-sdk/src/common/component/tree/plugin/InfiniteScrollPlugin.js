@@ -1,1 +1,1 @@
-define(["require","./TreePlugin"],function(e){var n=e("./TreePlugin");return n.extend({itemsRendered:function(){this.$("> .subcontainer > .viewPortChunk").css({height:"auto"})}})});
+define(["require","./TreePlugin"],function(e){"use strict";var n=e("./TreePlugin");return n.extend({itemsRendered:function(){this.$("> .subcontainer > .j-view-port-chunk").css({height:"auto"})}})});

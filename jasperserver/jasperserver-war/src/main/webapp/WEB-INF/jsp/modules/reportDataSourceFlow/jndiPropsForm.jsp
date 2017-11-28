@@ -129,7 +129,7 @@
                 <spring:bind path="dataResource.reportDataSource.description">
 					<tr>
 						<td align="right" valign="top"><spring:message code="label.description"/>&nbsp;</td>
-						<td align="left"><textarea name="${status.expression}" rows="5" cols="28" class="fnormal"><c:out value='${status.value}'/></textarea></td>
+						<td align="left"><textarea name="${status.expression}" rows="5" cols="28" class="fnormal">${status.value}</textarea></td>
 					</tr>
 					<c:if test="${status.error}">
 					<tr>

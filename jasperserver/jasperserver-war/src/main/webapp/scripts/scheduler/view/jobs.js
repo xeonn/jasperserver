@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: jobs.js 7748 2014-07-18 09:13:06Z kklein $
+ * @version: $Id: jobs.js 8179 2015-01-27 12:34:21Z psavushchik $
  */
 
 define('scheduler/view/jobs', function (require) {
@@ -29,6 +29,7 @@ define('scheduler/view/jobs', function (require) {
     require("utils.common");
 
     var $ = require('jquery'),
+        _ = require("underscore"),
         Backbone = require('backbone'),
         jobView = require('scheduler/view/job'),
         jobModel = require('scheduler/model/job'),

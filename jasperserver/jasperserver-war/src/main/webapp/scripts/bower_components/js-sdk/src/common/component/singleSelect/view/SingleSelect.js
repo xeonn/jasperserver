@@ -22,7 +22,7 @@
 
 /**
  * @author Sergey Prilukin
- * @version: $Id: SingleSelect.js 411 2014-11-14 14:20:31Z psavushchik $
+ * @version: $Id: SingleSelect.js 1160 2015-04-28 12:46:42Z spriluki $
  */
 
 /**
@@ -45,7 +45,9 @@ define(function (require) {
         singleSelectListTemplate = require("text!common/component/singleSelect/templates/listTemplate.htm"),
         singleSelectItemsTemplate = require("text!common/component/singleSelect/templates/itemsTemplate.htm"),
         dropDownTemplate = require("text!common/component/singleSelect/templates/dropDownTemplate.htm"),
-        i18n = require("bundle!ScalableInputControlsBundle");
+        i18n = require("bundle!ScalableInputControlsBundle"),
+        browserDetection = require("common/util/browserDetection"),
+        xssUtil = require("common/util/xssUtil");
 
     var $body = $("body");
 
@@ -160,7 +162,7 @@ define(function (require) {
 
             var singleSelect = $(this.template({
                 label: this.label,
-                isIPad: navigator.platform === "iPad",
+                isIPad: browserDetection.isIPad(),
                 value: this.model.get("value").label,
                 expanded: this.model.get("expanded"),
                 i18n: i18n
@@ -552,7 +554,7 @@ define(function (require) {
 
                 this.$el.find(".sSelect-input")
                     .attr("title", label)
-                    .find("> span").html(label);
+                    .find("> span").html(xssUtil.escape(label));
             }
         },
 

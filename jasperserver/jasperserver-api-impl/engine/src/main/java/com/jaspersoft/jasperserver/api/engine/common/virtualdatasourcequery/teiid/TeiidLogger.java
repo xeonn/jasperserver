@@ -51,14 +51,14 @@ public class TeiidLogger implements Logger {
         public void log(int i, java.lang.String s, java.lang.Object... objects) {
             log.debug(s);
             if (objects != null) {
-                for (Object obj : objects) log.debug(obj.getClass().toString() +  ":" + obj.toString());
+                for (Object obj : objects) if (obj != null) log.debug(obj.getClass().toString() +  ":" + obj.toString());
             }
         }
 
         public void log(int i, java.lang.String s, java.lang.Throwable throwable, java.lang.Object... objects) {
             log.debug(s);
             if (objects != null) {
-                for (Object obj : objects) log.debug(obj.getClass().toString() +  ":" + obj.toString(), throwable);
+                for (Object obj : objects) if (obj != null) log.debug(obj.getClass().toString() +  ":" + obj.toString(), throwable);
             }
         }
 

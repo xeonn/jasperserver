@@ -22,8 +22,10 @@
 
 /**
  * @author: afomin, inesterenko
- * @version: $Id$
+ * @version: $Id: controls.core.js 8179 2015-01-27 12:34:21Z psavushchik $
  */
+
+/* global JRS, ajax, console, _, Mustache, dialogs */
 
 JRS.Controls = (function(jQuery, _, Mustache, dialogs){
 
@@ -77,7 +79,7 @@ JRS.Controls = (function(jQuery, _, Mustache, dialogs){
                 // `parent`'s constructor function.
                 var Surrogate = function(){ this.constructor = child; };
                 Surrogate.prototype = parent.prototype;
-                child.prototype = new Surrogate;
+                child.prototype = new Surrogate();
 
                 // Add prototype properties (instance properties) to the subclass,
                 // if supplied.
@@ -155,7 +157,7 @@ JRS.Controls = (function(jQuery, _, Mustache, dialogs){
             //check presents of element in DOM
             isElementInDom:function (elem) {
                 var nextSibling = elem.nextSibling;
-                var parent = elem.parentNode && !(elem.parentNode.nodeType  === 11);
+                var parent = elem.parentNode && elem.parentNode.nodeType  !== 11;
                 return nextSibling || parent;
 
             },
@@ -163,12 +165,12 @@ JRS.Controls = (function(jQuery, _, Mustache, dialogs){
             // Optimized inserting of big content to DOM
             setInnerHtml:function (el, template, data) {
 
-                var nextSibling, parent;
+                var nextSibling, parent, display;
 
                 if (this.isElementInDom(el)) {
                     nextSibling = el.nextSibling;
                     parent = el.parentNode;
-                    var display = el.style.display;
+                    display = el.style.display;
                     //turn off css reflows on it element during update
                     el.style.display = 'none';
                     //remove from the dom, it also reduce reflows on this element

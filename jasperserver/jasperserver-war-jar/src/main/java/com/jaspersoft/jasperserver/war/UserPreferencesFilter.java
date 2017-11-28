@@ -20,6 +20,7 @@
  */
 package com.jaspersoft.jasperserver.war;
 
+import com.jaspersoft.jasperserver.api.JSException;
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
 import com.jaspersoft.jasperserver.api.common.util.LocaleHelper;
 import com.jaspersoft.jasperserver.api.common.util.TimeZoneContextHolder;
@@ -52,7 +53,7 @@ import java.util.TimeZone;
 
 /**
  * @author Ionut Nedelcu (ionutned@users.sourceforge.net)
- * @version $Id: UserPreferencesFilter.java 51947 2014-12-11 14:38:38Z ogavavka $
+ * @version $Id: UserPreferencesFilter.java 55164 2015-05-06 20:54:37Z mchan $
  */
 public class UserPreferencesFilter implements Filter
 {
@@ -179,7 +180,13 @@ public class UserPreferencesFilter implements Filter
                  session.removeAttribute("js_uname");
                  session.removeAttribute("js_upassword");
                  session.removeAttribute("passwordExpiredDays");
-				 userService.putUser(null, user);
+				  try {
+					  userService.putUser(null, user);
+				  } catch (JSException e){
+					  RequestDispatcher rd = request.getRequestDispatcher("/exituser.html?showPasswordChange=true&weakPassword=true");
+					  rd.forward(request, response);
+					  return;
+				  }
 				 chain.doFilter(request, response);
 				 return;
 		      }

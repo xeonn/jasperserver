@@ -235,7 +235,8 @@
 
     <sequential>
       <echo>Checking @{type} host and port:</echo>
-      <validateHost host="@{host}" failOnError="@{failOnError}" errorProperty="@{errorProperty}" />
+        <!--It`s not correct to fail when host don`t respond on ICMP packages -->
+        <!--<validateHost host="@{host}" failOnError="@{failOnError}" errorProperty="@{errorProperty}" />-->
       <if>
         <not>
           <isset property="@{errorProperty}" />
@@ -563,6 +564,7 @@
           <equals arg1="${appServerType}" arg2="tomcat5" />
           <equals arg1="${appServerType}" arg2="tomcat6" />
           <equals arg1="${appServerType}" arg2="tomcat7" />
+          <equals arg1="${appServerType}" arg2="tomcat8" />
           <equals arg1="${appServerType}" arg2="jboss" />
           <equals arg1="${appServerType}" arg2="jboss7" />
           <equals arg1="${appServerType}" arg2="jboss-as-7" />
@@ -586,6 +588,7 @@
           <equals arg1="${appServerType}" arg2="tomcat5" />
           <equals arg1="${appServerType}" arg2="tomcat6" />
           <equals arg1="${appServerType}" arg2="tomcat7" />
+          <equals arg1="${appServerType}" arg2="tomcat8" />
           <equals arg1="${appServerType}" arg2="jboss" />
           <equals arg1="${appServerType}" arg2="jboss7" />
           <equals arg1="${appServerType}" arg2="jboss-as-7" />

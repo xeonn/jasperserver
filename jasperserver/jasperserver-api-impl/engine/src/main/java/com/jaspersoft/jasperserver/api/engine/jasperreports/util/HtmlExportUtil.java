@@ -21,37 +21,26 @@
 
 package com.jaspersoft.jasperserver.api.engine.jasperreports.util;
 
-import net.sf.jasperreports.engine.DefaultJasperReportsContext;
-import net.sf.jasperreports.engine.JRPropertiesUtil;
 import net.sf.jasperreports.engine.JasperReportsContext;
 import net.sf.jasperreports.engine.export.AbstractHtmlExporter;
-import net.sf.jasperreports.engine.export.HtmlExporter;
-import net.sf.jasperreports.engine.export.JRHtmlExporter;
-import net.sf.jasperreports.engine.export.JRXhtmlExporter;
+import net.sf.jasperreports.export.HtmlExporterConfiguration;
+import net.sf.jasperreports.export.HtmlReportConfiguration;
+
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
  * @version $Id: JRHtmlExportUtils.java 19932 2010-12-11 15:24:29Z tmatyashovsky $
+ * @deprecated Replaced by {@link ExportUtil}.
  */
 public class HtmlExportUtil 
 {
 
-	public static AbstractHtmlExporter getHtmlExporter(JasperReportsContext jasperReportsContext)
+	/**
+	 * @deprecated Replaced by {@link ExportUtil#getHtmlExporter(JasperReportsContext)}.
+	 */
+	public static AbstractHtmlExporter<HtmlReportConfiguration, HtmlExporterConfiguration> getHtmlExporter(JasperReportsContext jasperReportsContext)
 	{
-		if (jasperReportsContext == null)
-		{
-			jasperReportsContext = DefaultJasperReportsContext.getInstance();
-		}
-		String htmlType = JRPropertiesUtil.getInstance(jasperReportsContext).getProperty("com.jaspersoft.jasperreports.export.html.type");
-		if ("xhtml".equalsIgnoreCase(htmlType))
-		{
-			return new JRXhtmlExporter(jasperReportsContext);
-		}
-		if ("html2".equalsIgnoreCase(htmlType))
-		{
-			return new HtmlExporter(jasperReportsContext);
-		}
-		return new JRHtmlExporter(jasperReportsContext);
+		return ExportUtil.getInstance(jasperReportsContext).createHtmlExporter();
 	}
 		
 }

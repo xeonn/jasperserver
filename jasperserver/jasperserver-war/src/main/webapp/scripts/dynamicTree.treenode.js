@@ -21,8 +21,10 @@
 
 
 /**
- * @version: $Id: dynamicTree.treenode.js 7762 2014-09-19 10:16:02Z sergey.prilukin $
+ * @version: $Id: dynamicTree.treenode.js 8904 2015-05-07 13:50:05Z agodovan $
  */
+
+/* global dynamicTree, isArray, layoutModule, cancelEventBubbling, isIPad */
 
 /**
  * The TreeNode Object
@@ -380,7 +382,7 @@ dynamicTree.TreeNode.addMethod('_createNode', function() {
     templH.treeNode = this;
 
     var wrapper = templH.childElements()[0];
-    wrapper.insert(this.name);
+    wrapper.insert(xssUtil.escape(this.name, {softHTMLEscape: true, whiteList: ['a']}));
     if (this.tooltip != null && this.tooltip.length > 0) {
         wrapper.title = this.tooltip;
     }
@@ -532,7 +534,9 @@ dynamicTree.TreeNode.addMethod('deselect', function(event) {
  *
  * @return {Boolean}
  */
-dynamicTree.TreeNode.addMethod('select', function(event, focus) {
+dynamicTree.TreeNode.addMethod('select', function(event, focus, options) {
+    options = options || {};
+
     !focus && this.focus(); // Commented out to fix bug http://bugzilla.jaspersoft.com/show_bug.cgi?id=19047
     if (!this.isSelected()) {
         var tree = dynamicTree.trees[this.getTreeId()];
@@ -540,7 +544,7 @@ dynamicTree.TreeNode.addMethod('select', function(event, focus) {
         tree.addNodeToSelected(this);
         this.refreshStyle();
 
-        tree.fireSelectEvent(this, event);
+        !options.silent && tree.fireSelectEvent(this, event);
         return true;
     } else {
         return false;
@@ -588,7 +592,7 @@ dynamicTree.TreeNode.addMethod('edit', function(evt) {
         titleHolder.cleanWhitespace();
         titleHolder.insert(input);
 
-        input.value = this.name;
+        input.value = xssUtil.unescape(this.name);
         input.focus();
         input.select(evt);
 

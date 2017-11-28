@@ -18,7 +18,9 @@
   ~ You should have received a copy of the GNU Affero General Public  License
   ~ along with this program. If not, see <http://www.gnu.org/licenses/>.
   --%>
+<%@ taglib prefix="js" uri="/WEB-INF/jasperserver.tld" %>
 
+<js:out javaScriptEscape="true">
 <script type="text/javascript">
     if (typeof Administer === "undefined") {
         Administer = {};
@@ -51,3 +53,4 @@
     __jrsConfigs__.Administer = Administer;
 
 </script>
+</js:out>

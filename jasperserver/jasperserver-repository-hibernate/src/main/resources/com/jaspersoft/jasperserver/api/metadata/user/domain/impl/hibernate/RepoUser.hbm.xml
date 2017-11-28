@@ -26,4 +26,11 @@
     <property name="enabled" type="boolean" column="enabled"/>
     <property name="previousPasswordChangeTime" type="timestamp" column="previousPasswordChangeTime"/>
   </class>
+
+<!-- create index JIUser_tenantId_index on JIUser (tenantId); -->
+<database-object>
+	<create>create index JIUser_tenantId_index on JIUser (tenantId)</create>
+	<drop>DROP INDEX JIUser_tenantId_index ON JIUser</drop>
+</database-object>
+
 </hibernate-mapping>

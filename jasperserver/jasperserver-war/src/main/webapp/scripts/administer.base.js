@@ -21,8 +21,10 @@
 
 
 /**
- * @version: $Id: administer.base.js 7762 2014-09-19 10:16:02Z sergey.prilukin $
+ * @version: $Id: administer.base.js 8900 2015-05-06 20:57:14Z yplakosh $
  */
+
+/* jshint undef: false */
 
 if (typeof Administer === "undefined"){
     Administer = {};
@@ -47,8 +49,11 @@ Administer = _.extend({
         'p#navDesignerCache': function() {return Administer.urlContext + "/flow.html?_flowId=designerCacheFlow"},
         'p#navAwsSettings': function() {return Administer.urlContext + "/flow.html?_flowId=awsSettingsFlow"},
         'p#navLogSettings': function() {return Administer.urlContext + "/log_settings.html"},
+        'p#logCollectors': function() {return Administer.urlContext + "/logCollectors.html"},
         'p#navImport': function() {return Administer.urlContext + "/adminImport.html"},
-        'p#navExport': function() {return Administer.urlContext + "/adminExport.html"}
+        'p#navExport': function() {return Administer.urlContext + "/adminExport.html"},
+        'p#navCustomAttributes': function() {return Administer.urlContext + "/customAttributes.html"},
+        'p#navResetSettings': function() {return Administer.urlContext + "/resetSettings.html"}
     },
 
     _sendRequest: function(url,data,callback) {

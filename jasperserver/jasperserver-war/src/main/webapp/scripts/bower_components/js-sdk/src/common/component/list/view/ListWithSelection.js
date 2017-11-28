@@ -22,7 +22,7 @@
 
 /**
  * @author: Sergey Prilukin
- * @version: $Id: ListWithSelection.js 399 2014-11-12 12:02:18Z ktsaregradskyi $
+ * @version: $Id: ListWithSelection.js 1178 2015-05-06 20:40:12Z yplakosh $
  */
 
 /**
@@ -41,7 +41,10 @@
  *        bufferSize:       @see ScalableList,
  *        loadFactor:       @see ScalableList,
  *        selection: {
- *            allowed:      <whether component allows to select items>
+ *            allowed:  {
+ *              left:  <whether component allows to select items via left button>
+ *              right: <whether component allows to select items via right button>
+ *            }
  *            multiple:     <whether component allows multiple selection>
  *        }
  *        value:            <initial selection it could be a string with value,
@@ -85,16 +88,26 @@ define(function (require) {
      in addition to what ScalableList expect to see in options hash this extension also looks for following options:
 
      selection       - object with following structure
-     {allowed: <true|false>,  //whether selection allowed. if not then no selections event
+     {allowed: {
+        left: <true|false>, //whether selection through left button allowed. if not then no selections event
                               //will be triggered and no selection will be rendered.
                               //true by default
-      multiple: <true|false>  //whether multiple selection is allowed.
+        right: <true|false>, //whether selection through right button allowed. if not then no selections event
+                              //will be triggered and no selection will be rendered.
+                              //false by default
+     },
+     multiple: <true|false>  //whether multiple selection is allowed.
                               //true by default
      }
      value           - initial selected value(s)
 
      also read description for ScalableList.
      */
+    var BUTTONS = {
+        LEFT: "left",
+        RIGHT: "right"
+    };
+
     var ListWithSelection = ScalableList.extend({
 
         //Default list model,
@@ -110,6 +123,7 @@ define(function (require) {
 
             this.eventListenerPattern = options.eventListenerPattern || "li";
             this.markerClass = options.markerClass ? options.markerClass : "";
+            this.selectedClass = options.selectedClass ? options.selectedClass : "selected";
 
             //init Selection
             this._initSelection(options.selection);
@@ -124,7 +138,9 @@ define(function (require) {
                 .on("mousedown", this.eventListenerPattern, _.bind(this.onMousedown, this))
                 .on("mousemove", this.eventListenerPattern, _.bind(this.onMousemove, this))
                 .on("dblclick", this.eventListenerPattern, _.bind(this.onMousedblclick, this))
-                .on("contextmenu", this.eventListenerPattern, _.bind(this.onContextMenu, this, this.$el));
+                .on("contextmenu", this.eventListenerPattern, _.bind(this.onItemEvent, this, this.$el))
+                .on("mouseout", this.eventListenerPattern, _.bind(this.onItemEvent, this, this.$el))
+                .on("mouseover", this.eventListenerPattern, _.bind(this.onItemEvent, this, this.$el));
 
             return res;
         },
@@ -136,7 +152,9 @@ define(function (require) {
                 .off("mousedown")
                 .off("mousemove")
                 .off("dblclick")
-                .off("contextmenu");
+                .off("contextmenu")
+                .off("mouseout")
+                .off("mouseover");
 
             return res;
         },
@@ -145,9 +163,17 @@ define(function (require) {
          Init selection
          */
         _initSelection: function(selection) {
+            selection = _.extend({allowed: {}}, selection);
+
+            var selectionAllowed = selection.allowed,
+                leftButtonSelection = !_.isObject(selectionAllowed) ? selectionAllowed : selectionAllowed.left;
+
             this.selection = {
-                allowed: selection && typeof selection.allowed !== "undefined" ?  selection.allowed : true,
-                multiple: selection && typeof selection.multiple !== "undefined" ?  selection.multiple : true
+                allowed: {
+                    left: typeof leftButtonSelection !== "undefined" ?  leftButtonSelection : true,
+                    right: typeof selectionAllowed.right !== "undefined" ?  selectionAllowed.right : false
+                },
+                multiple: typeof selection.multiple !== "undefined" ?  selection.multiple : true
             };
         },
 
@@ -170,7 +196,7 @@ define(function (require) {
         //Add selected attributes to model
         postProcessChunkModelItem: function(item, i) {
             ScalableList.prototype.postProcessChunkModelItem.call(this, item, i);
-            item.selected = this.model.selectionContains(item.value, item.index);
+            item.selected = this.model.selectionContains && this.model.selectionContains(item.value, item.index);
         },
 
         /*-------------------------
@@ -179,7 +205,7 @@ define(function (require) {
 
         onMousedblclick: function(event) {
             if(!this.selection.multiple){
-                if (this.selection.allowed && !this.getDisabled()) {
+                if ((this.selection.allowed.left || this.selection.allowed.right) && !this.getDisabled()) {
                     var itemData = this._getDomItemData(event.currentTarget);
                     this._singleSelect(event, itemData.value, itemData.index);
 
@@ -192,23 +218,30 @@ define(function (require) {
             }
         },
 
+        getItemByEvent: function(e){
+            return this._getDomItemData(e.currentTarget).item;
+        },
+
         // Handle on mousedown event on list items
         // decide whether to do single or multiselection
 
-        onContextMenu: function(element, e){
-            var itemData = this._getDomItemData(e.currentTarget);
+        onItemEvent: function(element, e){
+            var eventType = e.type,
+                item = this.getItemByEvent(e);
 
-            var item = this.model.get("items")[itemData.index];
-
-            this.trigger("list:item:contextmenu", item, e);
+            this.trigger("list:item:" + eventType, item, e);
         },
 
         onMousedown: function(event) {
-            if (this.selection.allowed && !this.getDisabled() && (event.which === 1)) {
+            if (!this.getDisabled() &&
+                (this.selection.allowed.left && (event.which === 1) ||
+                    this.selection.allowed.right && (event.which === 3))) {
+
+                var buttonType = (event.which === 1) ? BUTTONS.LEFT : BUTTONS.RIGHT;
 
                 if (this.selection.multiple) {
                     //rising a flag for selection via mouse move or scrolling
-                    this.leftMouseButtonPressed = true;
+                    this[buttonType + "MouseButtonPressed"] = true;
                     this.mouseDownPos = this._getMousePos(event);
                 }
 
@@ -222,7 +255,7 @@ define(function (require) {
 
         // Handle on mousemove event on list items
         onMousemove: function(event) {
-            if (this.selection.allowed && this.selection.multiple && !this.getDisabled() && this.leftMouseButtonPressed) {
+            if (this._allowMouseMoveSelection()) {
                 //Stopping manual scroll handler
                 this._stopAutoScroll();
 
@@ -243,8 +276,12 @@ define(function (require) {
         //Global mouse up handler used handle case when mouse up was done outside the component
         onGlobalMouseup: function(event) {
             //Releasing a flag
-            if (this.leftMouseButtonPressed) {
-                this.leftMouseButtonPressed = false;
+            var self = this;
+
+            if (this.leftMouseButtonPressed || this.rightMouseButtonPressed) {
+                _.each(BUTTONS, function(buttonType){
+                    self[buttonType + "MouseButtonPressed"] = false;
+                });
                 delete this.mouseDownPos;
 
                 this._stopAutoScroll();
@@ -258,7 +295,7 @@ define(function (require) {
 
         //Global mousedown handler used to allow scroll of the component then mouse is outside the component
         onGlobalMousemove: function(event) {
-            if (this.selection.allowed && this.selection.multiple && !this.getDisabled() && this.leftMouseButtonPressed) {
+            if (this._allowMouseMoveSelection()) {
 
                 //Used to prevent autoscroll if mouseup was down outside of the browser.
                 //Unfortunately in IE8 event.which can sometimes return 0
@@ -277,13 +314,13 @@ define(function (require) {
         },
 
         clearSelection: function() {
-            this.$el.find("li.selected" + this.markerClass ).removeClass("selected");
+            this.$el.find("li." + this.selectedClass + this.markerClass ).removeClass(this.selectedClass);
 
             this.selectionChanged = true;
         },
 
         selectValue: function(selection) {
-            this.$el.find("li" + this.markerClass + "[data-index='" + selection.index + "']:not(.selected)").addClass("selected");
+            this.$el.find("li" + this.markerClass + "[data-index='" + selection.index + "']:not(." + this.selectedClass + ")").addClass(this.selectedClass);
 
             if (this.selection.multiple) {
                 this.selectionChanged = true;
@@ -293,20 +330,20 @@ define(function (require) {
         },
 
         selectRange: function(options) {
-            var that = this;
+            var self = this;
 
             var visibleRangeStart = Math.max(this.model.get("bufferStartIndex"), options.start);
             var visibleRangeEnd = Math.min(this.model.get("bufferEndIndex"), options.end);
 
-            this.$el.find("li" + this.markerClass + ":not(.selected)").each(function() {
+            this.$el.find("li" + this.markerClass + ":not(." + this.selectedClass + ")").each(function() {
                 var $item = $(this);
                 var index = parseInt($item.attr("data-index"), 10);
 
                 if (index >= visibleRangeStart && index <= visibleRangeEnd) {
-                    var item = that.model.get("items")[index - that.model.get("bufferStartIndex")];
+                    var item = self.model.get("items")[index - self.model.get("bufferStartIndex")];
 
-                    if (that.model.selectionContains(item.value, index)) {
-                        $item.addClass("selected");
+                    if (self.model.selectionContains(item.value, index)) {
+                        $item.addClass(self.selectedClass);
                     }
                 }
             });
@@ -315,7 +352,8 @@ define(function (require) {
         },
 
         deselectValue: function(selection) {
-            this.$el.find("li[data-index='" + selection.index + "'].selected" + this.markerClass).removeClass("selected");
+            this.$el.find("li[data-index='" + selection.index + "']." + this.selectedClass + this.markerClass)
+                .removeClass(this.selectedClass);
 
             if (this.selection.multiple) {
                 this.selectionChanged = true;
@@ -416,7 +454,9 @@ define(function (require) {
             index = parseInt(index, 10);
 
             var item = this.model.get("items")[index - this.model.get("bufferStartIndex")];
+
             return {
+                item: item,
                 value: item.value,
                 index: index
             }
@@ -431,6 +471,12 @@ define(function (require) {
                 x: event.clientX,
                 y: event.clientY
             };
+        },
+
+        _allowMouseMoveSelection: function() {
+            return (this.selection.allowed.left && this.leftMouseButtonPressed ||
+                this.selection.allowed.right && this.rightMouseButtonPressed) &&
+                this.selection.multiple && !this.getDisabled();
         },
 
         /*-------------------------

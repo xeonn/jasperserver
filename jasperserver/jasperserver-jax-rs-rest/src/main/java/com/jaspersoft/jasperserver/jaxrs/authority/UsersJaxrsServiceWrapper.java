@@ -21,17 +21,20 @@
 package com.jaspersoft.jasperserver.jaxrs.authority;
 
 import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
-import com.jaspersoft.jasperserver.api.metadata.user.domain.client.ProfileAttributeImpl;
 import com.jaspersoft.jasperserver.dto.authority.ClientUser;
-import com.jaspersoft.jasperserver.dto.authority.ClientUserAttribute;
-import com.jaspersoft.jasperserver.dto.authority.UserAttributesListWrapper;
+import com.jaspersoft.jasperserver.dto.authority.hypermedia.HypermediaAttribute;
+import com.jaspersoft.jasperserver.dto.authority.hypermedia.HypermediaAttributesListWrapper;
 import com.jaspersoft.jasperserver.jaxrs.common.RestConstants;
 import com.jaspersoft.jasperserver.remote.exception.IllegalParameterValueException;
 import com.jaspersoft.jasperserver.remote.exception.RemoteException;
+import com.jaspersoft.jasperserver.remote.helpers.RecipientIdentity;
+import com.jaspersoft.jasperserver.remote.resources.converters.HypermediaOptions;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import javax.ws.rs.*;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.List;
@@ -41,12 +44,14 @@ import java.util.Set;
  * @author: Zakhar.Tomchenco
  */
 @Component
+@Transactional(rollbackFor = Exception.class)
 @Path("/users")
 public class UsersJaxrsServiceWrapper {
     @Resource(name = "usersJaxrsService")
     private UsersJaxrsService service;
-    @Resource(name = "userAttributesJaxrsService")
-    private UserAttributesJaxrsService attributeService;
+
+    @Resource(name = "attributesJaxrsService")
+    private AttributesJaxrsService attributesJaxrsService;
 
     @GET
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
@@ -96,60 +101,74 @@ public class UsersJaxrsServiceWrapper {
 
     @GET
     @Path("/{name}/attributes")
-    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    public Response getAttributesOfUser(@PathParam("name") String name,
+    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON, "application/hal+json", "application/hal+xml"})
+    public Response getAttributesOfUser(@PathParam("name") String userName,
                                         @QueryParam("name") Set<String> attrNames,
-                                        @QueryParam(RestConstants.QUERY_PARAM_OFFSET) Integer startIndex,
-                                        @QueryParam(RestConstants.QUERY_PARAM_LIMIT) Integer limit) throws RemoteException {
-
-        User recipient = attributeService.generateRecipient(name, null);
-        return attributeService.getAttributesOfRecipient(startIndex == null ? 0 : startIndex, limit == null ? 0 : limit, recipient, attrNames);
+                                        @QueryParam("_embedded") String embedded,
+                                        @HeaderParam(HttpHeaders.ACCEPT) String accept) throws RemoteException {
+        HypermediaOptions hypermediaOptions = attributesJaxrsService.getHypermediaOptions(accept, embedded);
+        return attributesJaxrsService.getAttributesOfRecipient(getHolder(userName), attrNames, hypermediaOptions);
     }
 
     @PUT
     @Path("/{name}/attributes")
-    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    public Response putAttributes(UserAttributesListWrapper newCollection,
-                                  @PathParam("name") String name) throws RemoteException {
-        User recipient = attributeService.generateRecipient(name, null);
-        return attributeService.putAttributes(newCollection.getProfileAttributes(), recipient);
+    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON, "application/hal+json", "application/hal+xml"})
+    @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON, "application/hal+json", "application/hal+xml"})
+    public Response putAttributes(HypermediaAttributesListWrapper newCollection,
+                                  @QueryParam("name") Set<String> attrNames,
+                                  @HeaderParam(HttpHeaders.CONTENT_TYPE) String mediaType,
+                                  @HeaderParam(HttpHeaders.ACCEPT) String accept,
+                                  @QueryParam("_embedded") String embedded,
+                                  @PathParam("name") String userName) throws RemoteException {
+        HypermediaOptions hypermediaOptions = attributesJaxrsService.getHypermediaOptions(accept, embedded);
+        return attributesJaxrsService.putAttributes(newCollection.getProfileAttributes(), getHolder(userName), attrNames, hypermediaOptions, mediaType);
     }
 
     @DELETE
     @Path("/{name}/attributes")
-    public Response deleteAttributes (@PathParam("name") String name,
+    public Response deleteAttributes(@PathParam("name") String userName,
                                       @QueryParam("name") Set<String> attrNames) throws RemoteException {
-        User recipient = attributeService.generateRecipient(name, null);
-        return attributeService.deleteAttributes(recipient, attrNames);
+        return attributesJaxrsService.deleteAttributes(getHolder(userName), attrNames);
     }
 
 
     @GET
     @Path("/{name}/attributes/{attrName}")
-    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    public Response getSpecificAttributeOfUser(@PathParam("name") String name,
-                                               @PathParam("attrName") String attrName) throws RemoteException {
-        User recipient = attributeService.generateRecipient(name, null);
-        return attributeService.getSpecificAttributeOfRecipient(recipient, attrName);
+    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON, "application/hal+json", "application/hal+xml"})
+    public Response getSpecificAttributeOfUser(@PathParam("name") String userName,
+                                               @PathParam("attrName") String attrName,
+                                               @HeaderParam(HttpHeaders.ACCEPT) String accept,
+                                               @QueryParam("_embedded") String embedded) throws RemoteException {
+        HypermediaOptions hypermediaOptions = attributesJaxrsService.getHypermediaOptions(accept, embedded);
+        return attributesJaxrsService.getSpecificAttributeOfRecipient(getHolder(userName), attrName, hypermediaOptions);
     }
 
     @PUT
     @Path("/{name}/attributes/{attrName}")
-    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    public Response putAttribute(ClientUserAttribute attr,
-                                 @PathParam("name") String name,
-                                 @PathParam("attrName") String attrName) throws RemoteException {
-        User recipient = attributeService.generateRecipient(name, null);
-        return attributeService.putAttribute(attr, recipient, attrName);
+    @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON, "application/hal+json", "application/hal+xml"})
+    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON, "application/hal+json", "application/hal+xml"})
+    public Response putAttribute(HypermediaAttribute attr,
+                                 @PathParam("name") String userName,
+                                 @PathParam("attrName") String attrName,
+                                 @HeaderParam(HttpHeaders.ACCEPT) String accept,
+                                 @HeaderParam(HttpHeaders.CONTENT_TYPE) String mediaType,
+                                 @QueryParam("_embedded") String embedded) throws RemoteException {
+        HypermediaOptions hypermediaOptions = attributesJaxrsService.getHypermediaOptions(accept, embedded);
+        return attributesJaxrsService.putAttribute(attr, getHolder(userName), attrName, hypermediaOptions, mediaType);
     }
 
 
     @DELETE
     @Path("/{name}/attributes/{attrName}")
-    public Response deleteAttribute(@PathParam("name") String name,
-                                    @PathParam("attrName") String attrName) throws RemoteException{
-        User recipient = attributeService.generateRecipient(name, null);
-        return attributeService.deleteAttribute(recipient, attrName);
+    public Response deleteAttribute(@PathParam("name") String userName,
+                                    @PathParam("attrName") String attrName,
+                                    @HeaderParam(HttpHeaders.ACCEPT) String accept,
+                                    @QueryParam("_embedded") String embedded) throws RemoteException{
+        return attributesJaxrsService.deleteAttribute(getHolder(userName), attrName);
     }
+
+    public RecipientIdentity getHolder(String userName) {
+        return new RecipientIdentity(User.class, userName);
+    }
+
 }

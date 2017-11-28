@@ -41,7 +41,7 @@
 <t:putAttribute name="typeSpecificContentAfterFolder">
     <fieldset class="group">
     <spring:bind path="dataResource.namedProperties[selectedSubDs]">
-            <input id="selectedSubDs" type="hidden" name="${status.expression}" value="<c:out value="${status.value}"/>" size="200" />
+            <input id="selectedSubDs" type="hidden" name="${status.expression}" value="${status.value}" size="200" />
             <c:if test="${status.error}">
                 <span class="message warning">${status.errorMessage}</span>
             </c:if>

@@ -27,13 +27,12 @@ import net.sf.jasperreports.data.csv.CsvDataAdapter;
 import net.sf.jasperreports.data.csv.CsvDataAdapterImpl;
 import net.sf.jasperreports.engine.data.JRCsvDataSource;
 
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 import java.util.Map;
+import java.util.Set;
 
 
 /**
@@ -44,6 +43,7 @@ import java.util.Map;
 public class TextDataSourceDefinition  extends AbstractTextDataSourceDefinition {
 
     private static String FILE_NAME_PROP = "fileName";
+    public static String DATA_FILE_RESOURCE_ALIAS = "dataFile";
         // FOR METADATA DISCOVERY
     int rowCountForMetadataDiscovery = -1;      // number of rows to use for metadata discovery
 
@@ -137,6 +137,11 @@ public class TextDataSourceDefinition  extends AbstractTextDataSourceDefinition 
             // new path:  repo:/reports/interactive/CsvData
             propertyValueMap.put(FILE_NAME_PROP, getSourceFileLocation(customReportDataSource));
             log.debug("Set Source File Location for Data Adapter to " + propertyValueMap.get(FILE_NAME_PROP));
+        }
+        if(customReportDataSource.getResources() != null && customReportDataSource.getResources().get(DATA_FILE_RESOURCE_ALIAS) != null){
+            // if data source has a data file as a sub resource, then take it's URI as file name property
+            propertyValueMap.put(FILE_NAME_PROP, "repo:" + customReportDataSource.getResources()
+                    .get(DATA_FILE_RESOURCE_ALIAS).getTargetURI());
         }
         return propertyValueMap;
     }

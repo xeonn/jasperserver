@@ -21,8 +21,11 @@
 
 
 /**
- * @version: $Id: report.view.base.js 8036 2014-11-20 06:08:27Z nmarcu $
+ * @version: $Id: report.view.base.js 8900 2015-05-06 20:57:14Z yplakosh $
  */
+
+/* global Template, ajax, layoutModule, Report, viewer, doNothing, dashboardViewFrame, dialogs, jaspersoft, _,
+ ControlsBase */
 
 ;(function (exports) {
 
@@ -170,14 +173,15 @@
                 */
                 if(Report.isLoaded) {
                     viewer.reportInstance.eventManager.triggerEvent("beforeAction", {name: "beforeAction", type: "reportRefresh"});
-                    viewer.reportInstance.refreshPage(0);
+                    return viewer.reportInstance.refreshPage(0);
                 } else {
-                    Report.isLoaded = true;
-                    viewer.loadReport();
+                    return viewer.loadReport().always(function() {
+                        Report.isLoaded = true;
+                    });
                 }
             } else {
                 if ('pdf' === output || 'swf' === output) {
-                    Report.exportReport(output, url);
+                    return Report.exportReport(output, url);
                 } else {
                     new jaspersoft.components.AjaxDownloader().start(url + "&" + Report.requestedInputParameters);
                 }
@@ -190,11 +194,23 @@
         cancelReportExecution: function () {
             document.body.style.cursor = "default";
             dialogs.popup.hide($(ajax.LOADING_ID));
-            viewer.reportInstance.cancelExecution().then(function() {
-                // Cancel request returns nothing.
-            }, function(){
+
+            if (viewer.reportInstance) {
+                viewer.reportInstance.cancelExecution().then(function() {
+                    // If report was never loaded before - back to repository
+                    if (!Report.isLoaded) {
+                        Report.goBack();
+                    }
+                }, function(){
+                    //nothing to do on exception,
+                    //popup dialog with exception still should appears
+                });
+            } else {
+                //there is no report instance to cancel
+                //the only thing we could do is to return back to repo
                 Report.goBack();
-            });
+            }
+
             /*
                 TODO: remove after Emerald 2 release.
              */
@@ -251,57 +267,3 @@
 })(
    window
 );
-
-
-
-
-
-/*
-refreshReportErrorHandler: function (ajaxAgent) {
-    if (Report.refreshReportCanceled) {
-        Report.goBack();
-        return true;
-    } else {
-        return baseErrorHandler(ajaxAgent);
-    }
-},
-
-confirmAndLeave: function () {
-    console.info('k');
-    var confirmed = Report.confirmExit();
-    if (!confirmed) {
-        return false;
-    }
-    // return a function to be called with an exit callback
-    return Report.closeViewerOnExit;
-},
-
-closeViewerOnExit: function (exitCallback) {
-    var params = {
-        _flowExecutionKey: Report.reportExecutionKey(),
-        _eventId: "end"
-    };
-    var url = 'flow.html?' + Object.toQueryString(params);
-
-    var exitCallbackOnce = function () {
-        if (!Report.exitCallbackCalled) {
-            Report.exitCallbackCalled = true;
-            exitCallback();
-        }
-    }
-
-    // set a timeout as well because we don't want to delay the exit if the ajax call takes too much
-    window.setTimeout(exitCallbackOnce, 3000);
-
-    // send a request to cleanup the current execution.
-    ajaxUpdate(url, {
-        errorHandler: function () {
-            return false;//ignore all errors
-        },
-        responseHandler: exitCallbackOnce
-    });
-},
- */
-
-
-

@@ -21,8 +21,10 @@
 
 
 /**
- * @version: $Id: editor.js 7748 2014-07-18 09:13:06Z kklein $
+ * @version: $Id: editor.js 8900 2015-05-06 20:57:14Z yplakosh $
  */
+
+/* global dialogs */
 
 define('scheduler/view/editor', function(require){
 
@@ -227,7 +229,7 @@ define('scheduler/view/editor', function(require){
                     var name = t.dialog.find('#saveAsInputName').val();
                     t.dialog.find('#saveAsInputName').parent().removeClass("error");
                     t.dialog.find('#saveAsInputName').next().text("");
-                    if (name == "") {
+                    if (name === "") {
                         t.dialog.find('#saveAsInputName').parent().addClass("error");
                         t.dialog.find('#saveAsInputName').next().text(i18n["report.scheduling.job.edit.specify.scheduledjobname"]);
                         t.saveAsFormValidation = false;
@@ -398,22 +400,37 @@ define('scheduler/view/editor', function(require){
             // create new model from uri
             t.model.createFromUri(uri);
 
-            // load model parameters
-            t.model.parameters(this.parentReportURI || false, function(err, data){
-                if (data && data.inputControl){
-                    var parameters = {},
-                        controls = data.inputControl;
+            // activate proper buttons
+	        var saveButton = t.$('.footer #save').addClass("hidden disabled").attr("disabled", "disabled");
+	        var submitButton = t.$('.footer #submit').addClass("hidden disabled").attr("disabled", "disabled");
+	        var saveOrSubmitButton;
+	        if (t.option === "fast") {
+		        // in "fast" mode we need to display "Submit" and disable "Save"
+		        // this is because Scheduler may be integrated into some systems, like Domain Designer, etc.
+		        submitButton.removeClass("hidden");
+		        saveOrSubmitButton = submitButton;
+	        } else {
+		        // in "normal" mode we need to display "Save" and disable "Submit"
+		        saveButton.removeClass("hidden");
+		        saveOrSubmitButton = saveButton;
+	        }
 
-                    for(var i=0, l=controls.length; i<l; i++)
-                        parameters[controls[i].id] = null;
 
-                    t.model.update('source', { parameters: { parameterValues: parameters }});
-                }
-            });
+	        // load model parameters tab
+	        t.model.parameters(this.parentReportURI || false, function(err, data){
+		        if (data && data.inputControl){
+			        var parameters = {},
+				        controls = data.inputControl;
 
-            // change buttons state
-            t.$('.footer #save')['fast' === t.option ? 'addClass' : 'removeClass']('hidden');
-            t.$('.footer #submit')['fast' !== t.option ? 'addClass' : 'removeClass']('hidden');
+			        for(var i=0, l=controls.length; i<l; i++)
+				        parameters[controls[i].id] = null;
+
+			        t.model.update('source', { parameters: { parameterValues: parameters }});
+		        }
+
+		        // and, once it loaded, we may enable button save or submit button
+		        saveOrSubmitButton.removeClass("disabled").attr("disabled", null);
+	        });
         }
     });
 

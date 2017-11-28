@@ -21,8 +21,10 @@
 
 
 /**
- * @version: $Id: resource.base.js 7762 2014-09-19 10:16:02Z sergey.prilukin $
+ * @version: $Id: resource.base.js 8179 2015-01-27 12:34:21Z psavushchik $
  */
+
+/* global TouchController, buildActionUrl, $$, $break, dynamicTree, buttonManager, localContext, isIPad */
 
 var resource = {
     messages: {},

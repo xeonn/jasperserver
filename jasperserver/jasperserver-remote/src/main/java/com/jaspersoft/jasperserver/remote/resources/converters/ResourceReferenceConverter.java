@@ -20,6 +20,8 @@
  */
 package com.jaspersoft.jasperserver.remote.resources.converters;
 
+import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
+import com.jaspersoft.jasperserver.api.common.domain.impl.ExecutionContextImpl;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Folder;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceReference;
@@ -36,7 +38,9 @@ import com.jaspersoft.jasperserver.remote.exception.MandatoryParameterNotFoundEx
 import com.jaspersoft.jasperserver.remote.resources.ClientTypeHelper;
 import com.jaspersoft.jasperserver.remote.services.PermissionsService;
 import com.jaspersoft.jasperserver.war.common.ConfigurationBean;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.transaction.UnexpectedRollbackException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -86,26 +90,17 @@ public class ResourceReferenceConverter<T extends ClientReferenceable> {
         ClientUriHolder result = null;
         if (serverObject != null) {
             if ((options != null && options.isExpanded())) {
-                Resource localResource = null;
+                try {
+                    Resource localResource;
 
-                if (serverObject.isLocal()) {
-                    localResource = serverObject.getLocalResource();
-                } else {
-                    Resource res = new ResourceLookupImpl();
-                    res.setURIString(serverObject.getTargetURI());
-
-                    int mask = permissionsService.getEffectivePermission(res, SecurityContextHolder.getContext().getAuthentication())
-                            .getPermissionMask();
-
-                    if ((mask & JasperServerPermission.ADMINISTRATION.getMask()) == JasperServerPermission.ADMINISTRATION.getMask() ||
-                        (mask & JasperServerPermission.READ.getMask()) == JasperServerPermission.READ.getMask()){
-                        localResource = repositoryService.getResource(null, serverObject.getTargetURI());
+                    if (serverObject.isLocal()) {
+                        localResource = serverObject.getLocalResource();
+                    } else {
+                        localResource = repositoryService.getResource(ExecutionContextImpl.getRuntimeExecutionContext(), serverObject.getReferenceURI());
                     }
-                }
 
-                if (localResource != null){
                     result = resourceConverterProvider.getToClientConverter(localResource).toClient(localResource, options);
-                } else {
+                } catch (AccessDeniedException e) {
                     result = new ClientReference(serverObject.getTargetURI());
                 }
             } else {
@@ -174,7 +169,7 @@ public class ResourceReferenceConverter<T extends ClientReferenceable> {
             throw new IllegalParameterValueException("resourceReference.uri", referenceUri);
         }
         // we need to update reference
-        final Resource resource = repositoryService.getResource(null, referenceUri);
+        final Resource resource = repositoryService.getResource(ExecutionContextImpl.getRuntimeExecutionContext(), referenceUri);
         if (resource == null) {
             // resource with such URI doesn't exist
             throw new IllegalParameterValueException("Referenced resource doesn't exist", "resourceReference.uri", referenceUri);

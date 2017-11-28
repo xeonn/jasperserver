@@ -20,9 +20,9 @@
  */
 
 
-/**
+ /**
  * @author: Olesya Bobruyko
- * @version:
+ * @version: $Id: groupMenuTrait.js
  */
 
 define(function (require) {
@@ -31,7 +31,26 @@ define(function (require) {
     var _ = require("underscore"),
         $ = require("jquery");
 
+    /**
+     * @mixin groupMenuTrait
+     * @description extends any Menu component, adding menu groups.
+     * @example
+     *  var GroupContextMenu = ClickMenu.extend(groupMenuTrait);
+     *  var groupContextMenu = new GroupContextMenu([
+        { label: "List View", groupId: "view", action: "list", "default": true },
+        { label: "Folder View", groupId: "view", action: "folder" },
+        { label: "All", groupId: "visualization", action: "all", "default": true },
+        { label: "Reports", groupId: "visualization", action: "report" },
+        { label: "Ad Hoc Views", groupId: "visualization", action: "adhoc"}
+     ], "#someElement", { toggle: true });
+     */
+
     var groupMenuTrait = {
+        /**
+         * @description Groups the menu items and adds separator.
+         * @memberof groupMenuTrait
+         * @private
+         */
         _onInitialize: function () {
             var $items = this.$contentContainer.find("li"),
                 GROUP_PROPERTY_NAME = "groupId",
@@ -45,6 +64,14 @@ define(function (require) {
             }, this);
         },
 
+        /**
+         * @description Gets group names.
+         * @param {object[]} models - option models
+         * @param {string} groupNameProperty - "groupId" property
+         * @returns {string[]} - group names array
+         * @memberof groupMenuTrait
+         * @private
+         */
         _getGroupNames: function (models, groupNameProperty) {
             return _.keys(_.groupBy(models, function (m) {
                 return m.get(groupNameProperty);

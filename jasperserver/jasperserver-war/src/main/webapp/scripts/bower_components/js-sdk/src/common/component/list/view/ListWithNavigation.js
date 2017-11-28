@@ -22,7 +22,7 @@
 
 /**
  * @author Sergey Prilukin
- * @version: $Id: ListWithNavigation.js 172 2014-09-23 11:45:30Z sergey.prilukin $
+ * @version: $Id: ListWithNavigation.js 1178 2015-05-06 20:40:12Z yplakosh $
  */
 
 define(function (require) {
@@ -93,10 +93,10 @@ define(function (require) {
         },
 
         getActiveValue: function() {
-            return this.model.getActive();
+            return this.model.getActive && this.model.getActive();
         },
 
-        activate: function(index) {
+        activate: function(index, options) {
             if (this.getCanActivate()) {
                 var active = this.getActiveValue();
 
@@ -104,10 +104,14 @@ define(function (require) {
                     return;
                 }
 
-                var that = this;
-                this.model.once("active:changed", function() {
-                    that.trigger("active:changed", that.getActiveValue());
-                }).activate(index);
+                if (!options || !options.silent) {
+                    var that = this;
+                    this.model.once("active:changed", function() {
+                        that.trigger("active:changed", that.getActiveValue());
+                    });
+                }
+
+                this.model.activate(index, options);
             }
         },
 
@@ -117,7 +121,7 @@ define(function (require) {
         postProcessChunkModelItem: function(item, i) {
             ListWithSelection.prototype.postProcessChunkModelItem.call(this, item, i);
 
-            var activeIndex = this._getActiveIndex();
+            var activeIndex = this._getActiveIndex && this._getActiveIndex();
 
             item.active = (typeof activeIndex !== "undefined" && activeIndex === this.model.get("bufferStartIndex") + i);
         },

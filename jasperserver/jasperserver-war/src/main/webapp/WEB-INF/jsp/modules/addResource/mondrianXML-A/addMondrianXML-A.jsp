@@ -109,8 +109,7 @@
                                         <label class="control textArea <c:if test="${status.error}"> error </c:if>"
                                                for="description">
                                             <span class="wrap"><spring:message code="jsp.editMondrianXmlaSourceForm.description" javaScriptEscape="true"/>:</span>
-                                            <textarea id="description" type="text" name="${status.expression}"><c:out
-                                                value='${status.value}'/></textarea>
+                                            <textarea id="description" type="text" name="${status.expression}">${status.value}</textarea>
                                             <span class="message warning"><c:if test="${status.error}">${status.errorMessage}</c:if></span>
                                         </label>
                                     </spring:bind>

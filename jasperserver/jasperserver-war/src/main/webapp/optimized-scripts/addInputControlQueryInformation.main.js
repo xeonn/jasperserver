@@ -1,1 +1,1 @@
-define(["require","!domReady","addinputcontrol.queryextra"],function(e){var i=e("!domReady"),n=e("addinputcontrol.queryextra");i(function(){n.initialize(),n.allowSubmit()})});
+define(["require","!domReady","addinputcontrol.queryextra"],function(e){"use strict";var i=e("!domReady"),t=e("addinputcontrol.queryextra");i(function(){t.initialize(),t.allowSubmit()})});

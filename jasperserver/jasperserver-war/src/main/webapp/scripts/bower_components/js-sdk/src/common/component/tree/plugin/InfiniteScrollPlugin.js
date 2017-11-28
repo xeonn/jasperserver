@@ -22,7 +22,7 @@
 
 /**
  * @author: Zakhar Tomchenko
- * @version: $Id: InfiniteScrollPlugin.js 380 2014-11-09 15:04:25Z ktsaregradskyi $
+ * @version: $Id: InfiniteScrollPlugin.js 1160 2015-04-28 12:46:42Z spriluki $
  */
 
 define(function(require){
@@ -32,7 +32,7 @@ define(function(require){
 
     return TreePlugin.extend({
         itemsRendered: function(){
-            this.$("> .subcontainer > .viewPortChunk").css({height: "auto"});
+            this.$("> .subcontainer > .j-view-port-chunk").css({height: "auto"});
         }
     });
 });

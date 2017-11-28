@@ -31,7 +31,7 @@ import com.jaspersoft.jasperserver.api.metadata.user.service.impl.UserAuthorityP
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: StandardUserPersistenceHandler.java 51947 2014-12-11 14:38:38Z ogavavka $
+ * @version $Id: StandardUserPersistenceHandler.java 55164 2015-05-06 20:54:37Z mchan $
  */
 public class StandardUserPersistenceHandler implements UserPersistenceHandler {
 	

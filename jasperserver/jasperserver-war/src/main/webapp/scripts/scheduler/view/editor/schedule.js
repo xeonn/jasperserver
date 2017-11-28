@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: schedule.js 7787 2014-09-19 13:11:00Z sergey.prilukin $
+ * @version: $Id: schedule.js 8900 2015-05-06 20:57:14Z yplakosh $
  */
 
 define('scheduler/view/editor/schedule', function(require){
@@ -34,11 +34,17 @@ define('scheduler/view/editor/schedule', function(require){
 		holydayCalView = require('scheduler/view/editor/holidayCal'),
 		holidayCalsCollection = require('scheduler/collection/holidayCals');
 
+	
+	// prepare a date and time format for jQuery Date/Time library from our internal i18n settings
+	var jqueryDateFormat = config.calendar.timepicker.dateFormat;
+	var jqueryTimeFormat = config.calendar.timepicker.timeFormat
+		.replace(":ss", ""); // in Scheduler we don't use "seconds", so momentjs should not take seconds into consideration
+
 	var setupDatepickersOn = function (selector){
 		$(selector).each(function (index, selector) {
 			$(selector).datetimepicker({
-				dateFormat: config.calendar.timepicker.dateFormat,
-				timeFormat: "HH:mm",
+				dateFormat: jqueryDateFormat,
+				timeFormat: jqueryTimeFormat,
 				showOn: "button",
 				buttonText: "",
 				changeYear: true,

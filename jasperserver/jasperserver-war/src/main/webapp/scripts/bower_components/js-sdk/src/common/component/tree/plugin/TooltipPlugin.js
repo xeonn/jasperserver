@@ -22,24 +22,46 @@
 
 /**
  * @author: Zakhar Tomchenko
- * @version: $Id: TooltipPlugin.js 270 2014-10-13 19:58:03Z agodovanets $
  */
 
 define(function(require){
     "use strict";
 
     var TreePlugin = require("./TreePlugin"),
+        _ = require("underscore"),
         Tooltip = require("common/component/tooltip/Tooltip");
 
     return TreePlugin.extend({
         initialize: function(options){
-            Tooltip.attachTo(this.$el);
+            this.tooltip = Tooltip.attachTo(options.attachTo, _.omit(options, "el"));
+
+            this.listensToList = false;
 
             TreePlugin.prototype.initialize.apply(this, arguments);
         },
 
+        itemsRendered: function(model, list){
+            var self = this;
+
+            // this because of list triggers render:data event often
+            if(!this.listensToList){
+                this.listensToList = true;
+
+                this.listenTo(list, "list:item:mouseover", function(item, e){
+                    self.tooltip.show(item);
+                });
+
+                this.listenTo(list, "list:item:mouseout", function(){
+                    self.tooltip.hide();
+                });
+            }
+
+        },
+
         remove: function() {
             Tooltip.detachFrom(this.$el);
+
+            this.tooltip.remove();
 
             TreePlugin.prototype.remove.apply(this, arguments);
         }

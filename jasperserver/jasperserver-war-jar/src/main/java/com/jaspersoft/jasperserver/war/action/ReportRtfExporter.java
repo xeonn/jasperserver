@@ -20,14 +20,17 @@
  */
 package com.jaspersoft.jasperserver.war.action;
 
-import java.util.Map;
+import java.io.OutputStream;
 
 import javax.servlet.http.HttpServletResponse;
 
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRPropertiesHolder;
 import net.sf.jasperreports.engine.JRPropertiesUtil;
+import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.export.JRRtfExporter;
+import net.sf.jasperreports.export.SimpleExporterInput;
+import net.sf.jasperreports.export.SimpleWriterExporterOutput;
 
 import org.springframework.webflow.execution.RequestContext;
 
@@ -38,13 +41,18 @@ import com.jaspersoft.jasperserver.api.engine.jasperreports.common.RtfExportPara
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ReportRtfExporter.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: ReportRtfExporter.java 54728 2015-04-24 15:28:20Z tdanciu $
  */
-public class ReportRtfExporter extends AbstractReportExporter {
+public class ReportRtfExporter extends AbstractReportExporter 
+{
 
-	public void export(RequestContext context, ExecutionContext executionContext, String reportUnitURI, Map baseParameters) throws JRException {
+	public void export(RequestContext context, ExecutionContext executionContext, JasperPrint jasperPrint, OutputStream outputStream) throws JRException
+	{
 		JRRtfExporter exporter = new JRRtfExporter(getJasperReportsContext());
-		exporter.setParameters(baseParameters);
+		
+		exporter.setExporterInput(new SimpleExporterInput(jasperPrint));
+		exporter.setExporterOutput(new SimpleWriterExporterOutput(outputStream));
+
 		exporter.exportReport();
 	}
 

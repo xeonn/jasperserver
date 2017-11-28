@@ -69,7 +69,12 @@
         <!-- SESSION REPLICATION -->
         <!-- Replace the default spring listener with the Tolerant listener to enable replication-->
         <!-- listener-class>com.jaspersoft.jasperserver.core.util.TolerantRequestContextListener</listener-class-->
-        <listener-class>org.springframework.web.context.request.RequestContextListener</listener-class>        
+
+        <!-- GlassFish 3 and above-->
+        <!-- Replace the default spring listener with the Glassfish specific listener -->
+        <!--<listener-class>com.jaspersoft.jasperserver.core.util.GlassFishRequestContextListener</listener-class-->
+
+        <listener-class>org.springframework.web.context.request.RequestContextListener</listener-class>
     </listener>
 
     <listener>
@@ -81,6 +86,11 @@
         <listener-class>org.jasig.cas.client.session.SingleSignOutHttpSessionListener</listener-class>
     </listener>
 
+    <!-- XSS jsp ELResolver -->
+    <listener>
+        <listener-class>com.jaspersoft.jasperserver.jsp.XSSEscapeXmlELResolverListener</listener-class>
+    </listener>
+
     <context-param>
         <param-name>sessionPublishedBeans</param-name>
         <param-value>configurationBean,concreteHeartbeatBean,concreteNavigationActionModelSupport</param-value>
@@ -90,6 +100,12 @@
     <!--filter>
         <filter-name>ClusterFilter</filter-name>
         <filter-class>com.jaspersoft.jasperserver.war.TolerantSessionFilter</filter-class>
+    </filter-->
+
+    <!--  UNCOMMENT FOR Glassfish 3 and above -->
+    <!--filter>
+        <filter-name>GlassFishFilter</filter-name>
+        <filter-class>com.jaspersoft.jasperserver.war.GlassFishSessionFilter</filter-class>
     </filter-->
     
     <filter>
@@ -136,38 +152,43 @@
         <url-pattern>/*</url-pattern>
     </filter-mapping>
 	<distributable/-->
- 	   
 
-    <filter-mapping>
-        <filter-name>p3pFilter</filter-name>
-        <url-pattern>/*</url-pattern>
-    </filter-mapping>
+    <!--  UNCOMMENT FOR GlassFish 3 and above -->
+    <!--filter-mapping>
+      <filter-name>GlassFishFilter</filter-name>
+      <url-pattern>/*</url-pattern>
+    </filter-mapping-->
 
-    <filter-mapping>
-        <filter-name>characterEncodingProxyFilter</filter-name>
-        <url-pattern>/*</url-pattern>
-    </filter-mapping>
+  <filter-mapping>
+      <filter-name>p3pFilter</filter-name>
+      <url-pattern>/*</url-pattern>
+  </filter-mapping>
 
-    <filter-mapping>
-        <filter-name>sessionDecoratorProxyFilter</filter-name>
-        <url-pattern>/*</url-pattern>
-    </filter-mapping>
+  <filter-mapping>
+      <filter-name>characterEncodingProxyFilter</filter-name>
+      <url-pattern>/*</url-pattern>
+  </filter-mapping>
 
-    <filter-mapping>
-        <filter-name>securityFilter</filter-name>
-        <url-pattern>/*</url-pattern>
-        <dispatcher>ERROR</dispatcher>
-        <dispatcher>REQUEST</dispatcher>
-    </filter-mapping>
+  <filter-mapping>
+      <filter-name>sessionDecoratorProxyFilter</filter-name>
+      <url-pattern>/*</url-pattern>
+  </filter-mapping>
 
-    <filter-mapping>
-        <filter-name>sitemesh</filter-name>
-        <url-pattern>/*</url-pattern>
-        <dispatcher>ERROR</dispatcher>
-        <dispatcher>FORWARD</dispatcher>
-    </filter-mapping>
-    
-    <!-- Filter to help parse the file name and extension of uplaoded files-->
+  <filter-mapping>
+      <filter-name>securityFilter</filter-name>
+      <url-pattern>/*</url-pattern>
+      <dispatcher>ERROR</dispatcher>
+      <dispatcher>REQUEST</dispatcher>
+  </filter-mapping>
+
+  <filter-mapping>
+      <filter-name>sitemesh</filter-name>
+      <url-pattern>/*</url-pattern>
+      <dispatcher>ERROR</dispatcher>
+      <dispatcher>FORWARD</dispatcher>
+  </filter-mapping>
+
+  <!-- Filter to help parse the file name and extension of uplaoded files-->
      <!--filter>  com.jaspersoft.jasperserver.war.MultipartRequestWrapperFilter takes over the processing
         <filter-name>multiPartHelperFilter</filter-name>
         <filter-class>com.jaspersoft.jasperserver.war.common.UploadMultipartFilter</filter-class>
@@ -496,21 +517,21 @@
     <resource-ref>
     <description>JasperServer Metadata repository</description>
         <res-ref-name>${metadata.jndi}</res-ref-name>
-        <res-type>javax.sql.DataSource</res-type>
+        <res-type>javax.sql.ConnectionPoolDataSource</res-type>
         <res-auth>Container</res-auth>
     </resource-ref>
     
     <resource-ref>
     <description>SugarCRM example database</description>
         <res-ref-name>${test.jndi}</res-ref-name>
-        <res-type>javax.sql.DataSource</res-type>
+        <res-type>javax.sql.ConnectionPoolDataSource</res-type>
         <res-auth>Container</res-auth>
     </resource-ref>
     
     <resource-ref>
     <description>Foodmart database</description>
         <res-ref-name>${foodmart.jndi}</res-ref-name>
-        <res-type>javax.sql.DataSource</res-type>
+        <res-type>javax.sql.ConnectionPoolDataSource</res-type>
         <res-auth>Container</res-auth>
     </resource-ref>
     
@@ -573,7 +594,7 @@
 
    <context-param>
         <param-name>Owasp.CsrfGuard.Config</param-name>
-         <param-value>WEB-INF/esapi/Owasp.CsrfGuard.properties</param-value>
+         <param-value>/WEB-INF/esapi/Owasp.CsrfGuard.properties</param-value>
     </context-param>
     <context-param>
         <param-name>Owasp.CsrfGuard.Config.Print</param-name>
@@ -596,7 +617,7 @@
         <servlet-class>org.owasp.csrfguard.servlet.JavaScriptServlet</servlet-class>
         <init-param>
             <param-name>source-file</param-name>
-            <param-value>WEB-INF/esapi/Owasp.CsrfGuard.js</param-value>
+            <param-value>/WEB-INF/esapi/Owasp.CsrfGuard.js</param-value>
         </init-param>
         <init-param>
             <param-name>inject-into-forms</param-name>

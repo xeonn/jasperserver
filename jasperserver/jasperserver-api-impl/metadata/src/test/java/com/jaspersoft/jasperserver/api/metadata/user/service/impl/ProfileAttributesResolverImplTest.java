@@ -22,6 +22,7 @@
 package com.jaspersoft.jasperserver.api.metadata.user.service.impl;
 
 import com.jaspersoft.jasperserver.api.JSException;
+import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.client.JdbcReportDataSourceImpl;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.ProfileAttribute;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.client.ProfileAttributeImpl;
@@ -56,7 +57,7 @@ import static org.testng.Assert.assertTrue;
  * <p></p>
  *
  * @author Volodya Sabadosh
- * @version $Id: ProfileAttributesResolverImplTest.java 51853 2014-12-05 21:54:12Z nthapa $
+ * @version $Id: ProfileAttributesResolverImplTest.java 54590 2015-04-22 17:55:42Z vzavadsk $
  */
 public class ProfileAttributesResolverImplTest {
     @InjectMocks
@@ -102,65 +103,69 @@ public class ProfileAttributesResolverImplTest {
         notParametrizedJdbcReportDataSource.setName("Some name");
         notParametrizedJdbcReportDataSource.setDescription("Some description");
         notParametrizedJdbcReportDataSource.setPassword("Some password");
-        notParametrizedJdbcReportDataSource.setUsername("Some userName");
+        notParametrizedJdbcReportDataSource.setUsername("Some userName" );
         notParametrizedJdbcReportDataSource.setConnectionUrl("Some connectionUrl");
         notParametrizedJdbcReportDataSource.setDriverClass("Some driverClass");
 
         when(messageSource.getMessage(any(String.class), any(Object[].class), any(Locale.class))).thenReturn("Some message");
 
-        String pattern = "\\{\\s*attribute\\s*\\(\\s*'([^\\\\/']+)'\\s*(,\\s*'([^\\\\/']+)'\\s*)?\\)\\s*\\}";
+        String functionPattern = "\\s*attribute\\s*\\(\\s*'([^\\\\/']+)'\\s*(,\\s*'([^\\\\/']+)'\\s*)?\\)\\s*";
+        String pattern = "\\{"+ functionPattern+"\\}";
 
         List<ProfileAttribute> allProfileAttributesList = new ArrayList<ProfileAttribute>();
         List<ProfileAttribute> userProfileAttributesList = new ArrayList<ProfileAttribute>();
         List<ProfileAttribute> tenantProfileAttributesList = new ArrayList<ProfileAttribute>();
         List<ProfileAttribute> serverProfileAttributesList = new ArrayList<ProfileAttribute>();
 
+        final String custom = "custom";
+
         ProfileAttribute profileAttribute = new ProfileAttributeImpl();
         profileAttribute.setAttrName("userName");
         profileAttribute.setAttrValue(jdbcUserName);
-        profileAttribute.setCategory(ProfileAttributeCategory.USER);
+        profileAttribute.setGroup(custom);
         userProfileAttributesList.add(profileAttribute);
 
         profileAttribute = new ProfileAttributeImpl();
         profileAttribute.setAttrName("password");
         profileAttribute.setAttrValue(jdbcUserPassword);
-        profileAttribute.setCategory(ProfileAttributeCategory.USER);
+        profileAttribute.setGroup(custom);
         userProfileAttributesList.add(profileAttribute);
 
         profileAttribute = new ProfileAttributeImpl();
         profileAttribute.setAttrName("name");
         profileAttribute.setAttrValue("name");
-        profileAttribute.setCategory(ProfileAttributeCategory.TENANT);
+        profileAttribute.setGroup(custom);
         tenantProfileAttributesList.add(profileAttribute);
 
         profileAttribute = new ProfileAttributeImpl();
         profileAttribute.setAttrName("description");
         profileAttribute.setAttrValue("description");
-        profileAttribute.setCategory(ProfileAttributeCategory.TENANT);
+        profileAttribute.setGroup(custom);
         tenantProfileAttributesList.add(profileAttribute);
 
         profileAttribute = new ProfileAttributeImpl();
         profileAttribute.setAttrName("connectionUrl");
         profileAttribute.setAttrValue(jdbcConnectionUrl);
-        profileAttribute.setCategory(ProfileAttributeCategory.TENANT);
+        profileAttribute.setGroup(custom);
         tenantProfileAttributesList.add(profileAttribute);
 
         profileAttribute = new ProfileAttributeImpl();
         profileAttribute.setAttrName("driverClass");
         profileAttribute.setAttrValue(jdbcDriverClass);
-        profileAttribute.setCategory(ProfileAttributeCategory.SERVER);
+        profileAttribute.setGroup(custom);
         serverProfileAttributesList.add(profileAttribute);
 
         allProfileAttributesList.addAll(userProfileAttributesList);
         allProfileAttributesList.addAll(tenantProfileAttributesList);
         allProfileAttributesList.addAll(serverProfileAttributesList);
 
-        when(profileAttributeService.getCurrentUserProfileAttributes(ProfileAttributeCategory.USER)).thenReturn(userProfileAttributesList);
-        when(profileAttributeService.getCurrentUserProfileAttributes(ProfileAttributeCategory.TENANT)).thenReturn(tenantProfileAttributesList);
-        when(profileAttributeService.getCurrentUserProfileAttributes(ProfileAttributeCategory.SERVER)).thenReturn(serverProfileAttributesList);
-        when(profileAttributeService.getCurrentUserProfileAttributes(ProfileAttributeCategory.HIERARCHICAL)).thenReturn(allProfileAttributesList);
+        when(profileAttributeService.getCurrentUserProfileAttributes(any(ExecutionContext.class), eq(ProfileAttributeCategory.USER))).thenReturn(userProfileAttributesList);
+        when(profileAttributeService.getCurrentUserProfileAttributes(any(ExecutionContext.class), eq(ProfileAttributeCategory.TENANT))).thenReturn(tenantProfileAttributesList);
+        when(profileAttributeService.getCurrentUserProfileAttributes(any(ExecutionContext.class), eq(ProfileAttributeCategory.SERVER))).thenReturn(serverProfileAttributesList);
+        when(profileAttributeService.getCurrentUserProfileAttributes(any(ExecutionContext.class), eq(ProfileAttributeCategory.HIERARCHICAL))).thenReturn(allProfileAttributesList);
 
         profileAttributesResolverImpl.setAttributePlaceholderPattern(pattern);
+        profileAttributesResolverImpl.setAttributeFunctionPattern(functionPattern);
     }
 
     @Test

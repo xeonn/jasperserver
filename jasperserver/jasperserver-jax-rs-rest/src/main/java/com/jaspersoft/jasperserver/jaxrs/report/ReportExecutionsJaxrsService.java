@@ -291,7 +291,8 @@ public class ReportExecutionsJaxrsService extends RemoteServiceWrapper<RunReport
                         .setMarkupType(reportExecutionRequest.getMarkupType())
                         .setBaseUrl(reportExecutionRequest.getBaseUrl())
                         .setAttachmentsPrefix(reportExecutionRequest.getAttachmentsPrefix())
-                        .setAllowInlineScripts(reportExecutionRequest.isAllowInlineScripts());
+                        .setAllowInlineScripts(reportExecutionRequest.isAllowInlineScripts())
+                        .setAnchor(reportExecutionRequest.getAnchor());
                 return Response.ok(remoteService.getReportExecutionFromRawParameters(reportExecutionRequest.getReportUnitUri(),
                         reportExecutionRequest.getParameters() != null ?
                                 reportExecutionRequest.getParameters().getRawParameters() :

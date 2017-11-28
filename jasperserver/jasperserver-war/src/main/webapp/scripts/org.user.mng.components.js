@@ -21,13 +21,18 @@
 
 
 /**
- * @version: $Id: org.user.mng.components.js 7846 2014-09-19 16:27:14Z sergey.prilukin $
+ * @version: $Id: org.user.mng.components.js 8900 2015-05-06 20:57:14Z yplakosh $
  */
+
+/* global  orgModule, isProVersion, layoutModule, buttonManager, invokeClientAction, invokeUserManagerAction,
+ ValidationModule, RegExpRepresenter, matchAny, isEncryptionOn, RegExpRepresenter, dialogs, invokeServerAction,
+ dynamicList
+*/
 
 //////////////////////////////////
 // Panel which shows users list
 //////////////////////////////////
-define(["jquery", "org.user.mng.main", "mng.common.actions", "common/util/encrypter"], function(jQuery, _tmp1, _tmp2, JSEncrypter) {
+define(["require", "jquery", "org.user.mng.main", "mng.common.actions", "common/util/encrypter"], function(require, jQuery, _tmp1, _tmp2, JSEncrypter) {
 
 	orgModule.userManager.userList = {
 		CE_LIST_TEMPLATE_ID: "tabular_twoColumn",
@@ -55,7 +60,7 @@ define(["jquery", "org.user.mng.main", "mng.common.actions", "common/util/encryp
 
 			orgModule.entityList._createEntityItem = function(value) {
 				var item = new dynamicList.ListItem({
-						label: value.userName.escapeHTML(),
+						label: value.userName,
 						value: value
 					});
 
@@ -63,13 +68,13 @@ define(["jquery", "org.user.mng.main", "mng.common.actions", "common/util/encryp
 					var id = element.select(orgModule.userManager.userList.USER_ID_PATTERN)[0];
 					var name = element.select(orgModule.userManager.userList.USER_NAME_PATTERN)[0];
 
-					id.update(this.getValue().userName.escapeHTML());
-					name.update(this.getValue().fullName.escapeHTML());
+					id.update(xssUtil.escape(this.getValue().userName));
+					name.update(xssUtil.escape(this.getValue().fullName));
 
 					var tenantId = this.getValue().tenantId;
 					if (isProVersion() && tenantId) {
 						var org = element.select(orgModule.userManager.userList.USER_ORGANIZATION_PATTERN)[0];
-						org.update(tenantId.escapeHTML());
+						org.update(xssUtil.escape(tenantId));
 					}
 
 					return element;
@@ -98,13 +103,18 @@ define(["jquery", "org.user.mng.main", "mng.common.actions", "common/util/encryp
 		user: null,
 
 		initialize: function(options) {
-			orgModule.properties.initialize({
-				viewAssignedListTemplateDomId: "list_type_attributes",
-				viewAssignedItemTemplateDomId: "list_type_attributes:role",
-				searchAssigned: false,
-				showAssigned: true,
-				attributes:{context:{urlTemplate:"rest_v2{{#tenantId}}/organizations/{{tenantId}}{{/tenantId}}/users/{{userName}}/attributes/{{modelId}}"}}
-			});
+            orgModule.properties.initialize(options._.extend({}, options, {
+                viewAssignedListTemplateDomId: "list_type_attributes",
+                viewAssignedItemTemplateDomId: "list_type_attributes:role",
+                searchAssigned: false,
+                showAssigned: true,
+                attributes: {
+                    context: {
+                        urlGETTemplate: "rest_v2/attributes?includeInherited=true&holder=user:{{#tenantId}}/{{tenantId}}{{/tenantId}}/{{userName}}&group=custom&excludeGroup=serverSettings",
+                        urlPUTTemplate: "rest_v2{{#tenantId}}/organizations/{{tenantId}}{{/tenantId}}/users/{{userName}}/attributes?_embedded=permission"
+                    }
+                }
+            }));
 
 			var panel = $(orgModule.properties._id);
 			this.name = panel.select(this.USER_NAME_PATTERN)[0];
@@ -202,17 +212,15 @@ define(["jquery", "org.user.mng.main", "mng.common.actions", "common/util/encryp
 				this.changeDisable(false, [umProperties.ENABLE_USER_PATTERN]);
 			};
 
-			orgModule.properties.validate = function() {
-				var umProperties = orgModule.userManager.properties;
-				if (ValidationModule.validateLegacy(umProperties._validators) &&
-					orgModule.properties.attributesView &&
-					orgModule.properties.attributesView.isValid()){
-					return true;
-				} else {
-					dialogs.systemConfirm.show(orgModule.messages['validationErrors'], 2000);
-					return false;
-				}
-			};
+            orgModule.properties.validate = function() {
+                var umProperties = orgModule.userManager.properties;
+                if (ValidationModule.validateLegacy(umProperties._validators)) {
+                    return true;
+                } else {
+                    dialogs.systemConfirm.show(orgModule.messages['validationErrors'], 2000);
+                    return false;
+                }
+            };
 
 			orgModule.properties.isChanged = function() {
 				var umProperties = orgModule.userManager.properties;
@@ -220,8 +228,11 @@ define(["jquery", "org.user.mng.main", "mng.common.actions", "common/util/encryp
 				var oldUser = this._value;
 				var user = umProperties._toUser();
 
-				return this.isEditMode && (oldUser.fullName != user.fullName || oldUser.email != user.email ||
-						oldUser.enabled != user.enabled || oldUser.password != user.password ||
+                var attributesFacade = orgModule.properties.attributesFacade,
+                    isAttributesChanged = attributesFacade && attributesFacade.containsUnsavedItems();
+
+				return this.isEditMode && (isAttributesChanged || oldUser.fullName != user.fullName || oldUser.email != user.email ||
+						oldUser.enabled != user.enabled || oldUser.password != user.password || oldUser.confirmPassword != user.confirmPassword ||
 						this.getAssignedEntities().length > 0 || this.getUnassignedEntities().length > 0);
 			};
 
@@ -253,13 +264,16 @@ define(["jquery", "org.user.mng.main", "mng.common.actions", "common/util/encryp
 			};
 
 			orgModule.properties.cancel = function() {
+                var dfd = new jQuery.Deferred();
 				this.setProperties(this._value);
-				this.attributesView && this.attributesView.cancel();
+                return this.attributesFacade ? this.attributesFacade.cancel() : dfd.resolve();
 			};
 		},
 
 		_initCustomEvents: function(roles) {
-			var panel = $(orgModule.properties._id);
+			var panel = $(orgModule.properties._id),
+                $activeElements = jQuery("#moveButtons, #userEnable"),
+                $availableAndAssignedEl = jQuery("#editRoles").find("#assigned, #available");
 
 			this.id.regExp = new RegExp(orgModule.Configuration.userNameNotSupportedSymbols);
 			this.id.unsupportedSymbols =
@@ -274,7 +288,17 @@ define(["jquery", "org.user.mng.main", "mng.common.actions", "common/util/encryp
 					ValidationModule.validateLegacy([orgModule.createInputRegExValidator(input)]);
 					event.stop();
 				}
+
+                orgModule.properties._toggleButton();
 			}.bindAsEventListener(this));
+
+            $activeElements.on('click', function(e) {
+                orgModule.properties._toggleButton();
+            });
+
+            $availableAndAssignedEl.on('dblclick', function() {
+                orgModule.properties._toggleButton();
+            });
 
 			this.email.observe('blur', function(event) {
 				var input = event.element();
@@ -309,7 +333,8 @@ define(["jquery", "org.user.mng.main", "mng.common.actions", "common/util/encryp
 					email: this.email.getValue(),
 					enabled: this.enabled.checked,
 					external: this.external.checked,
-					password: this.pass.getValue()
+					password: this.pass.getValue(),
+                    confirmPassword: this.confirmPass.getValue()
 				});
 			}
 
@@ -322,13 +347,14 @@ define(["jquery", "org.user.mng.main", "mng.common.actions", "common/util/encryp
 				email: this.email.getValue(),
 				enabled: this.enabled.checked,
 				external: this.external.checked,
-				password: ''
+				password: '',
+                confirmPassword: ''
 			});
 
 			if (isEncryptionOn) {              //global property from jsp page, set up in security-config.properties
 				var orgModuleUserManagerPropsObj =  this;
 
-				var paramToEncrypt = new Object();
+				var paramToEncrypt = {};
 				paramToEncrypt[this.pass.id] = this.pass.getValue();
 				paramToEncrypt[this.confirmPass.id] = this.confirmPass.getValue();
 

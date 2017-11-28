@@ -22,10 +22,12 @@
 
 /**
  * @author: Gerald Truong
- * @version: $Id: touch.controller.js 7785 2014-09-19 13:09:06Z sergey.prilukin $
+ * @version: $Id: touch.controller.js 8179 2015-01-27 12:34:21Z psavushchik $
  */
 
-TouchController = function(element,parent,options) {
+/* global TouchController */
+
+TouchController = function(element,parent,options) { // jshint ignore: line
     var it = this;
     this.element = element;
     this.parent = parent;
@@ -82,7 +84,7 @@ TouchController = function(element,parent,options) {
     this.observer.addEventListener('touchstart', this, false);
     this.observer.addEventListener('touchmove', this, false);
     this.observer.addEventListener('touchend', this, false);
-}
+};
 TouchController.prototype.handleEvent = function(e) {
     switch (e.type) {
         case 'touchstart':
@@ -95,7 +97,7 @@ TouchController.prototype.handleEvent = function(e) {
             this.onTouchEnd(e);
             break;
     }
-}
+};
 TouchController.prototype.computeBoundaries = function() {
     this.maxX = this.parent.clientWidth - this.element.clientWidth;
     this.maxY = this.parent.clientHeight - this.element.clientHeight;
@@ -127,7 +129,7 @@ TouchController.prototype.computeBoundaries = function() {
             this.element.style.maxHeight = this.parent.clientHeight + 'px';
         }
     }
-}
+};
 TouchController.prototype.onTouchStart = function(e) {
     this.scale_pre = false;
 
@@ -138,7 +140,7 @@ TouchController.prototype.onTouchStart = function(e) {
 
     this.contentStartOffsetX = this.contentOffsetX;
     this.contentStartOffsetY = this.contentOffsetY;
-}
+};
 TouchController.prototype.onTouchMove = function(e) {
     var cy = e.touches[0].clientY;
     var cx = e.touches[0].clientX;
@@ -157,7 +159,7 @@ TouchController.prototype.onTouchMove = function(e) {
             }
         }
     }
-}
+};
 
 TouchController.prototype.onTouchEnd = function(e) {
     if (this.dragging) {
@@ -176,7 +178,7 @@ TouchController.prototype.onTouchEnd = function(e) {
         }
     }
     this.dragging = false;
-}
+};
 
 TouchController.prototype.animateTo = function(cX,cY) {
     var deltaX = cX - this.startTouchX;
@@ -209,7 +211,7 @@ TouchController.prototype.animateTo = function(cX,cY) {
     }
     this.hbar && this.hbar.css('left',-1*offsetX*this.hratio+'px');
     this.vbar && this.vbar.css('top',-1*offsetY*this.vratio+'px');
-}
+};
 TouchController.prototype.isDragging = function(e) {
     var dx = e.touches[0].clientX - this.startTouchX;
     var dy = e.touches[0].clientY - this.startTouchY;
@@ -217,13 +219,13 @@ TouchController.prototype.isDragging = function(e) {
     var ady = Math.abs(dy);
     this.dragging = (adx > this.drag_sensitivity || ady > this.drag_sensitivity) ? true : false;
     return this.dragging;
-}
+};
 TouchController.prototype.shouldStartMomentum = function() {
     return false;
-}
+};
 TouchController.prototype.reset = function() {
-    offsetX = this.contentOffsetX;
-    offsetY = this.contentOffsetY;
+    var offsetX = this.contentOffsetX;
+    var offsetY = this.contentOffsetY;
 
     this.maxX = this.parent.clientWidth - this.element.clientWidth;
     this.maxY = this.parent.clientHeight - this.element.clientHeight;
@@ -237,22 +239,22 @@ TouchController.prototype.reset = function() {
         this.element.style.top = 0;
         this.element.style.left = 0;
     }
-}
+};
 TouchController.prototype.forceRefresh = function() {
     //this.element.style.webkitTransform = 'scale('+this.scale+') translate3d(0,100px, 0)';
     //this.element.style.webkitTransform = 'scale('+this.scale+') translate3d(0,0,0)';
-}
+};
 TouchController.prototype.isBottom = function() {
     if(this.maxY >= 0) {
         return false
     } else {
         return (this.contentOffsetY - this.maxY) < 10;
     }
-}
+};
 TouchController.prototype.addPadding = function(id,padding) {
     var w = jQuery('#'+id).width() + padding.right;
     var h = jQuery('#'+id).height() + padding.bottom;
     this.element.style.width = w +'px';
     this.element.style.height = h +'px';
-}
+};
 

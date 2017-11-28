@@ -48,4 +48,10 @@
 		-->
    </cache>
 
+	<cache name="diagnosticCache"
+		   maxElementsInMemory="10000"
+		   overflowToDisk="true"
+		   diskPersistent="true">
+	</cache>
+
 </ehcache>

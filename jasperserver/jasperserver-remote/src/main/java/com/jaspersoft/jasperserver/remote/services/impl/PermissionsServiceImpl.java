@@ -23,6 +23,7 @@ package com.jaspersoft.jasperserver.remote.services.impl;
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
 import com.jaspersoft.jasperserver.api.common.domain.impl.ExecutionContextImpl;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.InternalURI;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.PermissionUriProtocol;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
 import com.jaspersoft.jasperserver.api.metadata.common.service.ResourceFactory;
@@ -36,7 +37,6 @@ import com.jaspersoft.jasperserver.api.metadata.user.domain.client.ObjectPermiss
 import com.jaspersoft.jasperserver.api.metadata.user.domain.client.RoleImpl;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.client.UserImpl;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.impl.client.MetadataUserDetails;
-import com.jaspersoft.jasperserver.api.metadata.user.domain.impl.client.TenantAwareGrantedAuthority;
 import com.jaspersoft.jasperserver.api.metadata.user.service.ObjectPermissionService;
 import com.jaspersoft.jasperserver.api.metadata.user.service.UserAuthorityService;
 import com.jaspersoft.jasperserver.api.metadata.user.service.impl.AclPermissionsSecurityChecker;
@@ -49,11 +49,10 @@ import com.jaspersoft.jasperserver.remote.exception.IllegalParameterValueExcepti
 import com.jaspersoft.jasperserver.remote.exception.RemoteException;
 import com.jaspersoft.jasperserver.remote.exception.ResourceAlreadyExistsException;
 import com.jaspersoft.jasperserver.remote.exception.ResourceNotFoundException;
-import com.jaspersoft.jasperserver.remote.helpers.PermissionsRecipientIdentity;
+import com.jaspersoft.jasperserver.remote.helpers.RecipientIdentity;
 import com.jaspersoft.jasperserver.remote.services.PermissionsService;
 import com.jaspersoft.jasperserver.remote.services.ResourcesManagementRemoteService;
 import com.jaspersoft.jasperserver.remote.utils.AuditHelper;
-import com.jaspersoft.jasperserver.search.model.permission.Permission;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.security.acls.domain.CumulativePermission;
 import org.springframework.security.acls.domain.GrantedAuthoritySid;
@@ -62,12 +61,15 @@ import org.springframework.security.acls.model.AccessControlEntry;
 import org.springframework.security.acls.model.Acl;
 import org.springframework.security.acls.model.AclService;
 import org.springframework.security.acls.model.ObjectIdentity;
+import org.springframework.security.acls.model.ObjectIdentityRetrievalStrategy;
 import org.springframework.security.acls.model.Sid;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.GrantedAuthorityImpl;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.acls.model.Permission;
+
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -76,7 +78,7 @@ import java.util.*;
 /**
  * @author Volodya Sabadosh (vsabadosh@jaspersoft.com)
  * @author Zakhar Tomchenco (ztomchenco@jaspersoft.com)
- * @version $Id: PermissionsServiceImpl.java 51947 2014-12-11 14:38:38Z ogavavka $
+ * @version $Id: PermissionsServiceImpl.java 55164 2015-05-06 20:54:37Z mchan $
  */
 @Component("permissionsService")
 @Transactional(rollbackFor = Exception.class)
@@ -85,7 +87,8 @@ public class PermissionsServiceImpl implements PermissionsService {
 
     static {
         Set<Integer> set = new HashSet<Integer>();
-        for (Permission perm : Permission.values()) {
+        for (com.jaspersoft.jasperserver.search.model.permission.Permission perm :
+                com.jaspersoft.jasperserver.search.model.permission.Permission.values()) {
             set.add(perm.getMask());
         }
         ALLOWED_MASKS = Collections.unmodifiableSet(set);
@@ -97,12 +100,14 @@ public class PermissionsServiceImpl implements PermissionsService {
     protected AclService aclService;
     @javax.annotation.Resource(name = "aclSecurityChecker")
     protected AclPermissionsSecurityChecker aclPermissionsSecurityChecker;
+    @javax.annotation.Resource(name = "repositoryOIRetrievalStrategy")
+    protected ObjectIdentityRetrievalStrategy repositoryOIRetrievalStrategy;
     @javax.annotation.Resource(name = "objectPermissionService")
     protected PersistentObjectResolver persistentObjectResolver;
     @javax.annotation.Resource(name = "concreteRepository")
     protected RepositoryService repositoryService;
     @javax.annotation.Resource
-    private AuditHelper auditHelper;
+    protected AuditHelper auditHelper;
     @javax.annotation.Resource
     private ResourcesManagementRemoteService resourcesManagementRemoteService;
     @javax.annotation.Resource(name = "mappingResourceFactory")
@@ -110,17 +115,26 @@ public class PermissionsServiceImpl implements PermissionsService {
     @javax.annotation.Resource(name = "concreteUserAuthorityService")
     protected UserAuthorityService userAuthorityService;
 
-    protected Comparator<AccessControlEntry> aclCompartor = new Comparator<AccessControlEntry>() {
+    protected Comparator<Permission> permissionComparator = new Comparator<Permission>() {
         @Override
-        public int compare(AccessControlEntry o1, AccessControlEntry o2) {
+        public int compare(Permission o1, Permission o2) {
             // 1 is the highest mask value
-            int mask1 = o1.getPermission().equals(JasperServerPermission.ADMINISTRATION) ? Integer.MAX_VALUE : o1.getPermission().getMask();
-            int mask2 = o2.getPermission().equals(JasperServerPermission.ADMINISTRATION) ? Integer.MAX_VALUE : o2.getPermission().getMask();
+            int mask1 = o1.equals(JasperServerPermission.ADMINISTRATION) ? Integer.MAX_VALUE : o1.getMask();
+            int mask2 = o2.equals(JasperServerPermission.ADMINISTRATION) ? Integer.MAX_VALUE : o2.getMask();
+
             // 32 is a lowest except 0
             mask1 = mask1 == JasperServerPermission.EXECUTE.getMask() ? 1 : mask1;
             mask2 = mask2 == JasperServerPermission.EXECUTE.getMask() ? 1 : mask2;
 
-            int result = mask1 - mask2;
+            return mask1 - mask2;
+        }
+    };
+
+    protected Comparator<AccessControlEntry> aclCompartor = new Comparator<AccessControlEntry>() {
+        @Override
+        public int compare(AccessControlEntry o1, AccessControlEntry o2) {
+            int result = permissionComparator.compare(o1.getPermission(), o2.getPermission());
+
             if (result == 0) {
                 //if masks are equal, closest(longer identity's uri) is bigger
                 result = (o1.getAcl().getObjectIdentity().getIdentifier().toString().length()) -
@@ -145,10 +159,25 @@ public class PermissionsServiceImpl implements PermissionsService {
 
     public List<ObjectPermission> getPermissions(String resourceURI, Class<?> recipientType, String recipientId, boolean effectivePermissions, boolean resolveAll) throws RemoteException {
         List<ObjectPermission> result;
+
+        PermissionUriProtocol uriProtocol = PermissionUriProtocol.RESOURCE;
+        for (PermissionUriProtocol protocol : PermissionUriProtocol.values()) {
+            String prefix = "/".concat(protocol.getProtocolPrefix());
+            if (resourceURI.startsWith(prefix)) {
+                resourceURI = resourceURI.substring(prefix.length());
+                uriProtocol = protocol;
+                break;
+            } else if (resourceURI.startsWith(protocol.getProtocolPrefix())) {
+                resourceURI = resourceURI.substring(protocol.getProtocolPrefix().length());
+                uriProtocol = protocol;
+                break;
+            }
+        }
+
         if (resolveAll) {
             result = resolveAll(resourceURI, recipientType, recipientId, effectivePermissions);
         } else {
-            Resource resource = resolveResource(resourceURI);
+            InternalURI resource = resolveResource(resourceURI, uriProtocol);
             if (effectivePermissions) {
                 result = objectPermissionService.getEffectivePermissionsForObject(makeExecutionContext(), resource);
                 //Normlize URI and Permission recipients, because getEffectivePermissionsForObject using ACL service to pickup permissions
@@ -185,23 +214,23 @@ public class PermissionsServiceImpl implements PermissionsService {
         return permissions.size() > 0 ? (ObjectPermission) permissions.get(0) : null;
     }
 
-    public ObjectPermission getEffectivePermission(Resource resource, Role role) {
+    public ObjectPermission getEffectivePermission(InternalURI internalURI, Role role) {
         Authentication authentication = createAuthentication(role);
-        ObjectPermission permission = getEffectivePermission(resource, authentication);
+        ObjectPermission permission = getEffectivePermission(internalURI, authentication);
         permission.setPermissionRecipient(role);
         return permission;
     }
 
-    public ObjectPermission getEffectivePermission(Resource resource, User user) {
+    public ObjectPermission getEffectivePermission(InternalURI internalURI, User user) {
         Authentication authentication = createAuthentication(user);
-        return getEffectivePermission(resource, authentication);
+        return getEffectivePermission(internalURI, authentication);
     }
 
-    public ObjectPermission getEffectivePermission(Resource resource, Authentication authentication) {
+    public ObjectPermission getEffectivePermission(InternalURI internalURI, Authentication authentication) {
         ObjectPermission permission = new ObjectPermissionImpl();
         permission.setPermissionRecipient(authentication.getPrincipal());
         List<Sid> sids = new JasperServerSidRetrievalStrategyImpl().getSids(authentication);
-        Acl effectiveAcl = aclService.readAclById(resource, sids);
+        Acl effectiveAcl = aclService.readAclById(repositoryOIRetrievalStrategy.getObjectIdentity(internalURI), sids);
 
         if (effectiveAcl != null) {
             List<AccessControlEntry> permissions = new ArrayList<AccessControlEntry>();
@@ -252,12 +281,15 @@ public class PermissionsServiceImpl implements PermissionsService {
         return doPutPermission(objectPermission, true);
     }
 
-    public List<ObjectPermission> putPermissions(String uri, List<ObjectPermission> objectPermissions) throws RemoteException {
+    public List<ObjectPermission> putPermissions(InternalURI internalURI, List<ObjectPermission> objectPermissions) throws RemoteException {
+        PermissionUriProtocol protocol = PermissionUriProtocol.fromString(internalURI.getProtocol());
+        String uri = protocol.addPrefix(internalURI.getPath());
+
         // make sure that permissions will be definitely assigned to this resource
         for (ObjectPermission permission : objectPermissions) {
-            permission.setURI(REPO_URI_PREFIX + uri);
+            permission.setURI(uri);
         }
-        return doPutPermissions(REPO_URI_PREFIX + uri, objectPermissions, false);
+        return doPutPermissions(internalURI, objectPermissions, false);
     }
 
     public List<ObjectPermission> createPermissions(List<ObjectPermission> objectPermissions) throws RemoteException {
@@ -298,7 +330,7 @@ public class PermissionsServiceImpl implements PermissionsService {
 
         Authentication authenticationToken = SecurityContextHolder.getContext().getAuthentication();
         List<Sid> sids = new JasperServerSidRetrievalStrategyImpl().getSids(authenticationToken);
-        Acl acl = aclService.readAclById(resource, sids);
+        Acl acl = aclService.readAclById(repositoryOIRetrievalStrategy.getObjectIdentity(resource), sids);
         CumulativePermission cPermission = new CumulativePermission();
         for (Sid sid : sids) {
             cPermission.set(JasperServerAclHelper.getPermissionForSid(acl, sid));
@@ -311,33 +343,39 @@ public class PermissionsServiceImpl implements PermissionsService {
         if (StringUtils.isBlank(objectPermission.getURI())) {
             throw new IllegalParameterValueException("URI is blank", "uri", objectPermission.getURI());
         }
-        // Permission recipient check
-        if (objectPermission.getPermissionRecipient() == null) {
-            throw new IllegalParameterValueException("recepient", "null");
-        }
+
         if (!ALLOWED_MASKS.contains(objectPermission.getPermissionMask())) {
-            throw new IllegalParameterValueException("mask", new Integer(objectPermission.getPermissionMask()).toString());
+            throw new IllegalParameterValueException("mask", Integer.toString(objectPermission.getPermissionMask()));
         }
-        if (objectPermission.getPermissionRecipient() instanceof PermissionsRecipientIdentity) {
-            PermissionsRecipientIdentity identity = (PermissionsRecipientIdentity) objectPermission.getPermissionRecipient();
-            objectPermission.setPermissionRecipient(resolveRecipientObject(identity.getRecipientClass(), identity.getId()));
-        } else if (objectPermission.getPermissionRecipient() instanceof TenantQualified) {
-            if (persistentObjectResolver.getPersistentObject(objectPermission.getPermissionRecipient()) == null) {
-                if (objectPermission.getPermissionRecipient() instanceof User) {
-                    User user = (User) objectPermission.getPermissionRecipient();
+
+        objectPermission.setPermissionRecipient(getPermissionRecipient(objectPermission.getPermissionRecipient()));
+
+        // make sure, that resource exists
+        resolveResource(objectPermission.getURI());
+    }
+
+    protected Object getPermissionRecipient(Object rawRecipient) {
+        if (rawRecipient == null) {
+            throw new IllegalParameterValueException("recipient", "null");
+        } else if (rawRecipient instanceof RecipientIdentity) {
+            RecipientIdentity identity = (RecipientIdentity) rawRecipient;
+            return resolveRecipientObject(identity.getRecipientClass(), identity.getId());
+        } else if (rawRecipient instanceof TenantQualified) {
+            if (persistentObjectResolver.getPersistentObject(rawRecipient) == null) {
+                if (rawRecipient instanceof User) {
+                    User user = (User) rawRecipient;
                     throw new ResourceNotFoundException(user.getUsername());
                 }
-                if (objectPermission.getPermissionRecipient() instanceof Role) {
-                    Role role = (Role) objectPermission.getPermissionRecipient();
+                if (rawRecipient instanceof Role) {
+                    Role role = (Role) rawRecipient;
                     throw new ResourceNotFoundException(role.getRoleName());
                 }
             }
         } else {
-            throw new IllegalStateException("Unknown recipient class:" + objectPermission.getPermissionRecipient().getClass().getName());
+            throw new IllegalStateException("Unknown recipient class:" + rawRecipient.getClass().getName());
         }
 
-        // make sure, that resource exists
-        resolveResource(objectPermission.getURI());
+        return rawRecipient;
     }
 
     public void setObjectPermissionService(ObjectPermissionService objectPermissionService) {
@@ -380,8 +418,14 @@ public class PermissionsServiceImpl implements PermissionsService {
         return objectPermissionService.getObjectPermission(makeExecutionContext(), objectPermission);
     }
 
-    protected List<ObjectPermission> doPutPermissions(String uri, List<ObjectPermission> objectPermissions, boolean addTo) throws RemoteException {
+    protected List<ObjectPermission> doPutPermissions(InternalURI internalURI, List<ObjectPermission> objectPermissions, boolean addTo) throws RemoteException {
         if (!addTo) {
+            String uri = internalURI.getPath();
+            PermissionUriProtocol protocol = PermissionUriProtocol.fromString(internalURI.getProtocol());
+            if (protocol == PermissionUriProtocol.ATTRIBUTE) {
+               uri = protocol.addPrefix(uri);
+            }
+
             List<ObjectPermission> existing = this.getPermissions(uri, null, null, false, false);
             for (ObjectPermission permission : existing) {
                 this.deletePermission(permission);
@@ -431,6 +475,27 @@ public class PermissionsServiceImpl implements PermissionsService {
         }
 
         return res;
+    }
+
+    protected InternalURI resolveResource(String uri, PermissionUriProtocol protocol) throws RemoteException {
+        InternalURI resource;
+        if (protocol == PermissionUriProtocol.RESOURCE) {
+            resource = repositoryService.getResource(makeExecutionContext(), uri);
+            if (resource == null) {
+                resource = repositoryService.getFolder(makeExecutionContext(), uri);
+            }
+            if (resource == null) {
+                throw new ResourceNotFoundException(uri);
+            }
+
+            if (!aclPermissionsSecurityChecker.isPermitted(JasperServerPermission.ADMINISTRATION, resource)) {
+                throw new AccessDeniedException("Access denied", uri);
+            }
+        } else {
+            resource = new InternalURIDefinition(uri, protocol);
+        }
+
+        return resource;
     }
 
     protected Resource resolveResource(String uri) throws RemoteException {

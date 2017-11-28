@@ -24,11 +24,13 @@
 
 <%@ taglib prefix="c" uri="http://java.sun.com/jstl/core_rt" %>
 <%@ taglib prefix="authz" uri="http://www.springframework.org/security/tags" %>
+<%@ taglib prefix="js" uri="/WEB-INF/jasperserver.tld" %>
 
+<js:out javaScriptEscape="true">
 <script type="text/javascript">
     // Initialization of repository search init object.
     var heartbeatInitOptions = {
-        baseUrl: "<c:out value="${pageContext.request.contextPath}"/>",
+        baseUrl: "${pageContext.request.contextPath}",
         showDialog: false,
         sendClientInfo: false
     };
@@ -57,3 +59,4 @@
     %>
 </authz:authorize>
 </script>
+</js:out>

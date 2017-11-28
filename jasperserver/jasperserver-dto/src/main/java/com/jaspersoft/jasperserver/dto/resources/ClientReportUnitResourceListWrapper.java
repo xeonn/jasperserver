@@ -20,8 +20,6 @@
  */
 package com.jaspersoft.jasperserver.dto.resources;
 
-import com.jaspersoft.jasperserver.dto.authority.ClientRole;
-
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 import java.util.ArrayList;

@@ -24,7 +24,7 @@
  * Menu attached to an element which can be shown near this element
  *
  * @author: Kostiantyn Tsaregradskyi
- * @version: $Id: AttachableMenu.js 380 2014-11-09 15:04:25Z ktsaregradskyi $
+ * @version: $Id: AttachableMenu.js 812 2015-01-27 11:01:30Z psavushchik $
  */
 
 define(function (require) {
@@ -35,7 +35,9 @@ define(function (require) {
         $ = require("jquery"),
         _ = require("underscore");
 
-    return Menu.extend(AttachableComponent.extend({
+    return Menu.extend(AttachableComponent.extend(
+        /** @lends AttachableMenu.prototype */
+        {
 
         /**
          * @constructor AttachableMenu
@@ -43,9 +45,11 @@ define(function (require) {
          * @extends Menu
          * @param {array} options - Options for menu. @see Menu.
          * @param {jQuery|HTMLElement|selector} attachTo - Element to attach menu to.
+         * @param {object} [padding={top: 5, left: 5}] - padding of attachable menu.
          * @param {object} [additionalSettings] - Additional settings object. @see Menu.
          * @throws "Menu should have options" error if no menu options were passed to constructor.
-         * @fires option:<action> events when menu option is selected.
+         * @throws "AttachableComponent should be attached to an element" error if attachTo is missing.
+         * @fires option:action events when menu option is selected.
          * @example
          *  var attachableMenu = new AttachableMenu([ { label: "Save Dashboard", action: "save" } ], "#someElement");
          */
@@ -56,7 +60,6 @@ define(function (require) {
         },
 
         /**
-         * @method show
          * @description Shows menu near element.
          */
         show: function() {

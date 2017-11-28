@@ -30,12 +30,15 @@ import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceLookup;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceReference;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.CustomDomainMetaData;
+import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.CustomDomainMetaDataProvider;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.CustomReportDataSource;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportDataSource;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportUnit;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.service.ReportDataSourceService;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.service.ReportDataSourceServiceFactory;
+
 import net.sf.jasperreports.engine.JasperReport;
+
 import org.apache.commons.collections.OrderedMap;
 
 import java.util.List;
@@ -396,11 +399,21 @@ public interface EngineService
 	 */
     List<ReportExecutionStatusInformation> getSchedulerReportExecutionStatusList(SchedulerReportExecutionStatusSearchCriteria searchCriteria);
 
-    /*
+    /**
      *  This function is used for retrieving the metadata layer of the data connector in form of TableSourceMetadata
      *  TableSourceMetadata contains information JRFields, query, query language and field name mapping (actual JRField name, name used in domain)
      *  Currently, this function only supports data adapter CustomReportDataSource object such as CSV, XLS and XLSX data adapter CustomReportDataSource object.
+     *  @return the metadata or <code>null</code> if the datasource doesn't provide metadata
+     *  @throws Exception if any error occurs during metadata retrieval
      */
     public CustomDomainMetaData getMetaDataFromConnector(CustomReportDataSource customReportDataSource) throws Exception;
+
+	/**
+	 * Checks if the datasource provides metadata information.
+	 * A datasource is considered as providing metadata if either it's service or definition implement {@link CustomDomainMetaDataProvider}.
+	 * @param customReportDataSource - the custom datasource
+	 * @return <code>true</code> if the custom report provides metadata information; <code>false</code> otherwise
+	 */
+	public boolean isCustomDomainMetadataProvider(CustomReportDataSource customReportDataSource);
 
 }

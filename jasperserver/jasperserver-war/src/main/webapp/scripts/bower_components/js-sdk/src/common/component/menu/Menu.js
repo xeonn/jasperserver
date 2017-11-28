@@ -24,7 +24,7 @@
  * Basic Menu component.
  *
  * @author: Kostiantyn Tsaregradskyi
- * @version: $Id: Menu.js 270 2014-10-13 19:58:03Z agodovanets $
+ * @version: $Id: Menu.js 812 2015-01-27 11:01:30Z psavushchik $
  */
 
 define(function (require) {
@@ -38,22 +38,24 @@ define(function (require) {
 
     require("css!menu.css");
 
-    /**
-     * @constructor Menu
-     * @classdesc Basic Menu component. Works as a base for all other menu types.
-     * @extends OptionContainer
-     * @param {array} options - Array containing objects with "label" and "action" properties, e.g. [ { label: "Save Dashboard", action: "save" } ].
-     * @param {object} [additionalSettings] - Additional settings object.
-     * @param {string} [additionalSettings.menuContainerTemplate=common/component/menu/template/menuContainerTemplate.htm] - HTML template for a menu container.
-     * @param {string} [additionalSettings.menuOptionTemplate=common/component/menu/template/menuOptionTemplate.htm] - HTML template for a single menu option.
-     * @param {boolean} [additionalSettings.toggle] - Flag indicates that menu options can be in active/inactive states.
-     * @param {string} [additionalSettings.toggleClass] - CSS class that is added to menu option when option is active.
-     * @throws "Menu should have options" error if no menu options were passed to constructor.
-     * @fires option:<action> events when menu option is clicked.
-     * @example
-     *  var menu = new Menu([ { label: "Save Dashboard", action: "save" } ], { toggle: true });
-     */
-    return OptionContainer.extend({
+    return OptionContainer.extend(
+        /** @lends Menu.prototype */
+        {
+        /**
+         * @constructor Menu
+         * @classdesc Basic Menu component. Works as a base for all other menu types.
+         * @extends OptionContainer
+         * @param {array} options - Array containing objects with "label" and "action" properties, e.g. [ { label: "Save Dashboard", action: "save" } ].
+         * @param {object} [additionalSettings] - Additional settings object.
+         * @param {string} [additionalSettings.menuContainerTemplate=common/component/menu/template/menuContainerTemplate.htm] - HTML template for a menu container.
+         * @param {string} [additionalSettings.menuOptionTemplate=common/component/menu/template/menuOptionTemplate.htm] - HTML template for a single menu option.
+         * @param {boolean} [additionalSettings.toggle] - Flag indicates that menu options can be in active/inactive states.
+         * @param {string} [additionalSettings.toggleClass] - CSS class that is added to menu option when option is active.
+         * @throws "Menu should have options" error if no menu options were passed to constructor.
+         * @fires option:action events when menu option is clicked.
+         * @example
+         *  var menu = new Menu([ { label: "Save Dashboard", action: "save" } ], { toggle: true });
+         */
         constructor: function(options, additionalSettings) {
             if (!options || !_.isArray(options) || options.length === 0) {
                 throw new Error("Menu should have options");
@@ -70,6 +72,10 @@ define(function (require) {
             });
         },
 
+
+        /**
+         * @description Menu component initialization. Appends menu to body initializes events and traits.
+         */
         initialize: function() {
             OptionContainer.prototype.initialize.apply(this, arguments);
 

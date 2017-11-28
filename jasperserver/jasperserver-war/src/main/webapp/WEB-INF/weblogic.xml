@@ -34,6 +34,8 @@
             <!-- START: added for weblogic 12-->
             <package-name>org.antlr.runtime.*</package-name>
             <package-name>com.sun.jersey.*</package-name>
+            <package-name>org.codehaus.*</package-name>
+            <package-name>com.google.*</package-name>
             <!-- END: added for weblogic 12-->
             
             <package-name>com.sun.activation.*</package-name>

@@ -56,9 +56,10 @@ authorization for logged in user
         <authz:authorize ifNotGranted="ROLE_ANONYMOUS">
             <span id="casted">
                 <c:if test="<%= com.jaspersoft.jasperserver.api.metadata.user.service.impl.UserAuthorityServiceImpl.isUserSwitched() %>">
-                    <%= ((com.jaspersoft.jasperserver.api.metadata.user.domain.User)
+                    <c:set var="principalUserFullName" value="<%= ((com.jaspersoft.jasperserver.api.metadata.user.domain.User)
                           com.jaspersoft.jasperserver.api.metadata.user.service.impl.UserAuthorityServiceImpl.
-                          getSourceAuthentication().getPrincipal()).getFullName() %>
+                          getSourceAuthentication().getPrincipal()).getFullName() %>"/>
+                    ${principalUserFullName}
                     <spring:message code="jsp.main.as"/>
                 </c:if>
             </span>

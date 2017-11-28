@@ -2,8 +2,7 @@
  * <p></p>
  *
  * @author Zakhar.Tomchenco
- * @version $Id: TreeDataLayer.js 399 2014-11-12 12:02:18Z ktsaregradskyi $
- * @since
+ * @version $Id: TreeDataLayer.js 812 2015-01-27 11:01:30Z psavushchik $
  */
 
 define(function(require){

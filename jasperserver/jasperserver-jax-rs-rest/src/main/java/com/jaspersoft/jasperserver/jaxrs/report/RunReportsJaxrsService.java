@@ -50,7 +50,7 @@ import java.util.Map;
 
 /**
  * @author Yaroslav.Kovalchyk
- * @version $Id: RunReportsJaxrsService.java 50801 2014-10-29 00:20:56Z inesterenko $
+ * @version $Id: RunReportsJaxrsService.java 52527 2015-02-25 13:53:01Z ktsaregradskyi $
  */
 @Service
 @Path("/reports")
@@ -79,6 +79,7 @@ public class RunReportsJaxrsService extends RemoteServiceWrapper<RunReportServic
             @QueryParam("attachmentsPrefix") final String attachmentsPrefix,
             @QueryParam("allowInlineScripts") @DefaultValue("true") final Boolean allowInlineScripts,
             @QueryParam("markupType") final String markupType,
+            @QueryParam("anchor") final String anchor,
             @Context final HttpServletRequest request,
             @QueryParam(Request.PARAM_NAME_FRESH_DATA) @DefaultValue("false") final Boolean freshData,
             /* rest_v2 service should be interactive by default, therefore default value for "interactive" is "true" */
@@ -106,6 +107,7 @@ public class RunReportsJaxrsService extends RemoteServiceWrapper<RunReportServic
                 final ExportExecutionOptions exportOptions = new ExportExecutionOptions().setOutputFormat(outputFormat)
                         .setPages(ReportOutputPages.valueOf(page != null ? page.toString() : pages))
                         .setMarkupType(markupType)
+                        .setAnchor(anchor)
                         .setBaseUrl(baseUrlFromQuery != null && !baseUrlFromQuery.isEmpty() ? baseUrlFromQuery : baseUrl)
                         .setAttachmentsPrefix(attachmentsPrefix).setAllowInlineScripts(allowInlineScripts);
                 ReportOutputResource reportOutputResource = remoteService.getReportOutputFromRawParameters(Folder.SEPARATOR + reportUnitURI, parameterMap, reportExecutionOptions, exportOptions);

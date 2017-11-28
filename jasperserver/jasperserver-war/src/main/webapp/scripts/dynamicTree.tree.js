@@ -21,8 +21,10 @@
 
 
 /**
- * @version: $Id: dynamicTree.tree.js 8025 2014-11-12 13:10:12Z ktsaregradskyi $
+ * @version: $Id: dynamicTree.tree.js 8790 2015-04-22 21:28:09Z obobruyk $
  */
+
+/* global layoutModule, console, isNotNullORUndefined, cloneCustomAttributes */
 
 /**
  * Main namespace for all tree related things
@@ -303,7 +305,7 @@ dynamicTree.Tree.addMethod('revertSelection', function(evt) {
  * Returns the first selected node from the list of selected nodes. If no nodes were selected then null returned.
  */
 dynamicTree.Tree.addMethod('getSelectedNode', function() {
-    return (this.selectedNodes.length == 0) ? null : this.selectedNodes[0];
+    return (this.selectedNodes.length === 0) ? null : this.selectedNodes[0];
 });
 
 /**
@@ -395,7 +397,7 @@ dynamicTree.Tree.addMethod('getState', function(nodeID) {
 
     if(stateObject[nodeID]){
         state = stateObject[nodeID];
-        if (state == null || state == '') {
+        if (state === null || state === '') {
             state = dynamicTree.TreeNode.State.CLOSED;
         }
         return state;
@@ -446,7 +448,7 @@ dynamicTree.Tree.addMethod('comparer', function (node1, node2) {
     if (this.sorters && this.sorters.length) {
         for (i = 0; i < this.sorters.length; i++) {
             k = this.sorters[i](node1, node2);
-            if (k != 0) {
+            if (k !== 0) {
                 return k;
             }
         }
@@ -531,7 +533,8 @@ dynamicTree.Tree.addMethod('_deselectAllNodes', function(event) {
     }
 });
 
-dynamicTree.Tree.addMethod('_selectOrEditNode', function(evt, node, ctrlHeld, shiftHeld, isContextMenuBtn) {
+dynamicTree.Tree.addMethod('_selectOrEditNode', function(evt, node, ctrlHeld, shiftHeld, isContextMenuBtn, options) {
+    var min, max, parent;
     var isContextMenu = node.isSelected() && isContextMenuBtn;
     var isDeselect = this.multiSelectEnabled && node.isSelected() && ctrlHeld && !isContextMenu;
     var isEdit = node.isSelected() && dynamicTree.treeNodeEdited !== node && !this.multiSelectEnabled && !ctrlHeld && !isContextMenu;
@@ -565,10 +568,11 @@ dynamicTree.Tree.addMethod('_selectOrEditNode', function(evt, node, ctrlHeld, sh
     }
 
 	if(isRangeSelect || isRangeReduce) {
-        var parent = node.parent;
+        parent = node.parent;
         var start = parent.childs.indexOf(this._lastSelectedNode);
         var end = parent.childs.indexOf(node);
-        var min = Math.min(start, end), max = Math.max(start, end);
+        min = Math.min(start, end);
+        max = Math.max(start, end);
 	}
 
     if (isRangeSelect) {
@@ -594,7 +598,7 @@ dynamicTree.Tree.addMethod('_selectOrEditNode', function(evt, node, ctrlHeld, sh
     }
 
     if (isSelect) {
-        node.select(evt, node.nofocus);
+        node.select(evt, node.nofocus, options);
     }
 });
 

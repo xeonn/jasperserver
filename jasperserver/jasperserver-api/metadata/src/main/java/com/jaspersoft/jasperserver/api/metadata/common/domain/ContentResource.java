@@ -49,6 +49,7 @@ public interface ContentResource extends Resource
 	String TYPE_XLSX = "xlsx";
 	String TYPE_IMAGE = "img";//unspecified image type
 	String TYPE_PPTX = "pptx";
+	String TYPE_JSON = "json";
 	String TYPE_UNSPECIFIED = "contentResource";
 
 

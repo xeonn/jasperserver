@@ -20,14 +20,17 @@
  */
 package com.jaspersoft.jasperserver.war.action;
 
-import java.util.Map;
+import java.io.OutputStream;
 
 import javax.servlet.http.HttpServletResponse;
 
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRPropertiesHolder;
 import net.sf.jasperreports.engine.JRPropertiesUtil;
+import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.export.ooxml.JRDocxExporter;
+import net.sf.jasperreports.export.SimpleExporterInput;
+import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
 
 import org.springframework.webflow.execution.RequestContext;
 
@@ -35,15 +38,21 @@ import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.common.DocxExportParametersBean;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.common.ExportParameters;
 
+
 /**
  * @author sanda zaharia (shertage@users.sourceforge.net)
- * @version $Id: ReportDocxExporter.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: ReportDocxExporter.java 54728 2015-04-24 15:28:20Z tdanciu $
  */
-public class ReportDocxExporter extends AbstractReportExporter {
+public class ReportDocxExporter extends AbstractReportExporter 
+{
 
-	public void export(RequestContext context, ExecutionContext executionContext, String reportUnitURI, Map baseParameters) throws JRException {
+	public void export(RequestContext context, ExecutionContext executionContext, JasperPrint jasperPrint, OutputStream outputStream) throws JRException
+	{
 		JRDocxExporter exporter = new JRDocxExporter(getJasperReportsContext());
-		exporter.setParameters(baseParameters);
+
+		exporter.setExporterInput(new SimpleExporterInput(jasperPrint));
+		exporter.setExporterOutput(new SimpleOutputStreamExporterOutput(outputStream));
+		
 		exporter.exportReport();
 	}
 

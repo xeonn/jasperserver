@@ -21,7 +21,8 @@
 package com.jaspersoft.jasperserver.api.metadata.user.domain;
 
 import com.jaspersoft.jasperserver.api.JasperServerAPI;
-import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributeCategory;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.InternalURI;
+import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributeLevel;
 
 /**
  * ProfileAttribute interface manages attaching of extra information to users and roles. For example, you may assign
@@ -29,12 +30,12 @@ import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributeCat
  * views.
  *
  * @author sbirney
- * @version $Id: ProfileAttribute.java 50011 2014-10-09 16:57:26Z vzavadskii $
+ * @version $Id: ProfileAttribute.java 54590 2015-04-22 17:55:42Z vzavadsk $
  * @see com.jaspersoft.jasperserver.api.metadata.user.domain.client.ProfileAttributeImpl
  * @since 2.0.0
  */
 @JasperServerAPI
-public interface ProfileAttribute {
+public interface ProfileAttribute extends InternalURI {
 
     /**
      * Returns the name of the attribute.
@@ -86,22 +87,63 @@ public interface ProfileAttribute {
     public boolean isSecure();
 
     /**
-     *  Sets the value of secure field of the attribute. If the value is set to <code>true</code>, then attribute
+     * Sets the value of secure field of the attribute. If the value is set to <code>true</code>, then attribute
      * is secure. If it is set to <code>false</code>, then attribute is not secure.
      */
     public void setSecure(boolean secure);
 
     /**
-     * Returns the category of the attribute.
+     * Returns the group of the attribute.
      *
-     * @return the category of the attribute.
+     * @return the group of the attribute.
      */
-    public ProfileAttributeCategory getCategory();
+    public String getGroup();
 
     /**
-     * Sets category for the attribute.
+     * Sets group for the attribute.
      *
-     * @param category the category of the attribute.
+     * @param group the group of the attribute.
      */
-    public void setCategory(ProfileAttributeCategory category);
+    public void setGroup(String group);
+
+    /**
+     * Returns the description of the attribute
+     *
+     * @return the description of the attribute
+     */
+    public String getDescription();
+
+    /**
+     * Sets description for the attribute
+     *
+     * @param description the description of the attribute
+     */
+    public void setDescription(String description);
+
+    /**
+     * Shows profile attribute level relative to target level.
+     *
+     * @return <code>ProfileAttributeLevel</code> enum.
+     */
+    public ProfileAttributeLevel getLevel();
+
+    /**
+     * Sets profile attribute level relative to target level.
+     */
+    public void setLevel(ProfileAttributeLevel level);
+
+    /**
+     * Returns uri
+     *
+     * @return  uri
+     */
+    public String getUri();
+
+    /**
+     * Sets generated uri based on attribute holder uri and attribute name
+     *
+     * @param holderUri the internal attribute holder uri
+     * @param holderUri the internal attribute holder uri
+     */
+    public void setUri(String attrName, String holderUri);
 }

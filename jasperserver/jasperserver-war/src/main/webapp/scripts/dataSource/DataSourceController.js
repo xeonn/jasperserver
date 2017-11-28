@@ -19,6 +19,14 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+
+/**
+ * @author: Dima Gorbenko
+ * @version: $Id: DataSourceController.js 8900 2015-05-06 20:57:14Z yplakosh $
+ */
+
+/* global dialogs, redirectToUrl */
+
 define(function (require) {
     "use strict";
 
@@ -247,11 +255,15 @@ define(function (require) {
                 self.saveDialog.startSaveDialog();
             };
 
+            // validationMethodOnSaveClick is moved to view in text-data-source branch,
+            // but let's have them both (in model and in a view) here till merged
             if (!_.isUndefined(this.dataSourceView.model.validationMethodOnSaveClick)) {
                 this.dataSourceView.model.validationMethodOnSaveClick(funcOnceValidationPassed);
                 return;
+            } else if (!_.isUndefined(this.dataSourceView.validationMethodOnSaveClick)) {
+                this.dataSourceView.validationMethodOnSaveClick(funcOnceValidationPassed);
+                return;
             }
-
             funcOnceValidationPassed();
         },
 

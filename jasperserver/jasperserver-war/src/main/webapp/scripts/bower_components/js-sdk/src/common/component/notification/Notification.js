@@ -21,7 +21,7 @@
 
 /**
  * @author: Olesya Bobruyko
- * @version: $Id: Notification.js 280 2014-10-15 13:39:53Z ktsaregradskyi $
+ * @version: $Id: Notification.js 812 2015-01-27 11:01:30Z psavushchik $
  */
 
 define(function(require) {
@@ -44,59 +44,84 @@ define(function(require) {
 
     notificationTypeToCssClassMap[NOTIFICATION_TYPES.WARNING] = NOTIFICATION_TYPES.WARNING;
 
-    return Backbone.View.extend({
-        template: _.template(notificationTemplate),
+    return Backbone.View.extend(
+        /** @lends Notification.prototype */
+        {
+            template: _.template(notificationTemplate),
 
-        events: {
-            "click .close a": "hide"
-        },
+            events: {
+                "click .close a": "hide"
+            },
 
-        el: function() {
-            return this.template({
-                message: this.message,
-                i18n: i18n
-            });
-        },
+            el: function() {
+                return this.template({
+                    message: this.message,
+                    i18n: i18n
+                });
+            },
 
-        initialize: function() {
-            this.render();
-        },
+            /**
+             * @constructor Notification
+             * @classdesc Notification component.
+             *
+             */
+            initialize: function() {
+                this.render();
+            },
 
-        render: function() {
-            $("body").append(this.$el);
-            this.$el.hide();
-            this.$messageContainer = this.$(".notificationMessage > span:first-child");
+            /**
+             * @description Renders notification.
+             * @returns {Notification}
+             */
+            render: function() {
+                $("body").append(this.$el);
+                this.$el.hide();
+                this.$messageContainer = this.$(".notificationMessage > span:first-child");
 
-            return this;
-        },
+                return this;
+            },
 
-        show: function(options) {
-            options = _.extend({
-                type: NOTIFICATION_TYPES.WARNING,
-                delay: NOTIFICATION_DEFAULT_DELAY
-            }, options);
+            /**
+             * @description Shows notification.
+             * @param {object} options
+             * @param {string} [options.type="warning"] - type of notification (success, warning).
+             * @param {number} [options.delay=2000] - delay before notification is closed.
+             * @param {string} options.message - notification text.
+             */
+            show: function(options) {
+                options = _.extend({
+                    type: NOTIFICATION_TYPES.WARNING,
+                    delay: NOTIFICATION_DEFAULT_DELAY
+                }, options);
 
-            this.$messageContainer.text(options.message);
+                this.$messageContainer.text(options.message);
 
-            this.$messageContainer.removeClass().attr({"class": notificationTypeToCssClassMap[options.type]});
+                this.$messageContainer.removeClass().attr({"class": notificationTypeToCssClassMap[options.type]});
 
-            this.$el.slideDown();
+                this.$el.slideDown();
 
-            _.delay(_.bind(this.hide, this), options.delay);
+                _.delay(_.bind(this.hide, this), options.delay);
 
-            return this;
-        },
+                return this;
+            },
 
-        hide: function(event) {
-            event && event.preventDefault();
+            /**
+             * @description Hides notification.
+             * @param {object} event - jQuery event.
+             */
+            hide: function(event) {
+                event && event.preventDefault();
 
-            this.$el.slideUp();
+                this.$el.slideUp();
 
-            return this;
-        },
+                return this;
+            },
 
-        remove: function() {
-            Backbone.View.prototype.remove.call(this);
-        }
-    });
+            /**
+             * @description Removes notification.
+             */
+            remove: function() {
+                Backbone.View.prototype.remove.call(this);
+            }
+        });
 });

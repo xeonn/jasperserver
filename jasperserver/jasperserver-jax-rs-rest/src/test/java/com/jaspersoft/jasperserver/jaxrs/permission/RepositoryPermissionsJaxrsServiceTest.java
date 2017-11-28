@@ -21,19 +21,22 @@
 package com.jaspersoft.jasperserver.jaxrs.permission;
 
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Folder;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.InternalURI;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.PermissionUriProtocol;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.ObjectPermission;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.Role;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.client.ObjectPermissionImpl;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.client.RoleImpl;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.client.UserImpl;
+import com.jaspersoft.jasperserver.api.metadata.user.service.impl.InternalURIDefinition;
 import com.jaspersoft.jasperserver.dto.permissions.RepositoryPermission;
 import com.jaspersoft.jasperserver.dto.permissions.RepositoryPermissionListWrapper;
 import com.jaspersoft.jasperserver.jaxrs.common.RestConstants;
 import com.jaspersoft.jasperserver.remote.exception.IllegalParameterValueException;
 import com.jaspersoft.jasperserver.remote.exception.ResourceNotFoundException;
-import com.jaspersoft.jasperserver.remote.helpers.PermissionsRecipientIdentity;
-import com.jaspersoft.jasperserver.remote.helpers.PermissionsRecipientIdentityResolver;
+import com.jaspersoft.jasperserver.remote.helpers.RecipientIdentity;
+import com.jaspersoft.jasperserver.remote.helpers.RecipientIdentityResolver;
 import com.jaspersoft.jasperserver.remote.resources.converters.PermissionConverter;
 import com.jaspersoft.jasperserver.remote.services.PermissionsService;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
@@ -72,16 +75,16 @@ public class RepositoryPermissionsJaxrsServiceTest {
     private RepositoryPermissionsJaxrsService service;
 
     @Mock private PermissionsService permissionsService;
-    @Mock private PermissionsRecipientIdentityResolver permissionRecipientIdentityResolver;
+    @Mock private RecipientIdentityResolver permissionRecipientIdentityResolver;
     @Mock private PermissionConverter converter;
 
     private final List<ObjectPermission> mockPermissons = new ArrayList<ObjectPermission>(10);
 
     private final String userUri = "user:/me";
-    private final PermissionsRecipientIdentity userIdentity = new PermissionsRecipientIdentity(User.class, "me");
+    private final RecipientIdentity userIdentity = new RecipientIdentity(User.class, "me");
 
     private final String roleUri = "role:/ROLE_SITH";
-    private final PermissionsRecipientIdentity roleIdentity = new PermissionsRecipientIdentity(Role.class, "ROLE_SITH");
+    private final RecipientIdentity roleIdentity = new RecipientIdentity(Role.class, "ROLE_SITH");
 
     private final ObjectPermission serverPermission = new ObjectPermissionImpl();
     private final RepositoryPermission clientPermission = new RepositoryPermission();
@@ -544,7 +547,8 @@ public class RepositoryPermissionsJaxrsServiceTest {
         List<RepositoryPermission> data = new ArrayList<RepositoryPermission>();
         data.add(clientPermission);
         RepositoryPermissionListWrapper input = new RepositoryPermissionListWrapper(data);
-        String uri = "/public";
+        InternalURI uri = new InternalURIDefinition("/public", PermissionUriProtocol.RESOURCE);
+
         String jerseyUri = "public";
 
         Response response = service.updatePermissions(input,jerseyUri);
@@ -564,7 +568,7 @@ public class RepositoryPermissionsJaxrsServiceTest {
         List<RepositoryPermission> data = new ArrayList<RepositoryPermission>();
         data.add(clientPermission);
         RepositoryPermissionListWrapper input = new RepositoryPermissionListWrapper(data);
-        String uri = Folder.SEPARATOR;
+        InternalURI uri = new InternalURIDefinition(Folder.SEPARATOR, PermissionUriProtocol.RESOURCE);
 
         Response response = service.updatePermissionsRoot(input);
 

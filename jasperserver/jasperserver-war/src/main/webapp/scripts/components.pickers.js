@@ -22,8 +22,10 @@
 
 /**
  * @author: Sergey Prilukin
- * @version: $Id: components.pickers.js 7872 2014-10-04 09:08:52Z inesterenko $
+ * @version: $Id: components.pickers.js 8179 2015-01-27 12:34:21Z psavushchik $
  */
+
+/* global $F, buttonManager, _, layoutModule, dynamicTree, matchAny, dialogs */
 
 var picker = {
 };

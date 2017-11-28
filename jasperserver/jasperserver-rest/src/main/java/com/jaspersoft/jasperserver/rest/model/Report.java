@@ -22,10 +22,12 @@
 
 package com.jaspersoft.jasperserver.rest.model;
 
+import net.sf.jasperreports.engine.JasperPrint;
+
+import javax.activation.DataSource;
+import java.io.Serializable;
 import java.util.Iterator;
 import java.util.Map;
-import javax.activation.DataSource;
-import net.sf.jasperreports.engine.JasperPrint;
 
 /**
  * This class represent the model for the resource Report.
@@ -38,7 +40,7 @@ import net.sf.jasperreports.engine.JasperPrint;
  * By default this type of resource is not persistent, and it is stored in the
  * @author gtoffoli
  */
-public class Report {
+public class Report implements Serializable {
 
     private String uuid;
 

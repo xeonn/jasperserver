@@ -25,8 +25,12 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNotSame;
 import static org.testng.Assert.assertTrue;
 
 /**
@@ -54,5 +58,32 @@ public class ClientCustomDataSourceTest {
     @Test
     public void testHashCode() throws Exception {
         assertEquals(dataSource1.hashCode(), dataSource2.hashCode());
+    }
+
+    @Test
+    public void cloeableConstuctorClonesResources(){
+        final ClientCustomDataSource source = new ClientCustomDataSource();
+        final HashMap<String, ClientReferenceableFile> resources = new HashMap<String, ClientReferenceableFile>();
+        resources.put("resource1", new ClientReference("/reference1"));
+        ClientFile file = new ClientFile();
+        file.setType(ClientFile.FileType.css);
+        resources.put("resource2", file);
+        resources.put("resource3", new ClientReference("/reference2"));
+        file = new ClientFile();
+        file.setType(ClientFile.FileType.csv);
+        resources.put("resource4", file);
+        source.setResources(resources);
+        final Map<String, ClientReferenceableFile> resourcesClone = new ClientCustomDataSource(source).getResources();
+        assertNotNull(resourcesClone);
+        assertNotSame(resourcesClone, resources);
+        assertEquals(resourcesClone.size(), resources.size());
+        for(String key : resourcesClone.keySet()){
+            final ClientReferenceableFile clone = resourcesClone.get(key);
+            final ClientReferenceableFile original = resources.get(key);
+            assertNotNull(clone);
+            assertNotNull(original);
+            assertTrue(clone.equals(original));
+            assertNotSame(clone, original);
+        }
     }
 }

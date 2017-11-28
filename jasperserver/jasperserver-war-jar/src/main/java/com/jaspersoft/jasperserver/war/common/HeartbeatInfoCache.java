@@ -25,8 +25,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.apache.commons.httpclient.methods.PostMethod;
-
 /**
  * @author Teodor Danciu (teodord@users.sourceforge.net)
  * @version $Id: HibernateLoggingService.java 8408 2007-05-29 23:29:12Z melih $
@@ -49,13 +47,13 @@ public class HeartbeatInfoCache implements HeartbeatContributor, Serializable
 		infoCache.put(info, info);
 	}
 	
-	public void contributeToHttpCall(PostMethod post)
+	public void contributeToHttpCall(HeartbeatCall call)
 	{
 		for(Iterator it = infoCache.keySet().iterator(); it.hasNext();)
 		{
 			HeartbeatInfo info = (HeartbeatInfo)it.next();
 			
-			info.contributeToHttpCall(post);
+			info.contributeToHttpCall(call);
 		}
 	}
 	

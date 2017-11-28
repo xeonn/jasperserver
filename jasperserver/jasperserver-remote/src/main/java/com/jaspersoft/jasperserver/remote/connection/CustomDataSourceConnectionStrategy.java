@@ -26,6 +26,7 @@ import com.jaspersoft.jasperserver.api.engine.jasperreports.util.CustomDomainMet
 import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.CustomReportDataSource;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.service.CustomReportDataSourceService;
+import com.jaspersoft.jasperserver.api.metadata.jasperreports.service.ReportDataAdapterService;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.service.ReportDataSourceService;
 import com.jaspersoft.jasperserver.dto.resources.ClientCustomDataSource;
 import com.jaspersoft.jasperserver.dto.resources.ClientProperty;
@@ -46,7 +47,7 @@ import java.util.Set;
  * <p></p>
  *
  * @author yaroslav.kovalchyk
- * @version $Id: CustomDataSourceConnectionStrategy.java 50011 2014-10-09 16:57:26Z vzavadskii $
+ * @version $Id: CustomDataSourceConnectionStrategy.java 53873 2015-04-07 18:59:44Z mchan $
  */
 @Service
 public class CustomDataSourceConnectionStrategy implements ConnectionManagementStrategy<ClientCustomDataSource>, ConnectionMetadataBuilder<ClientCustomDataSource> {
@@ -68,14 +69,23 @@ public class CustomDataSourceConnectionStrategy implements ConnectionManagementS
         Exception exception = null;
 
         try {
-            ReportDataSourceService service = customDataSourceFactory.createService(toServer(connectionDescription));
+            final CustomReportDataSource reportDataSource = toServer(connectionDescription);
+            ReportDataSourceService service = customDataSourceFactory.createService(reportDataSource);
 
             passed = !(service instanceof CustomReportDataSourceService) || ((CustomReportDataSourceService) service).testConnection();
+            if (service instanceof ReportDataAdapterService) {
+                // try to generate metadata to validate if file is accessible and valid
+                engine.getMetaDataFromConnector(reportDataSource);
+            }
         } catch (Exception e) {
             exception = e;
         }
-        if (!passed) {
-            throw new ConnectionFailedException(connectionDescription, null, "Connection failed", exception);
+        if (!passed || exception != null) {
+            if(exception instanceof RemoteException){
+                throw (RemoteException)exception;
+            } else {
+                throw new ConnectionFailedException(connectionDescription, null, "Connection failed", exception);
+            }
         }
         return connectionDescription;
     }

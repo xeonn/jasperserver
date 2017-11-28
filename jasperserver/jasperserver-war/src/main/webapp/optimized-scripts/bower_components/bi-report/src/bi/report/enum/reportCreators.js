@@ -1,1 +1,0 @@
-define({AD_HOC_DESIGNER:"adhoc designer",JSS_IREPORT_STUDIO:"JSS/iReport studio"});

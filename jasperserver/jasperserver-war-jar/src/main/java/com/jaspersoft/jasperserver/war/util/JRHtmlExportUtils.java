@@ -21,16 +21,21 @@
 
 package com.jaspersoft.jasperserver.war.util;
 
-import net.sf.jasperreports.engine.export.JRHtmlExporterParameter;
+import com.jaspersoft.jasperserver.api.engine.jasperreports.util.ExportUtil;
+
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: JRHtmlExportUtils.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: JRHtmlExportUtils.java 54728 2015-04-24 15:28:20Z tdanciu $
  */
-public class JRHtmlExportUtils {
+public class JRHtmlExportUtils 
+{
 
-	public static final JRHtmlExporterParameter PARAMETER_HTTP_REQUEST =
+	/**
+	 * @deprecated Replaced by {@link ExportUtil#HTTP_SERVLET_REQUEST}.
+	 */
+	public static final net.sf.jasperreports.engine.export.JRHtmlExporterParameter PARAMETER_HTTP_REQUEST =
 		// derived class required because of protected constructor
-		new JRHtmlExporterParameter("HttpServletRequest") {}; 
+		new net.sf.jasperreports.engine.export.JRHtmlExporterParameter("HttpServletRequest") {}; 
 	
 }

@@ -1,35 +1,28 @@
-.primary.column.decorated.dashboardCanvas {
-    position: absolute;
-    height: auto;
-    width: auto;
+.dashboardViewer .dashboardContainer > .content > .body {
+    top: 29px;
 }
 
-.primary.column.decorated.dashboardCanvas > .content > .body {
-    height: auto;
-    width: auto;
-}
-
-.dashboardCanvas .nothingToDisplay {
+.dashboardContainer > .nothingToDisplay {
     position: absolute;
-    top: 30%;
+    top: 50%;
     left: 50%;
     margin-left: -200px;
+    margin-top: -100px;
     width: 400px;
     background: transparent;
     z-index: 1;
     border: medium none;
 }
 
-.dashboardCanvas .nothingToDisplay.hidden {
+.dashboardContainer > .nothingToDisplay.hidden {
     display: none;
 }
 
-.dashboardCanvas .nothingToDisplay .body > * {
+.dashboardContainer > .nothingToDisplay .body > * {
     background: #fff;
 }
 
-.dashboardCanvas .nothingToDisplay .message
-{
+.dashboardContainer > .nothingToDisplay .message {
     border: 1px solid #D3D2D2;
     margin: 10px 0;
     padding: 10px;

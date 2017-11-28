@@ -21,17 +21,21 @@
 
 package com.jaspersoft.jasperserver.api.engine.jasperreports.util;
 
-import net.sf.jasperreports.engine.JRDataSource;
-import net.sf.jasperreports.engine.JRField;
-import net.sf.jasperreports.engine.design.JRDesignField;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import net.sf.jasperreports.engine.JRDataSource;
+import net.sf.jasperreports.engine.JRField;
+import net.sf.jasperreports.engine.design.JRDesignField;
+
+import org.apache.commons.lang3.math.NumberUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * Created by IntelliJ IDEA.
@@ -44,7 +48,7 @@ public abstract class AbstractTextDataSourceDefinition extends DataAdapterDefini
 
     protected static final Log log = LogFactory.getLog(DataAdapterDefinition.class);
     // searching column data type under the following order:
-    protected Class typeList[] = {java.util.Date.class, Boolean.class, Number.class, String.class};
+    protected Class<?> typeList[] = {java.util.Date.class, Boolean.class, Number.class, String.class};
     // assigning numeric data type under the following order:
     ArrayList<String> numericTypes = new ArrayList<String>(Arrays.asList("java.lang.Integer", "java.lang.Long", "java.lang.Double"));
 
@@ -59,7 +63,7 @@ public abstract class AbstractTextDataSourceDefinition extends DataAdapterDefini
         this.rowCountForMetadataDiscovery = rowCountForMetadataDiscovery;
     }
 
-    public static boolean containsValue(List list) {
+    public static boolean containsValue(List<?> list) {
         return list != null && (list.size() > 0);
     }
 
@@ -122,8 +126,8 @@ public abstract class AbstractTextDataSourceDefinition extends DataAdapterDefini
     }
 
     protected String findType(JRDataSource csvDataSource, JRDesignField field) {
-        for (Class type : typeList) {
-            Class fieldType = getFieldType(type);
+        for (Class<?> type : typeList) {
+            Class<?> fieldType = getFieldType(type);
             field.setValueClassName(fieldType.getName());
             field.setValueClass(fieldType);
             Object value = null;
@@ -141,7 +145,7 @@ public abstract class AbstractTextDataSourceDefinition extends DataAdapterDefini
                 if (getBooleanType(value.toString()) == null) continue;
             } else if (type == Number.class) {
                 // NUMERIC TYPE
-                Class numericType = getNumericType(value, field);
+                Class<?> numericType = getNumericType(value, field);
                 if (numericType != null) type = numericType;
                 else continue;
 
@@ -153,29 +157,65 @@ public abstract class AbstractTextDataSourceDefinition extends DataAdapterDefini
     }
 
 
-    protected Class getFieldType(Class type) {
+    protected Class<?> getFieldType(Class<?> type) {
         if (type == Number.class || type == Boolean.class) return String.class;
         else return type;
     }
 
-    protected Class getNumericType(Object obj, JRDesignField field) {
-        Double value = null;
-        if (obj instanceof Double) {
-            value = (Double) obj;
-        } else if (obj instanceof String) {
-            String s = (String) obj;
-            if (!s.matches("[-+]?\\d*\\.?\\d+")) {
-                return null;
-            }
-            value = Double.parseDouble(s);
+    /**
+     * Converts the value into a number and returns the java type of the number.<br>
+     * Specifics of this implementation:<br>
+     * - returns {@link Double} as it's more accurate even if the value can be represented in {@link Float}<br>
+     * - accepts only decimal representations<br>
+     * - accepts only {@link String} and {@link Number} as the value<br>
+     * - if the value is a {@link String} then accepts only decimal representations<br>
+     * - doesn't accept java type qualifiers like 'L', 'd', etc... ('45L', '45f', etc...)
+     * - doesn't accept hex values ('0xF22')
+     * @param value - the value to convert
+     * @return java type of which the value can be represented in or <code>null</code> if the value cannot be converted
+     */
+    protected Class<? extends Number> getNumericType(Object value, JRDesignField field) {
+        Number number = null;
+
+        if (value instanceof Number) {
+            number = (Number) value;
+
+        } else if (value instanceof String) {
+
+            number = stringToNumber((String) value);
         }
-        if ((value - Math.rint(value)) == 0) {
-            if ((value > Integer.MAX_VALUE) || (value < Integer.MIN_VALUE)) return Long.class;
-            else return Integer.class;
-        } else return Double.class;
+
+        return number == null ? null : number.getClass();
     }
 
-    protected Class getBooleanType(String value) {
+    private Number stringToNumber(String strValue) {
+        if (StringUtils.isBlank(strValue)) {
+            return null;
+        }
+        // don't accept values with a type qualifier ('45L', '45F', etc...)
+        char lastDigit = strValue.charAt(strValue.length() - 1);
+        if (!Character.isDigit(lastDigit)) {
+            return null;
+        }
+        // don't accept hex values
+        if (strValue.indexOf('x') > 0) {
+            return null;
+        }
+        Number number = null;
+        try {
+            number = NumberUtils.createNumber(strValue);
+        } catch (NumberFormatException e) {
+            // ignored, returning null;
+        }
+        // special case of '.x' which NumberUtils evaluates to BigDecimal even if it fits double.
+        if (number instanceof BigDecimal && number.doubleValue() == 0D) {
+            number = new Double(number.doubleValue());
+        }
+        // use double as it's more accurate
+        return (number instanceof Float) ? new Double(number.doubleValue()) : number;
+    }
+
+    protected Class<?> getBooleanType(String value) {
         if (value.toString().equals("true") || value.toString().equals("false")) return Boolean.class;
         else return null;
     }

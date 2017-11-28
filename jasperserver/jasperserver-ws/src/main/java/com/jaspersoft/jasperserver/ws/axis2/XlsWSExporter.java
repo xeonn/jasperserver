@@ -28,17 +28,21 @@ import java.util.Map;
 import net.sf.jasperreports.engine.JRExporterParameter;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReportsContext;
-import net.sf.jasperreports.engine.export.JExcelApiExporter;
+import net.sf.jasperreports.engine.export.JRExporterContext;
+import net.sf.jasperreports.engine.export.JRXlsAbstractExporter;
 import net.sf.jasperreports.engine.export.JRXlsExporterParameter;
+import net.sf.jasperreports.export.XlsExporterConfiguration;
+import net.sf.jasperreports.export.XlsReportConfiguration;
 
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
 import com.jaspersoft.jasperserver.api.engine.common.service.EngineService;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.common.XlsExportParametersBean;
+import com.jaspersoft.jasperserver.api.engine.jasperreports.util.ExportUtil;
 import com.jaspersoft.jasperserver.api.metadata.xml.domain.impl.Argument;
 
 /**
  * @author sanda zaharia (shertage@users.sourceforge.net)
- * @@version $Id: XlsWSExporter.java 47331 2014-07-18 09:13:06Z kklein $
+ * @@version $Id: XlsWSExporter.java 54728 2015-04-24 15:28:20Z tdanciu $
  */
 public class XlsWSExporter implements WSExporter {
 	
@@ -54,7 +58,8 @@ public class XlsWSExporter implements WSExporter {
 			String reportUnitURI
 			) throws Exception
 	{
-		JExcelApiExporter exporter = new JExcelApiExporter(getJasperReportsContext());
+		JRXlsAbstractExporter<? extends XlsReportConfiguration, ? extends XlsExporterConfiguration, ? extends JRExporterContext> exporter = 
+			ExportUtil.getInstance(getJasperReportsContext()).createXlsExporter();
 		exporter.setParameter(JRExporterParameter.JASPER_PRINT, jasperPrint);
 		exporter.setParameter(JRExporterParameter.OUTPUT_STREAM, output);
 		

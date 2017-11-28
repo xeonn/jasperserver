@@ -57,13 +57,6 @@
 					<li class="leaf"><p class="wrap separator" href="#"><b class="icon"></b></p></li>
 				</ul>
 			</li>
-            <li class="node">
-                <p href="#" class="wrap header"><b class="icon"></b>New CSS structure</p>
-                <ul class="list filters">
-                    <li class="leaf"><a class="wrap button" href="flow.html?_flowId=sampleFlow&page=newCss"><b class="icon"></b>New CSS structure</a></li>
-                    <li class="leaf"><p class="wrap separator" href="#"><b class="icon"></b></p></li>
-                </ul>
-            </li>
 		</ul>
 		
     </t:putAttribute>

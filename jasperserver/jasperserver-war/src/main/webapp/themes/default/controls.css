@@ -31,7 +31,9 @@ fieldset.group legend {
 }
 
 fieldset.inputs fieldset.group legend.label {
-    overflow:visible \9; /* IE8 and IE9 */
+    display: inline-block;
+    overflow: visible;
+    width: 100%;
 }
 
 fieldset .sectionHeader {
@@ -93,7 +95,8 @@ fieldset .sectionHeader {
 .error>textArea,
 .error>select,
 .error div.mSelect-svListPlaceholder,
-.error div.sSelect.collapsed > a.sSelect-input{
+.error div.sSelect.collapsed > a.sSelect-input,
+.errorContainer.error input[type=text]{
 	margin-bottom: 0;
 	background: #E65C56;
 	color:white;
@@ -103,7 +106,7 @@ fieldset .sectionHeader {
 	display: none;
 }
 
-.error>.message.warning {
+.error > .message.warning {
 	display: block;
 	padding-left: 20px;
 	background-image: url(images/message_icons_sprite.png);
@@ -112,11 +115,11 @@ fieldset .sectionHeader {
 	clear: left;
 }
 
-.error>.message.success {
+.error > .message.success {
 	background-position: 2px -80px;
 }
 
-.group.error>.message {
+.group.error > .message {
 	display:inline-block;
 	padding-left: 20px;
 	background-image: url(images/message_icons_sprite.png);
@@ -125,15 +128,15 @@ fieldset .sectionHeader {
 	clear: left;
 }
 
-.error>.message a.details {
+.error > .message a.details {
 	text-decoration: underline;
 }
 
-.error>.message.success a.details {
+.error > .message.success a.details {
 	display:none;
 }
 
-.error.body>.message.warning {
+.error.body > .message.warning {
 	margin:10px;
 }
 
@@ -230,8 +233,19 @@ fieldset .sectionHeader {
 .textArea,
 .picker input,
 .browser {
-	width:97%
+	width: 100%;	/* NEW */
+	/* width: 97% \9;	IE8 */
 }
+
+ /* @media screen and (min-width:0\0) { IE9 and above
+	.input,
+	.select,
+	.textArea,
+	.picker input,
+	.browser {
+		width:97%;
+	}
+} */
 
 .saveLocation {
 	width:600px;
@@ -278,13 +292,30 @@ fieldset .sectionHeader {
 .input select,
 select,
 .textArea textarea,
+.input textarea,
 .control.browser input,
 .pickList,
 .pickList-hasIcons {
 	display: inherit;
 	margin-top:4px;
-	width:99%;
+	/* width:99%; */	/* DELETE */
+	width: 100%;		/* NEW */
+	/* width: 100% \9;		IE8 */
 }
+
+/* @media screen and (min-width:0\0) {  IE9 and above
+	.input input,
+	.picker input,
+	.input select,
+	select,
+	.textArea textarea,
+	.input textarea,
+	.control.browser input,
+	.pickList,
+	.pickList-hasIcons {
+		width: 100%;
+	}
+} */
 
 .description {
 	background-color:#EEEEEE;
@@ -292,14 +323,6 @@ select,
 	height:auto;
 	padding:8px;
 	margin-top:4px;
-}
-
-.sourceDialogNew .itemDescription {
-    background-color:#EEEEEE;
-    border:1px solid #E0E0E0;
-    height: 50px;
-    padding:8px;
-    margin: 6px 0 0;
 }
 
 select,
@@ -318,12 +341,12 @@ input[type=text] {
 	padding-left:3px;
 }
 
-.list .control>.wrap {
+.list .control > .wrap {
 	border-width: 0;
 }
 
 .control.picker {
-	padding-right:16px;
+	/* padding-right:16px; */
 	white-space:nowrap;
 }
 
@@ -333,7 +356,8 @@ input[type=text] {
 
 .picker input {
 	display: inline;
-	width: 90% !important;
+	width: calc(100% - 24px)  !important;
+	width: 90% \9 !important; /* IE8 */
 }
 
 .panel .picker .wrap {
@@ -342,28 +366,43 @@ input[type=text] {
 }
 
 .textArea textarea {
-	min-height:70px;
+	min-height: 70px;
 	overflow-y:auto;
 	resize:none;
 }
 
 .textArea.shorter textarea {
-	min-height:54px;
+	min-height: 54px;
 }
 
 .textArea.taller textarea,
 .select.taller select {
-	height:7.5em;
+	height: 7.5em;
 }
 
 
 input[type="text"],
 input[type="password"],
 textarea,
-.control.select.multiple>select,
 .mSelect-input, input.mSelect-input[type="text"],
 .sSelect-input,
 .control.combo>select.button {
+	border-style: solid;
+	border-width: 1px;
+	border-top-color: #848484;
+	border-left-color: #c1c1c1;
+	border-right-color: #c1c1c1;
+	border-bottom-color: #c1c1c1;
+	background-image: url(images/input_bkgd.png);
+	background-repeat: repeat-x;
+	background-position: top left;
+	-moz-box-sizing: border-box; 	/* NEW */
+	-webkit-box-sizing: border-box;	/* NEW */
+	box-sizing: border-box;			/* NEW */
+	height: 26px;					/* NEW */
+}
+
+.control.select.multiple > select {
 	border-style: solid;
 	border-width: 1px;
 	border-top-color: #848484;
@@ -403,7 +442,7 @@ input + label {
 	margin-bottom: 4px;
 }
 
-.control.browser>.wrap {
+.control.browser > .wrap {
 	display: block;
 }
 
@@ -411,7 +450,7 @@ input + label {
 	display: inline;
 	float: right;
 	margin-top: 8px;
-    margin-right: 9px;
+    margin-right: 0;
 }
 
 .control.browser input {}
@@ -421,8 +460,27 @@ input + label {
 }
 
 .list.locations .control.browser {
-	margin: 0 0 0 20px;
-	width: 97%;
+	margin: 0;
+	padding-left: 20px;
+	/* width: 97%; */
+}
+
+.list.locations #fileUpload {
+    padding-left: 20px;
+}
+
+.list.locations #fileUpload > input {
+    height: 26px \9;
+}
+
+@media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) { /* IE10 and IE11 only */
+    .list.locations #fileUpload > input {
+        height: 30px;
+    }
+
+    .list.locations #fileUpload {
+        padding-left: 18px;
+    }
 }
 
 .control.checkBox,
@@ -633,22 +691,19 @@ input[type="text"].date {
     margin-bottom: 0;
 }
 
-span.calTriggerWrapper {
-    position:relative;
-    height:16px !important;
-    top:5px;
-    display:inline-block !important;
-    .display:inline;
-    zoom:1;
+.calTriggerWrapper.button {
+    display: inline-block !important;
+    position: relative;
+    top: 4px;
+    zoom: 1;
 }
 
-span.calTriggerWrapper button {
-    position:absolute;
-    opacity:0;
-    filter:alpha(opacity=0);
-    height: 16px;
-    width: 14px;
+.calTriggerWrapper.button button {
+    background-color: transparent;
+    border:none;
     cursor: pointer;
+    height: 27px;
+    width: 17px;
 }
 
 /*
@@ -909,13 +964,14 @@ http://www.dynarch.com/projects/calendar/old/
 	padding-right: 2px;
 }
 
-.control.combo>.wrap {
+.control.combo > .wrap {
 	display:block;
 	margin-bottom: 5px;
 }
 
-.control.combo>.control.searchLockup,
-.control.combo>select {
+.control.combo > .control.searchLockup,
+.control.combo > .control.booleanInput,
+.control.combo > select {
 	width:100%;
 }
 
@@ -960,21 +1016,21 @@ http://www.dynarch.com/projects/calendar/old/
 	margin-bottom:15px;
 }
 
-.groupBox>.corner,
-.groupBox>.edge.rl,
-.groupBox>.edge.tb,
-.groupBox>.corner.top,
-.groupBox>.corner.bottom,
-.groupBox>.corner.left,
-.groupBox>.corner.right,
-.groupBox>.edge.rl.left,
-.groupBox>.edge.rl.right,
-.groupBox>.edge.tb.top,
-.groupBox>.edge.tb.bottom {
+.groupBox > .corner,
+.groupBox > .edge.rl,
+.groupBox > .edge.tb,
+.groupBox > .corner.top,
+.groupBox > .corner.bottom,
+.groupBox > .corner.left,
+.groupBox > .corner.right,
+.groupBox > .edge.rl.left,
+.groupBox > .edge.rl.right,
+.groupBox > .edge.tb.top,
+.groupBox > .edge.tb.bottom {
 	display:none;
 }
 
-.groupBox>.content {
+.groupBox > .content {
 /* set coordinates to visual (0,0,0,0) of .column.decorated background,
   as this object used as reference for positioning
   child objects */
@@ -990,8 +1046,8 @@ http://www.dynarch.com/projects/calendar/old/
 	padding:10px 10px;
 }
 
-.groupBox>.content>.header,
-.groupBox>.content>.footer {
+.groupBox > .content > .header,
+.groupBox > .content > .footer {
 	display: none;
 }
 
@@ -1009,49 +1065,54 @@ http://www.dynarch.com/projects/calendar/old/
 .control.paging .input,
 .control.zoom .input,
 .control.search .input {
-	top:-9px;
-	margin:0 4px;
+	top: -10px;
+	margin: 0 4px;
 }
 
 .control.zoom input {
-	width:46px;
-	height:15px;
+	height: 22px;
+	width: 46px;
+	/* height:15px; */ /* DELETE IF NO PROBLEMS */
 }
 
 .control.paging input {
-	width: 30px;
-	height:15px;
+	height: 22px;
+	width: 50px;
 }
 
 .control.search input {
-	width: 85px;
-	height:15px;
+	height: 22px;
+	width: 105px;
+	/* width: 85px */ /* DELETE IF NO PROBLEMS */
+	/* height:15px; */ /* DELETE IF NO PROBLEMS */
 }
 
 .control.paging .button,
 .control.zoom .button,
 .control.search .button {
+	background: none;
 	margin-bottom: 0;
-	background:none;
 }
 
 .control.zoom > .button.action.square,
 .control.search > .button.action.square {
-	margin:0;
-    height:28px;
-    width:20px;
+	height: 24px;
+	margin: 0;
+	width: 22px;
+    /* height: 28px; */
+    /* width: 20px; */
 }
 
 .control.paging > .button.action > .wrap,
 .control.zoom > .button.action > .wrap,
 .control.search > .button.action > .wrap  {
-    height:28px;
+    height: 28px;
 }
 
 .control.zoom .button.action > .wrap > .icon,
 .control.search .button.action > .wrap > .icon {
-    height:28px;
-    width:20px;
+    height: 28px;
+    width: 20px;
 }
 
 .control.zoom .button.action.zoomIn .icon,
@@ -1092,12 +1153,12 @@ http://www.dynarch.com/projects/calendar/old/
 
 .control.zoom .button.capsule,
 .control.search .button.capsule {
-	height:21px;
-	width:22px;
-	vertical-align:top;
-	margin-left:-5px;
-	margin-top:4px;
 	background-image: url("images/button_capsule_sprite.png");
+	height: 21px;
+	margin-left: -5px;
+	margin-top: 4px;
+	vertical-align: top;
+	width: 22px;
 }
 
 /* text input with drop-down menu, new in Emerald 3 */
@@ -1107,13 +1168,14 @@ http://www.dynarch.com/projects/calendar/old/
 }
 
 .textPlus > .button {
+	background-color: none;
+	border: 1px solid #c0c0c0;
+	border-top: 1px solid #848484;
+	border-left: none;
 	display:inline-block;
-	height:21px;
-	border:1px solid #c0c0c0;
-	border-top:1px solid #848484;
-	background-color:none;
-	vertical-align:bottom;
-	margin-left:-5px;
+	height: 22px;
+	margin-left: -5px;
+	vertical-align: bottom;
 }
 
 .textPlus > .button.search {
@@ -1125,19 +1187,19 @@ http://www.dynarch.com/projects/calendar/old/
 }
 
 .textPlus .button.search > .icon {
-	height:19px;
-	width:21px;
-	background-color:#fff;
-	background-image:url("images/search_sprite.png");
-	background-repeat:no-repeat;
-	background-position:-6px -126px;
+	background-color: #fff;
+	background-image: url("images/search_sprite.png");
+	background-repeat: no-repeat;
+	background-position: 0 -59px;
+	height: 20px;
+	width: 21px;
 }
 
 .textPlus .button.disclosure > .icon {
-	height:19px;
-	width:18px;
 	background-image: url("images/disclosure_indicators_sprite.png");
-	background-position:3px -52px
+	background-position: 4px -52px;
+	height: 20px;
+	width: 18px;
 }
 
 /*
@@ -1145,8 +1207,8 @@ http://www.dynarch.com/projects/calendar/old/
  */
 .control.path .step,
 .control.path .label {
-	margin:0 0.4em 0 0;
-	float:left;
+	margin: 0 0.4em 0 0;
+	float: left;
 }
 
 .control.path .step {
@@ -1188,12 +1250,12 @@ http://www.dynarch.com/projects/calendar/old/
 }
 
 .control.select.error>select,
-.control.pickWells>.control.select.error>select {
+.control.pickWells > .control.select.error>select {
 	top:30px;
 }
 
-.control.pickWells>.control.select,
-.control.pickWells>.control.combo {
+.control.pickWells > .control.select,
+.control.pickWells > .control.combo {
 	position: absolute;
 	top:0;
 	bottom: 0;
@@ -1201,28 +1263,28 @@ http://www.dynarch.com/projects/calendar/old/
 	margin: 0;
 }
 
-.control.pickWells>.control.select>select {
+.control.pickWells > .control.select>select {
 	position: absolute;
 	top:15px;
 	bottom: 0;
 }
 
-.control.pickWells>.availableValues,
-.control.pickWells>.selectedRoles {
+.control.pickWells > .availableValues,
+.control.pickWells > .selectedRoles {
 	left:0;
 	right: 50%;
 }
 
-.control.pickWells>.availableValues>select,
-.control.pickWells>.selectedRoles>select,
-.control.pickWells>.control.select .selectedUsers {
+.control.pickWells > .availableValues>select,
+.control.pickWells > .selectedRoles>select,
+.control.pickWells > .control.select .selectedUsers {
 	bottom:0;
 	position:absolute;
 	top:40px;
 }
 
-.control.pickWells>.control.select.selectedValues,
-.control.pickWells>.control.select.selectedUsers {
+.control.pickWells > .control.select.selectedValues,
+.control.pickWells > .control.select.selectedUsers {
 	left:51%;
 	right: 0;
 }
@@ -1271,13 +1333,24 @@ http://www.dynarch.com/projects/calendar/old/
 /*
  * From: searchLockup.css
  */
-.searchLockup {
+.searchLockup, .booleanInput {
 	position:relative;
 	height: auto;
 	white-space: nowrap;
 	min-width: 130px;
 	margin-bottom: 0;
 	height:auto;
+}
+
+.booleanInput {
+    min-width: 220px;
+}
+
+input.booleanComboInput{
+    width: 97%;
+    margin-right: 0;
+    background: none;
+    border: none;
 }
 
 #secondarySearchBox.searchLockup {
@@ -1291,70 +1364,39 @@ http://www.dynarch.com/projects/calendar/old/
 	margin-top:3px;
 }
 
-.searchLockup>label {
+.searchLockup > label {
 	display:block;
 	margin-bottom:5px;
 }
 
-.control.searchLockup>.wrap {
-	background:#ffffff;
-	border-style:solid;
-	border-width:1px;
-	border-color: #aaaaaa;
-	height:18px;
+.control.searchLockup > .wrap,
+.control.booleanInput > .wrap {
+	background: #ffffff;
+	border: 1px solid #999;
+	height: 22px;
+	position: relative; /* KEEP IF NO PROBLEMS - ADDED AFTER ISSUE WITH PERMISSIONS DIALOG */
 }
 
-#globalSearch.searchLockup>.wrap {
-	padding-left:0;
-	padding-right:22px;
-	border:1px solid #1887B8;
-}
-
-.control.searchLockup>.wrap>input[type=text] {
-	background:none;
-	border:none;
+.control.searchLockup > .wrap>input[type=text] {
+	background: none;
+	border: none;
     margin-right: 46px;
 }
 
-#globalSearch.control.searchLockup>.wrap>input[type=text] {
-	height: 14px;
-	margin: 2px 3px 0;
-	margin-top:3px \9; /* IE8 and IE9 */
-	*margin-top:2px; /* IE7 */
-	padding-bottom: 0;
-	padding-top: 0;
-	width: 120px;
-}
-
-#secondarySearchBox.control.searchLockup>.wrap>input[type=text] {
-	height: 14px;
-	margin:2px 32px 0 3px;
-	margin-top:3px \9; /* IE8 and IE9 */
-	*margin-top:2px; /* IE7 */
-	padding-bottom: 0;
-	padding-top: 0;
-	width: 118px;
-}
-
-.control.searchLockup>.right {
-	position:absolute;
-	right:20px;
-	display:inline-block;
+.control.searchLockup > .right {
+	position: absolute;
+	right: 20px;
+	display: inline-block;
 	width: 22px;
 }
 
-.control.searchLockup>.button.search {
-	position:absolute;
-	right:0;
-	top:0;
-	margin:0;
-	text-indent: -9999px;
-	display:inline-block;
-}
-
-#secondarySearchBox.control.searchLockup>.button.search {
+.control.searchLockup > .button.search {
+	position: absolute;
+	right: 0;
 	top: 0;
-	display:block;
+	margin: 0;
+	text-indent: -9999px;
+	display: inline-block;
 }
 
 .button.searchClear {
@@ -1363,44 +1405,90 @@ http://www.dynarch.com/projects/calendar/old/
 	top:-20px;
 	background-image: url(images/search_sprite.png);
 	background-repeat: no-repeat;
-	background-position: -185px -165px;
+	background-position: -84px -58px;
 	display: none;
 	position: absolute;
 	margin:0;
 	text-indent: -9999px;
 }
 
-.button.searchClear.up {
-	background-position: 0px -202px;
+.button.searchClear.up,
+.button.searchClear.over,
+.button.searchClear.pressed {
+	background-position: -84px -58px;
 	display: block;
 }
 
-.button.searchClear.over{
-	background-position: -64px -202px;
-}
-
-.button.searchClear.pressed {
-	background-position: 0px -202px;
-}
-
-
-#globalSearch .button.searchClear.up {
-	background-position: 0px -162px;
-}
-
-#globalSearch .button.searchClear.over{
-	background-position: -64px -162px;
-}
-
-#globalSearch .button.searchClear.pressed {
-	background-position: 0px -162px;
-}
-
-
-.header>.searchLockup {
+.header > .searchLockup {
 	position:relative;
 	margin-left:12px;
 }
+
+#secondarySearchBox.searchLockup {
+	float: left;
+	margin-top: 3px;
+	width: 167px;
+}
+
+#secondarySearchBox.control.searchLockup > .wrap {
+	border: 1px solid #e2e2e2;
+}
+
+#globalSearch.searchLockup {
+	width: 200px;
+	margin-top: 5px;
+}
+
+#globalSearch.searchLockup > .wrap {
+	padding-left: 0;
+	padding-right: 22px;
+	border: none;
+}
+
+#globalSearch.control.searchLockup > .wrap>input[type=text] {
+	height: 100%;
+	margin: 0;
+	margin-top: 4px \9; /* IE8 and IE9 */
+	padding-bottom: 0;
+	padding-top: 0;
+	width: 175px;
+}
+
+#secondarySearchBox.control.searchLockup > .wrap>input[type=text] {
+	height: 19px;
+	margin-left: 1px;
+	margin-top: 3px \9; /* IE8 and IE9 */
+	*margin-top: 2px; /* IE7 */
+	padding-bottom: 0;
+	padding-top: 0;
+	width: 120px;
+}
+
+:root #secondarySearchBox.control.searchLockup > .wrap>input[type=text],
+:root #globalSearch.control.searchLockup > .wrap>input[type=text] {
+	margin-top: 0 \ ;
+}
+
+#secondarySearchBox.control.searchLockup > .button.search {
+	top: 0;
+	display:block;
+}
+
+#secondarySearchBox .button.searchClear,
+#secondarySearchBox .button.searchClear.up,
+#secondarySearchBox .button.searchClear.over,
+#secondarySearchBox .button.searchClear.pressed {
+	background-position: -84px -28px;
+}
+
+#globalSearch .button.searchClear,
+#globalSearch .button.searchClear.up,
+#globalSearch .button.searchClear.over,
+#globalSearch .button.searchClear.pressed {
+	background-position: -84px 2px;
+}
+
+/* END search lockup */
 
 /*
  * From: tabSet.css
@@ -1427,34 +1515,35 @@ http://www.dynarch.com/projects/calendar/old/
 }
 
 .tabSet.horizontal.text {
-	margin-bottom:20px;
+	margin-bottom: 20px;
 }
 
-.tabSet.horizontal.text>.tab {
+.tabSet.horizontal.text > .tab {
 	border-right: 1px solid #999;
 }
 
-.tabSet.horizontal.text>.tab.last {
+.tabSet.horizontal.text > .tab.last {
 	border-right: none;
 }
 
-.tabSet.horizontal.text>.tab>.wrap {
+.tabSet.horizontal.text > .tab > .wrap {
 	background: none;
-	margin-bottom:0;
+	cursor: pointer; /* NEW */
+	margin-bottom: 0;
 }
 
-.tabSet.horizontal.text>.tab>.wrap.over,
-.tabSet.horizontal.text>.tab>.wrap.pressed {
+.tabSet.horizontal.text > .tab > .wrap.over,
+.tabSet.horizontal.text > .tab > .wrap.pressed {
 	background-color: transparent;
 	text-decoration: underline;
 }
 
-.tabSet.horizontal.text>.tab.selected>.wrap.over,
-.tabSet.horizontal.text>.tab.selected>.wrap.pressed {
+.tabSet.horizontal.text > .tab.selected > .wrap.over,
+.tabSet.horizontal.text > .tab.selected > .wrap.pressed {
 	text-decoration: none;
 }
 
-.tabSet.text>.label>.wrap {
+.tabSet.text > .label > .wrap {
 	padding:0 5px 0 0;
 }
 
@@ -1472,8 +1561,9 @@ http://www.dynarch.com/projects/calendar/old/
 
 .tabSet.vertical.buttons {
 	float:left;
-	min-width: 125px;
-	margin-right: 20px;
+	/* min-width: 125px;
+	margin-right: 20px; */ /* DELETE IF NO PROBLEMS */
+	min-width: 150px;
 }
 
 .tabSet.vertical.buttons .button {
@@ -1486,10 +1576,11 @@ http://www.dynarch.com/projects/calendar/old/
 }
 
 .tabSet.vertical.buttons .button {
-	border-bottom:1px solid #ffffff;
+	/* border-bottom: 1px solid #fff; */ /* changed to border top because border-bottom broke in Chrome */
+	border-top: 1px solid #fff;
 	padding: 0 15px 0 0;
 	text-align: center;
-	width:100%;
+	width: 100%;
 }
 
 .tabSet.vertical.buttons .button .wrap {
@@ -1506,19 +1597,16 @@ http://www.dynarch.com/projects/calendar/old/
 /* sprite positions */
 
 .tabSet.vertical.buttons .button {
-	background-image: url("images/tabs_vertical_sprite.png");
-	background-position: 0 0;
+	background-color: #1388d8;
 }
 
 .tabSet.vertical.buttons .selected .button,
 .tabSet.vertical.buttons .selected .button.over,
 .tabSet.vertical.buttons .selected .button.pressed,
+.tabSet.vertical.buttons .button.over,
+.tabSet.vertical.buttons .button.pressed,
 .tabSet.vertical.buttons .button.over {
-	background-position: 0 -128px;
-}
-
-.tabSet.vertical.buttons .button.pressed {
-	background-position: 0 -256px;
+	background-color: #195b8a;
 }
 
 /* .tabSet.horizontal.buttons */
@@ -1543,21 +1631,26 @@ http://www.dynarch.com/projects/calendar/old/
 }
 
 .tabSet.horizontal.buttons {
+	background-color: #fff;
     float: left;
-    z-index: 10;
-    position: relative;
-    background-color: #EEEEEE;
-    background-image: url("images/tabs_horizontal_buttons_bkgd.png");
-    background-repeat: repeat-x;
-    background-position: left top;
-    height: 25px;
-    padding: 5px 20px 2px;
+    /* height: 25px; */
+    height: 27px;
     margin-bottom: 0;
     overflow: visible;
+    padding-right: 20px;
+    position: relative;
+    z-index: 10;
+    
+    /* padding: 5px 20px 2px; */ /* DELETE IF NO PROBLEMS */
+    
+    /* background-color: #EEEEEE;
+    background-image: url("images/tabs_horizontal_buttons_bkgd.png");
+    background-repeat: repeat-x;
+    background-position: left top; */ /* DELETE */
 }
 
 /*
-.tabs>.tabSet.horizontal.buttons {
+.tabs > .tabSet.horizontal.buttons {
 	float:none;
 }
 */
@@ -1567,33 +1660,33 @@ http://www.dynarch.com/projects/calendar/old/
 }  
 
 .tabSet.horizontal.buttons li {
-	margin: 2px 1px 0 1px;
 	border: none;
-	padding:0;
-	height:25px;
+	height: 25px;
+	margin: 2px 2px 0 2px;
+	padding: 0;
 }
 
 .tabSet.horizontal.buttons .button {
+	border-right: 1px solid transparent;
+	border-bottom: 1px solid transparent;
+	border-left: 1px solid transparent;
 	padding: 0 15px 0 0;
 	text-align: center;
-	border-right:1px solid transparent;
-	border-bottom:1px solid transparent;
-	border-left:1px solid transparent;
 }
 
 .tabSet.horizontal.buttons .selected .button {
 	margin-top: 0;
 }
 
-.tabSet.horizontal.buttons .selected .button>.wrap {
+.tabSet.horizontal.buttons .selected .button > .wrap {
+	height: 26px;
 	line-height: 25px;
-	height: 25px;
 }
 
 .tabSet.horizontal.buttons .button .wrap {
-	padding: 0 0 0 15px;
-	line-height: 25px;
 	height: 25px;
+	line-height: 25px;
+	padding: 0 0 0 15px;
 }
 
 /*
@@ -1606,53 +1699,62 @@ http://www.dynarch.com/projects/calendar/old/
 */
 
 .tabSet.anchor {
-    background-color: #DEDEDC;
-    border-bottom: 1px solid #B5B5B5;
-    border-top: 1px solid #B5B5B5;
-    height: 4px;
-    top: 32px;
+    background-color: #f4f4f4;
+    border-bottom: 1px solid #e3e3e3;
+    border-top: 1px solid #e3e3e3;
+    height: 8px;
+    top: 28px;
 }
 
 /* .tabSet.horizontal.buttons. .selected */
 
-.tabSet.horizontal.buttons>.tab.selected>.button,
-.tabSet.horizontal.buttons>.tab.selected>.button.over,
-.tabSet.horizontal.buttons>.tab.selected>.button.pressed {
-	border-top:1px solid #b5b5b5;
-	border-right:1px solid #b5b5b5;
-	border-bottom:none;
-	border-left:1px solid #b5b5b5;
-	background-color: #DEDEDC;
-	cursor:default;
+.tabSet.horizontal.buttons > .tab.selected > .button,
+.tabSet.horizontal.buttons > .tab.selected > .button.over,
+.tabSet.horizontal.buttons > .tab.selected > .button.pressed {
+	background-color: #f4f4f4;
+	border-top: 1px solid #e3e3e3;
+	border-right: 1px solid #e3e3e3;
+	border-bottom: none;
+	border-left: 1px solid #e3e3e3;
+	cursor: default;
+	/* background-color: #DEDEDC; */
 }
 
 /* Reverse Style Tabs, active tabs are white */
-.tabSet.reverse.horizontal.buttons>.tab.selected>.button,
-.tabSet.reverse.horizontal.buttons>.tab.selected>.button.over,
-.tabSet.reverse.horizontal.buttons>.tab.selected>.button.pressed {
+.tabSet.reverse.horizontal.buttons > .tab.selected > .button,
+.tabSet.reverse.horizontal.buttons > .tab.selected > .button.over,
+.tabSet.reverse.horizontal.buttons > .tab.selected > .button.pressed {
     background-color: #FFFFFF;
+}
+
+.tabSet.reverse.horizontal.buttons > .tab > .button.over {
+	background-color: #f1f1f1;
+}
+
+.tabSet.reverse.horizontal.buttons > li {
+	margin: 0 0.4em 0 0;
 }
 
 /* .tabSet.horizontal.buttons .over */
 
 .tabSet.horizontal.buttons .button.over {
-	/* gradient end values are #fba82a and #fb7c24 */
-	border-top:1px solid #b5b5b5;
-	border-right:1px solid #b5b5b5;
 	border-bottom:none;
-	border-left:1px solid #b5b5b5;
-	background: url("images/tabs_horizontal_sprite.png") repeat-x scroll 0 0 #fb7c24;
+	/* border-left:1px solid #b5b5b5;
+	border-top:1px solid #b5b5b5;
+	border-right:1px solid #b5b5b5; */
+	/* gradient end values are #fba82a and #fb7c24 */
+	/* background: url("images/tabs_horizontal_sprite.png") repeat-x scroll 0 0 #fb7c24 */;
 }
 
 /* .tabSet.horizontal.buttons .pressed */
 
 .tabSet.horizontal.buttons .button.pressed {
-	/* gradient end values are #fb7c24 and #f6a429 */
-	border-top:1px solid #b5b5b5;
-	border-right:1px solid #b5b5b5;
 	border-bottom:none;
-	border-left:1px solid #b5b5b5;
-	background: url("images/tabs_horizontal_sprite.png") repeat-x scroll 0 -56px #f6a429;
+	/* border-top:1px solid #b5b5b5;
+	border-right:1px solid #b5b5b5;
+	border-left:1px solid #b5b5b5; */
+	/* background: url("images/tabs_horizontal_sprite.png") repeat-x scroll 0 -56px #f6a429; */
+	/* gradient end values are #fb7c24 and #f6a429 */
 }
 
 
@@ -1868,12 +1970,11 @@ div.olap_level_label {
 
 #chart-options-container .pod-header,
 #level-container .pod-header {
-    color: #0872A4;
-    height: 28px;
-    line-height: 28px;
-    font-weight:bold;
     background: #f0f0f0;
     border-bottom: solid 1px #e0e0e0;
+    font-size: 12px;
+    height: 28px;
+    line-height: 28px;
     padding-left:8px;
 }
 
@@ -1892,8 +1993,9 @@ div.olap_level_label {
 
 .toolbar .dropList {
 	width:auto;
-	margin-top:4px;
-	margin-right:8px;
+	margin-top: 4px;
+	margin-right: 8px;
+	margin-left: 8px;
 }
 
 
@@ -2005,9 +2107,21 @@ input.hasCalendar2[readonly] {
     border-width: 1px;
 }
 
-.sourceDialogNew.overlay .control.searchLockup>.wrap>input[type=text]{
-    width: 100%;
-    margin-right: 0;
-    box-sizing: border-box;
-    padding-right: 23px;
+
+/* START New Select Data Dialog Box */
+.sourceDialogNew .itemDescription {
+    background-color: #EEEEEE;
+    /* border: 1px solid #E0E0E0; */
+    height: 50px;
+    margin: 6px 0 0;
+    padding: 8px;
 }
+
+.sourceDialogNew.overlay .control.searchLockup > .wrap>input[type=text]{
+    box-sizing: border-box;
+    height: 100%;
+    margin-right: 0;
+    padding-right: 23px;
+    width: 100%;
+}
+/* END New Select Data Dialog Box */

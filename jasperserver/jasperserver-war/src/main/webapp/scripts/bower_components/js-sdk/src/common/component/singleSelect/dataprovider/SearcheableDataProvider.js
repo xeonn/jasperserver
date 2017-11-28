@@ -22,7 +22,7 @@
 
 /**
  * @author Sergey Prilukin
- * @version: $Id: SearcheableDataProvider.js 172 2014-09-23 11:45:30Z sergey.prilukin $
+ * @version: $Id: SearcheableDataProvider.js 812 2015-01-27 11:01:30Z psavushchik $
  */
 
 /**
@@ -117,7 +117,7 @@ define(function (require) {
             for (var i = 0; i < data.length; i++) {
                 var value = data[i];
 
-                var searchIn = value.label == undefined ? value.value : value.label;
+                var searchIn = value.label === undefined ? value.value : value.label;
 
                 if (searchIn.toLowerCase().indexOf(this.criteria.toLowerCase()) > -1) {
                     filteredData[j] = value;

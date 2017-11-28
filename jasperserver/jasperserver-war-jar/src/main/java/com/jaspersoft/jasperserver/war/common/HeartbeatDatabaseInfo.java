@@ -20,7 +20,6 @@
  */
 package com.jaspersoft.jasperserver.war.common;
 
-import org.apache.commons.httpclient.methods.PostMethod;
 
 
 /**
@@ -65,11 +64,11 @@ public class HeartbeatDatabaseInfo extends HeartbeatInfo
 		this.databaseVersion = databaseVersion;
 	}
 
-	public void contributeToHttpCall(PostMethod post)
+	public void contributeToHttpCall(HeartbeatCall call)
 	{
-		post.addParameter("repoDbName[]", getDatabaseName() == null ? "" : getDatabaseName());
-		post.addParameter("repoDbVersion[]", getDatabaseVersion() == null ? "" : getDatabaseVersion());
-		post.addParameter("repoDbCount[]", String.valueOf(getCount()));
+		call.addParameter("repoDbName[]", getDatabaseName() == null ? "" : getDatabaseName());
+		call.addParameter("repoDbVersion[]", getDatabaseVersion() == null ? "" : getDatabaseVersion());
+		call.addParameter("repoDbCount[]", String.valueOf(getCount()));
 	}
 
 	public String getKey()

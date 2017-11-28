@@ -177,7 +177,7 @@
                		http://bugzilla.jaspersoft.com/show_bug.cgi?id=36566
                		changed from 1.38 to 1.50               				
             -->
-            <resource-root path="WEB-INF/lib/bcprov-jdk14-1.50.jar" use-physical-code-source="true"/>
+            <resource-root path="WEB-INF/lib/bcprov-jdk15on-1.52.jar" use-physical-code-source="true"/>
 
             <!--
                2013-01-22 thorick

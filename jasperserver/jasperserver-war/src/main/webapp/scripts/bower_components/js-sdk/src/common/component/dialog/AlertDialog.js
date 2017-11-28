@@ -4,6 +4,11 @@
  * Licensed under commercial Jaspersoft Subscription License Agreement
  */
 
+/**
+ * @author:
+ * @version: $Id: AlertDialog.js 1178 2015-05-06 20:40:12Z yplakosh $
+ */
+
 define(function (require) {
     "use strict";
 
@@ -17,10 +22,12 @@ define(function (require) {
         contentTemplate: _.template(alertDialogTemplate),
 
         constructor: function(options) {
+            options || (options = {});
+
             Dialog.prototype.constructor.call(this, {
-                modal: true,
+                modal: options.modal !== false,
                 additionalCssClasses: "alertDialog",
-                title: i18n["dialog.exception.title"],
+                title: options.title || i18n["dialog.exception.title"],
                 buttons: [
                     { label: i18n["button.close"], action: "close", primary: true }
                 ]

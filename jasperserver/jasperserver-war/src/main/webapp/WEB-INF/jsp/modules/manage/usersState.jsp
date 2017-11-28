@@ -22,8 +22,10 @@
 
 <%@ taglib prefix="c" uri="http://java.sun.com/jstl/core_rt" %>
 <%@ taglib uri="/spring" prefix="spring"%>
+<%@ taglib prefix="js" uri="/WEB-INF/jasperserver.tld" %>
 <%@ page import="com.jaspersoft.jasperserver.api.security.SecurityConfiguration" %>
 
+<js:out javaScriptEscape="true">
 <script type="text/javascript">
     if (typeof orgModule === "undefined") {
         orgModule = {};
@@ -61,14 +63,14 @@
     // Initialization of repository search init object.
     localContext.flowExecutionKey = '${flowExecutionKey}';
     localContext.userMngInitOptions = {
-        state: ${state},
-        defaultUser: '<spring:message code="${defaultUser}" javaScriptEscape="true"/>',
-        defaultEntity: '<spring:message code="${defaultEntity}" javaScriptEscape="true"/>',
-        currentUser: '<spring:message code="${signedUser}" javaScriptEscape="true"/>',
-        currentUserRoles: ${currentUserRoles}
+        state: JSON.parse('${state}'),
+        defaultUser: '${defaultUser}',
+        defaultEntity: '${defaultEntity}',
+        currentUser: '${signedUser}',
+        currentUserRoles: JSON.parse('${currentUserRoles}')
     };
 
-    orgModule.Configuration = ${configuration};
+    orgModule.Configuration = JSON.parse('${configuration}');
 
     if (typeof __jrsConfigs__.userManagement === "undefined") {
         __jrsConfigs__.userManagement = {};
@@ -80,3 +82,4 @@
     var isEncryptionOn = <%= SecurityConfiguration.isEncryptionOn()%>;
 
 </script>
+</js:out>

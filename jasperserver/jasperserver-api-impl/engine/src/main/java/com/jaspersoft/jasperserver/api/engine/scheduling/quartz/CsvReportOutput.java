@@ -26,14 +26,14 @@ import java.io.OutputStream;
 import java.util.Locale;
 
 import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JRExporterParameter;
 import net.sf.jasperreports.engine.JRPropertiesHolder;
 import net.sf.jasperreports.engine.JRPropertiesUtil;
 import net.sf.jasperreports.engine.JasperPrint;
-import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.export.JRCsvExporter;
-import net.sf.jasperreports.engine.export.JRCsvExporterParameter;
 import net.sf.jasperreports.engine.export.JRHyperlinkProducerFactory;
+import net.sf.jasperreports.export.SimpleCsvExporterConfiguration;
+import net.sf.jasperreports.export.SimpleExporterInput;
+import net.sf.jasperreports.export.SimpleWriterExporterOutput;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -50,7 +50,7 @@ import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService
 
 /**
  * @author sanda zaharia (shertage@users.sourceforge.net)
- * @version $Id: CsvReportOutput.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: CsvReportOutput.java 54728 2015-04-24 15:28:20Z tdanciu $
  */
 public class CsvReportOutput extends AbstractReportOutput 
 {
@@ -80,16 +80,20 @@ public class CsvReportOutput extends AbstractReportOutput
 	{
 		try {
 			JRCsvExporter exporter = new JRCsvExporter(getJasperReportsContext());
-			exporter.setParameter(JRExporterParameter.JASPER_PRINT, jasperPrint);
+            exporter.setExporterInput(new SimpleExporterInput(jasperPrint));
 			
 			boolean close = false;
 			OutputStream csvDataOut = csvData.getOutputStream();
 			try {
-				exporter.setParameter(JRExporterParameter.CHARACTER_ENCODING, characterEncoding);
-				exporter.setParameter(JRExporterParameter.OUTPUT_STREAM, csvDataOut);
+	            SimpleWriterExporterOutput exporterOutput = new SimpleWriterExporterOutput(csvDataOut, characterEncoding);
+	            exporter.setExporterOutput(exporterOutput);
 				
 				if(exportParams != null)
-					exporter.setParameter(JRCsvExporterParameter.FIELD_DELIMITER, exportParams.getFieldDelimiter());
+				{
+					SimpleCsvExporterConfiguration configuration = new SimpleCsvExporterConfiguration();
+					configuration.setFieldDelimiter(exportParams.getFieldDelimiter());
+					exporter.setConfiguration(configuration);
+				}
 				
 				exporter.exportReport();
 				

@@ -27,6 +27,8 @@
     <alias name="${bean.navigationActionModelSupport}" alias="concreteNavigationActionModelSupport"/>
     <alias name="fileVirtualizerFactory" alias="concreteVirtualizerFactory"/>
     <alias name="${bean.instanceProductTypeResolver}" alias="instanceProductTypeResolverBean"/>
+    <alias name="${bean.repositoryContextManager}" alias="concreteRepositoryContextManager"/>
+
 
     <util:properties id="springConfiguration" location="${resource.root}/js.spring.properties" />
 
@@ -130,12 +132,6 @@
                 <entry key="post-update">
                     <ref bean="hibernateCompositePostUpdateListener"/>
                 </entry>
-                <entry key="post-commit-update">
- 	                <ref bean="propertiesSaveOrUpdateListener" />
-                </entry>
-                <entry key="post-commit-insert">
-                    <ref bean="propertiesSaveOrUpdateListener" />
-                </entry>
                 <entry key="post-commit-delete">
                     <ref bean="driverDeleteListener" />
                 </entry>
@@ -178,6 +174,8 @@
                 <ref bean="userAuthorityDeleteListener"/>
                 <ref bean="objectPermissionsUserAuthorityDeleteListener"/>
                 <ref bean="dataSnapshotReportUnitListener"/>
+                <ref bean="profileAttributesDeleteListener"/>
+                <ref bean="objectPermissionsProfileAttributeDeleteListener"/>
             </list>
         </constructor-arg>
     </bean>
@@ -559,6 +557,19 @@
         <property name="poolTimeout" value="900"/>
     </bean>
 
+    <bean id="mongoDbJDBCReportDataSourceServiceFactory" class="com.jaspersoft.jasperserver.api.engine.jasperreports.util.MongoDbJDBCReportDataSourceServiceFactory">
+        <property name="pooledJdbcDataSourceFactory">
+            <ref bean="dbcpJdbcDataSourceFactory"/>
+        </property>
+        <property name="poolTimeout" value="900"/>
+        <property name="mongoDBJDBCSchemaDefinitionTimeoutInMinute" value="1440"/>
+        <property name="schemaDefinitionDirectory" value="#{ systemProperties['java.io.tmpdir'] }"/>
+        <property name="repositoryService">
+            <ref bean="${bean.repositoryService}"/>
+        </property>
+    </bean>
+
+
     <bean id="awsDataSourceServiceFactory" class="com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl.AwsReportDataSourceServiceFactory"
           parent="jdbcDataSourceServiceFactory">
         <property name="awsDataSourceRecovery" ref="awsDataSourceRecovery"/>
@@ -707,6 +718,12 @@
 		<property name="cacheName" value="engineCache" />
 	</bean>
 
+    <bean id="diagnosticCache" class="org.springframework.cache.ehcache.EhCacheFactoryBean"
+          lazy-init="true">
+        <property name="cacheManager" ref="engineCacheManager"/>
+        <property name="cacheName" value="diagnosticCache" />
+    </bean>
+
 	<bean id="engineCacheManager" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean" depends-on="sysProperties">
 		<property name="configLocation">
 			<value>${resource.root}/engine-ehcache.xml</value>
@@ -716,6 +733,7 @@
 	<bean id="ehcacheEngineService" class="com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl.EhcacheEngineService">
 		<property name="engineService" ref="engineService"/>
 		<property name="cache" ref="engineCache"/>        
+        <property name="diagnosticCache" ref="diagnosticCache"/>
 	</bean>
 
 
@@ -787,7 +805,7 @@
         <constructor-arg index="0" type="java.util.Collection">
             <list>
                 <bean class="com.jaspersoft.jasperserver.api.engine.jasperreports.util.UserProfileBuiltInParameterProvider">
-                    <property name="profileAttributeService" ref="profileAttributeServiceTarget"/>
+                    <property name="profileAttributeService" ref="profileAttributeService"/>
                     <property name="profileAttributeCategories" ref="${bean.profileAttributeCategories}"/>
                 </bean>
             </list>
@@ -806,14 +824,16 @@
         <property name="persistentClassFactory" ref="persistentMappings"/>
         <property name="repositoryService" ref="unsecureRepositoryService"/>
         <property name="userAuthorityService" ref="${bean.internalUserAuthorityService}"/>
-        <property name="propertiesManagementService" ref="propertiesManagementService"/>
         <property name="tenantPersistenceResolver" ref="${bean.hibernateTenantService}"/>
         <property name="profileAttributeCategories" ref="${bean.profileAttributeCategories}"/>
+        <property name="changers" ref="${bean.propertyChangers}"/>
+        <property name="profileAttributeCache" ref="profileAttributeCache"/>
     </bean>
 
     <bean id="profileAttributesResolver"
           class="com.jaspersoft.jasperserver.api.metadata.user.service.impl.ProfileAttributesResolverImpl">
         <property name="attributePlaceholderPattern" ref="attributePlaceholderPattern"/>
+        <property name="attributeFunctionPattern" ref="attributeFunctionPattern"/>
         <property name="profileAttributeService" ref="profileAttributeService"/>
         <property name="messageSource" ref="messageSource"/>
         <property name="profileAttributeCategories" ref="${bean.profileAttributeCategories}"/>
@@ -822,7 +842,10 @@
     </bean>
 
     <bean id="attributePlaceholderPattern" class="java.lang.String">
-        <constructor-arg value="\{\s*attribute\s*\(\s*'([^\\/']+)'\s*(,\s*'([^\\/']+)'\s*)?\)\s*\}"/>
+        <constructor-arg value="\{#{attributeFunctionPattern}\}"/>
+    </bean>
+    <bean id="attributeFunctionPattern" class="java.lang.String">
+        <constructor-arg value="\s*attribute\s*\(\s*'([^\\/']+)'\s*(,\s*'([^\\/']+)'\s*)?\)\s*"/>
     </bean>
     <!-- Without capturing groups -->
     <bean id="attributePlaceholderPatternUI" class="java.lang.String">
@@ -836,15 +859,21 @@
         <value>SERVER</value>
     </util:list>
 
+    <bean id="attributePathTransformer" class="com.jaspersoft.jasperserver.api.metadata.user.service.impl.AttributePathTransformer"/>
+
     <bean id="profileAttributeService" class="org.springframework.aop.framework.ProxyFactoryBean">
-        <property name="interceptorNames">
-            <list>
-                <idref bean="profileAttributeServiceMethodSecurityInterceptor"/>
-                <idref bean="profileAttributeServiceTarget"/>
-            </list>
-        </property>
+        <property name="targetName" value="profileAttributeServiceTarget"/>
+        <property name="interceptorNames" ref="profileAttributeServiceInterceptorNamesSecured"/>
     </bean>
 
+    <!--<bean id="profileAttributeService" class="org.springframework.aop.framework.ProxyFactoryBean">-->
+        <!--<property name="interceptorNames">-->
+            <!--<list>-->
+                <!--<idref bean="profileAttributeServiceMethodSecurityInterceptor"/>-->
+                <!--<idref bean="profileAttributeServiceTarget"/>-->
+            <!--</list>-->
+        <!--</property>-->
+    <!--</bean>-->
     <bean id="profileAttributeServiceMethodSecurityInterceptor"
           class="org.springframework.security.access.intercept.aopalliance.MethodSecurityInterceptor">
         <property name="authenticationManager">
@@ -912,6 +941,7 @@
         <property name="userAuthorityService" ref="${bean.internalUserAuthorityService}"/>
         <property name="nonMutableAclCache" ref="ehCacheBasedJasperServerAclCache"/>
         <property name="aclService" ref="internalAclServiceCE"/>
+        <property name="attributePathTransformer" ref="attributePathTransformer"/>
         <property name="auditContext" ref="${bean.auditContext}"/>
     </bean>
 
@@ -937,6 +967,22 @@
       <property name="cacheName">
         <value>aclCache</value>
       </property>
+    </bean>
+
+
+
+
+    <bean id="profileAttributeCache" class="com.jaspersoft.jasperserver.api.metadata.user.service.impl.ProfileAttributeCacheImpl"
+          destroy-method="shutdown">
+        <property name="attributeCache" ref="attributeCache"/>
+
+    </bean>
+
+
+
+    <bean id="attributeCache" class="org.springframework.cache.ehcache.EhCacheFactoryBean" lazy-init="true">
+        <property name="cacheManager" ref="cacheManager"/>
+        <property name="cacheName" value="attributeCache" />
     </bean>
 
     <bean id="objectPermissionServiceTransactionInterceptor" class="org.springframework.transaction.interceptor.TransactionInterceptor">
@@ -989,7 +1035,16 @@
     <bean id="objectPermissionsUserAuthorityDeleteListener" class="com.jaspersoft.jasperserver.api.metadata.user.service.impl.HibernateObjectPermissionUserAuthorityDeleteListener">
         <property name="objectPermissionsServiceBeanName" value="${bean.objectPermissionServiceInternal}"/>
     </bean>
-   
+
+    <bean id="profileAttributesDeleteListener" class="com.jaspersoft.jasperserver.api.metadata.user.service.impl.HibernateProfileAttributesDeleteListener">
+        <property name="profileAttributesServiceBeanName" value="profileAttributeServiceTarget"/>
+    </bean>
+
+    <bean id="objectPermissionsProfileAttributeDeleteListener" class="com.jaspersoft.jasperserver.api.metadata.user.service.impl.HibernateObjectPermissionsProfileAttributeDeleteListener">
+        <property name="objectPermissionsServiceBeanName" value="${bean.objectPermissionServiceInternal}"/>
+        <property name="objectMappingFactory" ref="mappingResourceFactory"/>
+    </bean>
+
     <!-- i18n -->
     <bean id="messageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
         <property name="useCodeAsDefaultMessage" value="true"/>
@@ -1023,6 +1078,8 @@
                 <value>${resource.root}/internal/ja-pro_internal_messages</value>
 
                 <value>${resource.root}/bundles/ScalableInputControlsBundle</value>
+                <value>${resource.root}/bundles/ValidationBundle</value>
+                <value>${resource.root}/bundles/CommonBundle</value>
             </list>
         </property>
     </bean>
@@ -1077,6 +1134,11 @@
                         <bean class="net.sf.jasperreports.web.util.RequirejsModuleMapping">
                             <constructor-arg value="jr.ReportExecution"/>
                             <constructor-arg value="reportViewer/hyperlinkHandler/jr.ReportExecution"/>
+                            <constructor-arg value="false"/>
+                        </bean>
+                        <bean class="net.sf.jasperreports.web.util.RequirejsModuleMapping">
+                            <constructor-arg value="jr.ReportDataSeries"/>
+                            <constructor-arg value="reportViewer/hyperlinkHandler/jr.ReportDataSeries"/>
                             <constructor-arg value="false"/>
                         </bean>
                 	</list>
@@ -1148,7 +1210,9 @@
         <property name="lenientFormats" value="false"/>
     </bean>
 
-    <bean id="isoCalendarFormatProvider" class="com.jaspersoft.jasperserver.war.util.IsoCalendarFormatProvider"/>
+    <bean id="isoCalendarFormatProvider" class="com.jaspersoft.jasperserver.war.util.IsoCalendarFormatProvider">
+        <property name="lenientFormats" value="false"/>
+    </bean>
     
     <!-- handle file uploads using commons-fileupload
     <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver"/>
@@ -1332,10 +1396,10 @@
         <property name="themeFolderName" value="/themes" />
         <property name="themeServletPrefix" value="_themes" />
         <!-- Date formats -->
-        <property name="dateFormat" value="M/d/yyyy"/>
-        <property name="currentYearDateFormat" value="MMMMM d"/>
-        <property name="timestampFormat" value="M/d/yyyy hh:mmaaa"/>
-        <property name="timeFormat" value="hh:mmaaa"/>
+        <property name="dateFormat" value="repository.date.format"/>
+        <property name="currentYearDateFormat" value="repository.current.year.date.format"/>
+        <property name="timestampFormat" value="repository.datetime.format"/>
+        <property name="timeFormat" value="repository.time.format"/>
 
         <property name="entitiesPerPage" value="20"/>
         <property name="tempFolderUri" value="/temp"/>
@@ -1576,6 +1640,7 @@
         <property name="javaMailProperties">
             <props>
                 <prop key="mail.smtp.auth">false</prop>
+                <prop key="mail.smtp.sendpartial">true</prop>
             </props>
         </property>
     </bean>
@@ -1600,14 +1665,6 @@
         </property>
     </bean>
 
-	
-	<!-- a hibernate listener to cactch updates to Global Properties resource -->
-	<bean id="propertiesSaveOrUpdateListener" class="com.jaspersoft.jasperserver.api.metadata.common.service.impl.PropertiesSaveOrUpdateListener">
-		<!-- the listener is not wired to the propertiesManagementService yet, because we dont want to use the service in the import/export context -->
-		<!-- property name="propertiesManagementServiceName" value="propertiesManagementService"/  -->
-	</bean>
-	
-    
     <!-- setting system properties needed for EHCache (or anything else)
     	 EHCache can use prop placeholders like ${blah.blah} in its conf files; these are replaced
     	 with the value of the corresponding system property.

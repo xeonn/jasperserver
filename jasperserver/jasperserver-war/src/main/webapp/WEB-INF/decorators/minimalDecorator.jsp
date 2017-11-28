@@ -49,7 +49,7 @@
 
 <div id="frame">
 
-    <c:if test="${pageProperties['meta.noMenu']==null}">
+    <c:if test="${pageProperties['meta.noMenu']==null && param['decorate'] != 'no'}">
         <div id="mainNavigation" class="menu horizontal primaryNav">
             <ul id="navigationOptions" data-tab-index="2" data-component-type="navigation">
                 <li id="main_home" tabIndex="-1" class="leaf"><p class="wrap button"><span class="icon"></span><spring:message code="menu.home"/></p></li>

@@ -50,6 +50,7 @@ import com.jaspersoft.jasperserver.search.service.RepositorySearchResult;
 import com.jaspersoft.jasperserver.search.service.RepositorySearchService;
 import com.jaspersoft.jasperserver.search.service.ResourceService;
 import com.jaspersoft.jasperserver.search.sorter.ByLabelSorter;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.transaction.annotation.Propagation;
@@ -67,11 +68,12 @@ import java.util.Set;
  * Implementation of {@link RepositorySearchService}.
  *
  * @author Yuriy Plakosh
- * @version $Id: RepositorySearchServiceImpl.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: RepositorySearchServiceImpl.java 55164 2015-05-06 20:54:37Z mchan $
  */
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 public class RepositorySearchServiceImpl implements RepositorySearchService, Diagnostic {
     private static final Log log = LogFactory.getLog(RepositorySearchServiceImpl.class);
+    public static final String PARAM_SORT_BY_POPULARITY = "popularity";
 
     protected RepositoryService repositoryService;
     private ResourceService resourceService;
@@ -279,7 +281,7 @@ public class RepositorySearchServiceImpl implements RepositorySearchService, Dia
                 }
             }).build();
     }
-    
+
     /**
      * @param context  - execution context
      * @param criteria - search criteria
@@ -393,7 +395,9 @@ public class RepositorySearchServiceImpl implements RepositorySearchService, Dia
                 res = defaultSearchCriteriaFactory.newFactory(null);
             }
         } else {
-            res = defaultSearchCriteriaFactory.newFactory(ResourceLookup.class.getName());
+            String sortBy = criteria.getSortBy();
+            res = defaultSearchCriteriaFactory.newFactory(StringUtils.equals(sortBy, PARAM_SORT_BY_POPULARITY) ?
+                    Resource.class.getName() : ResourceLookup.class.getName());
         }
 
         return res;

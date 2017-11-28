@@ -114,7 +114,7 @@ function jumpTo(pageTo){
     <c:forEach items="${status.errorMessages}" var="error">
   <tr>
     <td>&nbsp;</td>
-    <td><span class="ferror"><c:out value="${error}"/></span></td>
+    <td><span class="ferror">${error}</span></td>
   </tr>
     </c:forEach>
   </c:if>
@@ -124,13 +124,13 @@ function jumpTo(pageTo){
 <spring:bind path="query.query.sql">
   <tr>
     <td align="right" valign="top"><spring:message code="jsp.editQueryTextForm.queryString"/>&nbsp;</td>
-    <td><textarea name="${status.expression}" rows="5" cols="28" class="fnormal"><c:out value='${status.value}'/></textarea></td>
+    <td><textarea name="${status.expression}" rows="5" cols="28" class="fnormal">${status.value}</textarea></td>
   </tr>
   <c:if test="${status.error}">
     <c:forEach items="${status.errorMessages}" var="error">
   <tr>
     <td>&nbsp;</td>
-    <td><span class="ferror"><c:out value="${error}"/></span></td>
+    <td><span class="ferror">${error}</span></td>
   </tr>
     </c:forEach>
   </c:if>

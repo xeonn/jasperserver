@@ -126,28 +126,6 @@ public class OlapUnitAction extends FormAction {
 	    // create olap view
 	    // this entire if case seems unnecessary --
 	    // there are no resources, and null is the default for "/"
-	    String folderURI = wrapper.getOlapUnit().getParentFolder();
-	    if (folderURI == null) {
-		folderURI = "/";
-	    }
-	    FilterCriteria resourcesInFolder = FilterCriteria.createFilter();
-	    resourcesInFolder.addFilterElement(FilterCriteria
-					       .createParentFolderFilter(folderURI));
-	    log("Searching for resources in the chosen folder:" + folderURI);
-	    ResourceLookup[] existingResources = repository.findResource(JasperServerUtil.getExecutionContext(context),
-									 resourcesInFolder);
-
-	    if (existingResources != null && existingResources.length != 0) {
-		log("res lookup size=" + existingResources.length);
-		List allResources = new ArrayList();
-		for (int i = 0; i < existingResources.length; i++) {
-		    ResourceLookup rLookup = existingResources[i];
-		    allResources.add(rLookup.getName());
-		    log("adding resource: " + rLookup.getName()
-			+ " to the list");
-		}
-		wrapper.setExistingResources(allResources);
-	    }
 	} else {
 	    // modify olap view
 	    // this case seems to be initializing the FormObject wrapper
@@ -172,10 +150,12 @@ public class OlapUnitAction extends FormAction {
 		log("Unknown connection type.");
 	    }
 	}
-	// get reusable resources
-	getAllConnections(context, wrapper);
-	findAllSchemas(context, wrapper);
-	getAllXmlaSources(context, wrapper);
+	/**
+	 * TODO(stas): Remove next lines. I didn't find any usage of results
+	 */
+//	getAllConnections(context, wrapper);
+//	findAllSchemas(context, wrapper);
+//	getAllXmlaSources(context, wrapper);
 	wrapper.setParentFolder((String) context.getFlowScope().get(
 								    PARENT_FOLDER_ATTR));
 	context.getFlowScope().put(FORM_OBJECT_KEY, wrapper);
@@ -189,11 +169,12 @@ public class OlapUnitAction extends FormAction {
 	
     /**
      * findAllSchemas finds all mondrian olap schema
-     * 
-     * @param context 
+     *
+     * @param context
      * @param wrapper
      */
-    private void findAllSchemas(RequestContext context, OlapUnitWrapper wrapper) 
+    @Deprecated
+    private void findAllSchemas(RequestContext context, OlapUnitWrapper wrapper)
     {
 	FilterCriteria filterCriteria = FilterCriteria
 	    .createFilter(FileResource.class);
@@ -208,12 +189,17 @@ public class OlapUnitAction extends FormAction {
 	    log("Found source lookups size=" + resourceLookup.length);
 	    allSources = new ArrayList(resourceLookup.length);
 	    for (int i = 0; i < resourceLookup.length; i++) {
-		Resource resource = (Resource) resourceLookup[i];
-		Object resourceObj = repository.getResource(null, resource.getURIString());
-		if (!allSources.contains(((FileResource) resourceObj).getURIString())) {
-		    allSources.add(((FileResource) resourceObj).getURIString());
-		}
-		log("added uri=" + resource.getURIString());
+			Resource resource = (Resource) resourceLookup[i];
+			Object resourceObj;
+			try {
+				resourceObj = repository.getResource(null, resource.getURIString());
+			} catch (JSException ex) {
+				continue;
+			}
+			if (!allSources.contains(((FileResource) resourceObj).getURIString())) {
+				allSources.add(((FileResource) resourceObj).getURIString());
+			}
+			log("added uri=" + resource.getURIString());
 	    }
 	    wrapper.setReusableSchemas(allSources);
 	}
@@ -221,10 +207,11 @@ public class OlapUnitAction extends FormAction {
 
     /**
      * getAllConnections finds all olap client connections
-     * 
-     * @param context 
+     *
+     * @param context
      * @param wrapper
      */
+    @Deprecated
     private void getAllConnections(RequestContext context, OlapUnitWrapper wrapper) {
 	// this seems fine, but i wish we could do away with all
 	// non-reusable connections -- the inline connection makes
@@ -240,28 +227,33 @@ public class OlapUnitAction extends FormAction {
 	    allMondrianConnections = new ArrayList(resourceLookup.length);
 	    allXmlaConnections = new ArrayList(resourceLookup.length);
 	    for (int i = 0; i < resourceLookup.length; i++) {
-		Resource resource = (Resource) resourceLookup[i];
-		Object resourceObj = repository.getResource(null, resource
-							    .getURIString());
-		if (resourceObj instanceof MondrianConnection) {
-		    if (!allMondrianConnections
-			.contains(((OlapClientConnection) resourceObj)
-				  .getURIString())) {
-			allMondrianConnections
-			    .add(((OlapClientConnection) resourceObj)
-				 .getURIString());
-		    }
-		} else if (resourceObj instanceof XMLAConnection) {
-		    if (!allXmlaConnections
-			.contains(((OlapClientConnection) resourceObj)
-				  .getURIString())) {
-			allXmlaConnections
-			    .add(((OlapClientConnection) resourceObj)
-				 .getURIString());
-		    }
-		} else {
-		    throw new JSException("jsexception.unknown.connection.type");
-		}
+			Resource resource = (Resource) resourceLookup[i];
+			Object resourceObj;
+			try {
+				resourceObj = repository.getResource(null, resource.getURIString());
+			} catch (JSException ex) {
+				continue;
+			}
+
+			if (resourceObj instanceof MondrianConnection) {
+				if (!allMondrianConnections
+				.contains(((OlapClientConnection) resourceObj)
+						.getURIString())) {
+				allMondrianConnections
+					.add(((OlapClientConnection) resourceObj)
+							.getURIString());
+				}
+			} else if (resourceObj instanceof XMLAConnection) {
+				if (!allXmlaConnections
+				.contains(((OlapClientConnection) resourceObj)
+						.getURIString())) {
+				allXmlaConnections
+					.add(((OlapClientConnection) resourceObj)
+							.getURIString());
+				}
+			} else {
+				throw new JSException("jsexception.unknown.connection.type");
+			}
 	    }
 	    wrapper.setReusableMondrianConnections(allMondrianConnections);
 	    wrapper.setReusableXmlaConnections(allXmlaConnections);
@@ -270,12 +262,13 @@ public class OlapUnitAction extends FormAction {
 
     /**
      * getAllXmlaConnections finds all xmla mondrian sources
-     * @param context 
-     * 
+     * @param context
+     *
      * @param wrapper
      */
+    @Deprecated
     private void getAllXmlaSources(RequestContext context, OlapUnitWrapper wrapper) {
-	FilterCriteria filterCriteria = 
+	FilterCriteria filterCriteria =
 	    FilterCriteria.createFilter(MondrianXMLADefinition.class);
 	ResourceLookup[] resourceLookup = repository.findResource(JasperServerUtil.getExecutionContext(context), filterCriteria);
 	List allXmlaDefinitions = null;
@@ -283,16 +276,22 @@ public class OlapUnitAction extends FormAction {
 	    log("Found xmla definition lookups size=" + resourceLookup.length);
 	    allXmlaDefinitions = new ArrayList(resourceLookup.length);
 	    for (int i = 0; i < resourceLookup.length; i++) {
-		Resource resource = (Resource) resourceLookup[i];
-		Object resourceObj = repository.getResource(null, resource.getURIString());
-		if (!allXmlaDefinitions.contains(((MondrianXMLADefinition) resourceObj).getURIString())) {
-		    allXmlaDefinitions.add(((MondrianXMLADefinition) resourceObj).getCatalog());
-		}
+			Resource resource = (Resource) resourceLookup[i];
+			Object resourceObj;
+			try {
+				resourceObj = repository.getResource(null, resource.getURIString());
+			} catch (JSException ex) {
+				continue;
+			}
+
+			if (!allXmlaDefinitions.contains(((MondrianXMLADefinition) resourceObj).getURIString())) {
+				allXmlaDefinitions.add(((MondrianXMLADefinition) resourceObj).getCatalog());
+			}
 	    }
 	    wrapper.setReusableXmlaDefinitions(allXmlaDefinitions);
-	} 	
+	}
     }
-	
+
     /**
      * handleTypeSelection receives input from mouse click and 
      * converts to the connection type.
@@ -356,14 +355,9 @@ public class OlapUnitAction extends FormAction {
 	    connectionWrapper.setParentFolder(wrapper.getParentFolder());
 	} else {
 	    // edit connection
-	    log("Found previous OlapClientConnection");
+		log("Found previous OlapClientConnection");
 	    connectionWrapper.setOlapConnectionType(wrapper
 						    .getOlapConnectionType()); //.TYPE_MONDRIAN_SCHEMA or .TYPE_XMLA_SCHEMA
-	    connectionWrapper.setReusableMondrianConnections(wrapper
-							     .getReusableMondrianConnections());
-	    connectionWrapper.setReusableSchemas(wrapper.getReusableSchemas());
-	    connectionWrapper.setReusableXmlaConnections(wrapper
-							 .getReusableXmlaConnections());
 	    connectionWrapper.setSource(wrapper.getSource());
 	    connectionWrapper.setType(wrapper.getType());
 	    connectionWrapper.setConnectionUri(wrapper.getOlapUnit()

@@ -39,7 +39,9 @@ public class ClientDashboardResource {
             /*ClientReference is included here to serve as resource reference*/
             @XmlElement(type = ClientReference.class, name = "resourceReference"),
             @XmlElement(type = ClientFile.class, name = "file"),
-            @XmlElement(type = ClientInputControl.class, name = "inputControl")
+            @XmlElement(type = ClientInputControl.class, name = "inputControl"),
+            @XmlElement(type = ClientReportUnit.class, name = "ClientReportUnit"),
+            @XmlElement(type = ClientAdhocDataView.class, name = "ClientAdhocDataView")
     })
     public ClientReferenceable getResource() {
         return resource;

@@ -22,12 +22,14 @@
 package com.jaspersoft.jasperserver.api.metadata.user.service.impl;
 
 import com.jaspersoft.jasperserver.api.JSException;
+import com.jaspersoft.jasperserver.api.common.domain.impl.ExecutionContextImpl;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Folder;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.client.ResourceImpl;
 import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.ProfileAttribute;
 import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributeCategory;
+import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributeEscapeStrategy;
 import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributeService;
 import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributesResolver;
 import org.apache.commons.logging.Log;
@@ -57,13 +59,23 @@ import static org.apache.commons.lang.StringUtils.isNotEmpty;
  *
  * @author Volodya Sabadosh
  * @author Vlad Zavadskii
- * @version $Id: ProfileAttributesResolverImpl.java 51908 2014-12-09 23:53:22Z nthapa $
+ * @version $Id: ProfileAttributesResolverImpl.java 54590 2015-04-22 17:55:42Z vzavadsk $
  */
 public class ProfileAttributesResolverImpl implements ProfileAttributesResolver {
     private static final Log log = LogFactory.getLog(ProfileAttributesResolverImpl.class);
 
     private ProfileAttributeService profileAttributeService;
     private Pattern attributePlaceholderPattern;
+
+    public Pattern getAttributeFunctionPattern() {
+        return attributeFunctionPattern;
+    }
+
+    public void setAttributeFunctionPattern(String attributeFunctionPattern) {
+        this.attributeFunctionPattern = Pattern.compile(attributeFunctionPattern, Pattern.MULTILINE);
+    }
+
+    private Pattern attributeFunctionPattern;
     private ObjectMapper objectMapper;
     private List<ProfileAttributeCategory> profileAttributeCategories;
     private MessageSource messageSource;
@@ -120,10 +132,10 @@ public class ProfileAttributesResolverImpl implements ProfileAttributesResolver 
     }
 
     /**
-    * {@inheritDoc}
-    */
+     * {@inheritDoc}
+     */
     @Override
-    public <T extends Resource> boolean isParametrizedResource(T resource, ProfileAttributeCategory... categories) {
+    public boolean isParametrizedResource(Object resource, ProfileAttributeCategory... categories) {
         try {
             OutputStream outputStream = new ByteArrayOutputStream();
             objectMapper.writeValue(outputStream, resource);
@@ -132,10 +144,11 @@ public class ProfileAttributesResolverImpl implements ProfileAttributesResolver 
             Scanner scanner = new Scanner(outputStreamStr);
             String foundAttribute;
             boolean hasAttributes = false;
-            while ((foundAttribute = scanner.findInLine(attributePlaceholderPattern)) != null || scanner.hasNextLine()) {
+            while ((foundAttribute = scanner.findInLine(attributeFunctionPattern)) !=null || scanner.hasNextLine()) {
                 if (foundAttribute == null) {
                     scanner.nextLine();
                     continue;
+
                 }
 
                 MatchResult matchResult = scanner.match();
@@ -167,7 +180,6 @@ public class ProfileAttributesResolverImpl implements ProfileAttributesResolver 
             throw new JSException(e.toString());
         }
     }
-
 
 
     /**
@@ -205,24 +217,29 @@ public class ProfileAttributesResolverImpl implements ProfileAttributesResolver 
         }
     }
 
-
+    /**
+     * {@inheritDoc}
+     */
+    public String merge(String templateString, String identifier) {
+        return merge(templateString, identifier, null);
+    }
 
     /**
      * {@inheritDoc}
      */
-    protected String merge(String templateString, String identifier) {
+    public String merge(String templateString, String identifier, ProfileAttributeEscapeStrategy escapeStrategy) {
         Map<ProfileAttributeCategory, Map<String, ProfileAttribute>> profileAttributeCategoryMap =
                 new HashMap<ProfileAttributeCategory, Map<String, ProfileAttribute>>();
         String replacementString = templateString;
         Scanner scanner = new Scanner(templateString);
 
         String foundAttribute;
-        while ((foundAttribute = scanner.findInLine(attributePlaceholderPattern)) != null || scanner.hasNextLine()) {
+        while ((foundAttribute = scanner.findInLine(attributePlaceholderPattern)) !=null || scanner.hasNextLine()) {
             if (foundAttribute == null) {
                 scanner.nextLine();
                 continue;
-            }
 
+            }
             MatchResult matchResult = scanner.match();
             String attrPlaceholder = matchResult.group(0);
             String attrName = matchResult.group(1);
@@ -257,6 +274,9 @@ public class ProfileAttributesResolverImpl implements ProfileAttributesResolver 
 
             if (profileAttributeMap.containsKey(attrName)) {
                 String attrValue = profileAttributeMap.get(attrName).getAttrValue();
+                if (escapeStrategy != null) {
+                    attrValue = escapeStrategy.escape(attrValue);
+                }
                 replacementString = replacementString.replace(attrPlaceholder, attrValue);
 
                 log.debug(messageSource.getMessage("profile.attribute.debug.substitution.success",
@@ -276,7 +296,8 @@ public class ProfileAttributesResolverImpl implements ProfileAttributesResolver 
 
     protected Map<String, ProfileAttribute> getProfileAttributeMap(ProfileAttributeCategory category) {
         Map<String, ProfileAttribute> profileAttributeMap = new HashMap<String, ProfileAttribute>();
-        List<ProfileAttribute> profileAttributes = profileAttributeService.getCurrentUserProfileAttributes(category);
+        List<ProfileAttribute> profileAttributes = profileAttributeService.
+                getCurrentUserProfileAttributes(ExecutionContextImpl.getRuntimeExecutionContext(), category);
 
         if (profileAttributes != null) {
             for (ProfileAttribute profileAttribute : profileAttributes) {

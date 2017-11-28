@@ -62,10 +62,12 @@
 									    <span class="wrap"><spring:message code="button.back"/></span>
 									    <span class="icon"></span>
 									</button></li>
+<!--
 								</ul>
 							</li>
 							<li class="node open">
 								<ul class="list buttonSet">
+-->
 									<li class="leaf"><button class="button capsule text first up scheduleJob">
 									    <span class="wrap"><spring:message code="report.scheduling.list.button.new"/></span>
 									    <span class="icon"></span>
@@ -74,10 +76,12 @@
 									    <span class="wrap"><spring:message code="report.scheduling.list.button.now"/></span>
 									    <span class="icon"></span>
 									</button></li>
+<!--
 								</ul>
 							</li>
 							<li class="node open">
 								<ul class="list buttonSet">
+-->
 									<li class="leaf"><button class="button capsule text up refreshList">
 									    <span class="wrap"><spring:message code="report.scheduling.list.button.refresh"/></span>
 									    <span class="icon"></span>

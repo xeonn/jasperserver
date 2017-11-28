@@ -84,7 +84,7 @@ import java.util.regex.Pattern;
 
 /**
  * @author swood
- * @version $Id: UserAuthorityServiceImpl.java 51947 2014-12-11 14:38:38Z ogavavka $
+ * @version $Id: UserAuthorityServiceImpl.java 55164 2015-05-06 20:54:37Z mchan $
  */
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 public class UserAuthorityServiceImpl extends HibernateDaoImpl implements UserDetailsService, ExternalUserService,
@@ -1370,6 +1370,22 @@ public class UserAuthorityServiceImpl extends HibernateDaoImpl implements UserDe
         return rowCount.intValue();
     }
 
+    /**
+     * The number of all roles
+     */
+    @Transactional(propagation = Propagation.REQUIRED)
+    protected int getTotalRolesCount(ExecutionContext context) {
+        Integer rowCount = (Integer) getHibernateTemplate().execute(new HibernateCallback() {
+            public Object doInHibernate(Session session)
+                    throws HibernateException, SQLException {
+                Criteria criteria = session.createCriteria(getPersistentRoleClass());
+                criteria.setProjection(Projections.rowCount());
+                return criteria.uniqueResult();
+            }
+        });
+        return rowCount;
+    }
+
     private Criteria createTenantUsersCriteria(Session session, Set tenantIds, String name) {
         return  createTenantUsersCriteria(session, tenantIds, name, true);
     }
@@ -2037,7 +2053,7 @@ public class UserAuthorityServiceImpl extends HibernateDaoImpl implements UserDe
                 .addDiagnosticAttribute(DiagnosticAttributeBuilder.TOTAL_ROLES_COUNT, new DiagnosticCallback<Integer>() {
                     @Override
                     public Integer getDiagnosticAttributeValue() {
-                        return getTenantRolesCount(ExecutionContextImpl.getRuntimeExecutionContext(), null, null);
+                        return getTotalRolesCount(ExecutionContextImpl.getRuntimeExecutionContext());
                     }
                 }).build();
     }

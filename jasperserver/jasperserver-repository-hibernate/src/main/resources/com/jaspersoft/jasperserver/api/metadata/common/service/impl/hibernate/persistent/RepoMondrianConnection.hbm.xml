@@ -10,4 +10,19 @@
 		<many-to-one column="reportDataSource" name="dataSource" class="com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.persistent.RepoResource"/>
 		<many-to-one column="mondrianSchema" name="schema"/>
 	</joined-subclass>
+
+<!-- create index JIMondrianConnection_mondrianSchema_index on JIMondrianConnection (mondrianSchema); -->
+<!-- replacing JIMondrianConnection_mondrianSchema_index with idx16_mondrianSchema_idx -->
+<database-object>
+	<create>create index idx16_mondrianSchema_idx on JIMondrianConnection (mondrianSchema)</create>
+	<drop>DROP INDEX idx16_mondrianSchema_idx ON JIMondrianConnection</drop>
+</database-object>
+
+<!-- create index JIMondrianConnection_reportDataSource_index on JIMondrianConnection (reportDataSource); -->
+<!-- replacing JIMondrianConnection_reportDataSource_index with idx17_reportDataSource_idx -->
+<database-object>
+	<create>create index idx17_reportDataSource_idx on JIMondrianConnection (reportDataSource)</create>
+	<drop>DROP INDEX idx17_reportDataSource_idx ON JIMondrianConnection</drop>
+</database-object>
+
 </hibernate-mapping>

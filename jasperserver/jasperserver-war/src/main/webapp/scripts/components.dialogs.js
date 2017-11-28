@@ -22,7 +22,7 @@
 
 /**
  * @author: Yuriy Plakosh
- * @version: $Id: components.dialogs.js 8012 2014-11-09 16:08:03Z ktsaregradskyi $
+ * @version: $Id: components.dialogs.js 8685 2015-04-10 14:06:42Z bkolesni $
  */
 
 /**
@@ -53,7 +53,7 @@ dialogs.systemConfirm = {
             if (!this.closeText){
                 this.closeText = this.message.innerHTML.toLowerCase();
             }
-            this.message.innerHTML = message + ' <span>| <a href="#">'+ this.closeText +'</a></span>';
+            this.message.innerHTML = xssUtil.escape(message) + ' <span>| <a href="#">'+ xssUtil.escape(this.closeText) +'</a></span>';
             dialogs.systemConfirm.container.slideDown();
             setTimeout('dialogs.systemConfirm.hide()', duration ? duration : 2000);
         }
@@ -137,10 +137,10 @@ dialogs.errorPopup = {
                 //If error is a plain text - wrap it into <p> element
                 if (!isStackTrace) {
                     finalContent = Builder.node('P', {'class':'message'});
-                    finalContent.update(contentText);
+                    finalContent.update(xssUtil.escape(contentText, {softHTMLEscape: true}));
                 }
 
-                this._content.update(finalContent);
+                this._content.update(xssUtil.escape(finalContent, {softHTMLEscape: true}));
                 this._dom.observe('click', this.clickHandler);
 
                 this._dom.setStyle({height: options.height || this._DIALOG_HEIGHT, width: options.width || this._DIALOG_WIDTH});

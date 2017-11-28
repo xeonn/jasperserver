@@ -135,7 +135,7 @@
 
 
     <bean id="casAuthenticationProvider" class="com.jaspersoft.jasperserver.api.security.externalAuth.wrappers.spring.cas.JSCasAuthenticationProvider" depends-on="externalAuthProperties">
-        <property name="userDetailsService"><ref local="casUserAuthorityService"/></property>
+        <property name="authenticationUserDetailsService"><ref local="casUserDetailsService"/></property>
 
         <property name="serviceProperties">
             <ref local="casServiceProperties"/>
@@ -162,7 +162,7 @@
     </bean>
 
     <bean id="casRestAuthenticationProvider" class="com.jaspersoft.jasperserver.api.security.externalAuth.wrappers.spring.cas.JSCasAuthenticationProvider" depends-on="externalAuthProperties">
-        <property name="userDetailsService"><ref local="casUserAuthorityService"/></property>
+        <property name="authenticationUserDetailsService"><ref local="casUserDetailsService"/></property>
 
         <property name="serviceProperties">
             <ref local="casRestServiceProperties"/>
@@ -189,7 +189,7 @@
     </bean>
 
     <bean id="casSoapAuthenticationProvider" class="com.jaspersoft.jasperserver.api.security.externalAuth.wrappers.spring.cas.JSCasAuthenticationProvider" depends-on="externalAuthProperties">
-        <property name="userDetailsService"><ref local="casUserAuthorityService"/></property>
+        <property name="authenticationUserDetailsService"><ref local="casUserDetailsService"/></property>
 
         <property name="serviceProperties">
             <ref local="casSoapServiceProperties"/>
@@ -215,15 +215,13 @@
         <property name="key" value="casCacheKey"/>
     </bean>
 
-    <bean id="casUserAuthorityService"
-          class="com.jaspersoft.jasperserver.api.metadata.user.service.impl.UserDetailsServiceImpl">
-        <property name="adminUsers">
-            <list><value> </value></list></property>
-        <property name="defaultAdminRoles">
-            <list><value>ROLE_USER</value>
-                <value>ROLE_ADMINISTRATOR</value></list></property>
-        <property name="defaultInternalRoles">
-            <list><value>ROLE_USER</value></list></property>
+    <bean id="casUserDetailsService"
+          class="org.springframework.security.cas.userdetails.GrantedAuthorityFromAssertionAttributesUserDetailsService">
+        <constructor-arg index="0">
+            <array value-type="java.lang.String">
+                <value>groupMembership</value>
+            </array>
+        </constructor-arg>
     </bean>
 
     <bean id="casServiceProperties" class="com.jaspersoft.jasperserver.api.security.externalAuth.wrappers.spring.cas.JSCASServiceProperties">

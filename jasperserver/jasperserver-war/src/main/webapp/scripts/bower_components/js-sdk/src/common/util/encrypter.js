@@ -22,7 +22,7 @@
 
 /**
  * @author: Dima Gorbenko <dgorbenko@jaspersoft.com>
- * @version: $Id: encrypter.js 270 2014-10-13 19:58:03Z agodovanets $
+ * @version: $Id: encrypter.js 812 2015-01-27 11:01:30Z psavushchik $
  */
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  */
@@ -131,13 +131,13 @@ define(function (require) {
 
             $.jCryption.getKeys("GetEncryptionKey", function(receivedKey) {
                 var pubKey = receivedKey;
-                var encDataObj = new Object();
+                var encDataObj = {};
 
                 var keyArr = [];
                 for (var i in dataObj)
                     keyArr.push(i);
 
-                var encData =  new Object();
+                var encData =  {};
                 JSEncrypter._encryptDataRecursive(dataObj, keyArr, 0, pubKey, encData, callbackFunc);
             });
         },

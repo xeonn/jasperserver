@@ -22,8 +22,12 @@
 
 /**
  * @author Angus Croll, Papanii Okai
- * @version: ${Id}
+ * @version: $Id: actionModel.modelGenerator.js 8179 2015-01-27 12:34:21Z psavushchik $
  */
+
+/* global localContext, isProVersion, designerBase, isIE, isIE7, setWidthStyleByReflection, isNotNullORUndefined,
+ isSupportsTouch, fitObjectIntoScreen, primaryNavModule, _, getAsFunction, getWindowHeight, getWindowWidth, alert,
+ buttonManager, layoutModule, toFunction */
 
 /**
  * ActionModel Object Originally written by Angus Croll.
@@ -31,7 +35,7 @@
  */
 
 if (typeof(localContext) == "undefined"){
-    localContext = window
+    localContext = window // jshint ignore: line
 }
 //var localContext = window;
 var actionModel = {};
@@ -675,7 +679,7 @@ actionModel.removeTrailingSeparator = function(){
     var lastRow = actionModel.menuListDom.lastChild;
     if ($(lastRow) && !actionModel.noItemsYet) {
         var lastRowId = lastRow.identify();
-        var reg = new RegExp("\w*separator\w*");
+        var reg = new RegExp("\w*separator\w*"); // jshint ignore: line
         if (reg.test(lastRowId)) {
             lastRow.remove();
         }

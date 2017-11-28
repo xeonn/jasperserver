@@ -30,24 +30,46 @@ define(function(require){
         colors = require("./enum/colors"),
         template = require("text!common/component/colorPicker/template/simpleColorPickerTemplate.htm");
 
-    return ColorPicker.extend(ClickComponent.extend({
+    return ColorPicker.extend(ClickComponent.extend(
+        /** @lends SimpleAttachableColorPicker.prototype */
+        {
 
+        /**
+         * @constructor SimpleAttachableColorPicker
+         * @classdesc SimpleAttachableColorPicker component.
+         * @extends ColorPicker
+         * @param {object} attachTo - HTML DOM or jQuery object
+         * @param {object} [padding={top: 5, left: 5}] - attachable component padding
+         * @param options
+         * @throws {Error} AttachableComponent should be attached to an element if attachTo is missing.
+         */
         constructor: function(attachTo, padding, options){
             ClickComponent.call(this, attachTo, padding);
             ColorPicker.call(this, options);
         },
 
+        /**
+         * @description initializes attachable color picker component
+         */
         initialize: function(){
             ColorPicker.prototype.initialize.apply(this);
             this.hide();
             $('body').append(this.$el);
         },
 
+        /**
+         * @description selects color and hides attachable color picker
+         * @access protected
+         * @fires SimpleColorPicker#color:selected
+         */
         _selectColor: function(event){
             this.hide();
             ColorPicker.prototype._selectColor.apply(this, arguments);
         },
 
+        /**
+         * @description removes attachable color picker
+         */
         remove: function() {
             ClickComponent.prototype.remove.apply(this, arguments);
             ColorPicker.prototype.remove.apply(this, arguments);

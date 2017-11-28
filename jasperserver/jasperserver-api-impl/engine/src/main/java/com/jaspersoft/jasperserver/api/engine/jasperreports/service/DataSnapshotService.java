@@ -32,13 +32,15 @@ import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportUnit;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: DataSnapshotService.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: DataSnapshotService.java 54483 2015-04-21 03:18:31Z ytymoshe $
  */
 public interface DataSnapshotService {
 
 	boolean isSnapshotRecordingEnabled();
 
 	boolean isSnapshotPersistenceEnabled();
+
+    boolean isSnapshotPersistenceEnabledForReportUri(String reportUri);
 	
 	DataSnapshotPersistentMetadata getSnapshotMetadata(ExecutionContext context, long snapshotId);
 	

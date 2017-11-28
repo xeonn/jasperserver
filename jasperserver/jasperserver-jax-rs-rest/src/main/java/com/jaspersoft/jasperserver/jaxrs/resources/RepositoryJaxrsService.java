@@ -72,11 +72,10 @@ import java.util.regex.Pattern;
  * <p></p>
  *
  * @author Zakhar.Tomchenco
- * @version $Id: RepositoryJaxrsService.java 51947 2014-12-11 14:38:38Z ogavavka $
+ * @version $Id: RepositoryJaxrsService.java 55294 2015-05-12 17:41:07Z ztomchen $
  */
 @Service
 @Path("/resources")
-@Transactional(rollbackFor = Exception.class)
 public class RepositoryJaxrsService {
 
     @Resource
@@ -126,7 +125,7 @@ public class RepositoryJaxrsService {
 
             User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             RepositorySearchResult<ClientResourceLookup> result =
-                    batchRepositoryService.getResources(q, folderUri, type, excludeFolders,
+                    batchRepositoryService.getResources(q, folderUri, type, null, excludeFolders,
                             start, limit,
                             recursive, showHiddenItems,
                             sortBy, accessType, user,
@@ -170,6 +169,7 @@ public class RepositoryJaxrsService {
     }
 
     @DELETE
+    @Transactional(rollbackFor = Exception.class)
     public Response deleteResources(@QueryParam("resourceUri") List<String> uris) throws RemoteException {
         if (uris == null || uris.isEmpty()) {
             //no URI is specified as a parameter. It means delete request on root resource.
@@ -190,12 +190,14 @@ public class RepositoryJaxrsService {
 
     @DELETE
     @Path("/{uri: .+}")
+    @Transactional(rollbackFor = Exception.class)
     public Response deleteResource(@PathParam(ResourceDetailsJaxrsService.PATH_PARAM_URI) String uri) throws RemoteException {
         return resourceDetailsJaxrsService.deleteResource(Folder.SEPARATOR + uri.replaceAll("/$", ""));
     }
 
     @POST
     @Path("/{uri: .+}")
+    @Transactional(rollbackFor = Exception.class)
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public Response defaultPostHandler(InputStream stream,
             @PathParam(ResourceDetailsJaxrsService.PATH_PARAM_URI) String _uri,
@@ -206,6 +208,7 @@ public class RepositoryJaxrsService {
             @HeaderParam(HttpHeaders.ACCEPT)String accept,
             @QueryParam(RestConstants.QUERY_PARAM_EXPANDED)@DefaultValue("false")Boolean expanded,
             @QueryParam(RestConstants.QUERY_PARAM_CREATE_FOLDERS)@DefaultValue("true")Boolean createFolders,
+            @QueryParam(RestConstants.QUERY_PARAM_DRY_RUN)@DefaultValue("false")Boolean dryRun,
             @QueryParam("overwrite")@DefaultValue("false")Boolean overwrite) throws RemoteException, IOException {
         String uri = Folder.SEPARATOR + _uri.replaceAll("/$", "");
         ClientResource resourceLookup = null;
@@ -219,7 +222,7 @@ public class RepositoryJaxrsService {
         }
         if(response == null){
             final ClientResource createdResource = resourceDetailsJaxrsService
-                    .createResource(resourceLookup, uri, createFolders);
+                    .createResource(resourceLookup, uri, createFolders, dryRun);
 
             if (expanded != null && expanded){
                 response = Response.fromResponse(resourceDetailsJaxrsService.getResourceDetails(createdResource.getUri(), mediaType.toString(), true))
@@ -232,6 +235,7 @@ public class RepositoryJaxrsService {
     }
 
     @POST
+    @Transactional(rollbackFor = Exception.class)
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public Response defaultPostHandlerForRoot(InputStream stream,
             @HeaderParam(HttpHeaders.CONTENT_LOCATION) String sourceUri,
@@ -241,8 +245,9 @@ public class RepositoryJaxrsService {
             @HeaderParam(HttpHeaders.ACCEPT)String accept,
             @QueryParam(RestConstants.QUERY_PARAM_EXPANDED)@DefaultValue("false")Boolean expanded,
             @QueryParam(RestConstants.QUERY_PARAM_CREATE_FOLDERS)@DefaultValue("true")Boolean createFolders,
+            @QueryParam(RestConstants.QUERY_PARAM_DRY_RUN)@DefaultValue("false")Boolean dryRun,
             @QueryParam("overwrite")@DefaultValue("false")Boolean overwrite) throws RemoteException, IOException{
-        return defaultPostHandler(stream, "", sourceUri,disposition, description, rawMimeType, accept, expanded, createFolders, overwrite);
+        return defaultPostHandler(stream, "", sourceUri,disposition, description, rawMimeType, accept, expanded, createFolders, dryRun, overwrite);
     }
 
     /**
@@ -290,6 +295,7 @@ public class RepositoryJaxrsService {
 
     @POST    
     @Path("/{uri: .+}")
+    @Transactional(rollbackFor = Exception.class)
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public Response createFileViaForm(
@@ -301,6 +307,7 @@ public class RepositoryJaxrsService {
     }
 
     @POST
+    @Transactional(rollbackFor = Exception.class)
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public Response createFileViaFormInRoot(
@@ -310,6 +317,7 @@ public class RepositoryJaxrsService {
     }
 
     @PUT
+    @Transactional(rollbackFor = Exception.class)
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public Response defaultPutHandlerForRoot(InputStream stream,
             @HeaderParam(HttpHeaders.CONTENT_LOCATION) String sourceUri,
@@ -324,6 +332,7 @@ public class RepositoryJaxrsService {
     }
 
     @PUT
+    @Transactional(rollbackFor = Exception.class)
     @Path("/{uri: .+}")
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public Response defaultPutHandler(InputStream stream,
@@ -372,6 +381,7 @@ public class RepositoryJaxrsService {
     }
 
     @PUT
+    @Transactional(rollbackFor = Exception.class)
     @Path("/{uri: .+}")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
@@ -385,6 +395,7 @@ public class RepositoryJaxrsService {
     }
 
     @PATCH
+    @Transactional(rollbackFor = Exception.class)
     @Path("/{uri: .+}")
     public Response patchResource(PatchDescriptor descriptor,
             @PathParam(ResourceDetailsJaxrsService.PATH_PARAM_URI) String uri) throws RemoteException{

@@ -135,6 +135,8 @@ public class ConfigurationBean
                 messages.getMessage(JasperServerConst.TYPE_RSRC_CONTENT_RESOURCE, null, "Content Resource", LocaleContextHolder.getLocale()));
         allTypes.put(FileResource.TYPE_CSS,
                     messages.getMessage(JasperServerConst.TYPE_RSRC_CSS_FILE, null, "CSS File", LocaleContextHolder.getLocale()));
+        allTypes.put(FileResource.TYPE_MONGODB_JDBC_CONFIG,
+                    messages.getMessage(JasperServerConst.TYPE_RSRC_MONGODB_JDBC_CONFIG, null, "MongoDB JDBC Schema", LocaleContextHolder.getLocale()));
         allTypes.put(FileResource.TYPE_FONT,
 					messages.getMessage(JasperServerConst.TYPE_RSRC_FONT, null, "Font", LocaleContextHolder.getLocale()));
         allTypes.put(FileResource.TYPE_IMAGE,
@@ -399,7 +401,7 @@ public class ConfigurationBean
     }
 
     public String getDateFormat() {
-        return dateFormat;
+        return messages.getMessage(dateFormat, new Object[] {}, LocaleContextHolder.getLocale());
     }
 
     public void setDateFormat(String dateFormat) {
@@ -407,7 +409,7 @@ public class ConfigurationBean
     }
 
     public String getCurrentYearDateFormat() {
-        return currentYearDateFormat;
+        return messages.getMessage(currentYearDateFormat, new Object[] {}, LocaleContextHolder.getLocale());
     }
 
     public void setCurrentYearDateFormat(String currentYearDateFormat) {
@@ -415,7 +417,7 @@ public class ConfigurationBean
     }
 
     public String getTimestampFormat() {
-        return timestampFormat;
+        return messages.getMessage(timestampFormat, new Object[] {}, LocaleContextHolder.getLocale());
     }
 
     public void setTimestampFormat(String timestampFormat) {
@@ -423,7 +425,7 @@ public class ConfigurationBean
     }
 
     public String getTimeFormat() {
-        return timeFormat;
+        return messages.getMessage(timeFormat, new Object[] {}, LocaleContextHolder.getLocale());
     }
 
     public void setTimeFormat(String timeFormat) {

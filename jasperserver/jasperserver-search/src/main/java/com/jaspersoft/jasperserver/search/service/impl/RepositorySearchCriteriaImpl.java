@@ -32,8 +32,8 @@ import java.util.List;
 
 /**
  * @author Yaroslav.Kovalchyk
- * @version $Id: RepositorySearchCriteriaImpl.java 49286 2014-09-23 13:32:25Z ykovalchyk $
- * @version $Id: RepositorySearchCriteriaImpl.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: RepositorySearchCriteriaImpl.java 55164 2015-05-06 20:54:37Z mchan $
+ * @version $Id: RepositorySearchCriteriaImpl.java 55164 2015-05-06 20:54:37Z mchan $
  */
 public class RepositorySearchCriteriaImpl implements RepositorySearchCriteria {
 
@@ -45,6 +45,7 @@ public class RepositorySearchCriteriaImpl implements RepositorySearchCriteria {
     private String searchText;
     private String folderUri;
     private List<String> resourceTypes;
+    private List<String> containerResourceTypes;
     private List<SearchFilter> customFilters;
     private boolean showHidden = false;
     private boolean excludeFolders = false;
@@ -129,6 +130,14 @@ public class RepositorySearchCriteriaImpl implements RepositorySearchCriteria {
 
     public void setResourceTypes(List<String> resourceTypes) {
         this.resourceTypes = resourceTypes;
+    }
+
+    public List<String> getContainerResourceTypes() {
+        return containerResourceTypes;
+    }
+
+    public void setContainerResourceTypes(List<String> containerResourceTypes) {
+        this.containerResourceTypes = containerResourceTypes;
     }
 
     public boolean isShowHidden() {
@@ -227,6 +236,19 @@ public class RepositorySearchCriteriaImpl implements RepositorySearchCriteria {
             // single null value is ignored
             if(!(resourceTypes.length == 1 && resourceTypes[0] == null)){
                 criteria.setResourceTypes(new ArrayList<String>(Arrays.asList(resourceTypes)));
+            }
+            return this;
+        }
+
+        public Builder setContainerResourceTypes(List<String> resourceTypes){
+            criteria.setContainerResourceTypes(resourceTypes);
+            return this;
+        }
+
+        public Builder setContainerResourceTypes(String... resourceTypes){
+            // single null value is ignored
+            if(!(resourceTypes.length == 1 && resourceTypes[0] == null)){
+                criteria.setContainerResourceTypes(new ArrayList<String>(Arrays.asList(resourceTypes)));
             }
             return this;
         }

@@ -66,7 +66,7 @@ public interface BatchRepositoryService {
      * @throws ResourceNotFoundException if specified folder uri not exists
      *
      */
-    RepositorySearchResult<ClientResourceLookup> getResources(String q, String folderUri, List<String> type, List<String> excludeFolders, Integer start, Integer limit, Boolean recursive, Boolean showHiddenItems, String sortBy, AccessType accessType, User user, Boolean forceFullPage) throws IllegalParameterValueException, ResourceNotFoundException;
+    RepositorySearchResult<ClientResourceLookup> getResources(String q, String folderUri, List<String> type, List<String> containerType, List<String> excludeFolders, Integer start, Integer limit, Boolean recursive, Boolean showHiddenItems, String sortBy, AccessType accessType, User user, Boolean forceFullPage) throws IllegalParameterValueException, ResourceNotFoundException;
 
     /**
      * Searches resources

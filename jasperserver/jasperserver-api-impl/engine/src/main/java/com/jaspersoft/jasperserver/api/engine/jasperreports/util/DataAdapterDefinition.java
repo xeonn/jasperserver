@@ -21,16 +21,15 @@
 
 package com.jaspersoft.jasperserver.api.engine.jasperreports.util;
 
-import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
 import com.jaspersoft.jasperserver.api.common.domain.impl.ExecutionContextImpl;
-import com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl.EngineServiceImpl;
-import com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl.RepositoryContextHandle;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl.RepositoryContextManager;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.CustomDomainMetaData;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.CustomDomainMetaDataProvider;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.CustomReportDataSource;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.service.ReportDataAdapterService;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.service.ReportDataSourceService;
+import com.jaspersoft.jasperserver.api.metadata.user.domain.Tenant;
+import com.jaspersoft.jasperserver.api.metadata.user.domain.impl.client.MetadataUserDetails;
 import com.jaspersoft.jasperserver.api.metadata.user.service.TenantService;
 import net.sf.jasperreports.data.DataAdapter;
 import net.sf.jasperreports.data.DataAdapterService;
@@ -47,6 +46,9 @@ import net.sf.jasperreports.repo.DataAdapterResource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeanWrapperImpl;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import javax.annotation.Resource;
 import java.beans.PropertyDescriptor;
@@ -77,7 +79,8 @@ public abstract class DataAdapterDefinition extends CustomDataSourceDefinition i
 
     @Resource(name = "concreteTenantService")
     private TenantService tenantService;
-
+    @Resource(name = "concreteRepositoryContextManager")
+    private RepositoryContextManager repositoryContextManager;
 
 
     protected static final Log log = LogFactory.getLog(DataAdapterDefinition.class);
@@ -92,7 +95,8 @@ public abstract class DataAdapterDefinition extends CustomDataSourceDefinition i
     protected void setPropertyDefinitions(CustomReportDataSource customReportDataSource) throws Exception {
         String dataAdapterClassName = (String) customReportDataSource.getPropertyMap().get("dataAdapterClassName");
         if (dataAdapterClassName == null) throw new Exception("Cannot create data adapter definition from this custom data source");
-        setName(DEFAULT_DATA_ADAPTER_DS);
+        if (customReportDataSource.getDataSourceName() != null) setName(customReportDataSource.getDataSourceName());
+        else setName(DATA_ADAPTER_SERVICE_CLASS);
         setDataAdapterClassName(dataAdapterClassName);
     }
 
@@ -192,9 +196,28 @@ public abstract class DataAdapterDefinition extends CustomDataSourceDefinition i
                 // set data adapter to the service
                 ((ReportDataAdapterService) service).setDataAdapter(dataAdapter);
                 ((ReportDataAdapterService) service).setDataAdapterService(getDataAdapterService(DataAdapterDefinitionUtil.getJasperReportsContext(), dataAdapter));
-                // set source file organization (tenant)
-                // tenant information for source file is needed because if there is no way to find out source file organization for superuser
-                ((ReportDataAdapterService) service).setSourceFileOrganizationUri(DataAdapterDefinitionUtil.getDataSourceUri(customDataSource, tenantService));
+                // repository URI of data file is tenant dependent. E.g. for root organization is /organizations/organization_1/someFolder/dataFile.csv
+                // and for jasperadmin on organization_1 it's /someFolder/dataFile.csv
+                // let's find user's tenant to allow service to find a data file correctly
+                String tenantUri = DataAdapterDefinitionUtil.getDataSourceUri(customDataSource, tenantService);
+                SecurityContext securityContext = SecurityContextHolder.getContext();
+                Authentication authentication = securityContext == null ? null : securityContext.getAuthentication();
+                if(authentication != null) {
+                    Object principal = authentication.getPrincipal();
+                    if (principal instanceof MetadataUserDetails) {
+                        MetadataUserDetails user = (MetadataUserDetails) principal;
+                        Tenant tenant = null;
+                        String tenantId = user.getTenantId();
+                        if (tenantId != null) {
+                            tenant = tenantService.getTenant(null, tenantId);
+                        }
+                        // if user has tenant, then take it's URI if no, then it's root organization's user
+                        // If root organization user, then let's build dummy URI of any root folder. Folder name
+                        // is taken away and just "/" is used internally
+                        tenantUri = tenant != null ? tenant.getTenantUri() : "/dummyFolerNameToIgnore";
+                    }
+                }
+                ((ReportDataAdapterService) service).setSourceFileOrganizationUri(tenantUri);
             }
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -286,6 +309,8 @@ public abstract class DataAdapterDefinition extends CustomDataSourceDefinition i
      */
     public JRDataSource getJRDataSource(DataAdapter dataAdapter) throws Exception {
         try {
+            // setup thread repository context for looking up data source file from repo
+            repositoryContextManager.setRepositoryContext(ExecutionContextImpl.getRuntimeExecutionContext(), "/ignore", null);
             DataAdapterService dataAdapterService = getDataAdapterService(DataAdapterDefinitionUtil.getJasperReportsContext(), dataAdapter);
             Map<String,Object> parameterValues = new HashMap<String, Object>();
             dataAdapterService.contributeParameters(parameterValues);
@@ -311,10 +336,6 @@ public abstract class DataAdapterDefinition extends CustomDataSourceDefinition i
     }
 
 
-
-
-
-
     /*
      * This function is used for retrieving the metadata layer of the data connector in form of TableSourceMetadata
      * TableSourceMetadata contains information JRFields, query, query language and field name mapping (actual JRField name, name used in domain)
@@ -335,37 +356,5 @@ public abstract class DataAdapterDefinition extends CustomDataSourceDefinition i
         dataAdapter = setupDataAdapter(dataAdapter, propertyValueMap);
         return getJRDataSource(dataAdapter);
     }
-
-
-
-    /*
-     *  setup repository context and try to figure out the tenant information in order to look up resources from repo
-     *  tenant information for source file is needed because if there is no way to find out source file organization for superuser
-     */
-    public RepositoryContextHandle setupThreadRepositoryContext(EngineServiceImpl engineService, CustomReportDataSource connector) {
-        RepositoryContext repositoryContext = RepositoryUtil.getThreadRepositoryContext();
-        ExecutionContext executionContext = null;
-        if (repositoryContext != null) executionContext = repositoryContext.getExecutionContext();
-        else {
-            executionContext = ExecutionContextImpl.getRuntimeExecutionContext();
-        }
-        RepositoryContextManager repositoryContextManager = null;
-        if (engineService instanceof EngineServiceImpl) repositoryContextManager = engineService.getRepositoryContextManager();
-        String dataSourceUri = DataAdapterDefinitionUtil.getDataSourceUri(connector, tenantService);
-        log.debug("DS URI - " + dataSourceUri);
-        log.debug("REPOSITORY executionContext = " + (executionContext != null) );
-        log.debug("repositoryContextManager CONTEXT = " + (repositoryContextManager != null) );
-        if ((executionContext != null) && (repositoryContextManager != null) && (dataSourceUri != null)) {
-            log.debug("set Repository context");
-            return repositoryContextManager.setRepositoryContext(executionContext, dataSourceUri, null);
-        } else {
-            log.debug("DataAdapterDataSourceWithMetaDataDefinition - setThreadRepositoryContext fail " + (executionContext != null) + ", " + (repositoryContextManager != null));
-            return null;
-        }
-    }
-
-
-
-
 
 }

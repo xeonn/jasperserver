@@ -76,7 +76,7 @@ public class CreateResourceActivity extends ReadResourceActivity {
             url += "adhocFlow";
         } else if (ResourceMediaType.DASHBOARD_CLIENT_TYPE.equals(resourceType)
                 && requestInfoProvider.isSupportedDevice()) {
-            url = requestInfoProvider.getBaseUrl().concat("/dashboard/designer.html");
+            url = requestInfoProvider.getBaseUrl().concat("dashboard/designer.html");
         } else if (ResourceMediaType.REPORT_UNIT_CLIENT_TYPE.equals(resourceType)){
             url = "addReport";
         }

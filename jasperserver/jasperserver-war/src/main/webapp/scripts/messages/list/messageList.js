@@ -21,8 +21,12 @@
 
 
 /**
- * @version: $Id: messageList.js 7748 2014-07-18 09:13:06Z kklein $
+ * @version: $Id: messageList.js 8685 2015-04-10 14:06:42Z bkolesni $
  */
+
+/* global toolbarButtonModule, layoutModule, matchAny, dynamicList, ajaxTargettedUpdate, alert, AjaxRequester,
+ baseErrorHandler, localContext
+*/
 
 var messageListModule = {
     _list: null,
@@ -101,18 +105,18 @@ var messageListModule = {
     _getMessageItems: function(messages) {
         var processItemTemplate = function(element) {
             var subject = element.select('.subject a')[0];
-            subject.update(this.getValue().subject.escapeHTML());
+            subject.update(xssUtil.escape(this.getValue().subject));
             subject.writeAttribute('href', 'flow.html?_flowExecutionKey=' + messageListModule._flowExecutionKey + '&_eventId=viewMessage&id=' + this.getValue().id);
 
             var date = element.select('.date')[0];
-            date.update(this.getValue().date.escapeHTML());
-            date.writeAttribute('title', this.getValue().timestamp.escapeHTML());
+            date.update(xssUtil.escape(this.getValue().date));
+            date.writeAttribute('title', this.getValue().timestamp);
 
             var type = element.select('.type')[0];       
-            type.update(this.getValue().type.escapeHTML());
+            type.update(xssUtil.escape(this.getValue().type));
 
             var component = element.select('.component')[0];
-            component.update(this.getValue().component.escapeHTML());
+            component.update(xssUtil.escape(this.getValue().component));
             
             return element;
         };
@@ -199,7 +203,7 @@ var messageListModule = {
             document.location = 'flow.html?_flowId=logEventFlow';
         }
 
-        showErrorPopup = function() { window.alert('Server Error'); }
+        showErrorPopup = function() { window.alert('Server Error'); }; // jshint ignore: line
         var resolved = baseErrorHandler(ajaxAgent);
 
         if (!resolved && ajaxAgent.status == 500) {

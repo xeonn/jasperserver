@@ -22,7 +22,7 @@
 
 /**
  * @author: Kostiantyn Tsaregradskyi
- * @version: $Id: RequestBiComponentError.js 270 2014-10-13 19:58:03Z agodovanets $
+ * @version: $Id: RequestBiComponentError.js 812 2015-01-27 11:01:30Z psavushchik $
  */
 
 define(function (require) {
@@ -39,8 +39,8 @@ define(function (require) {
 
             var errorCode = code,
                 responseJson,
-                msg = undefined,
-                parameters = undefined;
+                msg,
+                parameters;
             if(!code){
                 switch (xhr.status) {
                     case 401:

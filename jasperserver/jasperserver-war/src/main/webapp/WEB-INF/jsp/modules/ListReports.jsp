@@ -63,7 +63,7 @@
 					<c:param name="reportUnit" value="${reportUnit.URIString}"/>
 					<c:param name="_flowExecutionKey" value="${flowExecutionKey}"/>
 				</c:url>
-				<a href="${reportExecutionURL}"><c:out value="${reportUnit.label}"/></a>
+				<a href="${reportExecutionURL}">${reportUnit.label}</a>
 				</td>
 				<td align="right" valign="middle" nowrap>
 					<a href="javascript:document.fmLstRpts.reportUnit.value='${reportUnit.URIString}';document.fmLstRpts.scheduleReport.click();" title="<spring:message code="repository.browser.schedule.hint"/>">
@@ -76,11 +76,11 @@
 			</tr>
 		</table>
 	</td>
-    <td class="paddedcell"><c:out value="${reportUnit.description}"/></td>
+    <td class="paddedcell">${reportUnit.description}</td>
     <td class="paddedcell" nowrap><js:formatDate value="${reportUnit.creationDate}"/></td>
     <td class="paddedcell" nowrap>   
      <a href="ListReports.jsp#" onclick="gotoFolderExplorer('${reportUnit.parentFolder}')">
-      <c:out value="${reportUnit.parentFolder}"/>
+      ${reportUnit.parentFolder}
      </a> 
     </td>
   </tr>

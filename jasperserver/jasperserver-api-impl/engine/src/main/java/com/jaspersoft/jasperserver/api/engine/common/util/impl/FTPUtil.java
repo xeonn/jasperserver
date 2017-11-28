@@ -30,6 +30,7 @@ import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 import org.apache.commons.net.ftp.FTPReply;
 import org.apache.commons.net.ftp.FTPSClient;
+import javax.net.ssl.TrustManager;
 import java.io.InputStream;
 
 
@@ -39,7 +40,7 @@ public class FTPUtil implements FTPService {
 
 
     public FTPServiceClient connect(String host, String userName, String password) throws Exception {
-        return new FTPSServiceClientImpl(host, 990, "TLS", true, 0, "P", userName, password);
+        return new FTPSServiceClientImpl(host, 990, "TLS", true, 0, "P", userName, password, true, null);
     }
 
     public FTPServiceClient connectFTP(String host, int port, String userName, String password) throws Exception {
@@ -47,11 +48,15 @@ public class FTPUtil implements FTPService {
     }
 
     public FTPServiceClient connectFTPS(String host, int port, String userName, String password) throws Exception {
-        return new FTPSServiceClientImpl(host, port, "TLS", true, 0, "P", userName, password);
+        return new FTPSServiceClientImpl(host, port, "TLS", true, 0, "P", userName, password, true, null);
     }
 
     public FTPServiceClient connectFTPS(String host, int port, String protocol, boolean isImplicit, long pbsz, String prot, String userName, String password) throws Exception {
-        return new FTPSServiceClientImpl(host, port, protocol, isImplicit, pbsz, prot, userName, password);
+        return new FTPSServiceClientImpl(host, port, protocol, isImplicit, pbsz, prot, userName, password, true, null);
+    }
+
+    public FTPServiceClient connectFTPS(String host, int port, String protocol, boolean isImplicit, long pbsz, String prot, String userName, String password, boolean useDefaultTrustManager, TrustManager trustManager) throws Exception {
+        return new FTPSServiceClientImpl(host, port, protocol, isImplicit, pbsz, prot, userName, password, useDefaultTrustManager, trustManager);
     }
 
     public class FTPSServiceClientImpl implements FTPServiceClient {
@@ -69,14 +74,17 @@ public class FTPUtil implements FTPService {
         * @param prot PROT command
         * @param userName login user name
         * @param password login password
+        * @param useDefaultTrustManager - only do date validation if using default trust manager. Otherwise, use the value in trust manager parameter
+        * @param Trust Manager - set to NULL to use JVM trust manager (if useDefaultTrustManager is set to true, this value will be ignored)
         * @return FTPServiceClient interface to access ftp server
         */
-        public FTPSServiceClientImpl(String host, int port, String protocol, boolean isImplicit, long pbsz, String prot, String userName, String password) throws Exception {
+        public FTPSServiceClientImpl(String host, int port, String protocol, boolean isImplicit, long pbsz, String prot, String userName, String password, boolean useDefaultTrustManager, TrustManager trustManager) throws Exception {
             if (protocol == null) protocol = "TLS";
             if (pbsz < 0) pbsz = 0;
             if (prot == null) prot = "P";
 
             ftpClient = new FTPSClient(protocol, isImplicit);
+            if (!useDefaultTrustManager) ftpClient.setTrustManager(trustManager);
             ftpClient.connect(host, port);
 
             if (!ftpClient.login(userName, password)) {

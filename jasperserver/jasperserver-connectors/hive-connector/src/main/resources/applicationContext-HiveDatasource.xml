@@ -19,7 +19,7 @@
 			<list>
 				<map>
 					<entry key="name" value="jdbcURL" />
-					<entry key="default" value="jdbc:hive://localhost:10000/default" />
+					<entry key="default" value="jdbc:hive2://localhost:21050/default;auth=noSasl" />
 				</map>
 				<map>
 					<entry key="name" value="username" />

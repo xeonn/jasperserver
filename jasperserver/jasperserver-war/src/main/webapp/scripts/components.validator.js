@@ -21,8 +21,10 @@
 
 
 /**
- * @version: $Id: components.validator.js 7762 2014-09-19 10:16:02Z sergey.prilukin $
+ * @version: $Id: components.validator.js 8179 2015-01-27 12:34:21Z psavushchik $
  */
+
+/* global Class, $break */
 
 var ControlValidator = Class.create({
     initialize : function (id, controlToValidate, event, errorMessage, text) {
@@ -233,10 +235,10 @@ var RegularExpressionValidator  = Class.create(ControlValidator, {
 
         var matches = this.validationExpression.exec(value);
 
-        if ((matches == null && value.length == 0) || (matches != null && value == matches[0])) {
+        if ((matches == null && value.length === 0) || (matches != null && value == matches[0])) {
 
             this.setState(ControlValidator.State.SUCCESS);
-            this.onsuccess()
+            this.onsuccess();
             return true;
         } else {
 
@@ -256,7 +258,7 @@ var CompareValidator  = Class.create(ControlValidator, {
 
         this.operator = operator;
         this.controlToCompare = controlToCompare;
-        this.notValidateIfEmpty = (notValidateIfEmpty == undefined) ? true : notValidateIfEmpty;
+        this.notValidateIfEmpty = (notValidateIfEmpty === undefined) ? true : notValidateIfEmpty;
         if (!(this.operator)) {
 
             throw new Error("Operator cannot be null.");
@@ -381,8 +383,8 @@ var ValidationStack = Class.create({
 
             if (nextValidator) {
 
-                prevValidator.onsuccess = this._getEvalNextFn(prevValidator, nextValidator, oldSuccessHandler);;
-                prevValidator.onunsuccess = this._getEvalNextFn(prevValidator, nextValidator, oldUnsuccessHandler);;
+                prevValidator.onsuccess = this._getEvalNextFn(prevValidator, nextValidator, oldSuccessHandler);
+                prevValidator.onunsuccess = this._getEvalNextFn(prevValidator, nextValidator, oldUnsuccessHandler);
             } else {
 
                 prevValidator.onsuccess = this._getSuccessFn(prevValidator, oldSuccessHandler);

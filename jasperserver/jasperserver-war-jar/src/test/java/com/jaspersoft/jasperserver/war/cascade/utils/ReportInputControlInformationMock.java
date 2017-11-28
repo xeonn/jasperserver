@@ -9,6 +9,7 @@ import com.jaspersoft.jasperserver.api.engine.common.service.ReportInputControlV
  */
 public class ReportInputControlInformationMock implements ReportInputControlInformation {
     private String promptLabel;
+    private String description;
     private String parameterName;
     private Class valueType;
     private Class nestedType;
@@ -21,6 +22,15 @@ public class ReportInputControlInformationMock implements ReportInputControlInfo
 
     public void setPromptLabel(String promptLabel) {
         this.promptLabel = promptLabel;
+    }
+
+    @Override
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public String getParameterName() {

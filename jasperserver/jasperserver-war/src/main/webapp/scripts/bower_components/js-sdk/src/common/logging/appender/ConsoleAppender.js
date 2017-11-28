@@ -22,8 +22,10 @@
 
 /**
  * @author: Pavel Savushchyk
- * @version: $Id: ConsoleAppender.js 270 2014-10-13 19:58:03Z agodovanets $
+ * @version: $Id: ConsoleAppender.js 812 2015-01-27 11:01:30Z psavushchik $
  */
+
+/*global console */
 
 (function (factory, global) {
     if (typeof define === "function" && define.amd) {

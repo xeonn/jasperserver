@@ -78,7 +78,7 @@
 						                    		<c:forEach items="${control.inputControl.queryVisibleColumnsAsList}" var="column">
 						                    		<li class="leaf"><!-- NOTE: This leaf is an example of what an added value looks like -->
 														<div class="wrap">
-															<p class="column one"><c:out value="${column}"/></p>
+															<p class="column one">${column}</p>
 															<p class="column two"><a id="${column}" class="launcher"><spring:message code="button.remove"/></a></p>
 														</div>
 													</li>

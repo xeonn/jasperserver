@@ -21,8 +21,10 @@
 
 
 /**
- * @version: $Id: resource.query.js 7872 2014-10-04 09:08:52Z inesterenko $
+ * @version: $Id: resource.query.js 8179 2015-01-27 12:34:21Z psavushchik $
  */
+
+/* global resource, resourceLocator, ValidationModule, localContext, require */
 
 var resourceQuery = {
     STEP1_PAGE_ID: "addResource_query_step1",

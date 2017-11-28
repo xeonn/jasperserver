@@ -20,6 +20,8 @@
  */
 package com.jaspersoft.jasperserver.api.common.properties;
 
+import javax.annotation.PostConstruct;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -30,6 +32,15 @@ import java.util.Map;
  * @author scubar
  */
 public abstract class PropertyChangerAdapter implements PropertyChanger {
+
+    protected Map<String, String> defaults;
+
+    @PostConstruct
+    public void init() {
+        this.defaults = new HashMap<String, String>();
+        this.defaults.putAll(getProperties());
+    }
+
     @Override
     public void setProperty(String key, String val) { }
 
@@ -37,7 +48,11 @@ public abstract class PropertyChangerAdapter implements PropertyChanger {
     public String getProperty(String key) { return null; }
 
     @Override
-    public void removeProperty(String key, String val) {}
+    public void removeProperty(String key, String val) {
+        if (defaults.containsKey(key)) {
+            setProperty(key, defaults.get(key));
+        }
+    }
 
     @Override
     public Map<String, String> getProperties() {return null;}

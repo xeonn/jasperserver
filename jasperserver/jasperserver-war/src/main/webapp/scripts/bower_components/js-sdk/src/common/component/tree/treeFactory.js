@@ -22,7 +22,7 @@
 
 /**
  * @author: Kostiantyn Tsaregradskyi
- * @version: $Id: treeFactory.js 706 2014-12-02 08:49:20Z psavushchik $
+ * @version: $Id: treeFactory.js 1178 2015-05-06 20:40:12Z yplakosh $
  */
 
 define(function (require) {
@@ -34,6 +34,8 @@ define(function (require) {
         json3 = require("json3"),
         TreeDataLayer = require('./TreeDataLayer'),
         TooltipTreePlugin = require('./plugin/TooltipPlugin'),
+        ContextMenuTreePlugin = require("./plugin/ContextMenuTreePlugin"),
+        SearchTreePlugin = require('./plugin/SearchPlugin'),
         repositoryResourceTypes = require("common/enum/repositoryResourceTypes"),
         repositoryFoldersTreeLevelTemplate = require('text!./template/repositoryFoldersTreeLevelTemplate.htm'),
         i18n = require('bundle!CommonBundle'),
@@ -61,12 +63,24 @@ define(function (require) {
                     item.i18n = i18n;
                     return item;
                 }
+            },
+
+            tenantProcessor: {
+                processItem: function(item) {
+                    item._node = true;
+                    item.value.label = item.value.tenantName;
+                    item.value.uri = item.value.tenantUri;
+                    return item;
+                }
             }
         };
 
     return {
         repositoryFoldersTree: function(options) {
-            return Tree.use(TooltipTreePlugin).create().instance({
+            return Tree.use(TooltipTreePlugin, {
+                i18n: i18n,
+                contentTemplate: options.tooltipContentTemplate
+            }).create().instance({
                 additionalCssClasses: "folders",
                 dataUriTemplate: options.contextPath + "/rest_v2/resources?{{= id != '@fakeRoot' ? 'folderUri=' + id : ''}}&recursive=false&type=" + repositoryResourceTypes.FOLDER + "&offset={{= offset }}&limit={{= limit }}",
                 levelDataId: "uri",
@@ -79,17 +93,19 @@ define(function (require) {
                     //workaround for correct viewing of '/public' and '/' folder labels
                     "/": _.extend(new TreeDataLayer({
                         dataUriTemplate: options.contextPath + "/flow.html?_flowId=searchFlow&method=getNode&provider=repositoryExplorerTreeFoldersProvider&uri=/&depth=1",
-                        processors: _.chain(processors).omit("filterPublicFolderProcessor").values().value(),
+                        processors: _.chain(processors).omit("filterPublicFolderProcessor", "tenantProcessor").values().value(),
                         getDataArray: function (data) {
                             data = json3.parse($(data).text());
                             var publicFolder = _.find(data.children, function(item) {
                                 return item.uri === '/public';
-                            });
+                            }),
+                                res = [{ id: "@fakeRoot", label: data.label, uri: "/", resourceType: 'folder', permissionMask: computePermissionMask(data.extra),_links: {content: "@fakeContentLink"} }];
 
-                            return [
-                                { id: "@fakeRoot", label: data.label, uri: "/", resourceType: 'folder', permissionMask: computePermissionMask(data.extra),_links: {content: "@fakeContentLink"} },
-                                { id: "/public", label: publicFolder.label, uri: "/public", resourceType: 'folder', permissionMask: computePermissionMask(publicFolder.extra), _links: {content: "@fakeContentLink"} }
-                            ];
+                            if (publicFolder){
+                                  res.push({ id: "/public", label: publicFolder.label, uri: "/public", resourceType: 'folder', permissionMask: computePermissionMask(publicFolder.extra), _links: {content: "@fakeContentLink"} });
+                            }
+
+                            return res;
                         }
                     }), {
                         accept: 'text/html',
@@ -101,8 +117,45 @@ define(function (require) {
                     return data ? data[repositoryResourceTypes.RESOURCE_LOOKUP] : [];
                 }
             });
+        },
+
+        tenantFoldersTree: function(options) {
+            return Tree
+                .use(TooltipTreePlugin)
+                .use(SearchTreePlugin)
+                .use(ContextMenuTreePlugin, {
+                    contextMenu: options.contextMenu
+                }).create().instance(_.extend({}, {
+                    itemsTemplate: repositoryFoldersTreeLevelTemplate,
+                    selection: {allowed: {left: true, right: true}, multiple: false},
+                    rootless: true,
+                    collapsed: true,
+                    lazyLoad: true,
+                    dataUriTemplate: jrsConfigs.contextPath + "/rest_v2/organizations?{{= id != 'organizations' ? 'rootTenantId=' + id : ''}}&offset={{= offset }}&limit={{= limit }}&maxDepth=1",
+                    levelDataId: "id",
+                    getDataArray: function(data, status, xhr) {
+                        return data ? data[repositoryResourceTypes.ORGANIZATION] : [];
+                    },
+                    processors: [processors.tenantProcessor],
+                    customDataLayers: {
+                        //workaround for correct viewing of '/' tenant label
+                        "/": _.extend(new TreeDataLayer({
+                            dataUriTemplate: jrsConfigs.contextPath + "/flow.html?_flowId=treeFlow&method=getNode&provider=tenantTreeFoldersProvider&uri=/&prefetch=%2F",
+                            processors: [processors.tenantProcessor],
+                            getDataArray: function(data) {
+                                data = json3.parse($(data).text());
+
+                                return [
+                                    { id: data.id, tenantName: data.label, tenantUri: "/", resourceType: "folder", _links: {content: "@fakeContentLink"} }
+                                ];
+                            }
+                        }), {
+                            accept: 'text/html',
+                            dataType: 'text'
+                        })
+                    }}))
         }
-    }
+    };
 
 
     function computePermissionMask(extra){

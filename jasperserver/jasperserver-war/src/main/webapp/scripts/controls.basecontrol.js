@@ -22,8 +22,10 @@
 
 /**
  * @author: afomin, inesterenko
- * @version: $Id: controls.basecontrol.js 7762 2014-09-19 10:16:02Z sergey.prilukin $
+ * @version: $Id: controls.basecontrol.js 8179 2015-01-27 12:34:21Z psavushchik $
  */
+
+/* global JRS, _ */
 
 JRS.Controls = (function (jQuery, _, Controls) {
 
@@ -153,7 +155,7 @@ JRS.Controls = (function (jQuery, _, Controls) {
             //Check whether control is visible
             //Also returns true if visible property was not set at all
             isVisible: function(args) {
-                return !args || args.visible == undefined || args.visible === true;
+                return !args || args.visible === undefined || args.visible === true;
             },
 
             //render message
@@ -250,7 +252,7 @@ JRS.Controls = (function (jQuery, _, Controls) {
                         var selectedValue = _.find(selections, function (selection) {
                             return selection === option.value;
                         });
-                        if (selectedValue != undefined) {
+                        if (selectedValue !== undefined) {
                             option.selected = true;
                         } else {
                             delete option.selected;

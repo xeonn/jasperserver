@@ -53,7 +53,7 @@ import java.util.TimeZone;
  * </p>
  * 
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ReportJob.java 48468 2014-08-21 07:47:20Z yuriy.plakosh $
+ * @version $Id: ReportJob.java 54934 2015-04-30 19:56:16Z lchirita $
  * @since 1.0
  * @see ReportSchedulingService#scheduleJob(com.jaspersoft.jasperserver.api.common.domain.ExecutionContext, ReportJob)
  */
@@ -165,6 +165,8 @@ public class ReportJob implements Serializable {
 	 * @see #getOutputFormats()
 	 */
 	public static final byte OUTPUT_FORMAT_PPTX = 14;
+	
+	public static final byte OUTPUT_FORMAT_JSON = 15;
 	
 	/**
 	 * Report unit with data snapshot output format.

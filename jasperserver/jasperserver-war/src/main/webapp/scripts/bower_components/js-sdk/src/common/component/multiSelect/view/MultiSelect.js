@@ -21,12 +21,16 @@
 
 
 /**
- * @author Sergey Prilukin
- * @version: $Id: MultiSelect.js 411 2014-11-14 14:20:31Z psavushchik $
+ * @author Sergey Prilukin; modified by: Ken Penn
+ * @version: $Id: MultiSelect.js 812 2015-01-27 11:01:30Z psavushchik $
  */
 
 /**
- * Selecteditems list. Part of MultiSelect.
+ * tabbed MultiSelect
+ * notes: the Available Items list and Selected Items list are interdependent;
+ *        the Available Items list uses ListWithSelectionAsObjectHashModel
+ *        the Selected Items list uses CacheableDataProvider,
+ *          which is dependent on ListWithSelectionAsObjectHashModel
  */
 
 define(function (require) {
@@ -38,22 +42,50 @@ define(function (require) {
         AvailableItemsList = require("common/component/multiSelect/view/AvailableItemsList"),
         SelectedItemsList = require("common/component/multiSelect/view/SelectedItemsList"),
         SelectedItemsDataProvider = require("common/component/multiSelect/dataprovider/SelectedItemsDataProvider"),
-        multiSelectTemplate = require("text!common/component/multiSelect/templates/multiSelectTemplate.htm");
+        NumberUtil = require("common/util/parse/number"),
+        browserDetection = require("common/util/browserDetection"),
+        multiSelectTemplate = require("text!common/component/multiSelect/templates/multiSelectTemplate.htm"),
+        i18n = require("bundle!ScalableInputControlsBundle"),
+        xssUtil = require("common/util/xssUtil"),
+        doCalcOnVisibleNodeClone = require("common/component/list/util/domAndCssUtil").doCalcOnVisibleNodeClone;
+
+    //css
+    require("css!common/js_reset");
+    require("css!common/base");
+    require("css!common/layout");
+    require("css!common/modules");
+    require("css!common/state");
+    require("css!common/utility");
 
     var SELECTION_CHANGE_TIMEOUT = 100;
 
     var MultiSelect = Backbone.View.extend({
 
+        className: "jrs",
+
+        events: function() {
+            return {
+                "click  .j-toggle-ctrl": "toggleLists"
+            };
+        },
+
         initialize: function(options) {
             this.template = _.template(multiSelectTemplate);
+            this.visibleItemsCount = options.visibleItemsCount;
 
+            this.i18n = {
+                selected  : i18n["sic.multiselect.toggle.selected"],
+                available : i18n["sic.multiselect.toggle.available"]
+            };
+
+            this.availableItemsListModel = this._createAvailableItemsListModel(options);
             this.availableItemsList = this._createAvailableItemsList(options);
             this.selectedItemsDataProvider = this._createSelectedItemsListDataProvider(options);
             this.selectedItemsList = this._createSelectedItemsList(options);
 
             this.initListeners();
 
-            //Do not trigger selection chnaged first time
+            // Do not trigger selection changed first time
             if (typeof options.value !== "undefined") {
                 this.silent = true;
                 this.availableItemsList.setValue(options.value);
@@ -62,8 +94,13 @@ define(function (require) {
             this.render();
         },
 
+        _createAvailableItemsListModel: function(options) {
+            return new Backbone.Model();
+        },
+
         _createAvailableItemsList: function(options) {
             return options.availableItemsList || new AvailableItemsList({
+                model: this.availableItemsListModel,
                 getData: options.getData,
                 bufferSize: options.bufferSize,
                 loadFactor: options.loadFactor,
@@ -73,53 +110,122 @@ define(function (require) {
         },
 
         _createSelectedItemsListDataProvider: function(options) {
-            return this.selectedItemsDataProvider =  new SelectedItemsDataProvider({
-                getData: options.getData
-            });
+            return new SelectedItemsDataProvider(options.selectedListOptions);
         },
 
         _createSelectedItemsList: function(options) {
+            this.formatValue = options.formatValue;
+
             return new SelectedItemsList({
                 getData: this.selectedItemsDataProvider.getData,
                 bufferSize: options.bufferSize,
                 loadFactor: options.loadFactor,
                 chunksTemplate: options.chunksTemplate,
-                scrollTimeout: options.scrollTimeout,
-                visibleItemsCount: options.visibleItemsCount
+                scrollTimeout: options.scrollTimeout
             });
         },
 
         initListeners: function() {
             this.listenTo(this.availableItemsList, "selection:change", this.selectionChange, this);
-            this.listenTo(this.availableItemsList, "expand", this.onExpand, this);
-            this.listenTo(this.availableItemsList, "collapse", this.onCollapse, this);
+            this.listenTo(this.availableItemsListModel, "change:totalValues", this._updateAvailableItemsCountLabel, this);
+
             this.listenTo(this.selectedItemsList, "selection:remove", this.selectionRemoved, this);
         },
 
         render: function() {
+            var $multiSelect = $(this.template({
+                isIPad: browserDetection.isIPad(),
+                i18n : i18n
+            }));
+
             this.availableItemsList.undelegateEvents();
             this.selectedItemsList.undelegateEvents();
 
-            var multiSelect = $(this.template({
-                isIPad: navigator.platform === "iPad"
-            }));
+            this.selectedItemsList.$el.insertAfter($multiSelect.find('.m-Multiselect-toggleContainer'));
+            this.availableItemsList.$el.insertAfter($multiSelect.find('.m-Multiselect-toggleContainer'));
+
+            this.$el.empty();
+            this.$el.append($multiSelect[0]);
 
             this.availableItemsList.render();
             this.selectedItemsList.render();
 
-            multiSelect.append(this.availableItemsList.el);
-            multiSelect.append(this.selectedItemsList.el);
-
-            this.$el.empty();
-            this.$el.append(multiSelect);
+            this._updateAvailableItemsCountLabel();
 
             this.availableItemsList.delegateEvents();
             this.selectedItemsList.delegateEvents();
 
+            this._tuneCSS();
+
             return this;
         },
 
+        _tuneCSS: function() {
+            var self = this;
+
+            // only need to do this once
+            if (!this._cssDepententSizesSet) {
+                doCalcOnVisibleNodeClone({
+                    el: this.$el,
+                    css: {"width": "500px"},
+                    alwaysClone: true, //should be true since we modify cloned element
+                    callback: function ($el) {
+                        self.toggleContainerHeight = $el.find(".m-Multiselect-toggleContainer").outerHeight();
+                        //need to fix height of an element copy before measuring it's total height
+                        self._tuneCSSInternal($el);
+                        $el.find(".j-scalable-list").css({height: "0"});
+                        self.emptyContainerHeight = $el.outerHeight();
+                    }
+                });
+
+                this._cssDepententSizesSet = true;
+            }
+
+            this._tuneCSSInternal(this.$el);
+        },
+
+        _tuneCSSInternal: function($el) {
+            var toggleContainerHeight = this.toggleContainerHeight;
+
+            $el.find('.j-toggle-panel.j-available').css("padding-top", toggleContainerHeight);
+            $el.find('.j-toggle-panel.j-selected').css("padding-top", toggleContainerHeight);
+            $el.css("height", "100%");
+        },
+
+
         /* Event Handlers */
+
+        toggleLists : function (evt) {
+            evt.stopPropagation();
+
+            if ($(evt.currentTarget).hasClass('is-active')) {
+                //tab is already selected. nothing to do here
+                return;
+            }
+
+            this.$el.find('.j-toggle-ctrl').toggleClass('is-active is-inactive');
+            this.$el.find('.j-toggle-panel').toggleClass('j-active j-inactive');
+
+            var inactive = this.$el.find('.j-toggle-panel.j-inactive');
+            inactive.css({
+                "position": "absolute",
+                "left": "-9999px",
+                "top": "0",
+                "width": inactive.width() + "px"
+            });
+            this.$el.find('.j-toggle-panel.j-active').css({
+                "position": "relative",
+                "left": "",
+                "top": "",
+                "width": ""
+            });
+
+            if (!browserDetection.isIPad()) {
+                //focus input after toggle so keyboard could be used immediately
+                //to navigate through visible list
+                this.$el.find('.j-toggle-panel.j-active input').focus();
+            }
+        },
 
         selectionChange: function(selection) {
             clearTimeout(this.selectionChangeTimeout);
@@ -129,48 +235,78 @@ define(function (require) {
         },
 
         selectionRemoved: function (selection) {
-            var indexMapping = this.selectedItemsDataProvider.getReverseIndexMapping();
+            // for performance reasons we broke encapsulation here
+            // and get raw selection.
+            // we even did not make copy of it, since it will be immediately reset
+            var currentRawSelection = this.availableItemsList.model.get("value"),
+                seletedIndex,
+                selectedLength = selection.length;
 
-            var availableSelection = this.availableItemsList.getValue();
-            var newAvailableSelection = {};
-
-            for (var i in availableSelection) {
-                if (availableSelection.hasOwnProperty(i)) {
-                    var index = indexMapping ? indexMapping[i] : i;
-                    if (index !== undefined && selection[index] === undefined) {
-                        var value = availableSelection[i];
-                        if (value !== undefined) {
-                            newAvailableSelection[i] = value;
-                        }
-                    }
-                }
+            for (seletedIndex = 0; seletedIndex < selectedLength; seletedIndex += 1) {
+                delete currentRawSelection[selection[seletedIndex]];
             }
 
-            this.availableItemsList.setValue(newAvailableSelection);
-        },
-
-        onExpand: function() {
-            this.selectedItemsList.$el.addClass("disabled");
-            this.trigger("expand");
-        },
-
-        onCollapse: function() {
-            this.selectedItemsList.$el.removeClass("disabled");
-            this.trigger("collapse");
+            this.availableItemsList.setValue(_.keys(currentRawSelection));
         },
 
         /* Internal helper methods */
+
         selectionChangeInternal: function(selection) {
-            var that = this;
-            this.selectedItemsDataProvider.setSelectedData(selection);
-            this.selectedItemsList.fetch(function() {
-                that.selectedItemsList.resize();
+            var self = this,
+                activeValue = this.selectedItemsList.listView.getActiveValue(),
+                scrollTop = this.selectedItemsList.listView.$el.scrollTop();
+
+            this.selectedItemsDataProvider.setData(selection);
+            this.selectedItemsList.fetch(function () {
+                self._updateSelectedItemsCountLabel();
+                self.selectedItemsList.resize();
+
+                self.selectedItemsList.listView.$el.scrollTop(scrollTop);
+
+                //if selected items list is still visible: preserve it's active element
+                if (activeValue && self.selectedItemsList.$el.hasClass("j-active")) {
+                    var total = self.selectedItemsList.listView.model.get('total');
+                    if (total && total > activeValue.index) {
+                        self.selectedItemsList.listView.activate(activeValue.index);
+                    } else if (total) {
+                        self.selectedItemsList.listView.activate(activeValue.index - 1);
+                    }
+                }
             });
+
 
             if (!this.silent) {
                 this.triggerSelectionChange();
             } else {
                 delete this.silent;
+            }
+        },
+
+            // sets label appropriately on tabs
+        _setToggleLabel: function (target, count, text) {
+            var labelCount = NumberUtil.formatNumber(count),
+                $labelEl = this.$el.find(target + ' .m-Multiselect-toggleLabel'),
+                labelText = text + ': ' +  labelCount;
+
+            $labelEl.text(labelText)
+                .attr('title', xssUtil.escape(labelText));
+        },
+
+        _updateAvailableItemsCountLabel: function() {
+            var total = this.availableItemsList.model.get('totalValues') || 0;
+            this._setToggleLabel('.j-available', total || 0, this.i18n.available);
+        },
+
+        _updateSelectedItemsCountLabel: function() {
+            var $noSelection = this.$el.find('.j-no-selection'),
+                count = this.selectedItemsList.listView.model.get('total') || 0;
+
+            this._setToggleLabel('.j-selected', count, this.i18n.selected);
+
+            if (count === 0) {
+                $noSelection.show();
+            } else {
+                $noSelection.hide();
             }
         },
 
@@ -189,11 +325,15 @@ define(function (require) {
 
         fetch: function(callback, options) {
             this.availableItemsList.fetch(callback, options);
-            //this.selectedItemsList.fetch();
         },
 
         reset: function(options) {
             this.availableItemsList.reset(options);
+        },
+
+        resize: function() {
+            this.availableItemsList.resize();
+            this.selectedItemsList.resize();
         },
 
         setValue: function(value, options) {

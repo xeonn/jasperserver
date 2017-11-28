@@ -47,7 +47,7 @@ Usage:
     </t:putAttribute>
     <t:putAttribute name="headerClass" value="mover"/>
     <t:putAttribute name="bodyContent">
-            <fieldset class="group">
+            <fieldset class="group first">
                 <legend class="offLeft"><span>Name</span></legend>
                 <label class="control input text" for="addRoleName" title="<spring:message code="jsp.roleManager.roleCreator.roleName.title" javaScriptEscape="true"/>">
                     <span class="wrap"><spring:message code="jsp.roleManager.roleCreator.roleName" javaScriptEscape="true"/> (<spring:message code='required.field'/>):</span>

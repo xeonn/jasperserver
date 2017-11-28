@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.1.xsd">
 
     <bean id="virtualDataSourceHandler" class="com.jaspersoft.jasperserver.api.engine.common.virtualdatasourcequery.VirtualDataSourceHandler">
         <property name="repositoryService">
@@ -9,16 +11,17 @@
         </property>
         <property name="virtualDataSourceQueryService" ref="teiidVirtualQueryService"/>
         <property name="profileAttributesResolver" ref="profileAttributesResolver"/>
+        <property name="customReportDataSourceServiceFactory" ref="customDataSourceServiceFactory"/>
     </bean>
 
-    <bean id="teiidVirtualQueryService" class="com.jaspersoft.jasperserver.api.engine.common.virtualdatasourcequery.impl.TeiidVirtualDataSourceQueryServiceImpl">
+    <bean id="abstractTeiidVirtualQueryService" class="com.jaspersoft.jasperserver.api.engine.common.virtualdatasourcequery.impl.TeiidVirtualDataSourceQueryServiceImpl" abstract="true">
         <property name="virtualReportDataSourceServiceFactory"><ref bean="virtualDataSourceServiceFactory"/></property>
         <property name="memoryConfig"><ref bean="teiidMemoryConfig"/></property>
         <property name="transactionManagerConfiguration"><ref bean="transactionManagerConfiguration"/></property>
         <property name="serverConfig"><ref bean="serverConfig"/></property>
         <property name="engineService"><ref local="engineService"/></property>
         <property name="repositoryService"><ref bean="${bean.repositoryService}"/></property>
-        <property name="poolTimeoutInMinute" value="720"/>
+        <property name="poolTimeoutInMinute" value="20"/>
         <property name="useSubDSTableList" value="true"/>
         <property name="virtualDataSourceConfigList">
             <list>
@@ -135,6 +138,16 @@
                 </bean>
             </list>
         </property>
+
+        <!-- uncomment to make objects of these types available in VDS -->
+        <!-- by default only object of type TABLE are available -->
+        <!-- possible values are the ones returned by java.sql.DatabaseMetaData.getTableTypes() -->
+        <!--property name="databaseObjectTypesFilter">
+          <util:set>
+            <value>TABLE</value>
+            <value>VIEW</value>
+          </util:set>
+        </property-->
     </bean>
 
     <bean id="defaultTranslatorConfig" class="com.jaspersoft.jasperserver.api.engine.common.virtualdatasourcequery.teiid.TranslatorConfig">

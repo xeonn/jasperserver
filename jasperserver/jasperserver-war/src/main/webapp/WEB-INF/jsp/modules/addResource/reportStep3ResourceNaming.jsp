@@ -24,7 +24,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
 <t:insertTemplate template="/WEB-INF/jsp/templates/page.jsp">
-    <c:set var="editMode" value='<%= request.getParameter("isEdit") %>'/>
+    <c:set var="editMode" value='${param.isEdit}'/>
     <t:putAttribute name="pageTitle"><c:choose><c:when test="${masterFlow=='olapClientConnection'}"><spring:message code="addResources.schemaDetails"/></c:when><c:when test="${masterFlow!='reportUnit'}"><spring:message code="addResources.accessGrantDefinition.details"/></c:when><c:when test="${masterFlow=='reportUnit' and fileResource.parentFlowObject.editMode}"><spring:message code="resource.report.titleEdit"/></c:when><c:otherwise><spring:message code="resource.report.title"/></c:otherwise></c:choose></t:putAttribute>
     <t:putAttribute name="bodyID" value="addResourceFile"/>
     <t:putAttribute name="bodyClass" value="oneColumn flow wizard ${lastSubflow?'lastStep':''}"/>
@@ -37,7 +37,7 @@
             <t:insertTemplate template="/WEB-INF/jsp/templates/container.jsp">
                 <t:putAttribute name="containerClass" value="column decorated primary"/>
                 <c:set var="isSchema"  value="${fileResource.fileResource.fileType=='olapMondrianSchema' || fileResource.fileResource.fileType=='accessGrantSchema'}"/>
-                <c:set var="editMode" value='<%= request.getParameter("isEdit") %>'/>
+                <c:set var="editMode" value='${param.isEdit}'/>
                 <t:putAttribute name="containerTitle">
                     <c:choose>
                         <c:when test="${masterFlow=='olapClientConnection'}"><spring:message code="addResources.schemaDetails"/></c:when>
@@ -60,7 +60,7 @@
                     <div id="stepDisplay">
                         <input type="hidden" name="_flowExecutionKey" value="${flowExecutionKey}"/>
                         <input type="hidden" id="editMode" value="${fileResource.editMode}">
-                        <input type="hidden" id="ParentFolderUri" value='<%= request.getParameter("ParentFolderUri") %>'>
+                        <input type="hidden" id="ParentFolderUri" value='${param.ParentFolderUri}'>
 
                         <fieldset class="row instructions">
                             <legend class="offLeft"><span><spring:message code="resource.report.instructions"/></span></legend>
@@ -133,7 +133,7 @@
                                             <spring:bind path="fileResource.fileResource.description">
                                                 <label class="control textArea <c:if test="${status.error}">error</c:if>" for="${status.expression}">
                                                     <span class="wrap"><spring:message code="dialog.file.description"/>:</span>
-                                                    <textarea <c:if test="${fileResource.subflowMode && isSchema && fileResource.source=='CONTENT_REPOSITORY'}">disabled</c:if> name="${status.expression}" id="${status.expression}" type="text"><c:out value='${status.value}'/></textarea>
+                                                    <textarea <c:if test="${fileResource.subflowMode && isSchema && fileResource.source=='CONTENT_REPOSITORY'}">disabled</c:if> name="${status.expression}" id="${status.expression}" type="text">${status.value}</textarea>
                                                     <span class="message warning"><c:if test="${status.error}">${status.errorMessage}</c:if></span>
                                                 </label>
                                             </spring:bind>

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <artifactId>jboss-parent</artifactId>
+    <groupId>org.jboss</groupId>
+    <version>11-redhat-1</version>
+  </parent>
+  <groupId>org.picketbox</groupId>
+  <artifactId>picketbox-parent</artifactId>
+  <version>4.0.19.SP4-redhat-1</version>
+  <packaging>pom</packaging>
+  <name>PicketBox- Parent</name>
+  <description>PicketBox is a security framework for authentication, authorization, audit and mapping</description>
+  <url>http://jboss.org/picketbox</url>
+  <organization>
+    <name>JBoss Inc.</name>
+    <url>http://www.jboss.org</url>
+  </organization>
+  <licenses>
+    <license>
+      <name>lgpl</name>
+      <url>http://repository.jboss.com/licenses/lgpl.txt</url>
+    </license>
+  </licenses>
+  <scm>
+    <connection>scm:svn:http://anonsvn.jboss.org/repos/picketbox/tags/4.0.19.SP4</connection>
+    <developerConnection>scm:svn:https://svn.jboss.org/repos/picketbox/tags/4.0.19.SP4</developerConnection>
+  </scm>
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <configuration>
+            <printSummary>true</printSummary>
+            <disableXmlReport>false</disableXmlReport>
+            <testFailureIgnore>true</testFailureIgnore>
+            <includes>
+              <include>**/**TestCase.java</include>
+            </includes>
+            <forkMode>pertest</forkMode>
+            <argLine>${surefire.jvm.args}</argLine>
+            <useFile>false</useFile>
+            <trimStackTrace>false</trimStackTrace>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+    <plugins>
+      <plugin>
+        <artifactId>maven-release-plugin</artifactId>
+        <configuration>
+          <tagBase>https://svn.jboss.org/repos/picketbox/tags</tagBase>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>

@@ -98,7 +98,7 @@
                                                 code='required.field'/>):</span>
 
                                         <input id="filePath" type="file" name="${status.expression}"
-                                               value="<c:out value='${status.value}'/>"/>
+                                               value="${status.value}"/>
                                             <span class="message warning"><c:if test="${status.error}">${status.errorMessage}</c:if></span>
                                         </spring:bind>
                                     </label>
@@ -145,8 +145,7 @@
                                         <textarea
                                                 <c:if test="${fileResource.subflowMode && (fileResource.fileResource.fileType=='olapMondrianSchema' || fileResource.fileResource.fileType=='accessGrantSchema') && fileResource.source=='CONTENT_REPOSITORY'}">disabled</c:if>
                                                 name="${status.expression}"
-                                                type="text" id="addFileInputDescription"><c:out
-                                                value='${status.value}'/></textarea>
+                                                type="text" id="addFileInputDescription">${status.value}</textarea>
                                             <span class="message warning"><c:if test="${status.error}">${status.errorMessage}</c:if></span>
                                         </spring:bind>
                                     </label>

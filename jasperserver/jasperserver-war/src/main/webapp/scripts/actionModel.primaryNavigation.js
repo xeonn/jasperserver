@@ -21,8 +21,10 @@
 
 
 /**
- * @version: $Id: actionModel.primaryNavigation.js 8012 2014-11-09 16:08:03Z ktsaregradskyi $
+ * @version: $Id: actionModel.primaryNavigation.js 8900 2015-05-06 20:57:14Z yplakosh $
  */
+
+/* global isNotNullORUndefined, actionModel, __jrsConfigs__, getAsFunction */
 
 var primaryNavModule = {
 
@@ -109,6 +111,11 @@ var primaryNavModule = {
             navObject = this.JSON[navKey][0];  //get labels
             if(isNotNullORUndefined(navObject)){
                 this.createMutton(navId, navObject.text);
+            } else {
+                if (navId === "main_home" || navId === "main_library"){
+                    var leaf = $(navId);
+                    leaf && $(leaf).removeClassName("hidden");
+                }
             }
         }
     },

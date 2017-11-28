@@ -27,7 +27,7 @@ import com.jaspersoft.jasperserver.api.engine.common.service.ReportInputControlV
 
 /**
  * @author andy21ca
- * @version $Id: ReportInputControlWithoutParameterInformation.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: ReportInputControlWithoutParameterInformation.java 55164 2015-05-06 20:54:37Z mchan $
  */
 public class ReportInputControlWithoutParameterInformation implements
 		ReportInputControlInformation, Serializable {
@@ -36,14 +36,16 @@ public class ReportInputControlWithoutParameterInformation implements
 	
 	private final String name;
     private final String label;
+    private final String description;
     private final ReportInputControlValuesInformation valuesInformation;
     
     private Object defaultValue;
 	
-    public ReportInputControlWithoutParameterInformation(String name, String label, 
+    public ReportInputControlWithoutParameterInformation(String name, String label, String description,
     		ReportInputControlValuesInformation valuesInformation) {
 		this.name = name;
 		this.label = label;
+        this.description = description;
 		this.valuesInformation = valuesInformation;
 	}
 
@@ -51,7 +53,12 @@ public class ReportInputControlWithoutParameterInformation implements
     public String getPromptLabel() {
         return label;
     }
-    
+
+    @Override
+    public String getDescription() {
+        return description;
+    }
+
     @Override
     public String getParameterName() {
         return name;

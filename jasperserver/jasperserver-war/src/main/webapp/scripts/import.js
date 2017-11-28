@@ -22,8 +22,10 @@
 
 /**
  * @author: inesterenko
- * @version: $Id: import.js 7762 2014-09-19 10:16:02Z sergey.prilukin $
+ * @version: $Id: import.js 8179 2015-01-27 12:34:21Z psavushchik $
  */
+
+/* global JRS */
 
 if (JRS.Import) {
     throw new Error("JRS.Import already exist");

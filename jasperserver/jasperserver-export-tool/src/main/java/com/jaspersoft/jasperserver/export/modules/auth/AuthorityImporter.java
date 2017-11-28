@@ -40,7 +40,7 @@ import java.util.Map;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: AuthorityImporter.java 50011 2014-10-09 16:57:26Z vzavadskii $
+ * @version $Id: AuthorityImporter.java 54590 2015-04-22 17:55:42Z vzavadsk $
  */
 public class AuthorityImporter extends BaseImporterModule {
 	
@@ -70,7 +70,6 @@ public class AuthorityImporter extends BaseImporterModule {
 			Role role = (Role) roles.get(rolename);
 			return role;
 		}
-		
 	}
 	
 	private ImportHandler importHandler;
@@ -82,6 +81,7 @@ public class AuthorityImporter extends BaseImporterModule {
 	}
 
 	public List<String> process() {
+		initProcess();
 		importRoles();
 		
 		// init the import handler after the roles are imported
@@ -202,6 +202,7 @@ public class AuthorityImporter extends BaseImporterModule {
 		ProfileAttribute attribute = attributeService.newProfileAttribute(executionContext);
 		attribute.setPrincipal(user);
 		attributeBean.copyTo(attribute);
+		setPermissions(attribute, attributeBean.getPermissions(), false);
 		attributeService.putProfileAttribute(executionContext, attribute);
 	}
 

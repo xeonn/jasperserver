@@ -24,40 +24,46 @@ package com.jaspersoft.jasperserver.ws.axis2;
  * @author Fedir Sajbert
  */
 
-import com.jaspersoft.jasperserver.api.JSException;
-import com.jaspersoft.jasperserver.api.JSExceptionWrapper;
-import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
-import com.jaspersoft.jasperserver.api.common.domain.ValidationError;
-import com.jaspersoft.jasperserver.api.common.domain.ValidationErrors;
-import com.jaspersoft.jasperserver.api.common.domain.impl.ExecutionContextImpl;
-import com.jaspersoft.jasperserver.api.engine.common.service.EngineService;
-import com.jaspersoft.jasperserver.api.engine.jasperreports.domain.impl.ReportUnitRequest;
-import com.jaspersoft.jasperserver.api.engine.jasperreports.domain.impl.ReportUnitResult;
-import com.jaspersoft.jasperserver.api.engine.jasperreports.service.DataCacheProvider;
-import com.jaspersoft.jasperserver.api.engine.jasperreports.service.DataCacheProvider.SnapshotSaveStatus;
-import com.jaspersoft.jasperserver.api.engine.jasperreports.service.DataSnapshotService;
-import com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl.ReportLoadingService;
-import com.jaspersoft.jasperserver.api.engine.jasperreports.util.HtmlExportUtil;
-import com.jaspersoft.jasperserver.api.logging.audit.context.AuditContext;
-import com.jaspersoft.jasperserver.api.logging.audit.domain.AuditEvent;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.FileResource;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.Folder;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceLookup;
-import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
-import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportDataSource;
-import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportUnit;
-import com.jaspersoft.jasperserver.api.metadata.view.domain.FilterCriteria;
-import com.jaspersoft.jasperserver.api.metadata.xml.domain.impl.*;
-import com.jaspersoft.jasperserver.ws.axis2.repository.ReportUnitHandler;
-import com.jaspersoft.jasperserver.ws.axis2.repository.SubResourceHandler;
-import com.jaspersoft.jasperserver.ws.xml.ByteArrayDataSource;
-import com.jaspersoft.jasperserver.ws.xml.Marshaller;
-import com.jaspersoft.jasperserver.ws.xml.Unmarshaller;
-import net.sf.jasperreports.engine.*;
-import net.sf.jasperreports.engine.export.*;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.TimeZone;
+
+import javax.activation.DataHandler;
+import javax.activation.DataSource;
+
+import net.sf.jasperreports.engine.JRExporter;
+import net.sf.jasperreports.engine.JRExporterParameter;
+import net.sf.jasperreports.engine.JRParameter;
+import net.sf.jasperreports.engine.JRReport;
+import net.sf.jasperreports.engine.JRRuntimeException;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReportsContext;
+import net.sf.jasperreports.engine.ReportContext;
+import net.sf.jasperreports.engine.SimpleReportContext;
+import net.sf.jasperreports.engine.export.GenericElementReportTransformer;
+import net.sf.jasperreports.engine.export.JRCsvExporter;
+import net.sf.jasperreports.engine.export.JRHtmlExporterParameter;
+import net.sf.jasperreports.engine.export.JRRtfExporter;
+import net.sf.jasperreports.engine.export.JRXlsAbstractExporterParameter;
+import net.sf.jasperreports.engine.export.JRXmlExporter;
 import net.sf.jasperreports.engine.util.JRSaver;
 import net.sf.jasperreports.engine.util.JRTypeSniffer;
+
 import org.apache.axis.AxisFault;
 import org.apache.axis.Message;
 import org.apache.axis.MessageContext;
@@ -78,10 +84,40 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.MessageCodesResolver;
 
-import javax.activation.DataHandler;
-import javax.activation.DataSource;
-import java.io.*;
-import java.util.*;
+import com.jaspersoft.jasperserver.api.JSException;
+import com.jaspersoft.jasperserver.api.JSExceptionWrapper;
+import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
+import com.jaspersoft.jasperserver.api.common.domain.ValidationError;
+import com.jaspersoft.jasperserver.api.common.domain.ValidationErrors;
+import com.jaspersoft.jasperserver.api.common.domain.impl.ExecutionContextImpl;
+import com.jaspersoft.jasperserver.api.engine.common.service.EngineService;
+import com.jaspersoft.jasperserver.api.engine.jasperreports.domain.impl.ReportUnitRequest;
+import com.jaspersoft.jasperserver.api.engine.jasperreports.domain.impl.ReportUnitResult;
+import com.jaspersoft.jasperserver.api.engine.jasperreports.service.DataCacheProvider;
+import com.jaspersoft.jasperserver.api.engine.jasperreports.service.DataCacheProvider.SnapshotSaveStatus;
+import com.jaspersoft.jasperserver.api.engine.jasperreports.service.DataSnapshotService;
+import com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl.ReportLoadingService;
+import com.jaspersoft.jasperserver.api.engine.jasperreports.util.ExportUtil;
+import com.jaspersoft.jasperserver.api.logging.audit.context.AuditContext;
+import com.jaspersoft.jasperserver.api.logging.audit.domain.AuditEvent;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.FileResource;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.Folder;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceLookup;
+import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
+import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportDataSource;
+import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportUnit;
+import com.jaspersoft.jasperserver.api.metadata.view.domain.FilterCriteria;
+import com.jaspersoft.jasperserver.api.metadata.xml.domain.impl.Argument;
+import com.jaspersoft.jasperserver.api.metadata.xml.domain.impl.ListItem;
+import com.jaspersoft.jasperserver.api.metadata.xml.domain.impl.OperationResult;
+import com.jaspersoft.jasperserver.api.metadata.xml.domain.impl.Request;
+import com.jaspersoft.jasperserver.api.metadata.xml.domain.impl.ResourceDescriptor;
+import com.jaspersoft.jasperserver.ws.axis2.repository.ReportUnitHandler;
+import com.jaspersoft.jasperserver.ws.axis2.repository.SubResourceHandler;
+import com.jaspersoft.jasperserver.ws.xml.ByteArrayDataSource;
+import com.jaspersoft.jasperserver.ws.xml.Marshaller;
+import com.jaspersoft.jasperserver.ws.xml.Unmarshaller;
 
 
 public class ManagementServiceImpl implements RepositoryServiceContext, BeanFactoryAware {
@@ -1468,7 +1504,7 @@ public class ManagementServiceImpl implements RepositoryServiceContext, BeanFact
 	public JRExporter getExporter(String type, Map exportParameters) {
 		JRExporter exporter = null;
 		if (type.equals(Argument.RUN_OUTPUT_FORMAT_HTML)) {
-			exporter = HtmlExportUtil.getHtmlExporter(getJasperReportsContext());
+			exporter = ExportUtil.getInstance(getJasperReportsContext()).createHtmlExporter();
 			if (exportParameters.get(Argument.RUN_OUTPUT_IMAGES_URI) != null)
 			{
 				exporter.setParameter(JRHtmlExporterParameter.IMAGES_URI,"" + exportParameters.get(Argument.RUN_OUTPUT_IMAGES_URI));
@@ -1481,7 +1517,7 @@ public class ManagementServiceImpl implements RepositoryServiceContext, BeanFact
 	        // collecting the images into a map
 	        exporter.setParameter(JRHtmlExporterParameter.IMAGES_MAP, new LinkedHashMap());
 		} else if (type.equals(Argument.RUN_OUTPUT_FORMAT_XLS)) {
-			exporter =  new JExcelApiExporter();
+			exporter =  ExportUtil.getInstance(getJasperReportsContext()).createXlsExporter();
 			exporter.setParameter(JRXlsAbstractExporterParameter .IS_ONE_PAGE_PER_SHEET, Boolean.FALSE);
 			exporter.setParameter(JRXlsAbstractExporterParameter .IS_WHITE_PAGE_BACKGROUND, Boolean.FALSE);
 		} else if (type.equals(Argument.RUN_OUTPUT_FORMAT_CSV)) {

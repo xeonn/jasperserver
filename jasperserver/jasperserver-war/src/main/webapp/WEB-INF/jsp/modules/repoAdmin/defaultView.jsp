@@ -131,7 +131,7 @@
 				<tr>
 					<td>
 						<a href="javascript:document.frm.resource.value='${resource.URIString}';document.frm.viewReport.click();">
-							<c:out value="${resource.name}"/>
+							${resource.name}
 						</a>
 					</td>
 					<td align="right" valign="middle" nowrap>
@@ -148,18 +148,18 @@
 		<%-- olap web flow --%>
 		<c:when test="${resource.resourceType == 'com.jaspersoft.jasperserver.api.metadata.olap.domain.OlapUnit'}">
 			<a href="javascript:disableLink('<c:url value="/olap/viewOlap.html"><c:param name="name" value="${resource.URIString}"/><c:param name="new" value="true"/><c:param name="parentFlow" value="repoAdminFlow"/><c:param name="folderPath" value="${lastFolder}"/></c:url>');" class="disLink" onclick="this.disabled='true'">
-				<c:out value="${resource.name}"/></a>
+				${resource.name}</a>
 		</c:when>
 		<c:when test="${resource.resourceType == 'com.jaspersoft.jasperserver.api.metadata.common.domain.ContentResource'}">
 			<a href="<c:url value="/fileview/fileview${resource.URIString}"/>" target="_new">
-				<c:out value="${resource.name}"/></a>
+				${resource.name}</a>
 		</c:when>
 		<c:otherwise>
-			<c:out value="${resource.name}"/>
+			${resource.name}
 		</c:otherwise>
 		</c:choose>
 	</td>
-    <td class="paddedcell"><c:out value="${resource.label}"/></td>
+    <td class="paddedcell">${resource.label}</td>
     <td class="paddedcell"><spring:message code="resource.${resource.resourceType}.label"/></td>
     <td class="paddedcell" nowrap><js:formatDate value="${resource.creationDate}"/></td>
     <c:choose>
@@ -198,7 +198,7 @@
       <input type="submit" class="fnormal" name="_eventId_Add" value="<spring:message code="jsp.repoAdmin.defaultView.button.addNew"/>" onClick="document.frm.resourceType.value=document.frm.cmbResourceType.value" class="fnormal"/>
       <select name="cmbResourceType" class="fnormal">
         <c:forEach items="${requestScope.resourceTypes}" var="resourceType">
-        <option value="<c:out value="${resourceType.value}"/>"><spring:message code="${resourceType.key}"/></option>
+        <option value="${resourceType.value}"/>"><spring:message code="${resourceType.key}</option>
         <%--
         <option value="com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportUnit">Report Unit</option>
         <option value="com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.JndiJdbcReportDataSource">Data Source</option>

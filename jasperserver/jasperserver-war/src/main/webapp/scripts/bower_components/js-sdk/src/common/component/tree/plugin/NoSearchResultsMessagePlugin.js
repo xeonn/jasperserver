@@ -30,7 +30,7 @@ define(function (require) {
         noResourcesFoundMessageTemplate = require('text!../template/noResourcesFoundMessageTemplate.htm'),
 
         _onNoResourcesResult = function (rootLevel) {
-            !rootLevel.dataLayer.dataSize && rootLevel.list.$el.html(this.noResourcesFoundMessage);
+            !rootLevel.list.totalItems && rootLevel.list.$el.html(this.noResourcesFoundMessage);
         };
 
     return TreePlugin.extend({}, {

@@ -1,4 +1,4 @@
-package com.jaspersoft.jasperserver.core.util;
+package com.jaspersoft.jasperserver.core.util.validators;
 
 import com.jaspersoft.jasperserver.core.util.validators.InputValidator;
 import org.junit.Ignore;

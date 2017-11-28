@@ -23,4 +23,12 @@
         <property name="includingStackTraceWhenJobFails" column="inc_stktrc_when_job_fails" type="boolean" not-null="true"/>
         <property name="skipNotificationWhenJobFails" column="skip_notif_when_job_fails" type="boolean" not-null="true"/>
     </class>
+
+<!-- create index JIReportJobMailRecipient_destination_id_index on JIReportJobMailRecipient (destination_id); -->
+<!-- replacing JIReportJobMailRecipient_destination_id_index with idx27_destination_id_idx -->
+<database-object>
+	<create>create index idx27_destination_id_idx on JIReportJobMailRecipient (destination_id)</create>
+	<drop>DROP INDEX idx27_destination_id_idx ON JIReportJobMailRecipient</drop>
+</database-object>
+
 </hibernate-mapping>

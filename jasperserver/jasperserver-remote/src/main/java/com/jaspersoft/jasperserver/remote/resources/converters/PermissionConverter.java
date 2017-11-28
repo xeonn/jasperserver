@@ -23,6 +23,7 @@ package com.jaspersoft.jasperserver.remote.resources.converters;
 
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Folder;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.InternalURI;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.PermissionUriProtocol;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.ObjectPermission;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.client.ObjectPermissionImpl;
@@ -31,7 +32,7 @@ import com.jaspersoft.jasperserver.api.metadata.user.domain.impl.client.Metadata
 import com.jaspersoft.jasperserver.dto.permissions.RepositoryPermission;
 import com.jaspersoft.jasperserver.remote.exception.MandatoryParameterNotFoundException;
 import com.jaspersoft.jasperserver.remote.exception.IllegalParameterValueException;
-import com.jaspersoft.jasperserver.remote.helpers.PermissionsRecipientIdentityResolver;
+import com.jaspersoft.jasperserver.remote.helpers.RecipientIdentityResolver;
 import com.jaspersoft.jasperserver.remote.services.PermissionsService;
 import org.springframework.stereotype.Component;
 
@@ -46,7 +47,7 @@ import javax.annotation.Resource;
 @Component
 public class PermissionConverter implements ToClientConverter<ObjectPermission, RepositoryPermission>, ToServerConverter<RepositoryPermission, ObjectPermission> {
     @Resource(name = "concretePermissionsRecipientIdentityResolver")
-    private PermissionsRecipientIdentityResolver resolver;
+    private RecipientIdentityResolver resolver;
 
     public RepositoryPermission toClient(ObjectPermission serverObject, ToClientConversionOptions options) {
         RepositoryPermission client = new RepositoryPermission(stripRepo(serverObject.getURI()), null, serverObject.getPermissionMask());
@@ -100,10 +101,18 @@ public class PermissionConverter implements ToClientConverter<ObjectPermission, 
     }
 
     private String addRepo(String source){
-        if (!source.startsWith(PermissionsService.REPO_URI_PREFIX)){
-            source = PermissionsService.REPO_URI_PREFIX.concat(ensureRoot(source));
+        PermissionUriProtocol permissionUriProtocol = PermissionUriProtocol.RESOURCE;
+        for (PermissionUriProtocol protocol : PermissionUriProtocol.values()) {
+            if (source.startsWith(protocol.getProtocolPrefix())) {
+                permissionUriProtocol = protocol;
+            }
+        }
+
+        if (permissionUriProtocol == PermissionUriProtocol.RESOURCE && !source.startsWith(permissionUriProtocol.getProtocolPrefix())){
+            source = permissionUriProtocol.getProtocolPrefix().concat(ensureRoot(source));
         }
         return source;
+
     }
 
     private String ensureRoot(String uri){

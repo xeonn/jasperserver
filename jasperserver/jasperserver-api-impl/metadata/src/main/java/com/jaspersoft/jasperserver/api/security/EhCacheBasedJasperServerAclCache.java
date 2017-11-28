@@ -83,7 +83,7 @@ public class EhCacheBasedJasperServerAclCache implements NonMutableAclCache {
         if ((acl.getParentAcl() != null) && (acl.getParentAcl() instanceof Acl)) {
             putInCache(acl.getParentAcl());
         }
-        cache.putIfAbsent(new Element(acl.getObjectIdentity().getIdentifier().toString(), acl));
+        cache.put(new Element(acl.getObjectIdentity().getIdentifier().toString(), acl));
 
 
     }

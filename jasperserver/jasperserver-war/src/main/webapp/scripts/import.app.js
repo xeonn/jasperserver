@@ -22,8 +22,10 @@
 
 /**
  * @author: ztomchenco
- * @version: $Id: import.app.js 7762 2014-09-19 10:16:02Z sergey.prilukin $
+ * @version: $Id: import.app.js 8179 2015-01-27 12:34:21Z psavushchik $
  */
+
+/* global JRS, _, jaspersoft, Backbone */
 
 JRS.Import.App = (function(importz, $,_, components) {
 

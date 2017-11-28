@@ -79,7 +79,7 @@
                         <!--/.control-->
                     </div>
                     <div id="stepDisplay">
-                        <input type="hidden" id="ParentFolderUri" value='<%= request.getParameter("ParentFolderUri") %>'>
+                        <input type="hidden" id="ParentFolderUri" value='${param.ParentFolderUri}'>
                         <input type="hidden" name="_flowExecutionKey" value="${flowExecutionKey}"/>
                         <input type="hidden" id="editMode" value="${wrapper.editMode}">
 
@@ -124,7 +124,7 @@
                                         <spring:bind path="wrapper.reportUnit.description">
                                             <label class="control textArea <c:if test="${status.error}">error</c:if>" for="${status.expression}">
                                                 <span class="wrap"><spring:message code="resource.report.description"/>:</span>
-                                                <textarea class="" id="${status.expression}" name="${status.expression}" type="text"><c:out value='${status.value}'/></textarea>
+                                                <textarea class="" id="${status.expression}" name="${status.expression}" type="text">${status.value}</textarea>
                                                 <span class="message warning"><c:if test="${status.error}">${status.errorMessage}</c:if></span>
                                             </label>
                                         </spring:bind>
@@ -170,7 +170,8 @@
                                                         <label class="wrap" for="CONTENT_REPOSITORY" title="<spring:message code='resource.report.repository'/>">
                                                             <spring:message code="resource.report.selectJRXML"/>
                                                         </label>
-                                                        <input class="" id="CONTENT_REPOSITORY" type="radio" name="${status.expression}" title="<spring:message code="resource.report.repository"/>" value="CONTENT_REPOSITORY" <c:if test="${status.value=='CONTENT_REPOSITORY'}">checked="checked"</c:if> <c:if test='${empty wrapper.reusableJrxmls}'>disabled="disabled"</c:if>/>
+                                                        <input class="" id="CONTENT_REPOSITORY" type="radio" name="${status.expression}" title="<spring:message code="resource.report.repository"/>" value="CONTENT_REPOSITORY" <c:if test="${status.value=='CONTENT_REPOSITORY'}">checked="checked"</c:if>
+                                                        <c:if test='${not wrapper.anyJrxmlAvailable}'>disabled="disabled"</c:if>/>
                                                     </div>
                                                     <div class="browser">
                                                     <label title="<spring:message code="resource.report.repository"/>" for="resourceUri"

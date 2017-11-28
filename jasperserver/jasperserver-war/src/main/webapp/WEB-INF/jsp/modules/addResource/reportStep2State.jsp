@@ -22,6 +22,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jstl/core_rt" %>
 <%@ taglib uri="/spring" prefix="spring"%>
 <%@ taglib prefix="authz" uri="http://www.springframework.org/security/tags" %>
+<%@ taglib prefix="js" uri="/WEB-INF/jasperserver.tld" %>
 
 <script type="text/javascript">
     if (typeof localContext === "undefined") {
@@ -29,10 +30,12 @@
     }
 
     localContext.initOptions = {
+        <js:out javaScriptEscape="true">
         jrxmlFileResourceAlreadyUploaded: "${jrxmlFileResourceAlreadyUploaded}",
         isEditMode: ${wrapper.editMode},
         type: "jrxml",
-        resourceIdNotSupportedSymbols: "<spring:message code="${resourceIdNotSupportedSymbols}" javaScriptEscape="true"/>"
+        resourceIdNotSupportedSymbols: "${resourceIdNotSupportedSymbols}"
+        </js:out>
     };
 
     if (typeof resource === "undefined") {

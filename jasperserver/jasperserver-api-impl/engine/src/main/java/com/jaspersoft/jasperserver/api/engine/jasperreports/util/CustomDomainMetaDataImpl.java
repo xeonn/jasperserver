@@ -21,6 +21,7 @@
 package com.jaspersoft.jasperserver.api.engine.jasperreports.util;
 
 
+import com.jaspersoft.jasperserver.api.JasperServerAPI;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.CustomDomainMetaData;
 import net.sf.jasperreports.engine.JRField;
 import net.sf.jasperreports.engine.design.JRDesignField;
@@ -35,6 +36,7 @@ import java.util.Map;
  * This class contains the metadata layer for connector which contains JRField names, field types, query language,
  * query text, description, and field name mapping <JRField name, Name in domain>
  */
+@JasperServerAPI
 public class CustomDomainMetaDataImpl implements CustomDomainMetaData {
 
     private List<String> fieldNames;    // JRField Names
@@ -45,58 +47,97 @@ public class CustomDomainMetaDataImpl implements CustomDomainMetaData {
     private String queryText;       // query text
     List<JRField> baseFieldList = null;
 
+    /**
+     *  return field names
+     */
     public List<String> getFieldNames() {
         return fieldNames;
     }
 
+    /**
+     *  set field names
+     */
     public void setFieldNames(List<String> fieldNames) {
         this.fieldNames = fieldNames;
         baseFieldList = null;
     }
 
+    /**
+     *  return field mapping relationship between data source field names and domain display names
+     */
     public Map<String, String> getFieldMapping() {
         return fieldMapping;
     }
 
+    /**
+     *  set field mapping relationship between data source field names and domain display names
+     */
     public void setFieldMapping(Map<String, String> fieldMapping) {
         this.fieldMapping = fieldMapping;
     }
 
+    /**
+     *  get field types
+     */
     public List<String> getFieldTypes() {
         return fieldTypes;
     }
 
+    /**
+     *  set field types
+     */
     public void setFieldTypes(List<String> fieldTypes) {
         this.fieldTypes = fieldTypes;
         baseFieldList = null;
     }
 
+    /**
+     *  get field descriptions
+     */
     public List<String> getFieldDescriptions() {
         return fieldDescriptions;
     }
 
+    /**
+     *  set field descriptions
+     */
     public void setFieldDescriptions(List<String> fieldDescriptions) {
         this.fieldDescriptions = fieldDescriptions;
         baseFieldList = null;
     }
 
+    /**
+     *  set query languages
+     */
     public String getQueryLanguage() {
         return queryLanguage;
     }
 
+    /**
+     *  return query languages
+     */
     public void setQueryLanguage(String queryLanguage) {
         this.queryLanguage = queryLanguage;
     }
 
+    /**
+     *  return query that uses in query executer
+     */
     public String getQueryText() {
         return queryText;
     }
 
+    /**
+     *  set query that uses in query executer
+     */
     public void setQueryText(String queryText) {
         this.queryText = queryText;
     }
 
-    // return a list of JRField (including name, description, and type)
+
+    /**
+     *  return list of JRField Name (name, type, description) for custom data source
+     */
     public List<JRField> getJRFieldList() {
         if (baseFieldList != null) return baseFieldList;
         baseFieldList = new ArrayList<JRField>();

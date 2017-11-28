@@ -12,7 +12,7 @@
                         {{ _.each(fieldDelimiterOptions, function(delimeter) {
                         var value = delimeter.value, label = delimeter.label;
                         }}
-                        <option value="{{- value }}" {{= (value == modelAttributes.fieldDelimiter) ? "selected='selected'" : "" }} > {{- i18n[label] }}</option>
+                        <option value="{{- value }}" {{- (value == modelAttributes.fieldDelimiter) ? "selected='selected'" : "" }} > {{- i18n[label] }}</option>
                         {{ }); }}
                     </select>
 
@@ -53,7 +53,7 @@
                         {{ _.each(rowDelimiterOptions, function(delimeter) {
                         var value = delimeter.value, label = delimeter.label;
                         }}
-                        <option value="{{- value }}" {{= (value == modelAttributes.rowDelimiter) ? "selected='selected'" : "" }} > {{- i18n[label] }}</option>
+                        <option value="{{- value }}" {{- (value == modelAttributes.rowDelimiter) ? "selected='selected'" : "" }} > {{- i18n[label] }}</option>
                         {{ }); }}
                     </select>
                     <span class="message warning"></span>
@@ -91,7 +91,7 @@
 				{{ _.each(encodingOptions, function(encoding) {
                 var value = encoding.value, label = encoding.label;
 				}}
-				<option value="{{- value }}" {{= (value == modelAttributes.encodingType) ? "selected='selected'" : "" }} > {{- i18n[label] }}</option>
+				<option value="{{- value }}" {{- (value == modelAttributes.encodingType) ? "selected='selected'" : "" }} > {{- i18n[label] }}</option>
 				{{ }); }}
 			</select>
 			<span class="message warning"></span>

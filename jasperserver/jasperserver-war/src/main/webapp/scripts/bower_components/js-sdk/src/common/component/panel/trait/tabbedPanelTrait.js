@@ -22,7 +22,7 @@
 
 /**
  * @author: Zakhar Tomchenko, Kostiantyn Tsaregradskyi
- * @version: $Id: tabbedPanelTrait.js 307 2014-10-22 13:15:28Z psavushchik $
+ * @version: $Id: tabbedPanelTrait.js 1154 2015-04-25 17:52:53Z ktsaregr $
  */
 
 define(function(require){
@@ -130,6 +130,18 @@ define(function(require){
                 var optionView = this.tabHeaderContainer.getOptionView(tabId);
 
                 optionView && optionView.select();
+            },
+
+            showTab: function(tabId) {
+                var optionView = this.tabHeaderContainer.getOptionView(tabId);
+
+                optionView && optionView.show();
+            },
+
+            hideTab: function(tabId) {
+                var optionView = this.tabHeaderContainer.getOptionView(tabId);
+
+                optionView && optionView.hide();
             }
         }
     });

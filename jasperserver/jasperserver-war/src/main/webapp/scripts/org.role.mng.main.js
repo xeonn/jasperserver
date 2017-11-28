@@ -21,8 +21,10 @@
 
 
 /**
- * @version: $Id: org.role.mng.main.js 7762 2014-09-19 10:16:02Z sergey.prilukin $
+ * @version: $Id: org.role.mng.main.js 8900 2015-05-06 20:57:14Z yplakosh $
  */
+
+/* global orgModule, _, layoutModule, webHelpModule, localContext, isProVersion, invokeClientAction */
 
 function invokeRoleAction(actionName, options) {
     var action = orgModule.roleActionFactory[actionName](options);
@@ -103,6 +105,14 @@ orgModule.roleManager = {
             var id = tree ? tree.getOrganization().id : null;
             new orgModule.Role({roleName: "", tenantId: id}).navigateToManager();
         }.bindAsEventListener(this));
+
+        orgModule.observe("entity:deleted", function(){
+            orgModule.properties.hide();
+        });
+
+        orgModule.observe("entities:deleted", function(){
+            orgModule.properties.hide();
+        });
 
         if(!isProVersion()) {
             orgModule.manager.reloadEntities();

@@ -21,8 +21,10 @@
 
 
 /**
- * @version: $Id: app.js 7748 2014-07-18 09:13:06Z kklein $
+ * @version: $Id: app.js 8900 2015-05-06 20:57:14Z yplakosh $
  */
+
+/* global ControlsBase, JSCookie, dialogs */
 
 define('scheduler/view/app', function(require){
 
@@ -31,6 +33,7 @@ define('scheduler/view/app', function(require){
     require("utils.common");
 
     var $ = require('jquery'),
+        _ = require("underscore"),
         Backbone = require('backbone'),
         domReady = require('!domReady'),
         jrsConfigs = require('jrs.configs'),
@@ -82,8 +85,10 @@ define('scheduler/view/app', function(require){
 
             // saving the URL from which we came - we need this url when user press Back button
             if (document.referrer.indexOf("login.html") === -1) {
-                new JSCookie(jobUtil.SCHEDULER_BACK_COOKIE_NAME, encodeURIComponent(document.referrer));
-                new JSCookie(jobUtil.SCHEDULER_LIST_BACK_COOKIE_NAME, encodeURIComponent(location.href));
+                window.localStorage && localStorage.setItem(jobUtil.SCHEDULER_BACK_COOKIE_NAME,
+                    encodeURIComponent(document.referrer));
+                window.localStorage && localStorage.setItem(jobUtil.SCHEDULER_LIST_BACK_COOKIE_NAME,
+                    encodeURIComponent(location.href));
             }
         },
 

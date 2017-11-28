@@ -150,8 +150,9 @@ public class ExportExecution {
                 case ready:
                     break;
                 default: {
-                    descriptor = new ErrorDescriptor.Builder().setErrorCode("export.not.ready")
-                            .setMessage("Export not ready").getErrorDescriptor();
+                    // not ready and not failed. This situation happens if export execution is restarted after report execution complete.
+                    // let's call this method recursively to wait for next signal.
+                    result = getFinalOutputResource();
                 }
             }
             if (descriptor != null) throw new ExportExecutionRejectedException(descriptor);

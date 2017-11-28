@@ -21,7 +21,7 @@
 
 /**
  * @author yaroslav.kovalchyk
- * @version $Id: Authentication.js 709 2014-12-02 16:50:02Z ykovalchyk $
+ * @version $Id: Authentication.js 1178 2015-05-06 20:40:12Z yplakosh $
  */
 
 define(function (require) {
@@ -35,12 +35,13 @@ define(function (require) {
         request = require("common/transport/request"),
         errorCodes = require("common/bi/error/enum/biComponentErrorCodes"),
         biComponentErrorFactory = require("common/bi/error/biComponentErrorFactory"),
-        authSettings = require("settings!auth")||{"ticketParameterName":"ticket"},
+        defaultTokenParameterName = "ticket",
+        authSettings = require("settings!auth")||{"ticketParameterName":defaultTokenParameterName},
         schemaString = require("text!./Authentication.json");
 
     function getParametersString(properties) {
         if (properties.token) {
-            return (properties.tokenName || authSettings.ticketParameterName) + "=" + properties.token;
+            return (properties.tokenName || authSettings.ticketParameterName || defaultTokenParameterName) + "=" + properties.token;
         } else {
             return "j_username=" + properties.name + "&j_password=" + properties.password + "&orgId=" + (properties.organization ? properties.organization : "null") + (properties.locale ? "&userLocale=" + properties.locale : "") + (properties.timezone ? "&userTimezone=" + properties.timezone : "");
         }

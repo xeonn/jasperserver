@@ -22,24 +22,48 @@ package com.jaspersoft.jasperserver.remote.reports;
 
 import com.jaspersoft.jasperserver.remote.services.ExportExecution;
 import com.jaspersoft.jasperserver.remote.services.ReportExecution;
+import com.jaspersoft.jasperserver.war.action.hyperlinks.HyperlinkProducerFactoryFlowFactory;
+import net.sf.jasperreports.engine.JRExporterParameter;
 import net.sf.jasperreports.engine.ReportContext;
 import net.sf.jasperreports.engine.export.AbstractHtmlExporter;
 import net.sf.jasperreports.engine.export.JRHtmlExporterParameter;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+
 /**
  * <p></p>
  *
  * @author yaroslav.kovalchyk
- * @version $Id: EmbeddableHtmlExportStrategy.java 50801 2014-10-29 00:20:56Z inesterenko $
+ * @version $Id: EmbeddableHtmlExportStrategy.java 52527 2015-02-25 13:53:01Z ktsaregradskyi $
  */
 @Service
 public class EmbeddableHtmlExportStrategy extends AbstractHtmlExportStrategy {
+    @Resource(name = "viewReportHyperlinkProducerFactory")
+    private HyperlinkProducerFactoryFlowFactory hyperlinkProducerFactory;
     @Override
-    protected AbstractHtmlExporter prepareExporter(ReportExecution reportExecution, ExportExecution exportExecution, String contextPath) {
+    protected AbstractHtmlExporter prepareExporter(final ReportExecution reportExecution, ExportExecution exportExecution, String contextPath) {
         final AbstractHtmlExporter exporter = super.prepareExporter(reportExecution, exportExecution, contextPath);
         exporter.setParameter(JRHtmlExporterParameter.HTML_HEADER, "");
         exporter.setParameter(JRHtmlExporterParameter.HTML_FOOTER, "");
+        // there is no valid request and response in the async export context.
+        // Let's proxy request to forward required parameters to hyperlink producers
+        HttpServletRequest requestProxy = (HttpServletRequest) Proxy.newProxyInstance(this.getClass().getClassLoader(),
+                new Class<?>[]{HttpServletRequest.class}, new InvocationHandler() {
+                    @Override
+                    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                        Object result = null;
+                        if ("getAttribute".equals(method.getName())) {
+                            result = "reportResult".equals(args[0]) ? reportExecution.getReportUnitResult() : null;
+                        }
+                        return result;
+                    }
+                });
+        exporter.setParameter(JRExporterParameter.HYPERLINK_PRODUCER_FACTORY, hyperlinkProducerFactory.getHyperlinkProducerFactory(requestProxy, null));
         ReportContext reportContext = reportExecution.getFinalReportUnitResult().getReportContext();
         if (reportContext != null) {
             reportContext.setParameterValue(ReportContext.REQUEST_PARAMETER_APPLICATION_DOMAIN, exportExecution.getOptions().getBaseUrl());

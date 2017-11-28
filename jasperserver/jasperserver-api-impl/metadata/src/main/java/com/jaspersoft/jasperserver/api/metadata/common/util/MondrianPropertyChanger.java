@@ -41,7 +41,9 @@ public class MondrianPropertyChanger extends PropertyChangerAdapter {
 
     public void setProperty(String key, String val) {
 		log.debug("setting mondrian property: " + key + " - " + val);
-		MondrianProperties.instance().setProperty(key, val);
+        if (val != null) {
+            MondrianProperties.instance().setProperty(key, val);
+        }
 	}
 
 	public String getProperty(String key) {

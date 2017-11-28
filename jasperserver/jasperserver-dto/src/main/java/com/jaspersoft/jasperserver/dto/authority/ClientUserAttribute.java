@@ -27,18 +27,27 @@ import javax.xml.bind.annotation.XmlRootElement;
  * <p></p>
  *
  * @author Zakhar.Tomchenco
- * @version $Id$
+ * @author Volodya Sabadosh
+ * @version $Id $
  */
 @XmlRootElement(name = "attribute")
 public class ClientUserAttribute {
     private String name;
     private String value;
     private Boolean secure = null;
+    private Boolean inherited = null;
+    private String description;
+    private Integer permissionMask;
+    private String holder;
 
     public ClientUserAttribute(ClientUserAttribute other) {
         this.name = other.getName();
         this.value = other.getValue();
         this.secure = other.isSecure();
+        this.description = other.getDescription();
+        this.permissionMask = other.getPermissionMask();
+        this.inherited = other.isInherited();
+        this.holder = other.getHolder();
     }
 
     public ClientUserAttribute() {
@@ -50,6 +59,15 @@ public class ClientUserAttribute {
 
     public ClientUserAttribute setName(String name) {
         this.name = name;
+        return this;
+    }
+
+    public String getHolder() {
+        return holder;
+    }
+
+    public ClientUserAttribute setHolder(String holder) {
+        this.holder = holder;
         return this;
     }
 
@@ -72,6 +90,33 @@ public class ClientUserAttribute {
         return secure;
     }
 
+    @XmlElement(name = "inherited")
+    public Boolean isInherited() {
+        return inherited;
+    }
+
+    public ClientUserAttribute setInherited(Boolean inherited) {
+        this.inherited = inherited;
+        return this;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Integer getPermissionMask() {
+        return permissionMask;
+    }
+
+    public ClientUserAttribute setPermissionMask(Integer permissionMask) {
+        this.permissionMask = permissionMask;
+        return this;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -81,6 +126,7 @@ public class ClientUserAttribute {
 
         if (name != null ? !name.equals(that.name) : that.name != null) return false;
         if (value != null ? !value.equals(that.value) : that.value != null) return false;
+        if (holder != null ? !holder.equals(that.holder) : that.holder != null) return false;
 
         return true;
     }
@@ -89,6 +135,7 @@ public class ClientUserAttribute {
     public int hashCode() {
         int result = name != null ? name.hashCode() : 0;
         result = 31 * result + (value != null ? value.hashCode() : 0);
+        result = 31 * result + (holder != null ? holder.hashCode() : 0);
         return result;
     }
 
@@ -98,6 +145,10 @@ public class ClientUserAttribute {
                 "name='" + name + '\'' +
                 ", value='" + value + '\'' +
                 ", secure='" + secure + '\'' +
+                ", inherited='" + inherited + '\'' +
+                ", description='" + description + '\'' +
+                ", permissionMask='" + permissionMask + '\'' +
+                ", holder='" + holder + '\'' +
                 '}';
     }
 }

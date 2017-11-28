@@ -42,15 +42,19 @@ import com.jaspersoft.jasperserver.api.metadata.user.service.TenantService;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.CacheMode;
+import org.hibernate.Criteria;
+import org.hibernate.HibernateException;
+import org.hibernate.Session;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
+import org.springframework.orm.hibernate3.HibernateCallback;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -261,9 +265,7 @@ public class TenantServiceImpl extends HibernateDaoImpl
 			return null;
 		} else {
             Tenant tenant = toClientTenant(rTenant);
-            if (rTenant.getTenantId() != null && !(rTenant.getTenantId().equals(ORGANIZATIONS))) {
-                tenant.setAttributes(profileAttributeService.getProfileAttributesForPrincipal(null, tenant));
-            }
+            tenant.setAttributes(profileAttributeService.getProfileAttributesForPrincipal(null, tenant));
             return tenant;
         }
 	}
@@ -584,6 +586,24 @@ public class TenantServiceImpl extends HibernateDaoImpl
         return 0;
     }
 
+    /**
+     * The number of all tenants
+     */
+    @Transactional(propagation = Propagation.REQUIRED)
+    protected int getTotalTenantsCount(ExecutionContext context) {
+        Integer rowCount = (Integer) getHibernateTemplate().execute(new HibernateCallback<Object>() {
+            @Override
+            public Object doInHibernate(Session session) throws HibernateException, SQLException {
+                Criteria criteria = session.createCriteria(persistentTenantClass());
+                criteria.add(Restrictions.not(Restrictions.eq("tenantId", ORGANIZATIONS)));
+                criteria.setProjection(Projections.rowCount());
+                return criteria.uniqueResult();
+            }
+        });
+
+        return rowCount;
+    }
+
     public List<Tenant> getSubTenants(ExecutionContext context, String parentTenantId, String text, int firstResult,
             int maxResults) {
         DetachedCriteria criteria = createSearchTenantsCriteria(parentTenantId, text);
@@ -678,7 +698,7 @@ public class TenantServiceImpl extends HibernateDaoImpl
             .addDiagnosticAttribute(DiagnosticAttributeBuilder.TOTAL_ORGANIZATIONS_COUNT, new DiagnosticCallback<Integer>() {
                 @Override
                 public Integer getDiagnosticAttributeValue() {
-                    return getSubTenantsCount(null, ORGANIZATIONS, null);
+                    return getTotalTenantsCount(null);
                 }
             }).build();
     }

@@ -20,14 +20,18 @@
  */
 package com.jaspersoft.jasperserver.war.action;
 
+import java.io.OutputStream;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
-import net.sf.jasperreports.engine.JRExporterParameter;
+import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRPropertiesHolder;
 import net.sf.jasperreports.engine.JRPropertiesUtil;
+import net.sf.jasperreports.engine.JasperPrint;
 
+import org.springframework.webflow.core.collection.AttributeMap;
 import org.springframework.webflow.execution.RequestContext;
 
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
@@ -38,18 +42,26 @@ import com.jaspersoft.jasperserver.api.engine.jasperreports.common.PdfExportPara
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ReportPdfExporter.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: ReportPdfExporter.java 54728 2015-04-24 15:28:20Z tdanciu $
  */
-public class ReportPdfExporter extends AbstractReportExporter {
+public class ReportPdfExporter extends AbstractReportExporter 
+{
 
 	private EngineService engine;
 	private PdfExportParametersBean exportParameters;
 	
-	public void export(RequestContext context, ExecutionContext executionContext, String reportUnitURI, Map baseParameters) {
-
+	public void export(RequestContext context, ExecutionContext executionContext, JasperPrint jasperPrint, OutputStream outputStream) throws JRException
+	{
+		Map baseParameters = new HashMap();
+		baseParameters.put(net.sf.jasperreports.engine.JRExporterParameter.JASPER_PRINT, jasperPrint);
+		baseParameters.put(net.sf.jasperreports.engine.JRExporterParameter.OUTPUT_STREAM, outputStream);
+		
 		if (exportParameters.isOverrideReportHints()) {
-			baseParameters.put(JRExporterParameter.PARAMETERS_OVERRIDE_REPORT_HINTS, Boolean.TRUE);
+			baseParameters.put(net.sf.jasperreports.engine.JRExporterParameter.PARAMETERS_OVERRIDE_REPORT_HINTS, Boolean.TRUE);
 		}
+
+		AttributeMap flowAttrs = context.getFlowScope();
+		String reportUnitURI = flowAttrs.getRequiredString(getFlowAttributeReportUnitURI());
 		
 		engine.exportToPdf(executionContext, reportUnitURI, baseParameters);
 	}

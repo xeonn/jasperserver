@@ -22,9 +22,11 @@ package com.jaspersoft.jasperserver.remote.resources.converters;
 
 import com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl.CustomReportDataSourceServiceFactory;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.util.CustomDataSourceDefinition;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceReference;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.CustomReportDataSource;
 import com.jaspersoft.jasperserver.dto.resources.ClientCustomDataSource;
 import com.jaspersoft.jasperserver.dto.resources.ClientProperty;
+import com.jaspersoft.jasperserver.dto.resources.ClientReferenceableFile;
 import com.jaspersoft.jasperserver.remote.exception.IllegalParameterValueException;
 import org.springframework.stereotype.Service;
 
@@ -39,7 +41,7 @@ import java.util.Set;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: CustomDataSourceResourceConverter.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: CustomDataSourceResourceConverter.java 53873 2015-04-07 18:59:44Z mchan $
  */
 @Service
 public class CustomDataSourceResourceConverter extends ResourceConverterImpl<CustomReportDataSource, ClientCustomDataSource> {
@@ -47,6 +49,8 @@ public class CustomDataSourceResourceConverter extends ResourceConverterImpl<Cus
     protected Set<String> propertiesToIgnore;
     @Resource(name = "customDataSourceServiceFactory")
     private CustomReportDataSourceServiceFactory customDataSourceFactory;
+    @Resource
+    protected ResourceReferenceConverterProvider resourceReferenceConverterProvider;
 
     @Override
     protected CustomReportDataSource resourceSpecificFieldsToServer(ClientCustomDataSource clientObject, CustomReportDataSource resultToUpdate, ToServerConversionOptions options) throws IllegalParameterValueException {
@@ -54,34 +58,62 @@ public class CustomDataSourceResourceConverter extends ResourceConverterImpl<Cus
         final CustomDataSourceDefinition definition = customDataSourceFactory.getDefinitionByName(clientObject.getDataSourceName());
         // let's fill service class by dataSourceName. If dataSourceName is incorrect and no such definition,
         // then let validator throw corresponding error
-        if(definition != null){
+        if (definition != null) {
             // service class attribute is read only. It's determined by dataSourceName
             resultToUpdate.setServiceClass(definition.getServiceClassName());
         }
         Map<String, Object> properties = new HashMap<String, Object>();
         final Map resultToUpdatePropertyMap = resultToUpdate.getPropertyMap();
-        if(resultToUpdatePropertyMap != null && !resultToUpdatePropertyMap.isEmpty()){
+        if (resultToUpdatePropertyMap != null && !resultToUpdatePropertyMap.isEmpty()) {
             // put all properties to ignore (if any exists) to the result properties map
-            for(String currentPropertyToIgnore : propertiesToIgnore){
-                if(resultToUpdatePropertyMap.containsKey(currentPropertyToIgnore)){
+            for (String currentPropertyToIgnore : propertiesToIgnore) {
+                if (resultToUpdatePropertyMap.containsKey(currentPropertyToIgnore)) {
                     properties.put(currentPropertyToIgnore, resultToUpdatePropertyMap.get(currentPropertyToIgnore));
                 }
             }
         }
         // put all the properties, received from the client
-        if(clientObject.getProperties() != null && !clientObject.getProperties().isEmpty()){
-            for(ClientProperty property : clientObject.getProperties()){
+        final List<ClientProperty> clientProperties = clientObject.getProperties();
+        if (clientProperties != null && !clientProperties.isEmpty()) {
+            for (ClientProperty property : clientProperties) {
                 final String propertyKey = property.getKey();
                 final String propertyValue = property.getValue();
-                if((propertiesToIgnore.contains(propertyKey) && propertyValue != null)
+                if ((propertiesToIgnore.contains(propertyKey) && propertyValue != null)
                         || !propertiesToIgnore.contains(propertyValue)) {
                     // put current property if not ignored property or property is ignored but isn't null (overwrite)
                     properties.put(propertyKey, propertyValue);
+                }
             }
         }
-        }
         resultToUpdate.setPropertyMap(properties.isEmpty() ? null : properties);
+        resultToUpdate.setResources(convertResourcesToServer(clientObject.getResources(), options));
         return resultToUpdate;
+    }
+
+    protected Map<String, ResourceReference> convertResourcesToServer(Map<String, ClientReferenceableFile> resources, ToServerConversionOptions options){
+        Map<String, ResourceReference> serverResources = null;
+        if(resources != null && !resources.isEmpty()){
+            serverResources = new HashMap<String, ResourceReference>();
+            final ResourceReferenceConverter<ClientReferenceableFile> referenceConverter =
+                    resourceReferenceConverterProvider.getConverterForType(ClientReferenceableFile.class);
+            for(String key : resources.keySet()){
+                serverResources.put(key, referenceConverter.toServer(resources.get(key), options));
+            }
+        }
+        return serverResources;
+    }
+
+    protected Map<String, ClientReferenceableFile> convertResourcesToClient(Map<String, ResourceReference> serverResources, ToClientConversionOptions options){
+        Map<String, ClientReferenceableFile> resources = null;
+        if(serverResources != null && !serverResources.isEmpty()){
+            resources = new HashMap<String, ClientReferenceableFile>(serverResources.size());
+            final ResourceReferenceConverter<ClientReferenceableFile> referenceConverter =
+                    resourceReferenceConverterProvider.getConverterForType(ClientReferenceableFile.class);
+            for(String key : serverResources.keySet()){
+                resources.put(key, referenceConverter.toClient(serverResources.get(key), options));
+            }
+        }
+        return resources;
     }
 
     @Override
@@ -99,7 +131,8 @@ public class CustomDataSourceResourceConverter extends ResourceConverterImpl<Cus
                 }
             }
         }
-        client.setProperties(properties.isEmpty() ? null : properties);
+        client.setProperties(properties == null || properties.isEmpty() ? null : properties);
+        client.setResources(convertResourcesToClient(serverObject.getResources(), options));
         return client;
     }
 }

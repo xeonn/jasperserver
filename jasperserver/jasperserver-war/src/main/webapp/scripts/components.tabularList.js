@@ -21,13 +21,15 @@
 
 
 /**
- * @version: $Id: components.tabularList.js 7762 2014-09-19 10:16:02Z sergey.prilukin $
+ * @version: $Id: components.tabularList.js 8179 2015-01-27 12:34:21Z psavushchik $
  */
+
+/* global Class, $$, Truncator, */
 
 Element.addMethods({
   isTextNode: function(element) {
       element = $(element);
-      return element.childElements().length == 0 && element.innerHTML.strip().length > 0;
+      return element.childElements().length === 0 && element.innerHTML.strip().length > 0;
   }
 });
 
@@ -96,6 +98,6 @@ var TabularList = Class.create({
     },
 
     _isTextNode: function(node) {
-        return node.childElements().length == 0 && node.innerHTML.strip().length > 0;
+        return node.childElements().length === 0 && node.innerHTML.strip().length > 0;
     }
 });

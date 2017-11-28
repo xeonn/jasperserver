@@ -21,8 +21,11 @@
 
 
 /**
- * @version: $Id: dynamicTree.treesupport.js 7762 2014-09-19 10:16:02Z sergey.prilukin $
+ * @version: $Id: dynamicTree.treesupport.js 8790 2015-04-22 21:28:09Z obobruyk $
  */
+
+/* global dynamicTree, deepClone, __jrsConfigs__, _, ajaxTargettedUpdate, baseErrorHandler, unescapeBackslash,
+ ajaxTargettedUpdate, trim  */
 
 /**
  * TreeSupport is extend Tree to use it with JasperServer.
@@ -84,7 +87,7 @@ dynamicTree.TreeSupport = function(id, options) {
     }
 
     this._initOpenListener();
-}
+};
 
 dynamicTree.TreeSupport.prototype = deepClone(dynamicTree.Tree.prototype);
 
@@ -203,7 +206,10 @@ dynamicTree.TreeSupport.addMethod('showTreeCallback', function (userCallbackFn, 
         return;
     }
 
-    var rootObj = (div.innerHTML.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')).evalJSON();
+    //as this data was escaped before adding to DOM to prevent XSS (core.ajax.js:246)
+    //here it should be unescaped for further use
+    var json = xssUtil.unescape(jQuery(div).text());
+    var rootObj = json.evalJSON();
 
     if (this.modifyRootObject) {
         rootObj = this.modifyRootObject(rootObj, false);
@@ -265,7 +271,7 @@ dynamicTree.TreeSupport.addMethod('processNode', function (metaNode) {
     var ch = metaNode.children;
     if (ch != null) {
         var len = ch.length;
-        if (len == 0) {
+        if (len === 0) {
             localRoot.setHasChilds(false);
         } else {
             for (var i = 0; i < len; i++) {
@@ -305,7 +311,7 @@ dynamicTree.TreeSupport.addMethod('getTreeNodeChildren', function (parentNode, u
             parentNode.stopWaiting();
         }
         baseErrorHandler(ajaxAgent);
-    }
+    };
 
     ajaxTargettedUpdate(
         this.urlGetChildren + '&provider=' + this.providerId + '&uri=' + encodeURIComponent(encodeURIComponent(uri)) +
@@ -330,7 +336,8 @@ dynamicTree.TreeSupport.addMethod('getTreeNodeChildrenCallback', function (paren
         }
         return;
     }
-    var ns = window.eval('(' + div.innerHTML.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>') + ')');
+    //var ns = window.eval('(' + div.innerHTML.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>') + ')'); // jshint ignore: line
+    var ns = xssUtil.unescape(jQuery(div).text()).evalJSON();
 
     var parentNode = dynamicTree.nodes[parentNodeId];
 
@@ -346,7 +353,7 @@ dynamicTree.TreeSupport.addMethod('getTreeNodeChildrenCallback', function (paren
     parentNode.stopWaiting();
 
     var len = ns.length;
-    if (len == 0) {
+    if (len === 0) {
         parentNode.setHasChilds(false);
     } else {
         var treeId = parentNode.getTreeId();
@@ -439,7 +446,9 @@ dynamicTree.TreeSupport.addMethod('getTreeMultipleNodesChildrenCallback', functi
         }
         return;
     }
-    var ns = window.eval('(' + div.innerHTML.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>') + ')');
+    //var ns = window.eval('(' + div.innerHTML.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>') + ')'); // jshint ignore: line
+    var ns = xssUtil.unescape(jQuery(div).text()).evalJSON();
+
     div = document.getElementById(this.ajaxBufferId);
     div.innerHTML = '';
 
@@ -482,7 +491,7 @@ dynamicTree.TreeSupport.addMethod('setMultipleNodesChilden', function (parentNod
                 parentNode.stopWaiting();
 
                 var len = ns.length;
-                if (len == 0) {
+                if (len === 0) {
                     parentNode.setHasChilds(false);
                 } else {
                     var treeId = parentNode.getTreeId();
@@ -571,7 +580,9 @@ dynamicTree.TreeSupport.addMethod('getTreeNodeChildrenPrefetchedCallback', funct
         }
         return;
     }
-    var n = window.eval('(' + div.innerHTML.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>') + ')');
+    //var n = window.eval('(' + div.innerHTML.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>') + ')'); // jshint ignore: line
+    var n = xssUtil.unescape(jQuery(div).text()).evalJSON();
+
     div = document.getElementById(this.ajaxBufferId);
     div.innerHTML = '';
 
@@ -615,16 +626,18 @@ dynamicTree.TreeSupport.addMethod('getTreeNodeChildrenPrefetchedCallback', funct
  * @param fnAction {Function} optional action to be called
  * @param findFirstChild {Boolean} optional parameter, if true first child of the node will be open
  */
-dynamicTree.TreeSupport.addMethod('openAndSelectNode', function(uriStr, fnAction, findFirstChild) {
+dynamicTree.TreeSupport.addMethod('openAndSelectNode', function(uriStr, fnAction, findFirstChild, options) {
     var fn = function(node) {
+        var tree = dynamicTree.trees[node.getTreeId()];
+
         if (node.parent) {
-            var tree = dynamicTree.trees[node.getTreeId()];
             if (tree && tree.rootNode != node.parent && tree.getState(node.parent.id) == dynamicTree.TreeNode.State.CLOSED) {
                 node.parent.handleNode();
             }
         }
+
         if(node && jQuery('#dataChooserSource').length) node.nofocus = true;
-        tree._selectOrEditNode(undefined, node, false);
+        tree._selectOrEditNode(undefined, node, false, false, false, options);
     };
 
     this.processNodePath(uriStr, fn, findFirstChild);
@@ -642,29 +655,34 @@ dynamicTree.TreeSupport.addMethod('openAndSelectNode', function(uriStr, fnAction
 });
 
 dynamicTree.TreeSupport.addMethod('processNodePath', function(uriStr, fnForNode, findFirstChild) {
-
-    var path = uriStr.split('/');
     var node = this.getRootNode();
-    var i;
 
-    for (i = 0; i < path.length; i++) {
-        if (!path[i]) {
-            continue;
-        }
-        var oldNode = node;
-        node = this.findNodeChildByMetaName(node, path[i]);
-        if (!node) {
-            if(findFirstChild){
-                node = this.findNodeFirstNodeChildByAlphabeticalOrder(oldNode);
-                if(!node){
+    if(uriStr === "/") {
+        fnForNode(node);
+    }else{
+        var path = uriStr.split('/');
+        var i;
+
+        for (i = 0; i < path.length; i++) {
+            if (!path[i]) {
+                continue;
+            }
+            var oldNode = node;
+            node = this.findNodeChildByMetaName(node, path[i]);
+            if (!node) {
+                if(findFirstChild){
+                    node = this.findNodeFirstNodeChildByAlphabeticalOrder(oldNode);
+                    if(!node){
+                        return;
+                    }
+                }else{
                     return;
                 }
-            }else{
-                return;
             }
+            fnForNode(node);
         }
-        fnForNode(node);
     }
+
 });
 
 /**

@@ -20,8 +20,10 @@
  */
 
 /**
- * @version: $Id: historyHelper.js 270 2014-10-13 19:58:03Z agodovanets $
+ * @version: $Id: historyHelper.js 812 2015-01-27 11:01:30Z psavushchik $
  */
+
+/*global JSCookie, redirectToUrl */
 
 define(function (require) {
 

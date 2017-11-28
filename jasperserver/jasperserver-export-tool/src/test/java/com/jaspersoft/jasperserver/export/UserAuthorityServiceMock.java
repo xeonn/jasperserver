@@ -26,9 +26,10 @@ import com.jaspersoft.jasperserver.api.metadata.user.domain.Role;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.client.RoleImpl;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.client.UserImpl;
-import com.jaspersoft.jasperserver.api.metadata.user.domain.impl.hibernate.RepoRole;
+import com.jaspersoft.jasperserver.api.metadata.user.domain.impl.hibernate.RepoTenant;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.impl.hibernate.RepoUser;
 import com.jaspersoft.jasperserver.api.metadata.user.service.UserAuthorityService;
+import com.jaspersoft.jasperserver.api.metadata.user.service.impl.UserAuthorityPersistenceService;
 import com.jaspersoft.jasperserver.api.metadata.view.domain.FilterCriteria;
 import org.hibernate.criterion.DetachedCriteria;
 
@@ -37,7 +38,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class UserAuthorityServiceMock implements UserAuthorityService {
+public class UserAuthorityServiceMock implements UserAuthorityService, UserAuthorityPersistenceService {
 
     private Map<String, Role> roles;
     private Map<String,List<User>> usersWithRoles;
@@ -311,5 +312,30 @@ public class UserAuthorityServiceMock implements UserAuthorityService {
 
     public void setUsersMap(Map<String, User> users) {
         this.users = users;
+    }
+
+    @Override
+    public RepoUser getPersistentUser(String username) {
+        return null;
+    }
+
+    @Override
+    public Object getPersistentObject(Object clientObject) {
+        return null;
+    }
+
+    @Override
+    public RepoTenant getPersistentTenant(String tenantId, boolean required) {
+        return null;
+    }
+
+    @Override
+    public RepoTenant getPersistentTenantByAlias(String tenantAlias, boolean required) {
+        return null;
+    }
+
+    @Override
+    public List<RepoTenant> getPersistentTenants(List<String> tenantIds) {
+        return null;
     }
 }

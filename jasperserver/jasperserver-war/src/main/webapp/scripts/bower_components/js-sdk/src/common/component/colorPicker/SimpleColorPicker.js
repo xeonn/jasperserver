@@ -32,12 +32,21 @@ define(function(require){
 
     require("css!simpleColorPicker.css");
 
-    return Backbone.View.extend({
+    return Backbone.View.extend(
+        /** @lends SimpleColorPicker.prototype */
+        {
 
         events: {
             "click .color": "_selectColor"
         },
 
+        /**
+         * @constructor SimpleColorPicker
+         * @classdesc SimpleColorPicker component.
+         * @param {object} options
+         * @param {string} [options.label=undefined] - color picker label
+         * @param {string} [options.label=showTransparentInput] - show transparent (to set transparent property) input field.
+        */
         constructor: function(options){
             this.label = options && options.label;
             this.showTransparentInput = options && options.showTransparentInput;
@@ -53,6 +62,10 @@ define(function(require){
             });
         },
 
+        /**
+         * @description Highlights color in color picker with orange borders.
+         * @param {string} color - hex color value
+        */
         highlightColor: function(color){
             var index = _.indexOf(colors, color);
             var colorBox = index >= 0 ? this.$el.find("div[data-index='" + index + "']") : this.$el.find(".color.transparent");
@@ -60,6 +73,11 @@ define(function(require){
             colorBox.addClass("selected");
         },
 
+        /**
+         * @description Selects color. Triggers event.
+         * @access protected
+         * @fires SimpleColorPicker#color:selected
+         */
         _selectColor: function(event){
             var colorEl = $(event.target);
             var color = colorEl.css("background-color");
@@ -67,10 +85,16 @@ define(function(require){
             this.trigger("color:selected", colorEl.css("background-color"));
         },
 
+        /**
+         * @description Show color picker.
+         */
         show: function(){
             this.$el.show();
         },
 
+        /**
+         * @description Hides color picker.
+         */
         hide: function(){
             this.$el.hide();
         }

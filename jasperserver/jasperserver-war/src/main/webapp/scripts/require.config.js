@@ -14,12 +14,13 @@ requirejs.config(
   paths: {
     'backbone.original': 'bower_components/backbone/backbone',
     'underscore.string': 'bower_components/underscore.string/lib/underscore.string',
+    restResource: 'bower_components/js-sdk/src/common/plugin/restResource',
     'iota-observable': 'bower_components/iota-observable/iota-observable',
     'requirejs.plugin.css': 'bower_components/require-css/css',
     'tv4.original': 'bower_components/tv4/tv4',
     'backbone.validation.original': 'bower_components/backbone-validation/dist/backbone-validation-amd',
     jquery: 'bower_components/jquery/dist/jquery',
-    'lodash.custom': 'bower_components/lodash.custom/lodash-2.4.1-custom',
+    'lodash.custom': 'bower_components/lodash.custom/dist/lodash.custom',
     json3: 'bower_components/json3/lib/json3',
     xregexp: 'bower_components/xregexp/xregexp-all',
     moment: 'bower_components/moment/moment',
@@ -28,17 +29,30 @@ requirejs.config(
     xdm: 'bower_components/xdm/artifacts/v2.4.19/easyXDM.jasper',
     'rivets.original': 'bower_components/rivets/dist/rivets',
     base64: 'bower_components/js-base64/base64',
+    'backbone.epoxy.original': 'bower_components/backbone.epoxy/backbone.epoxy',
+    'backbone.marionette': 'bower_components/backbone.marionette/lib/core/backbone.marionette',
+    'backbone.wreqr': 'bower_components/backbone.wreqr/lib/backbone.wreqr',
+    'backbone.babysitter': 'bower_components/backbone.babysitter/lib/backbone.babysitter',
     'jquery.timepicker.addon': 'bower_components/jquery.timepicker.addon/dist/jquery-ui-timepicker-addon',
     'jquery.ui': 'bower_components/jquery-ui/ui/jquery-ui-1.10.4.custom',
     'datepicker.i18n.en': 'bower_components/jquery-ui/ui/i18n/jquery.ui.datepicker-en',
-    'datepicker.i18n.de': 'bower_components/jquery-ui/ui/ui/i18n/jquery.ui.datepicker-de',
-    'datepicker.i18n.es': 'bower_components/jquery-ui/ui/ui/i18n/jquery.ui.datepicker-es',
-    'datepicker.i18n.fr': 'bower_components/jquery-ui/ui/ui/i18n/jquery.ui.datepicker-fr',
-    'datepicker.i18n.it': 'bower_components/jquery-ui/ui/ui/i18n/jquery.ui.datepicker-it',
-    'datepicker.i18n.ja': 'bower_components/jquery-ui/ui/ui/i18n/jquery.ui.datepicker-ja',
-    'datepicker.i18n.ro': 'bower_components/jquery-ui/ui/ui/i18n/jquery.ui.datepicker-ro',
-    'datepicker.i18n.zh-CN': 'bower_components/jquery-ui/ui/ui/i18n/jquery.ui.datepicker-zh-CN',
-    'datepicker.i18n.zh-TW': 'bower_components/jquery-ui/ui/ui/i18n/jquery.ui.datepicker-zh-TW',
+    'datepicker.i18n.de': 'bower_components/jquery-ui/ui/i18n/jquery.ui.datepicker-de',
+    'datepicker.i18n.es': 'bower_components/jquery-ui/ui/i18n/jquery.ui.datepicker-es',
+    'datepicker.i18n.fr': 'bower_components/jquery-ui/ui/i18n/jquery.ui.datepicker-fr',
+    'datepicker.i18n.it': 'bower_components/jquery-ui/ui/i18n/jquery.ui.datepicker-it',
+    'datepicker.i18n.ja': 'bower_components/jquery-ui/ui/i18n/jquery.ui.datepicker-ja',
+    'datepicker.i18n.pt-BR': 'bower_components/jquery-ui/ui/i18n/jquery.ui.datepicker-pt-BR',
+    'datepicker.i18n.zh-CN': 'bower_components/jquery-ui/ui/i18n/jquery.ui.datepicker-zh-CN',
+    'datepicker.i18n.zh-TW': 'bower_components/jquery-ui/ui/i18n/jquery.ui.datepicker-zh-TW',
+    'timepicker.i18n.en': 'bower_components/jquery.timepicker.addon/src/i18n/jquery-ui-timepicker-en',
+    'timepicker.i18n.de': 'bower_components/jquery.timepicker.addon/src/i18n/jquery-ui-timepicker-de',
+    'timepicker.i18n.es': 'bower_components/jquery.timepicker.addon/src/i18n/jquery-ui-timepicker-es',
+    'timepicker.i18n.fr': 'bower_components/jquery.timepicker.addon/src/i18n/jquery-ui-timepicker-fr',
+    'timepicker.i18n.it': 'bower_components/jquery.timepicker.addon/src/i18n/jquery-ui-timepicker-it',
+    'timepicker.i18n.ja': 'bower_components/jquery.timepicker.addon/src/i18n/jquery-ui-timepicker-ja',
+    'timepicker.i18n.pt-BR': 'bower_components/jquery.timepicker.addon/src/i18n/jquery-ui-timepicker-pt-BR',
+    'timepicker.i18n.zh-CN': 'bower_components/jquery.timepicker.addon/src/i18n/jquery-ui-timepicker-zh-CN',
+    'timepicker.i18n.zh-TW': 'bower_components/jquery.timepicker.addon/src/i18n/jquery-ui-timepicker-zh-TW',
     'jquery.ui.mouse.touch': 'bower_components/jquery.ui.touch-punch/jquery.ui.touch-punch',
     'jquery.selection': 'bower_components/jquery.selection/src/jquery.selection',
     'jquery.urldecoder': 'bower_components/jquery.urldecoder/jquery.urldecoder',
@@ -48,11 +62,13 @@ requirejs.config(
     tv4: 'bower_components/js-sdk/src/common/config/tv4Settings',
     'backbone.validation': 'bower_components/js-sdk/src/common/extension/backboneValidationExtension',
     rivets: 'bower_components/js-sdk/src/common/extension/rivetsExtension',
+    'backbone.epoxy': 'bower_components/js-sdk/src/common/extension/epoxyExtension',
     bundle: 'bower_components/js-sdk/src/common/plugin/bundle',
     settings: 'bower_components/js-sdk/src/common/plugin/settings',
     text: 'bower_components/js-sdk/src/common/plugin/text',
     css: 'bower_components/js-sdk/src/common/plugin/css',
     csslink: 'bower_components/js-sdk/src/common/plugin/csslink',
+    vizShim: 'bower_components/js-sdk/src/common/plugin/vizShim',
     logger: 'bower_components/js-sdk/src/common/logging/logger',
     'jquery-ui-custom-css': 'bower_components/jquery-ui/themes/redmond/jquery-ui-1.10.4-custom.css',
     'jquery-ui-custom-css-visualizejs': 'bower_components/jquery-ui/themes/redmond/jquery-ui-1.10.4-custom-visualizejs.css',
@@ -64,6 +80,7 @@ requirejs.config(
     dragdrop: 'bower_components/scriptaculous/src/dragdrop',
     iscroll: 'bower_components/iscroll/src/iscroll',
     'dragdrop.extra': 'bower_components/dragdropextra/dragdropextra',
+    encoding: 'bower_components/encoding/encoding',
     touchcontroller: 'touch.controller',
     'export.app': 'export.app',
     'components.toolbar': 'components.toolbarButtons.events',
@@ -143,7 +160,7 @@ requirejs.config(
       deps: ['jquery.ui'],
       exports: 'jQuery'
     },
-    'datepicker.i18n.ro': {
+    'datepicker.i18n.pt-BR': {
       deps: ['jquery.ui'],
       exports: 'jQuery'
     },
@@ -153,6 +170,42 @@ requirejs.config(
     },
     'datepicker.i18n.zh-TW': {
       deps: ['jquery.ui'],
+      exports: 'jQuery'
+    },
+    'timepicker.i18n.en': {
+      deps: ['jquery.ui','jquery.timepicker.addon'],
+      exports: 'jQuery'
+    },
+    'timepicker.i18n.de': {
+      deps: ['jquery.ui','jquery.timepicker.addon'],
+      exports: 'jQuery'
+    },
+    'timepicker.i18n.es': {
+      deps: ['jquery.ui','jquery.timepicker.addon'],
+      exports: 'jQuery'
+    },
+    'timepicker.i18n.fr': {
+      deps: ['jquery.ui','jquery.timepicker.addon'],
+      exports: 'jQuery'
+    },
+    'timepicker.i18n.it': {
+      deps: ['jquery.ui','jquery.timepicker.addon'],
+      exports: 'jQuery'
+    },
+    'timepicker.i18n.ja': {
+      deps: ['jquery.ui','jquery.timepicker.addon'],
+      exports: 'jQuery'
+    },
+    'timepicker.i18n.pt-BR': {
+      deps: ['jquery.ui','jquery.timepicker.addon'],
+      exports: 'jQuery'
+    },
+    'timepicker.i18n.zh-CN': {
+      deps: ['jquery.ui','jquery.timepicker.addon'],
+      exports: 'jQuery'
+    },
+    'timepicker.i18n.zh-TW': {
+      deps: ['jquery.ui','jquery.timepicker.addon'],
       exports: 'jQuery'
     },
     'jquery.timepicker.addon': {
@@ -264,10 +317,6 @@ requirejs.config(
       deps: ['jquery','prototype','utils.common','core.layout'],
       exports: 'keyManager'
     },
-    'error.system': {
-      deps: ['jquery','core.layout','utils.common'],
-      exports: 'systemError'
-    },
     'components.templateengine': {
       deps: ['namespace','jquery','underscore','mustache'],
       exports: 'jaspersoft.components.templateEngine'
@@ -357,7 +406,7 @@ requirejs.config(
       exports: 'toolbarButtonModule'
     },
     'components.tooltip': {
-      deps: ['jquery','prototype','utils.common','core.layout'],
+      deps: ['jquery','prototype','underscore','utils.common','core.layout'],
       exports: 'JSTooltip'
     },
     'components.dynamicTree': {
@@ -410,14 +459,6 @@ requirejs.config(
     'repository.search.globalSearchBoxInit': {
       deps: ['prototype','actionModel.primaryNavigation','components.searchBox'],
       exports: 'globalSearchBox'
-    },
-    'attributes.model': {
-      deps: ['namespace','underscore','backbone','components.templateengine','controls.core'],
-      exports: 'jaspersoft.attributes'
-    },
-    'attributes.view': {
-      deps: ['jquery','underscore','backbone','attributes.model','components.templateengine'],
-      exports: 'jaspersoft.attributes'
     },
     'export': {
       deps: ['namespace'],
@@ -492,7 +533,7 @@ requirejs.config(
       exports: 'dynamicTree'
     },
     'dynamicTree.treenode': {
-      deps: ['prototype','dynamicTree.tree'],
+      deps: ['prototype','underscore','dynamicTree.tree'],
       exports: 'dynamicTree'
     },
     'dynamicTree.events': {
@@ -524,7 +565,7 @@ requirejs.config(
       exports: 'InfiniteScroll'
     },
     'mng.common': {
-      deps: ['jquery','prototype','utils.common','tools.infiniteScroll','components.list','components.dynamicTree','components.toolbar'],
+      deps: ['jquery','underscore','prototype','utils.common','tools.infiniteScroll','components.list','components.dynamicTree','components.toolbar'],
       exports: 'orgModule'
     },
     'mng.main': {
@@ -572,7 +613,7 @@ requirejs.config(
       exports: 'Options'
     },
     'repository.search.components': {
-      deps: ['repository.search.main','prototype','utils.common','dynamicTree.utils'],
+      deps: ['repository.search.main','prototype','underscore','utils.common','dynamicTree.utils'],
       exports: 'GenerateResource'
     },
     'component.repository.search': {
@@ -584,7 +625,7 @@ requirejs.config(
       exports: 'repositorySearch'
     },
     'repository.search.main': {
-      deps: ['prototype','actionModel.modelGenerator','utils.common'],
+      deps: ['prototype','actionModel.modelGenerator','utils.common','common/component/dialog/AlertDialog'],
       exports: 'repositorySearch'
     },
     'report.global': {

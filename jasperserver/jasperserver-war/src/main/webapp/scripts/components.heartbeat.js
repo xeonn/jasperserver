@@ -21,8 +21,10 @@
 
 
 /**
- * @version: $Id: components.heartbeat.js 7762 2014-09-19 10:16:02Z sergey.prilukin $
+ * @version: $Id: components.heartbeat.js 8179 2015-01-27 12:34:21Z psavushchik $
  */
+
+/* global layoutModule, ajaxNonReturningUpdate, baseErrorHandler, dialogs, appendPostData */
 
 var heartbeat = {
     DOM_ID: "heartbeatOptin",

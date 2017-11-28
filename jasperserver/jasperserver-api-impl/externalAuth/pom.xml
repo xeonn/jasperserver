@@ -12,7 +12,7 @@
     <parent>
         <groupId>com.jaspersoft.jasperserver</groupId>
         <artifactId>jasperserver-api-impl</artifactId>
-        <version>6.0.1</version>
+        <version>6.1.0</version>
     </parent>
 
     <dependencies>
@@ -46,7 +46,6 @@
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
-            <version>4.2.1</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.security</groupId>

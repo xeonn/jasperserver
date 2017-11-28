@@ -35,9 +35,10 @@
         <property name="operation" value="insert"/>
     </bean>
 
-    <bean id="anonymousProcessingFilter" class="org.springframework.security.web.authentication.AnonymousAuthenticationFilter">
-        <property name="key" value="foobar"/>
-        <property name="userAttribute" ref="anonymousUserDescriptor"/>
+    <bean id="anonymousProcessingFilter" class="com.jaspersoft.jasperserver.war.JSAnonymousAuthenticationFilter">
+        <constructor-arg index="0">
+            <value>foobar</value>
+        </constructor-arg>
     </bean>
 
     <bean id="JIAuthenticationSynchronizer"
@@ -236,6 +237,7 @@
 
     <bean id="validator" class="com.jaspersoft.jasperserver.api.security.validators.Validator">
         <property name="messages" ref="messageSource"/>
+        <property name="profileAttributesResolver" ref="profileAttributesResolver"/>
     </bean>
 
     <bean id="delegatingExceptionTranslationFilter"
@@ -320,6 +322,7 @@
                 <security:intercept-url pattern="/heartbeatinfo.html" access="ROLE_USER,ROLE_ADMINISTRATOR" />
                 <security:intercept-url pattern="/rest/**" access="ROLE_USER,ROLE_ADMINISTRATOR" />
                 <security:intercept-url pattern="/rest_v2/thumbnails/**" access="ROLE_USER,ROLE_ADMINISTRATOR" />
+                <security:intercept-url pattern="/rest_v2/discovery/**" access="ROLE_USER,ROLE_ADMINISTRATOR" />
                 <security:intercept-url pattern="/rest_v2/jobs/**" access="ROLE_USER,ROLE_ADMINISTRATOR" />
                 <security:intercept-url pattern="/rest_v2/permissions/**" access="ROLE_USER,ROLE_ADMINISTRATOR" />
                 <security:intercept-url pattern="/rest_v2/reports/**" access="ROLE_USER,ROLE_ADMINISTRATOR" />
@@ -348,6 +351,8 @@
                 <security:intercept-url pattern="/scheduler/jobsummary.html" access="ROLE_USER,ROLE_ADMINISTRATOR" />
                 <security:intercept-url pattern="/scheduler/jobdetails.html" access="ROLE_USER,ROLE_ADMINISTRATOR" />
                 <security:intercept-url pattern="/scheduler/main.html" access="ROLE_USER,ROLE_ADMINISTRATOR" />
+                <!--dashboard-->
+                <security:intercept-url pattern="/dashboard/viewer.html" access="ROLE_USER,ROLE_ADMINISTRATOR" />
             </security:filter-security-metadata-source>
         </property>
     </bean>

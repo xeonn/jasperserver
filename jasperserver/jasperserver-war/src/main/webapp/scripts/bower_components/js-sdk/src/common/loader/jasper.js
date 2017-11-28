@@ -19,13 +19,15 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*global jasperContext, window, console */
 
 /**
  * @author: Igor Nesterenko
- * @version $Id: jasper.js 418 2014-11-20 09:43:10Z ktsaregradskyi $
+ * @version $Id: jasper.js 898 2015-03-02 16:57:01Z psavushchik $
  */
-(function(global, require){
+
+/*global jasperContext, window, console, jasperjs, require, requirejs */
+
+(function(global){
 
     "use strict";
 
@@ -60,18 +62,18 @@
                 } else {
                     this._callbacks.push(handler);
                 }
-            }
+            };
 
             this.resolveSettings  = function(settings){
                 this.settings = settings;
                 this.require && execute.call(this);
-            }
+            };
 
             this.resolveConfig = function(req){
                 this.require = req;
                 this.settings && execute.call(this);
             }
-        }
+        };
 
     function jasper(conf, callback){
 
@@ -185,4 +187,4 @@
     jasper._errors_ = errors;
 
     jasper.version = "0.0.1a";
-})(this, require);
+})(this);

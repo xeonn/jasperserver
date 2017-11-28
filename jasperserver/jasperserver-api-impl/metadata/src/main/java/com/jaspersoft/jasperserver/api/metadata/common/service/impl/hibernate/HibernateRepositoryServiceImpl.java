@@ -36,7 +36,6 @@ import com.jaspersoft.jasperserver.api.logging.access.domain.AccessEvent;
 import com.jaspersoft.jasperserver.api.logging.audit.context.AuditContext;
 import com.jaspersoft.jasperserver.api.logging.audit.domain.AuditEvent;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.*;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.impl.IdedObject;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.impl.IdedRepoObject;
 import com.jaspersoft.jasperserver.api.metadata.common.service.JSResourceNotFoundException;
 import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryEventListener;
@@ -51,15 +50,12 @@ import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.ut
 import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.util.UpdateDatesIndicator;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportDataSource;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportUnit;
-import com.jaspersoft.jasperserver.api.metadata.user.domain.ObjectPermission;
-import com.jaspersoft.jasperserver.api.metadata.user.domain.impl.ObjectPermissionRecipientIdentity;
 import com.jaspersoft.jasperserver.api.metadata.view.domain.FilterCriteria;
 import com.jaspersoft.jasperserver.api.metadata.view.domain.FilterElement;
 import com.jaspersoft.jasperserver.api.search.*;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.Hibernate;
 import org.hibernate.HibernateException;
 import org.hibernate.LockMode;
 import org.hibernate.Query;
@@ -86,7 +82,7 @@ import java.util.*;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: HibernateRepositoryServiceImpl.java 51947 2014-12-11 14:38:38Z ogavavka $
+ * @version $Id: HibernateRepositoryServiceImpl.java 55164 2015-05-06 20:54:37Z mchan $
  */
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 public class HibernateRepositoryServiceImpl extends HibernateDaoImpl implements HibernateRepositoryService, ReferenceResolver, RepoManager, ApplicationContextAware {
@@ -557,7 +553,8 @@ public class HibernateRepositoryServiceImpl extends HibernateDaoImpl implements 
 			executeWriteCallback(new DaoCallback() {
 				public Object execute() {
 					RepoResource repo = getRepoResource(resource);
-                    String eventType;
+                // EGS: bug #40720
+					String eventType;
                     boolean isImporting = context != null && context.getAttributes() != null && context.getAttributes().contains(RepositoryService.IS_IMPORTING);
                     boolean isOverwriting = context != null && context.getAttributes() != null && context.getAttributes().contains(RepositoryService.IS_OVERWRITING);
 
@@ -576,25 +573,28 @@ public class HibernateRepositoryServiceImpl extends HibernateDaoImpl implements 
 
                         try {
                             repo.copyFromClient(resource, HibernateRepositoryServiceImpl.this);
-
-                            UpdateDatesIndicator.clean();
                         } catch (RuntimeException e) {
-                            UpdateDatesIndicator.clean();
-
                             throw e;
+                        } finally {
+                            UpdateDatesIndicator.clean();
                         }
                     } else { // For regular cases just set updateDate of current (top level) resource to operational.
                         repo.copyFromClient(resource, HibernateRepositoryServiceImpl.this);
 
                         repo.setUpdateDate(getOperationTimestamp());
                     }
-
-					RepoResource repositoryResource = repo;
-					getHibernateTemplate().saveOrUpdate(repositoryResource);
-
-                    logAccessResource(repositoryResource, true);
+			HibernateTemplate template = getHibernateTemplate();
+			try{
+				template.saveOrUpdate(repo);
+			
+			} catch (RuntimeException e){
+				log.error("******** Recovering from template.lock/saveOrUpdate ***** " + e.getMessage());
+				template.refresh(repo);
+			}
+			template = null;
+                    logAccessResource(repo, true);
                     closeAuditEvent(eventType);
-					return null;
+					return repo;
 				}
 			}, flush);
 			
@@ -611,7 +611,7 @@ public class HibernateRepositoryServiceImpl extends HibernateDaoImpl implements 
 								childrenFolder.setName(childrenFolder.getName().substring(TEMP_NAME_PREFIX_LENGTH));
 								refreshFolderPaths(childrenFolder);
 							}
-							
+							//template.lock(res, LockMode.FORCE);
 							template.save(res);
 						}
 						return null;
@@ -1492,7 +1492,6 @@ public class HibernateRepositoryServiceImpl extends HibernateDaoImpl implements 
 	}
 
 	protected void deleteFolder(String uri) {
-        // TODO: Spring Security - possiblly fix for bug #29251 should be located here (implement it)
         auditFolderActivity("deleteFolder", uri);
 		RepoFolder folder = getFolder(uri, true);
 		if (folder.isRoot()) {

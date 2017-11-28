@@ -24,6 +24,8 @@ import com.jaspersoft.jasperserver.api.common.domain.impl.ExecutionContextImpl;
 import com.jaspersoft.jasperserver.api.engine.common.service.EngineService;
 import com.jaspersoft.jasperserver.api.engine.common.service.ReportInputControlInformation;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl.EhcacheEngineService;
+import com.jaspersoft.jasperserver.api.logging.audit.context.AuditContext;
+import com.jaspersoft.jasperserver.api.logging.audit.domain.AuditEvent;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.InputControl;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ListOfValuesItem;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Query;
@@ -50,7 +52,7 @@ import java.util.Set;
 
 /**
  * @author Yaroslav.Kovalchyk
- * @version $Id: QueryValuesLoader.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: QueryValuesLoader.java 55246 2015-05-11 10:41:11Z spriluki $
  */
 @Service
 public class QueryValuesLoader implements ValuesLoader {
@@ -67,9 +69,13 @@ public class QueryValuesLoader implements ValuesLoader {
     protected EngineService engineService;
     @javax.annotation.Resource
     private DataConverterService dataConverterService;
+    @javax.annotation.Resource
+    private AuditContext concreteAuditContext;
 
     @Override
     public List<ListOfValuesItem> loadValues(InputControl inputControl, ResourceReference dataSource, Map<String, Object> parameters, Map<String, Class<?>> parameterTypes, ReportInputControlInformation info) throws CascadeResourceNotFoundException {
+        createInputControlsAuditEvent(inputControl.getURIString(), parameters);
+
         List<ListOfValuesItem> result = null;
         ResourceReference dataSourceForQuery = resolveDatasource(inputControl, dataSource);
         final Query query = cachedRepositoryService.getResource(Query.class, inputControl.getQuery());
@@ -84,6 +90,12 @@ public class QueryValuesLoader implements ValuesLoader {
 
         if (parameters!=null&&parameters.containsKey(EhcacheEngineService.IC_REFRESH_KEY)) {
         	executionParameters.put(EhcacheEngineService.IC_REFRESH_KEY,"true");
+        }
+        if (parameters!=null&&parameters.containsKey(EhcacheEngineService.DIAGNOSTIC_REPORT_URI)) {
+            executionParameters.put(EhcacheEngineService.DIAGNOSTIC_REPORT_URI, parameters.get(EhcacheEngineService.DIAGNOSTIC_REPORT_URI));
+        }
+        if (parameters!=null&&parameters.containsKey(EhcacheEngineService.DIAGNOSTIC_STATE)) {
+            executionParameters.put(EhcacheEngineService.DIAGNOSTIC_STATE, parameters.get(EhcacheEngineService.DIAGNOSTIC_STATE));
         }
         
         /* Typed results are returned */
@@ -122,6 +134,9 @@ public class QueryValuesLoader implements ValuesLoader {
                 result.add(item);
             }
         }
+
+        closeInputControlsAuditEvent();
+
         return result;
     }
 
@@ -208,5 +223,31 @@ public class QueryValuesLoader implements ValuesLoader {
             }
         }
         return resolvedDatasource;
+    }
+
+    protected void createInputControlsAuditEvent(final String resourceUri, final Map<String, Object> parameters) {
+        concreteAuditContext.doInAuditContext(new AuditContext.AuditContextCallback() {
+            public void execute() {
+                AuditEvent event = concreteAuditContext.createAuditEvent("inputControlsQuery");
+                if (event.getResourceUri() == null) {
+                    event.setResourceUri(resourceUri);
+                }
+
+                for (Map.Entry<String, Object> entry: parameters.entrySet()) {
+                    if (entry.getKey() != null) {
+                        concreteAuditContext.addPropertyToAuditEvent("inputControlParam", entry, event);
+                    }
+                }
+
+            }
+        });
+    }
+
+    protected void closeInputControlsAuditEvent() {
+        concreteAuditContext.doInAuditContext("inputControlsQuery", new AuditContext.AuditContextCallbackWithEvent() {
+            public void execute(AuditEvent auditEvent) {
+                concreteAuditContext.closeAuditEvent(auditEvent);
+            }
+        });
     }
 }

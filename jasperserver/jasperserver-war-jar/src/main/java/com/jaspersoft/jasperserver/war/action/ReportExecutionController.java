@@ -22,24 +22,28 @@ package com.jaspersoft.jasperserver.war.action;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.jaspersoft.jasperserver.war.action.hyperlinks.ReportContextFactory;
 import net.sf.jasperreports.engine.DefaultJasperReportsContext;
-import net.sf.jasperreports.engine.JRExporterParameter;
 import net.sf.jasperreports.engine.JRPropertiesUtil;
 import net.sf.jasperreports.engine.JRRuntimeException;
 import net.sf.jasperreports.engine.JasperReportsContext;
 import net.sf.jasperreports.engine.ReportContext;
-import net.sf.jasperreports.engine.export.JRHtmlExporterParameter;
 import net.sf.jasperreports.engine.export.JRHyperlinkProducerFactory;
 import net.sf.jasperreports.engine.export.JsonExporter;
-import net.sf.jasperreports.engine.export.JsonExporterParameter;
+import net.sf.jasperreports.export.SimpleExporterInput;
+import net.sf.jasperreports.export.SimpleJsonExporterConfiguration;
+import net.sf.jasperreports.export.SimpleJsonReportConfiguration;
+import net.sf.jasperreports.export.SimpleWriterExporterOutput;
 import net.sf.jasperreports.web.JRInteractiveException;
 import net.sf.jasperreports.web.actions.AbstractAction;
 import net.sf.jasperreports.web.actions.Action;
@@ -54,22 +58,30 @@ import net.sf.jasperreports.web.util.WebUtil;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
+import org.springframework.context.ApplicationContext;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.mvc.multiaction.MultiActionController;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.jaspersoft.jasperserver.api.JSException;
 import com.jaspersoft.jasperserver.api.JSShowOnlyErrorMessage;
 import com.jaspersoft.jasperserver.api.engine.common.service.EngineService;
+import com.jaspersoft.jasperserver.api.engine.jasperreports.util.ExportUtil;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.domain.impl.ReportUnitResult;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.service.DataCacheProvider;
+import com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl.CopyDestinationExistsException;
+import com.jaspersoft.jasperserver.api.metadata.common.service.JSResourceNotFoundException;
 import com.jaspersoft.jasperserver.war.action.hyperlinks.HyperlinkProducerFactoryFlowFactory;
-import com.jaspersoft.jasperserver.war.util.JRHtmlExportUtils;
+import com.jaspersoft.jasperserver.war.action.hyperlinks.ReportContextFactory;
 import com.jaspersoft.jasperserver.war.util.SessionObjectSerieAccessor;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ReportExecutionController.java 51449 2014-11-14 16:14:56Z inesterenko $
+ * @version $Id: ReportExecutionController.java 55164 2015-05-06 20:54:37Z mchan $
  */
 public class ReportExecutionController extends MultiActionController {
 
@@ -78,7 +90,7 @@ public class ReportExecutionController extends MultiActionController {
     //TODO: move to front-end
 	private static final List<String> MODULES_NAMES = Arrays.asList(
             "jr.LocalAnchor", "jr.LocalPage", "jr.Reference",
-            "jr.RemoteAnchor", "jr.ReportExecution", "jasperreports-loader"
+            "jr.RemoteAnchor", "jr.ReportExecution", "jr.ReportDataSeries", "jasperreports-loader"
     );
 
 	public static final String REPORT_EXECUTION_PREFIX = "flowReportExecution";
@@ -112,6 +124,8 @@ public class ReportExecutionController extends MultiActionController {
     @Resource(name="reportExecutionAccessor")
     private GlobalReportExecutionAccessor reportExecutionAccessor;
     private ReportContextFactory reportContextFactory;
+    @Autowired
+    private ApplicationContext applicationContext;
 
 	public ModelAndView viewReportCancel(HttpServletRequest req, HttpServletResponse res) {
 		String flowExecutionKey = req.getParameter("_flowExecutionKey");
@@ -132,7 +146,9 @@ public class ReportExecutionController extends MultiActionController {
 			}
 		}
 
-		return new ModelAndView(NULL_VIEW);
+        //can not return NULL_VIEW here because empty response will
+        //leeds to parser error on client side
+        return new ModelAndView("json:result", Collections.singletonMap("result", "ok"));
 	}
 
 	public ModelAndView viewReportAsyncCancel(HttpServletRequest req, HttpServletResponse res) throws Exception {
@@ -251,14 +267,14 @@ public class ReportExecutionController extends MultiActionController {
             } else {
                 Action action = getAction(req, reportContext, currentJasperReportsContext);
                 JSController controller = new JSController(currentJasperReportsContext);
-            try {
+                try {
                     // clear search stuff before performing an action
                     if (action.requiresRefill()) {
                         reportContext.setParameterValue("net.sf.jasperreports.search.term.highlighter", null);
                     }
                     
-                controller.runAction(reportContext, action);
-                result.put("contextid", reportContextId);
+                    controller.runAction(reportContext, action);
+                    result.put("contextid", reportContextId);
 
                     // FIXMEJIVE: actions shoud return their own ActionResult that would contribute with JSON object to the output
                     JsonNode actionResult = (JsonNode) reportContext.getParameterValue("net.sf.jasperreports.web.actions.result.json");
@@ -266,16 +282,32 @@ public class ReportExecutionController extends MultiActionController {
                         result.put("actionResult", actionResult);
                         reportContext.setParameterValue("net.sf.jasperreports.web.actions.result.json", null);
                     }
-                    
-            } catch (JRInteractiveException e) {
-                res.setStatus(500);
-                result = new LinkedHashMap<String, Object>();
-                result.put("msg", "The server encountered an error!"); //FIXME use i18n for messages
-                result.put("devmsg", e.getMessage());
-                } finally {
-                    if(shouldRefreshExecutionOutput){
+
+                } catch (JRInteractiveException e) {
+                    res.setStatus(500);
+                    result = new LinkedHashMap<String, Object>();
+                    result.put("msg", "The server encountered an error!");
+                    result.put("devmsg", e.getMessage());
+                } catch (CopyDestinationExistsException e){
+                    res.setStatus(403);
+                    result = new LinkedHashMap<String, Object>();
+                    result.put("msg", e.getMessage());
+                    result.put("code", "resource.already.exists");
+                } catch (JSResourceNotFoundException e){
+                    res.setStatus(403);
+                    result = new LinkedHashMap<String, Object>();
+                    result.put("msg", "Folder not found");
+                    result.put("code", "folder.not.found");
+                } catch (AccessDeniedException e){
+                    res.setStatus(403);
+                    result = new LinkedHashMap<String, Object>();
+                    result.put("msg", e.getMessage());
+                    result.put("code", "access.denied");
+                }
+                finally {
+                    if (shouldRefreshExecutionOutput) {
                         reportExecutionAccessor.refreshOutput(reportContextId);
-            }
+                    }
                 }
             }
         } else {
@@ -293,6 +325,9 @@ public class ReportExecutionController extends MultiActionController {
         if (actions != null) {
             if (actions.size() == 1) {
                 result = actions.get(0);
+                AutowireCapableBeanFactory beanFactory = applicationContext.getAutowireCapableBeanFactory();
+                beanFactory.autowireBeanProperties(result, AutowireCapableBeanFactory.AUTOWIRE_NO, false);
+                beanFactory.initializeBean(result, result.getClass().getName());
             } else if (actions.size() > 1) {
                 result = new MultiAction(actions);
             }
@@ -337,6 +372,10 @@ public class ReportExecutionController extends MultiActionController {
                 boolean hasPages = jasperPrintAccessor.pageStatus(0, null).pageExists();
 
                 JsonExporter exporter = new JsonExporter(jasperReportsContext);
+
+                SimpleJsonReportConfiguration jsonReportConfig = new SimpleJsonReportConfiguration();
+                SimpleJsonExporterConfiguration jsonExporterConfig = new SimpleJsonExporterConfiguration();
+
                 ReportPageStatus pageStatus = null;
 				boolean isReportComponentsExportOnly = false;
 
@@ -358,7 +397,7 @@ public class ReportExecutionController extends MultiActionController {
                         throw new JRRuntimeException("Page " + pageIdx + " not found in report");
                     }
 
-                    exporter.setParameter(JRExporterParameter.PAGE_INDEX, pageIdx);
+                    jsonReportConfig.setPageIndex(pageIdx);
                 }
 
                 response.setContentType(getContentType());
@@ -368,14 +407,15 @@ public class ReportExecutionController extends MultiActionController {
                 prepareExport(request, reportName, reportContext);
 
 				exporter.setReportContext(reportContext);
-                exporter.setParameter(JRExporterParameter.JASPER_PRINT, jasperPrintAccessor.getJasperPrint());
-                exporter.setParameter(JRExporterParameter.OUTPUT_WRITER, response.getWriter());
-				exporter.setParameter(JRHtmlExportUtils.PARAMETER_HTTP_REQUEST, request);
-				exporter.setParameter(JsonExporterParameter.REPORT_COMPONENTS_EXPORT_ONLY, isReportComponentsExportOnly);
+                exporter.setExporterInput(new SimpleExporterInput(jasperPrintAccessor.getJasperPrint()));
+                exporter.setExporterOutput(new SimpleWriterExporterOutput(response.getWriter()));
+				exporter.getExporterContext().setValue(ExportUtil.HTTP_SERVLET_REQUEST, request);//key does not really matter here, as first value of type request is taken, regardless of key
+				jsonExporterConfig.setReportComponentsExportOnly(isReportComponentsExportOnly);
 
-                JRHyperlinkProducerFactory hyperlinkFactory = getHyperlinkProducerFactory().getHyperlinkProducerFactory(
+				JRHyperlinkProducerFactory hyperlinkFactory = getHyperlinkProducerFactory().getHyperlinkProducerFactory(
                         request, response);
-                exporter.setParameter(JRHtmlExporterParameter.HYPERLINK_PRODUCER_FACTORY, hyperlinkFactory);
+				jsonReportConfig.setHyperlinkProducerFactory(hyperlinkFactory);
+                exporter.setConfiguration(jsonReportConfig);
                 exporter.exportReport();
                 reportContext.setParameterValue("net.sf.jasperreports.engine.export.clear.json.cache", Boolean.FALSE);
             } catch(JRRuntimeException e) {

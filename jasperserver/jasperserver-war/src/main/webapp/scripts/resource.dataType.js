@@ -21,8 +21,10 @@
 
 
 /**
- * @version: $Id: resource.dataType.js 8068 2014-12-04 12:14:35Z ykovalchyk $
+ * @version: $Id: resource.dataType.js 8179 2015-01-27 12:34:21Z psavushchik $
  */
+
+/* global resource, ValidationModule, localContext */
 
 
 var resourceDataType = {

@@ -20,24 +20,25 @@
 */
 package com.jaspersoft.jasperserver.remote.connection;
 
-import com.jaspersoft.jasperserver.dto.connection.XlsFileConnection;
-import com.jaspersoft.jasperserver.dto.connection.metadata.XlsFileMetadata;
-import com.jaspersoft.jasperserver.dto.connection.metadata.XlsSheet;
-import jxl.Sheet;
-import jxl.Workbook;
-import jxl.read.biff.BiffException;
-import org.springframework.stereotype.Service;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.springframework.stereotype.Service;
+
+import com.jaspersoft.jasperserver.dto.connection.XlsFileConnection;
+import com.jaspersoft.jasperserver.dto.connection.metadata.XlsFileMetadata;
+import com.jaspersoft.jasperserver.dto.connection.metadata.XlsSheet;
+
 /**
  * <p></p>
  *
  * @author yaroslav.kovalchyk
- * @version $Id: XlsFileConnectionStrategy.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: XlsFileConnectionStrategy.java 54728 2015-04-24 15:28:20Z tdanciu $
  */
 @Service
 public class XlsFileConnectionStrategy extends AbstractFileConnectionStrategy<XlsFileConnection> {
@@ -49,23 +50,25 @@ public class XlsFileConnectionStrategy extends AbstractFileConnectionStrategy<Xl
     @Override
     protected Object internalBuildMetadata(XlsFileConnection connection, InputStream inputStream) throws IOException {
         List<XlsSheet> sheets = new ArrayList<XlsSheet>();
-        try {
-            final Workbook workbook = Workbook.getWorkbook(inputStream);
-            for (Sheet currentSheet : workbook.getSheets()) {
-                List<String> columns = new ArrayList<String>();
-                final XlsSheet clientSheet = new XlsSheet().setName(currentSheet.getName()).setColumns(columns);
-                sheets.add(clientSheet);
-                for (int i = 0; i < currentSheet.getColumns(); i++) {
-                    if (connection.hasHeaderLine()) {
-                        columns.add(currentSheet.getColumn(i)[0].getContents());
-                    } else {
-                        columns.add(buildColumnName (i));
-                    }
+
+        final HSSFWorkbook workbook = new HSSFWorkbook(inputStream);
+        int numberOfSheets = workbook.getNumberOfSheets();
+        for (int s = 0; s < numberOfSheets; s++) {
+        	HSSFSheet currentSheet = workbook.getSheetAt(s);
+            List<String> columns = new ArrayList<String>();
+            final XlsSheet clientSheet = new XlsSheet().setName(currentSheet.getSheetName()).setColumns(columns);
+            sheets.add(clientSheet);
+            HSSFRow firstRow = currentSheet.getRow(0);
+            int numberOfColumns = firstRow.getLastCellNum();
+            for (int i = 0; i < numberOfColumns; i++) {
+                if (connection.hasHeaderLine()) {
+                    columns.add(firstRow.getCell(i).getStringCellValue());
+                } else {
+                    columns.add(buildColumnName (i));
                 }
             }
-        } catch (BiffException e) {
-            throw new IOException("Unable to parse input stream to a workbook", e);
         }
+        
         return new XlsFileMetadata().setSheets(sheets);
     }
 }

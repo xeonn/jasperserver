@@ -20,6 +20,7 @@
   --%>
 
 <%@ taglib uri="/spring" prefix="spring"%>
+<%@ taglib prefix="js" uri="/WEB-INF/jasperserver.tld" %>
 
 <script type="text/javascript">
     if (typeof localContext === "undefined") {
@@ -27,8 +28,10 @@
     }
 
     localContext.initOptions = {
+        <js:out javaScriptEscape="true">
         isEditMode: ${listOfValuesDTO.editMode},
-        resourceIdNotSupportedSymbols: "<spring:message code="${resourceIdNotSupportedSymbols}" javaScriptEscape="true"/>"
+        resourceIdNotSupportedSymbols: "${resourceIdNotSupportedSymbols}"
+        </js:out>
     };
 
 

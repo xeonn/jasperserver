@@ -15,7 +15,7 @@
         <tr class="bodyCell" data-fieldId="{{- y }}">
             <td class="jrs-grid-cell cell_1">
                 <div class="jrs-grid-cell-content">
-                    <input type="checkbox" name="show" {{= field.show ? "checked" : "" }} />
+                    <input type="checkbox" name="show" {{- field.show ? "checked" : "" }} />
                 </div>
             </td>
             <td class="jrs-grid-cell cell_2">
@@ -33,7 +33,7 @@
                 <div class="jrs-grid-cell-content">
                     <select name="javaType">
                     {{ _.each(javaTypes, function(javaType) { }}
-                        <option value="{{- javaType }}" {{= javaType === field.javaType ? "selected" : ""}}>{{- i18n[javaTypeMapper[javaType]]}}</option>
+                        <option value="{{- javaType }}" {{- javaType === field.javaType ? "selected" : ""}}>{{- i18n[javaTypeMapper[javaType]]}}</option>
                     {{ }); }}
                     </select>
                 </div>

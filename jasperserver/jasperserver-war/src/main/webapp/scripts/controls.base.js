@@ -21,8 +21,10 @@
 
 
 /**
- * @version: $Id: controls.base.js 7762 2014-09-19 10:16:02Z sergey.prilukin $
+ * @version: $Id: controls.base.js 8179 2015-01-27 12:34:21Z psavushchik $
  */
+
+/* global Template, layoutModule, $$, $break, _, dialogs, matchAny */
 
 var ControlsBase = {
     INPUT_CONTROLS_FORM: "inputControlsForm",

@@ -100,13 +100,15 @@
     <c:set var="drillThroughTable2" value="${withMenu == 'true' && belowCube == 'true' && inDrillThrough == 'true'}"/>
 
     <%-- drillthrough contitions, i.e., menu, toolbar, cube and drillthrough table --%>
-    <c:set var="menuToolbarCube" value="${((menuToolbarCubeAll) || drillThroughTable2) && not drillThroughTable1}"/>
-    <c:set var="drillthrough" value="${(drillThroughTable1 || drillThroughTable2) && not ((menuToolbarCubeAll))}"/>
+    <c:set var="menuToolbarCube" value="${((menuToolbarCubeAll || drillThroughTable2) && not drillThroughTable1)}"/>
+    <c:set var="drillthrough" value="${((drillThroughTable1 || drillThroughTable2) && not menuToolbarCubeAll)}"/>
 
+    <js:out javaScriptEscape="true">
     <script>
-        var viewURI = '<c:out value="${requestScope.name}" />';
+        var viewURI = '${requestScope.name}';
         var olapPage = 'olap/viewOlap.html';
     </script>
+    </js:out>
 
 </t:putAttribute>
 <t:putAttribute name="bodyContent">
@@ -161,7 +163,7 @@
         <%-- store olapModel name --%>
     <input type="hidden" name="name" value="${requestScope.name}"/>
     <input type="hidden" name="decorate" value="${param.decorate}"/>
-    <input type="hidden" name="ParentFolderUri" value="<spring:escapeBody htmlEscape="true"><%=request.getParameter("ParentFolderUri")%></spring:escapeBody>"/>
+    <input type="hidden" name="ParentFolderUri" value="${param.ParentFolderUri}"/>
     <c:if test="${olapModel == null}">
         <jsp:forward page="empty.jsp"/>
     </c:if>
@@ -285,7 +287,7 @@
             <th align="left" valign="top" height="1">
     <span class="fsection" style="font-size: 12pt">
         <c:if test="${olapSession.olapUnit != null}">
-                        <c:out value="${olapSession.olapUnit.label}"/></span>
+                        ${olapSession.olapUnit.label}</span>
                 <br/>
                 </c:if>
             </th>
@@ -376,7 +378,7 @@
         <br/>
         <a href="<c:url value='/flow.html'><c:param name='_flowId' value='searchFlow'/>
                                            <c:param name='curlnk' value='2'/>
-                                           <c:param name='showFolder' value='<%=request.getParameter("ParentFolderUri")%>'/>
+                                           <c:param name='showFolder' value='${param.ParentFolderUri}'/>
                                            <c:param name="decorate" value='${param.decorate}'/>
                  </c:url>"><spring:message code="jsp.viewOlap.backToRepo"/></a>
         </c:if>

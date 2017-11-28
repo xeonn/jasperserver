@@ -1,1 +1,1 @@
-define([],function(){return{supportsTouch:function(){return"ontouchstart"in window||navigator.msMaxTouchPoints}(),supportsModernSelection:function(){return"getSelection"in window.document}()}});
+define([],function(){"use strict";return{supportsTouch:function(){return"ontouchstart"in window||navigator.msMaxTouchPoints}()}});

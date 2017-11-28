@@ -73,7 +73,7 @@ FINALLY
                     </ul>
                 </div>
                     <div id="stepDisplay">
-                        <input type="hidden" id="ParentFolderUri" value='<%= request.getParameter("ParentFolderUri") %>'>
+                        <input type="hidden" id="ParentFolderUri" value='${param.ParentFolderUri}'>
                         <fieldset class="row instructions">
                             <legend class="offLeft"><span><spring:message code="resource.query.instructions"/></span></legend>
                             <h2 class="textAccent02"><spring:message code="resource.query.nameQuery"/></h2>
@@ -121,7 +121,7 @@ FINALLY
                                             <spring:bind path="query.query.description">
                                                 <label class="control textArea <c:if test="${status.error}">error</c:if>" for="${status.expression}">
                                                     <span class="wrap"><spring:message code="label.description"/>:</span>
-                                                    <textarea id="query.description" name="${status.expression}" type="text"><c:out value='${status.value}'/></textarea>
+                                                    <textarea id="query.description" name="${status.expression}" type="text">${status.value}</textarea>
                                                     <span class="message warning">
                                                         <c:if test="${status.error}">${status.errorMessage}</c:if>
                                                     </span>

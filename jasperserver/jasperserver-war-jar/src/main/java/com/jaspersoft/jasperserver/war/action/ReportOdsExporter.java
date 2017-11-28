@@ -20,31 +20,33 @@
  */
 package com.jaspersoft.jasperserver.war.action;
 
-import java.util.Map;
+import java.io.OutputStream;
 
 import javax.servlet.http.HttpServletResponse;
 
-import jxl.write.biff.RowsExceededException;
 import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JRExporterParameter;
 import net.sf.jasperreports.engine.JRPropertiesHolder;
 import net.sf.jasperreports.engine.JRPropertiesUtil;
-import net.sf.jasperreports.engine.export.JExcelApiExporterParameter;
-import net.sf.jasperreports.engine.export.JRXlsExporterParameter;
+import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.export.oasis.JROdsExporter;
+import net.sf.jasperreports.export.SimpleExporterInput;
+import net.sf.jasperreports.export.SimpleOdsExporterConfiguration;
+import net.sf.jasperreports.export.SimpleOdsReportConfiguration;
+import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
 
 import org.springframework.webflow.execution.RequestContext;
 
-import com.jaspersoft.jasperserver.api.JSException;
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.common.ExportParameters;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.common.OdsExportParametersBean;
 
+
 /**
  * @author sanda zaharia (shertage@users.sourceforge.net)
- * @version $Id: ReportOdsExporter.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: ReportOdsExporter.java 54728 2015-04-24 15:28:20Z tdanciu $
  */
-public class ReportOdsExporter extends AbstractReportExporter{
+public class ReportOdsExporter extends AbstractReportExporter
+{
 
 	private static final String DIALOG_NAME = "odsExportParams";
 	
@@ -71,46 +73,51 @@ public class ReportOdsExporter extends AbstractReportExporter{
 		this.exportParameters = exportParameters;
 	}
 
-	public void export(RequestContext context, ExecutionContext executionContext, String reportUnitURI, Map baseParameters) throws JRException,JSException {
+	public void export(RequestContext context, ExecutionContext executionContext, JasperPrint jasperPrint, OutputStream outputStream) throws JRException
+	{
 		JROdsExporter exporter = new JROdsExporter(getJasperReportsContext());
-		exporter.setParameters(baseParameters);
+
+		exporter.setExporterInput(new SimpleExporterInput(jasperPrint));
+		exporter.setExporterOutput(new SimpleOutputStreamExporterOutput(outputStream));
+
 		OdsExportParametersBean exportParams = (OdsExportParametersBean)getExportParameters(context);
 		
+		SimpleOdsReportConfiguration odsReportConfig = new SimpleOdsReportConfiguration();
+		
 		if (exportParams.isOverrideReportHints()) {
-			exporter.setParameter(JRExporterParameter.PARAMETERS_OVERRIDE_REPORT_HINTS, Boolean.TRUE);
+			odsReportConfig.setOverrideHints(Boolean.TRUE);
 		}
 		
 		if (exportParams.getOnePagePerSheet() != null)
-			exporter.setParameter(JRXlsExporterParameter.IS_ONE_PAGE_PER_SHEET, exportParams.getOnePagePerSheet());
+			odsReportConfig.setOnePagePerSheet(exportParams.getOnePagePerSheet());
 		if (exportParams.getDetectCellType() != null)
-			exporter.setParameter(JRXlsExporterParameter.IS_DETECT_CELL_TYPE, exportParams.getDetectCellType());
+			odsReportConfig.setDetectCellType(exportParams.getDetectCellType());
 		if (exportParams.getRemoveEmptySpaceBetweenRows() != null)
-			exporter.setParameter(JRXlsExporterParameter.IS_REMOVE_EMPTY_SPACE_BETWEEN_ROWS, exportParams.getRemoveEmptySpaceBetweenRows());
+			odsReportConfig.setRemoveEmptySpaceBetweenRows(exportParams.getRemoveEmptySpaceBetweenRows());
 		if (exportParams.getRemoveEmptySpaceBetweenColumns() != null)
-			exporter.setParameter(JRXlsExporterParameter.IS_REMOVE_EMPTY_SPACE_BETWEEN_COLUMNS, exportParams.getRemoveEmptySpaceBetweenColumns());
+			odsReportConfig.setRemoveEmptySpaceBetweenColumns(exportParams.getRemoveEmptySpaceBetweenColumns());
 		if (exportParams.getWhitePageBackground() != null)
-			exporter.setParameter(JRXlsExporterParameter.IS_WHITE_PAGE_BACKGROUND, exportParams.getWhitePageBackground());
+			odsReportConfig.setWhitePageBackground(exportParams.getWhitePageBackground());
 		if (exportParams.getIgnoreGraphics() != null)
-			exporter.setParameter(JRXlsExporterParameter.IS_IGNORE_GRAPHICS, exportParams.getIgnoreGraphics());
+			odsReportConfig.setIgnoreGraphics(exportParams.getIgnoreGraphics());
 		if (exportParams.getCollapseRowSpan() != null)
-			exporter.setParameter(JRXlsExporterParameter.IS_COLLAPSE_ROW_SPAN, exportParams.getCollapseRowSpan());
+			odsReportConfig.setCollapseRowSpan(exportParams.getCollapseRowSpan());
 		if (exportParams.getIgnoreCellBorder() != null)
-			exporter.setParameter(JRXlsExporterParameter.IS_IGNORE_CELL_BORDER, exportParams.getIgnoreCellBorder());
+			odsReportConfig.setIgnoreCellBorder(exportParams.getIgnoreCellBorder());
 		if (exportParams.getFontSizeFixEnabled() != null)
-			exporter.setParameter(JRXlsExporterParameter.IS_FONT_SIZE_FIX_ENABLED, exportParams.getFontSizeFixEnabled());
+			odsReportConfig.setFontSizeFixEnabled(exportParams.getFontSizeFixEnabled());
 		if (exportParams.getMaximumRowsPerSheet() != null)
-			exporter.setParameter(JRXlsExporterParameter.MAXIMUM_ROWS_PER_SHEET, exportParams.getMaximumRowsPerSheet());
+			odsReportConfig.setMaxRowsPerSheet(exportParams.getMaximumRowsPerSheet());
 		if(exportParams.getXlsFormatPatternsMap() != null && !exportParams.getXlsFormatPatternsMap().isEmpty())
-			exporter.setParameter(JRXlsExporterParameter.FORMAT_PATTERNS_MAP, exportParams.getXlsFormatPatternsMap());
-		exporter.setParameter(JExcelApiExporterParameter.CREATE_CUSTOM_PALETTE, Boolean.TRUE);
-		try{
-			exporter.exportReport();
-		}catch(JRException e){
-			if(e.getCause() instanceof RowsExceededException)
-				throw new JSException("jsexception.too.many.data.rows");
-			else
-				throw e;
-		}
+			odsReportConfig.setFormatPatternsMap(exportParams.getXlsFormatPatternsMap());
+
+		exporter.setConfiguration(odsReportConfig);
+
+		SimpleOdsExporterConfiguration odsExporterConfig = new SimpleOdsExporterConfiguration();
+		odsExporterConfig.setCreateCustomPalette(Boolean.TRUE);
+		exporter.setConfiguration(odsExporterConfig);
+		
+		exporter.exportReport();
 	}
 
 	protected String getContentType(RequestContext context) {

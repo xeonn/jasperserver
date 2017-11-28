@@ -29,6 +29,8 @@ import java.util.List;
 import java.util.Properties;
 
 import com.jaspersoft.jasperserver.api.common.util.ImportRunMonitor;
+import com.jaspersoft.jasperserver.api.common.util.diagnostic.DiagnosticSnapshotPropertyHelper;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dom4j.Attribute;
@@ -44,10 +46,11 @@ import com.jaspersoft.jasperserver.export.modules.Attributes;
 import com.jaspersoft.jasperserver.export.modules.ImporterModule;
 import com.jaspersoft.jasperserver.export.modules.ImporterModuleContext;
 import com.jaspersoft.jasperserver.export.modules.MapAttributes;
+import com.jaspersoft.jasperserver.export.modules.repository.ResourceImporter;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ImporterImpl.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: ImporterImpl.java 54483 2015-04-21 03:18:31Z ytymoshe $
  */
 public class ImporterImpl extends BaseExporterImporter implements Importer {
 	
@@ -131,6 +134,11 @@ public class ImporterImpl extends BaseExporterImporter implements Importer {
 		Attributes contextAttributes = createContextAttributes();
         contextAttributes.setAttribute("sourceJsVersion",properties.getProperty(VERSION_ATTR));
         contextAttributes.setAttribute("targetJsVersion",super.getJsVersion());
+        
+        if (DiagnosticSnapshotPropertyHelper.isDiagSnapshotSet(properties))
+        {
+        	contextAttributes.setAttribute(DiagnosticSnapshotPropertyHelper.ATTRIBUTE_IS_DIAG_SNAPSHOT, Boolean.TRUE.toString());
+        }
 
 		for (Iterator it = indexRoot.elementIterator(getIndexModuleElementName()); it.hasNext(); ) {
             if (Thread.interrupted()){

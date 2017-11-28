@@ -62,12 +62,9 @@
                         <li class="node open">
                             <ul class="list buttonSet">
                                 <%--bug 18939: &#8230 changed to "..." --%>
-                                <li class="leaf"><button id="addNewUserBtn" class="button capsule text up"><span class="wrap"><spring:message code="jsp.userManager.addUser" javaScriptEscape="true"/>...</span><span class="icon"></span></button></li>
-                            </ul>
-                        </li>
-                        <li class="node open"><!-- NOTE: This node here in reference to bugzilla#13160, do not include unless bug given target/priority for Ruby -->
-                            <ul class="list buttonSet">
-                                <li class="leaf"><button id="enableAllUsersBtn" class="button capsule text first up" disabled="disabled"><span class="wrap"><spring:message code="jsp.userManager.enableAll" javaScriptEscape="true"/></span><span class="icon"></span></button></li>
+                                <li class="leaf"><button id="addNewUserBtn" class="button capsule text first up"><span class="wrap"><spring:message code="jsp.userManager.addUser" javaScriptEscape="true"/>...</span><span class="icon"></span></button></li>
+
+                                <li class="leaf"><button id="enableAllUsersBtn" class="button capsule text up" disabled="disabled"><span class="wrap"><spring:message code="jsp.userManager.enableAll" javaScriptEscape="true"/></span><span class="icon"></span></button></li>
                                 <li class="leaf"><button id="disableAllUsersBtn" class="button capsule text middle up" disabled="disabled"><span class="wrap"><spring:message code="jsp.userManager.disableAll" javaScriptEscape="true"/></span><span class="icon"></span></button></li>
                                 <li class="leaf"><button id="deleteAllUsersBtn" class="button capsule text last up" disabled="disabled"><span class="wrap"><spring:message code="jsp.userAndRoleManager.deleteAll" javaScriptEscape="true"/></span><span class="icon"></span></button></li>
                             </ul>

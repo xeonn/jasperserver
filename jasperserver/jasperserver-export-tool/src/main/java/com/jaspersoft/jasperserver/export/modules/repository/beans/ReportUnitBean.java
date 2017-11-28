@@ -23,6 +23,7 @@ package com.jaspersoft.jasperserver.export.modules.repository.beans;
 import java.util.List;
 import java.util.Map;
 
+import com.jaspersoft.jasperserver.api.common.util.diagnostic.DiagnosticSnapshotPropertyHelper;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.service.DataSnapshotService;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.DataContainer;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.MemoryDataContainer;
@@ -37,7 +38,7 @@ import com.jaspersoft.jasperserver.export.modules.repository.ResourceModuleConfi
 
 /**
  * @author tkavanagh
- * @version $Id: ReportUnitBean.java 51276 2014-11-09 17:44:57Z ktsaregradskyi $
+ * @version $Id: ReportUnitBean.java 55164 2015-05-06 20:54:37Z mchan $
  */
 
 public class ReportUnitBean extends ResourceBean {
@@ -81,7 +82,7 @@ public class ReportUnitBean extends ResourceBean {
 			DataSnapshotService snapshotService = getSnapshotService(
 					exportHandler.getConfiguration());
 			
-			if (!snapshotService.isSnapshotPersistenceEnabled()) {
+			if (!snapshotService.isSnapshotPersistenceEnabledForReportUri(ru.getPath())) {
 				if (log.isDebugEnabled()) {
 					log.debug("data snapshot persistence disabled, ignoring snapshot " + snapshotId
 							+ " of report " + ru.getURIString());
@@ -134,9 +135,9 @@ public class ReportUnitBean extends ResourceBean {
         }
 
         ru.setQuery(importHandler.handleReference(getQuery()));
-		ru.setInputControls(handleReferences(getInputControls(), importHandler));
+		ru.setInputControls(handleReferences(ru, getInputControls(), importHandler));
 		ru.setMainReport(importHandler.handleReference(getMainReport()));
-        List rs = handleReferences(getResources(), importHandler);
+        List rs = handleReferences(ru, getResources(), importHandler);
         if (ru.getResources() == null) {
             ru.setResources(rs);
         } else if (rs != null) {
@@ -158,9 +159,11 @@ public class ReportUnitBean extends ResourceBean {
 		} else {
 			DataSnapshotService snapshotService = getSnapshotService(
 					importHandler.getConfiguration());
-			if (!snapshotService.isSnapshotPersistenceEnabled()) {
+			boolean isDiagSnapshot = isDiagSnapshotAttributeSet(importHandler);
+
+			if (!isDiagSnapshot && !snapshotService.isSnapshotPersistenceEnabled()) {
 				if (log.isDebugEnabled()) {
-					log.debug("data snapshot persistencee disabled, not importing snapshot for report " 
+					log.debug("data snapshot persistence disabled, not importing snapshot for report " 
 							+ ru.getURIString());
 				}
 				
@@ -174,6 +177,10 @@ public class ReportUnitBean extends ResourceBean {
 			}
 			
 			Map<String, Object> parametersMap = dataSnapshotMetadata.getParametersMap(ru, importHandler);
+			if (isDiagSnapshot)
+			{
+				parametersMap.put(DiagnosticSnapshotPropertyHelper.ATTRIBUTE_IS_DIAG_SNAPSHOT, Boolean.TRUE.toString());
+			}
 			DefaultDataCacheSnapshotMetadata metadata = new DefaultDataCacheSnapshotMetadata(
 					parametersMap, dataSnapshotMetadata.getSnapshotDate());
 			
@@ -194,6 +201,15 @@ public class ReportUnitBean extends ResourceBean {
 				log.debug("saved data snapshot " + snapshotId + " for report " + ru.getURIString());
 			}
 		}
+	}
+
+	/**
+	 * @param attributes
+	 * @return
+	 */
+	private boolean isDiagSnapshotAttributeSet(ResourceImportHandler importHandler) 
+	{
+    	return Boolean.valueOf((String)importHandler.getImportContext().getAttributes().getAttribute(DiagnosticSnapshotPropertyHelper.ATTRIBUTE_IS_DIAG_SNAPSHOT));
 	}
 
 	public ResourceReferenceBean getDataSource() {

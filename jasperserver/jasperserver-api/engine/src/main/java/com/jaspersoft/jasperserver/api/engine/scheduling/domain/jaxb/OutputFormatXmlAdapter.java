@@ -34,7 +34,7 @@ import java.util.Set;
  * See http://java.net/jira/browse/JAXB-787
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: OutputFormatXmlAdapter.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: OutputFormatXmlAdapter.java 54934 2015-04-30 19:56:16Z lchirita $
  */
 public class OutputFormatXmlAdapter extends XmlAdapter<ReportJobOutputFormatsWrapper, Set<Byte>> {
 
@@ -52,7 +52,8 @@ public class OutputFormatXmlAdapter extends XmlAdapter<ReportJobOutputFormatsWra
         XLS_NOPAG(ReportJob.OUTPUT_FORMAT_XLS_NOPAG),
         XLSX_NOPAG(ReportJob.OUTPUT_FORMAT_XLSX_NOPAG),
         DATA_SNAPSHOT(ReportJob.OUTPUT_FORMAT_DATA_SNAPSHOT),
-        PPTX(ReportJob.OUTPUT_FORMAT_PPTX);
+        PPTX(ReportJob.OUTPUT_FORMAT_PPTX),
+        JSON(ReportJob.OUTPUT_FORMAT_JSON);
 
 
         private final Byte byteValue;

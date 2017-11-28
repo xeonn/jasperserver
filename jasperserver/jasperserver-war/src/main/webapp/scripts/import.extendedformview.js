@@ -22,8 +22,10 @@
 
 /**
  * @author: inesterenko, ztomchenco
- * @version: $Id: import.extendedformview.js 7762 2014-09-19 10:16:02Z sergey.prilukin $
+ * @version: $Id: import.extendedformview.js 8179 2015-01-27 12:34:21Z psavushchik $
  */
+
+/* global JRS, _, Backbone, jaspersoft, */
 
 JRS.Import.ExtendedFormView = (function (importz, jQuery, _, Backbone, State, templateEngine, AjaxUploader) {
 
@@ -105,7 +107,7 @@ JRS.Import.ExtendedFormView = (function (importz, jQuery, _, Backbone, State, te
             if (this.isValid()) {
                 (new (Backbone.Model.extend({
                     url:"rest_v2/import"
-                }))).fetch({
+                }))()).fetch({
                     success: _.bind(function(){
                         this.model.get("state").reset();
                         this.model.get("state").set({phase:State.INPROGRESS});

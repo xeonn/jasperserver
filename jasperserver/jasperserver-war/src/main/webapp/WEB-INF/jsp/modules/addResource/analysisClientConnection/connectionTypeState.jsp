@@ -21,7 +21,9 @@
 
 <%@ taglib uri="/spring" prefix="spring"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="js" uri="/WEB-INF/jasperserver.tld" %>
 
+<js:out javaScriptEscape="true">
 <script type="text/javascript">
     if (typeof localContext === "undefined") {
         localContext = {};
@@ -29,7 +31,7 @@
 
     localContext.initOptions = {
         isEditMode: ${connectionWrapper.editMode},
-        resourceIdNotSupportedSymbols: "<spring:message code="${resourceIdNotSupportedSymbols}" javaScriptEscape="true"/>"
+        resourceIdNotSupportedSymbols: "${resourceIdNotSupportedSymbols}"
     };
 
     if (typeof resource === "undefined") {
@@ -63,3 +65,4 @@
     __jrsConfigs__.connectionType.resource = resource;
 
 </script>
+</js:out>

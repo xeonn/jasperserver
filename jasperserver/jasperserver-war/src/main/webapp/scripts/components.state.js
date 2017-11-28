@@ -21,7 +21,10 @@
 
 /*
  * @author inesterenko
+ * @version: $Id: components.state.js 8179 2015-01-27 12:34:21Z psavushchik $
  */
+
+/* global jaspersoft, _, Backbone */
 
 jaspersoft.components.State = (function (jQuery, _, Backbone, exports, ServerErrorsBackboneTrait) {
 

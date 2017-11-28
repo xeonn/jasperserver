@@ -24,25 +24,19 @@ package com.jaspersoft.jasperserver.export.modules.repository;
 import com.jaspersoft.jasperserver.api.JSException;
 import com.jaspersoft.jasperserver.api.JSExceptionWrapper;
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
+import com.jaspersoft.jasperserver.api.metadata.common.service.impl.GlobalPropertiesListUpgradeExecutor;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Folder;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.InternalURI;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.ListOfValues;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceReference;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.client.FolderImpl;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.util.DataContainerStreamUtil;
 import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
-import com.jaspersoft.jasperserver.api.metadata.user.domain.ObjectPermission;
-import com.jaspersoft.jasperserver.api.metadata.user.domain.Role;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.Tenant;
-import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
-import com.jaspersoft.jasperserver.api.metadata.user.service.ObjectPermissionService;
 import com.jaspersoft.jasperserver.api.metadata.user.service.TenantService;
 import com.jaspersoft.jasperserver.export.modules.BaseImporterModule;
 import com.jaspersoft.jasperserver.export.modules.ImporterModuleContext;
-import com.jaspersoft.jasperserver.export.modules.common.TenantQualifiedName;
 import com.jaspersoft.jasperserver.export.modules.repository.beans.FolderBean;
-import com.jaspersoft.jasperserver.export.modules.repository.beans.PermissionRecipient;
-import com.jaspersoft.jasperserver.export.modules.repository.beans.RepositoryObjectPermissionBean;
 import com.jaspersoft.jasperserver.export.modules.repository.beans.ResourceBean;
 import com.jaspersoft.jasperserver.export.modules.repository.beans.ResourceReferenceBean;
 import com.jaspersoft.jasperserver.core.util.PathUtils;
@@ -68,7 +62,7 @@ import java.util.regex.Pattern;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ResourceImporter.java 51947 2014-12-11 14:38:38Z ogavavka $
+ * @version $Id: ResourceImporter.java 55164 2015-05-06 20:54:37Z mchan $
  */
 public class ResourceImporter extends BaseImporterModule implements ResourceImportHandler, InitializingBean {
 	
@@ -85,6 +79,7 @@ public class ResourceImporter extends BaseImporterModule implements ResourceImpo
     private List<String> rootSubTenantFolderUris;
     private Pattern orgPattern = Pattern.compile("((/" + TenantService.ORGANIZATIONS + "/[^/]+)*)");
     private Pattern themesPattern = Pattern.compile(".*/themes/.*");
+	private GlobalPropertiesListUpgradeExecutor globalPropertiesListUpgradeExecutor;
 
 	protected RepositoryService repository;
 	protected String prependPath;
@@ -94,8 +89,6 @@ public class ResourceImporter extends BaseImporterModule implements ResourceImpo
 	private LinkedList folderQueue;
 	private LinkedList resourceQueue;
     Deque<ResourceReference> createdResourcesStack;
-	private Map roles;
-	private Map users;
 
 	public void afterPropertiesSet() {
 		this.repository = configuration.getRepository();
@@ -173,6 +166,9 @@ public class ResourceImporter extends BaseImporterModule implements ResourceImpo
 				importFolder(uri, true);
 			}
 		}
+
+		upgradeGlobalPropertiesList();
+
         return null;
 	}
 
@@ -242,14 +238,23 @@ public class ResourceImporter extends BaseImporterModule implements ResourceImpo
 		}
 	}
 
+	protected void upgradeGlobalPropertiesList() {
+		if (hasResourceBeanData(GlobalPropertiesListUpgradeExecutor.PATH)) {
+			// Take resource from import file not from the repo because it can be ignored during import
+			ListOfValues globalPropertiesList = (ListOfValues) createResource(
+					readResourceBean(GlobalPropertiesListUpgradeExecutor.PATH));
+			globalPropertiesListUpgradeExecutor.upgrade(globalPropertiesList, getIncludeSettingsFlag());
+		}
+	}
+
+	@Override
 	protected void initProcess() {
+		super.initProcess();
+
 		importedURIs = new HashSet();
 		folderQueue = new LinkedList();
 		resourceQueue = new LinkedList();
 		createdResourcesStack = new ArrayDeque<ResourceReference>();
-
-		roles = new HashMap();
-		users = new HashMap();
 	}
 
 	protected void importFolder(String uri, boolean detailsRequired) {
@@ -518,7 +523,7 @@ public class ResourceImporter extends BaseImporterModule implements ResourceImpo
 				ATTRIBUTE_UPDATE_RESOURCES);
 		if (updateResources == null) {
 			updateResources = new HashSet();
-			getContextAttributes().setAttribute(ATTRIBUTE_UPDATE_RESOURCES, 
+			getContextAttributes().setAttribute(ATTRIBUTE_UPDATE_RESOURCES,
 					updateResources);
 		}
 		
@@ -629,89 +634,6 @@ public class ResourceImporter extends BaseImporterModule implements ResourceImpo
 		return importResource(uri, ignoreMissing);
 	}
 
-	protected void setPermissions(InternalURI object, RepositoryObjectPermissionBean[] permissions, boolean checkExisting) {
-		if (permissions != null) {
-			for (int i = 0; i < permissions.length; i++) {
-				RepositoryObjectPermissionBean permissionBean = permissions[i];
-				setPermission(object, permissionBean, checkExisting);
-			}
-		}
-	}
-
-	protected void setPermission(InternalURI object, RepositoryObjectPermissionBean permissionBean, boolean checkExisting) {
-		ObjectPermissionService permissionsService = configuration.getPermissionService();
-		
-		PermissionRecipient permissionRecipient = permissionBean.getRecipient();
-		Object recipient;
-		String recipientType = permissionRecipient.getRecipientType();
-		if (recipientType.equals(configuration.getPermissionRecipientRole())) {
-			recipient = getRole(permissionRecipient);
-			if (recipient == null) {
-				commandOut.warn("Role " + permissionRecipient + " not found, skipping permission of " + object.getURI());
-			}
-		} else if (recipientType.equals(configuration.getPermissionRecipientUser())) {
-			recipient = getUser(permissionRecipient);
-			if (recipient == null) {
-				commandOut.warn("User " + permissionRecipient + " not found, skipping permission of " + object.getURI());
-			}
-		} else {
-			recipient = null;
-			commandOut.warn("Unknown object permission recipient type " + recipientType + ", skipping permission of " + object.getURI());
-		}
-		
-		if (recipient != null) {
-			boolean existing;
-			if (checkExisting) {
-				List permissions = permissionsService.getObjectPermissionsForObjectAndRecipient(executionContext, object, recipient);
-				existing = permissions != null && !permissions.isEmpty();
-			} else {
-				existing = false;
-			}
-			if (existing) {
-				if (log.isInfoEnabled()) {
-					log.info("Permission on " + object.getURI() + " for " + permissionRecipient + " already exists, skipping.");
-				}
-			} else {
-				ObjectPermission permission = permissionsService.newObjectPermission(executionContext);
-				permission.setURI(object.getURI());
-				permission.setPermissionMask(permissionBean.getPermissionMask());
-				permission.setPermissionRecipient(recipient);
-				
-				permissionsService.putObjectPermission(executionContext, permission);
-			}
-		}		
-	}
-
-	protected Role getRole(TenantQualifiedName roleName) {
-		Role role;
-		if (roles.containsKey(roleName)) {
-			role = (Role) roles.get(roleName);
-		} else {
-			role = loadRole(roleName);
-			roles.put(roleName, role);
-		}
-		return role;
-	}
-
-	protected Role loadRole(TenantQualifiedName roleName) {
-		return configuration.getAuthorityService().getRole(executionContext, roleName.getName());
-	}
-
-	protected User getUser(TenantQualifiedName username) {
-		User user;
-		if (users.containsKey(username)) {
-			user = (User) users.get(username);
-		} else {
-			user = loadUser(username);
-			users.put(username, user);
-		}
-		return user;
-	}
-
-	protected User loadUser(TenantQualifiedName username) {
-		return configuration.getAuthorityService().getUser(executionContext, username.getName());
-	}
-
 	public ResourceModuleConfiguration getConfiguration() {
 		return configuration;
 	}
@@ -760,7 +682,12 @@ public class ResourceImporter extends BaseImporterModule implements ResourceImpo
         this.skipThemesArgument = skipThemesArgument;
     }
 
-    @Override
+	public void setGlobalPropertiesListUpgradeExecutor(GlobalPropertiesListUpgradeExecutor
+															   globalPropertiesListUpgradeExecutor) {
+		this.globalPropertiesListUpgradeExecutor = globalPropertiesListUpgradeExecutor;
+	}
+
+	@Override
     public Resource getHandledResource(String uri) {
         ResourceReference lookup = new ImportResourceReference(uri);
         for (ResourceReference reference : this.createdResourcesStack) {
@@ -775,4 +702,9 @@ public class ResourceImporter extends BaseImporterModule implements ResourceImpo
     public boolean fileExists(String filename) {
     	return input.fileExists(configuration.getResourcesDirName(), filename);
     }
+
+	@Override
+	public ImporterModuleContext getImportContext() {
+		return importContext;
+	}
 }

@@ -24,7 +24,19 @@ package com.jaspersoft.jasperserver.export.modules;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Iterator;
+import java.util.List;
 
+import com.jaspersoft.jasperserver.api.JSException;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.InternalURI;
+import com.jaspersoft.jasperserver.api.metadata.user.domain.ObjectPermission;
+import com.jaspersoft.jasperserver.api.metadata.user.domain.ProfileAttribute;
+import com.jaspersoft.jasperserver.api.metadata.user.domain.Role;
+import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
+import com.jaspersoft.jasperserver.api.metadata.user.service.ObjectPermissionService;
+import com.jaspersoft.jasperserver.export.modules.common.ProfileAttributeBean;
+import com.jaspersoft.jasperserver.export.modules.repository.beans.PermissionRecipient;
+import com.jaspersoft.jasperserver.export.modules.repository.beans.RepositoryObjectPermissionBean;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dom4j.Element;
@@ -39,7 +51,7 @@ import com.jaspersoft.jasperserver.export.util.CommandOut;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: BaseExporterModule.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: BaseExporterModule.java 54590 2015-04-22 17:55:42Z vzavadsk $
  */
 public abstract class BaseExporterModule implements ExporterModule {
 
@@ -56,6 +68,10 @@ public abstract class BaseExporterModule implements ExporterModule {
 	protected ExportOutput output;
 	protected ExecutionContext executionContext;
 	protected boolean exportEverything;
+
+	private ObjectPermissionService permissionService;
+	private String permissionRecipientRole;
+	private String permissionRecipientUser;
 	
 	public void setId(String id) {
 		this.id = id;
@@ -181,5 +197,95 @@ public abstract class BaseExporterModule implements ExporterModule {
 
 	public ExecutionContext getExecutionContext() {
 		return executionContext;
+	}
+
+	public ObjectPermissionService getPermissionService() {
+		return permissionService;
+	}
+
+	public void setPermissionService(ObjectPermissionService permissionService) {
+		this.permissionService = permissionService;
+	}
+
+	public String getPermissionRecipientRole() {
+		return permissionRecipientRole;
+	}
+
+	public void setPermissionRecipientRole(String permissionRecipientRole) {
+		this.permissionRecipientRole = permissionRecipientRole;
+	}
+
+	public String getPermissionRecipientUser() {
+		return permissionRecipientUser;
+	}
+
+	public void setPermissionRecipientUser(String permissionRecipientUser) {
+		this.permissionRecipientUser = permissionRecipientUser;
+	}
+
+	public RepositoryObjectPermissionBean[] handlePermissions(InternalURI object) {
+		List permissions = permissionService.getObjectPermissionsForObject(executionContext, object);
+		RepositoryObjectPermissionBean[] permissionBeans;
+		if (permissions == null || permissions.isEmpty()) {
+			permissionBeans = null;
+		} else {
+			commandOut.debug("Found " + permissions.size() + " permissions for " + object.getURI());
+
+			permissionBeans = new RepositoryObjectPermissionBean[permissions.size()];
+			int c = 0;
+			for (Iterator i = permissions.iterator(); i.hasNext(); ++c) {
+				ObjectPermission permission = (ObjectPermission) i.next();
+				RepositoryObjectPermissionBean permissionBean = toPermissionBean(permission);
+				permissionBeans[c] = permissionBean;
+			}
+		}
+		return permissionBeans;
+	}
+
+	protected RepositoryObjectPermissionBean toPermissionBean(ObjectPermission permission) {
+		RepositoryObjectPermissionBean permissionBean = new RepositoryObjectPermissionBean();
+
+		Object permissionRecipient = permission.getPermissionRecipient();
+		if (permissionRecipient instanceof Role) {
+			Role role = (Role) permissionRecipient;
+			permissionBean.setRecipient(
+					new PermissionRecipient(getPermissionRecipientRole(),
+							role.getTenantId(), role.getRoleName()));
+		} else if (permissionRecipient instanceof User) {
+			User user = (User) permissionRecipient;
+			permissionBean.setRecipient(
+					new PermissionRecipient(getPermissionRecipientUser(),
+							user.getTenantId(), user.getUsername()));
+		} else {
+			// Adding non localized message cause import-export tool does not support localization.
+			StringBuilder message = new StringBuilder("Permission recipient type ");
+			message.append(permissionRecipient.getClass().getName());
+			message.append(" is not recognized.");
+			throw new JSException(message.toString());
+		}
+
+		permissionBean.setPermissionMask(permission.getPermissionMask());
+
+		return permissionBean;
+	}
+
+	public ProfileAttributeBean[] prepareAttributesBeans(List userAttributes) {
+		ProfileAttributeBean[] attributes;
+
+		if (userAttributes == null || userAttributes.isEmpty()) {
+			attributes = null;
+		} else {
+			attributes = new ProfileAttributeBean[userAttributes.size()];
+			int idx = 0;
+			for (Iterator it = userAttributes.iterator(); it
+					.hasNext(); ++idx) {
+				ProfileAttribute attr = (ProfileAttribute) it.next();
+				attributes[idx] = new ProfileAttributeBean();
+				attributes[idx].copyFrom(attr);
+				attributes[idx].setPermissions(handlePermissions(attr));
+			}
+		}
+
+		return attributes;
 	}
 }

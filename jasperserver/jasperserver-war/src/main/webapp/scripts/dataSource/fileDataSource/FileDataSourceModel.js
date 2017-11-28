@@ -22,7 +22,7 @@
 
 /**
  * @author: Dima Gorbenko
- * @version: $Id: FileDataSourceModel.js 7872 2014-10-04 09:08:52Z inesterenko $
+ * @version: $Id: FileDataSourceModel.js 8920 2015-05-21 13:02:29Z ktsaregr $
  */
 
 define(function (require) {
@@ -35,7 +35,7 @@ define(function (require) {
         jrsConfigs = require("jrs.configs"),
         i18n = require("bundle!jasperserver_messages");
 
-    return CustomDataSourceModel.extend({
+    var FileDataSourceModel = CustomDataSourceModel.extend({
 
         fileTypes:[],
 
@@ -115,14 +115,23 @@ define(function (require) {
         parse: function() {
             var model = CustomDataSourceModel.prototype.parse.apply(this, arguments);
 
-            if (_.isString(model.fileName)) {
-                var path = model.fileName.split(":");
-                model.repositoryFileName = path[1];
-                delete model.fileName;
-                if (path[0] === "repo") {
-                    model.fileSourceType = fileSourceTypes.REPOSITORY.name;
-                }
-            }
+	        if (_.isString(model.fileName)) {
+
+		        if (model.fileName.indexOf("repo:") !== -1) {
+
+			        var path = model.fileName.split(":");
+
+			        model.fileSourceType = fileSourceTypes.REPOSITORY.name;
+			        model.repositoryFileName = path[1];
+
+		        } else {
+			        model.fileSourceType = fileSourceTypes.SERVER_FILE_SYSTEM.name;
+			        model.serverFileName = model.fileName;
+		        }
+
+		        delete model.fileName;
+	        }
+
             model.useFirstRowAsHeader = (model.useFirstRowAsHeader === "true");
 
             return model;
@@ -130,13 +139,26 @@ define(function (require) {
 
         customFieldsToJSON: function(data, customFields) {
             // converting file location section
-            var filePath = data.repositoryFileName;
-            if(data.fileSourceType === fileSourceTypes.REPOSITORY.name){
-                data.fileName = "repo:" + filePath + (jrsConfigs.organizationId ? "|" + jrsConfigs.organizationId : "");
-            }
+
+	        if (data.fileSourceType === fileSourceTypes.REPOSITORY.name){
+
+		        data.fileName = "repo:" + data.repositoryFileName + (jrsConfigs.organizationId ? "|" + jrsConfigs.organizationId : "");
+
+	        } else if (data.fileSourceType === fileSourceTypes.SERVER_FILE_SYSTEM.name) {
+
+		        data.fileName = data.serverFileName;
+	        }
+
             delete data.repositoryFileName;
+	        delete data.serverFileName;
+
 			return CustomDataSourceModel.prototype.customFieldsToJSON.call(this, data, customFields);
-		}
+		},
+
+        resetValidation: function() {
+            this.validation = _.clone(FileDataSourceModel.prototype.validation);
+        }
     });
 
+    return FileDataSourceModel;
 });

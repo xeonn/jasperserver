@@ -31,10 +31,15 @@ import com.jaspersoft.jasperserver.api.common.virtualdatasourcequery.JndiDataSou
 import com.jaspersoft.jasperserver.api.engine.common.virtualdatasourcequery.impl.CustomDataSourceImpl;
 import com.jaspersoft.jasperserver.api.engine.common.virtualdatasourcequery.impl.JdbcDataSourceImpl;
 import com.jaspersoft.jasperserver.api.engine.common.virtualdatasourcequery.impl.JndiDataSourceImpl;
+import com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl.CustomReportDataSourceServiceFactory;
+import com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl.JdbcReportDataSourceServiceFactory;
+import com.jaspersoft.jasperserver.api.engine.jasperreports.util.CustomDataSourceDefinition;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceReference;
 import com.jaspersoft.jasperserver.api.metadata.common.service.JSResourceAcessDeniedException;
 import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
+import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.CustomJdbcReportDataSourceProvider;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.CustomReportDataSource;
+import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportDataSource;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.VirtualReportDataSource;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.JdbcReportDataSource;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.JndiJdbcReportDataSource;
@@ -50,13 +55,14 @@ import java.util.Set;
 
 /**
  * @author Ivan Chan (ichan@jaspersoft.com)
- * @version $Id: VirtualDataSourceHandler.java 51947 2014-12-11 14:38:38Z ogavavka $
+ * @version $Id: VirtualDataSourceHandler.java 55164 2015-05-06 20:54:37Z mchan $
  */
 public class VirtualDataSourceHandler {
 
     RepositoryService repositoryService;
     VirtualDataSourceQueryService virtualDataSourceQueryService;
     private ProfileAttributesResolver profileAttributesResolver;
+    private CustomReportDataSourceServiceFactory customReportDataSourceServiceFactory;
     private static String dataSourceSchemaSeparator = "_";
 
     /*
@@ -79,6 +85,7 @@ public class VirtualDataSourceHandler {
     public VirtualDataSourceQueryService getVirtualDataSourceQueryService() {
         return virtualDataSourceQueryService;
     }
+
 
     /*
      * a hook to replace teiid with other virtual data source service (like JDBCUnity)
@@ -106,9 +113,13 @@ public class VirtualDataSourceHandler {
         this.profileAttributesResolver = profileAttributesResolver;
     }
 
+    public void setCustomReportDataSourceServiceFactory(CustomReportDataSourceServiceFactory customReportDataSourceServiceFactory) {
+        this.customReportDataSourceServiceFactory = customReportDataSourceServiceFactory;
+    }
+
     /*
-         * generate sql data source for virtual data source
-         */
+    * generate sql data source for virtual data source
+    */
     public javax.sql.DataSource getSqlDataSource(ExecutionContext context, VirtualReportDataSource jsDataSource) throws Exception {
         Collection<DataSource> subDataSourceList = new ArrayList<DataSource>();
 
@@ -116,6 +127,9 @@ public class VirtualDataSourceHandler {
             try {
                 Object reportDataSource = getResource(context, entry.getValue());
                 // create sub data source list
+                if (reportDataSource instanceof  ReportDataSource) {
+                    reportDataSource = resolveReportDataSourceAttributes((ReportDataSource)reportDataSource);
+                }
                 if (reportDataSource instanceof JdbcReportDataSource) {
                     JdbcDataSource jdbcDataSource = new JdbcDataSourceImpl((JdbcReportDataSource) reportDataSource, findSchemas(jsDataSource.getSchemas(), entry.getKey()), entry.getKey(),
                             jsDataSource);
@@ -127,9 +141,8 @@ public class VirtualDataSourceHandler {
                     subDataSourceList.add(jndiDataSource);
                 }
                 if (reportDataSource instanceof CustomReportDataSource) {
-                    CustomDataSource customDataSource = new CustomDataSourceImpl(resolveCustomDataSourceAttributes((CustomReportDataSource) reportDataSource), findSchemas(jsDataSource.getSchemas(), entry.getKey()), entry.getKey(),
-                            jsDataSource);
-                    subDataSourceList.add(customDataSource);
+                    subDataSourceList.add(createVDSSubDataSourceFromCustomReportDataSource((CustomReportDataSource) reportDataSource,
+                            findSchemas(jsDataSource.getSchemas(), entry.getKey()), entry.getKey(), jsDataSource));
                 }
 
             } catch (AccessDeniedException accessDeniedEx) {
@@ -143,10 +156,23 @@ public class VirtualDataSourceHandler {
         return virtualSQLDataSource;
     }
 
-    //We should additionally resolve attributes for Custom Report Data Source there because connection service for it is not
+    public  DataSource createVDSSubDataSourceFromCustomReportDataSource(CustomReportDataSource customReportDataSource, Set<String> schemas, String dataSourceName, VirtualReportDataSource parentDataSource) {
+
+        CustomDataSourceDefinition dsDef = customReportDataSourceServiceFactory.getDefinition(customReportDataSource);
+		// does it have its own factory? if so, delegate to it
+		if ((dsDef.getCustomFactory() != null) && (dsDef.getCustomFactory() instanceof CustomJdbcReportDataSourceProvider))
+        {
+			JdbcReportDataSource jdbcReportDataSource = ((CustomJdbcReportDataSourceProvider) dsDef.getCustomFactory()).getJdbcReportDataSource(customReportDataSource);
+            return new JdbcDataSourceImpl(jdbcReportDataSource, schemas,  dataSourceName, parentDataSource);
+		}
+        return new CustomDataSourceImpl(customReportDataSource, schemas,  dataSourceName, parentDataSource);
+    }
+
+
+    //We should additionally resolve attributes for Report Data Source there because connection service for it is not
     // handled via implementation of ReportDataSourceServiceFactory.createService(which is intercepted by ProfileAttributesResolverAspect).
-    private CustomReportDataSource resolveCustomDataSourceAttributes(CustomReportDataSource customReportDataSource) {
-        return profileAttributesResolver.merge(customReportDataSource);
+    private ReportDataSource resolveReportDataSourceAttributes(ReportDataSource reportDataSource) {
+        return profileAttributesResolver.merge(reportDataSource);
     }
 
     private Object getResource(ExecutionContext context, ResourceReference resourceReference) {

@@ -167,10 +167,13 @@ public class BasePreAuthenticatedProcessingFilter extends AbstractPreAuthenticat
 		super.successfulAuthentication(request, response, authResult);
 		externalDataSynchronizer.synchronize();
         final String accept = request.getHeader("Accept");
-        if (accept != null && accept.toLowerCase().contains("application/json")) {
-            // JSON response is requested, let's redirect to configured URL
+        final String requestURI = request.getRequestURI();
+        final String contextPath = request.getContextPath();
+        if (accept != null && accept.toLowerCase().contains("application/json")
+                && (requestURI.equals(contextPath) || requestURI.equals(contextPath + "/"))) {
+            // authentication JSON response is requested, let's redirect to configured URL
             // this is used by visualize.js authentication
-            final String redirectUrl = request.getContextPath() + jsonRedirectUrl;
+            final String redirectUrl = contextPath + jsonRedirectUrl;
             try {
                 response.sendRedirect(response.encodeRedirectURL(redirectUrl));
             } catch (IOException e) {

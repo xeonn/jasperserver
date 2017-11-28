@@ -21,8 +21,10 @@
 
 
 /**
- * @version: $Id: addQueryWithResourceLocator.main.js 8025 2014-11-12 13:10:12Z ktsaregradskyi $
+ * @version: $Id: addQueryWithResourceLocator.main.js 8179 2015-01-27 12:34:21Z psavushchik $
  */
+
+/* global isIPad */
 
 define(function(require) {
     "use strict";

@@ -22,8 +22,10 @@
 
 /**
  * @author: agodovanets, inesterenko
- * @version: $Id: controls.dataconverter.js 7762 2014-09-19 10:16:02Z sergey.prilukin $
+ * @version: $Id: controls.dataconverter.js 8179 2015-01-27 12:34:21Z psavushchik $
  */
+
+/* global JRS, _ */
 
 ;(function (exp, _, Controls) {
     var DataConverter = Controls.Base.extend({

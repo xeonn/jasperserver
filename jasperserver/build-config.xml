@@ -14,7 +14,7 @@
     <taskdef resource="net/sf/antcontrib/antlib.xml"/>
 
     <!-- define dependencies -->
-    <property name="ce.webapp.deps" value="ce.webapp, ce.common"/>
+    <property name="ce.webapp.deps" value="ce.webapp, ce.common, ce.ftp"/>
     <property name="ce.unit-test.deps" value="ce.unit-test, ce.common, ce.export-shared"/>
     <property name="ce.esapi.deps" value="ce.common.esapi"/>
     <property name="ce.api-impl.deps" value="ce.common.esapi"/>
@@ -35,6 +35,8 @@
     <property name="ce.export.path" value="${js-path}/jasperserver-export-package/config"/>
     <property name="ce.export-shared.path" value="${js-path}/jasperserver-export-package/shared-config"/>
     <property name="ce.sso.path" value="${js-path}/samples/externalAuth-sample-config"/>
+
+    <property name="ce.ftp.path" value="${js-path}/jasperserver-ftp/shared-config"/>
 
     <!-- 
         Comma-separated list of files with platform-specific values;

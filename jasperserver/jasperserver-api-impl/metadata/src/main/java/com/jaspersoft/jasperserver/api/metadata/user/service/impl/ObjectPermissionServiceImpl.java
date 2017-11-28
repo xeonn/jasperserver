@@ -26,6 +26,7 @@ import com.jaspersoft.jasperserver.api.logging.audit.context.AuditContext;
 import com.jaspersoft.jasperserver.api.logging.audit.domain.AuditEvent;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Folder;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.InternalURI;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.PermissionUriProtocol;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.impl.IdedObject;
 import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryUnsecure;
@@ -40,7 +41,7 @@ import com.jaspersoft.jasperserver.api.metadata.user.domain.ObjectPermission;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.Role;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.client.ObjectPermissionImpl;
-import com.jaspersoft.jasperserver.api.metadata.user.domain.impl.ObjectPermissionRecipientIdentity;
+import com.jaspersoft.jasperserver.api.metadata.user.domain.impl.ObjectRecipientIdentity;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.impl.hibernate.RepoObjectPermission;
 import com.jaspersoft.jasperserver.api.metadata.user.service.ObjectPermissionService;
 import com.jaspersoft.jasperserver.api.metadata.user.service.UserAuthorityService;
@@ -61,8 +62,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.orm.hibernate3.HibernateCallback;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.acls.domain.GrantedAuthoritySid;
-import org.springframework.security.acls.domain.PrincipalSid;
 import org.springframework.security.acls.model.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -101,8 +100,9 @@ public class ObjectPermissionServiceImpl extends HibernateDaoImpl implements
     private NonMutableAclCache nonMutableAclCache;
     private AclService aclService;
 
+	private AttributePathTransformer attributePathTransformer;
 
-    private ApplicationContext appContext;
+	private ApplicationContext appContext;
     private AuditContext auditContext;
 
 	/**
@@ -161,7 +161,11 @@ public class ObjectPermissionServiceImpl extends HibernateDaoImpl implements
         this.auditContext = auditContext;
     }
 
-    /**
+	public void setAttributePathTransformer(AttributePathTransformer attributePathTransformer) {
+		this.attributePathTransformer = attributePathTransformer;
+	}
+
+	/**
      * Get the parent URI of the given URI, by slicing off the last part of the path
      *
      * @param currentURI
@@ -230,7 +234,7 @@ public class ObjectPermissionServiceImpl extends HibernateDaoImpl implements
 		deleteObjectPermissions(context, permissions);
 	}
 
-	public void deleteObjectPermissionsForRecipient(ExecutionContext context, ObjectPermissionRecipientIdentity recipientIdentity) {
+	public void deleteObjectPermissionsForRecipient(ExecutionContext context, ObjectRecipientIdentity recipientIdentity) {
     	if (log.isDebugEnabled()) {
     		log.debug("Deleting object permissions for recipient " + recipientIdentity);
     	}
@@ -359,6 +363,7 @@ public class ObjectPermissionServiceImpl extends HibernateDaoImpl implements
         if(objPermission == null){
             throw new IllegalArgumentException("Permission can't be null");
         }
+
         // checking administrative access
         if (!isPrivilegedOperation(context) && !isObjectAdministrable(context, objPermission.getURI())) {
             throw new AccessDeniedException("Access is denied");
@@ -408,6 +413,8 @@ public class ObjectPermissionServiceImpl extends HibernateDaoImpl implements
 
 		clearAclEntriesCache(objPermission.getURI());
 	}
+
+
 
 	public void deleteObjectPermission(ExecutionContext context, ObjectPermission objPermission) {
 		// Given the object and the recipient, find the permission
@@ -501,14 +508,14 @@ public class ObjectPermissionServiceImpl extends HibernateDaoImpl implements
 	        });
 		} else if (recipientObject != null) {
 			// Select on recipient
-			ObjectPermissionRecipientIdentity recipientIdentity = new ObjectPermissionRecipientIdentity(recipientObject);
+			ObjectRecipientIdentity recipientIdentity = new ObjectRecipientIdentity(recipientObject);
 			objList = getRepoObjectPermissions(recipientIdentity);
 
 		}
 		return objList;
 	}
 
-	protected List getRepoObjectPermissions(final ObjectPermissionRecipientIdentity recipientIdentity) {
+	protected List getRepoObjectPermissions(final ObjectRecipientIdentity recipientIdentity) {
 		final String objPermissionClassName = getPersistentClassFactory().getImplementationClassName(ObjectPermission.class);
 
 		final String queryString = "from " + objPermissionClassName + " as objPermission " +
@@ -556,8 +563,9 @@ public class ObjectPermissionServiceImpl extends HibernateDaoImpl implements
 			return new ArrayList();
 		}
 		InternalURI res = (InternalURI) targetObject;
-		List objList = getRepoObjectPermissions(context, "repo:" + res.getPath(), null);
-		return makeObjectPermissionClientList("repo:" + res.getPath(), objList);
+		String uriWithProtocol = res.getProtocol()+ ":" + res.getPath();
+		List objList = getRepoObjectPermissions(context, uriWithProtocol, null);
+		return makeObjectPermissionClientList(uriWithProtocol, objList);
 	}
 
     @Override
@@ -627,12 +635,17 @@ public class ObjectPermissionServiceImpl extends HibernateDaoImpl implements
         InternalURI targetURI=null;
         if (targetObject instanceof String) {
             String path = (String) targetObject;
-            // clear out repo: part if it`s exist;
-            path = path.startsWith(RESOURCE_URI_PREFIX) ? path.substring(RESOURCE_URI_PREFIX_LENGTH).trim() : path;
-            targetURI = new InternalURIDefinition(path);
+
+            targetURI = new InternalURIDefinition(PermissionUriProtocol.removePrefix(path),
+					PermissionUriProtocol.getProtocol(path));
         } else if (targetObject instanceof InternalURI) {
             targetURI =(InternalURI) targetObject;
         }
+
+		String protocol = targetURI != null ? targetURI.getProtocol() : null;
+		if (protocol != null && protocol.equals(PermissionUriProtocol.ATTRIBUTE.toString())) {
+			return isAttributeAdministrable(context, targetURI.getPath());
+		}
 
         if (targetURI!=null) {
             // Look if it is really a resouce...
@@ -656,6 +669,7 @@ public class ObjectPermissionServiceImpl extends HibernateDaoImpl implements
         } else {
             objectPermissions = getObjectPermissionsForObject(context,targetObject);
         }
+
         for(Object obj:objectPermissions) {
             if (obj instanceof ObjectPermission) {
                 Sid permissionSid = localStrategy.getSid(((ObjectPermission) obj).getPermissionRecipient());
@@ -671,6 +685,27 @@ public class ObjectPermissionServiceImpl extends HibernateDaoImpl implements
         }
         return false;
     }
+
+	public boolean isAttributeAdministrable(ExecutionContext context, String attributePath) {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+		String checkPermissionUri = attributePathTransformer.transformPath(attributePath, authentication);
+		SidRetrievalStrategy sidStrategy = new JasperServerSidRetrievalStrategyImpl();
+
+		Arrays.asList(JasperServerPermission.ADMINISTRATION);
+		List<Sid> checkSids = sidStrategy.getSids(authentication);
+
+		Acl acl;
+		try {
+			acl = aclService.readAclById(new InternalURIDefinition(checkPermissionUri,
+					PermissionUriProtocol.ATTRIBUTE), checkSids);
+		} catch (JSException e) {
+			// in some cases we are trying to reach not reachable resource, this will throw error
+			acl = null;
+		}
+
+		return acl != null && acl.isGranted(Arrays.asList(JasperServerPermission.ADMINISTRATION), checkSids, false);
+	}
 
 	private List makeObjectPermissionClientList(String uri, List objList) {
 		List resultList = new ArrayList(objList.size());
@@ -729,7 +764,7 @@ public class ObjectPermissionServiceImpl extends HibernateDaoImpl implements
 	}
 
 	protected String repositoryURI(String repositoryPath) {
-		return RESOURCE_URI_PREFIX + repositoryPath;
+		return PermissionUriProtocol.addDefaultPrefixIfNotExist(repositoryPath);
 	}
 
 	protected void clearAclEntriesCache(String uri) {

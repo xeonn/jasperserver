@@ -22,19 +22,21 @@
 .twoColumn>.primary.column,
 .body.twoColumn>.primary.column,
 .row.twoColumn>.primary.column {
-	right:0;
-	left:200px;
-	display:block;
-	margin-left:10px;
+	right: 0;
+	left: 200px;
+	display: block;
+	margin-left: 1px;
 }
 
 .twoColumn>.secondary.column,
 .body.twoColumn>.secondary.column,
 .row.twoColumn>.secondary.column {
-	min-width:200px;
-	width:200px;
-	left:0;
-	display:block;
+	border-right: 1px solid #e3e3e3;
+	/* border-right: 1px solid #999; */ /* dark alternative */
+	left: 0;
+	display: block;
+	min-width: 199px; /* !important; CHANGED FROM 200px FOR AMBER 2 THEME, JRS-5195 will fix this */
+	width: 200px;
 }
 
 .twoColumn>.tertiary.column {
@@ -139,31 +141,42 @@
 .threeColumn>.primary.column,
 .body.threeColumn>.primary.column,
 .row.threeColumn>.primary.column {
-	right:200px;
-	left:200px;
-	margin-left: 10px;
-	margin-right: 10px;
-	display:block;
+	display: block;
+	left: 200px;
+	margin-left: 1px;
+	margin-right: 1px;
+	right: 200px;
+}
+
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+	/* Safari and Google Chrome only */
+	.threeColumn>.primary.column,
+	.body.threeColumn>.primary.column,
+	row.threeColumn>.primary.column {
+		margin-left: 2px;
+	}
 }
 
 .threeColumn>.secondary.column,
 .body.threeColumn>.secondary.column,
 .row.threeColumn>.secondary.column {
-	min-width:200px;
-	width:200px;
-	left:0;
-	right:auto;
-	display:block;
+	border-right: 1px solid #e3e3e3;
+	display: block;
+	left: 0;
+	min-width: 200px;
+	right: auto;
+	width: 200px;
 }
 
 .threeColumn>.tertiary.column,
 .body.threeColumn>.tertiary.column,
 .row.threeColumn>.tertiary.column {
-	min-width:200px;
-	width:200px;
-	right:0;
-	left:auto;
-	display:block;	
+	border-left: 1px solid #e3e3e3;
+	display: block;
+	left: auto;	
+	min-width: 200px;
+	right: 0;
+	width: 200px;
 }
 
 /* .threeColumn_equal> */
@@ -171,9 +184,9 @@
 .threeColumn_equal> .primary.column,
 .body.threeColumn_equal> .primary.column,
 .row.threeColumn_equal> .primary.column {
-	right:33%;
-	left:33%;
-	display:block;
+	display: block;
+	right: 33%;
+	left: 33%;
 }
 
 .threeColumn_equal> .secondary.column,
@@ -188,29 +201,29 @@
 .threeColumn_equal> .tertiary.column,
 .body.threeColumn_equal> .tertiary.column,
 .row.threeColumn_equal> .tertiary.column {
-	width:32%;
-	right:0;
-	left:auto;
-	display:block;
+	display: block;
+	left: auto;
+	right: 0;
+	width: 32%;
 }
 
 /* .threeColumn.manager */
 
 .threeColumn.manager>.primary.column {
-	right:40%;
-	left:15%;
-	display:block;
+	display: block;
+	right: 40%;
+	left: 15%;
 }
 
 .threeColumn.manager>.secondary.column {
-	left:0;
-	display:block;
+	display: block;
+	left: 0;
 	width: 15%;
 }
 
 .threeColumn.manager>.tertiary.column {
-	right:0;
-	display:block;
+	display: block;
+	right: 0;
 	width: 40%;
 }
 
@@ -222,8 +235,8 @@ ROW LAYOUTS Row elements can be used to create parent context's for columns for 
 */
 .row>.sizer.vertical {
 	bottom: 0;
-	width: 100%;
 	height: 10px;
+	width: 100%;
 }
 
 /* two panes, fill column */
@@ -233,9 +246,9 @@ ROW LAYOUTS Row elements can be used to create parent context's for columns for 
 } 
 
 .twoPanes .panel.pane {
-	position: absolute;
-	min-height: 30px;
 	margin-bottom: 0;
+	min-height: 30px;
+	position: absolute;
 }
 
 .twoPanes .pane>.content>.body {
@@ -243,14 +256,14 @@ ROW LAYOUTS Row elements can be used to create parent context's for columns for 
 }
 
 .twoPanes .pane.secondary {
-	bottom:0px;
+	bottom: 0px;
 	height: 200px;
 }
 
 .twoPanes .pane.primary {
-	top:0;
-	bottom:200px;
+	bottom: 200px;
 	height: auto;
+	top:0;
 }
 
 .twoPanes .pane.secondary>.content {
@@ -320,39 +333,47 @@ NOTE: .flow layout classes are used by .wizards as well
 }
 
 .flow #flowControls {
+	color: #333;
 	float: left;
-	position: relative;
-	padding: 0 10px;
 	margin-top: 85px;
 	min-width: 125px;
-	color: #333;
+	padding: 0 20px 0 10px;
+	position: relative;
+}
+
+.flow #stepDisplay .column.primary .header,
+.flow #stepDisplay .column.secondary .header {
+	border-bottom: 1px solid #e3e9ef; /* NEW */
+	/* border-bottom: 1px solid #d5d5d5; */ /* DELETE IF NO PROBLEMS */
 }
 
 .flow #stepDisplay .column.primary .header .title,
-.flow #stepDisplay .column.secondary .header .title{
-	float: none;
+.flow #stepDisplay .column.secondary .header .title {
 	display: inline-block;
 	*display: inline; /* IE7 */
+	float: none;
 	*margin-right: 4px; /* IE7 */
 	zoom:1; /* IE */
+	
+    /* font-weight: bold; */  /* DELETE IF NO PROBLEMS */
 } 
 
 .flow #stepDisplay {
 	display: inline-block;
+	height: 99%;
 	position: relative;
-	height:99%;
-	width:80%
+	width: 80%
 }
 
-.flow #stepDisplay.error .instructions>.warning {
-	display:block;
+.flow #stepDisplay.error .instructions > .warning {
+	display: block;
 }
 
-.flow #stepDisplay .instructions>.warning {
-	display:none;
+.flow #stepDisplay .instructions > .warning {
+	display: none;
 }
 
-.flow #stepDisplay .instructions.error>.warning {
+.flow #stepDisplay .instructions.error . warning {
 	display:block;
 }
 
@@ -386,32 +407,32 @@ flow #flowControls .tabSet {
 	overflow: auto;
 }
 
-.flow .inputs.oneColumn>.primary.decorated>.content>.body {
+.flow .inputs.oneColumn > .primary.decorated > .content > .body {
 	padding: 15px 5px 5px 20px;
 }
 
-.flow .inputs.oneColumn>.primary>.content>.header {
+.flow .inputs.oneColumn > .primary > .content > .header {
 	overflow:visible;
 }
 
-.flow .inputs .twoColumn_equal>.column {
+.flow .inputs .twoColumn_equal > .column {
 	padding:0 5px;
 }
 
-.flow .inputs.twoColumn>.column.primary {
+.flow .inputs.twoColumn > .column.primary {
 	margin-left:35px;
 }
 
 
-.flow .inputs> .column {
+.flow .inputs > .column {
 	margin-left: 10px;	
 }
 
-.flow .inputs> .column.decorated {
+.flow .inputs > .column.decorated {
 	margin-top: 5px;	
 }
 
-.flow .twoColumn_equal>.column>.sizer,
+.flow .twoColumn_equal > .column > .sizer,
 .flow .twoColumn_equal .minimize {
 	display: none;
 }
@@ -468,13 +489,13 @@ flow #flowControls .tabSet {
  */
 /* .pickWells */
 
-.twoColumn_equal.pickWells>.primary.column,
-.moveButtons>.primary.column {
+.twoColumn_equal.pickWells > .primary.column,
+.moveButtons > .primary.column {
 	margin: 16px 16px 16px 30px;
 }
 
-.twoColumn_equal.pickWells>.secondary.column,
-.moveButtons>.secondary.column {
+.twoColumn_equal.pickWells  >.secondary.column,
+.moveButtons > .secondary.column {
 	margin: 16px 30px 16px 16px;
 }
 

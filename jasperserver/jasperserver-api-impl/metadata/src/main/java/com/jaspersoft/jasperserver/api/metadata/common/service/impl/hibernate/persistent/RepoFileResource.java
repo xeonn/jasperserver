@@ -23,9 +23,9 @@ package com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.p
 import java.sql.Blob;
 import java.sql.SQLException;
 
+import com.jaspersoft.jasperserver.api.metadata.common.domain.FileResourceBase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.Hibernate;
 
 import com.jaspersoft.jasperserver.api.JSException;
 import com.jaspersoft.jasperserver.api.JSExceptionWrapper;
@@ -38,12 +38,13 @@ import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.Re
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: RepoFileResource.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: RepoFileResource.java 53873 2015-04-07 18:59:44Z mchan $
  * 
  * @hibernate.joined-subclass table="file_resource"
  * @hibernate.joined-subclass-key column="id"
  */
-public class RepoFileResource extends RepoResource {
+public class RepoFileResource extends RepoResource implements FileResourceBase {
+
 	private static final Log log = LogFactory.getLog(RepoFileResource.class);
 	
 	private String fileType;
@@ -199,4 +200,8 @@ public class RepoFileResource extends RepoResource {
             setReference(null);
         }
     }
+
+	protected Class getImplementingItf() {
+		return FileResourceBase.class;
+	}
 }

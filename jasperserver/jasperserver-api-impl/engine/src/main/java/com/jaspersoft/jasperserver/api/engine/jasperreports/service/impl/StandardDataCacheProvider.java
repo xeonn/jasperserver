@@ -32,6 +32,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
+import com.jaspersoft.jasperserver.api.common.util.diagnostic.DiagnosticSnapshotPropertyHelper;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.domain.impl.ReportUnitRequestBase;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.service.DataCacheProvider;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.service.DataSnapshotService;
@@ -43,7 +44,7 @@ import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportUnit;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: StandardDataCacheProvider.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: StandardDataCacheProvider.java 54483 2015-04-21 03:18:31Z ytymoshe $
  */
 public class StandardDataCacheProvider implements DataCacheProvider {
 	
@@ -239,15 +240,8 @@ public class StandardDataCacheProvider implements DataCacheProvider {
 			return null;
 		}
 
-		if (!dataSnapshotService.isSnapshotPersistenceEnabled()) {
-			// if snapshot persistence is disabled, don't use saved snapshots
-			if (log.isDebugEnabled()) {
-				log.debug("snapshot persistence is disabled, not using snapshot " + snapshotId
-						+ " for report " + reportUnit.getURIString());
-			}
-			return null;
-		}
-		
+		// Need to load metadata to see if it has isDiagSnapshot set,
+		// postpone snapshotPersistentEnabled check until after metadata.
 		// try to load the persistent snapshot
 		if (log.isDebugEnabled()) {
 			log.debug("loading saved data snapshot " + snapshotId + " for " + reportUnit.getURIString());
@@ -260,6 +254,20 @@ public class StandardDataCacheProvider implements DataCacheProvider {
 			}
 			return null;
 		}
+		
+		boolean isDiagSnapshot = DiagnosticSnapshotPropertyHelper.isDiagSnapshotSet(persistentSnapshot.getSnapshotMetadata().getParameters());
+
+		if (!dataSnapshotService.isSnapshotPersistenceEnabledForReportUri(reportUnit.getURI().replaceAll("repo:", ""))
+				&& !isDiagSnapshot) {
+			// if snapshot persistence is disabled, don't use saved snapshots
+			if (log.isDebugEnabled()) {
+				log.debug("snapshot persistence is disabled, not using snapshot " + snapshotId
+						+ " for report " + reportUnit.getURIString());
+			}
+			persistentSnapshot = null;
+			return null;
+		}
+		
 		
 		Date snapshotDate = persistentSnapshot.getSnapshotMetadata().getSnapshotDate();
 		Resource dataSource = getReportLoadingService().getFinalResource(context, reportUnit.getDataSource(), Resource.class);
@@ -297,6 +305,7 @@ public class StandardDataCacheProvider implements DataCacheProvider {
 			String key = dataParamsEntry.getKey();
 			Object value = dataParamsEntry.getValue();
 			Object snapshotValue = snapshotParams == null ? null : snapshotParams.get(key);
+			
 			if (value == null ? (snapshotValue != null) : (snapshotValue == null || !value.equals(snapshotValue))) {
 				match = false;
 				break;
@@ -329,7 +338,7 @@ public class StandardDataCacheProvider implements DataCacheProvider {
 		} else {
 			DataCacheSnapshot snapshot = cacheProvider.getSnapshot();
 			boolean hadSavedSnapshot = cacheProvider.hadSavedSnapshot();
-			if (!dataSnapshotService.isSnapshotPersistenceEnabled()
+			if (!dataSnapshotService.isSnapshotPersistenceEnabledForReportUri((String) reportContext.getParameterValue("reportUnit"))
 					|| snapshot == null || !snapshot.getSnapshot().isPersistable()) {
 				// if we can't save a snapshot, check if we had a saved snapshot that we need to delete
 				status = hadSavedSnapshot ? SnapshotSaveStatus.UPDATED : SnapshotSaveStatus.NO_CHANGE;

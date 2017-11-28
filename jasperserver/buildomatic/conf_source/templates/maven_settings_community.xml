@@ -37,10 +37,6 @@
           </releases>
         </repository>
         <repository>
-          <id>cloudera-repo-releases</id>
-          <url>https://repository.cloudera.com/artifactory/repo/</url>
-        </repository>
-        <repository>
           <id>jaspersoft-external-addons</id>
           <url>http://jaspersoft.artifactoryonline.com/jaspersoft/jrs-ce-addons-releases</url>
           <snapshots>
@@ -114,6 +110,19 @@
           </releases>
         </repository>
         <repository>
+          <id>jboss-eap-alpha</id>
+          <name>JBoss EAP 6.3.0.Alpha</name>
+          <url>https://maven.repository.redhat.com/earlyaccess/all/</url>
+          <layout>default</layout>
+          <releases>
+            <enabled>true</enabled>
+            <updatePolicy>never</updatePolicy>
+          </releases>
+          <snapshots>
+            <enabled>false</enabled>
+          </snapshots>
+        </repository>
+        <repository>
           <id>Repo1 Maven</id>
           <url>http://repo1.maven.org/maven2/</url>
           <snapshots>
@@ -153,6 +162,10 @@
             <enabled>true</enabled>
           </releases>
         </repository>
+        <repository>
+          <id>cloudera-repo-releases</id>
+          <url>https://repository.cloudera.com/artifactory/repo/</url>
+        </repository>
       </repositories>
       <pluginRepositories>
         <pluginRepository>
@@ -160,26 +173,6 @@
           <url>http://jaspersoft.artifactoryonline.com/jaspersoft/third-party-ce-artifacts</url>
           <snapshots>
             <enabled>false</enabled>
-          </snapshots>
-          <releases>
-            <enabled>true</enabled>
-          </releases>
-        </pluginRepository>
-        <pluginRepository>
-          <id>codehaus-plugins</id>
-          <url>http://dist.codehaus.org/</url>
-          <snapshots>
-            <enabled>true</enabled>
-          </snapshots>
-          <releases>
-            <enabled>true</enabled>
-          </releases>
-        </pluginRepository>
-        <pluginRepository>
-          <id>codehaus-plugins-2</id>
-          <url>http://repository.codehaus.org/</url>
-          <snapshots>
-            <enabled>true</enabled>
           </snapshots>
           <releases>
             <enabled>true</enabled>

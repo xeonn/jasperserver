@@ -285,6 +285,9 @@ public class TibcoDriverManagerImpl implements TibcoDriverManager {
         registerDriver("tibcosoftware.jdbc.sqlserver.SQLServerDriver");
         registerDriver("tibcosoftware.jdbc.db2.DB2Driver");
         registerDriver("tibcosoftware.jdbc.hive.HiveDriver");
+        registerDriver("tibcosoftware.jdbc.impala.ImpalaDriver");
+        registerDriver("tibcosoftware.jdbc.mongodb.MongoDBDriver");
+        registerDriver("tibcosoftware.jdbc.redshift.RedshiftDriver");
         deregisterTibcosoftwareincDrivers();
     }
 

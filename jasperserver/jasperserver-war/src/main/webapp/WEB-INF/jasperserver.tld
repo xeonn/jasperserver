@@ -316,4 +316,29 @@
             -->
         </attribute>
     </tag>
+
+
+    <tag>
+        <name>out</name>
+        <info>Tag surrounds JSP code in which EL expressions should not be XML-escaped.</info>
+        <tagclass>com.jaspersoft.jasperserver.war.tags.JasperOutTag</tagclass>
+        <bodycontent>JSP</bodycontent>
+        <attribute>
+            <!--
+                Determines whether characters &lt; &gt; ( ) ; ' " in EL expression values
+                will be converted to their corresponding character entity codes.
+                Default value is false.
+            -->
+            <name>escapeScript</name>
+            <required>false</required>
+        </attribute>
+        <attribute>
+            <!--
+                When true, escapes the contents with UTF-8 versus entity codes
+                Default value is false.
+            -->
+            <name>javaScriptEscape</name>
+            <required>false</required>
+        </attribute>
+    </tag>
 </taglib>

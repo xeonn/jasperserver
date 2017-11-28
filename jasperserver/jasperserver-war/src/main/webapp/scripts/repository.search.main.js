@@ -21,7 +21,12 @@
 
 
 /**
- * @version: $Id: repository.search.main.js 7762 2014-09-19 10:16:02Z sergey.prilukin $
+ * @version: $Id: repository.search.main.js 8915 2015-05-15 16:44:12Z spriluki $
+ */
+
+/* global isIPad, layoutModule, webHelpModule, orgModule, buttonManager, alert, dialogs, JRS,
+    confirm, Template, isSupportsTouch, isRightClick, actionModel, deepClone, _, localContext, getInitOptions,
+ __jrsConfigs__, require
  */
 
 /**
@@ -171,10 +176,8 @@ function canResourceBeEdited(resource) {
     // Edit menu item is forbidden.
     if (["DashboardResource"].include(resource.typeSuffix())) {
         return false;
-    } else if (["ReportUnit", "ReportOptions", "AdhocReportUnit"].include(resource.typeSuffix())) {
-        return allowed;
     } else {
-        return allowed && repositorySearch.model.isAdministrator();
+        return allowed;
     }
 }
 
@@ -1014,7 +1017,11 @@ var repositorySearch = {
     },
 
     defaultErrorHandler: function(event) {
-        dialogs.systemConfirm.show(event.memo.responseData || event.memo, 5000);
+        require(["common/component/dialog/AlertDialog", "bundle!jasperserver_messages"], function(AlertDialog, i18n) {
+            var errorDialog = new AlertDialog({title: i18n["dialog.dependencies.title"]});
+            errorDialog.setMessage(event.memo.responseData || event.memo);
+            errorDialog.open();
+        });
     },
 
     initThemeEvents: function() {
@@ -1225,13 +1232,13 @@ repositorySearch.model = {
      */
     getFolderUriState: function() { return this.getServerState().folderUri; },
 
-    setSelectedFolder: function(folder) { return this.getUIState().selectedFolder = folder; },
+    setSelectedFolder: function(folder) { return this.getUIState().selectedFolder = folder; }, // jshint ignore: line
     getSelectedFolder: function() { return this.getUIState().selectedFolder; },
 
-    setContextFolder: function(folder) { return this.getUIState().contextFolder = folder; },
+    setContextFolder: function(folder) { return this.getUIState().contextFolder = folder; }, // jshint ignore: line
     getContextFolder: function() { return this.getUIState().contextFolder; },
 
-    setSelectedResources: function(resources) { return this.getUIState().selectedResources = resources; },
+    setSelectedResources: function(resources) { return this.getUIState().selectedResources = resources; }, // jshint ignore: line
     getSelectedResources: function() { return this.getUIState().selectedResources; }
 };
 
@@ -1547,10 +1554,10 @@ var Folder = function(node) {
     this.node = node;
 
     this.name = node.param.id;
-    this.label = node.name;
-    this.desc = (node.param.extra.desc) ? node.param.extra.desc : "";
-    this.description = this.desc;
-    this.date = (node.param.extra.date) ? node.param.extra.date : "";
+    this.label = xssUtil.unescape(node.name);
+    this.desc = (node.param.extra.desc) ? xssUtil.unescape(node.param.extra.desc) : "";
+    this.description = xssUtil.unescape(this.desc);
+    this.date = (node.param.extra.date) ? xssUtil.unescape(node.param.extra.date) : "";
     this.URI = node.param.uri;
     this.URIString = node.param.uri;
 };
@@ -1700,7 +1707,7 @@ var Utils = {
         return localContext.rsInitOptions || __jrsConfigs__.repositorySearch["localContext"].rsInitOptions;
     },
     getInitConfiguration: function () {
-        return getInitOptions().configuration;
+        return Utils.getInitOptions().configuration;
     }
 };
 
@@ -1717,4 +1724,4 @@ document.observe('key:delete', function(event) {
     if (canAllBeDeleted())invokeBulkAction("Delete");
 });
 //TODO: Remove this
-designerBase = undefined;
+designerBase = undefined; // jshint ignore: line

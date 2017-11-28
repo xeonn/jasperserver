@@ -34,8 +34,8 @@ FLOATING DIALOGS
 }
 
 .properties.resource .textArea textarea {
-	height:40px;
-    min-height:40px;
+	height: 58px;
+    min-height: 58px;
 }
 
 .properties.resource .ok,
@@ -47,6 +47,13 @@ FLOATING DIALOGS
 .properties.resource.showMode .ok {
 	display: inline;
 }
+
+/* .aboutBox */
+
+#aboutBox {
+    width: 380px;
+}
+
 
 /* .permissions */
 
@@ -65,14 +72,17 @@ FLOATING DIALOGS
 }
 
 .dialog.permissions .searchLockup {
-	left:10px;
-	top:0px;
-	width:250px;
+	left: 5px;
+	top: 0px;
+	width: 250px;
 }
 
 .dialog.permissions .searchLockup input {
-	width:200px;
-	margin-left:3px;
+	position: absolute;
+		left: 0;
+		top: 0;
+	height: 100%;
+	width: 200px;
 }
 
 .dialog.permissions .groupBox {
@@ -81,7 +91,7 @@ FLOATING DIALOGS
 	padding: 0;
 }
 
-.dialog.permissions .groupBox>.content>.body {
+.dialog.permissions .groupBox > .content > .body {
 	padding: 0;
 }
 
@@ -98,15 +108,23 @@ FLOATING DIALOGS
 	margin: 0;
 }
 
-/* Add Organizations, Users, Roles */
-
-#addOrganization.dialog.overlay {
-	*width:350px;
+.dialog.permissions #permissionsViewBy > .label {
+	padding-right: 6px; /* NEW */
 }
 
+/* Add Organizations, Users, Roles */
+
+#addOrganization.dialog.overlay,
 #addUser.dialog.overlay,
 #addRole.dialog.overlay {
-	*width:300px;
+	min-width: 350px;
+	width: auto;
+}
+
+#addOrganization.dialog.overlay .group,
+#addUser.dialog.overlay .group,
+#addRole.dialog.overlay .group {
+	padding-left: 0;
 }
 
 
@@ -164,6 +182,13 @@ FLOATING DIALOGS
 	padding:3px 0 0 0;
 }
 
+/* confirmationDialog */
+
+.confirmationDialog .confirmationText {
+    word-wrap: break-word;
+}
+
+
 /* #standardConfirm/#standardAlert */
 
 .standardConfirm .message,
@@ -171,37 +196,23 @@ FLOATING DIALOGS
 	margin:auto 5px 20px;
 }
 
-.standardConfirm>.content>.body,
-.standardAlert>.content>.body {
-	padding:20px 20px 10px;
+.standardConfirm > .content>.body,
+.standardAlert > .content>.body {
+	padding: 20px;
 	white-space:normal;
 	word-wrap:break-word;
 }
 
-.standardConfirm {
-	max-width:550px \9; /* IE8 and IE9 */
-}
 
-.standardConfirm>.content,
-.standardAlert>.content {
-    max-width:550px;
-    max-width:550px \9; /* IE8 and IE9 */
+.standardConfirm {
+	max-width: 550px \9; IE8 and IE9
+	min-width: 300px;
 }
 
 @media screen and (-webkit-min-device-pixel-ratio:0) {
 	.standardConfirm {
-		max-width:550px;
+		max-width: 550px;
 	}
-
-	.standardConfirm>.content,
-	.standardAlert>.content  {
-		max-width:550px;
-	}
-}
-
-.standardConfirm.sizeable>.content,
-.standardAlert.sizeable>.content {
-	max-width:1200px;
 }
 
 .standardConfirm.noMaxWidth {
@@ -230,6 +241,17 @@ FLOATING DIALOGS
 	padding: 8px 6px 8px 4px;
 }
 
+/* #helpLoggingIn */
+
+#helpLoggingIn .message {
+	font-size: 12px;
+}
+
+#helpLoggingIn ul.decorated {
+	margin-bottom: 22px;
+}
+
+
 /* #heartbeatOptin */
 
 .heartbeatOptin .message {
@@ -255,6 +277,7 @@ FLOATING DIALOGS
 .detail.sizeable #groupBox {
 	bottom:15px;
 }
+
 
 /* #editlabel */
 
@@ -286,13 +309,6 @@ FLOATING DIALOGS
 	overflow:auto; 
 	overflow:hidden \9; /* IE8 and IE9 */
 	*overflow:hidden;   /* IE7 */
-}
-
-@media screen and (-webkit-min-device-pixel-ratio:0) { /* Chrome and Safari  */
-	.saveAs .input input,
-	.saveAs .textArea textarea {
-		height:14px;
-	}
 }
 
 .saveAs .groupBox {
@@ -353,18 +369,18 @@ FLOATING DIALOGS
 
 .saveAs.forDataView .forDataView.dataViewColumn .groupBox{
     height: 390px;
-    width:100%;
+    width: 100%;
 }
 
 .saveAs.forDataView.forReport .forDataView.dataViewColumn .groupBox,
 .saveAs .forReport.reportColumn .groupBox {
     height: 170px;
-    width:100%;
+    width: 100%;
 }
 
 .saveAs #saveAsInputDescription,  .saveAs textarea.resourceDescriptionInput{
-    min-height: 40px;
-    min-height:44px \9; /* IE9 */
+    min-height: 60px;
+    min-height: 44px \9; /* IE9 */
 }
 
 .saveAs {
@@ -390,7 +406,8 @@ FLOATING DIALOGS
 }
 
 #adHocGeneratorSelect.groupBox {
-	border:none;
+	border: none;
+	margin-top: 12px;
 }
 
 #saveDataViewAndReport #adHocGeneratorSelectReportTemplate {
@@ -477,7 +494,11 @@ textarea[readonly]#viewQueryInput   {
 
 #locationSelector .input,
 #commonGeneratorSelectReportTemplate {
-	width:97%;
+	width: 97%;
+	width: -moz-calc(100% - 10px);
+	width: -webkit-calc(100% - 10px);
+	width: -o-calc(100% - 10px);
+	width: calc(100% - 10px);
 }
 
 #browseTemplate .control.browser .button.action {
@@ -528,7 +549,7 @@ textarea[readonly]#viewQueryInput   {
 }
 
 #commonGeneratorSelect .group.locationSelector {
-	margin-top:0;
+	margin: 0;
 }
 
 #commonGeneratorSelect .group.locationSelector legend {
@@ -647,6 +668,10 @@ textarea[readonly]#viewQueryInput   {
 	width:600px;
 }
 
+#sortDialog #availableFields {
+	top: 0;
+}
+
 .sortDialog .column.decorated {
 	border:1px solid #D4D5D5;
 }
@@ -699,11 +724,18 @@ and (max-device-width : 1024px) {
 
 /* #selectFields */
 
+#selectFields.dialog .twoColumn_equal.pickWells > .primary.column,
+#selectFields.dialog .moveButtons > .primary.column,
+#selectFields.dialog .twoColumn_equal.pickWells  >.secondary.column,
+#selectFields.dialog .moveButtons > .secondary.column {
+    border: 1px solid #c5c5c5;
+}
+
 .selectFields {
-	height:400px;
-	min-height:200px;
-	min-width:300px;
-	width:600px;
+	height: 400px;
+	min-height: 200px;
+	min-width: 300px;
+	width: 600px;
 }
 
 .selectFields .secondary .minimize,
@@ -711,36 +743,44 @@ and (max-device-width : 1024px) {
 	display: none;
 }
 
+.selectFields .list.column.simple {
+    margin-right: 0;
+    border-right: none;
+}
+
 /* select chart type */
 
 #chartTypeSelector {
-    min-width:526px;
     height: 495px;
-    *width:526px; /* IE7 */
+    min-width: 526px;
+    *width: 526px; /* IE7 */
     z-index: 1000; /* Bug 34694 - FiltersData Levels are visible thru Chart Format/Chart Types dialogs */
 }
 
 #chartTypeSelector .wrap {
-	font-weight:bold;
-	margin-bottom:5px;
-	color:#666;
+	color: #666;
+	font-weight: bold;
+	margin-bottom: 5px;
 }
 
 #chartTypeSelector div.body > .row {
-	overflow:hidden;
-	margin-bottom:12px;
-	margin-left:-5px;
+	overflow: hidden;
+	margin-bottom: 12px;
+	margin-left: -5px;
+	min-width: 508px; /* prevents chart type icons from wrapping */
 }
 
 #chartTypeSelector div.body > .row > .cell {
-	float:left;
-	width:51px;
-	height:34px;
-	margin-right:5px;
-	margin-left:5px;
-	cursor:pointer;
-    border:1px solid transparent;
-    background: url("images/chart_type_sprite.png") no-repeat scroll 0 0 rgba(0, 0, 0, 0);
+    background-image: url("images/chart_type_sprite.png");
+    background-repeat: no-repeat;
+    background-color: transparent;
+    border: 1px solid transparent;
+	cursor: pointer;
+	float: left;
+	height: 36px;
+	margin-left: 5px;
+	margin-right: 5px;
+	width: 53px;
 }
 
 #chartTypeSelector div.body > .row > .cell[name="column"] {
@@ -968,31 +1008,32 @@ and (max-device-width : 1024px) {
 }
 
 #chartTypeSelector div.body > .row > .cell.selected {
-    border:solid 1px #0872A4;
+    background-color: #1388d8;
+    border: solid 1px #1388d8;
 }
 
 #chartTypeSelector div.body > .selectBox {
-    position:absolute;
-    z-index:0;
-    border:solid 1px #0872A4;
-    width:45px;
-    height:28px;
-    padding:4px;
+    border: solid 1px #0872A4;
+    height: 28px;
+    padding: 4px;
+    position: absolute;
+    width: 45px
+    z-index: 0;;
 }
 
 /* Chart format dialog. */
 
 #chartFormatDialog {
-    min-width:270px;
+    min-width: 270px;
+    min-height: 250px;
     width: auto;
-    min-height: 280px;
     *width:auto; /* IE7 */
     z-index: 1000; /* Bug 34694 - FiltersData Levels are visible thru Chart Format/Chart Types dialogs */
 }
 
 #chartFormatDialog.dialog.overlay > .content {
-	*display:block; /* IE7 */
-	*width:auto !important; /* IE7 */
+	*display: block; /* IE7 */
+	*width: auto !important; /* IE7 */
 }
 
 
@@ -1051,6 +1092,12 @@ and (max-device-width : 1024px) {
 	width:510px; 
 }
 
+.dialog.inputControls .groupBox .body {
+    overflow-x: hidden;
+    margin-left: 8px;
+    margin-right: 8px;
+}
+
 .pane.inputControls {
 	margin-bottom: 10px;
 }
@@ -1102,13 +1149,14 @@ and (max-device-width : 1024px) {
 
 /* Add Local Bundle dialog */
 
-#selectFile_bundle #filePath_bundle {
-	*width:300px; /* IE7 */
-	width:300px \9; /* IE8 and IE9 */
+#selectFile_bundle {
+    width: 450px;
 }
 
 #selectFile_bundle .control.groupBox.fillParent {
 	*height:263px; /* IE7 */
+	bottom: 0;
+	right: 0;
 }
 
 /* .sourceDialog */
@@ -1331,17 +1379,21 @@ PANES
 	width: 50px;
 	float: left;
 	margin-top:0;
+	margin-right: 6px;
 }
 
 .pane.settings .control select {
 	float: left;
-	margin-top: 0;
+	margin-top: 3px;
+	margin-right: 6px;
+	/* margin-top: 0; */ /* DELETE IF NO PROBLEMS */
 }
 
 .pane.settings .control .wrap {
-	margin:0 0 5px 20px;
-	max-width:330px;
 	display: inline-block;
+	margin: 0 0 5px 20px;
+	/* max-width: 330px; */ /* DELETE IF NO PROBLEMS */
+	max-width: 450px;
 }
 
 /* #managedPrintLoader */
@@ -1494,3 +1546,50 @@ PANES
 #calcFieldMeasure.dialog .weightedOnFieldsList .control.pickList {
 	width:100%;
 }
+
+/* JIVE */
+
+.jive_chartTypeSelector .header > .title,
+.jive_dialog .dialogHeader .dialogTitle {
+	color: #333 !important;
+	font-weight: normal !important;
+	font-size: 14px !important;
+}
+
+#jive_dialog .applytoWrapper {
+    margin-top: 8px !important;
+}
+
+#jive_dialog .tabContainer {
+	top: 5px !important;
+}
+
+#jive_dialog .tab.dialog {
+	color: #666 !important;
+	top: 2px !important;
+}
+
+#jive_dialog .tab.dialog.active {
+	top: 1px !important;
+}
+
+#jive_dialog .tab.multisheet.active span,
+#jive_dialog .tab.dialog.active span {
+	height: 23px !important;
+	line-height: 21px !important;
+}
+
+.jive_chartTypeSelector div.body > .row > .cell {
+	height: 36px !important;
+	width: 53px !important;
+}
+
+.jive_chartTypeSelector div.body > .row > .cell.selected {
+    background-color: #1388d8 !important;
+    border: solid 1px #1388d8 !important;
+}
+
+.jive_chartTypeSelector div.body > .row {
+	min-width: 508px !important;
+}
+

@@ -22,8 +22,10 @@
 
 /**
  * @author: inesterenko
- * @version: $Id: export.extendedformview.js 7762 2014-09-19 10:16:02Z sergey.prilukin $
+ * @version: $Id: export.extendedformview.js 8685 2015-04-10 14:06:42Z bkolesni $
  */
+
+/* global JRS, _, Backbone, jaspersoft */
 
 JRS.Export.ExtendedFormView = (function (exportz, jQuery, _, Backbone, templateEngine, AuthorityModel, AuthorityPickerView, State) {
     var isIE = navigator.userAgent.toLowerCase().indexOf("msie") > -1;
@@ -48,7 +50,7 @@ JRS.Export.ExtendedFormView = (function (exportz, jQuery, _, Backbone, templateE
             _.bindAll(this);
 
             this.rolesList = new AuthorityPickerView({
-                model:AuthorityModel.instance("rest_v2/roles{{#searchString}}?search={{searchString}}{{/searchString}}"),
+                model:AuthorityModel.instance("rest_v2/roles{{#searchString}}?search={{{searchString}}}{{/searchString}}"),
                 customClass:"selectedRoles",
                 title:exportz.i18n["export.select.roles"]
             });
@@ -57,7 +59,7 @@ JRS.Export.ExtendedFormView = (function (exportz, jQuery, _, Backbone, templateE
             this.rolesList.render();
 
             this.usersList = new AuthorityPickerView({
-                model:AuthorityModel.instance("rest_v2/users{{#searchString}}?search={{searchString}}{{/searchString}}"),
+                model:AuthorityModel.instance("rest_v2/users{{#searchString}}?search={{{searchString}}}{{/searchString}}"),
                 customClass:"select selectedUsers",
                 title:exportz.i18n["export.select.users"]
             });
@@ -65,10 +67,10 @@ JRS.Export.ExtendedFormView = (function (exportz, jQuery, _, Backbone, templateE
             this.usersList.on("change:selection", this.bindWithUsers);
             this.usersList.render();
 
-            this.rolesToUsers =  AuthorityModel.instance("rest_v2/users?hasAllRequiredRoles=false{{#roles}}&requiredRole={{.}}{{/roles}}");
+            this.rolesToUsers =  AuthorityModel.instance("rest_v2/users?hasAllRequiredRoles=false{{#roles}}&requiredRole={{{.}}}{{/roles}}");
             this.rolesToUsers.on("change", this.onRolesToUsersChange);
 
-            this.usersToRoles =  AuthorityModel.instance("rest_v2/roles?hasAllUsers=false{{#users}}&user={{.}}{{/users}}");
+            this.usersToRoles =  AuthorityModel.instance("rest_v2/roles?hasAllUsers=false{{#users}}&user={{{.}}}{{/users}}");
             this.usersToRoles.on("change", this.onUsersToRolesChange);
 
             this.fileTemplate = templateEngine.createTemplate("exportDataFileTemplate");

@@ -20,6 +20,7 @@
  */
 package com.jaspersoft.jasperserver.api.metadata.jasperreports.domain;
 
+import com.jaspersoft.jasperserver.api.JasperServerAPI;
 import net.sf.jasperreports.engine.JRField;
 import java.util.List;
 import java.util.Map;
@@ -27,9 +28,10 @@ import java.util.Map;
 
 /**
  * @author ichan
- *  Interface for metadata layer of connector which contains JRField (name, type description), query language,
+ *  Interface for metadata layer of custom data source which contains JRField (name, type description), query language,
  * query text, and field name mapping <JRField name, Name in domain>
  */
+@JasperServerAPI
 public interface CustomDomainMetaData {
 
     /**

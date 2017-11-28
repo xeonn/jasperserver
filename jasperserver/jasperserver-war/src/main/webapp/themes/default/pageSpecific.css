@@ -1,3 +1,287 @@
+/* LOGIN PAGE */
+
+#loginPage > .banner {
+	background-color: transparent;
+	border-bottom: none;
+	position: absolute;
+		top: 0;
+		right: 0;
+		left: 0;
+	padding-right: 12px;
+	z-index: 9999; 
+}
+
+#loginPage #logo {
+	display: none;
+}
+
+#loginPage #frame {
+	top: 0;
+}
+
+#loginPage p.errorMessage {
+    white-space:normal;
+    padding-bottom:6px;
+    margin-bottom:0;
+} 
+
+#loginPage #display {
+    /* overflow: hidden */;
+    overflow: auto;
+    bottom:0;
+    top:0;
+    left:0;
+    right:0;
+}
+
+#loginPage #loginForm {
+    background:#fff;
+    border: none;
+    float: right;
+    /* position: absolute;
+    	top:0;
+    	right: 0;
+		bottom: 0; */
+    width: 55%;
+}
+
+#loginPage .login {
+	position: relative;
+	width: 100%;
+	min-height:340px;
+	border:none;
+	margin:0px;
+	z-index: 0;
+}
+
+#loginPage .login .header > .title {
+    margin-left:10px;
+}
+
+#loginPage .login .footer {
+    /* padding: 0 20px 20px 20px; */
+    /* height: 75px; */
+    
+    border-width: 0;
+    height: auto;
+    padding: 0;
+}
+
+#loginPage .login .footer {
+    border-width: 0;
+}
+
+#loginPage .info > .content {
+	background-color: #1388d8; /* need duplicate bg color for text overflow and scrolling purposes */
+	top: 0;
+	left: 0;
+	margin-right: 0;
+	margin-bottom: 0;
+	margin-left: 0;
+}
+
+#loginPage #copy {
+    background-color: #1388d8; /* need duplicate bg color for text overflow and scrolling purposes */
+    border: none;
+    margin: 0;
+    position:absolute;
+    	top: 0;
+		left: 0;
+		bottom: 0;
+    width: 45% !important; /* without !important, layout breaks on mobile */
+}
+
+#loginPage #copy > .content > .body {
+	padding: 0;
+}
+
+#loginPage #welcome,
+#loginPage .community #welcome {
+	background-color: #006fa7;
+    height: 80px;
+}
+
+#loginPage #welcome h1 {
+    height: auto;
+    margin: 0;
+    padding-top: 22px;
+    text-align: center;
+}
+
+#loginPage #welcome .text {
+	display: none;
+}
+
+#loginPage #welcome .logo {
+    background-image:url(images/logo_welcome.png);
+    background-repeat: no-repeat;
+    background-size:100%;
+    background-position: 0px 0px;
+    min-width:330px;
+    max-width:350px;
+    display: inline-block;
+    text-indent: -5000px;
+    height: 44px;
+}
+
+@media all and (-ms-high-contrast:none) {
+     #loginPage #welcome .logo { background-position-y: 4px; } /* IE10 */
+     *::-ms-backdrop, #loginPage #welcome .logo { background-position-y: 4px; } /* IE11 */
+}
+
+
+#amazonLogo {
+    background: url("images/aws_logo.png") no-repeat;
+    background-size: 200px 90px;
+    height: 90px;
+    margin-top: 20px;
+    width: 200px;
+    /* margin-left:20px; */
+}
+
+#copy .body {
+    overflow:hidden;
+}
+
+#copy .header, #copy .footer {
+    border:none;
+}
+
+#loginPage #buttons {
+    width:700px;
+    margin:auto;
+}
+
+#loginPage #buttons  > .primary,
+#loginPage #buttons  > .secondary {
+    float: left;
+    width: 300px;
+    padding-left: 25px;
+    padding-top: 1px; /* For rendering in chrome */
+    position: relative;
+}
+
+#loginPage #rotating {
+    width: auto;
+    margin: 25px 0;
+}
+
+#loginPage #rotating > .secondary {
+	margin-bottom: 36px;
+}
+
+#loginPage #rotating > .primary,
+#loginPage #rotating > .secondary {
+    padding: 0 25px;
+    position: relative;
+	width: auto;
+}
+
+#loginPage #rotating h2 {
+	font-size: 20px;
+    font-weight:normal;
+    margin-bottom: .4em;	/* 8px / 20px */
+}
+
+#loginPage #rotating .list.decorated {
+	font-size: 14px;
+	line-height: 1.5;
+}
+
+#loginPage #rotating .list.decorated li {
+	background: none;
+	padding-left: 0;
+}
+
+#loginPage #rotating .primary .list.decorated li {
+	margin: 0 0 1.428em 0;
+}
+
+#loginPage #rotating .secondary .list.decorated li {
+	background: transparent url("images/lists_sprite.png") no-repeat 0 -1360px;
+	margin: 0 0 .714em 0;
+	padding-left: 21px;
+}
+
+#loginPage .sellPoint {
+    font-weight: bold;
+    display: block;
+}
+
+#loginPage #login h2 {
+    font-weight: normal;
+    margin-top:15px !important;
+}
+
+#loginPage #buttons {
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e0e0e0;
+    margin-bottom: 15px;
+    overflow:hidden;
+}
+
+#loginPage .primaryNav,
+#loginPage #globalSearch,
+#loginPage #userID,
+#loginPage #main_logOut {
+    display: none;
+}
+
+#loginPage #help {
+    border: none;
+}
+
+#loginPage #loginForm legend {
+    width:220px;
+}
+
+#loginPage #changePassword {
+    margin-top:16px;
+}
+
+#loginForm .header {
+	display: none;
+}
+
+#loginForm .devices {
+    background-image:url("images/login_devices.png"); 
+    background-repeat:no-repeat;
+    background-position:0px 0px;
+    background-size:439px;
+    height: 201px;
+    margin: 36px auto;
+    width: 440px;
+}
+
+#localeAndTimeZone {
+	margin-top: 12px;
+}
+
+#loginForm > .dialog > .content > .body {
+    padding-bottom: 12px;
+}
+
+#loginForm .inputSection {
+	margin: 0 auto;
+	width: 360px;
+}
+
+/* END LOGIN PAGE */
+
+
+
+/* Text button sets on various pages */
+
+#messages .list.buttonSet .list.buttonSet,
+#repoBrowse .list.buttonSet .list.buttonSet,
+#scheduler_jobSummary .list.buttonSet .list.buttonSet,
+#manage_users .list.buttonSet .list.buttonSet,
+#manage_roles .toolbar > .list.buttonSet,
+#manage_orgs .toolbar > .list.buttonSet {
+	border-right: 1px solid #cecece;
+}
+
+
 /*
  * From: addEditDomain.css
  */
@@ -6,14 +290,31 @@
     padding:0;
 }
 
-#domainDesigner_editDomain .list.linkedResources .wrap>.column.one,
-#domainDesigner_addDomain .list.linkedResources .wrap>.column.one {
-    width: 55%;
+#domainDesigner_editDomain .list.linkedResources .wrap > .column.one,
+#domainDesigner_addDomain .list.linkedResources .wrap > .column.one {
+    width: 65%;
     margin-left:2px;
+    /* width: 55%; */ /* DELETE IF NO PROBLEM */S
+}
+
+#addDomain .flow #stepDisplay .column.primary .header .title,
+#addDomain .flow #stepDisplay .column.secondary .header .title,
+#domainDesigner_editDomain .flow #stepDisplay .column.primary .header .title,
+#domainDesigner_editDomain .flow #stepDisplay .column.secondary .header .title {
+	font-size: 12px;
+	height: 22px;
+	line-height: 22px;
+}
+
+#addDomain .flow #stepDisplay .column.primary .body,
+#addDomain .flow #stepDisplay .column.secondary .body,
+#domainDesigner_editDomain .flow #stepDisplay .column.primary .body,
+#domainDesigner_editDomain .flow #stepDisplay .column.secondary .body {
+	margin-top: 10px;
 }
 
 /*
-.list.linkedResources.twoColumn .wrap>.column.two {
+.list.linkedResources.twoColumn .wrap > .column.two {
 width:40%;
 text-align:right;
 }
@@ -23,7 +324,7 @@ text-align:right;
     width:85%;
 }
 
-#domainDesigner_editDomain #stepDisplay .column>.content>.body {
+#domainDesigner_editDomain #stepDisplay .column > .content > .body {
     top:29px;
 }
 
@@ -32,10 +333,50 @@ text-align:right;
     *min-width:400px; /* IE7 */
 }
 
+#domainDesigner_editDomain #stepDisplay .column.primary .content > .body {
+	margin-top: 24px;
+}
+
 #domainDesigner_editDomain #bundlesList .column.one,
 #domainDesigner_editDomain #bundlesList .column.two {
     margin-top:7px;
     line-height:1.182em;
+}
+
+#securityFileLeaf > .wrap > .column {
+	line-height: 18px;
+	padding-top: 6px;
+}
+
+#securityFileLeaf > .wrap > .column.two,
+#domainDesigner_editDomain #bundlesList .column.two,
+#addDomain #bundlesList .column.two  {
+	text-align: right;
+}
+
+#domainDesigner_editDomain #bundlesList > .leaf,
+#addDomain #bundlesList> .leaf {
+	overflow: visible;
+}
+
+#domainDesigner_editDomain #bundlesList > .leaf p,
+#addDomain #bundlesList> .leaf p {
+	line-height: 18px;
+	padding-top: 6px;
+}
+
+#domainDesigner_editDomain #addBundleLeaf,
+#addDomain #addBundleLeaf {
+	overflow: visible;
+}
+
+.tabbed.showingToolBar .tabSet.horizontal.buttons > .tab.selected > .button, 
+.tabbed.showingToolBar .tabSet.horizontal.buttons > .tab.selected > .button.over, 
+.tabbed.showingToolBar .tabSet.horizontal.buttons > .tab.selected > .button.pressed {
+	background-color: #ebebeb;
+	border-top: 1px solid #ccc;
+	border-right: 1px solid #ccc;
+	border-left: 1px solid #ccc;
 }
 
 /*
@@ -58,7 +399,7 @@ text-align:right;
 /*
  * From: addReportControls.css
  */
-#addReport_Controls .inputs>.primary .body {
+#addReport_Controls .inputs > .primary .body {
     padding: 0;
 }
 
@@ -99,7 +440,7 @@ text-align:right;
     padding:0 5px;
 }
 
-#addResourceFile #fileTypeLabel.error>.message.warning {
+#addResourceFile #fileTypeLabel.error > .message.warning {
     display: inline;
     position: absolute;
     left:100%;
@@ -141,12 +482,7 @@ text-align:right;
 }
 
 #addResource_listOfValues .list.attributesTable .wrap.header {
-    background: #e1e9f3; /*fallback for non-CSS3 browsers*/
-    background: -webkit-linear-gradient(#e1e9f3, #d4dee9); /*new webkit*/
-    background: -moz-linear-gradient(#e1e9f3, #d4dee9); /*mozilla*/
-    background: -ms-linear-gradient(#e1e9f3, #d4dee9); /*IE10*/
-    background: -o-linear-gradient(#e1e9f3, #d4dee9); /*opera 11.10+*/
-    background: linear-gradient(#e1e9f3, #d4dee9); /*future CSS3 browsers*/
+    background-color: #edf2f8
     border-top: 1px solid #FFFFFF;
 }
 
@@ -157,7 +493,7 @@ text-align:right;
 #addResource_listOfValues .list.attributesTable .column.one,
 #addResource_listOfValues .list.attributesTable .column.two,
 #addResource_listOfValues .list.attributesTable .column.three  {
-    border-right: 1px solid #FFFFFF;
+    /* border-right: 1px solid #FFFFFF; */
     padding-left:6px;
     text-overflow: ellipsis;
 }
@@ -177,13 +513,23 @@ text-align:right;
     padding-right:2px;
 }
 
-#addResource_listOfValues .list.attributesTable #listOfValues .column.one,
-#addResource_listOfValues .list.attributesTable #listOfValues .column.two  {
-    border-right: 1px solid #E3E9EF;
+
+
+#addResource_listOfValues .list.attributesTable .column.one,
+#addResource_listOfValues .list.attributesTable .column.two {
+	width: 40%;
+}
+
+#addResource_listOfValues .list.attributesTable .column.three {
+	width: 18%;
+}
+
+#addResource_listOfValues #listOfValues .column.one {
+	margin-left: -18px;
 }
 
 #addResource_listOfValues .list.attributesTable #listOfValues .column.one input {
-    *margin-left:9px; /* IE7 */
+    *margin-left: 9px; /* IE7 */
 }
 
 #addResource_listOfValues .list.attributesTable #listOfValues li:first-child {
@@ -191,20 +537,62 @@ text-align:right;
 }
 
 #addResource_listOfValues .list.attributesTable #listOfValues .column.two {
-    padding-right:0;
+    padding-right: 0;
 }
 
 #addResource_listOfValues .list.attributesTable #listOfValues .column.three {
-    border-right:none;
+    border-right: none;
 }
 
 #addResource_listOfValues #listOfValues p.column {
-    line-height:15px;
-    padding-bottom:2px;
-    padding-top:3px;
+    line-height: 28px;
+    padding-top: 1px;
+    
+    height: 32px \9; /* for IE8 and 9 */
+    line-height: 32px \9; /* for IE8 and 9 */
+    padding-top: 0 \9; /* for IE8 and 9 */
 }
 
+/*
+#addResource_listOfValues #listOfValues p.column .launcher {
+	line-height: 19px;
+}
+*/
+
 /* addResource_inputControl_information */
+
+#addResource_inputControl_information .linkedResources > #control {
+	margin-bottom: 12px;
+}
+
+#addResource_inputControl_information #control .linkedResources > .leaf > .wrap {
+	padding: 4px 20px;
+}
+
+#addResource_inputControl_information #controls .list.tabular > li > .wrap {
+	padding: 1px 20px;
+}
+
+#addResource_inputControl_information .flow #stepDisplay {
+	width: 60%
+}
+
+#addResource_inputControl_information #controls .linkedResources.twoColumn .column.two {
+	padding-left: 24px;
+}
+
+#addResource_inputControl_information .linkedResources .column.one {
+	width: 80%;
+	min-width: 500px;
+}
+
+#addResource_inputControl_information .linkedResources .column.two {
+	width: 18%
+}
+
+#addResource_inputControl_information .tabular.linkedResources.twoColumn {
+	min-width: 700px
+}
 
 /* #addResource_locateDatatype */
 
@@ -219,6 +607,13 @@ text-align:right;
     display: none;
 }
 
+/* addNewDataSource */
+
+#addNewDataSource .column.showingToolBar > .content > .body {
+	margin-top: 0;
+	padding-top: 16px;
+}
+
 /* addResource multiple uses */
 
 #addResource_dataSource_aws #select,
@@ -226,7 +621,6 @@ text-align:right;
 #addNewDataSource #select {
     min-height:180px;
 }
-
 
 /* #addResource_dataSource_aws #driverID, */
 [name=selectedDriverClass] {
@@ -245,6 +639,20 @@ text-align:right;
     width:500px\9;
 }
 
+#addNewDataSource .mongoDbJdbcSpecificFields [name=repositoryFileName] {
+	display: inline-block;
+}
+#addNewDataSource .mongoDbJdbcSpecificFields [name=repositoryBrowserButton] {
+	margin-left: 10px;
+}
+#addNewDataSource .mongoDbJdbcSpecificFields [name=serverFileName] {
+	width: 435px;
+}
+#addNewDataSource .mongoDbJdbcSpecificFields [name=fileLocationContainer] div.group {
+	margin-left: 0px;
+}
+
+
 .dataSourceSaveDialog {
     width: 440px;
     height: auto;
@@ -256,13 +664,16 @@ text-align:right;
     height: 100%;
 }
 
-.dataSourceSaveDialog .treeBox {
-    height: calc(100% - 250px);
-    min-height: 100px;
-    overflow: auto;
+.dataSourceSaveDialog.dialog > .content > .subcontainer {
+    padding: 16px;
 }
 
-.dataSourceSaveDialog .viewPortChunk{
+.dataSourceSaveDialog .treeBox {
+    overflow: auto;
+    margin: 0;
+}
+
+.dataSourceSaveDialog .j-view-port-chunk{
     width: auto;
 }
 
@@ -270,11 +681,11 @@ text-align:right;
     overflow: visible;
 }
 
-.dataSourceSaveDialog .collapsible>li>.wrap {
+.dataSourceSaveDialog .collapsible>li > .wrap {
     overflow: visible;
 }
 
-.dataSourceSaveDialog .hideRoot>.node>.subcontainer>.viewPortChunk>.collapsible{
+.dataSourceSaveDialog .hideRoot > .node > .subcontainer>.j-view-port-chunk>.collapsible{
     margin-left: 0;
 }
 
@@ -298,7 +709,7 @@ text-align:right;
 }
 
 .panel.dialog.overlay.dataSourceSaveDialog {
-    height: 410px;
+    min-height: 410px;
 }
 
 /* addResource_dataSource, general */
@@ -331,11 +742,19 @@ text-align:right;
 }
 */
 
+#addResource_dataType .control.picker {
+	width: 200px;
+}
+
+#addResource_dataType .ui-datepicker-trigger {
+	margin-top: 3px;
+}
+
 #addResource_dataSource_text #fileLocation input[type=text],
 #addResource_dataSource_text #fileLocation input[type=password],
 #addResource_dataSource_excel #fileLocation input[type=text],
 #addResource_dataSource_excel #fileLocation input[type=password] {
-	width:400px;
+	width: 400px;
 }
 
 #addResource_dataSource_text #repositoryInput input[type=text],
@@ -406,6 +825,11 @@ text-align:right;
     margin-top:6px;
     margin-right:6px;
     display:inline-block;
+}
+
+#aws_settings {
+    margin-left: 10px;
+    margin-top: 10px;
 }
 
 #addResource_dataSource_aws #aws_region button {
@@ -506,30 +930,31 @@ text-align:right;
 #addResource_query_step1 #flowControls .stepIndicator .icon,
 #addResource_locateDataSource #flowControls .stepIndicator .icon,
 #addResource_query_step3 #flowControls .stepIndicator .icon {
-    top:-4px
+    top: 4px
 }
 
 #addResource_analysisConnection div.title label.wrap {
-    color:inherit;
+    color: inherit;
 }
 
 #stepDisplay fieldset.row.oneColumn div.header {
-    overflow:hidden;
+    overflow: hidden;
+    border-bottom: 1px solid #d5d5d5;
 }
 
 #stepDisplay fieldset.row.oneColumn div.title {
-    float:left !important;
+    float: left !important;
 }
 
 #stepDisplay fieldset.row.oneColumn label.control.inline {
-    float:left;
+    float: left;
 }
 
 /* #addResource_dataSource_federated */
 
 #dataSourcesSelector {
-    position:relative;
-    min-width:760px;
+    position: relative;
+    min-width: 760px;
 }
 
 #selectedDataSources {
@@ -538,7 +963,7 @@ text-align:right;
 }
 
 #selectedDataSources label {
-    padding-bottom:16px \9; /* for IE8 and 9 */
+    padding-bottom: 16px \9; /* for IE8 and 9 */
 }
 
 @media screen and (-webkit-min-device-pixel-ratio:0) {
@@ -575,20 +1000,29 @@ x:-o-prefocus, #selectedDataSources label {
 
 #selectedDataSourcesHeader {
     border-top:1px solid #FFFFFF;
-    background-color: #E1E9F3;
-    background-image: -moz-linear-gradient(#E1E9F3, #D4DEE9) repeat scroll 0 0 transparent; /* Firefox 3.6-15 */
-    background-image: -webkit-gradient(linear, left top, left bottom, from(#E1E9F3), to(#D4DEE9)); /* Safari 4+, Chrome */
-    background-image: -webkit-linear-gradient(top, #E1E9F3, #D4DEE9); /* Chrome 10+, Safari 5.1+, iOS 5+ */
-    background-image: -o-linear-gradient(top, #E1E9F3, #D4DEE9); /* Opera 11.10-12.00 */
-    background-image: linear-gradient(to bottom, #E1E9F3, #D4DEE9); /* Firefox 16+, IE10, Opera 12.50+ */
+    background-color: #edf2f8;
 }
 
 
-#selectedDataSourcesHeader .column.two,
-#selectedSubDataSourcesList  .column.two {
-    border-left:2px solid #F0F1FA;
-    padding-left:6px;
+#selectedDataSourcesHeader .column,
+#selectedSubDataSourcesList .column {
+    padding: 2px 6px;
 }
+
+/* CHROME AND SAFARI ONLY */
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+    #selectedDataSourcesHeader .column,
+	#selectedSubDataSourcesList .column.one {
+		top: 1px;
+	}
+}
+
+
+/*
+#selectedDataSourcesHeader .wrap > .column {
+	top: 2px;
+}
+*/
 
 #selectedSubDataSourcesList .column.two {
     float:inherit;
@@ -643,34 +1077,34 @@ x:-o-prefocus, #selectedDataSources label {
     line-height:24px;
 }
 
+#selectedSubDataSourcesList .dataSourceName {
+	display: inline-block;
+	height: 100%
+	line-height: 24px;
+}
+
 
 
 /*
  * From: dashboardDesigner.css
  */
-#dashboardDesigner .primary.column>.content>.body {
+#dashboardDesigner .primary.column > .content > .body {
     background: url("images/grid_20x20_bkgd.png") repeat scroll -10px -10px #F6F9F9;
 }
 
-#dashboardDesigner .list.collapsible.folders .leaf>.wrap>.icon {
+#dashboardDesigner .list.collapsible.folders .leaf > .wrap > .icon {
     display: none;
 }
 
-#dashboardDesigner .list.collapsible.folders .leaf>.wrap {
+#dashboardDesigner .list.collapsible.folders .leaf > .wrap {
     margin-top:1px;
     margin-left:2px;
-}
-
-#dashboardDesigner .control.select.multiple {
-    min-height: 60px;
 }
 
 #dashboardDesigner fieldset.control {
     width:100%;
 }
 
-#dashboardDesigner .control.select.multiple a,
-#dashboardViewer .control.select.multiple a,
 #dashboardDesigner fieldset.control a,
 #dashboardViewer fieldset.control a {
     display: none;
@@ -681,7 +1115,7 @@ x:-o-prefocus, #selectedDataSources label {
     font-size:11px;
     font-weight:normal;
     font-family: Verdana, Arial, Helvetica, sans-serif;
-} 
+}
 
 
 #dashboardViewerFrame {
@@ -741,14 +1175,14 @@ x:-o-prefocus, #selectedDataSources label {
     height:auto;
 }
 
-#sizeGuide>.label {
+#sizeGuide > .label {
     position: absolute;
     right:20px;
     bottom:2px;
     display: block;
 }
 
-#sizeGuide.proportional>.label {
+#sizeGuide.proportional > .label {
     display: none;
 }
 
@@ -789,7 +1223,7 @@ x:-o-prefocus, #selectedDataSources label {
     z-index: 2;
 }
 
-.componentContainer.control>.sizer {
+.componentContainer.control > .sizer {
     display:none;
 }
 
@@ -846,13 +1280,13 @@ x:-o-prefocus, #selectedDataSources label {
     margin-bottom:5px;
 }
 
-.componentContainer.control.displayText>.edit,
-.componentContainer.control.displayText.editMode>.read {
+.componentContainer.control.displayText > .edit,
+.componentContainer.control.displayText.editMode > .read {
     display: none;
 }
 
-.componentContainer.control.displayText>.read,
-.componentContainer.control.displayText.editMode>.edit {
+.componentContainer.control.displayText > .read,
+.componentContainer.control.displayText.editMode > .edit {
     display: block;
     color:#000;
 }
@@ -861,8 +1295,8 @@ x:-o-prefocus, #selectedDataSources label {
     padding:2px 5px;
 }
 
-.componentContainer.control.displayText>.edit,
-.componentContainer.control.displayText>.read {
+.componentContainer.control.displayText > .edit,
+.componentContainer.control.displayText > .read {
     width:100%;
     height: 100%;
     border: none;
@@ -870,7 +1304,7 @@ x:-o-prefocus, #selectedDataSources label {
     text-align: center;
 }
 
-.componentContainer.control.displayText>.edit {
+.componentContainer.control.displayText > .edit {
     text-align:left;
 }
 
@@ -882,7 +1316,7 @@ x:-o-prefocus, #selectedDataSources label {
     height:5em;
 }
 
-.componentContainer.control>.list>.leaf {
+.componentContainer.control > .list > .leaf {
     margin:0;
 }
 
@@ -919,7 +1353,7 @@ x:-o-prefocus, #selectedDataSources label {
     border:1px solid #333;
 }
 
-.componentContainer>.overlay.button {
+.componentContainer > .overlay.button {
     border:7px solid transparent;
     bottom:0;
     left:0;
@@ -930,21 +1364,21 @@ x:-o-prefocus, #selectedDataSources label {
     z-index:3;
 }
 
-.componentContainer.iframe>.overlay.button {
+.componentContainer.iframe > .overlay.button {
     z-index:100;
 }
 
-.componentContainer>.overlay.pressed,
-.componentContainer>.overlay.over {
+.componentContainer > .overlay.pressed,
+.componentContainer > .overlay.over {
     border-color:#217EB5;
 }
 
-.componentContainer>.overlay.pressed,
-.componentContainer.selected>.overlay {
+.componentContainer > .overlay.pressed,
+.componentContainer.selected > .overlay {
     opacity:1;
 }
 
-.componentContainer.selected>.overlay.button {
+.componentContainer.selected > .overlay.button {
 	border:2px dashed #217EB5;
 	cursor:move;
 	margin:-7px;
@@ -958,11 +1392,7 @@ x:-o-prefocus, #selectedDataSources label {
 	z-index: 0;
 }
 
-#dashboardControlsPlaceHolder .componentContainer.select.multiple > .overlay.button {
-    bottom:-31px;
-}
-
-.componentContainer>.sizer {
+.componentContainer > .sizer {
     background-color:#217EB5;
     bottom:-11px;
     display:none;
@@ -972,31 +1402,27 @@ x:-o-prefocus, #selectedDataSources label {
     width:10px;
 }
 
-#dashboardControlsPlaceHolder .componentContainer.select.multiple>.sizer {
-	bottom:-41px;
-}
-
-.componentContainer.selected>.sizer,
-.componentContainer.control.label.selected>.sizer,
-.componentContainer.control.free.selected>.sizer {
+.componentContainer.selected > .sizer,
+.componentContainer.control.label.selected > .sizer,
+.componentContainer.control.free.selected > .sizer {
     display:block;
     z-index: 21;
 }
 
-.componentContainer>.sizer.horizontal {
+.componentContainer > .sizer.horizontal {
     bottom:50%;
     margin-bottom:-5px
 }
 
-.componentContainer>.sizer.vertical {
+.componentContainer > .sizer.vertical {
     right:50%;
     margin-right:-5px;
 }
 
-.componentContainer.selected.control.select.multiple>.sizer.vertical,
-.componentContainer.selected.control.picker>.sizer.horizontal,
-.componentContainer.selected.control.text.label>.sizer.horizontal,
-.componentContainer.selected.control.text.free>.diagonal.sizer {
+.componentContainer.selected.control.select.multiple > .sizer.vertical,
+.componentContainer.selected.control.picker > .sizer.horizontal,
+.componentContainer.selected.control.text.label > .sizer.horizontal,
+.componentContainer.selected.control.text.free > .diagonal.sizer {
     display:block;
 }
 
@@ -1049,8 +1475,8 @@ x:-o-prefocus, #selectedDataSources label {
 /* dashboardViewer */
 #dashboardViewer #marquee,
 #dashboardViewer #framePlaceholder,
-#dashboardViewer .componentContainer>.sizer,
-#dashboardViewer .componentContainer>.overlay,
+#dashboardViewer .componentContainer > .sizer,
+#dashboardViewer .componentContainer > .overlay,
 #dashboardViewer #customURL {
     display:none;
 }
@@ -1082,7 +1508,7 @@ x:-o-prefocus, #selectedDataSources label {
 
 #dashboardViewer fieldset.control {width:100%;}
 
-.componentContainer.iframe>.floatingMenu {
+.componentContainer.iframe > .floatingMenu {
     margin:0;
     border: 1px solid #999;
     background: none;
@@ -1101,11 +1527,11 @@ x:-o-prefocus, #selectedDataSources label {
     *height:30px; /* IE7 */
 }
 
-.componentContainer.iframe.over>.floatingMenu {
+.componentContainer.iframe.over > .floatingMenu {
     display:block;
 }
 
-.componentContainer.iframe>.floatingMenu>.button {
+.componentContainer.iframe > .floatingMenu > .button {
     text-indent: -5000px;
     padding: 0;
     margin-right: 3px;
@@ -1113,46 +1539,46 @@ x:-o-prefocus, #selectedDataSources label {
     *margin:0 5px; /* IE7 */
 }
 
-.componentContainer.iframe>.floatingMenu>.button>.wrap {
+.componentContainer.iframe > .floatingMenu > .button > .wrap {
     padding: 0;
     line-height: normal;
     height: 22px;
     width: 22px;
 }
 
-.componentContainer.iframe>.floatingMenu>.button>.wrap>.icon {
+.componentContainer.iframe > .floatingMenu > .button > .wrap > .icon {
     background-image: url("images/floatingMenu_sprite.png");
     background-repeat: no-repeat;
     height: 22px;
     width: 22px;
 }
 
-.componentContainer.iframe>.floatingMenu>.button,
-.componentContainer.iframe>.floatingMenu>.button>.wrap {
+.componentContainer.iframe > .floatingMenu > .button,
+.componentContainer.iframe > .floatingMenu > .button > .wrap {
     background:none;
 }
 
-.componentContainer.iframe>.floatingMenu>.button.open>.wrap>.icon {
+.componentContainer.iframe > .floatingMenu > .button.open > .wrap > .icon {
     background-position: left -136px;
 }
 
-.componentContainer.iframe>.floatingMenu>.button.open.over>.wrap>.icon {
+.componentContainer.iframe > .floatingMenu > .button.open.over > .wrap > .icon {
     background-position: left -108px;
 }
 
-.componentContainer.iframe>.floatingMenu>.button.open.pressed>.wrap>.icon {
+.componentContainer.iframe > .floatingMenu > .button.open.pressed > .wrap > .icon {
     background-position: left -80px;
 }
 
-.componentContainer.iframe>.floatingMenu>.button.refresh>.wrap>.icon {
+.componentContainer.iframe > .floatingMenu > .button.refresh > .wrap > .icon {
     background-position: -1px -53px;
 }
 
-.componentContainer.iframe>.floatingMenu>.button.refresh.over>.wrap>.icon {
+.componentContainer.iframe > .floatingMenu > .button.refresh.over > .wrap > .icon {
     background-position: -1px -25px;
 }
 
-.componentContainer.iframe>.floatingMenu>.button.refresh.pressed>.wrap>.icon {
+.componentContainer.iframe > .floatingMenu > .button.refresh.pressed > .wrap > .icon {
     background-position: -1px 3px;
 }
 
@@ -1205,13 +1631,14 @@ x:-o-prefocus, #selectedDataSources label {
 }
 
 #dataChooserSource .sourceDialogNew {
-    min-width: 450px;
-    min-height: 510px;
-    height: 510px;
+    height: 500px;
     width: 450px;
+    min-width: 450px;
+    min-height: 400px;
 }
 
 #dataChooserSource .sourceDialogNew .treeBox {
+	height: 100% !important;
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     -khtml-user-select: none;
@@ -1260,10 +1687,16 @@ x:-o-prefocus, #selectedDataSources label {
 /* #dataChooserDisplay */
 
 #dataChooserDisplay #listMode {
-    margin:10px 1% 0 auto;
-    position:absolute;
-    right:0;
-    top:0;
+    margin: 0;
+    padding-top: 7px;
+    position: absolute;
+    	right: 0;
+		top: 0;
+}
+
+#dataChooserDisplay #stepDisplay .column.primary .header,
+#dataChooserDisplay #stepDisplay .column.secondary .header {
+	border-bottom: 1px solid #fff;
 }
 
 #dataChooserDisplay .list.tabular.twoColumn.hideRoot {
@@ -1334,17 +1767,26 @@ and (orientation:landscape) {
 }
 
 #dataChooserPreFilters #values {
-    margin-bottom:0;
-    padding-top:1px;
-    *padding-top:-1px; /* IE7 */
+	box-sizing: border-box;
+    margin-bottom: 0;
+   /*  padding-top: 1px; */ /* DELETE IF NO PROBLEMS */
 }
 
-#dataChooserPreFilters #values>.control.picker>.button.picker {
-    margin-bottom:0;
+#dataChooserPreFilters #values > .availableValues > .wrap {
+	margin-top: 1px;
+	margin-bottom: 3px;
 }
 
+#dataChooserPreFilters #values > .selectedValues > .wrap {
+	margin-top: 1px;
+	margin-left: 6px;
+}
 
-#dataChooserPreFilters #values>.control.picker>input {
+#dataChooserPreFilters #values > .control.picker > .button.picker {
+    margin-bottom: 0;
+}
+
+#dataChooserPreFilters #values > .control.picker>input {
     margin-bottom:0;
     *margin-right:2px; /* IE7 */
     *margin-top:3px; /* IE7 */
@@ -1353,7 +1795,7 @@ and (orientation:landscape) {
 }
 
 #dataChooserPreFilters .column.two.pickWells {
-    float:none;
+    /* float:none; */ /* DELETE IF NO PROBLEMS */ 
 }
 
 #dataChooserPreFilters .button.minimize {
@@ -1361,8 +1803,9 @@ and (orientation:landscape) {
 }
 
 #dataChooserPreFilters #mvSearchInput {
-    margin-left:3px;
-    width:150px;
+	height: 20px;
+    margin-left: 3px;
+    width: 150px;
 }
 
 #dataChooserPreFilters .list.filters > .leaf.editMode {
@@ -1370,8 +1813,8 @@ and (orientation:landscape) {
 }
 
 #dataChooserPreFilters .control.pickWells > .availableValues>select {
-    *height:110px; /* IE7 */
-    height:110px \9; /* IE8 and IE9 */
+    *height: 110px; /* IE7 */
+    height: 110px;
 }
 
 
@@ -1386,8 +1829,16 @@ and (orientation:landscape) {
     *left:0; /* IE7 */
     *top:13px; /* IE7 */
     *height:140px; /* IE7 */
-    height:135px \9; /* IE8 and IE9 */
-    margin-left:6px
+    height: 135px;
+    overflow-y: auto;
+    margin-left: 6px
+}
+
+/* targets Chrome and Safari only */
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+	#dataChooserPreFilters .control.pickWells > .selectedValues>select {
+		top: 18px;
+	}
 }
 
 #dataChooserPreFilters .control.inline>select {
@@ -1400,12 +1851,75 @@ and (orientation:landscape) {
 #home_user #outerFrame #dashboardViewer .body .body {
     overflow:auto;
 }
-/*
- * From: designer.css
- */
 
-#adhocToolbar > .buttonSet {
+
+/* Ad Hoc Designer */
+
+#designer .toolbar {
+	border-top: 1px solid #fff;
+}
+
+#designer .toolbar > .buttonSet {
     width:800px;
+    
+    height: 100%; /* NEW */
+    margin: 0; /* NEW */
+}
+
+#designer .toolbar .button.capsule {
+	border: none;
+	height: 100%;
+	margin-top: 0;
+	margin-right: 2px;
+	margin-left: 2px;
+}
+
+#designer .toolbar > .list.buttonSet > .node {
+	border-right: 1px solid #cdcdcd;
+	border-left: 1px solid #fff;
+}
+
+#designer .toolbar > .list.buttonSet > .node > .list.buttonSet.first {
+	border-right: 1px solid #cdcdcd;
+} /* NEW */
+
+#designer .toolbar > .list.buttonSet > .node > .list.buttonSet.last {
+	border-left: 1px solid #fff;
+} /* NEW */
+
+#designer .toolbar > .list.buttonSet > .node > .list.buttonSet.olapNo,
+#designer .toolbar > .list.buttonSet > .node > .list.buttonSet.olapYes {
+	margin: 0;
+	padding: 0 6px;
+}
+ /* NEW */
+
+#adhocToolbar > .list.buttonSet > .node:first-of-type,
+#designer .toolbar > .list.buttonSet > .node:first-of-type {
+	border-left: none;
+}
+
+#designer .toolbar .list.buttonSet > .node,
+#designer .toolbar .list.buttonSet > .leaf {
+	height: 100%;
+}
+
+#designer .toolbar > .list.buttonSet .list.buttonSet { /* NEW */
+	height: 100%;
+	margin-right: 6px;
+	margin-left: 6px;
+}
+
+#adhocToolbar > .list.buttonSet > .node.toolDroplist {
+	border:none;
+} /* added new classname .toolDroplist to adHocDesigner.jsp */
+
+#adhocToolbar > .list.buttonSet > .node.toolDroplist.first {
+	border-left: 1px solid #fff;
+} /* added new classname .toolDroplist to adHocDesigner.jsp */
+
+#adhocToolbar > .list.buttonSet > .node.toolDroplist > .dropList {
+	margin-left: 10px;
 }
 
 #menuList > li[disabled] > p {
@@ -1417,13 +1931,25 @@ and (orientation:landscape) {
     width: 300px;
 }
 
-#designer #canvas>.content>.header {
+#designer #fields > .content > .header {
+	height: 29px; /* needs to be 1px taller to line up with center panel header containing toolbar */
+}
+
+#designer #availableFields {
+	top: 29px; /* needs to match previous rule */
+}
+
+#designer #availableFields .content > .body {
+	background-color: #fafafa;
+}
+
+#designer #canvas > .content > .header {
     border-bottom:none;
     min-height: 28px;
     height:auto;
 }
 
-#designer .tokens>.measure .wrap {
+#designer .tokens > .measure .wrap {
     *color:#666666; /* IE7 */
 }
 
@@ -1432,7 +1958,7 @@ and (orientation:landscape) {
     border-top: 1px solid #e0e0e0;
 }
 
-#designer #fields.column.decorated.secondary>.content>.header>.title {
+#designer #fields.column.decorated.secondary > .content > .header > .title {
     overflow:hidden;
 }
 
@@ -1440,13 +1966,16 @@ and (orientation:landscape) {
     background-color: #C7B7E4;
 }
 
+/*
 #designer #availableFields .dimension .header {
     background-color: #C3DBBD;
 }
+*/ /* This gets overridden later in this file */
 
 #designer #availableFields .measure .header,
 #designer #availableFields .dimension .header {
-    border-bottom-color: #b7b7b7;
+	border-bottom: 1px solid #fff;
+    /* border-bottom-color: #b7b7b7; */
 }
 
 #adhoc #adhocCanvasContainer{
@@ -1507,7 +2036,6 @@ and (orientation:landscape) {
 }
 
 #designer #mainTableContainer {
-    border-left:1px solid #e0e0e0;
     bottom:0;
     left:0;
     right:0;
@@ -1540,7 +2068,7 @@ and (max-device-width : 1024px) {
     }
 }
 
-#designer #canvas>.content.hasFooter>.header {
+#designer #canvas > .content.hasFooter > .header {
     height:auto;
 }
 
@@ -1711,7 +2239,7 @@ and (max-device-width : 1024px) {
 }
 
 /* Bug 29891 - Adhoc improvment: User not able create filter using drag and drop.
-.column.decorated>.content>.body>#filter-container {
+.column.decorated > .content > .body>#filter-container {
     height: 100%
 }
 */
@@ -1819,10 +2347,6 @@ and (max-device-width : 1024px) {
     background-position: 3px 3px;
 }
 
-#designer .toolbar #explorer .icon {
-    background-position: 3px 3px;
-}
-
 #designer .toolbar #save .icon {
     background-position: 2px -31px;
 }
@@ -1865,6 +2389,7 @@ and (max-device-width : 1024px) {
     left:3px;
 }
 
+#designer .toolbar #explorer .icon,
 #designer .toolbar #presentation.over .icon,
 #designer .toolbar #presentation.pressed .icon {
     background-position: -67px 3px;
@@ -1983,13 +2508,13 @@ and (max-device-width : 1024px) {
     border-bottom:1px solid #c5c5c5;
 }
 
-.displayManager .axis>.title {
+.displayManager .axis > .title {
     text-align: right;
     vertical-align: middle;
     white-space:nowrap;
 }
 
-.displayManager .axis>.slot {
+.displayManager .axis > .slot {
     display: table-cell;
     width: 100%;
     background-image: url("images/input_bkgd.png");
@@ -2009,14 +2534,14 @@ and (max-device-width : 1024px) {
 
 
 .tokens .button {
+    -moz-border-radius: 1px;
+    -webkit-border-radius: 1px;
+    border-radius: 1px;
     display: inline-block !important;
-    *display:inline !important; /* IE7 */
-    zoom:1; /* IE */;
+    *display:inline !important; /* IE7 */;
     margin: 2px;
-    -moz-border-radius: 3px;
-    -webkit-border-radius: 3px;
-    border-radius: 3px;
-    padding:2px 20px 2px 3px;
+    padding: 2px 20px 2px 3px;
+    zoom:1; /* IE */
 }
 
 .tokens .dimension .button {
@@ -2024,89 +2549,87 @@ and (max-device-width : 1024px) {
 }
 
 .tokens .measure .button {
-    *margin:1px 5px 0 0; /* IE7 */
+    *margin: 1px 5px 0 0; /* IE7 */
 }
 
 .tokens .level {
-    top:1px;
+    top: 1px;
 }
 
 .tokens .dimenzion .level, /* misspelling is intentional */
 .tokens .meazure .level {
-    top:0px;
+    top: 0px;
 }
 
-.tokens>.dimension,
-.tokens>.measure,
-.dimension>.levels,
-.measure>.members {
-    display:inline;
+.tokens > .dimension,
+.tokens > .measure,
+.dimension > .levels,
+.measure > .members {
+    display: inline;
 }
 
-.tokens>.dimension>.title,
-.tokens>.measure>.title {
-    display:none;
+.tokens > .dimension > .title,
+.tokens > .measure > .title {
+    display: none;
 }
 
-.tokens>.measure,
+.tokens > .measure,
 .dragging.dimension {
-    -moz-border-radius: 3px;
-    -webkit-border-radius: 3px;
-    border-radius: 3px;
     background: #E9D9FE;
+    -moz-border-radius: 1px;
+    -webkit-border-radius: 1px;
+    border-radius: 1px;
     margin-left: 2px;
     padding: 4px 3px 4px 2px;
-    top: 1px;
-    position: relative;
     *padding: 3px 3px 3px 2px; /* IE7 */
+    position: relative;
+    top: 1px;
 }
 
-.tokens>.measure {
-    zoom:1; /* IE */;
-    *margin-top:-2px; /* IE7 */
+.tokens > .measure {
+    *margin-top: -2px; /* IE7 */
+    zoom: 1; /* IE */;
 }
 
-.tokens>.measure>.handle {
+.tokens > .measure > .handle {
     background: url("images/lists_sprite.png") no-repeat 4px -1038px;
     *background: url("images/lists_sprite.png") no-repeat 4px -1040px; /* IE7 */
-    width:12px;
+    cursor: pointer;
     display: inline-block;
     position: relative;
-    cursor: pointer;
+    width:12px;
 }
 
-.measure>.members>.member,
+.measure > .members > .member,
 li.level.meazure, /* misspelling is intentional */
 #designer #availableFields .measure .header {
+   /*  background-color: #aedbf0; */
+    
     /* purple measures */
-    background-color: #d3c8eb; /* for non-css3 browsers */
-    background:-webkit-gradient(linear, left top, left bottom, from(#ded5f0), to(#d3c8eb)); /* for webkit browsers */
-    background:-moz-linear-gradient(top, #ded5f0, #d3c8eb); /* for firefox 3.6+ */
+    background-color: #d3c8eb;
 }
 
-.dimension>.levels>.level,
+.dimension > .levels > .level,
 #designer #availableFields .dimension .header,
 li.level.dimenzion, /* misspelling is intentional */
 .dragging.dimension {
+    /* background-color: #ced98b; */
+    
     /* blue dimensions */
-    background-color: #d5dee8; /* for non-css3 browsers */
-    background:-webkit-gradient(linear, left top, left bottom, from(#e1e9f3), to(#d5dee8)); /* for webkit browsers */
-    background:-moz-linear-gradient(top, #e1e9f3, #d5dee8); /* for firefox 3.6+ */
+    background-color: #d5dee8;
 }
 
-.dimension>.levels>.level.notShown,
-.dimension.odd>.levels>.level.notShown {
+.dimension > .levels > .level.notShown,
+.dimension.odd > .levels > .level.notShown {
     background-color: #ddd; /* for non-css3 browsers */
-    background:-webkit-gradient(linear, left top, left bottom, from(#eee), to(#ccc)); /* for webkit browsers */
-    background:-moz-linear-gradient(top, #eee, #ccc); /* for firefox 3.6+ */
 }
 
 li.dragging.dimension, li.dragging.measure {
+    -moz-border-radius: 1px;
+    -webkit-border-radius: 1px;
+    border-radius: 1px;
     list-style: none outside none;
     margin: 2px;
-    -moz-border-radius: 3px;
-    -webkit-border-radius: 3px;
-    border-radius: 3px;
     padding:2px 20px 2px 3px;
 }
 
@@ -2122,7 +2645,7 @@ li.dragging.measure {
     background:-moz-linear-gradient(top, #D0C3E8, #C2B2E3); /* for firefox 3.6+ */
 }
 
-.tokens .button>.wrap {
+.tokens .button > .wrap {
     display: inline !important;
     padding-left:12px;
     background-image: url("images/lists_sprite.png");
@@ -2131,14 +2654,14 @@ li.dragging.measure {
 }
 
 .wrap.dragging.dimension,
-.tokens .button.level>.wrap {
+.tokens .button.level > .wrap {
     background:none;
     padding-left:4px;
     *color:#666666 !important; /* IE7 */
 }
 
 .wrap.dragging.measure,
-.tokens .button.member>.wrap {
+.tokens .button.member > .wrap {
     background:none;
     padding-left:4px;
 }
@@ -2167,7 +2690,7 @@ li.dragging.measure {
     background:url("images/lists_sprite.png") 5px -1034px no-repeat, -moz-linear-gradient(top, #D0C3E8, #C2B2E3); /* for firefox 3.6+ */
 }
 
-.tokens .button>.icon {
+.tokens .button > .icon {
     background: url("images/lists_sprite.png") 3px -1095px no-repeat;
     left:auto;
     right: 4px;
@@ -2177,22 +2700,27 @@ li.dragging.measure {
 }
 
 /*TODO Needs review: Bug 27332 - UI: Improved Adhoc Flow - Can not change filter expression (Edit button is not visible) */
-#complexExpressionPod .header>.title {
+#complexExpressionPod .header > .title {
     float:none;
 }
 
-/* 
- * filter panel, ad hoc designer 
-*/
+/* filter panel, ad hoc designer */
 
+/*
 #filters .primary .list {
 	border-bottom: 1px solid #E0E0E0;
 }
+*/
 
 #filters.column.decorated > .content >  .body {
     left: 0;
-    position: absolute;
     overflow-x: hidden;
+    position: absolute;
+    top: 28px;
+}
+
+#filters > .content.hasFooter > .header {
+	height: 29px;
 }
 
 #filters .svList.disabled {
@@ -2207,54 +2735,41 @@ li.dragging.measure {
 
 #filter-container .header,
 #expression-container .header {
+    background-color: #d5dee8;
+    /* border-bottom:1px solid #D5DEE8; */
+    height: 28px;
     overflow: hidden;
-    background: #d4dee9; /*fallback for non-CSS3 browsers*/
-    background: -webkit-linear-gradient(#e1e9f3, #d4dee9); /*new webkit*/
-    background: -moz-linear-gradient(#e1e9f3, #d4dee9); /*mozilla*/
-    background: -ms-linear-gradient(#e1e9f3, #d4dee9); /*IE10*/
-    background: -o-linear-gradient(#e1e9f3, #d4dee9); /*opera 11.10+*/
-    background: linear-gradient(#e1e9f3, #d4dee9); /*future CSS3 browsers*/
-    border-bottom:1px solid #D5DEE8;
-    height:24px;
-    min-height:24px;
 }
 
 #expression-container .header {
-    background: #e1e9f3; /*fallback for non-CSS3 browsers*/
-    background: -webkit-linear-gradient(#DED5F0, #D3C8EB); /*new webkit*/
-    background: -moz-linear-gradient(#DED5F0, #D3C8EB); /*mozilla*/
-    background: -ms-linear-gradient(#DED5F0, #D3C8EB); /*IE10*/
-    background: -o-linear-gradient(#DED5F0, #D3C8EB); /*opera 11.10+*/
-    background: linear-gradient(#DED5F0, #D3C8EB); /*future CSS3 browsers*/
+    background: #d3c8eb;
     border-bottom-color: #B7B7B7;
 }
 
 #filter-container .title,
 #expression-container .title {
-    float:none;
-    position:relative;
-    white-space:nowrap;
+    float: none;
+    font-size: 11px;
+    line-height: 29px;
     max-width: 100%;
     margin-left: 0;
     margin-right: 0;
     padding-left: 0;
     padding-right: 0;
+    position: relative;
+    white-space: nowrap;
 }
 
 #filter-container .filterName,
 #expression-container .filterName {
-    font-weight:bold;
-
-    padding-left: 20px;
-    display:inline-block;
-    overflow:hidden;
-    text-overflow:ellipsis;
-
-    width:40%;
-    height:24px;
-    line-height:24px;
-
+    display: inline-block;
     float: left;
+    font-size: 12px;
+    overflow: hidden;
+    padding-left: 20px;
+    text-overflow: ellipsis;
+    width: 40%;
+
 }
 
 #expression-container .filterName {
@@ -2262,96 +2777,79 @@ li.dragging.measure {
 }
 
 #filter-container .operator {
-    display:inline-block;
-    white-space:nowrap;
-    vertical-align: top;
-    height:24px;
-    line-height:24px;
-    padding-right:12px;
-    position:relative;
-    font-weight: normal;
+    display: inline-block;
     float: right;
+    font-weight: normal;
     margin-right: 30px;
+    padding-right: 12px;
+    position: relative;
+    vertical-align: top;
+    white-space: nowrap;
 }
 
 #filter-container .button.operator > .icon {
     background-image: url("images/disclosure_indicators_sprite.png");
-    background-position: 0 -48px;
+    background-position: 0 -46px;
     background-repeat: no-repeat;
     width: 11px;
-    height:24px;
     position: absolute;
-    top: 0;
-    right: 0;
-    left:auto;
+        top: 0;
+        right: 0;
+        left:auto;
 }
 
 
 #filters .panel.filter .header .disclosure,
 #filters .panel.expression .header .disclosure {
-    height:24px;
-    width:20px;
-    top: 0;
-    left: 0;
+    background-position: 5px -922px;
     float:left;
+    height: 28px;
     position: absolute;
-
-    background-position: 2px -697px;
+		top: 0;
+		left: 0;
+    width: 20px;
 }
 
 #filters .panel.filter.minimized .header .disclosure,
 #filters .panel.expression.minimized .header .disclosure {
-    background-position: 2px -673px;
+    background-position: -15px -922px;
 }
 
 #filter-container .title .button.mutton  {  
-    background: #d4dee9; /*fallback for non-CSS3 browsers*/
-    background: -webkit-linear-gradient(#e1e9f3, #d4dee9); /*new webkit*/
-    background: -moz-linear-gradient(#e1e9f3, #d4dee9); /*mozilla*/
-    background: -ms-linear-gradient(#e1e9f3, #d4dee9); /*IE10*/
-    background: -o-linear-gradient(#e1e9f3, #d4dee9); /*opera 11.10+*/
-    background: linear-gradient(#e1e9f3, #d4dee9); /*future CSS3 browsers*/
-
-    position: absolute;
-    top:0;
-    right: 0;
-
-    height:24px;
-    width:20px;
+	height: 28px;
+	position: absolute;
+		top: 0;
+		right: 0;
+    width: 20px;
 }
 
 #filter-container .button.mutton > .icon {
     background: url("images/disclosure_indicators_sprite.png");
-    background-position: 0 -145px;
+    background-position: 0 -142px;
     background-repeat: no-repeat;
-
+    height: 28px;
     position: absolute;
-    top:0;
-    right: 0;
-
-    height:24px;
+    	top:0;
+		right: 0;
     width:20px;
 
 }
 
 #filter-container .sSelect-input {
-	margin-top:0px;
+	margin-top: 0px;
 }
 
-#filter-container .pane.filter .control.text,
-#filter-container .pane.filter .control.picker {
+#filter-container .control.text,
+#filter-container .control.picker {
 	margin-bottom:0;
-    -moz-box-sizing: border-box;
-    -ms-box-sizing: border-box;
-    -webkit-box-sizing: border-box;
-    -khtml-box-sizing: border-box;
-    box-sizing: border-box;
 }
 
+/*
 #filter-container .pane.filter .input.text {
-	width:auto;
-	padding-right:9px;
+	width: auto;
+	padding-right: 9px;
 }
+*/ /* IF 100% WIDTHS WORK, THIS CAN BE REMOVED */
 
 #filter-container .pane.filter .control.picker {
 	padding-right:23px;
@@ -2359,7 +2857,6 @@ li.dragging.measure {
 
 #filters > .content > .footer {
 	padding:0;
-    height: 37px;
 }
 
 #filters > .content > .body {
@@ -2383,6 +2880,7 @@ li.dragging.measure {
 }
 
 #filters .footer #applyFilter {
+	margin-top: 0;
     padding-left: 8px;
 }
 
@@ -2391,7 +2889,8 @@ li.dragging.measure {
 }
 
 #filter-container .panel.filter .values {
-    padding: 7px;
+    padding-top: 7px;
+    padding-bottom: 7px;
 }
 
 #filters .panel.filter .select {
@@ -2412,19 +2911,20 @@ li.dragging.measure {
 }
 
 #filters .panel.filter .button.picker {
-	vertical-align:middle;	
-	height:14px;
+	height: 26px;
+	vertical-align: top;
 }
 
 #filters .panel.filter .input input,
 #filters .panel.filter .picker input {
+    /* height: 22px; */
     margin: 0;
     width:100% !important;
 }
 
 .values.between > .compare {
-    text-align:center;
-    margin-bottom:6px;
+    margin: 4px 26px 5px 0;
+    text-align: center;
 }
 
 .values.between > .control{
@@ -2466,7 +2966,7 @@ li.dragging.measure {
     -webkit-box-sizing: border-box;
     -khtml-box-sizing: border-box;
     box-sizing: border-box;
-	width:100%;
+	width: 100%;
 }
 
 #expression-container .error > .message.warning,
@@ -2475,28 +2975,29 @@ li.dragging.measure {
 }
 
 #applyFilter.group {
-    margin:3px;
-    padding-left:0;
-    display:inline-block;
+    margin: 3px;
+    padding-left: 0;
+    display: inline-block;
 }
 
 #filterMessage {
     background-image: url("images/message_icons_sprite.png");
     background-repeat: no-repeat;
     display: inline-block;
-    width:60%;
+    width: 60%;
     vertical-align:top;
     line-height: 1.3em;
     padding-left: 20px;
-    margin-top:4px;
+    margin-top: 4px;
     white-space: normal;   
 }
 
 #filterMessage span {
-    height:32px;
+    height: 32px;
 }
 
 #filters #filter-container .leaf.filter {
+    border-top: 1px solid #fff;
     overflow: visible;
 }
 
@@ -2545,48 +3046,61 @@ li.dragging.measure {
     display: none;
 }
 
-#designerCache .list.tabular>.leaf.header>.wrap>.column {
+#designerCache .list.tabular > .leaf.header > .wrap > .column {
     line-height: 1em;
 }
 
-#designerCache .list.tabular>.leaf.header>.wrap>.column>p {
+#designerCache .list.tabular > .leaf.header > .wrap > .column > p {
     margin-bottom: 0;
 }
 
-#designerCache .list.fiveColumn .wrap>.column.one {
-    width:70px;
-}
-
-#designerCache .list.fiveColumn .wrap>.column.two {
-    width:65%;
-}
-
-#designerCache .list.fiveColumn .wrap>.column.three {
-    width:7%;
+#designerCache .list.fiveColumn .wrap > .column.one {
     text-align: center;
+    width: 70px;
 }
 
-#designerCache .list.fiveColumn .wrap>.column.four {
-    width:7%;
+#designerCache .list.fiveColumn .wrap > .column.two {
+    padding: 0 16px;
+    width: 62%;
+}
+
+#designerCache .list.fiveColumn .wrap > .column.three {
+    padding: 0 8px;
     text-align: center;
+    width: 9%;
 }
 
-#designerCache .list.fiveColumn .wrap>.column.five {
-    width:8%;
+#designerCache .list.fiveColumn .wrap > .column.four {
+    text-align: center;
+    width: 9%;
+}
+
+#designerCache .list.fiveColumn .wrap > .column.five {
+    width: 8%;
+}
+
+#designerCache .list.fiveColumn.tabular > .list.header div.wrap {
+	background-color: #edf2f8;
+}
+
+#designerCache .list.fiveColumn.tabular > .list div.wrap {
+	padding-top: 3px;
+	padding-bottom: 3px;
 }
 
 #designerCache .list.fiveColumn .query {
-    max-height:6em;
-    overflow:hidden;
-    white-space:pre;
-    margin-bottom:5px;
+    line-height: 1.182em;
+    margin-bottom: 5px;
+    max-height: 6em;
+    overflow: hidden;
+    white-space: pre;
 }
 
-#designerCache .list.tabular>.leaf.running {
+#designerCache .list.tabular > .leaf.running {
     font-style: italic;
 }
 
-#designerCache .list.tabular>.leaf.running>.wrap>.column.one {
+#designerCache .list.tabular > .leaf.running > .wrap > .column.one {
     background-image: url(images/list_node_animation.gif);
     background-repeat: no-repeat;
     height:16px;
@@ -2597,11 +3111,17 @@ li.dragging.measure {
  */
 /* #domainDesigner_tables */
 
-#domainDesigner_tables .inputs>.primary>.content>.body {
+#domainDesigner_tables .header > .launcher {
+	font-size: 12px;
+    line-height: 26px;
+    margin-top: 0;
+}
+
+#domainDesigner_tables .inputs > .primary > .content > .body {
     margin-top: 15px;
 }
 
-#domainDesigner_tables #destTablesColumn>.hasFooter>.footer>.control.checkBox {
+#domainDesigner_tables #destTablesColumn > .hasFooter > .footer > .control.checkBox {
     margin-top: 12px;
 }
 
@@ -2633,19 +3153,19 @@ li.dragging.measure {
     display: block;
 }
 
-#derivedTableDetailsPanel .footer>.button {
+#derivedTableDetailsPanel .footer > .button {
     margin-top:4px;
 }
 
 /* joins */
 
-#domainDesigner_joins .primaryLeft>.primary {
+#domainDesigner_joins .primaryLeft > .primary {
     margin-left:0;
     right:40%;
     min-width:400px;
 }
 
-#domainDesigner_joins .primaryLeft>.secondary {
+#domainDesigner_joins .primaryLeft > .secondary {
     width:40%;
 }
 
@@ -2653,7 +3173,7 @@ li.dragging.measure {
     min-width:300px;
 }
 
-#domainDesigner_joins .list.tabular.fourColumn>li>.wrap>.column.one {
+#domainDesigner_joins .list.tabular.fourColumn>li > .wrap > .column.one {
     width:30%;
     white-space: pre;
     line-height: 1.3em;
@@ -2663,15 +3183,15 @@ li.dragging.measure {
     word-wrap: break-word;
 }
 
-#domainDesigner_joins .list.tabular.fourColumn>li>.wrap.header>.column.one,
-#domainDesigner_joins .list.tabular.fourColumn>li>.wrap.header>.column.two {
+#domainDesigner_joins .list.tabular.fourColumn>li > .wrap.header > .column.one,
+#domainDesigner_joins .list.tabular.fourColumn>li > .wrap.header > .column.two {
 	white-space:normal;
 	line-height:2.5em;
 	margin-top:0;
 	margin-bottom:0;
 }
 
-#domainDesigner_joins .list.tabular.fourColumn>li>.wrap>.column.two {
+#domainDesigner_joins .list.tabular.fourColumn>li > .wrap > .column.two {
     width:29%;
     margin-left:1%;
     white-space: pre;
@@ -2682,59 +3202,60 @@ li.dragging.measure {
     word-wrap: break-word;
 }
 
-#domainDesigner_joins .list.tabular.fourColumn>li>.wrap>.column.three {
-    width:15%;
+#domainDesigner_joins .list.tabular.fourColumn>li > .wrap > .column.three {
+    width: 15%;
 }
 
-#domainDesigner_joins .list.tabular.fourColumn>li>.wrap>.column.four {
-    width:14%;
-    margin-left:1%;
+#domainDesigner_joins .list.tabular.fourColumn>li > .wrap > .column.four {
+    margin-left: 1%;
+    width: 14%;
 }
 
-#domainDesigner_joins .pickWells>.sizer.vertical {
+#domainDesigner_joins .pickWells > .sizer.vertical {
     display: block;
 }
 
 #domainDesigner_joins #pickWells {
-    top:0;
     overflow: hidden;
     position: absolute;
-    left:0;
-    right:0;
+	    top:0;
+	    left:0;
+	    right:0;
 }
 
 #domainDesigner_joins #joins {
-    top: 65%;
-    bottom:0;
     position: absolute;
-    left:0;
-    right:0;
+    	top: 65%;
+	    right:0;
+	    bottom:0;
+	    left:0;
 }
 
 #domainDesigner_joins #joinTabSet {
-    left:20px;
+	font-size: 12px;
     position:absolute;
-    top:8px;
+    	top: 6px;
+		left: 12px;
 }
 
 #domainDesigner_joins #joinsPanel {
-    margin:16px 16px 16px 16px;
-    width: 40%;
+    margin:	16px 16px 16px 16px;
     min-width: 300px;
+    width: 40%;
 }
 
 #domainDesigner_joins #joins .list.tabular.fourColumn {
-    min-width:400px;
+    min-width: 400px;
 }
 
 #domainDesigner_joins #joins .list.tabular.fourColumn .column.one,
 #domainDesigner_joins #joins .list.tabular.fourColumn .column.two {
-    width:37%;
+    width: 37%;
 }
 
 #domainDesigner_joins #joins .list.tabular.fourColumn .column.three,
 #domainDesigner_joins #joins .list.tabular.fourColumn .column.four {
-    width:11%;
+    width: 11%;
 }
 
 #domainDesigner_joins #joins .list.tabular.fourColumn .column.four {
@@ -2742,6 +3263,20 @@ li.dragging.measure {
 }
 
 /* #domainDesigner_calculatedFields */
+
+#domainDesigner_calculatedFields #calculatedFieldsPanel .control,
+#domainDesigner_calculatedFields #calculatedFieldsPanel .control textarea,
+#domainDesigner_calculatedFields #calculatedFieldsPanel .input input {
+	width: 100% \9; /* IE8 */
+}
+
+@media screen and (min-width:0\0) {  /* IE9 and above */
+	#domainDesigner_calculatedFields #calculatedFieldsPanel .control,
+	#domainDesigner_calculatedFields #calculatedFieldsPanel .control textarea,
+	#domainDesigner_calculatedFields #calculatedFieldsPanel .input input {
+		width: 100%;
+	}
+}
 
 #domainDesigner_calculatedFields #fields {
     margin:16px 0 16px 16px;
@@ -2778,6 +3313,13 @@ li.dragging.measure {
     width:auto;
 }
 
+/* targets Chrome and Safari only */
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+    #domainDesigner_filters #preFilters .panel.filter .select {
+        margin-bottom: 9px;
+    }
+}
+
 #domainDesigner_filters .dialog.inlay.filter > .content > .body > .column.two.pickWells .wrap {
 	left:auto;
 	position:relative;
@@ -2806,6 +3348,7 @@ li.dragging.measure {
 .availableValues.button {
     *height:102px !important;
     height:70% \9;
+    height: 71%;
     width:99%;
 }
 
@@ -2841,14 +3384,16 @@ li.dragging.measure {
 /* targets Chrome and Safari only */
 @media screen and (-webkit-min-device-pixel-ratio:0) {
 	#domainDesigner_filters .control.pickWells > .control.availableValues .availableValues.button {
-		top:45px;
-		bottom:6px;
+		top: 45px;
+		bottom: -9px;
+	    overflow: auto;
 	}
-	
+
 	#domainDesigner_filters #filtersListId #values label .selectedValues {
 	    height:auto;
-	    top:19px;
-	    bottom:6px;
+	    top: 19px;
+	    bottom: -9px;
+	    overflow: auto;
 	}
 }
 /* end Chrome and Safari styles */
@@ -2856,7 +3401,11 @@ li.dragging.measure {
 
 /* #domainDesigner_display */
 
-#domainDesigner_display #setsAndItems>.content>.body {
+#domainDesigner_display #properties > .content > .body {
+	padding: 0 8px; /* NEW */
+}
+
+#domainDesigner_display #setsAndItems > .content > .body {
     overflow: hidden;
 }
 
@@ -2864,38 +3413,47 @@ li.dragging.measure {
     margin:16px 16px 16px 30px;
 }
 
-#domainDesigner_display #setsAndItems>.content>.body>.moveButtons {
+#domainDesigner_display #setsAndItems > .content > .body > .moveButtons {
     padding-top:10px;
 }
 
-#domainDesigner_display #setsAndItems>.content>.body>.moveButtons>.toTop {
+#domainDesigner_display #setsAndItems > .content > .body > .moveButtons > .toTop {
     margin-top:0;
 }
 
-#domainDesigner_display #setsAndItems>.content>.body {
+#domainDesigner_display #setsAndItems > .content > .body {
     overflow: hidden;
     *margin-top:-1px; /* IE7 */
 }
 
-#domainDesigner_display #setsAndItems .footer>.button,
-#domainDesigner_display #properties .footer>.button {
+#domainDesigner_display #setsAndItems .footer > .button,
+#domainDesigner_display #properties .footer > .button {
     margin-top:4px;
 }
 
 .usedResources {
-    margin-top: 15px;
+	border: 1px solid #e3e3e3;
+    margin: 15px 4px;
+}
+
+.usedResources th {
+	background-color: #edf2f8;
+	border-bottom: 1px solid #e3e3e3;
+	padding: 6px;
+	text-align: left;
 }
 
 .usedResources td {
-    padding: 2px;
+	border-bottom: 1px solid #e3e3e3;
+    padding: 6px;
 }
 
 /*
  * From: home.css
  */
 
-#home_admin .column.home>.content>.body,
-#home_manage .column.home>.content>.body {
+#home_admin .column.home > .content > .body,
+#home_manage .column.home > .content > .body {
 	background-color:#fff;
 	background-image:none;
 }
@@ -2905,19 +3463,19 @@ li.dragging.measure {
     width:700px;
 }
 
-.home #viewReports>.icon {
+.home #viewReports > .icon {
     background-position: left -938px;
 }
 
-.home #createView>.icon {
+.home #createView > .icon {
     background-position: left -1395px;
 }
 
-.home #createReport>.icon {
+.home #createReport > .icon {
     background-position: left -1157px;
 }
 
-.home #manageServer>.icon {
+.home #manageServer > .icon {
     background-position: 5px -1649px;
 }
 
@@ -2989,236 +3547,20 @@ li.dragging.measure {
     border: none;
 }
 
-/*
- * From: login.css
- */
-#loginPage p.errorMessage {
-    white-space:normal;
-    padding-bottom:6px;
-    margin-bottom:0;
-}
 
-#loginPage #display {
-    overflow: hidden;
-    bottom:0;
-    top:0;
-    left:0;
-    right:0;
-}
 
-#loginPage .wrapper {
-    margin:0;
-    position: absolute;
-    bottom:4px;
-    top:4px;
-    left:4px;
-    right:4px;
-}
-
-#loginPage #loginForm {
-    border:1px solid #666;
-    position: absolute;
-    right:0;
-    top: 0;
-    bottom: 0;
-    background:#fff;
-    width:260px;
-}
-
-#loginPage .login {
-	position: relative;
-	width: 100%;
-	min-height:340px;
-	border:none;
-	margin:0px;
-	z-index: 0;
-}
-
-#loginPage .login .header {
-    background:url(images/column_header_bkgd.png) repeat-x #fff;
-    border-bottom: 1px solid #C5C5C5;
-}
-
-#loginPage .login .header>.title {
-    margin-left:10px;
-}
-
-#loginPage .login .footer {
-    padding:0 20px 20px 20px;
-    height:75px;
-    border-width:0;
-}
-
-#loginPage .login .footer {
-    border-width:0;
-}
-
-#loginPage #copy {
-    float: left;
-    background:#fff;
-    top:0;
-    left:0;
-    bottom:0;
-    right:268px;
-    position:absolute;
-    /* overrides to .info selector of old login page */
-    overflow-y:auto;
-    overflow-x:hidden;
-    margin:0;
-    border:1px solid #666;
-    border-radius: 0;
-    -moz-border-radius: 0;
-    -webkit-border-radius: 0;
-}
-
-#loginPage #welcome .text {
-	display: inline-block;
-	height: 42px;
-    vertical-align: top;
-    margin-right: 9px;
-}
-
-#loginPage #welcome .logo {
-	background:url(images/logo_welcome.png) no-repeat #fff 0px 5px;
-	display: inline-block;
-    text-indent: -5000px;
-	width: 314px;
-	height: 42px;
-}
-
-@media all and (-ms-high-contrast:none)
-     {
-     #loginPage #welcome .logo { background-position-y: 4px; } /* IE10 */
-     *::-ms-backdrop, #loginPage #welcome .logo { background-position-y: 4px; } /* IE11 */
-     }
-
-#copy .body {
-    overflow:hidden;
-}
-
-#copy .header, #copy .footer {
-    border:none;
-}
-
-#loginPage #buttons {
-    width:700px;
-    margin:auto;
-}
-
-#loginPage #buttons >.primary,
-#loginPage #buttons >.secondary {
-    float:left;
-    width:300px;
-    padding-left:25px;
-    padding-top:1px; /* For rendering in chrome */
-    position: relative;
-}
-
-#loginPage #rotating {
-    /* width:650px; */
-    width:750px;
-    margin:auto;
-}
-
-#loginPage #rotating >.primary,
-#loginPage #rotating >.secondary {
-    float:left;
-    padding-left:25px;
-    position: relative;
-}
-
-#loginPage #rotating >.primary {
-    width:400px;
-}
-
-#loginPage #rotating >.secondary {
-	width: 300px;
-}
-
-#loginPage #welcome {
-    height: 310px;
-    background-image: url("images/login_welcome_bkgd.jpg");
-    background-repeat: no-repeat;
-    background-position: center 70px;
-    margin-bottom: 15px;
-}
-
-#loginPage .sellPoint {
-    font-weight:bold;
-}
-
-#loginPage .community #welcome {
-    background-image: url("images/login_welcome_ce_bkgd.jpg");
-}
-
-#loginPage #welcome h1 {
-    font-size: 36px;
-    margin-bottom:0px;
-    margin-top:10px;
-    text-align: center;
-    font-weight: normal;
-    line-height: 36px;
-    height: 42px;
-}
-
-#loginPage #login h2 {
-    font-weight: normal;
-    margin-top:15px !important;
-}
-
-#loginPage #buttons {
-    padding-bottom: 10px;
-    border-bottom: 1px solid #e0e0e0;
-    margin-bottom: 15px;
-    overflow:hidden;
-}
-
-#loginPage #rotating {
-    margin-bottom: 25px;
-}
-
-#loginPage #rotating h2 {
-    font-weight:bold;
-}
-
-#loginPage .primaryNav,
-#loginPage #globalSearch,
-#loginPage #userID,
-#loginPage #main_logOut {
-    display: none;
-}
-
-#loginPage #help {
-    border: none;
-}
-
-#loginPage #loginForm legend {
-    width:220px;
-}
-
-#loginPage #changePassword {
-    margin-top:16px;
-}
-
-#loginForm > .dialog > .content > .body {
-    padding-bottom:12px;
-}
-
-#amazonLogo {
-    background: url("images/aws_logo.png") no-repeat;
-    background-size: 200px 90px;
-    height: 90px;
-    width: 200px;
-    margin-left:20px;
-}
-
-/*
- * manage_users_and_roles
- */
+/* manage_users_and_roles */
+ 
+/* this ruleset is for CE only */
 #manage_users .twoColumn.manager > .primary.column,
 #manage_roles .twoColumn.manager > .primary.column {
-    margin-left:5px;
-    margin-right:10px;
+    margin-left: 0;
+    margin-right: 1px;
+}
+
+#manage_users .twoColumn.manager .tertiary.column,
+#manage_roles .twoColumn.manager .tertiary.column {
+    border-left: 1px solid #e3e3e3;
 }
 
 #manage_roles #properties {
@@ -3259,11 +3601,13 @@ li.dragging.measure {
     display: none;
 }
 
-#propertiesButtons .button {
+/* #propertiesButtons .button {
     margin-top:4px;
-}
+} REDUNDANT */
 
-#manage_users #propertiesButtons {
+#manage_users #propertiesButtons,
+#manage_roles #propertiesButtons,
+#manage_orgs #propertiesButtons {
 	white-space:normal;
 }
 
@@ -3294,13 +3638,18 @@ li.dragging.measure {
 #properties #assignedView .searchLockup,
 #properties #assigned .searchLockup,
 #properties #available .searchLockup {
-    top:4px;
-    margin: 0 10px 0 0;
-    width:auto;
-    position: absolute;
-    left:10px;
-    right: 0;
+    margin: 0 3px 0 0;
     min-width: 0;
+    width: auto;
+    position: absolute;
+		top: 2px;
+		right: 0;
+		left: 3px;
+}
+
+#properties #assignedViewList .leaf > .wrap {
+	margin-right: 3px;
+	margin-left: 3px;
 }
 
 #properties #assignedView .searchLockup .button.searchClear,
@@ -3321,30 +3670,39 @@ li.dragging.measure {
 #properties #assignedView .searchLockup .button.searchClear.up,
 #properties #assigned .searchLockup .button.searchClear.up,
 #properties #available .searchLockup .button.searchClear.up {
-    background-position: 0 -202px;
+    background-position: -84px -28px;
     display: block;
 }
 
-#properties #assignedView .searchLockup>.wrap>input[type="text"],
-#properties #assigned .searchLockup>.wrap>input[type="text"],
-#properties #available .searchLockup>.wrap>input[type="text"] {
-    height:14px;
-    width:65%;
-    margin-left:3px;
+#properties #assignedView .searchLockup > .wrap>input[type="text"],
+#properties #assigned .searchLockup > .wrap>input[type="text"],
+#properties #available .searchLockup > .wrap>input[type="text"] {
+    height: 100%;
+    width: 65%;
+    margin-left: 3px;
+    padding-top: 0;
 }
 
-#properties #assignedView .searchLockup>.wrap>input[type="text"] {
+#properties #assignedView .searchLockup > .wrap>input[type="text"] {
     width:80%
 }
 
 #manage_roles #properties #attributes,
 #properties.editMode #editUsers {
     position: absolute;
-    top:115px;
-    left:0;
-    right:0;
-    bottom: 0;
+		top: 115px;
+		right: 8px;
+		bottom: 8px;
+		left: 8px;
     min-height: 250px;
+}
+
+#properties.editMode #editUsers #available {
+	margin: 0 26px 8px 0;
+}
+
+#properties.editMode #editUsers #assigned {
+	margin: 0 0 8px 26px;
 }
 
 #manage_roles #entitiesList .wrap .column.one {
@@ -3357,11 +3715,17 @@ li.dragging.measure {
     margin-top:4px;
 }
 
+/* START manage orgs, roles, users */
 
-#manage_users .toolbar>.buttonSet .node,
-#manage_orgs .toolbar>.buttonSet .node,
-#manage_roles .toolbar>.buttonSet .node {
-    margin-right:8px;
+#manage_orgs .toolbar .node > .list.buttonSet,
+#manage_roles .toolbar .node > .list.buttonSet {
+	margin-right: 0;
+}
+
+#manage_users .column.primary .footer,
+#manage_orgs .column.primary .footer,
+#manage_roles .column.primary .footer {
+	display: none;
 }
 
 #manage_users #availableList .icon.button,
@@ -3375,22 +3739,13 @@ li.dragging.measure {
 #manage_users #assignedList .wrap.button,
 #manage_roles #availableList .wrap.button,
 #manage_roles #assignedList .wrap.button {
-    padding-left:10px;
+    padding-left: 10px;
 }
 
-#manage_orgs #properties {min-width:240px;}
-#manage_users #properties {min-width:420px;}
-
-/* targets Chrome and Safari only */
-@media screen and (-webkit-min-device-pixel-ratio:0) {
-    #manage_orgs .toolbar>.buttonSet,
-    #manage_users .toolbar>.buttonSet,
-    #manage_roles .toolbar>.buttonSet {
-        margin-top:3px !important;
-    }
+#manage_orgs #properties,
+#manage_users #properties {
+	min-width: 420px;
 }
-/* end Chrome and Safari styles */
-
 
 /*
  * From: messageDetail.css
@@ -3468,71 +3823,146 @@ li.dragging.measure {
     bottom: 38px;
 }
 
-/*
- * nothingToDisplay
- */
-#nothingToDisplay.info>.content>.body>.message {
-    text-align:center;
-    margin:10px 0;
-    padding:28px 8px;
-    border:1px solid #D3D2D2;
-    background-color:#fff;
+
+/* nothingToDisplay */
+
+#nothingToDisplay.info > .content > .body > .message {
+    background-color: #fff;
+    border: 1px solid #D3D2D2;
+    margin: 10px 0;
+    padding: 28px 8px;
+    text-align: center;
 }
 
-/*
- * settings: olap, Ad Hoc, AWS, log
- */
+
+/* SERVER SETTINGS: OLAP, AD HOC, AWS, LOG, IMPORT, EXPORT */
+
+#settings .list.settings .column.simple.primary {
+	left: 4px;
+	width: 580px
+}
+
+#settings .list.settings .column.simple.secondary {
+	border-right: none;
+	width: auto;
+}
+
+#settings .pane > .content {
+	border-bottom: 1px solid #e3e3e3;
+}
+
+#settings .pane.settings .control.input.text > .wrap {
+	margin: 6px 0 0 8px;
+}
+ 
+ 
+#serverSettingsMenu .footer {
+	display: none;
+}
+
+#serverSettingsMenu .content.hasFooter .body {
+	bottom: 0;
+}
+
+#analysisOptions #settings > .content.hasFooter > .footer,
+#logSettings #settings > .content.hasFooter > .footer,
+#designerOptions #settings > .content.hasFooter > .footer,
+#awsOptions #settings > .content.hasFooter > .footer {
+	/* hide footer on select settings pages */
+	display: none;
+}
+
+#analysisOptions #settings > .content.hasFooter > .body,
+#logSettings #settings > .content.hasFooter > .body,
+#designerOptions #settings > .content.hasFooter > .body,
+#awsOptions #settings > .content.hasFooter > .body {
+	/* hide footer on select settings pages */
+	bottom: 0;
+}
+
 #analysisOptions .pane.settings .header,
 #designerOptions .pane.settings .header,
 #awsOptions .pane.settings .header {
+    display: inline-block;
     height: auto;
-    width: 90%;
+    width: 520px;
     margin-top: 8px;
-    display:inline-block;
 }
 
 #analysisOptions .pane.settings .header .title,
 #designerOptions .pane.settings .header .title,
 #awsOptions .pane.settings .header .title {
+    font-size: 11px;
+    font-weight: bold;
     line-height: 16px;
+    max-width: 100%;
+    white-space: normal;
+    width: 100%;
+}
+
+#awsOptions .pane.settings .control.checkBox {
+	margin-top: 6px;
 }
 
 #awsOptions .pane.settings .control.text input {
-    width:400px;
-    max-width:400px;
-    display:block;
+    margin-left: 8px;
+    max-width: 450px;
+    width: 450px;
 }
 
 #awsOptions .pane.settings .body {
-    padding-top:0px;
+    padding-top: 0px;
 }
 
-#awsOptions .pane.settings .control.text .wrap {
-    max-width:400px;
+#awsOptions #settings .list.settings .column.simple.secondary {
+	width: 60%
+}
+
+#awsOptions .pane.settings .control.input.text .wrap {
     line-height: 16px;
-    margin:0 4px 4px 0;
+    margin: 4px 4px 4px 8px;
+    max-width: 450px;
+}
+
+#awsOptions .list.settings .column.simple.primary {
+	margin-bottom: 6px;
+}
+
+#logSettings .list.threeColumn {
+	min-width: 800px;
 }
 
 #logSettings .list.threeColumn .wrap .column.one, 
 #logSettings .list.threeColumn .wrap .column.two {
+	display: inline-block;
     line-height: 1.6em;
     margin: 6px 16px 6px 0;
-    overflow: hidden;
     white-space: normal;
+    width: 40%;
     word-wrap: break-word;
+    
+    /* overflow: hidden; */ /* DELETE IF NO PROBLEMS, redundant to rule in lists.css */
+}
+
+#logSettings .list.threeColumn .wrap .column.three {
+	display: inline-block;
+	width: 15%;
 }
 
 #logSettings .list.threeColumn .wrap .column.three > select {
-	width:auto;
-} 
+	width: auto;
+}
 
-
-/*
- * importDataFile
- */
+/* importDataFile */
 
 #importDataFile #fileUploadForm {
     margin:24px;
+    width: 400px;
+}
+
+#importDataFile #uploadFile {
+    height: 22px; 
+    width: 100%;
 }
 
 #importDataFile .inputSet .leaf > .inputSet .leaf {
@@ -3540,12 +3970,14 @@ li.dragging.measure {
     padding: 3px 17px 0 17px;
 }
 
-/*
- * exportDataFile
- */
+/* exportDataFile */
 
 #exportDataFile .body div>fieldset {
     margin:24px;
+}
+
+#exportDataFile #filenameId {
+	width: 300px;
 }
 
 #selectRolesUsers {
@@ -3560,13 +3992,13 @@ li.dragging.measure {
 }
 
 #selectRolesUsers input[type=text] {
-    width:80%;
+    height: 20px;
+    width: 320px;
 }
 
 
-/*
- * reportOptions
- */
+
+/* REPORT OPTIONS */
 
 #reportOptions_edit #stepDisplay .row.inputs .group {
 	width:50%;
@@ -3577,12 +4009,12 @@ li.dragging.measure {
     overflow: hidden;
 }
 
-#reportOptions_edit #stepDisplay .column.primary .header>.title {
+#reportOptions_edit #stepDisplay .column.primary .header > .title {
     line-height: normal;
     height:auto;
 }
 
-#reportOptions_edit #stepDisplay .column.primary .header>.title>.path {
+#reportOptions_edit #stepDisplay .column.primary .header > .title > .path {
     display: block;
     margin-top: 3px;
 }
@@ -3591,15 +4023,25 @@ li.dragging.measure {
     margin-top:10px;
 }
 
-/*
- * From: reportViewer.css
- */
+
+
+/* REPORT VIEWER */
+
+#reportViewer .toolbar {
+	border-top:1px solid #fff;
+}
+
 #reportViewer .control.paging,
 #reportViewer .control.zoom,
 #reportViewer .control.search {
-    height: 28px;
+    height: 100%;
     margin: 0;
     width: auto;
+}
+
+#reportViewer .control.paging {
+	float: right;
+	margin-right: 12px;
 }
 
 #reportViewer .control.zoom {
@@ -3620,7 +4062,7 @@ li.dragging.measure {
 	margin-right:0
 }
 
-#reportViewer #reportViewFrame>.content>.header {
+#reportViewer #reportViewFrame > .content > .header {
     height:auto;
     border-bottom:none;
     zoom:1; /* IE */
@@ -3646,13 +4088,14 @@ li.dragging.measure {
 
 #reportViewer #zoom_value_button.over .icon,
 #reportViewer #zoom_value_button.pressed .icon {
-	background-position:4px -86px
+	background-position: 4px -86px
 }
 
 /* pagination and zoom controls containers */
 
 #reportViewer .control.paging .input,
 #reportViewer .control.zoom .input {
+    height: 100%;
     *top: -4px; /* IE7 */
     zoom: 1; /* IE */
 }
@@ -3668,9 +4111,9 @@ li.dragging.measure {
 /* pagination and zoom icon properties and positions */
 
 #reportViewer #pagination .action.square {
-    margin:0;
-    height:28px;
-    width:28px;
+    height: 100%;
+    margin: 0;
+    width: 28px;
 }
 
 #reportViewer #pagination .action.square.over,
@@ -3680,77 +4123,79 @@ li.dragging.measure {
     background:none;
 }
 
-#reportViewer #pagination .action.square>.wrap>.icon {
+#reportViewer #pagination .action.square > .wrap > .icon {
     height:28px;
     width:28px;
 }
 
-/* targets Chrome and Safari only */
-@media screen and (-webkit-min-device-pixel-ratio:0) {
-
-    #reportViewer .toolbar>.buttonSet {
-        margin-top:3px !important;
-    }
-}
-/* end Chrome and Safari styles */
-
-
 #reportViewer .toolbar #page_first .icon,
 #reportViewer .toolbar #page_first.over .icon {
-    background-position: 7px -98px;
+    background-position: 7px -99px;
 }
 
 #reportViewer .toolbar #page_prev .icon,
 #reportViewer .toolbar #page_prev.over .icon {
-    background-position: 7px -45px;
+    background-position: 7px -46px;
 }
 
 #reportViewer .toolbar #page_next .icon,
 #reportViewer .toolbar #page_next.over .icon {
-    background-position: 3px 8px;
+    background-position: 3px 7px;
 }
 
 #reportViewer .toolbar #page_last .icon,
 #reportViewer .toolbar #page_last.over .icon {
-    background-position: 5px -151px;
+    background-position: 5px -152px;
 }
 
 #reportViewer .toolbar #page_first.pressed .icon {
-    background-position: -47px -98px;
+    background-position: -47px -99px;
 }
 
 #reportViewer .toolbar #page_prev.pressed .icon {
-    background-position: -47px -45px;
+    background-position: -47px -46px;
 }
 
 #reportViewer .toolbar #page_next.pressed .icon {
-    background-position: -51px 8px;
+    background-position: -51px 7px;
 }
 
 #reportViewer .toolbar #page_last.pressed .icon{
-    background-position: -48px -151px;
+    background-position: -48px -152px;
 }
 
 #reportViewer .toolbar #page_first[disabled] .icon {
-    background-position: -88px -98px;
+    background-position: -88px -99px;
 }
 
 #reportViewer .toolbar #page_prev[disabled] .icon {
-    background-position: -88px -45px;
+    background-position: -88px -46px;
 }
 
 #reportViewer .toolbar #page_next[disabled] .icon {
-    background-position: -92px 8px;
+    background-position: -92px 7px;
 }
 
 #reportViewer .toolbar #page_last[disabled] .icon {
-    background-position: -90px -151px;
+    background-position: -90px -152px;
 }
 
-#reportViewer #viewerToolbar>.buttonSet {
-    float: right;
-    height:28px;
-    margin-right:10px;
+#reportViewer  .toolbar > .buttonSet {
+    /* float: right; */
+    float: left;
+    height: 27px; /* 1px shorter than height because of top white border */
+    margin-right: 10px;
+}
+
+#reportViewer .toolbar .button.capsule {
+	margin-right: 2px;
+	margin-left: 2px;
+}
+
+#reportViewer .toolbar > .list.buttonSet .list.buttonSet {
+    height: 100%;
+    margin-left: 4px;
+    margin-right: 4px;
 }
 
 #reportViewer .toolbar .button.disabled .icon,
@@ -3794,7 +4239,7 @@ li.dragging.measure {
 }
 
 #reportViewer .toolbar #bookmarksDialog .icon {
-    background-position: 3px -251px;
+    background-position: 4px -251px;
 }
 
 #reportViewer #asyncCancel {
@@ -3843,13 +4288,14 @@ li.dragging.measure {
 }
 
 #reportViewer .toolbar #ICDialog.over .icon,
-#reportViewer .toolbar #ICDialog.pressed .icon {
-    background-position: -72px -174px;
+#reportViewer .toolbar #ICDialog.pressed .icon,
+#reportViewer .toolbar #ICDialog.down .icon {
+    background-position: -71px -174px;
 }
 
 #reportViewer .toolbar #bookmarksDialog.over .icon,
 #reportViewer .toolbar #bookmarksDialog.pressed .icon {
-    background-position: -72px -251px;
+    background-position: -71px -251px;
 }
 
 /* disabled */
@@ -3881,35 +4327,93 @@ li.dragging.measure {
     background-image:none;
 }
 
+/*
+#reportViewer .toolbar .list.buttonSet > .list.buttonSet {
+	margin-right: 6px;
+	margin-left: 6px;
+}
+*/
+
+#reportViewer .toolbar .list.buttonSet > .list.buttonSet:first-of-type {
+	margin: 0;
+	border-right: 1px solid #cdcdcd;
+}
+
+#reportViewer .list.buttonSet > .node {
+	border-left: 1px solid #fff;
+	border-right: 1px solid #cdcdcd;
+}
+
+#reportViewer .list.buttonSet > .node.conditional {
+	border-right: none;
+}
+
+#reportViewer .list.buttonSet > .node.conditional > .list.buttonSet {
+	border: none;
+	position: relative;	
+}
+
+#reportViewer .list.buttonSet > .node.conditional.first {
+	border-left: none;
+}
+
+#reportViewer .list.buttonSet > .node.conditional.first > .list.buttonSet {
+	margin-left: 0;
+	margin-right: 0;
+}
+
+#reportViewer .list.buttonSet > .node.conditional #controls {
+	margin: 0 0 0 4px;
+}
+
+#reportViewer .list.buttonSet > .node.conditional #ICDialog {
+	margin-right: 4px;
+}
+
+
+#reportViewer .list.buttonSet > .node.conditional.second .buttonSet > .leaf {
+	margin-right: 6px;
+}
+
+#reportViewer .toolbar .button.capsule {
+	border: none;
+}
+
+#reportViewer .toolbar #back {
+	padding: 0 6px;
+}
+
+/*
 #reportViewer .toolbar button.capsule.text {
     margin-left:8px;
 }
+*/ /* REMOVE FOR AMBER 2 IF NO PROBLEMS */
 
 #reportViewer #dataRefreshButton {
-    height:21px;
-    width:26px;
-    margin-top:4px;
-    margin-left:10px;
+	border: none;
+	height: 28px;
+    width: 28px;
+    margin-left: 10px;
     *position:absolute; /* IE7 */
 }
 
 #reportViewer #dataRefreshButton .wrap {
-    background:none;
-    height:21px;
+    background: none;
+    height: 21px;
 }
 
 #reportViewer #dataRefreshButton .icon {
     background-image: url("images/viewer_toolbar_buttons_sprite.png");
-    background-position:-1px -216px;
-    width:26px;
+    background-position: 1px -216px;
+    width: 26px;
 }
 
 #reportViewer #dataRefreshButton.up.over .icon {
-    background-position:-38px -216px;
+    background-position: -36px -216px;
 }
 
 #reportViewer #dataRefreshButton.up.pressed .icon {
-    background-position:-76px -216px;
+    background-position: -74px -216px;
 }
 
 /*
@@ -3999,8 +4503,8 @@ and (max-device-width : 1024px) {
 }
 
 /* inputControls - savedValues display case */
-#reportViewer #inputControls.showingSubHeader>.content>.header>.sub.header,
-#reportViewer #inputControlsForm.showingSubHeader>.content>.header>.sub.header {
+#reportViewer #inputControls.showingSubHeader > .content > .header > .sub.header,
+#reportViewer #inputControlsForm.showingSubHeader > .content > .header > .sub.header {
     height:auto;
     padding: 2px 0px 0px 10px;
     border-bottom: 1px solid #E0E0E0;
@@ -4013,19 +4517,21 @@ and (max-device-width : 1024px) {
 }
 
 
-#reportViewer #inputControlsForm {}
+#reportViewer #inputControlsForm > .content > .body {
+    padding: 8px;
+}
 
 
 #reportViewer #inputControlsForm.minimized {
     min-width:0;
 }
 
-#reportViewer #inputControlsForm>.content>.footer>.button {
+#reportViewer #inputControlsForm > .content > .footer > .button {
     margin-top:4px;
 }
 
-#reportViewer #inputControls.showingSubHeader>.content>.body,
-#reportViewer #inputControlsForm.showingSubHeader>.content>.body {
+#reportViewer #inputControls.showingSubHeader > .content > .body,
+#reportViewer #inputControlsForm.showingSubHeader > .content > .body {
     margin-top: 51px;
 }
 
@@ -4044,6 +4550,14 @@ and (max-device-width : 1024px) {
     *width:98%;
     margin-left:0;
 }
+
+#reportViewer .saveAs > .content > .body .groupBox {
+    top: 170px;
+    right: 18px;
+    bottom: 12px;
+    left: 18px;
+}
+
 
 /* Inner pagination of report. Used always in dashboards and optional in view report */
 #innerPagination {
@@ -4099,21 +4613,45 @@ and (max-device-width : 1024px) {
     background-position: -15px -30px;
 }
 
-/*
- * From: repository.css
- */
+
+/* START Tabbed Reports overrides */
+#reportPartsContainer div.reportPart.active {
+	height: 23px !important;
+}
+
+div#reportPartsContainer div.reportPart {
+	border: none !important;
+	background-color: transparent !important;
+	min-width: 80px !important;
+}
+
+div#reportPartsContainer span {
+	line-height: 22px !important;
+	min-width: auto !important;
+	padding: 0 12px !important;
+}
+
+div#reportPartsContainer span {
+	font-weight: bold !important;
+}
+
+#reportPartsNavigation {
+	top: -3px !important;
+}
+/* END Tabbed Reports overrides */
+
+/* Repository */
+
 #repoBrowse #resultsContainer {
     z-index: 0;
 }
 
-#repoBrowse #results .toolbar {
-    border-top:none;
+#repoBrowse .toolbar .node > .list.buttonSet {
+	margin-right: 0;
 }
 
-@media screen and (-webkit-min-device-pixel-ratio:0) {
-    #repoBrowse #results .toolbar>.buttonSet {
-        margin-top:3px; /* Chrome and Safari */
-    }
+#repoBrowse #results .toolbar {
+    border-top:none;
 }
 
 #repoBrowse #results div.subheader {
@@ -4126,10 +4664,11 @@ and (max-device-width : 1024px) {
     min-width:0;
     zoom:1; /* IE */;
 }
+
 #repoBrowse .list.tabular.fourColumn {
     min-width:0;
     zoom:1; /* IE */;
-    position:relative;
+    /* position:relative; */ /* THIS CAUSES DISPLAY ISSUES IN CHROME */
 }
 
 #repoBrowse #filters,
@@ -4139,7 +4678,11 @@ and (max-device-width : 1024px) {
 }
 
 #resultsListHeader {
-    margin-top:0;
+    margin-top: 0;
+}
+
+#repoBrowse #resultsListHeader {
+    margin-top: 1px;
 }
 
 #repoBrowse #sortMode #relevance {
@@ -4151,13 +4694,13 @@ and (max-device-width : 1024px) {
     min-width: 500px !important;
 }
 
-#repoBrowse .column.primary>.content>.body {
-    margin-top:28px;
-    *margin-top:30px; /* IE7 */
+#repoBrowse .column.primary > .content > .body {
+    margin-top: 33px;
+    *margin-top: 30px; /* IE7 */
 }
 
-#repoBrowse .column.secondary>.content>.body {
-    top:27px;
+#repoBrowse .column.secondary > .content > .body {
+    top: 27px;
 }
 
 #repoBrowse .resourcePath {
@@ -4193,18 +4736,18 @@ and (max-device-width : 1024px) {
     color:#fff !important;
 }
 
-#resultsList div.resourceType {
+/* #resultsList div.resourceType {
     background:#fff;
-}
+} */ /* DELETE IF THERE ARE NO PROBLEMS */
 
-#resultsList li.resources div.wrap.over div.resourceType {
+/* #resultsList li.resources div.wrap.over div.resourceType {
     background:#efefef;
 }
 
 #resultsList li.selected > div.wrap > div.resourceType,
 #resultsList li.pressed > div.wrap > div.resourceType {
     background:#217eb5 !important;
-}
+} */ /* DELETE IF THERE ARE NO PROBLEMS */
 
 /* repoLibrary */
 #repoLibrary {
@@ -4222,15 +4765,15 @@ and (max-device-width : 1024px) {
     top:7px;
 }
 
-#repoLibrary .column.primary>.content>.subheader .toolbar {
+#repoLibrary .column.primary > .content > .subheader .toolbar {
     display: none;
 }
 
-#repoLibrary .column.primary>.content>.body.showingSubHeader {
+#repoLibrary .column.primary > .content > .body.showingSubHeader {
     margin-top:28px;
 }
 
-#repoLibrary .column.secondary>.content>.body {
+#repoLibrary .column.secondary > .content > .body {
     top:27px;
 }
 
@@ -4239,15 +4782,15 @@ and (max-device-width : 1024px) {
     overflow-y: hidden;
 }
 
-#repoSearch .column.primary>.content>.subheader .toolbar {
+#repoSearch .column.primary > .content > .subheader .toolbar {
     display: none;
 }
 
-#repoSearch .column.primary>.content>.body.showingSubHeader {
+#repoSearch .column.primary > .content > .body.showingSubHeader {
     margin-top:28px;
 }
 
-#repoSearch .column.secondary>.content>.body {
+#repoSearch .column.secondary > .content > .body {
     top:27px;
     bottom:0;
 }
@@ -4318,7 +4861,7 @@ and (orientation:portrait) {
     background-color: transparent;
 }
 
-#scheduler_editor > .content.hasFooter > .body { 
+#scheduler_editor > .content.hasFooter > .body {
 	top:66px;
 	bottom:38px;
 }
@@ -4326,26 +4869,26 @@ and (orientation:portrait) {
 
 /* START general rules for scheduler */
 #scheduler_jobSummary .saveAs {
-    height: 245px;
+    height: 250px;
 }
 
 #scheduler_jobSummary .saveAs .body {
-    top:30px;
-    padding-bottom:0;
+    top: 30px;
+    padding-bottom: 0;
 }
 
-/* applying the style below at the #scheduler_editor level 
+/* applying the style below at the #scheduler_editor level
 prevents the style from affecting the global search control */
 #schedulerTab-schedule .control,
 #schedulerTab-output .control,
 #schedulerTab-schedule .control.radio .datepicker,
 #schedulerTab-output .control.radio .datepicker {
-	margin-bottom:0;
-	margin-top:0;
+	margin-bottom: 0;
+	margin-top: 0;
 } 
 
 #scheduler_editor #stepDisplay { 
-    padding:24px 32px;
+    padding: 24px 32px;
 }
 
 #scheduler_editor .content .body .schedule_for {
@@ -4359,6 +4902,7 @@ prevents the style from affecting the global search control */
 }
 
 #scheduler_editor .content .body .sub.header .button.options {
+	height: 28px; /* NEW */
     top: 0;
     right: 0;
 }
@@ -4369,13 +4913,13 @@ prevents the style from affecting the global search control */
 
 #scheduler_editor .content .body [data-tab-current=parameters] .sub.header {
     display: block;
-    position:absolute;
-    left:0;
-    right:0;
-    margin:10px 0 0 16px;
+    margin: 10px 0 0 16px;
+    position: absolute;
+		left: 0;
+		right: 0;
 }
 
-#scheduler_editor #stepDisplay > fieldset > legend { 
+#scheduler_editor #stepDisplay > fieldset > legend {
     display: block;
     height: 24px;
     line-height: 24px;
@@ -4384,7 +4928,7 @@ prevents the style from affecting the global search control */
 }
 
 #scheduler_editor #stepDisplay > fieldset legend {
-	left:0;
+	left: 0;
 }
 
 /* END general rules for scheduler */
@@ -4394,7 +4938,7 @@ prevents the style from affecting the global search control */
 #scheduler_editor #timeZone select,
 #scheduler_editor #outputLocale select {
 	width:auto;
-	min-width:300px; 
+	min-width:300px;
 }
 
 #scheduler_editor input[type=text] {
@@ -4420,19 +4964,19 @@ prevents the style from affecting the global search control */
 
 #schedulerTab-schedule #recurrenceSelector select {
 	width:auto;
-	min-width:150px; 
+	min-width:150px;
 }
 
 #schedulerTab-schedule #simpleRecurrence > label,
 #schedulerTab-schedule #simpleRecurrenceInterval label {
-	width:60px; 
+	width:60px;
 }
 
 #schedulerTab-schedule #simpleRecurrenceInterval input[type=text] {
 	margin-top:5px;
 	margin-left:0;
 	padding:2px 3px;
-	width:60px; 
+	width:60px;
 }
 
 #schedulerTab-schedule #simpleRecurrenceInterval select {
@@ -4440,121 +4984,111 @@ prevents the style from affecting the global search control */
 	width:auto;
 	min-width:100px;
 	margin-left:12px;
-} 
+}
 
 #schedulerTab-schedule #fixedRepeat,
 #schedulerTab-schedule #timestampSequence {
-    top: 4px; 
+    top: 4px;
 }
 
 #schedulerTab-schedule #scheduleEndSimple .leaf {
-	margin-bottom:6px; 
+	margin-bottom:6px;
 }
 
 #schedulerTab-schedule #scheduleEndSimple legend {
-    margin-bottom:3px; 
+    margin-bottom:3px;
 }
 
 #schedulerTab-schedule #scheduleEndSimple .message.warning,
 #schedulerTab-schedule #jobCommon .message.warning {
-	margin-left:6px; 
+	margin-left:6px;
 }
 
 #schedulerTab-schedule #selectedMonths .message.warning,
 #schedulerTab-schedule #weekDays .message.warning {
-	margin-top:4px; 
+	margin-top:4px;
 }
 
 #schedulerTab-schedule #simpleRecurrenceInterval .message.warning {
     position: absolute;
-    margin-top:3px; 
+    margin-top:3px;
 }
 
 #schedulerTab-schedule #startOn .datepicker,
 #schedulerTab-schedule #calendarEnd .datepicker {
     width: 170px !important;
-    margin-bottom:3px; 
+    margin-bottom:3px;
 }
 
 #schedulerTab-schedule #selectedMonths > .control.select,
 #schedulerTab-schedule #weekDays > .control.select {
     position: relative;
-    left:20px; 
+    left:20px;
 }
 
-#schedulerTab-schedule #selectedMonths, 
+#schedulerTab-schedule #selectedMonths,
 #schedulerTab-schedule #weekDays {
     padding-right:20px;
     *width:200px; /* IE7 */
 }
 
-#schedulerTab-schedule #calendarRecurrence .list>.node {
+#schedulerTab-schedule #calendarRecurrence .list > .node {
     float: left;
-    clear: none; 
-} 
-
-#schedulerTab-schedule #calendarRecurrence .control.picker {
-    clear: both; 
+    clear: none;
 }
 
-#schedulerTab-schedule #calendarRecurrence .control.picker>.wrap {
+#schedulerTab-schedule #calendarRecurrence .control.picker {
+    clear: both;
+}
+
+#schedulerTab-schedule #calendarRecurrence .control.picker > .wrap {
     display: inline; 
 }
 
 #schedulerTab-schedule #calendarRecurrence .control.picker input {
-    width: auto; 
+    width: auto;
 }
 
 #schedulerTab-schedule #calendarRecurrence > .inputSet {
-    overflow:hidden  
+    overflow:hidden
 } /* this is only for giving layout to the inputSet container */
 
 #schedulerTab-schedule #calendarRecurrence .node {
     width:220px;
-    margin-right:12px; 
+    margin-right:12px;
 }
 
 #schedulerTab-schedule #calendarRecurrence .hint {
     white-space:normal;
-    line-height:1.182; 
+    line-height:1.182;
 }
 
 #schedulerTab-schedule #repeatTimes > .group legend {
-    margin-left:0; 
+    margin-left:0;
 }
 
 #schedulerTab-schedule #repeatTimes .leaf {
-    margin-bottom:8px; 
+    margin-bottom:8px;
 }
 
 #schedulerTab-schedule #repeatTimes input {
-    width:97%; 
+    width:97%;
 }
 
 #schedulerTab-schedule #days,
 #schedulerTab-schedule #repeatTimes .control.twoLine {
-    margin-left:12px; 
+    margin-left:12px;
 }
 
 #schedulerTab-schedule #theMonthDays {
     width:162px !important;
-    margin-top:0; 
+    margin-top:0;
 }
 
 #schedulerTab-schedule button.ui-datepicker-trigger {
-    /* position: relative; */
-    /* top: 7px;  causes issues in safari */
-    /* left: 2px;  causes issues in safari */
     top: 0px \9; /* IE8 and IE9 */
 }
 
-/* CHROME */
-@media screen and (-webkit-min-device-pixel-ratio:0) { 
-    #schedulerTab-schedule button.ui-datepicker-trigger {
-    	top:6px;
-    	vertical-align:top;
-    } 
-}
 
 #schedulerTab-schedule .warning.opened[data-field=ftpTest] {
     display: inline;
@@ -4562,7 +5096,7 @@ prevents the style from affecting the global search control */
 } /* ??? */
 
 #schedulerTab-schedule .control.select.multiple {
-    min-height: 64px; 
+    min-height: 64px;
 }
 
 #schedulerTab-schedule #startDateLabel {
@@ -4584,35 +5118,21 @@ prevents the style from affecting the global search control */
 }
 
 #schedulerTab-schedule .button.picker {
-
-    *background-position: 1px -581px; /* IE7 */
-    background-position: 0px -585px \9; /* IE8 and IE9 */
-    height:20px \9; /* IE8 and IE9 */
-    margin-bottom:-5px \9; /* IE8 and IE9 */
-}
-
-#schedulerTab-schedule .button.picker.over {
-    *background-position: 1px -618px; /* IE7 */
-    background-position: 0px -614px \9; /* IE8 and IE9 */
-}
-
-#schedulerTab-schedule .button.picker.pressed {
-    *background-position: 1px -653px; /* IE7 */
-    background-position: 0px -649px \9; /* IE8 and IE9 */
+    height: 27px \9; /* IE8 and IE9 */
 }
 
 #schedulerTab-schedule .control.inline.text .hint,
 #schedulerTab-schedule .control.inline.text .warning {
-	margin-left:6px; 
+	margin-left:6px;
 }
 
 #schedulerTab-schedule .holidayCalendar select {
-    width: 240px; 
+    width: 240px;
 }
 
 #schedulerTab-schedule .holidayCalendar.disabled select,
 #schedulerTab-schedule .holidayCalendar select.loading {
-    opacity: 0.5; 
+    opacity: 0.5;
 }
 
 #schedulerTab-schedule #startDate,
@@ -4620,7 +5140,7 @@ prevents the style from affecting the global search control */
 #schedulerTab-schedule #selectedMonths_radio,
 #schedulerTab-schedule #weekDays_radio,
 #schedulerTab-schedule #monthDays_radio {
-    top: 4px; 
+    top: 4px;
 }
 
 #schedulerTab-schedule #calendarRecurrence .warning.message {
@@ -4644,18 +5164,18 @@ prevents the style from affecting the global search control */
 
 /* START scheduler: output tab */
 #schedulerTab-output #outputFileOptions {
-    width: 500px; 
+    width: 500px;
 }
 
 #schedulerTab-output #repositoryOutput,
 #schedulerTab-output #fileSystemOutput {
-	width:400px; 
+	width:400px;
 	-moz-box-sizing: border-box;
 }
 
 #ftpServerOutput {
 	width:auto;
-	margin-top:20px; 
+	margin-top:20px;
 }
 
 #schedulerTab-output #outputFormat .list.inputSet {
@@ -4666,7 +5186,7 @@ prevents the style from affecting the global search control */
 	clear:none;
 	float:left;
 	margin-right:15px;
-	width:30%; 
+	width:30%;
 }
 
 #schedulerTab-output .control .message.warning {
@@ -4675,7 +5195,7 @@ prevents the style from affecting the global search control */
 
 #schedulerTab-output #fileHandling .control.twoLine label.wrap {
 	line-height:20px;
-	top:-2px; 
+	top:-2px;
 }
 
 #schedulerTab-output #fileHandling input[type=text]  {
@@ -4690,7 +5210,7 @@ prevents the style from affecting the global search control */
     margin-bottom: 10px;
     margin-top: 8px;
     margin-left:20px;
-}  
+}
 
 #schedulerTab-output #repositoryOutput input[type=text],
 #schedulerTab-output #fileSystemOutput input[type=text]  {
@@ -4698,14 +5218,14 @@ prevents the style from affecting the global search control */
 }
 
 #ftpServerOutput .list {
-	overflow:hidden; 
+	overflow:hidden;
 }
 
 #ftpServerOutput .leaf {
 	width:400px;
 	margin-right:24px;
     clear: none;
-    float: left;  
+    float: left;
 }
 
 #schedulerTab-output #testConnection {
@@ -4725,7 +5245,7 @@ prevents the style from affecting the global search control */
 
 
 /* START scheduler: notification tab */
-#schedulerTab-notifications #jobSuccess .group.first legend, 
+#schedulerTab-notifications #jobSuccess .group.first legend,
 #schedulerTab-notifications #jobNotification .group.first legend {
     margin-bottom: 18px;
 }
@@ -4814,25 +5334,25 @@ prevents the style from affecting the global search control */
 */
 
 .authorityPicker {
-    bottom: 0;
-    left: 0;
-    right: 0;
-    top: 46px;
-    position: absolute;
-    user-select: none;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
     background-image: url("images/input_bkgd.png");
     background-position: left top;
     background-repeat: repeat-x;
     border-color: #848484 #C1C1C1 #E1E1E1;
     border-style: solid;
     border-width: 0 1px 0;
+    position: absolute;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		top: 46px;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
 }
 
 
-.authorityPicker>.list{
+.authorityPicker > .list {
     overflow-y: auto;
     overflow-x:hidden;
     position: absolute;
@@ -4843,20 +5363,28 @@ prevents the style from affecting the global search control */
     cursor: default;
 }
 
-.authorityPicker>.list>.leaf {
+.authorityPicker > .list.disabled {
+    opacity: 1; 
+    /* this list is somehow getting a double-disabled effect; 
+       full opacity is required for item selections within 
+       this element to be visible */
+}
+
+.authorityPicker > .list > .leaf {
     padding:0;
     display:block;
     overflow:visible;
 }
 
-.authorityPicker>.list>.leaf div{
-    padding: 2px 6px 3px 6px;
-	line-height: 16px;
+.authorityPicker > .list > .leaf div {
+	box-sizing: content-box; /* needed for proper vertical spacing */
 	height: 16px;
-	*padding: 2px 6px;
+	line-height: 16px;
 	overflow: hidden;
-	white-space: nowrap;
+    padding: 2px 6px 3px 6px;
+	*padding: 2px 6px;
 	text-overflow: ellipsis;
+	white-space: nowrap;
 }
 
 .authorityPicker .highlighted {
@@ -4921,23 +5449,21 @@ prevents the style from affecting the global search control */
     text-align: center;
 }
 
-.notification.error>.message.warning,
-.notification.success>.message.warning {
+.notification.error > .message.warning,
+.notification.success > .message.warning {
     display: inline;
 }
 
 /*
     User attributes view
-    
+
 */
 
 .nothingToDisplay #attributesTab {
     display: none;
 }
 
-#attributesTab {
-    margin:-8px 20px 20px 20px;
-}
+
 
 #attributesTab.editMode {
     margin:0px;
@@ -5147,21 +5673,26 @@ textarea#errorReport {
     background-color: #EFEFEF;
 }
 
-/* New Home Page */
+
+/* HOME PAGE */
 
 .homeSidebar {
-    width:300px;
+    width:380px;
     float:left;
     margin: 24px;
 }
 
 .homeSidebar-title {
-    font-size:20px;
+	display:none;
+    /*
+	font-size:20px;
     font-weight:normal;
     line-height:1.15em;
     margin-bottom:12px;
     margin-left:6px;
+	*/
     /* color definition is in theme.css so element can remain themable */
+    /* this element should be removed from the markup */
 }
 
 .home,
@@ -5172,30 +5703,20 @@ textarea#errorReport {
 
 
 .homeMain {
-    position:absolute;
-    top:24px;
-    right:24px;
-    bottom:24px;
-    left:375px;
-    max-width:625px;
+    position: absolute;
+    	top: 24px;
+    	right: 0;
+    	bottom: 0;
+    	left: 455px;
+    max-width: 800px;
 }
 
 .homeAdmin {
-    position:relative;
-    margin:24px auto;
-    width:420px;
-    min-width:200px;
-}
-
-.homeAdmin,
-.homeAdmin * {
-    -moz-box-sizing: border-box;
-    -webkit-box-sizing: border-box;
-    box-sizing: border-box;
-}
-
-.homeAdmin .workflowsBlock {
-    margin-left:16px;
+    position: relative;
+    margin: 72px auto 0 auto;
+    max-width: 700px;
+    min-width: 550px;
+    width: auto;
 }
 
 .message-nothing-display{
@@ -5217,19 +5738,18 @@ textarea#errorReport {
 }
 
 .workflow {
-    position:relative;
-    display:inline-block;
-    vertical-align:top;
-    width:185px;
-    height:245px;
-    padding:0;
-    margin-right:14px;
-    margin-bottom:16px;
-    border:1px solid #cccccc;
+    position: relative;
+    display: inline-block;
+    vertical-align: top;
+    width: 50%;
+    height: auto;
+    padding: 0 36px 0 0;
+    margin-bottom: 48px;
 }
 
 .workflow-container {
-    padding:12px;
+    /* padding:0 10px; */
+    padding: 0;
 }
 
 .workflow-icon,
@@ -5242,66 +5762,66 @@ textarea#errorReport {
 .workflow-icon-report,
 .workflow-icon-admin,
 .workflow-icon-adhocview,
-.workflow-icon-serversettings
-
-{
-    background-image:url("images/homePages_icons_sprite.png");
-    height:50px;
-    width:80px;
-    margin:6px auto 9px auto;
-}
-
-workflow-icon-datasource {
-    background-position:0 0;
-}
-
-.workflow-icon-domain {
-    background-position:0 -80px;
-}
-
-.workflow-icon-adhocview {
-    background-position:0 -160px;
-}
-
-.workflow-icon-report {
-    background-position:0 -240px;
-}
-
-.workflow-icon-dashboard  {
-    background-position:0 -320px;
-}
-
-.workflow-icon-admin{
-    background-position:0 -400px;
-}
-
 .workflow-icon-serversettings {
-    background-position:0 -400px;
+    background-color: transparent;
+    background-image: url("images/homePages_icons_sprite.png");
+    background-repeat: no-repeat;
+    background-size: 79px auto;
+    height: 80px;
+    left: 0;
+    margin: 0;
+    position: absolute;
+    top: 0;
+    width: 80px;
 }
 
-.workflow-icon-users  {
-    background-position:0 -480px;
+.workflow-icon-datasource {
+    background-position: -2px 0;
 }
-
+.workflow-icon-domain {
+    background-position: -2px -80px;
+}
+.workflow-icon-adhocview {
+    background-position: -2px -159px;
+}
+.workflow-icon-report {
+    background-position: -2px -238px;
+}
+.workflow-icon-dashboard {
+    background-position: -2px -317px;
+}
+.workflow-icon-admin {
+    background-position: -2px -396px;
+}
+.workflow-icon-users {
+    background-position: -2px -475px;
+}
 .workflow-icon-roles {
-    background-position:0 -560px;
+    background-position: -2px -554px;
+}
+.workflow-icon-repository {
+    background-position: -2px -713px;
+}
+.workflow-icon-serversettings {
+    background-position: -2px -792px;
 }
 
-.workflow-icon-repository  {
-    background-position:0 -640px;
-}
+
 
 .workflow-title {
-    font-size:20px;
-    font-weight:normal;
-    line-height:1.4em;
-    margin-bottom:3px;
-    line-height:1.15em;
+    font-size: 20px;
+    font-weight: normal;
+    line-height: 1.4em;
+    margin-bottom: 3px;
+    margin-left: 86px;
+    line-height: 1.15em;
     /* color definition is in theme.css so element can remain themable */
 }
 
 .workflow-description {
-    line-height:1.4em;
+    font-size: 12px;
+    line-height: 1.5; /* 18px */
+    margin: 2px 0 6px 87px;
 }
 
 .workflow-description a {
@@ -5309,66 +5829,87 @@ workflow-icon-datasource {
 }
 
 .workflow-buttonContainer {
-    background:url("images/button_action_primary_sprite.png") repeat-x scroll 0 0 #2881BB;
-    position:absolute;
-    right:0;
-    bottom:0;
-    left:0;
-    width:100%;
-    height:24px;
+    height: 24px;
+    margin-left: 86px;
 }
 
 .workflow-buttonContainer .button {
-    height:24px;
-    line-height:24px;
-    padding:0 6px;
-    font-family:verdana;
-    font-size:10px;
+    font-family: Verdana, Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    height: 24px;
+    line-height: 24px;
+    padding-right: 16px;
+    /* color: #1572cf; old color */
     /* color definition is in theme.css so element can remain themable */
 }
 
-.workflow-buttonContainer .left {
-    float:left;
-}
+.workflow-buttonContainer .left {}
+.workflow-buttonContainer .right {}
 
-.workflow-buttonContainer .right {
-    float:right;
+
+/* iPads (portrait and landscape) */
+@media only screen
+and (min-device-width : 768px)
+and (max-device-width : 1024px)
+and (orientation:portrait) {
+	.homeSidebar {
+	    width: 280px;
+	}
+	
+	.homeMain {
+		left: 345px;
+	}
+	
+	.workflow {
+		margin-bottom: 30px;
+		width: 100%;
+	}
 }
 
 /*Resource blocks - expandble blocks*/
+.resourceBlock {
+    width:100%;
+}
 
 
 .resourceBlock-header {
-    width:100%;
-    background-color:#e0e0e0;
-    height:24px;
-    line-height:24px;
-    cursor:pointer;
+    background-color: #e3e5e6;
+    cursor: pointer;
+    height: 26px;
+    line-height: 26px;
+    width: 100%;
 }
 
 .resourceBlock-title {
-    line-height:inherit;
-    display:inline;
-    font-weight:bold;
+    display: inline;
+    font-size: 12px;
+    font-weight: bold;
+    line-height: inherit;
     /* color definition is in theme.css so element can remain themable */
 }
 
 .resourceBlock-list {
-    margin-top:6px
+    margin-top:6px;
+    width:100%;
 }
 
 .resourceBlock-list li {
-    padding-left:20px;
-    line-height:22px;
+	font-size: 12px;
+    line-height: 26px;
+    padding-left: 4px;
 }
 
 .resourceBlock-list-icon {
     background-image: url("images/lists_sprite.png");
-    width:16px;
+    width:17px;
     height:22px;
     float:left;
-    margin-right:2px;
 }
+
+.resourceBlock-list-icon.start {background-position:0 -1128px}
+
+.resourceBlock-list-icon.link {background-position:0 -1423px}
+
 
 /* color definitions for the links below are in theme.css so they remain themable */
 .resourceBlock a:link 		{}
@@ -5378,61 +5919,56 @@ workflow-icon-datasource {
 
 
 .resourceBlock-table {
-    width:300px;
+	font-size: 12px;
     table-layout: fixed;
+    width: 100%;
 }
 
 .resourceBlock-table td {
-    border-bottom:1px solid #E3E9EF;
-    padding:5px;
-    width:100%
+    border-bottom: 1px solid #e3e5e6;
+    padding: 6px 5px;
+    width: 100%
 }
 
 .resourceBlock-table .fileName {
-    width:200px;
-    border-right:1px solid #E3E9EF;
+    line-height: 15px;
     overflow: hidden;
+    width: 67%;
     word-wrap: break-word;
 }
 
 .resourceBlock-table .fileType {
-    width:auto;
-    white-space:nowrap;
+    width: auto;
+    white-space: nowrap;
     overflow: hidden;
     word-wrap: break-word;
 }
 
 
-.resourceBlock-list-icon.start {background-position:0 -1128px}
-
-.resourceBlock-list-icon.link {background-position:0 -1161px}
-
-
 .buttonIcon,
-.buttonIconToggle
-{
-    display:inline;
-    vertical-align:top;
-    padding:0;
-    border:none;
-    cursor:pointer;
+.buttonIconToggle {
+    border: none;
+    cursor: pointer;
+    display: inline;
+    padding: 0;
+    vertical-align: top;
 }
 
 .buttonIconToggle {
     background-image: url("images/disclosure_indicators_sprite.png");
-    background-color:transparent;
+    background-color: transparent;
     background-repeat: no-repeat;
-    margin-left:6px;
-    width:12px;
-    height:inherit;
+    margin-left: 6px;
+    width: 12px;
+    height: inherit;
 }
 
 .buttonIconToggle.isOpen {
-    background-position:-2px -697px;
+    background-position: 0 -923px;
 }
 
 .buttonIconToggle.isClosed {
-    background-position:-2px -673px;
+    background-position: -20px -923px;
 }
 
 .disableCursor   a {
@@ -5468,7 +6004,7 @@ workflow-icon-datasource {
     box-sizing: border-box;
     border: 1px solid #aaa;
     border-top: 0;
-    
+
     /* fonts */
     font-family:Verdana,Arial,Helvetica,sans-serif;
     font-size:11px;
@@ -5477,12 +6013,15 @@ workflow-icon-datasource {
 
 .sList li.selected,
 .mSelect-svList > .selected .mSelect-svList-button {
-    background-color:#217eb5;
+    /* background-color: #217eb5; */ /* PRE-AMBER 2 */
+    color: #fff;
+    background-color: #1388d8;
 }
 
 .sList li.active.selected,
 .mSelect-svList > .active.selected .mSelect-svList-button {
-    background-color: #0061a2;
+    /* background-color: #0061a2; */ /* PRE-AMBER 2 */
+    background-color: #195b8a;
 }
 
 .sList.disabled li.selected {
@@ -5491,7 +6030,8 @@ workflow-icon-datasource {
 
 .sList li.active,
 .mSelect-svList > .active .mSelect-svList-button {
-    background-color: #E5E5E5;
+    /* background-color: #E5E5E5; */ /* PRE-AMBER 2 */
+    background-color: #efefef;
 }
 .sList li > div {
     padding: 2px 0px 2px 0px;
@@ -5529,23 +6069,23 @@ workflow-icon-datasource {
 }
 
 .sSelect-input {
-    position: relative;
-    display: block;
-    overflow: hidden;
+    background-clip: padding-box;
+    background-color: #ffffff;
+    -moz-background-clip: padding;
+    -webkit-background-clip: padding-box;
     -moz-box-sizing: border-box;
     -ms-box-sizing: border-box;
     -webkit-box-sizing: border-box;
     -khtml-box-sizing: border-box;
     box-sizing: border-box;
-    height: 21px;
-    line-height: 18px;
-    padding: 0 0 0 8px;
-    margin-top:4px;
-    -moz-background-clip: padding;
-    -webkit-background-clip: padding-box;
-    background-clip: padding-box;
-    background-color: #ffffff;
     color: #333333 !important;
+    display: block;
+    height: 26px;
+    line-height: 24px;
+    margin-top: 4px;
+    overflow: hidden;
+    padding: 0 0 0 8px;
+    position: relative;
     text-decoration: none;
 }
 
@@ -5572,10 +6112,10 @@ workflow-icon-datasource {
 .sSelect-disclosureContainer {
     display: block;
     position: absolute;
-    right: 0;
-    top: 2px;
-    bottom:2px;
-    width: 16px;
+		top: 0;
+		right: 0;
+		bottom:0;
+    width: 20px;
 }
 
 .sSelect-disclosure {
@@ -5590,8 +6130,13 @@ workflow-icon-datasource {
 }
 
 .sSelect.collapsed .sSelect-disclosure {
-    background-image: url("images/search_sprite.png");
-    background-position: -10px -128px;
+    background-image: url("images/panels_icons_sprite.png");
+    background-position: -5px -325px;
+}
+
+.sSelect .control.searchLockup > .button.search {
+    background-image: url(images/panels_icons_sprite.png);
+    background-position: 0 -326px
 }
 
 .sSelect-listContainer {
@@ -5624,7 +6169,7 @@ workflow-icon-datasource {
 }
 
 .sSelect.ipad.collapsed .sSelect-disclosure {
-    background-position: -10px -124px;
+    background-position: -5px -323px;
 }
 
 .sSelect.ipad.expanded .sSelect-disclosure {
@@ -5637,7 +6182,7 @@ workflow-icon-datasource {
 
 .sSelect.ipad .control.searchLockup .button.search{
     height:25px;
-    background-position:-4px -122px
+    background-position: 0 -325px
 }
 
 .sSelect-dropDown.ipad .sSelect-list li {
@@ -5680,8 +6225,9 @@ workflow-icon-datasource {
     -webkit-box-sizing: border-box;
     -khtml-box-sizing: border-box;
     box-sizing: border-box;
-    width:100%;
-    padding-right:28px;
+    height: 100%;
+    padding-right: 28px;
+    width: 100%;
 }
 
 .sSelect-list {
@@ -5735,7 +6281,7 @@ workflow-icon-datasource {
 /* special width requirements to match other input controls */
 .list.inputControls .ssPlaceholder,
 .list.inputControls .msPlaceholder {
-    width:97%;
+    width: 100%;
 }
 
 #dashboardDesigner .sSelect-sSearch .searchLockup,
@@ -5756,24 +6302,24 @@ workflow-icon-datasource {
     min-width: 220px; /* need this so close button will fit into footer */
 }
 
-.topOfPage .mSelect {
+.topOfPage .msPlaceholder > div {
     width: 220px;
 }
 
 .mSelect-input,
 input[type="text"].mSelect-input {
+    background: #FFF url("images/panels_icons_sprite.png") no-repeat;
+    border-style: solid;
+    background-position: right -325px;
     -moz-box-sizing: border-box;
     -ms-box-sizing: border-box;
     -webkit-box-sizing: border-box;
     -khtml-box-sizing: border-box;
     box-sizing: border-box;
-    height:21px;
-    width:100%;
-    margin:4px 0 0 0;
-    padding:0 22px 0 3px;
-    border-style:solid;
-    background:#FFF url("images/panels_icons_sprite.png") no-repeat;
-    background-position:right -327px;
+    /* height: 21px; */ /* DELETE IF NO PROBLEMS */
+    margin: 4px 0 0 0;
+    padding: 0 22px 0 3px;
+    width: 100%;
 }
 
 .mSelect-input.placeholder {
@@ -5830,7 +6376,7 @@ input[type="text"].mSelect-input {
 }
 
 .mSelect-svListPlaceholder.focused .sList {
-    border-color: #fabc58;
+   /* border-color: #fabc58; */
 }
 
 .mSelect-svList > .selected .mSelect-svList-button {
@@ -5944,7 +6490,7 @@ input[type="text"].mSelect-input {
     margin:0px;
     vertical-align:top;
     height:18px;
-    line-height:17px; 
+    line-height:17px;
 }
 
 .mSelect-all-label {
@@ -6026,12 +6572,6 @@ input[type="text"].mSelect-input {
 	cursor:pointer;
 }
 
-#dashboardDesigner .mSelect,
-#dashboardViewer .mSelect {
-	min-width:inherit;
-}
-
-
 /* for narrow select controls, START */
 #dashboardDesigner .mSelect-footer-narrow,
 #dashboardViewer .mSelect-footer-narrow {
@@ -6063,20 +6603,9 @@ input[type="text"].mSelect-input {
 /* for narrow select controls, END */
 
 
+/* styles which allows multiselet to be resizable */
 #dashboardDesigner .msPlaceholder,
-#dashboardDesigner .msPlaceholder > div,
-#dashboardDesigner .mSelect,
-#dashboardDesigner .svList,
-#dashboardDesigner .mSelect-svListPlaceholder,
-#dashboardDesigner .componentContainer.control.select.multiple .leaf,
-#dashboardDesigner .componentContainer.control.select.multiple .leaf .control,
-#dashboardViewer .msPlaceholder,
-#dashboardViewer .msPlaceholder > div,
-#dashboardViewer .mSelect,
-#dashboardViewer .svList,
-#dashboardViewer .mSelect-svListPlaceholder,
-#dashboardViewer .componentContainer.control.select.multiple .leaf,
-#dashboardViewer .componentContainer.control.select.multiple .leaf .control {
+#dashboardViewer .msPlaceholder {
     height: 100%;
     width: 100%;
 }
@@ -6087,45 +6616,331 @@ input[type="text"].mSelect-input {
 }
 
 
-#designer #availableFieldsMutton, #designer #availableFieldsMutton.over,
-#designer #availableMeasuresMutton, #designer #availableMeasuresMutton.over {
-    top: 4px;
+#designer #availableFieldsMutton,
+#designer #availableFieldsMutton.over,
+#designer #availableMeasuresMutton, 
+#designer #availableMeasuresMutton.over {
     background-position: 0 -150px;
+    top: 4px;
 }
 #designer #availableMeasuresMutton, #designer #availableMeasuresMutton.over {
     right: 16px;
 }
 
-.sourceDialogNew.overlay > .content > .header.mover,
-.sourceDialogNew.overlay > .content > .footer {
+
+/* START New Select Data Dialog Box */
+.sourceDialogNew.overlay > .content > .header.mover {
     border: none;
+}
+
+.sourceDialogNew.dialog.overlay > .content > .footer {
+	position: absolute;
+}
+
+.sourceDialogNew.overlay .itemDescription {
+	height: 54px;
+	margin: 0;
+	padding: 8px 22px;
 }
 
 .sourceDialogNew.overlay > .content > .header.mover > .sub.header.tabHeaderContainer {
-    margin: 15px 8px 0 17px;
+    /* margin: 15px 8px 0 17px; */ /* DELETE IF NO PROBLEMS */
     border: none;
+    height: 42px;
+    margin: 0;
 }
 
 .sourceDialogNew.overlay > .content > .subcontainer {
-    padding: 4px 15px 10px;
+    padding: 4px 15px 10px 15px;
 }
 
+.sourceDialogNew.overlay .list.collapsible.folders.hideRoot {
+	margin-left: -18px;
+	margin-top: 4px;
+}
 
 .sourceDialogNew.overlay > .content > .header > .sub.header > .control {
-    margin: 6px 1.5em 0 0;
-    width: 100%;
+    /* box-sizing: border-box; */
     float: right;
-    padding-left: 100px;
-    box-sizing: border-box;
+    margin: 16px 24px 0 0;
+    padding-left: 118px;
+    width: 100%;
 }
 
 .sourceDialogNew.overlay > .content > .header > .sub.header > .button {
     position: absolute;
-    top: 4px;
-    left: 0;
+    	top: 16px;
+    	left: 17px;
 }
 
 .sourceDialogNew.overlay > .content > .header > .sub.header > .button.list {
-    left: 38px;
+    left: 54px;
 }
+
+.sourceDialogNew.overlay .control.searchLockup > .wrap {
+	height: 24px; /* this one is 2px taller than normal to match height of adjacent buttons */
+}
+
+.sourceDialogNew.overlay .control.searchLockup .button.search.up, 
+.sourceDialogNew.overlay .control.searchLockup .button.search.over, 
+.sourceDialogNew.overlay .control.searchLockup .button.search.pressed, 
+.sourceDialogNew.overlay .control.searchLockup .button.search.disabled {
+    background-position: 0 -57px;
+}
+
+.sourceDialogNew.overlay .control.searchLockup .button.searchClear.up,
+.sourceDialogNew.overlay .control.searchLockup .button.searchClear.over,
+.sourceDialogNew.overlay .control.searchLockup .button.searchClear.pressed {
+	background-position: -84px -59px;
+}
+/* END New Select Data Dialog Box */
+
+/* JIVE */
+
+.jive_chartMenu .wrap.over {
+	background-color: #1388d8 !important;
+	color: #fff !important;
+}
+
+/* =============================================== */
+/* "Diagnostic Tool" a.k.a. "Log Collectors" Begin */
+
+.LogCollectors .toolbar > .list.buttonSet .leaf:first-of-type .button  {
+	border-left: none;
+}
+
+.LogCollectors {}
+
+.LogCollectors .collectorsList {
+    min-width: 820px;
+	width: 100%;
+}
+
+.LogCollectors .collectorsList tr {
+	border-bottom: 1px solid #E3E9EF;
+	border-top: 1px solid #FFF;
+	cursor: default;
+	height: 26px;
+	margin-top: 0;
+	position: relative;
+}
+
+.LogCollectors .collectorsList tr td {
+	height: 26px;
+	line-height: 26px;
+	padding: 0 5px;
+	vertical-align: top;
+}
+
+.LogCollectors .collectorsList thead tr {
+	background-color: #edf2f8;
+	border-bottom: 2px solid #e3e9ef;
+}
+
+.LogCollectors .collectorsList tr[status=stopped] {
+	color: #ccc;
+}
+
+.LogCollectors .collectorsList .cOne {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	width: 25%;
+}
+
+.LogCollectors .collectorsList .cTwo {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	width: 22%;
+}
+
+.LogCollectors .collectorsList .cThree {
+    width: 12%;
+}
+
+.LogCollectors .collectorsList .cFour {
+    width: 15%;
+}
+
+.LogCollectors .collectorsList .cFive {
+    width: 10%;
+}
+
+.LogCollectors .collectorsList .cSix {
+	min-width: 80px;
+	width: 10%;
+}
+
+.LogCollectors .collectorsList select {
+    display: inline-block \9;
+	margin-top: 5px \9;
+	margin-bottom: 0 \9;
+	margin-right: 15px;
+	min-width: 100px;
+	width: auto;
+}
+
+.LogCollectors .collectorsList .actionIcons {
+	position: relative;
+}
+
+.LogCollectors .collectorsList .actionIcons div {
+	position: absolute;
+	top: 4px;
+	width: 20px;
+	height: 20px;
+	cursor: pointer;
+}
+
+.LogCollectors .collectorsList .actionIcons .stop,
+.LogCollectors .collectorsList .actionIcons .stop.stopped,
+.LogCollectors .collectorsList .actionIcons .download,
+.LogCollectors .collectorsList .actionIcons .download.notAvailable,
+.LogCollectors .collectorsList .actionIcons .remove {
+    background-image: url(images/log_collectors.png);
+    background-repeat: none;
+}
+
+.LogCollectors .collectorsList .actionIcons .stop {
+	background-position: 0 1px;
+	right: 64px;
+}
+
+.LogCollectors .collectorsList .actionIcons .stop.shutting_down {
+	background-image: url(images/report_load_animation.gif);
+	background-position: 1px 2px;
+	background-repeat: no-repeat;
+	cursor: default;
+}
+
+.LogCollectors .collectorsList .actionIcons .stop.stopped {
+	background-position: -93px 1px;
+	cursor: default;
+}
+
+.LogCollectors .collectorsList .actionIcons .download {
+	background-position: -73px 1px;
+	right: 32px;
+}
+
+.LogCollectors .collectorsList .actionIcons .download.notAvailable {
+	background-position: -28px 1px;
+	cursor: default;
+}
+
+.LogCollectors .collectorsList .actionIcons .remove {
+	background-position: -52px 1px;
+	right: 6px;
+}
+
+.LogCollectors .nothingToDisplay.panel.info {
+	position: absolute;
+	   top: 50%;
+	   right: 35%;
+	   bottom: 33%;
+	   left: 50%;
+	min-width: 600px;
+	margin-left: -300px;
+	margin-top: 0;
+	text-align: center;
+	padding: 28px 8px 40px 8px;
+	border: 1px solid #D3D2D2;
+	background-color: #fff;
+}
+
+.CreateLogCollector .createLogCollectorForm {
+	margin-top: 40px;
+	margin-left: 40px;
+}
+
+.CreateLogCollector input[name=name],
+.CreateLogCollector label.userId input,
+.CreateLogCollector label.userId .hint {
+	width: 290px;
+}
+
+.CreateLogCollector .includeDataSnapshot {
+	margin-bottom: 20px;
+}
+
+.CreateLogCollector .resourceUri {
+	margin-bottom: 40px;
+	width: 420px;
+}
+
+.CreateLogCollector .verbosity {
+	width: 150px;
+}
+
+.CreateLogCollector .footer {
+	border-top: 1px solid #D4D5D5;
+}
+
+.CreateLogCollector .reportChooserDialog .sourceDialogNew {
+	min-width: 450px;
+	min-height: 510px;
+	height: 510px;
+	width: 450px;
+}
+
+.logCollectorSaveDialog {
+	width: 500px;
+}
+
+/* "Diagnostic Tool" a.k.a. "Log Collectors" End   */
+/* =============================================== */
+
+
+
+/* =========================== */
+/* Report Chooser Dialog Begin */
+
+.reportChooserDialog {
+	min-width: 450px;
+	min-height: 510px;
+	height: 510px;
+	width: 450px;
+}
+
+.reportChooserDialog .treeBox {
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+.reportChooserDialog.sourceDialogNew.overlay .itemDescription {
+    height: 54px;
+    margin: 11px 0 0 0;
+    padding: 8px 22px;
+}
+
+/* Report Chooser Dialog End   */
+/* =========================== */
+
+
+
+/*................................HIGHER RES images................................*/
+@media only screen and (-webkit-min-device-pixel-ratio: 2), only screen and (min--moz-device-pixel-ratio: 2){
+
+    .workflow-icon,
+    .workflow-icon-datasource,
+    .workflow-icon-domain,
+    .workflow-icon-repository,
+    .workflow-icon-roles,
+    .workflow-icon-users,
+    .workflow-icon-dashboard,
+    .workflow-icon-report,
+    .workflow-icon-admin,
+    .workflow-icon-adhocview,
+    .workflow-icon-serversettings {
+        background-image: url("images/homePages_icons_sprite-2x.png") !important;
+    }
+
+    #loginForm .devices {
+        background-image:url("images/login_devices-2x.png") !important;
+    }
+
+}
+
 

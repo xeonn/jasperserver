@@ -22,8 +22,10 @@
 
 /**
  * @author: afomin, inesterenko
- * @version: $Id: controls.viewmodel.js 7762 2014-09-19 10:16:02Z sergey.prilukin $
+ * @version: $Id: controls.viewmodel.js 8179 2015-01-27 12:34:21Z psavushchik $
  */
+
+/* global JRS, _, Report */
 
 JRS.Controls = (function (jQuery, _, Controls) {
 
@@ -68,11 +70,11 @@ JRS.Controls = (function (jQuery, _, Controls) {
 
         /* Listens for controls change and triggers controls update */
         onControlChange:function (event, control) {
-            var selectedData;
+            var selectedData, slaveControlIds;
             var controlInCascade = control.slaveDependencies && control.slaveDependencies.length;
             if (controlInCascade) {
                 //optimize changes in cascade
-                var slaveControlIds = this._getAllSlaveControlIds(control.id);
+                slaveControlIds = this._getAllSlaveControlIds(control.id);
                 var parentControlIds = this._getParentControlIds(slaveControlIds);
                 var controlsIds = _.union(slaveControlIds, parentControlIds);
                 selectedData = this.get("selection");

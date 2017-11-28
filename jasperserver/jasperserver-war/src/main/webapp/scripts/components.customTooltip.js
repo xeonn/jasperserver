@@ -21,8 +21,10 @@
 
 
 /**
- * @version: $Id: components.customTooltip.js 7762 2014-09-19 10:16:02Z sergey.prilukin $
+ * @version: $Id: components.customTooltip.js 8179 2015-01-27 12:34:21Z psavushchik $
  */
+
+/* global fitObjectIntoScreen, getScrollLeft, getBoxOffsets, fitObjectIntoScreen, getParentDiv, getScrollTop */
 
 var customTooltip = {};
 customTooltip.TOOLTIP_ID="custTooltip";

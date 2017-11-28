@@ -36,7 +36,7 @@ import java.util.Locale;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ReportExecutionHyperlinkProducerFactory.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: ReportExecutionHyperlinkProducerFactory.java 52527 2015-02-25 13:53:01Z ktsaregradskyi $
  */
 public class ReportExecutionHyperlinkProducerFactory extends BaseReportExecutionHyperlinkProducerFactory implements HyperlinkProducerFlowFactory {
 	
@@ -54,25 +54,27 @@ public class ReportExecutionHyperlinkProducerFactory extends BaseReportExecution
 	public class HyperlinkProducer extends BaseHyperlinkProducer {
 		
 		private final HttpServletResponse response;
-		private final String contextPath;
-		private final String flowExecutionKey;
-		private final String reportUnit;
-		private final Locale reportLocale;
+		private String contextPath;
+		private String flowExecutionKey;
+		private String reportUnit;
+		private Locale reportLocale;
         private boolean viewAsDashboardFrame = false;
 
 		public HyperlinkProducer(final HttpServletRequest request, HttpServletResponse response) {
 			this.response = response;
-			flowExecutionKey = (String) request.getAttribute("flowExecutionKey");
-			contextPath = request.getContextPath();
-			reportUnit = (String) request.getAttribute(getUrlParameterReportUnit());
-			reportLocale = (Locale) request.getAttribute(getAttributeReportLocale());
-            viewAsDashboardFrame = (request.getAttribute(ReportParametersAction.VIEW_AS_DASHBOARD_FRAME) != null) &&
-                                    request.getAttribute(ReportParametersAction.VIEW_AS_DASHBOARD_FRAME).toString().equalsIgnoreCase("true");
+			if(request != null) {
+				flowExecutionKey = (String) request.getAttribute("flowExecutionKey");
+				contextPath = request.getContextPath();
+				reportUnit = (String) request.getAttribute(getUrlParameterReportUnit());
+				reportLocale = (Locale) request.getAttribute(getAttributeReportLocale());
+				viewAsDashboardFrame = (request.getAttribute(ReportParametersAction.VIEW_AS_DASHBOARD_FRAME) != null) &&
+						request.getAttribute(ReportParametersAction.VIEW_AS_DASHBOARD_FRAME).toString().equalsIgnoreCase("true");
+			}
 		}
 		
 		public String getHyperlink(JRPrintHyperlink hyperlink) {
 			String uri = super.getHyperlink(hyperlink);
-			return response.encodeURL(uri);
+			return response != null ? response.encodeURL(uri) : uri;
 		}
 		
 		//FIXME is this still required?  we are no longer using ReportExecution hyperlinks for Jive

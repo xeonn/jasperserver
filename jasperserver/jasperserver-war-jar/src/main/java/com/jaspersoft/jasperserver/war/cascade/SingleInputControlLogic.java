@@ -32,7 +32,7 @@ public class SingleInputControlLogic extends GenericInputControlLogic<InputContr
     protected ReportInputControlsInformation getReportInputControlsInformation(InputControlImpl container) throws CascadeResourceNotFoundException {
         ReportInputControlsInformationImpl info = new ReportInputControlsInformationImpl();
 
-        info.setInputControlInformation(container.getName(), new ReportInputControlWithoutParameterInformation(container.getName(), container.getLabel(), null));
+        info.setInputControlInformation(container.getName(), new ReportInputControlWithoutParameterInformation(container.getName(), container.getLabel(), container.getDescription(), null));
 
         if (container.getQuery() != null) {
             Query query = cachedRepositoryService.getResource(Query.class, container.getQuery());

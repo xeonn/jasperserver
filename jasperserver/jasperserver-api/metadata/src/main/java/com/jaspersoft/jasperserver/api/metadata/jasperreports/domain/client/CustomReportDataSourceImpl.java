@@ -20,20 +20,30 @@
  */
 package com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.client;
 
-import java.util.Map;
-
+import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceReference;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.CustomReportDataSource;
+
+import java.util.Map;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: CustomReportDataSourceImpl.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: CustomReportDataSourceImpl.java 53873 2015-04-07 18:59:44Z mchan $
  */
 public class CustomReportDataSourceImpl extends ReportDataSourceImpl implements CustomReportDataSource {
 
 	private String serviceClass;
 	private String dataSourceName;
 	private Map propertyMap;
-	
+	private Map<String, ResourceReference> resources;
+
+	public Map<String, ResourceReference> getResources() {
+		return resources;
+	}
+
+	public void setResources(Map<String, ResourceReference> resources) {
+		this.resources = resources;
+	}
+
 	public Map getPropertyMap() {
 		return propertyMap;
 	}

@@ -22,8 +22,10 @@
 
 /**
  * @author afomin, inesterenko
- * @version: $Id: components.utils.js 7762 2014-09-19 10:16:02Z sergey.prilukin $
+ * @version: $Id: components.utils.js 8179 2015-01-27 12:34:21Z psavushchik $
  */
+
+/* global jaspersoft, console, _, Mustache, dialogs, ajax */
 
 jaspersoft.components.utils = (function(jQuery, _, Mustache, dialogs, ajax){
     var isIE = navigator.userAgent.toLowerCase().indexOf("msie") > -1;
@@ -35,7 +37,7 @@ jaspersoft.components.utils = (function(jQuery, _, Mustache, dialogs, ajax){
             //check presents of element in DOM
             isElementInDom:function (elem) {
                 var nextSibling = elem.nextSibling;
-                var parent = elem.parentNode && !(elem.parentNode.nodeType  === 11);
+                var parent = elem.parentNode && elem.parentNode.nodeType  !== 11;
                 return nextSibling || parent;
 
             },
@@ -43,12 +45,12 @@ jaspersoft.components.utils = (function(jQuery, _, Mustache, dialogs, ajax){
             // Optimized inserting of big content to DOM
             setInnerHtml:function (el, template, data) {
 
-                var nextSibling, parent;
+                var nextSibling, parent, display;
 
                 if (this.isElementInDom(el)) {
                     nextSibling = el.nextSibling;
                     parent = el.parentNode;
-                    var display = el.style.display;
+                    display = el.style.display;
                     //turn off css reflows on it element during update
                     el.style.display = 'none';
                     //remove from the dom, it also reduce reflows on this element

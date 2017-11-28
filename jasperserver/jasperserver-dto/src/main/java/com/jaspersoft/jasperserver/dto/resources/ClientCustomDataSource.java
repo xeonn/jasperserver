@@ -20,22 +20,27 @@
 */
 package com.jaspersoft.jasperserver.dto.resources;
 
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: ClientCustomDataSource.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: ClientCustomDataSource.java 53873 2015-04-07 18:59:44Z mchan $
  */
 @XmlRootElement(name = ResourceMediaType.CUSTOM_DATA_SOURCE_CLIENT_TYPE)
 public class ClientCustomDataSource extends ClientResource<ClientCustomDataSource> implements ClientReferenceableDataSource {
     private String serviceClass;
     private String dataSourceName;
     private List<ClientProperty> properties;
+    private Map<String, ClientReferenceableFile> resources;
 
     public String getDataSourceName() {
         return dataSourceName;
@@ -55,12 +60,27 @@ public class ClientCustomDataSource extends ClientResource<ClientCustomDataSourc
                 properties.add(new ClientProperty(property));
             }
         }
+        final Map<String, ClientReferenceableFile> sourceResources = source.getResources();
+        if(sourceResources != null){
+            resources = new HashMap<String, ClientReferenceableFile>(sourceResources.size());
+            for(String key : sourceResources.keySet()){
+                final ClientReferenceableFile clientReferenceable = sourceResources.get(key);
+                ClientReferenceableFile clone;
+                if(clientReferenceable instanceof ClientReference){
+                    clone = new ClientReference((ClientReference) clientReferenceable);
+                } else {
+                    clone = new ClientFile((ClientFile) clientReferenceable);
+                }
+                resources.put(key, clone);
+            }
+        }
+
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof ClientCustomDataSource)) return false;
         if (!super.equals(o)) return false;
 
         ClientCustomDataSource that = (ClientCustomDataSource) o;
@@ -68,6 +88,7 @@ public class ClientCustomDataSource extends ClientResource<ClientCustomDataSourc
         if (dataSourceName != null ? !dataSourceName.equals(that.dataSourceName) : that.dataSourceName != null)
             return false;
         if (properties != null ? !new HashSet(properties).equals(new HashSet(that.properties)) : that.properties != null) return false;
+        if (resources != null ? !resources.equals(that.resources) : that.resources != null) return false;
         if (serviceClass != null ? !serviceClass.equals(that.serviceClass) : that.serviceClass != null) return false;
 
         return true;
@@ -78,8 +99,19 @@ public class ClientCustomDataSource extends ClientResource<ClientCustomDataSourc
         int result = super.hashCode();
         result = 31 * result + (serviceClass != null ? serviceClass.hashCode() : 0);
         result = 31 * result + (dataSourceName != null ? dataSourceName.hashCode() : 0);
-        result = 31 * result + (properties != null ? new HashSet(properties).hashCode() : 0);
+        result = 31 * result + (properties != null ?  new HashSet(properties).hashCode() : 0);
+        result = 31 * result + (resources != null ? resources.hashCode() : 0);
         return result;
+    }
+
+    @XmlJavaTypeAdapter(FilesMapXmlAdapter.class)
+    @XmlElement(name = "resources")
+    public Map<String, ClientReferenceableFile> getResources() {
+        return resources;
+    }
+
+    public void setResources(Map<String, ClientReferenceableFile> resources) {
+        this.resources = resources;
     }
 
     public ClientCustomDataSource setDataSourceName(String dataSourceName) {
@@ -101,7 +133,25 @@ public class ClientCustomDataSource extends ClientResource<ClientCustomDataSourc
     }
 
     public ClientCustomDataSource setProperties(List<ClientProperty> properties) {
+        String prefix = "repo:";
         this.properties = properties;
+        /**
+         * for testing purpose:
+         * add resource reference of JSON custom data source to client custom data source
+         */
+        if (properties != null) {
+            for (ClientProperty property : properties) {
+                if (property.getKey().equals("fileName")) {
+                    String value = property.getValue();
+                    if ((property.getValue() != null) && property.getValue().startsWith(prefix)) {
+                        Map<String, ClientReferenceableFile> sourceResources = new HashMap<String, ClientReferenceableFile>();
+                        String uri = value.substring(prefix.length());
+                        sourceResources.put("dataFile", new ClientReference(uri));
+                        setResources(sourceResources);
+                    }
+                }
+            }
+        }
         return this;
     }
 
@@ -111,10 +161,7 @@ public class ClientCustomDataSource extends ClientResource<ClientCustomDataSourc
                 "serviceClass='" + serviceClass + '\'' +
                 ", dataSourceName='" + dataSourceName + '\'' +
                 ", properties=" + properties +
-                ", version=" + getVersion() +
-                ", permissionMask=" + getPermissionMask() +
-                ", uri='" + getUri() + '\'' +
-                ", label='" + getLabel() + '\'' +
+                ", resources=" + resources +
                 '}';
     }
 }

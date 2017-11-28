@@ -21,11 +21,25 @@
 			<one-to-many class="com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.persistent.RepoFolder"/>
 		</set>
 		<property name="hidden" type="boolean" column="hidden"/>
-		<property name="name" not-null="true" length="100" type="string" column="name"/>
-		<property name="label" not-null="true" length="100" type="string" column="label"/>
+		<property name="name" not-null="true" length="200" type="string" column="name"/>
+		<property name="label" not-null="true" length="200" type="string" column="label"/>
 		<property name="description" length="250" type="string" column="description"/>
 		<many-to-one column="parent_folder" name="parent"/>
 		<property name="creationDate" not-null="true" type="timestamp" column="creation_date"/>
 		<property name="updateDate" not-null="true" type="timestamp" column="update_date"/>
 	</class>
+
+<!-- create index JIResourceFolder_parent_folder_index on JIResourceFolder (parent_folder); -->
+<!-- replacing JIResourceFolder_parent_folder_index with idx35_parent_folder_idx -->
+<database-object>
+	<create>create index idx35_parent_folder_idx on JIResourceFolder (parent_folder)</create>
+	<drop>DROP INDEX idx35_parent_folder_idx ON JIResourceFolder</drop>
+</database-object>
+
+<!-- create index JIResourceFolder_version_index on JIResourceFolder (version); -->
+<database-object>
+	<create>create index JIResourceFolder_version_index on JIResourceFolder (version)</create>
+	<drop>DROP INDEX JIResourceFolder_version_index ON JIResourceFolder</drop>
+</database-object>
+
 </hibernate-mapping>

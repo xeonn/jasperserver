@@ -22,9 +22,10 @@ package com.jaspersoft.jasperserver.war.control;
 
 import com.jaspersoft.jasperserver.api.common.util.TimeZoneContextHolder;
 import com.jaspersoft.jasperserver.api.common.util.TimeZonesList;
-import com.jaspersoft.jasperserver.api.engine.scheduling.domain.ReportJob;
-import com.jaspersoft.jasperserver.api.engine.scheduling.domain.ReportJobSummary;
 import com.jaspersoft.jasperserver.api.engine.scheduling.service.ReportSchedulingService;
+import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
+import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportUnit;
+import com.jaspersoft.jasperserver.war.common.JasperServerUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +34,6 @@ import org.springframework.web.servlet.mvc.multiaction.MultiActionController;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.List;
 
 /**
  * @author Chaim Arbiv
@@ -45,11 +45,16 @@ public class SchedulerController extends MultiActionController {
 
     private static final Log log = LogFactory.getLog(SchedulerController.class);
 
+    public static final String REPORT_PARAMETER_NAME = "reportUnitURI";
+    public static final String PARENT_REPORT_PARAMETER_NAME = "parentReportUnitURI";
+
     private TimeZonesList timezones;
     private ReportSchedulingService scheduler;
 
     @Autowired(required=true)
     private HttpServletRequest request;
+
+    private RepositoryService repository;
 
     private boolean enableSaveToHostFS;
 
@@ -66,52 +71,28 @@ public class SchedulerController extends MultiActionController {
 
         mav.addObject("enableSaveToHostFS", getEnableSaveToHostFS());
         mav.addObject("enableDataSnapshot", getEnableDataSnapshot());
+        mav.addObject("controlsDisplayForm", getParametersForm(getReportUri(request)));
 
         return mav;
     }
-
-    public ModelAndView jobsummary(HttpServletRequest request, HttpServletResponse response) throws Exception {
-        log.info("scheduler req with uri: "+ getReportUri(request));
-
-        ModelAndView mav = new ModelAndView();
-        mav.setViewName("modules/reportScheduling/jobsSummary");
-
-        List<ReportJobSummary> jobsSummaryList = getScheduler().getScheduledJobSummaries(null, getReportUri(request));
-        mav.addObject("jobsSummaryList", jobsSummaryList);
-        log.debug("returned jobs: " + jobsSummaryList.size());
-
-        if (jobsSummaryList.size()>0){
-            mav.addObject("reportUnitURI", jobsSummaryList.get(0).getReportUnitURI());
-        }
-        mav.addObject("timezone", TimeZoneContextHolder.getTimeZone().getID());
-
-
-        return mav;
-    }
-
-    public ModelAndView jobdetails(HttpServletRequest request, HttpServletResponse response) throws Exception {
-
-        ModelAndView mav = new ModelAndView();
-        mav.setViewName("modules/reportScheduling/jobDetails");
-
-        if (request.getParameter("id")!=null){
-            long jobId = Long.parseLong(request.getParameter("id"));
-            log.info("jobdetails for job "+jobId);
-
-            ReportJob job = getScheduler().getScheduledJob(null, jobId);
-            mav.addObject("job", job);
-
-        }
-        return mav;
-    }
-
 
     private String getReportUri(HttpServletRequest request){
-        String reportUnitURI = request.getParameter("reportUnitURI");
-        if (reportUnitURI!=null && !reportUnitURI.isEmpty())
-            return request.getParameter("reportUnitURI");
-        else
-            throw new IllegalArgumentException("Could not retrieve report uri");
+        String reportURI = request.getParameter(PARENT_REPORT_PARAMETER_NAME);
+
+        if (reportURI == null || reportURI.isEmpty()) {
+            reportURI = request.getParameter(REPORT_PARAMETER_NAME);
+        }
+
+        return reportURI;
+    }
+
+    private String getParametersForm(String reportUnitUri) {
+        if (reportUnitUri == null) {
+            return null;
+        }
+
+        ReportUnit reportUnit = (ReportUnit) repository.getResource(JasperServerUtil.getExecutionContext(), reportUnitUri);
+        return reportUnit.getInputControlRenderingView();
     }
 
     public ReportSchedulingService getScheduler() {
@@ -169,5 +150,9 @@ public class SchedulerController extends MultiActionController {
 
     public String getEnableDataSnapshot() {
         return enableDataSnapshot;
+    }
+
+    public void setRepository(RepositoryService repository) {
+        this.repository = repository;
     }
 }

@@ -22,25 +22,30 @@
 package com.jaspersoft.jasperserver.export.modules.repository.beans;
 
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceReference;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.CustomReportDataSource;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.impl.datasource.RepoCustomDataSource;
 import com.jaspersoft.jasperserver.export.modules.repository.ResourceExportHandler;
 import com.jaspersoft.jasperserver.export.modules.repository.ResourceImportHandler;
 
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: CustomDataSourceBean.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: CustomDataSourceBean.java 53873 2015-04-07 18:59:44Z mchan $
  */
 public class CustomDataSourceBean extends ResourceBean {
 
 	private String serviceClass;
 	private Map propertyMap;
+    private Map<String, ResourceReferenceBean> resources = new HashMap<String, ResourceReferenceBean>();
 
 	protected void additionalCopyFrom(Resource res, ResourceExportHandler referenceHandler) {
 		CustomReportDataSource ds = (CustomReportDataSource) res;
+        copyResourcesFrom(ds, referenceHandler);
 		setServiceClass(ds.getServiceClass());
 
 		Map dsProperties = ds.getPropertyMap();
@@ -60,8 +65,26 @@ public class CustomDataSourceBean extends ResourceBean {
 		}
 	}
 
+    protected void copyResourcesFrom(CustomReportDataSource ds,
+			ResourceExportHandler exportHandler) {
+		Map dsResources = ds.getResources();
+		if (dsResources == null || dsResources.isEmpty()) {
+			resources = null;
+		} else {
+			resources = new LinkedHashMap();
+			for (Iterator it = dsResources.entrySet().iterator(); it.hasNext();) {
+				Map.Entry entry = (Map.Entry) it.next();
+				String alias = (String) entry.getKey();
+				ResourceReference ref = (ResourceReference) entry.getValue();
+				ResourceReferenceBean refBean = exportHandler.handleReference(ref);
+				resources.put(alias, refBean);
+			}
+		}
+	}
+
 	protected void additionalCopyTo(Resource res, ResourceImportHandler importHandler) {
 		CustomReportDataSource ds = (CustomReportDataSource) res;
+        copyResourcesTo(ds, importHandler);
 		ds.setServiceClass(getServiceClass());
 
 		final Map dsPropertyMap = getPropertyMap();
@@ -83,6 +106,20 @@ public class CustomDataSourceBean extends ResourceBean {
 		}
 	}
 
+    protected void copyResourcesTo(CustomReportDataSource ds, ResourceImportHandler importHandler) {
+		Map<String, ResourceReference> dsResources = new LinkedHashMap<String, ResourceReference>();
+		if (resources != null && !resources.isEmpty()) {
+			for (Iterator it = resources.entrySet().iterator(); it.hasNext();) {
+				Map.Entry entry = (Map.Entry) it.next();
+				String alias = (String) entry.getKey();
+				ResourceReferenceBean refBean = (ResourceReferenceBean) entry.getValue();
+				ResourceReference ref = importHandler.handleReference(refBean);
+				dsResources.put(alias, ref);
+			}
+		}
+		ds.setResources(dsResources);
+	}
+
 	public String getServiceClass() {
 		return serviceClass;
 	}
@@ -99,4 +136,11 @@ public class CustomDataSourceBean extends ResourceBean {
 		this.propertyMap = propertyMap;
 	}
 
+    public Map<String, ResourceReferenceBean> getResources() {
+        return resources;
+    }
+
+    public void setResources(Map<String, ResourceReferenceBean> resources) {
+        this.resources = resources;
+    }
 }

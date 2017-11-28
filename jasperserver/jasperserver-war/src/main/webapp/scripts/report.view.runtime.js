@@ -21,7 +21,11 @@
 
 
 /**
- * @version: $Id: report.view.runtime.js 8036 2014-11-20 06:08:27Z nmarcu $
+ * @version: $Id: report.view.runtime.js 8179 2015-01-27 12:34:21Z psavushchik $
+ */
+
+/* global Report, viewer, Controls, ControlsBase, toolbarButtonModule, matchAny, JRS, isIPad, isSupportsTouch,
+ TouchController, layoutModule, centerElement, dialogs, ajax, buttonManager, _, alert, addDataToForm
  */
 
 Report.toolbarActionMap = {

@@ -22,6 +22,7 @@ package com.jaspersoft.jasperserver.war.action.tree;
 
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
 import com.jaspersoft.jasperserver.core.util.CipherUtil;
+import com.jaspersoft.jasperserver.jsp.EscapeXssScript;
 import com.jaspersoft.jasperserver.war.common.ConfigurationBean;
 import com.jaspersoft.jasperserver.war.common.JasperServerUtil;
 import com.jaspersoft.jasperserver.war.model.TreeDataProvider;
@@ -35,6 +36,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.util.HtmlUtils;
+import org.springframework.web.util.JavaScriptUtils;
 import org.springframework.webflow.action.MultiAction;
 import org.springframework.webflow.execution.Event;
 import org.springframework.webflow.execution.RequestContext;
@@ -132,6 +134,7 @@ public class TreeAction extends MultiAction {
     	if (treeNode != null) {
     	    StringBuffer sb = new StringBuffer();
     	    sb.append("<div id='treeNodeText'>");
+//            String response = EscapeXssScript.escape(treeNode.toJSONString());
             String response = treeNode.toJSONString();
             if (forceHtmlEscape != null && forceHtmlEscape.equals("true")){
                 sb.append(StringEscapeUtils.escapeHtml(response));
@@ -170,7 +173,8 @@ public class TreeAction extends MultiAction {
     	    sb.append('[');
     	    for (Iterator i = treeNode.getChildren().iterator(); i.hasNext(); ) {
     	        TreeNode n = (TreeNode) i.next();
-    	        sb.append(n.toJSONString());
+    	        //sb.append(EscapeXssScript.escape(n.toJSONString()));
+                sb.append(n.toJSONString());
     	        if (i.hasNext()) {
     	            sb.append(',');
     	        }
@@ -215,9 +219,11 @@ public class TreeAction extends MultiAction {
                     sb.append(',');
                 }
 
-                sb.append("{\"parentUri\":\"").append(treeNode.getUriString()).append("\",\"children\":[");
+                sb.append("{\"parentUri\":\"")
+                        .append(JavaScriptUtils.javaScriptEscape(treeNode.getUriString())).append("\",\"children\":[");
                 for (Iterator i = treeNode.getChildren().iterator(); i.hasNext();) {
                     TreeNode n = (TreeNode) i.next();
+                    //sb.append(EscapeXssScript.escape(n.toJSONString()));
                     sb.append(n.toJSONString());
                     if (i.hasNext()) {
                         sb.append(',');

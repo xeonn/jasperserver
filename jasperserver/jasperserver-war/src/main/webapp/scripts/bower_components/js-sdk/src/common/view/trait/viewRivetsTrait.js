@@ -24,7 +24,7 @@
  * Trait that adds methods to bind/unbind RivetsJS to your view.
  *
  * @author: Kostiantyn Tsaregradskyi
- * @version: $Id: viewRivetsTrait.js 270 2014-10-13 19:58:03Z agodovanets $
+ * @version: $Id: viewRivetsTrait.js 812 2015-01-27 11:01:30Z psavushchik $
  */
 
 define(function (require) {
@@ -40,6 +40,7 @@ define(function (require) {
     return {
         /**
          * @function bindRivets
+         * @memberof viewRivetsTrait
          * @description Binds RivetsJS to root el of a Backbone.View. Passes controller and model to Rivets View.
          */
         bindRivets: function(){
@@ -50,6 +51,7 @@ define(function (require) {
 
         /**
          * @function unbindRivets
+         * @memberof viewRivetsTrait
          * @description Unbinds current RivetsJS binding.
          */
         unbindRivets: function(){

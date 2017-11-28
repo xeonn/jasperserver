@@ -54,12 +54,12 @@
 <c:forEach var="olapUnit" items="${paginatedItems}" varStatus="itStatus">
   <tr height="18" <c:if test="${itStatus.count % 2 == 0}">class="list_alternate"</c:if>>
     <td><a href="javascript:disableLink('<c:url value="/olap/viewOlap.html"><c:param name="name" value="${olapUnit.URIString}"/><c:param name="new" value="true"/></c:url>');" class="disLink" onclick="this.disabled='true'">
-		<c:out value="${olapUnit.label}"/></a></td>
-    <td class="paddedcell"><c:out value="${olapUnit.description}"/></td>
+		${olapUnit.label}</a></td>
+    <td class="paddedcell">${olapUnit.description}</td>
     <td class="paddedcell" nowrap><js:formatDate value="${olapUnit.creationDate}"/></td>
     <td class="paddedcell" nowrap>   
      <a href="listOlapViews.jsp#" onclick="gotoFolderExplorer('${olapUnit.parentFolder}')">
-      <c:out value="${olapUnit.parentFolder}"/>
+      ${olapUnit.parentFolder}
      </a> 
     </td>
   </tr>

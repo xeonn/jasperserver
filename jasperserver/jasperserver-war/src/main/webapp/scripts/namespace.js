@@ -21,8 +21,10 @@
 
 
 /**
- * @version: $Id: namespace.js 7878 2014-10-05 23:18:41Z inesterenko $
+ * @version: $Id: namespace.js 8179 2015-01-27 12:34:21Z psavushchik $
  */
+
+/* jshint undef: false */
 
 //JasperServer namespace  mess
 

@@ -1,5 +1,5 @@
 .simpleColorPicker{
-    width: 278px;
+    width: 268px;
     position: absolute;
     z-index: 9999;
     background-color: #ffffff;
@@ -11,8 +11,8 @@
     max-height: 480px;
     overflow-y: auto;
     overflow-x: hidden;
-    padding: 3px;
-    margin: 0 16px;
+    /* padding: 3px; */
+    margin: 12px;
     position: relative;
 }
 
@@ -24,9 +24,11 @@
 }
 
 .simpleColorPicker .body .color.transparent{
-    border: 1px solid black;
-    width: 230px;
-    height: 16px;
+    border: 1px solid #9e9e9e;
+    width: 234px;
+    height: 20px;
+    line-height: 18px;
+    padding-left: 4px;
     margin: 4px;
     background-color: rgba(0, 0, 0, 0);
     cursor: pointer;
@@ -34,8 +36,8 @@
 
 .simpleColorPicker .header{
     position: relative;
-    color: #0872A4;
-    background: url("images/column_header_bkgd.png");
+    background-color: #e3e3e3;
+    color: #195b8a;
 }
 
 .simpleColorPicker .header h2{
@@ -43,7 +45,7 @@
     margin: 0 0 0 10px;
     cursor: default;
     padding: 0 4px;
-    font-size: 11px;
+    font-size: 12px;
     line-height: 28px;
 }
 
@@ -63,14 +65,16 @@
     margin: 4px;
 }
 
-.simpleColorPicker .colorWrapper.selected{
-    padding: 1px;
-    margin: 0;
-    border: 3px solid orange;
+.simpleColorPicker .colorWrapper.selected {
+    /* padding: 1px; */
+    /* margin: 0; */
+    /* border: 3px solid orange; */
+    outline: 2px solid orange;
 }
 
-.simpleColorPicker .body .color.transparent.selected{
-    padding: 1px;
-    margin: 1px;
-    border: 3px solid orange;
+.simpleColorPicker .body .color.transparent.selected {
+    /* padding: 1px; */
+    /* margin: 1px; */
+    border: 1px solid #fff;
+    outline: 2px solid orange;
 }

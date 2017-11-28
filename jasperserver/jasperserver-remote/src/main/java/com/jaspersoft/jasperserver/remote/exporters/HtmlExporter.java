@@ -21,9 +21,17 @@
 
 package com.jaspersoft.jasperserver.remote.exporters;
 
-import com.jaspersoft.jasperserver.api.engine.jasperreports.util.HtmlExportUtil;
-import com.jaspersoft.jasperserver.api.metadata.xml.domain.impl.Argument;
-import com.jaspersoft.jasperserver.war.util.JRHtmlExportUtils;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+
 import net.sf.jasperreports.engine.JRExporter;
 import net.sf.jasperreports.engine.JRExporterParameter;
 import net.sf.jasperreports.engine.JasperReportsContext;
@@ -34,19 +42,14 @@ import net.sf.jasperreports.engine.export.HtmlResourceHandler;
 import net.sf.jasperreports.engine.export.JRHtmlExporterParameter;
 import net.sf.jasperreports.engine.export.MapHtmlResourceHandler;
 import net.sf.jasperreports.web.util.WebHtmlResourceHandler;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import com.jaspersoft.jasperserver.api.engine.jasperreports.util.ExportUtil;
+import com.jaspersoft.jasperserver.api.metadata.xml.domain.impl.Argument;
+import com.jaspersoft.jasperserver.war.util.JRHtmlExportUtils;
 
 /*  2012-09-13  thorick: restored 24858 to fix build   */
 /*  2012-09-13  thorick: backout 24858 to fix build
@@ -88,7 +91,7 @@ public class HtmlExporter extends AbstractExporter {
 
     @Override
     public JRExporter createExporter() throws Exception {
-        return HtmlExportUtil.getHtmlExporter(getJasperReportsContext());
+        return ExportUtil.getInstance(getJasperReportsContext()).createHtmlExporter();
     }
 
     @Override

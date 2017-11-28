@@ -21,8 +21,10 @@
 
 
 /**
- * @version: $Id: output.js 7751 2014-08-21 07:47:20Z yuriy.plakosh $
+ * @version: $Id: output.js 8900 2015-05-06 20:57:14Z yplakosh $
  */
+
+/* global outputRepository */
 
 define('scheduler/view/editor/output', function (require) {
 
@@ -223,7 +225,7 @@ define('scheduler/view/editor/output', function (require) {
 
                 var check = await();
                 t.model.permission(function(err, permission){
-                    if (err || !(permission === 1 || permission === 30)) {
+                    if (err || !(permission === 1 || permission === 30 || permission === 6)) {
 
                         try {
                             err = JSON.parse(err.responseText);

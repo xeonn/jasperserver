@@ -21,6 +21,7 @@
 
 package com.jaspersoft.jasperserver.api.engine.jasperreports.util;
 
+import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.ProfileAttribute;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.Role;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
@@ -43,10 +44,14 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
@@ -54,7 +59,7 @@ import static org.testng.Assert.assertTrue;
  * <p></p>
  *
  * @author Vlad Zavadskii
- * @version $Id: UserProfileBuiltInParameterProviderTest.java 50011 2014-10-09 16:57:26Z vzavadskii $
+ * @version $Id: UserProfileBuiltInParameterProviderTest.java 54590 2015-04-22 17:55:42Z vzavadsk $
  */
 public class UserProfileBuiltInParameterProviderTest {
     @InjectMocks
@@ -111,13 +116,13 @@ public class UserProfileBuiltInParameterProviderTest {
         allProfileAttributes.addAll(hierarchicalProfileAttributes);
         allProfileAttributes.addAll(serverProfileAttributes);
 
-        when(profileAttributeService.getCurrentUserProfileAttributes(ProfileAttributeCategory.USER))
+        when(profileAttributeService.getCurrentUserProfileAttributes(any(ExecutionContext.class), eq(ProfileAttributeCategory.USER)))
                 .thenReturn(userProfileAttributes);
-        when(profileAttributeService.getCurrentUserProfileAttributes(ProfileAttributeCategory.TENANT))
+        when(profileAttributeService.getCurrentUserProfileAttributes(any(ExecutionContext.class), eq(ProfileAttributeCategory.TENANT)))
                 .thenReturn(tenantProfileAttributes);
-        when(profileAttributeService.getCurrentUserProfileAttributes(ProfileAttributeCategory.SERVER))
+        when(profileAttributeService.getCurrentUserProfileAttributes(any(ExecutionContext.class), eq(ProfileAttributeCategory.SERVER)))
                 .thenReturn(serverProfileAttributes);
-        when(profileAttributeService.getCurrentUserProfileAttributes(ProfileAttributeCategory.HIERARCHICAL))
+        when(profileAttributeService.getCurrentUserProfileAttributes(any(ExecutionContext.class), eq(ProfileAttributeCategory.HIERARCHICAL)))
                 .thenReturn(allProfileAttributes);
 
         List<ProfileAttributeCategory> allowedCategories = new ArrayList<ProfileAttributeCategory>();
@@ -336,5 +341,106 @@ public class UserProfileBuiltInParameterProviderTest {
 
         assertEquals(user, parameters.get(0)[1]);
         assertEquals(user.getUsername(), parameters.get(1)[1]);
+    }
+
+    @Test
+    public void getParameters_preDefinedAttributesAreNotNull_passed() {
+        reset(profileAttributeService);
+        final String[] stringAttributes = {
+                "LoggedInUsername",
+                "LoggedInUserFullname",
+                "LoggedInUserEmailAddress",
+                "LoggedInUserTenantId"
+        };
+        final String[] booleanAttributes = {
+                "LoggedInUserEnabled",
+                "LoggedInUserExternallyDefined"
+        };
+        final String[] collectionAttributes = {
+                "LoggedInUserRoles",
+                "LoggedInUserAttributes",
+                "LoggedInUserAttributeNames",
+                "LoggedInUserAttributeValues"
+        };
+
+        for (String attribute : stringAttributes) {
+            Object value = userProfileBuiltInParameterProvider.getParameter(null, null, null, attribute)[1];
+            assertEquals(value, "");
+        }
+
+        for (String attribute : booleanAttributes) {
+            Boolean value = (Boolean) userProfileBuiltInParameterProvider.getParameter(null, null, null, attribute)[1];
+            assertFalse(value);
+        }
+
+        Collection<Object> emptyCollection = new ArrayList<Object>();
+        for (String attribute : collectionAttributes) {
+            Object value = userProfileBuiltInParameterProvider.getParameter(null, null, null, attribute)[1];
+            assertEquals(value, emptyCollection);
+        }
+    }
+
+    @Test
+    public void getParameters_profileAttributesAreNull_passed() {
+        final String[] attributes = {
+                "LoggedInUserAttribute_",
+                "LoggedInTenantAttribute_",
+                "ServerAttribute_",
+                "Attribute_"
+        };
+
+        for (String attribute : attributes) {
+            Object value = userProfileBuiltInParameterProvider.getParameter(null, null, null, attribute + "attrName");
+            assertNull(value);
+        }
+    }
+
+    @Test
+    public void getParameters_allAttributesExceptProfileOneAreCaseInsensitive_passed() {
+        final String[] attributes = {
+                "loggedinuser",
+                "loggedinusername",
+                "loggedinuserfullname",
+                "loggedinuseremailaddress",
+                "loggedinuserenabled",
+                "loggedinuserexternallydefined",
+                "loggedinusertenantid",
+                "loggedinuserroles",
+                "loggedinuserattributes",
+                "loggedinuserattributenames",
+                "loggedinuserattributevalues"
+        };
+
+        for (String attribute : attributes) {
+            Object value = userProfileBuiltInParameterProvider.getParameter(null, null, null, attribute.toLowerCase());
+            assertNotNull(value);
+        }
+    }
+
+    @Test
+    public void getParameters_profileAttributesNamesAreCaseSensitive_passed() {
+        final String[] attributesWithRigthCase = {
+                "loggedinuserattribute_userAttr",
+                "loggedintenantattribute_tenantAttr",
+                "serverattribute_serverAttr",
+                "attribute_hierarchicalAttr"
+        };
+
+        final String[] attributesWithLowerCase = {
+                "loggedinuserattribute_userattr",
+                "loggedintenantattribute_tenantattr",
+                "serverattribute_serverattr",
+                "attribute_hierarchicalattr"
+        };
+
+        for (String attribute : attributesWithRigthCase) {
+            Object value = userProfileBuiltInParameterProvider.getParameter(null, null, null, attribute);
+            assertNotNull(value);
+        }
+
+        for (String attribute : attributesWithLowerCase) {
+            Object value = userProfileBuiltInParameterProvider.getParameter(null, null, null, attribute);
+            assertNull(value);
+        }
     }
 }

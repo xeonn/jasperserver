@@ -214,7 +214,7 @@
     <util:constant id="JasperServerPermission.EXECUTE" static-field="com.jaspersoft.jasperserver.api.metadata.security.JasperServerPermission.EXECUTE"/>
     <util:constant id="JasperServerPermission.NOTHING" static-field="com.jaspersoft.jasperserver.api.metadata.security.JasperServerPermission.NOTHING"/>
 
-    <bean id="repositoryRetrievalStrategy" class="com.jaspersoft.jasperserver.api.metadata.user.service.impl.ResourceObjectIdentityRetrievalStrategyImpl"/>
+    <bean id="repositoryOIRetrievalStrategy" class="com.jaspersoft.jasperserver.api.metadata.user.service.impl.ResourceObjectIdentityRetrievalStrategyImpl"/>
     <bean id="sidRetrievalStrategy" class="com.jaspersoft.jasperserver.api.metadata.user.service.impl.JasperServerSidRetrievalStrategyImpl"/>
     <bean id="permissionGrantingStrategy" class="com.jaspersoft.jasperserver.api.metadata.security.JasperServerPermissionGrantingStrategy"/>
 
@@ -223,7 +223,7 @@
         <property name="aclService" ref="internalAclServiceCE"/>
         <property name="sidRetrievalStrategy" ref="sidRetrievalStrategy"/>
         <property name="permissionGrantingStrategy" ref="permissionGrantingStrategy"/>
-        <property name="objectIdentityRetrievalStrategy" ref="repositoryRetrievalStrategy"/>
+        <property name="objectIdentityRetrievalStrategy" ref="repositoryOIRetrievalStrategy"/>
     </bean>
 
     <alias name="${bean.AclPermissionsSecurityChecker}" alias="aclSecurityChecker"/>
@@ -247,7 +247,7 @@
         <property name="processDomainObjectClass">
             <value>com.jaspersoft.jasperserver.api.metadata.common.domain.Resource</value>
         </property>
-        <property name="objectIdentityRetrievalStrategy" ref="repositoryRetrievalStrategy"/>
+        <property name="objectIdentityRetrievalStrategy" ref="repositoryOIRetrievalStrategy"/>
         <property name="sidRetrievalStrategy" ref="sidRetrievalStrategy"/>
     </bean>
     
@@ -281,7 +281,7 @@
 				</entry>
 			</map>
         </property>
-        <property name="objectIdentityRetrievalStrategy" ref="repositoryRetrievalStrategy"/>
+        <property name="objectIdentityRetrievalStrategy" ref="repositoryOIRetrievalStrategy"/>
         <property name="sidRetrievalStrategy" ref="sidRetrievalStrategy"/>
     </bean>
     
@@ -299,7 +299,7 @@
         <property name="processDomainObjectClass">
             <value>com.jaspersoft.jasperserver.api.metadata.common.domain.Resource</value>
         </property>
-        <property name="objectIdentityRetrievalStrategy" ref="repositoryRetrievalStrategy"/>
+        <property name="objectIdentityRetrievalStrategy" ref="repositoryOIRetrievalStrategy"/>
         <property name="sidRetrievalStrategy" ref="sidRetrievalStrategy"/>
     </bean>
      
@@ -316,7 +316,7 @@
         <property name="processDomainObjectClass">
             <value>java.lang.String</value>
         </property>
-        <property name="objectIdentityRetrievalStrategy" ref="repositoryRetrievalStrategy"/>
+        <property name="objectIdentityRetrievalStrategy" ref="repositoryOIRetrievalStrategy"/>
         <property name="sidRetrievalStrategy" ref="sidRetrievalStrategy"/>
     </bean>
     
@@ -484,7 +484,7 @@
                 <ref local="JasperServerPermission.READ"/>
             </list>
         </constructor-arg>
-        <property name="objectIdentityRetrievalStrategy" ref="repositoryRetrievalStrategy"/>
+        <property name="objectIdentityRetrievalStrategy" ref="repositoryOIRetrievalStrategy"/>
         <property name="sidRetrievalStrategy" ref="sidRetrievalStrategy"/>
 
     </bean>
@@ -499,7 +499,7 @@
                 <ref local="JasperServerPermission.READ"/>
             </list>
         </constructor-arg>
-        <property name="objectIdentityRetrievalStrategy" ref="repositoryRetrievalStrategy"/>
+        <property name="objectIdentityRetrievalStrategy" ref="repositoryOIRetrievalStrategy"/>
         <property name="sidRetrievalStrategy" ref="sidRetrievalStrategy"/>
 
     </bean>
@@ -513,7 +513,7 @@
                 <ref local="JasperServerPermission.READ_WRITE"/>
             </list>
         </constructor-arg>
-        <property name="objectIdentityRetrievalStrategy" ref="repositoryRetrievalStrategy"/>
+        <property name="objectIdentityRetrievalStrategy" ref="repositoryOIRetrievalStrategy"/>
         <property name="sidRetrievalStrategy" ref="sidRetrievalStrategy"/>
 
         <!--<property name="processConfigAttribute">-->
@@ -554,12 +554,12 @@ TODO: SSU - Seems this bean is not needed
                 userListFlow=ROLE_ADMINISTRATOR
                 roleListFlow=ROLE_ADMINISTRATOR
                 editFolderFlow=ROLE_ADMINISTRATOR
-                fileResourceFlow=ROLE_ADMINISTRATOR
-                listOfValuesFlow=ROLE_ADMINISTRATOR
-                reportDataSourceFlow=ROLE_ADMINISTRATOR
-                inputControlsFlow=ROLE_ADMINISTRATOR
+                fileResourceFlow=ROLE_USER,ROLE_ADMINISTRATOR
+                listOfValuesFlow=ROLE_USER,ROLE_ADMINISTRATOR
+                reportDataSourceFlow=ROLE_USER,ROLE_ADMINISTRATOR
+                inputControlsFlow=ROLE_USER,ROLE_ADMINISTRATOR
                 tenantFlow=ROLE_ADMINISTRATOR
-                createSLDatasourceFlow=ROLE_ADMINISTRATOR
+                createSLDatasourceFlow=ROLE_USER,ROLE_ADMINISTRATOR
                 userEditFlow=ROLE_ADMINISTRATOR
                 roleEditFlow=ROLE_ADMINISTRATOR
                 queryReferenceFlow=ROLE_ADMINISTRATOR
@@ -643,7 +643,7 @@ TODO: SSU - Seems this bean is not needed
     <bean id="aclUserMoveVoter" class="com.jaspersoft.jasperserver.api.metadata.security.MultiAclEntryVoter">
         <property name="configAttribute" value="ACL_USER_MOVE"/>
         <property name="aclService" ref="internalAclServiceCE"/>
-        <property name="objectIdentityRetrievalStrategy" ref="repositoryRetrievalStrategy"/>
+        <property name="objectIdentityRetrievalStrategy" ref="repositoryOIRetrievalStrategy"/>
         <property name="sidRetrievalStrategy" ref="sidRetrievalStrategy"/>
         <property name="argumentVoters">
             <list>
@@ -674,7 +674,7 @@ TODO: SSU - Seems this bean is not needed
     <bean id="aclUserCopyVoter" class="com.jaspersoft.jasperserver.api.metadata.security.MultiAclEntryVoter">
         <property name="configAttribute" value="ACL_USER_COPY"/>
         <property name="aclService" ref="internalAclServiceCE"/>
-        <property name="objectIdentityRetrievalStrategy" ref="repositoryRetrievalStrategy"/>
+        <property name="objectIdentityRetrievalStrategy" ref="repositoryOIRetrievalStrategy"/>
         <property name="sidRetrievalStrategy" ref="sidRetrievalStrategy"/>
         <property name="argumentVoters">
             <list>
@@ -708,7 +708,7 @@ TODO: SSU - Seems this bean is not needed
     <bean id="aclUserMultiCopyVoter" class="com.jaspersoft.jasperserver.api.metadata.security.MultiAclEntryVoter">
         <property name="configAttribute" value="ACL_USER_MULTI_COPY"/>
         <property name="aclService" ref="internalAclServiceCE"/>
-        <property name="objectIdentityRetrievalStrategy" ref="repositoryRetrievalStrategy"/>
+        <property name="objectIdentityRetrievalStrategy" ref="repositoryOIRetrievalStrategy"/>
         <property name="sidRetrievalStrategy" ref="sidRetrievalStrategy"/>
 
         <property name="argumentVoters">
@@ -838,7 +838,96 @@ TODO: SSU - Seems this bean is not needed
         <property name="nonMutableAclCache" ref="ehCacheBasedJasperServerAclCache"/>
     </bean>
 
+    <!--Profile Attributes SECURITY-->
+    <bean id="profileAttributeServiceInterceptorNamesSecured" class="java.util.ArrayList">
+        <constructor-arg  index="0" type="java.util.Collection">
+            <list merge="true">
+                <idref local="profileAttributesServiceServiceMethodSecurityInterceptor"/>
+            </list>
+        </constructor-arg>
+    </bean>
 
+    <bean id="profileAttributesServiceServiceMethodSecurityInterceptor"
+          class="org.springframework.security.access.intercept.aopalliance.MethodSecurityInterceptor">
+        <property name="authenticationManager">
+            <ref local="authenticationManager"/>
+        </property>
+        <property name="afterInvocationManager">
+            <ref local="getProfileAttributesAfterInvocationProviderManager"/>
+        </property>
+        <property name="accessDecisionManager">
+            <ref local="modifyProfileAttributesAccessDecisionManager"/>
+        </property>
+        <property name="securityMetadataSource">
+            <security:method-security-metadata-source>
+                <security:protect method="com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributeService.getProfileAttributesForPrincipal" access="ACL_ATTRIBUTE_USER_READ"/>
+                <security:protect method="com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributeService.putProfileAttribute" access="ROLE_ADMINISTRATOR, ACL_ATTRIBUTE_USER_ADMIN"/>
+                <security:protect method="com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributeService.deleteProfileAttribute" access="ROLE_ADMINISTRATOR, ACL_ATTRIBUTE_USER_ADMIN"/>
+                <security:protect method="com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributeService.getCurrentUserProfileAttributes" access="ACL_ATTRIBUTE_USER_READ"/>
+            </security:method-security-metadata-source>
+        </property>
+    </bean>
 
+    <bean id="modifyProfileAttributesAccessDecisionManager" class="org.springframework.security.access.vote.UnanimousBased">
+        <constructor-arg name="decisionVoters" type="java.util.List">
+            <list>
+                <ref bean="roleVoter"/>
+                <ref bean="aclAttributeUserAdminVoter"/>
+            </list>
+        </constructor-arg>
+        <property name="allowIfAllAbstainDecisions">
+            <value>true</value>
+        </property>
+    </bean>
+
+    <bean id="getProfileAttributesAfterInvocationProviderManager" class="org.springframework.security.access.intercept.AfterInvocationProviderManager">
+        <property name="providers">
+            <list>
+                <ref bean="aclAttributeUserReadVoter"/>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="aclAttributeUserAdminVoter" class="com.jaspersoft.jasperserver.api.metadata.security.AttributeArgumentVoter">
+        <property name="configAttribute"  value="ACL_ATTRIBUTE_USER_ADMIN"/>
+        <property name="requiredPermissions">
+            <list>
+                <ref local="JasperServerPermission.ADMINISTRATION"/>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="aclAttributeUserReadVoter" class="com.jaspersoft.jasperserver.api.metadata.security.ContextSensitiveAttributeArgumentVoter">
+        <property name="configAttribute"  value="ACL_ATTRIBUTE_USER_READ"/>
+        <property name="requiredPermissionsMap">
+            <map>
+                <entry key="default">
+                    <list>
+                        <ref local="JasperServerPermission.ADMINISTRATION"/>
+                        <ref local="JasperServerPermission.READ"/>
+                    </list>
+                </entry>
+                <entry key="execute">
+                    <list>
+                        <ref local="JasperServerPermission.ADMINISTRATION"/>
+                        <ref local="JasperServerPermission.READ"/>
+                        <ref local="JasperServerPermission.EXECUTE"/>
+                    </list>
+                </entry>
+            </map>
+        </property>
+    </bean>
+
+    <util:list id="defaultAttributePermissions">
+        <bean class="com.jaspersoft.jasperserver.api.metadata.user.domain.client.ObjectPermissionImpl">
+            <property name="permissionMask" value="1"/>
+            <property name="permissionRecipient" ref="roleAdministratorBean"/>
+            <property name="URI" value="attr:/"/>
+        </bean>
+    </util:list>
+
+    <bean id="roleAdministratorBean" class="com.jaspersoft.jasperserver.api.metadata.user.domain.client.RoleImpl">
+        <property name="roleName" ref="roleAdministrator"/>
+    </bean>
 
 </beans>

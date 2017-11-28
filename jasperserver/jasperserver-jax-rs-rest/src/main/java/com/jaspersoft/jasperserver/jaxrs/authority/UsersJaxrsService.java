@@ -20,32 +20,23 @@
  */
 package com.jaspersoft.jasperserver.jaxrs.authority;
 
-import com.jaspersoft.jasperserver.api.JSException;
-import com.jaspersoft.jasperserver.api.metadata.user.domain.ProfileAttribute;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.Role;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
-import com.jaspersoft.jasperserver.api.metadata.user.domain.client.ProfileAttributeImpl;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.client.UserImpl;
 import com.jaspersoft.jasperserver.dto.authority.ClientUser;
-import com.jaspersoft.jasperserver.dto.authority.ClientUserAttribute;
-import com.jaspersoft.jasperserver.dto.authority.UserAttributesListWrapper;
 import com.jaspersoft.jasperserver.jaxrs.common.RestConstants;
-import com.jaspersoft.jasperserver.remote.ServiceException;
 import com.jaspersoft.jasperserver.remote.common.UserSearchCriteria;
 import com.jaspersoft.jasperserver.remote.exception.IllegalParameterValueException;
 import com.jaspersoft.jasperserver.remote.exception.RemoteException;
 import com.jaspersoft.jasperserver.remote.exception.ResourceAlreadyExistsException;
 import com.jaspersoft.jasperserver.remote.exception.ResourceNotFoundException;
-import com.jaspersoft.jasperserver.remote.resources.converters.UserAttributesConverter;
 import com.jaspersoft.jasperserver.remote.resources.converters.UserConverter;
-import com.jaspersoft.jasperserver.remote.services.GenericAttributesService;
 import com.jaspersoft.jasperserver.remote.services.UserAndRoleService;
 import com.jaspersoft.jasperserver.remote.services.impl.UserAndRoleServiceImpl;
 
 import javax.annotation.Resource;
 import javax.ws.rs.core.Response;
 import java.util.*;
-import java.util.regex.Pattern;
 
 /**
  * @author: Zakhar.Tomchenco

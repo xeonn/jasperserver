@@ -107,7 +107,7 @@
                                                 <span class="wrap"><spring:message
                                                         code="dialog.file.description"/>:</span>
                                                 <textarea id="addFileInputDescription"
-                                                          type="text" name="${status.expression}"><c:out value='${status.value}'/></textarea>
+                                                          type="text" name="${status.expression}">${status.value}</textarea>
                                                 <span class="message warning"><c:if test="${status.error}">${status.errorMessage}</c:if></span>
                                             </label>
                                         </spring:bind>

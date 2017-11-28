@@ -22,8 +22,10 @@
 
 /**
  * @author: afomin, inesterenko
- * @version: $Id: controls.datatransfer.js 7762 2014-09-19 10:16:02Z sergey.prilukin $
+ * @version: $Id: controls.datatransfer.js 8900 2015-05-06 20:57:14Z yplakosh $
  */
+
+/* global JRS, errorObject, __jrsConfigs__, Mustache, dialogs, _, statusText */
 
 JRS.Controls = (function (JSON, jQuery, _, Controls) {
 
@@ -45,9 +47,10 @@ JRS.Controls = (function (JSON, jQuery, _, Controls) {
 
     //Common error handing
     function commonErrorHandler(err) {
+        var errorObject;
         try {
             try {
-                var errorObject = jQuery.parseJSON(err.responseText);
+                errorObject = jQuery.parseJSON(err.responseText);
             } catch (e) {}
 
             if (errorObject && errorObject.error) {
@@ -173,10 +176,10 @@ JRS.Controls = (function (JSON, jQuery, _, Controls) {
                 return this.sendRequest(url, updatedStructure, {type : "PUT"}).then(_.bind(this.dataConverter.structureFormater, this.dataConverter));
             },
 
-            fetchInitialControlValues:function (reportUri) {
+            fetchInitialControlValues:function (reportUri, selectedData) {
                 var url = this.buildUrl(reportUri, null, this.INITIAL_CONTROLS_VALUES_TEMPLATE_URL);
 
-                var initialControlsValues = this.sendRequest(url).
+                var initialControlsValues = this.sendRequest(url, selectedData).
                     then(this.dataConverter.convertResponseToControlsState);
 
                 Controls.Utils.showLoadingDialogOn(initialControlsValues);

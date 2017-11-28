@@ -119,7 +119,7 @@
 
 <center><h1>JasperServer Web Services Sample</h1></center>
 <hr/>
-<h3>Saved job <c:out value="${savedJob.id}"/>.</h3>
+<h3>Saved job ${savedJob.id}.</h3>
 <hr/>
 <a href="<c:url value="reportSchedule.jsp"><c:param name="reportUri" value="${param['reportUri']}"/></c:url>">Back</a>
 </body>

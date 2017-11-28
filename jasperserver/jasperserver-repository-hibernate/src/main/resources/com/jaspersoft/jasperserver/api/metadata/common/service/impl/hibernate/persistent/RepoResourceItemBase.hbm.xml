@@ -33,8 +33,8 @@
         <version column="version" unsaved-value="negative" name="version"/>
 
         <property name="id" not-null="true" type="long" column="id" insert="false" update="false"/>
-        <property name="name" length="100" not-null="true" type="string" column="name" insert="false" update="false"/>
-        <property name="label" not-null="true" length="100" type="string" column="label"/>
+        <property name="name" length="200" not-null="true" type="string" column="name" insert="false" update="false"/>
+        <property name="label" not-null="true" length="200" type="string" column="label"/>
         <property name="description" length="250" type="string" column="description"/>
         <property name="creationDate" not-null="true" type="timestamp" column="creation_date"/>
         <property name="updateDate" not-null="true" type="timestamp" column="update_date"/>

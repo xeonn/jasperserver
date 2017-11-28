@@ -190,4 +190,9 @@ public class EngineBaseDecorator implements EngineService
     public CustomDomainMetaData getMetaDataFromConnector(CustomReportDataSource customReportDataSource) throws Exception {
         return decoratedEngine.getMetaDataFromConnector(customReportDataSource);
     }
+
+    @Override
+    public boolean isCustomDomainMetadataProvider(CustomReportDataSource customReportDataSource) {
+        return decoratedEngine.isCustomDomainMetadataProvider(customReportDataSource);
+    }
 }

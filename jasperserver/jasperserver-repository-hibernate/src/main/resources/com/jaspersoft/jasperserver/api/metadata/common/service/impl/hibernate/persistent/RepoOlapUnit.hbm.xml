@@ -11,4 +11,12 @@
 		<property name="mdxQuery" column="mdx_query" type="text" not-null="true" length="400000" />
 		<property name="olapViewOptions" type="com.jaspersoft.hibernate.ByteWrappingBlobType" length="20971520" column="view_options"/>
 	</joined-subclass>
+
+<!-- create index JIOlapUnit_olapClientConnection_index on JIOlapUnit (olapClientConnection); -->
+<!-- replacing JIOlapUnit_olapClientConnection_index with idx23_olapClientConnection_idx -->
+<database-object>
+	<create>create index idx23_olapClientConnection_idx on JIOlapUnit (olapClientConnection)</create>
+	<drop>DROP INDEX idx23_olapClientConnection_idx ON JIOlapUnit</drop>
+</database-object>
+
 </hibernate-mapping>

@@ -21,10 +21,10 @@
 
 
 /**
- * @version: $Id: components.checkbox-utils.js 7762 2014-09-19 10:16:02Z sergey.prilukin $
+ * @version: $Id: components.checkbox-utils.js 8179 2015-01-27 12:34:21Z psavushchik $
  */
 
-var checkboxLists = new Array();
+var checkboxLists = [];
 
 function checkboxListInit(id, formName, checkAllName, checkboxName, totalCount, selectedCount)
 {

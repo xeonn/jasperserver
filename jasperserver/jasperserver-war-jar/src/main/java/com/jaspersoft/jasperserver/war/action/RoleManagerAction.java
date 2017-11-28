@@ -297,9 +297,9 @@ public class RoleManagerAction extends BaseManagerAction {
                 closeAuditEvent("deleteRole");
             }
             else if (roleNames.size() > 0) {
-                createAuditEvent("deleteAllRoles");
+                createAuditEvent("deleteRoles");
                 roleManagerService.deleteAll(null, roleNames);
-                closeAuditEvent("deleteAllRoles");
+                closeAuditEvent("deleteRoles");
 
                 for (String roleName : roleNames) {
                     setUsersOperationResult(context, new UsersOperationResult(roleName));

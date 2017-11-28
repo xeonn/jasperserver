@@ -23,11 +23,11 @@
 Default rendering HTML fragment for a JR report called from the JasperViewerTag.
 
  Expects attributes:
-    pageIndex:          Integer         Current page in report
-    lastPageIndex:      Integer         Greatest page number in report
-    page:               String          URL for surrounding page
-    exporter:           JRHtmlExporter  The wrapped JasperPrint
-    pageIndexParameter:     String      parameter name in URL for paging
+    pageIndex:          Integer              Current page in report
+    lastPageIndex:      Integer              Greatest page number in report
+    page:               String               URL for surrounding page
+    exporter:           AbstractHtmlExporter The exporter implementation
+    pageIndexParameter: String               parameter name in URL for paging
 --%>
 
 <%@ taglib prefix="t" uri="http://tiles.apache.org/tags-tiles" %>
@@ -37,6 +37,7 @@ Default rendering HTML fragment for a JR report called from the JasperViewerTag.
 
 <%@ page import="net.sf.jasperreports.engine.export.*" %>
 <%@ page import="net.sf.jasperreports.engine.*" %>
+<%@ page import="net.sf.jasperreports.export.*" %>
 <%@ page import="com.jaspersoft.jasperserver.war.action.ExporterConfigurationBean" %>
 <%@ page import="com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportUnit" %>
 <%@ page import="java.io.StringWriter" %>
@@ -70,16 +71,22 @@ Default rendering HTML fragment for a JR report called from the JasperViewerTag.
     <%--  Report Output  --%>
 
     <c:if test="${!emptyReport}">
-        <jsp:useBean id="exporter" type="JRExporter" scope="request"/>
-        <jsp:useBean id="isComponentMetadataEmbedded" type="java.lang.Boolean" scope="request"/>
+        <jsp:useBean id="exporter" type="AbstractHtmlExporter" scope="request"/>
+        <jsp:useBean id="exporterOutput" type="HtmlExporterOutput" scope="request"/>
         <%
-          exporter.setParameter(JRExporterParameter.OUTPUT_WRITER, out);
+          SimpleHtmlExporterOutput htmlExporterOutput = new SimpleHtmlExporterOutput(out);
+          htmlExporterOutput.setImageHandler(exporterOutput.getImageHandler());
+          htmlExporterOutput.setResourceHandler(exporterOutput.getResourceHandler());
+          htmlExporterOutput.setFontHandler(exporterOutput.getFontHandler());
+          exporter.setExporterOutput(htmlExporterOutput);
+
           exporter.exportReport();
 
-          if (isComponentMetadataEmbedded) {
-              JsonExporter jsonExporter = (JsonExporter) request.getAttribute("jsonExporter");
+          JsonExporter jsonExporter = (JsonExporter) request.getAttribute("jsonExporter");
+          if (jsonExporter != null)
+          {
               StringWriter sw = new StringWriter();
-              jsonExporter.setParameter(JRExporterParameter.OUTPUT_WRITER, sw);
+              jsonExporter.setExporterOutput(new SimpleWriterExporterOutput(sw));
               jsonExporter.exportReport();
 
               String serializedJson = sw.getBuffer().toString();

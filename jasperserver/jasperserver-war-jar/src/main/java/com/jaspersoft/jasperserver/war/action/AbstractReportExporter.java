@@ -22,7 +22,6 @@ package com.jaspersoft.jasperserver.war.action;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.ServletOutputStream;
@@ -30,7 +29,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JRExporterParameter;
 import net.sf.jasperreports.engine.JRPropertiesHolder;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReportsContext;
@@ -55,9 +53,10 @@ import com.jaspersoft.jasperserver.war.util.ObjectProcessor;
 import com.jaspersoft.jasperserver.war.util.ObjectSelector;
 import com.jaspersoft.jasperserver.war.util.SessionObjectSerieAccessor;
 
+
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: AbstractReportExporter.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: AbstractReportExporter.java 54728 2015-04-24 15:28:20Z tdanciu $
  */
 public abstract class AbstractReportExporter extends MultiAction {
 	
@@ -96,11 +95,11 @@ public abstract class AbstractReportExporter extends MultiAction {
 		JasperPrint jasperPrint = getJasperPrint(context, jasperPrintName);
 		if (setResponseContentLength)
 		{
-			exportBuffered(context, response, jasperPrint, reportUnitURI);
+			exportBuffered(context, response, jasperPrint);
 		}
 		else
 		{
-			exportToStream(context, response, jasperPrint, reportUnitURI);
+			exportToStream(context, response, jasperPrint);
 		}
 		
 		return success();
@@ -138,18 +137,23 @@ public abstract class AbstractReportExporter extends MultiAction {
 		return jasperPrint;
 	}
 
-	protected void exportToStream(RequestContext context, HttpServletResponse response, JasperPrint jasperPrint, String reportUnitURI) throws IOException, JRException {
-		Map parameters = new HashMap();
-		parameters.put(JRExporterParameter.JASPER_PRINT, jasperPrint);
+	/**
+	 * @deprecated Replaced by {@link #exportToStream(RequestContext, HttpServletResponse, JasperPrint)}.
+	 */
+	protected void exportToStream(RequestContext context, HttpServletResponse response, JasperPrint jasperPrint, String reportUnitURI) throws IOException, JRException 
+	{
+		exportToStream(context, response, jasperPrint);
+	}
 
+	protected void exportToStream(RequestContext context, HttpServletResponse response, JasperPrint jasperPrint) throws IOException, JRException 
+	{
 		OutputStream ouputStream = response.getOutputStream();
-		parameters.put(JRExporterParameter.OUTPUT_STREAM, ouputStream);
 		
 		try
 		{
 			response.setContentType(getContentType(context));
 			setAdditionalResponseHeaders(context, response);
-			export(context, getExecutionContext(context), reportUnitURI, parameters);
+			export(context, getExecutionContext(context), jasperPrint, ouputStream);
 		}
 		finally
 		{
@@ -171,15 +175,20 @@ public abstract class AbstractReportExporter extends MultiAction {
 		return ExecutionContextImpl.getRuntimeExecutionContext(JasperServerUtil.getExecutionContext(context));
 	}
 
-	protected void exportBuffered(RequestContext context, HttpServletResponse response, JasperPrint jasperPrint, String reportUnitURI) throws IOException, JRException {
-		Map parameters = new HashMap();
-		parameters.put(JRExporterParameter.JASPER_PRINT, jasperPrint);
+	/**
+	 * @deprecated Replaced by {@link #exportBuffered(RequestContext, HttpServletResponse, JasperPrint)}. 
+	 */
+	protected void exportBuffered(RequestContext context, HttpServletResponse response, JasperPrint jasperPrint, String reportUnitURI) throws IOException, JRException 
+	{
+		exportBuffered(context, response, jasperPrint);
+	}
 
+	protected void exportBuffered(RequestContext context, HttpServletResponse response, JasperPrint jasperPrint) throws IOException, JRException 
+	{
 		FileBufferedOutputStream bufferedOutput = new FileBufferedOutputStream(getMemoryThreshold(), getInitialMemoryBufferSize());
-		parameters.put(JRExporterParameter.OUTPUT_STREAM, bufferedOutput);
 
 		try {
-			export(context, getExecutionContext(context), reportUnitURI, parameters);
+			export(context, getExecutionContext(context), jasperPrint, bufferedOutput);
 			bufferedOutput.close();
 			
 			int exportSize = bufferedOutput.size();
@@ -281,7 +290,23 @@ public abstract class AbstractReportExporter extends MultiAction {
 		return reportUnitURI.substring(reportUnitURI.lastIndexOf("/") + 1);
 	}
 	
-	protected abstract void export(RequestContext context, ExecutionContext executionContext, String reportUnitURI, Map baseParameters) throws JRException;
+	/**
+	 * @deprecated Replaced by {@link #export(RequestContext, ExecutionContext, JasperPrint, OutputStream)}.
+	 */
+	public void export(RequestContext context, ExecutionContext executionContext, String reportUnitURI, Map baseParameters) throws JRException 
+	{
+		export(
+			context, 
+			executionContext, 
+			(JasperPrint)baseParameters.get(net.sf.jasperreports.engine.JRExporterParameter.JASPER_PRINT), 
+			(OutputStream)baseParameters.get(net.sf.jasperreports.engine.JRExporterParameter.OUTPUT_STREAM)
+			);
+	}
+	
+	/**
+	 * 
+	 */
+	protected abstract void export(RequestContext context, ExecutionContext executionContext, JasperPrint jasperPrint, OutputStream outputStream) throws JRException;
 	
 	protected String getFilename(RequestContext context) {
 		ServletExternalContext servletContext = (ServletExternalContext) context.getExternalContext();

@@ -22,13 +22,12 @@
 package com.jaspersoft.jasperserver.api.metadata.security;
 
 import com.jaspersoft.jasperserver.api.JSException;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.PermissionUriProtocol;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.ObjectPermission;
+import com.jaspersoft.jasperserver.api.metadata.user.service.impl.AttributePathTransformer;
 import com.jaspersoft.jasperserver.api.metadata.user.service.impl.InternalURIDefinition;
 import com.jaspersoft.jasperserver.api.metadata.user.service.impl.JasperServerSidRetrievalStrategyImpl;
-import com.jaspersoft.jasperserver.api.metadata.user.service.impl.ObjectPermissionServiceImpl;
 import org.springframework.security.access.ConfigAttribute;
-import org.springframework.security.acls.domain.GrantedAuthoritySid;
-import org.springframework.security.acls.domain.SidRetrievalStrategyImpl;
 import org.springframework.security.acls.model.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
@@ -41,7 +40,7 @@ import java.util.List;
  * <p></p>
  *
  * @author Zakhar.Tomchenco
- * @version $Id: IsAdministrableObjectPermissionArgumentVoter.java 51947 2014-12-11 14:38:38Z ogavavka $
+ * @version $Id: IsAdministrableObjectPermissionArgumentVoter.java 54590 2015-04-22 17:55:42Z vzavadsk $
  */
 @Component
 public class IsAdministrableObjectPermissionArgumentVoter extends BasicObjectPermissionArgumentVoter {
@@ -50,13 +49,16 @@ public class IsAdministrableObjectPermissionArgumentVoter extends BasicObjectPer
     // let's use unsecure object permission service
     @Resource(name = "internalAclService")
     private AclService resourcesAclService;
+    @Resource
+    private AttributePathTransformer attributePathTransformer;
 
     @Override
     protected boolean isPermitted(Authentication authentication, ObjectPermission objectPermission, Object object) {
         SidRetrievalStrategy sidStrategy = new JasperServerSidRetrievalStrategyImpl();
+
         Acl acl;
         try {
-            acl = resourcesAclService.readAclById(new InternalURIDefinition(objectPermission.getURI()), sidStrategy.getSids(authentication));
+            acl = resourcesAclService.readAclById(getSecureObject(authentication, objectPermission), sidStrategy.getSids(authentication));
         } catch (JSException e) {
             // in some cases we are trying to reach not reachable resource, this will throw error
             acl=null;
@@ -68,6 +70,16 @@ public class IsAdministrableObjectPermissionArgumentVoter extends BasicObjectPer
         }
 
         return false;
+    }
+
+    private InternalURIDefinition getSecureObject(Authentication authentication, ObjectPermission objectPermission) {
+        String checkPermissionUri = PermissionUriProtocol.removePrefix(objectPermission.getURI());
+        PermissionUriProtocol protocol = PermissionUriProtocol.getProtocol(objectPermission.getURI());
+        if (protocol == PermissionUriProtocol.ATTRIBUTE) {
+            checkPermissionUri = attributePathTransformer.transformPath(checkPermissionUri, authentication);
+        }
+
+        return new InternalURIDefinition(checkPermissionUri, protocol);
     }
 
     @Override

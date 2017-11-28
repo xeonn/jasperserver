@@ -23,6 +23,7 @@ package com.jaspersoft.jasperserver.test;
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.FileResource;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Folder;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.PermissionUriProtocol;
 import com.jaspersoft.jasperserver.api.metadata.security.JasperServerPermission;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.ObjectPermission;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.Role;
@@ -147,6 +148,9 @@ public class CoreDataCreateTestNG extends BaseServiceSetupTestNG {
         // add folder perm: root folder, ROLE_USER (read_only)
         createObjectPermission("/", roleAdministrator, JasperServerPermission.ADMINISTRATION.getMask());
         createObjectPermission("/", roleUser, JasperServerPermission.READ.getMask());    // root folder read only for ROLE_USER
+
+        // add attributes perm: attributes root, ROLE_ADMINISTRATOR (administrator)
+        createObjectPermission("/", roleAdministrator, JasperServerPermission.ADMINISTRATION.getMask(), PermissionUriProtocol.ATTRIBUTE);    // root folder read only for ROLE_USER
 
         // create user anonymousUser
         // create and add role ROLE_ANONYMOUS to anonymousUser

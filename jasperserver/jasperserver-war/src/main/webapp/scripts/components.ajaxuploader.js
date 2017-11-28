@@ -22,10 +22,12 @@
 
 /**
  * @author: ztomchenco
- * @version: $Id: components.ajaxuploader.js 8025 2014-11-12 13:10:12Z ktsaregradskyi $
+ * @version: $Id: components.ajaxuploader.js 8179 2015-01-27 12:34:21Z psavushchik $
  */
 
-jaspersoft || (jaspersoft = {components:{}});
+/* global jaspersoft, _, ActiveXObject */
+
+jaspersoft || (jaspersoft = {components:{}}); // jshint ignore: line
 jaspersoft.components || (jaspersoft.components = {});
 
 jaspersoft.components.AjaxUploader = (function ($, Template) {
@@ -34,7 +36,7 @@ jaspersoft.components.AjaxUploader = (function ($, Template) {
         var result;
         if (document.firstChild.innerText && document.firstChild.innerText !== "") {
             if (document.body){
-                var result = new ActiveXObject("Microsoft.XMLDOM");
+                result = new ActiveXObject("Microsoft.XMLDOM");
                 result.async = false;
                 //remove injected by IE symbols
                 result.loadXML(document.firstChild.innerText.replace("\r\n-", "\r\n"));
@@ -56,7 +58,7 @@ jaspersoft.components.AjaxUploader = (function ($, Template) {
     }
 
     function parseChildren(node){
-        var children;
+        var children, ob;
         if (!node.children){
             children = [];
             for (var i= 0, l= node.childNodes.length; i<l; i++){
@@ -71,7 +73,6 @@ jaspersoft.components.AjaxUploader = (function ($, Template) {
         if (children.length === 0 && node.childNodes.length === 1){
             return node.childNodes[0].nodeValue;
         } else {
-            var ob;
             if (children.length > 1 && (children[0].nodeName === children[1].nodeName)){
                 ob = [];
                 for (var i= 0, l= children.length; i<l; i++){

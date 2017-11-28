@@ -106,7 +106,7 @@
                                                     code='resource.dataSource.name'/> (<spring:message
                                                     code='required.field'/>):</span>
                                 <input class="" id="labelID" type="text" name="${status.expression}"
-                                       value="<c:out value="${status.value}"/>"/>
+                                       value="${status.value}"/>
                                 <!-- NOTE: This inline javascript here just for demonstration purposes; in production use AJAX to validate and create resourceID on keyup -->
                                             <span class="message warning">
                                                 <c:if test="${status.error}">${status.errorMessage}</c:if>

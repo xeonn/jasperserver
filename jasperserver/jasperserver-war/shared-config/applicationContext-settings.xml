@@ -19,6 +19,7 @@
                 <entry key="decimalFormatSymbols" value-ref="decimalFormatSymbolsProvider"/>
                 <entry key="auth" value-ref="authSettingsProvider"/>
                 <entry key="request" value-ref="requestSettingsProvider"/>
+                <entry key="inputControls" value-ref="inputControls"/>
             </map>
         </constructor-arg>
     </bean>
@@ -85,14 +86,19 @@
                 <entry key="dateFormat" value="calendar.date.format"/>
             </map>
         </property>
+        <property name="timePickerSettingsPattern">
+            <bean class="java.util.regex.Pattern" factory-method="compile">
+                <constructor-arg index="0">
+                    <value><![CDATA[(\$|jQuery)\.timepicker.regional['"\w\-\[\]]+\s+=\s+(.*);.*(\$|jQuery)\.timepicker.setDefaults\(]]></value>
+                </constructor-arg>
+                <constructor-arg index="1">
+                    <util:constant static-field="java.util.regex.Pattern.DOTALL"/>
+                </constructor-arg>
+            </bean>
+        </property>
+        <property name="timePickerSettingsPathTemplate" value="/scripts/bower_components/jquery.timepicker.addon/src/i18n/jquery-ui-timepicker-%s.js"/>
         <property name="timePickerPropertiesMapping">
             <map>
-                <entry key="timeText" value="CAL_time"/>
-                <entry key="hourText" value="CAL_hour"/>
-                <entry key="minuteText" value="CAL_min"/>
-                <entry key="secondText" value="CAL_second"/>
-                <entry key="currentText" value="CAL_now"/>
-                <entry key="closeText" value="CAL_close"/>
                 <entry key="timeFormat" value="calendar.time.format"/>
                 <entry key="dateFormat" value="calendar.date.format"/>
                 <entry key="separator" value="calendar.datetime.separator"/>
@@ -103,4 +109,8 @@
     </bean>
 
     <bean id="requestSettingsProvider" class="com.jaspersoft.jasperserver.remote.settings.RequestSettingsProvider"/>
+
+    <util:map id="inputControls">
+        <entry key="useUrlParametersOnReset" value="true"/>
+    </util:map>
 </beans>

@@ -19,6 +19,14 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+
+/**
+ * @author: Dima Gorbenko
+ * @version: $Id: BaseDataSourceModel.js 8790 2015-04-22 21:28:09Z obobruyk $
+ */
+
+/* global ajax, dialogs, AjaxRequester */
+
 define(function (require) {
     "use strict";
 

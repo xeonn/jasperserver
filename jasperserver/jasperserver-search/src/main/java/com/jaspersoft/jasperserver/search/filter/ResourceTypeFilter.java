@@ -22,6 +22,7 @@ package com.jaspersoft.jasperserver.search.filter;
 
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Folder;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceLookup;
 import com.jaspersoft.jasperserver.api.metadata.common.service.ResourceFactory;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportUnit;
@@ -35,13 +36,17 @@ import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * <p>Filters resources by resourceType field.</p>
  *
  * @author Yuriy Plakosh
- * @version $Id: ResourceTypeFilter.java 51441 2014-11-14 14:01:06Z bkolesnikov $
+ * @version $Id: ResourceTypeFilter.java 55352 2015-05-15 08:20:19Z ykovalch $
  */
 public class ResourceTypeFilter extends BaseSearchFilter implements Serializable {
     private Map<String, List<String>> filterOptionToResourceTypes;
@@ -78,13 +83,14 @@ public class ResourceTypeFilter extends BaseSearchFilter implements Serializable
                 if (repositorySearchCriteria.getResourceTypes() != null && !repositorySearchCriteria.getResourceTypes().isEmpty()) {
                     List<String> types = new ArrayList<String>(repositorySearchCriteria.getResourceTypes());
                     boolean addFolders = types.remove(Folder.class.getName());
-                    boolean extractTopics = types.remove("com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.Topic");
+                    boolean extractTopics = types.remove("com.jaspersoft.commons.semantic.datasource.Topic");
 
-                    Criterion criterion = Restrictions.in("resourceType", types);
+                    Criterion criterion = types.isEmpty() ? null : Restrictions.in("resourceType", types);
 
-                    if (addFolders && ResourceLookup.class.getName().equals(type)) {
+                    if (addFolders && (ResourceLookup.class.getName().equals(type) || (types.isEmpty() && Resource.class.getName().equals(type)))) {
+                        // folders only are requested
                         Criterion folderCriterion = Restrictions.isNull("resourceType");
-                        criterion = types.isEmpty() ? folderCriterion : Restrictions.or(folderCriterion, criterion);
+                        criterion = criterion == null ? folderCriterion : Restrictions.or(folderCriterion, criterion);
                     }
 
                     if(extractTopics){
@@ -112,7 +118,7 @@ public class ResourceTypeFilter extends BaseSearchFilter implements Serializable
                         Criterion isReportUnit = Restrictions.eq("resourceType", ReportUnit.class.getName());
                         Criterion isTopic = Restrictions.and(isReportUnit, Restrictions.in("id", topicIds));
 
-                        criterion = Restrictions.or(criterion, isTopic);
+                        criterion = criterion == null ? isTopic : Restrictions.or(criterion, isTopic);
                     }
 
                     criteria.add(criterion);

@@ -9,12 +9,12 @@
 			<generator class="native"/>
 		</id>
 		<natural-id mutable="true">
-			<property name="name" not-null="true" length="100" type="string" column="name"/>
+			<property name="name" not-null="true" length="200" type="string" column="name"/>
 			<many-to-one column="parent_folder" name="parent"/>
 		</natural-id>
 		<version column="version" unsaved-value="negative" name="version"/>
 		<many-to-one column="childrenFolder" cascade="save-update,delete" name="childrenFolder"/>
-		<property name="label" not-null="true" length="100" type="string" column="label"/>
+		<property name="label" not-null="true" length="200" type="string" column="label"/>
 		<property name="description" length="250" type="string" column="description"/>
         <property name="resourceType" not-null="true" length="255" type="string" column="resourceType"
                   index="resource_type_index"/>
@@ -29,4 +29,18 @@
             <one-to-many class="com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.persistent.RepoReportThumbnail"/>
         </set>
 	</class>
+
+<!-- create index JIResource_childrenFolder_index on JIResource (childrenFolder); -->
+<!-- replacing JIResource_childrenFolder_index with JIResource_childrenFolder_idx -->
+<database-object>
+	<create>create index JIResource_childrenFolder_idx on JIResource (childrenFolder)</create>
+	<drop>DROP INDEX JIResource_childrenFolder_idx ON JIResource</drop>
+</database-object>
+
+<!-- create index JIResource_parent_folder_index on JIResource (parent_folder); -->
+<database-object>
+	<create>create index JIResource_parent_folder_index on JIResource (parent_folder)</create>
+	<drop>DROP INDEX JIResource_parent_folder_index ON JIResource</drop>
+</database-object>
+
 </hibernate-mapping>

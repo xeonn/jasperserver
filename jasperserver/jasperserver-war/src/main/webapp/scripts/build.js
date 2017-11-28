@@ -16,17 +16,10 @@
     "ReportRequireJsConfig": "empty:"
   },
   "shim": {
-    "xdm.remote.page": {
-      "deps": [
-        "bower_components/requirejs/require",
-        "require.config",
-        "bower_components/jquery/dist/jquery"
-      ]
-    },
     "mustache": {
       "init": function () {
-                                return Mustache;
-                            }
+                    return Mustache;
+                }
     }
   },
   "modules": [
@@ -74,6 +67,12 @@
     },
     {
       "name": "addQueryWithResourceLocator.page"
+    },
+    {
+      "name": "adminCustomAttributesPage"
+    },
+    {
+      "name": "adminResetSettingsPage"
     },
     {
       "name": "admin.export.page"
@@ -148,5 +147,5 @@
       "name": "xdm.remote.page"
     }
   ],
-  "fileExclusionRegExp": /(prototype.*patched\.js|Owasp\.CsrfGuard\.js)/
+  "fileExclusionRegExp": /(^\.|prototype.*patched\.js|Owasp\.CsrfGuard\.js)/
 })

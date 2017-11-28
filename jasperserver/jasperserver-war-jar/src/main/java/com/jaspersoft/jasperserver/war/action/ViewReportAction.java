@@ -91,7 +91,7 @@ import com.jaspersoft.jasperserver.war.util.SessionObjectSerieAccessor;
 
 /**
  * @author Ionut Nedelcu (ionutned@users.sourceforge.net)
- * @version $Id: ViewReportAction.java 51559 2014-11-20 06:43:37Z nmarcu $
+ * @version $Id: ViewReportAction.java 54728 2015-04-24 15:28:20Z tdanciu $
  */
 public class ViewReportAction extends ReportParametersAction
 {
@@ -633,14 +633,14 @@ public class ViewReportAction extends ReportParametersAction
 			ReportContext reportContext = getReportContext(context);
 			request.setReportContext(reportContext);
 			return (ReportUnitResult) getEngine().execute(getExecutionContext(context), request);
+        } catch (JRFillInterruptedException e) {
+            throw new ReportCanceledException(e);
         } catch (JRRuntimeException e){
             int indexIO = ExceptionUtils.indexOfThrowable(e, IOException.class);
             if (indexIO != -1){
                 throw new JSShowOnlyErrorMessage(((Exception) ExceptionUtils.getThrowableList(e).get(indexIO)).getMessage());
             }
             throw e;
-        } catch (JRFillInterruptedException e) {
-            throw new ReportCanceledException(e);
         } finally {
 			endReportExecution(context);
         }

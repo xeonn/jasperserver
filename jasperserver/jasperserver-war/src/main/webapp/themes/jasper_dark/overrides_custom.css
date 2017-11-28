@@ -25,12 +25,15 @@ and therefore, will not display the new components correctly.
     border: 1px solid #bf5b08;
 }
 
+.action.primary {
+    background-image: none;
+    background-color: #035b85;
+}
 
 /* CONTAINERS */
 
 .banner {
-	border-top:1px solid #000b2c;
-	border-bottom: 1px solid #000b2c;
+	background-color: #003356;
 }
 
 column.decorated {
@@ -38,12 +41,7 @@ column.decorated {
 }
 
 #frameFooter {
-	background: url("images/footer_bkgd.png") repeat-x scroll 0 0 #024666;
-	border-top: 1px solid #000b2c
-}
-
-body {
-	background: none repeat scroll 0 0 #035b85;
+	background-color: #003356;
 }
 
 .panel.tooltip .message.label {
@@ -64,7 +62,6 @@ body {
 #systemMessage {
     color: #035b85;
     font-weight: bold;
-    padding: 6px 6px 0;
     text-align: center;
 }
 
@@ -82,7 +79,9 @@ body {
 .list > li.selected > .wrap,
 .list > li.selected > .wrap.over,
 .sList li.selected,
-.mSelect-svList > .selected .mSelect-svList-button {
+.mSelect-svList > .selected .mSelect-svList-button,
+.list.filters > li > .wrap.over,
+.list.filters > li > .wrap.pressed {
 	background-color: #035B85;
 }
 
@@ -102,7 +101,6 @@ body {
 
 /* sky */
 .palette09,
-.launcher,
 .button.action.jumbo,
 .homeSidebar-title, 
 .workflow-title, 
@@ -114,36 +112,37 @@ body {
 	color:#035b85;
 }
 
+.button.action.primary.disabled,
+.button.action.primary[disabled], 
+.tabSet.buttons.vertical [disabled] {
+    color: #7595ab;
+}
+
 .palette10,
 #metaLinks a:active,
 a#about:active {
 	color:#92c6de;
 }
 
-/* dark blue in gradient */
-.content .header > .title, 
+/* dark blue in gradient */ 
+.palette11,
 .column.decorated.minimized .vtitle, 
 .tabSet.horizontal.buttons .selected > .button > .wrap,
 #filter-container .filterName,
 #expression-container .filterName,
-#scheduler_editor #stepDisplay > fieldset > legend {
-	color: #035b85;
-}
-
-/* royal */
-.palette11,
+#scheduler_editor #stepDisplay > fieldset > legend,
 .textAccent02,
 .tabSet.text .selected.tab>.wrap,
 .tabSet.text .selected.tab>.wrap.over,
 .tabSet.text .selected.tab>.wrap.pressed,
 .list.filters>li.selected>.wrap,
-.list.filters>.leaf>.wrap.pressed,
 .list.stepIndicator .selected>.wrap,
 .panel.info.system .message,
 .resourceName,
 .fsection,
 #reportContainer a,
-.plusminus .node>.wrap>.jrbookmark {
+.plusminus .node>.wrap>.jrbookmark,
+.filterManagerDialog .addNewFilter {
 	color:#035b85;
 }
 
@@ -187,14 +186,14 @@ a#about:active {
 	background-color:#035b85 !important;
 }
 
-a#about, 
-a#about:hover, 
-a#about:active, 
-#frameFooter,
-#frameFooter #about a,
-#frameFooter #about a:visited {
-	color: #92c6de;
-	color: #92c6de\9; /* IE8 and IE9 */
+#frameFooter #about a, 
+#frameFooter #about a:link,
+#frameFooter #about a:visited,
+#frameFooter #about a:hover, 
+#frameFooter #about a:active,
+#frameFooter #copyright {
+	color: #84a2b6;
+	color: #84a2b6\9; /* IE8 and IE9 */
 }
 
 a.emphasis,
@@ -218,6 +217,23 @@ a.emphasis:active {
 
 /* PAGE SPECIFIC */
 
+#loginPage #frame {
+	background-color: #fff;
+}
+
+#loginPage #welcome {
+    background-color: #003356;
+    height: 80px;
+}
+
+#loginPage #copy {
+	background-color: #035b85;
+}
+
+#loginPage .info > .content {
+	background-color: #035b85;
+}
+
 #resultsList li.selected > div.wrap > div.resourceType,
 #resultsList li.pressed > div.wrap > div.resourceType {
 	background:#035b85 !important;
@@ -226,6 +242,10 @@ a.emphasis:active {
 .authorityPicker .selected,
 .authorityPicker .highlighted.selected {
     background-color: #035b85;
+}
+
+.workflow-buttonContainer .button {
+    color: #1c78a4;
 }
 
 

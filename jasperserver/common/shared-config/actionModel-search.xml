@@ -58,6 +58,8 @@
                                 className="up"/>
                         <option labelKey="resourceTypes.xml.file" action="invokeCreate" actionArgs="FileResource@@xml"
                                 className="up"/>
+                        <option labelKey="resourceTypes.mongodb.jdbc.config" action="invokeCreate" actionArgs="FileResource@@config"
+                                className="up"/>
                     </selectAction>
 
                     <option labelKey="RM_NEW_RESOURCE_INPUT_CONTROL" action="invokeCreate" actionArgs="InputControl"

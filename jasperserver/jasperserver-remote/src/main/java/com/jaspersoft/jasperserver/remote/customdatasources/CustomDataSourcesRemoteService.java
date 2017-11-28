@@ -2,20 +2,20 @@
  * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
 * http://www.jaspersoft.com.
 *
-* Unless you have purchased  a commercial license agreement from Jaspersoft,
-* the following license terms  apply:
+* Unless you have purchased a commercial license agreement from Jaspersoft,
+* the following license terms apply:
 *
-* This program is free software: you can redistribute it and/or  modify
-* it under the terms of the GNU Affero General Public License  as
-* published by the Free Software Foundation, either version 3 of  the
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU Affero General Public License as
+* published by the Free Software Foundation, either version 3 of the
 * License, or (at your option) any later version.
 *
 * This program is distributed in the hope that it will be useful,
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-* GNU Affero  General Public License for more details.
+* GNU Affero General Public License for more details.
 *
-* You should have received a copy of the GNU Affero General Public  License
+* You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 package com.jaspersoft.jasperserver.remote.customdatasources;
@@ -31,12 +31,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * <p></p>
  *
  * @author yaroslav.kovalchyk
- * @version $Id: CustomDataSourcesRemoteService.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: CustomDataSourcesRemoteService.java 53873 2015-04-07 18:59:44Z mchan $
  */
 @Service
 public class CustomDataSourcesRemoteService implements InitializingBean {
@@ -44,23 +45,28 @@ public class CustomDataSourcesRemoteService implements InitializingBean {
     private List<CustomDataSourceDefinition> definitions;
     @Resource
     private CustomDataSourceDefinitionToClientConverter converter;
+    @Resource
+    private Set<String> customDataSourcesToHide;
 
     private Map<String, CustomDataSourceDefinition> definitionMap = new HashMap<String, CustomDataSourceDefinition>();
 
-    public List<String> getCustomDataSourceDefinitions(){
+    public List<String> getCustomDataSourceDefinitions() {
         return new ArrayList<String>(definitionMap.keySet());
     }
 
-    public ClientCustomDataSourceDefinition getCustomDataSourceDefinition(String name){
+    public ClientCustomDataSourceDefinition getCustomDataSourceDefinition(String name) {
         final CustomDataSourceDefinition customDataSourceDefinition = definitionMap.get(name);
-        if(customDataSourceDefinition == null) throw new ResourceNotFoundException(name);
+        if (customDataSourceDefinition == null) throw new ResourceNotFoundException(name);
         return converter.toClient(customDataSourceDefinition, null);
     }
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        for(CustomDataSourceDefinition currentDefinition : definitions){
-            definitionMap.put(currentDefinition.getName(), currentDefinition);
+        for (CustomDataSourceDefinition currentDefinition : definitions) {
+            final String name = currentDefinition.getName();
+            if (!customDataSourcesToHide.contains(name)) {
+                definitionMap.put(name, currentDefinition);
+            }
         }
     }
 }

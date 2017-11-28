@@ -45,6 +45,7 @@ import com.jaspersoft.jasperserver.war.common.JasperServerUtil;
 import com.jaspersoft.jasperserver.war.dto.*;
 import com.jaspersoft.jasperserver.war.model.impl.BaseTreeDataProvider;
 import com.jaspersoft.jasperserver.war.model.impl.TypedTreeDataProvider;
+import com.jaspersoft.jasperserver.war.repository.JRXMLRepository;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -112,6 +113,8 @@ public class ReportUnitAction extends FormAction {
     protected final Log log = LogFactory.getLog(this.getClass());
 
 	private RepositoryService repository;
+
+	private JRXMLRepository jrxmlRepository;
 
     protected RepositorySecurityChecker securityChecker;
 
@@ -198,50 +201,36 @@ public class ReportUnitAction extends FormAction {
 
 	public Event initAction(RequestContext context) throws Exception {
 		ReportUnitWrapper wrapper = getFormReportUnitWrapper(context);
-		// Get a list of all jrxmls in repo and set in the formObject
-		FilterCriteria criteria = FilterCriteria
-				.createFilter(FileResource.class);
-		criteria.addFilterElement(FilterCriteria.createPropertyEqualsFilter(
-				"fileType", FileResource.TYPE_JRXML));
-		ResourceLookup[] lookups = repository.findResource(JasperServerUtil.getExecutionContext(context), criteria);
-		List allJrxmls = null;
-		if (lookups != null && lookups.length != 0) {
-			log("Found JRXML lookups size=" + lookups.length);
-			allJrxmls = new ArrayList(lookups.length);
-			for (int i = 0; i < lookups.length; i++) {
-				Resource fileR = (Resource) lookups[i];
-				allJrxmls.add(fileR.getURIString());
-				log("added uri=" + fileR.getURIString());
-			}
-			wrapper.setReusableJrxmls(allJrxmls);
-		} else {
-			log("No reusable Jrxmls found");
-		}
+
+        wrapper.setAnyJrxmlAvailable(jrxmlRepository.isAnyJrxmlExists(context));
 		/* In new Mode get a list of all resources already present in the chosen
 		 * folder, to validate report name's uniqueness */
 		if (wrapper.isNewMode()) {
-			String folderURI = wrapper.getReportUnit().getParentFolder();
-			if (folderURI == null)
-			{
-				folderURI = "/";
-			}
-			FilterCriteria resourcesInFolder = FilterCriteria.createFilter();
-			resourcesInFolder.addFilterElement(FilterCriteria
-					.createParentFolderFilter(folderURI));
-			log("Searching for resources in the chosen folder:"+folderURI);
-			ResourceLookup[] existingResources = repository.findResource(JasperServerUtil.getExecutionContext(context),
-					resourcesInFolder);
-			
-			if (existingResources != null && existingResources.length != 0) {
-				log("res lookup size="+existingResources.length);
-				List allResources = new ArrayList();
-				for (int i = 0; i < existingResources.length; i++) {
-					ResourceLookup rLookup = existingResources[i];
-					allResources.add(rLookup.getName());
-					log("adding resource: "+rLookup.getName()+ " to the list");
-				}
-				wrapper.setExistingResources(allResources);
-			}
+            /**
+             * TODO(stas): Remove this block. I didn't find any usage of getExistingResources
+             */
+//			String folderURI = wrapper.getReportUnit().getParentFolder();
+//			if (folderURI == null)
+//			{
+//				folderURI = "/";
+//			}
+//			FilterCriteria resourcesInFolder = FilterCriteria.createFilter();
+//			resourcesInFolder.addFilterElement(FilterCriteria
+//					.createParentFolderFilter(folderURI));
+//			log("Searching for resources in the chosen folder:"+folderURI);
+//			ResourceLookup[] existingResources = repository.findResource(JasperServerUtil.getExecutionContext(context),
+//					resourcesInFolder);
+//
+//			if (existingResources != null && existingResources.length != 0) {
+//				log("res lookup size="+existingResources.length);
+//				List allResources = new ArrayList();
+//				for (int i = 0; i < existingResources.length; i++) {
+//					ResourceLookup rLookup = existingResources[i];
+//					allResources.add(rLookup.getName());
+//					log("adding resource: "+rLookup.getName()+ " to the list");
+//				}
+//				wrapper.setExistingResources(allResources);
+//			}
 		} else {
 			setJRXMLQueryLanguage(context, false);
 		}
@@ -1223,4 +1212,7 @@ public class ReportUnitAction extends FormAction {
         this.dataSourceTreeDataProvider = dataSourceTreeDataProvider;
     }
 
+    public void setJrxmlRepository(JRXMLRepository jrxmlRepository) {
+        this.jrxmlRepository = jrxmlRepository;
+    }
 }

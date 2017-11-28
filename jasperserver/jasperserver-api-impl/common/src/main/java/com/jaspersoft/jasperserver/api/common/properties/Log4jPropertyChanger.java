@@ -20,24 +20,36 @@
  */
 package com.jaspersoft.jasperserver.api.common.properties;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-
+import com.jaspersoft.jasperserver.api.common.util.diagnostic.LoggerLevelChangeInitiator;
+import com.jaspersoft.jasperserver.api.common.util.diagnostic.LoggerLevelChanger;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 
 /**
  * Log4j changer manages log4j configuration.
  * it assumes a "log4j." prefix for all logger names.
  * @author udavidovich
+ * @version $Id: Log4jPropertyChanger.java 54483 2015-04-21 03:18:31Z ytymoshe $
  */
+@Component
 public class Log4jPropertyChanger extends PropertyChangerAdapter {
-	final public static String PROPERTY_PREFIX = "log4j.";
-
+	public final static String PROPERTY_PREFIX = "log4j.";
     private static final Log log = LogFactory.getLog(Log4jPropertyChanger.class);
+
     private Log4jSettingsService log4jSettingsService;
+
+    @Autowired(required = false)
+    @Qualifier("logVerbosityManager")
+    private LoggerLevelChanger loggerLevelChanger;
 
     public void setLog4jSettingsService(Log4jSettingsService log4jSettingsService) {
         this.log4jSettingsService = log4jSettingsService;
@@ -48,14 +60,21 @@ public class Log4jPropertyChanger extends PropertyChangerAdapter {
         log.debug("setting log4j property: " + key + " - " + value);
         key=parseKey(key);
         Logger log = Logger.getLogger(key);
-        log.setLevel(Level.toLevel(value));
+        Level level = Level.toLevel(value);
+        if (loggerLevelChanger == null) {
+            // CE version
+            log.setLevel(level);
+        } else {
+            // PRO version
+            loggerLevelChanger.setLevel(log, level, LoggerLevelChangeInitiator.SERVER_SETTINGS);
+        }
 	}
 
     @Override
 	public String getProperty(String key) {
         key=parseKey(key);
         Logger log = Logger.getLogger(key);
-        return log.getEffectiveLevel().toString(); 
+        return log.getEffectiveLevel().toString();
         //effective level can be inherited from a parent
 	}
 
@@ -68,7 +87,7 @@ public class Log4jPropertyChanger extends PropertyChangerAdapter {
         return propertiesMap;
     }
 
-    static public String parseKey(String key) {
+    public static String parseKey(String key) {
 		assert (key.startsWith(PROPERTY_PREFIX));
 		return key.substring(PROPERTY_PREFIX.length());
 	}

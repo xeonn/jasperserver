@@ -48,7 +48,7 @@ Usage:
     </t:putAttribute>
     <t:putAttribute name="headerClass" value="mover"/>
     <t:putAttribute name="bodyContent">
-        <fieldset class="group">
+        <fieldset class="group first">
             <legend class="offLeft"><span><spring:message code="dialog.file.nameAndDescription" javaScriptEscape="true"/></span></legend>
             <label class="control input text" class="required" for="addOrgName" title="<spring:message code="MT_ORG_NAME_TEXT" javaScriptEscape="true"/>">
                 <span class="wrap"><spring:message code="MT_ORG_NAME" javaScriptEscape="true"/>  (<spring:message code='required.field'/>):</span>

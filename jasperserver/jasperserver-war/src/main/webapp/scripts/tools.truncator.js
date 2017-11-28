@@ -22,8 +22,10 @@
 
 /**
  * @author: stas.chubar
- * @version: $Id: tools.truncator.js 7762 2014-09-19 10:16:02Z sergey.prilukin $
+ * @version: $Id: tools.truncator.js 8179 2015-01-27 12:34:21Z psavushchik $
  */
+
+/* global Class, isIE, Template */
 
 /*
  * Truncator is based on Abbreviator jQuery Plugin
@@ -155,6 +157,7 @@ var Truncator = Class.create({
 
 Truncator.tmpDivId = 'truncator-tmp-div';
 Truncator.tmpSpanId = 'truncator-tmp-span';
+/*jshint multistr: true */
 Truncator.template = new Template('\
     <div id="#{divId}" style="width:9999px; left:-9999px; top:-9999px; display:block; position: absolute">\
         <span id="#{spanId}"></span>\

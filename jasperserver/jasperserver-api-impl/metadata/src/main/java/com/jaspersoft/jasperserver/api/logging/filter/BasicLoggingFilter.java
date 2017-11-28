@@ -21,6 +21,8 @@
 package com.jaspersoft.jasperserver.api.logging.filter;
 
 import com.jaspersoft.jasperserver.api.logging.context.LoggingContextProvider;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -35,6 +37,8 @@ import java.io.IOException;
  * @version $Id$
  */
 public abstract class BasicLoggingFilter implements Filter {
+
+    private static final Log log = LogFactory.getLog(BasicLoggingFilter.class);
 
     private LoggingContextProvider loggingContextProvider;
     private Exception originalException = null;
@@ -61,9 +65,13 @@ public abstract class BasicLoggingFilter implements Filter {
             originalException = e;
             throw e;
         } finally {
-            logException(request, originalException);
-            originalException = null;
-            loggingContextProvider.flushContext();
+            try {
+                logException(request, originalException);
+                originalException = null;
+                loggingContextProvider.flushContext();
+            } catch (Exception e) {
+                log.error("Exception during flushing audit context", e);
+            }
         }
     }
 

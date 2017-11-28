@@ -20,12 +20,10 @@
  */
 package com.jaspersoft.jasperserver.war.common;
 
-import org.apache.commons.httpclient.methods.PostMethod;
-
 
 /**
  * @author Lucian Chirita
- * @version $Id: HeartbeatCustomDSInfo.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: HeartbeatCustomDSInfo.java 55164 2015-05-06 20:54:37Z mchan $
  */
 public class HeartbeatCustomDSInfo extends HeartbeatInfo {
 	/**
@@ -43,9 +41,9 @@ public class HeartbeatCustomDSInfo extends HeartbeatInfo {
 		this.serviceClass = serviceClass;
 	}
 
-	public void contributeToHttpCall(PostMethod post) {
-		post.addParameter("customDSClass[]", getServiceClass() == null ? "" : getServiceClass());
-		post.addParameter("customDSCount[]", String.valueOf(getCount()));
+	public void contributeToHttpCall(HeartbeatCall call) {
+		call.addParameter("customDSClass[]", getServiceClass() == null ? "" : getServiceClass());
+		call.addParameter("customDSCount[]", String.valueOf(getCount()));
 	}
 
 	public String getKey() {

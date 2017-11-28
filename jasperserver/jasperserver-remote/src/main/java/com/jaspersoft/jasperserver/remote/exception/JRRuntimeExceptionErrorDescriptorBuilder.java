@@ -21,6 +21,7 @@
 package com.jaspersoft.jasperserver.remote.exception;
 
 import com.jaspersoft.jasperserver.remote.exception.xml.ErrorDescriptor;
+import net.sf.jasperreports.crosstabs.fill.calculation.BucketingService;
 import net.sf.jasperreports.engine.JRRuntimeException;
 import org.springframework.stereotype.Component;
 
@@ -28,16 +29,16 @@ import org.springframework.stereotype.Component;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: JRRuntimeExceptionErrorDescriptorBuilder.java 51369 2014-11-12 13:59:41Z sergey.prilukin $
+ * @version $Id: JRRuntimeExceptionErrorDescriptorBuilder.java 55164 2015-05-06 20:54:37Z mchan $
  */
 @Component
 public class JRRuntimeExceptionErrorDescriptorBuilder implements ErrorDescriptorBuilder<JRRuntimeException> {
     @Override
     public ErrorDescriptor build(JRRuntimeException e) {
         ErrorDescriptor descriptor = new ErrorDescriptor(e);
-        final String message = e.getMessage() != null ? e.getMessage() : "";
-        if(message.contains("Crosstab bucket/measure limit")){
-            descriptor = new ErrorDescriptor.Builder().setErrorCode("crosstab.bucket.mesure.limit").setMessage(message)
+        final String messageKey = e.getMessageKey();
+        if(BucketingService.EXCEPTION_MESSAGE_KEY_BUCKET_MEASURE_LIMIT.equals(messageKey)){
+            descriptor = new ErrorDescriptor.Builder().setErrorCode("crosstab.bucket.measure.limit").setMessage(e.getMessage())
                     .getErrorDescriptor();
         }
         return descriptor;

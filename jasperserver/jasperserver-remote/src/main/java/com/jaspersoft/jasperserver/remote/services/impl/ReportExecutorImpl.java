@@ -46,6 +46,7 @@ import com.jaspersoft.jasperserver.remote.utils.AuditHelper;
 import com.jaspersoft.jasperserver.remote.utils.RepositoryHelper;
 import com.jaspersoft.jasperserver.war.cascade.CachedRepositoryService;
 import com.jaspersoft.jasperserver.war.cascade.CascadeResourceNotFoundException;
+import net.sf.jasperreports.engine.JRAbstractExporter;
 import net.sf.jasperreports.engine.JRExporterParameter;
 import net.sf.jasperreports.engine.JRParameter;
 import net.sf.jasperreports.engine.JRRuntimeException;
@@ -177,12 +178,15 @@ public class ReportExecutorImpl implements ReportExecutor {
             return exporter.exportReport(jasperPrint, output, engine, exportParameters, createExecutionContext(),
                     strategyForReport.getConcreteReportURI(report));
         } catch (JRRuntimeException e){
-            if(e.getMessage().contains("index out of range : ") || e.getMessage().contains("out.of.range")){
+            if(JRAbstractExporter.EXCEPTION_MESSAGE_KEY_PAGE_INDEX_OUT_OF_RANGE.equals(e.getMessageKey())
+            		|| JRAbstractExporter.EXCEPTION_MESSAGE_KEY_START_PAGE_INDEX_OUT_OF_RANGE.equals(e.getMessageKey())
+            		|| JRAbstractExporter.EXCEPTION_MESSAGE_KEY_END_PAGE_INDEX_OUT_OF_RANGE.equals(e.getMessageKey())){
+                final String pages = exportParameters.get(Argument.RUN_OUTPUT_PAGES).toString();
+                final int totalPages = jasperPrint.getPages().size();
                 throw new ExportExecutionRejectedException(new ErrorDescriptor.Builder().setMessage(
-                        "Pages out of range : "
-                                + exportParameters.get(Argument.RUN_OUTPUT_PAGES).toString()
-                                + " of " + jasperPrint.getPages().size())
-                        .setErrorCode("export.pages.out.of.range").getErrorDescriptor());
+                        "Pages out of range : " + pages + " of " + totalPages)
+                        .setErrorCode("export.pages.out.of.range").setParameters(pages, "" + totalPages)
+                        .getErrorDescriptor());
             }
             throw new ExportExecutionRejectedException(e.getMessage());
         } catch (Exception e) {
@@ -312,6 +316,8 @@ public class ReportExecutorImpl implements ReportExecutor {
 
             // fresh data if requested or saving
             request.setUseDataSnapshot(!(options.isFreshData() || options.isSaveDataSnapshot()));
+
+            request.setAsynchronous(true);
 
             return request;
         }

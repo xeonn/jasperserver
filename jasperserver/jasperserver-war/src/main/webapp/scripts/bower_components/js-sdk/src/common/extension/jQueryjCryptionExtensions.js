@@ -20,8 +20,10 @@
 */
 
 /**
- * @version: $Id: jQueryjCryptionExtensions.js 46 2014-07-11 13:57:04Z inesterenko $
+ * @version: $Id: jQueryjCryptionExtensions.js 812 2015-01-27 11:01:30Z psavushchik $
  */
+
+/*global BigInt, biToHex, biToString */
 
 define(function(require){
     "use strict";

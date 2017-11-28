@@ -109,7 +109,7 @@ FINALLY
                     <input type="hidden" id="jumpToPage" name="jumpToPage"/>
                     <input type="submit" style="visibility:hidden;" value="" name="_eventId_jump" id="jumpButton"/>
                     <input type="hidden" name="_flowExecutionKey" value="${flowExecutionKey}"/>
-                    <input type="hidden" id="ParentFolderUri" value='<%= request.getParameter("ParentFolderUri") %>'>
+                    <input type="hidden" id="ParentFolderUri" value='${param.ParentFolderUri}'>
                     <div id="stepDisplay">
                         <fieldset class="row instructions">
                             <legend class="offLeft"><span><spring:message code="resource.report.instructions"/></span></legend>

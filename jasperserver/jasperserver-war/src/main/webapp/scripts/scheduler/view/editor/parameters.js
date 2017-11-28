@@ -21,8 +21,10 @@
 
 
 /**
- * @version: $Id: parameters.js 7832 2014-09-19 13:36:11Z sergey.prilukin $
+ * @version: $Id: parameters.js 8179 2015-01-27 12:34:21Z psavushchik $
  */
+
+/* global ControlsBase, JRS, OptionsDialog */
 
 define(function(require){
 
@@ -55,13 +57,13 @@ define(function(require){
             if (config.isProVersion){
                 var header,
                     i18n = require('bundle!jasperserver_messages'),
-                    template = _.template(parameters)
+                    template = _.template(parameters);
 
                 // render header
                 t.header = $(template({
                     i18n: i18n,
                     config: config
-                }))
+                }));
 
                 t.$el.parent().find('.schedule_for').append(t.header);
 
@@ -80,7 +82,7 @@ define(function(require){
                             done(function () {
                                 t.reportOptionsDialog.hideWarning();
                                 var container = t.reportOptions.getElem().parent();
-                                if (container.length == 0) {
+                                if (container.length === 0) {
                                    container = $('.sub.header');
                                    container.prepend(t.reportOptions.getElem());
                                 }

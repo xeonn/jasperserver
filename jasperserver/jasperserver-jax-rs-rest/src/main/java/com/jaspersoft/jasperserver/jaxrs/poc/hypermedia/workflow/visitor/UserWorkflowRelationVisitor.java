@@ -193,6 +193,7 @@ public class UserWorkflowRelationVisitor extends RelationsVisitor<UserWorkflowRe
 
                 searchCriteria.setResourceTypes(resourceTypes);
                 searchCriteria.setStartIndex(0);
+                searchCriteria.setExcludeFolders(true);
 
                 if (isLink){
                     child.setCriteria(searchCriteria);

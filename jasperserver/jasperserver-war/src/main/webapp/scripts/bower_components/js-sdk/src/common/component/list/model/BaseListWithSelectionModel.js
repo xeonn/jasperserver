@@ -239,9 +239,18 @@ define(function (require) {
             Selects all values
          */
         selectAll: function() {
-            this._clearSelection();
-            var self = this;
+            var self = this,
+                firstIteration = true;
+
             this._fetchAllDataAndModifySelection(function(value, index) {
+
+                //this is necessary when getData is slow operation
+                //so model will not be empty too early
+                if (firstIteration) {
+                    self._clearSelection();
+                    firstIteration = false;
+                }
+
                 self._addToSelection(value, index);
             }, _.bind(this._triggerSelectionChange, this));
         },

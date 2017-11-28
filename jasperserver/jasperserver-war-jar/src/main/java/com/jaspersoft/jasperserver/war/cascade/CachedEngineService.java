@@ -50,7 +50,7 @@ import java.util.Map;
 /**
  * Provides cached access to some methods of EngineService.
  * @author Anton Fomin
- * @version $Id: CachedEngineService.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: CachedEngineService.java 55164 2015-05-06 20:54:37Z mchan $
  */
 @Service
 public class CachedEngineService {
@@ -130,8 +130,8 @@ public class CachedEngineService {
         final String cacheKey = String.valueOf(filterResolver.getCacheKey(query.getSql(), parameterValues, keyColumn, resultColumns));
         final SessionCache sessionCache = controlLogicCacheManager.getSessionCache();
         OrderedMap results = sessionCache.getCacheInfo(OrderedMap.class, cacheKey);
-        parameterValues.put(EhcacheEngineService.IC_CACHE_KEY, cacheKey+" ; "+controlLogicCacheManager.getSessionCacheKey());
-        boolean refresh = parameterValues!=null&&parameterValues.containsKey(EhcacheEngineService.IC_REFRESH_KEY);
+
+        boolean refresh = parameterValues != null && parameterValues.containsKey(EhcacheEngineService.IC_REFRESH_KEY);
         if (!doCache || results == null || refresh) {
             results = ehcacheEngineService.executeQuery(context != null ? context : ExecutionContextImpl.getRuntimeExecutionContext(),
                     queryReference, keyColumn, resultColumns, defaultDataSourceReference, parameterValues, parameterTypes, false);

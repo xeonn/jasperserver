@@ -21,8 +21,10 @@
 
 
 /**
- * @version: $Id: mng.main.js 8025 2014-11-12 13:10:12Z ktsaregradskyi $
+ * @version: $Id: mng.main.js 8900 2015-05-06 20:57:14Z yplakosh $
  */
+
+/* global orgModule, isProVersion, alert,  */
 
 function invokeServerAction(actionName, options) {
     var actionBuilder = orgModule.serverActionFactory[actionName];
@@ -49,7 +51,11 @@ function invokeClientAction(actionName, options) {
 orgModule.confirmAndLeave = function() {
     var entities = orgModule.entityList.getSelectedEntities();
 
-    return invokeClientAction("cancelIfEdit", { entity: entities[0] });
+    if(!orgModule.properties.attributesFacade){
+        return invokeClientAction("cancelIfEdit", { entity: entities[0], entityEvent: false});
+    }
+
+    return true;
 };
 
 orgModule.manager = {
@@ -70,32 +76,35 @@ orgModule.manager = {
                 org = this.tree.getOrganization();
             }
 
+            var entityEvent = event.memo.entityEvent;
+
             if (!this.lastSelectedOrg || this.lastSelectedOrg.id != org.id) {
                 var entities = orgModule.entityList.getSelectedEntities();
 
 
-                if(invokeClientAction("cancelIfEdit", { entity: entities[0] })) {
+                if(invokeClientAction("cancelIfEdit", { entity: entities[0] || org, entityEvent: entityEvent})) {
                     invokeServerAction(orgModule.ActionMap.BROWSE, {
                         tenantId : (org) ? org.id : null
                     });
                     this.lastSelectedOrg = org
                 } else {
-                    this.lastSelectedOrg && this.tree.selectOrganization(this.lastSelectedOrg);
+                    this.lastSelectedOrg && this.tree.selectOrganization(this.lastSelectedOrg, {silent: orgModule.properties.locked });
                 }
             }
         }.bindAsEventListener(this));
 
         orgModule.observe("entity:search", function(event) {
-            var entities = orgModule.entityList.getSelectedEntities();
-            var text = event.memo.text;
+            var entities = orgModule.entityList.getSelectedEntities(),
+                text = event.memo.text,
+                org = this.tree.getOrganization();
 
-            if(invokeClientAction("cancelIfEdit", { entity: entities[0] })) {
+            if(invokeClientAction("cancelIfEdit", { entity: entities[0] || org })) {
                 invokeServerAction(orgModule.ActionMap.SEARCH, {
                     text: text
                 });
                 this.lastSearchText = text;
             } else {
-                if (text.length == 0 && this.lastSearchText && this.lastSearchText.length != 0) {
+                if (text.length === 0 && this.lastSearchText && this.lastSearchText.length !== 0) {
                     orgModule.entityList.setSearchText(this.lastSearchText);
                 }
             }
@@ -106,16 +115,41 @@ orgModule.manager = {
         }.bindAsEventListener(this));
 
         orgModule.observe("entity:selectAndGetDetails", function(event) {
-            invokeServerAction(orgModule.ActionMap.SELECT_AND_GET_DETAILS, {
-                entity : event.memo.entity.getNameWithTenant()
-            })
+            // Due to complexity of code in mng.common (event flow) there is need to handle some cases in such inappropriate manner
+            // This need to by refactored once mng.common will be refactored in new AMD way + new tree.
+            var entityEvent = event.memo.entityEvent,
+                isCtrlHeld = event.memo.isCtrlHeld,
+                cancelIfEdit = event.memo.cancelIfEdit,
+                entities = orgModule.entityList.getSelectedEntities();
+
+            if (entities.length > 1) {
+                orgModule.properties.hide();
+            } else {
+                var firstEntity = entities[0],
+                    entityName;
+
+                if (firstEntity && entityEvent) {
+                    entityName = firstEntity.getNameWithTenant()
+                } else {
+                    entityName = (!entityEvent || isCtrlHeld || cancelIfEdit) && event.memo.entity.getNameWithTenant();
+                }
+
+                if (!firstEntity && (orgModule.userManager || (!orgModule.userManager && orgModule.roleManager)) && isCtrlHeld) {
+                    orgModule.properties.hide();
+                    return;
+                }
+
+                entityName && invokeServerAction(orgModule.ActionMap.SELECT_AND_GET_DETAILS, {
+                    entity: entityName
+                });
+            }
         }.bindAsEventListener(this));
 
         // Response events listeners.
         orgModule.observe("result:changed", function(event) {
             var data = event.memo.responseData;
             orgModule.entityList.setEntities(data.entities.collect(this.entityJsonToObject));
-            orgModule.entityList.restoreSelectedEntity(options.defaultEntity);
+            options.defaultEntity && orgModule.entityList.restoreSelectedEntity(options.defaultEntity);
         }.bindAsEventListener(this));
 
         orgModule.observe("result:next", function(event) {
@@ -126,11 +160,19 @@ orgModule.manager = {
         }.bindAsEventListener(this));
 
         orgModule.observe("entity:detailsLoaded", function(event) {
-            var entity = this.entityJsonToObject(event.memo.responseData);
-            orgModule.entityList.update(entity.getNameWithTenant(), entity);
-            orgModule.properties.show(entity);
+            var entity = this.entityJsonToObject(event.memo.responseData),
+                properties = orgModule.properties;
 
-            orgModule.properties.setProperties(entity);
+            orgModule.entityList.update(entity.getNameWithTenant(), entity);
+
+            properties.setDetailsLoadedEntity(entity);
+            properties.show(entity);
+            !properties.locked && properties.setProperties(entity);
+
+            orgModule.entityList.toolbar.refresh();
+
+            properties.unlock();
+
         }.bindAsEventListener(this));
 
         orgModule.observe("searchAvailable:loaded", function(event) {
@@ -143,7 +185,7 @@ orgModule.manager = {
         orgModule.observe("searchAssigned:loaded", function(event) {
             var data = event.memo.responseData;
 
-            if(data && data.entities && data.entities.length > 0) {
+            if(data && data.entities) {
                 orgModule.properties.setAssignedEntities(data.entities.collect(this.relatedEntityJsonToObject));
             }
         }.bindAsEventListener(this));
@@ -184,6 +226,7 @@ orgModule.manager = {
         }.bindAsEventListener(this));
 
         orgModule.observe("entity:updated",function(event) {
+            var self = this;
             var entityName = event.memo.inputData.entityName;
 
 
@@ -211,15 +254,19 @@ orgModule.manager = {
                 entityJson = event.memo.inputData.entity;
             }
 
+            var attributesFacade = orgModule.properties.attributesFacade || {};
+            var saveDfD = attributesFacade.designer && attributesFacade.designer.saveDfD;
 
             if (orgModule.properties.isEditMode) {
-                orgModule.properties.changeMode(false);
+                saveDfD ? saveDfD.done(function(){
+                    orgModule.properties.changeMode(false);
+                }) : orgModule.properties.changeMode(false);
             }
 
             if (entityJson) {
-                var entity = this.entityJsonToObject(entityJson.evalJSON ? entityJson.evalJSON():entityJson);
-                orgModule.entityList.update(entityName, entity);
-                orgModule.entityList.selectEntity(entity.getNameWithTenant ? entity.getNameWithTenant() : entityName);
+                saveDfD ? saveDfD.done(function(){
+                    self.updateEntityList(entityJson, entityName);
+                }) : this.updateEntityList(entityJson, entityName);
             }
         }.bindAsEventListener(this));
 
@@ -236,6 +283,12 @@ orgModule.manager = {
                 orgModule.entityList.remove(entityNameSet.evalJSON());
             }
         }.bindAsEventListener(this));
+    },
+
+    updateEntityList: function(entityJson, entityName){
+        var entity = this.entityJsonToObject(entityJson.evalJSON ? entityJson.evalJSON() : entityJson);
+        orgModule.entityList.update(entityName, entity);
+        orgModule.entityList.selectEntity(entity.getNameWithTenant ? entity.getNameWithTenant() : entityName);
     },
 
     entityJsonToObject: function(json) {

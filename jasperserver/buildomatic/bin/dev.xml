@@ -157,7 +157,7 @@
                   dir="@{dir}"
                   resultproperty="maven.result">
                 <jvmarg value="-Xms128m"/>
-                <jvmarg value="-Xmx512m"/>
+                <jvmarg value="-Xmx1024m"/>
                 <jvmarg value="-XX:PermSize=32m"/>
                 <jvmarg value="-XX:MaxPermSize=256m"/>
                 <sysproperty key="classworlds.conf" value="${maven.home}/bin/m2.conf"/>

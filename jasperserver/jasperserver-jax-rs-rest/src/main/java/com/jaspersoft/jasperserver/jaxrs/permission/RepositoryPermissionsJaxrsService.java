@@ -21,16 +21,19 @@
 package com.jaspersoft.jasperserver.jaxrs.permission;
 
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Folder;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.InternalURI;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.PermissionUriProtocol;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.ObjectPermission;
+import com.jaspersoft.jasperserver.api.metadata.user.service.impl.InternalURIDefinition;
 import com.jaspersoft.jasperserver.jaxrs.common.RestConstants;
+import com.jaspersoft.jasperserver.remote.helpers.RecipientIdentityResolver;
 import com.jaspersoft.jasperserver.remote.resources.converters.PermissionConverter;
 import com.jaspersoft.jasperserver.dto.permissions.RepositoryPermission;
 import com.jaspersoft.jasperserver.dto.permissions.RepositoryPermissionListWrapper;
 import com.jaspersoft.jasperserver.remote.exception.IllegalParameterValueException;
 import com.jaspersoft.jasperserver.remote.exception.RemoteException;
 import com.jaspersoft.jasperserver.remote.exception.ResourceNotFoundException;
-import com.jaspersoft.jasperserver.remote.helpers.PermissionsRecipientIdentity;
-import com.jaspersoft.jasperserver.remote.helpers.PermissionsRecipientIdentityResolver;
+import com.jaspersoft.jasperserver.remote.helpers.RecipientIdentity;
 import com.jaspersoft.jasperserver.remote.services.PermissionsService;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 import org.springframework.stereotype.Component;
@@ -65,7 +68,7 @@ public class RepositoryPermissionsJaxrsService {
     private PermissionsService service;
 
     @Resource(name = "concretePermissionsRecipientIdentityResolver")
-    private PermissionsRecipientIdentityResolver permissionRecipientIdentityResolver;
+    private RecipientIdentityResolver permissionRecipientIdentityResolver;
 
     @Resource(name = "permissionConverter")
     private PermissionConverter converter;
@@ -146,7 +149,8 @@ public class RepositoryPermissionsJaxrsService {
         for (RepositoryPermission permission : permissions){
             server.add(converter.toServer(permission.setUri(resourceUri), null));
         }
-        service.putPermissions(Folder.SEPARATOR + resourceUri,server);
+        InternalURI internalURI = new InternalURIDefinition(Folder.SEPARATOR + resourceUri, PermissionUriProtocol.RESOURCE);
+        service.putPermissions(internalURI, server);
         permissions.clear();
         for (ObjectPermission permission : server){
             permissions.add(converter.toClient(permission, null));
@@ -195,7 +199,7 @@ public class RepositoryPermissionsJaxrsService {
     }
 
     private Response getPermission(String resourceUri, String recipientUri) throws RemoteException{
-        PermissionsRecipientIdentity identity = permissionRecipientIdentityResolver.toIdentity(recipientUri);
+        RecipientIdentity identity = permissionRecipientIdentityResolver.toIdentity(recipientUri);
         ObjectPermission permission =  service.getPermission(resourceUri,identity.getRecipientClass(), identity.getId());
 
         if (permission == null){
@@ -258,7 +262,7 @@ public class RepositoryPermissionsJaxrsService {
     }
 
     private void deletePermission(String resourceUri, String recipientUri) throws RemoteException{
-        PermissionsRecipientIdentity identity = permissionRecipientIdentityResolver.toIdentity(recipientUri);
+        RecipientIdentity identity = permissionRecipientIdentityResolver.toIdentity(recipientUri);
         ObjectPermission permission =  service.getPermission(resourceUri,identity.getRecipientClass(), identity.getId());
 
         if (permission == null) {

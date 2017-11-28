@@ -20,42 +20,32 @@
  */
 package com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl;
 
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Pattern;
-
-import net.sf.jasperreports.data.cache.DataSnapshot;
-import net.sf.jasperreports.engine.ReportContext;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.jaspersoft.jasperserver.api.JSException;
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
-import com.jaspersoft.jasperserver.api.engine.jasperreports.service.DataCacheProvider;
-import com.jaspersoft.jasperserver.api.engine.jasperreports.service.DataCacheProvider.SnapshotSaveStatus;
-import com.jaspersoft.jasperserver.api.engine.jasperreports.service.DataSnapshotCachingService;
-import com.jaspersoft.jasperserver.api.engine.jasperreports.service.DataSnapshotPersistResult;
-import com.jaspersoft.jasperserver.api.engine.jasperreports.service.DataSnapshotService;
-import com.jaspersoft.jasperserver.api.engine.jasperreports.util.DefaultDataCacheSnapshot;
+import com.jaspersoft.jasperserver.api.engine.jasperreports.service.*;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceLookup;
 import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
 import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.util.RepositoryUtils;
-import com.jaspersoft.jasperserver.api.metadata.data.cache.DataCacheSnapshot;
-import com.jaspersoft.jasperserver.api.metadata.data.cache.DataCacheSnapshotData;
-import com.jaspersoft.jasperserver.api.metadata.data.cache.DataCacheSnapshotMetadata;
-import com.jaspersoft.jasperserver.api.metadata.data.cache.DataSnapshotPersistenceService;
-import com.jaspersoft.jasperserver.api.metadata.data.cache.DataSnapshotPersistentMetadata;
-import com.jaspersoft.jasperserver.api.metadata.data.cache.DataSnapshotSavedId;
+import com.jaspersoft.jasperserver.api.metadata.data.cache.*;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportUnit;
 import com.jaspersoft.jasperserver.api.metadata.view.domain.FilterCriteria;
+import net.sf.jasperreports.data.cache.DataSnapshot;
+import net.sf.jasperreports.engine.ReportContext;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: StandardDataSnapshotService.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: StandardDataSnapshotService.java 54648 2015-04-23 12:22:57Z vsabados $
  */
+@Component
 public class StandardDataSnapshotService implements DataSnapshotService {
 
 	private static final Log log = LogFactory.getLog(StandardDataSnapshotService.class);
@@ -68,6 +58,8 @@ public class StandardDataSnapshotService implements DataSnapshotService {
 	private DataCacheProvider dataCacheProvider;
 	private RepositoryService repository;
 	private RepositoryService unsecureRepository;
+    @Autowired(required = false)
+    private DiagnosticParametersWatcher diagnosticParametersWatcher;
 
 	public DataSnapshotPersistentMetadata getSnapshotMetadata(ExecutionContext context, long snapshotId) {
 		// look in the cache for the metadata
@@ -242,7 +234,7 @@ public class StandardDataSnapshotService implements DataSnapshotService {
 		// if not copying, only saving data snapshot when it has modified
 		DataCacheSnapshot snapshot = dataCacheProvider.getDataSnapshot(context, reportContext);
 		
-		if (!isSnapshotPersistenceEnabled() 
+		if (!isSnapshotPersistenceEnabledForReportUri((String) reportContext.getParameterValue("reportUnit"))
 				|| (snapshot != null && !snapshot.getSnapshot().isPersistable())) {
 			if (log.isDebugEnabled()) {
 				log.debug("data snapshot not persistable");
@@ -389,6 +381,7 @@ public class StandardDataSnapshotService implements DataSnapshotService {
 		return persistenceService;
 	}
 
+    @SuppressWarnings("unused") // Used by Spring
 	public void setPersistenceService(
 			DataSnapshotPersistenceService persistenceService) {
 		this.persistenceService = persistenceService;
@@ -398,6 +391,7 @@ public class StandardDataSnapshotService implements DataSnapshotService {
 		return cachingService;
 	}
 
+    @SuppressWarnings("unused") // Used by Spring
 	public void setCachingService(DataSnapshotCachingService cachingService) {
 		this.cachingService = cachingService;
 	}
@@ -422,6 +416,7 @@ public class StandardDataSnapshotService implements DataSnapshotService {
 		return unsecureRepository;
 	}
 
+    @SuppressWarnings("unused") // Used by Spring
 	public void setUnsecureRepository(RepositoryService unsecureRepository) {
 		this.unsecureRepository = unsecureRepository;
 	}
@@ -430,6 +425,7 @@ public class StandardDataSnapshotService implements DataSnapshotService {
 		return snapshotRecordingEnabled;
 	}
 
+    @SuppressWarnings("unused") // Used by Spring
 	public void setSnapshotRecordingEnabled(boolean snapshotRecordingEnabled) {
 		this.snapshotRecordingEnabled = snapshotRecordingEnabled;
 	}
@@ -438,8 +434,25 @@ public class StandardDataSnapshotService implements DataSnapshotService {
 		return snapshotPersistenceEnabled;
 	}
 
+    public boolean isSnapshotPersistenceEnabledForReportUri(String reportUri) {
+        return isCurrentReportUriBeingWatchedByDiagnostics(reportUri) && isCreatingSnapshot() || snapshotPersistenceEnabled;
+    }
+
+    @SuppressWarnings("unused") // Used by Spring
 	public void setSnapshotPersistenceEnabled(boolean snapshotPersistenceEnabled) {
 		this.snapshotPersistenceEnabled = snapshotPersistenceEnabled;
 	}
-	
+
+    @SuppressWarnings("unused") // Used by Spring
+    public void setDiagnosticParametersWatcher(DiagnosticParametersWatcher diagnosticParametersWatcher) {
+        this.diagnosticParametersWatcher = diagnosticParametersWatcher;
+    }
+
+    private boolean isCurrentReportUriBeingWatchedByDiagnostics(String reportUri) {
+        return diagnosticParametersWatcher != null && diagnosticParametersWatcher.isResourceUriWatched(reportUri);
+    }
+
+    private boolean isCreatingSnapshot() {
+        return true;
+    }
 }

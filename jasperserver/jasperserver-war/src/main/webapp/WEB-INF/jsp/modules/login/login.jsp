@@ -68,7 +68,8 @@
         </script>
         <![endif]-->
 
-        <c:set var='showPasswordChange' value='<%=request.getParameter("showPasswordChange")%>'/>
+        <c:set var='showPasswordChange' value='${param.showPasswordChange}'/>
+        <c:set var='weakPassword' value='<%=request.getParameter("weakPassword")%>'/>
 
         <div class="wrapper">
             <t:insertTemplate template="/WEB-INF/jsp/templates/container.jsp">
@@ -76,8 +77,8 @@
                 <t:putAttribute name="containerID" value="copy"/>
                 <t:putAttribute name="bodyContent">
                     <div id="welcome" class="row">
-                        <h1 class="textAccent02">
-                        	<span class="text">Welcome to</span><span class="logo">TIBCO Jaspersoft</span>  
+                        <h1>
+                        	<span class="logo">TIBCO Jaspersoft</span>  
                         	<!-- <spring:message code='LOGIN_WELCOME_OS'/> -->
                         	       	
                         
@@ -161,9 +162,12 @@
                                 </c:otherwise>
                             </c:choose>
                         </c:if>
-                        <c:if test="${showPasswordChange eq 'true'}">
+                        <c:if test="${showPasswordChange eq 'true' and weakPassword != 'true'}">
                             <p class="errorMessage"><spring:message code='jsp.loginError.expiredPassword1'/></p>
                             <p class="errorMessage"><spring:message code='jsp.loginError.expiredPassword2'/></p>
+                        </c:if>
+                        <c:if test="${weakPassword eq 'true'}">
+                             <p class="errorMessage"><spring:message code='exception.remote.weak.password'/></p>
                         </c:if>
                         <p id="customError" class="errorMessage hidden"></p>
                     </t:putAttribute>
@@ -182,9 +186,11 @@
                         </c:forEach>
                     </t:putAttribute>
                 </t:insertTemplate>
-                <c:if test="${isProVersion and isEC2}">
-                    <div id="amazonLogo" class="row"></div>
-                </c:if>
+                <%-- MOVED TO LOGIN.JSP TEMPLATE FILE
+                    <c:if test="${isProVersion and isEC2}">
+                        <div id="amazonLogo" class="row"></div>
+                    </c:if>
+                --%>
             </form>
         </div>
 

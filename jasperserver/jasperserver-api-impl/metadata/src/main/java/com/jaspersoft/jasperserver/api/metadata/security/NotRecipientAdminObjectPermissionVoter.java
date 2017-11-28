@@ -20,6 +20,7 @@
  */
 package com.jaspersoft.jasperserver.api.metadata.security;
 
+import com.jaspersoft.jasperserver.api.metadata.common.domain.PermissionUriProtocol;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.ObjectPermission;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.Role;
 import org.springframework.security.core.Authentication;
@@ -41,7 +42,10 @@ public class NotRecipientAdminObjectPermissionVoter extends BasicObjectPermissio
     protected String roleAdministrator;
     @Override
     protected boolean isPermitted(Authentication authentication, ObjectPermission objectPermission, Object object) {
-        return objectPermission.getPermissionRecipient() != null && (!(objectPermission.getPermissionRecipient() instanceof Role)
+        PermissionUriProtocol permissionUriProtocol = PermissionUriProtocol.getProtocol(objectPermission.getURI());
+        boolean isAttribute = (permissionUriProtocol == PermissionUriProtocol.ATTRIBUTE);
+
+        return isAttribute || objectPermission.getPermissionRecipient() != null && (!(objectPermission.getPermissionRecipient() instanceof Role)
                 || (objectPermission.getPermissionRecipient() instanceof Role
                 && !roleAdministrator.equals(((Role)objectPermission.getPermissionRecipient()).getRoleName())));
     }

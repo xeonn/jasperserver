@@ -20,6 +20,7 @@
  */
 package com.jaspersoft.jasperserver.api.engine.common.virtualdatasourcequery.impl;
 
+import com.google.common.collect.ImmutableSet;
 import com.jaspersoft.jasperserver.api.common.util.CacheManager;
 import com.jaspersoft.jasperserver.api.common.virtualdatasourcequery.ConnectionFactory;
 import com.jaspersoft.jasperserver.api.common.virtualdatasourcequery.CustomDataSource;
@@ -29,6 +30,7 @@ import com.jaspersoft.jasperserver.api.common.virtualdatasourcequery.teiid.Serve
 import com.jaspersoft.jasperserver.api.common.virtualdatasourcequery.teiid.TeiidDataSource;
 import com.jaspersoft.jasperserver.api.common.virtualdatasourcequery.teiid.TranslatorConfiguration;
 import com.jaspersoft.jasperserver.api.engine.common.service.EngineService;
+import com.jaspersoft.jasperserver.api.engine.common.virtualdatasourcequery.CustomDataSourceProps;
 import com.jaspersoft.jasperserver.api.engine.common.virtualdatasourcequery.VirtualDataSourceConfig;
 import com.jaspersoft.jasperserver.api.engine.common.virtualdatasourcequery.VirtualDataSourceHandler;
 import com.jaspersoft.jasperserver.api.engine.common.virtualdatasourcequery.VirtualSQLDataSource;
@@ -38,11 +40,15 @@ import com.jaspersoft.jasperserver.api.engine.common.virtualdatasourcequery.teii
 import com.jaspersoft.jasperserver.api.engine.common.virtualdatasourcequery.teiid.TranslatorConfig;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl.AwsDataSourceService;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl.JdbcDataSourceService;
-import com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl.VirtualReportDataSourceServiceFactory;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.AwsReportDataSource;
+import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.CustomDomainMetaData;
+import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.CustomReportDataSource;
+import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportDataSource;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.service.ReportDataSourceService;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.service.ReportDataSourceServiceFactory;
+
 import org.springframework.beans.factory.InitializingBean;
 import org.teiid.adminapi.Model;
 import org.teiid.adminapi.impl.ModelMetaData;
@@ -51,11 +57,13 @@ import org.teiid.runtime.EmbeddedConfiguration;
 import org.teiid.translator.TranslatorException;
 
 import javax.sql.DataSource;
+
 import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -65,7 +73,7 @@ import java.util.Set;
 
 /**
  * @author Ivan Chan (ichan@jaspersoft.com)
- * @version $Id: TeiidVirtualDataSourceQueryServiceImpl.java 50647 2014-10-24 18:22:53Z ichan $
+ * @version $Id: TeiidVirtualDataSourceQueryServiceImpl.java 53880 2015-04-08 02:08:21Z rzhilkib $
  */
 public class TeiidVirtualDataSourceQueryServiceImpl extends AbstractVirtualDataSourceQueryServiceImpl implements CacheManager, InitializingBean {
 
@@ -88,6 +96,15 @@ public class TeiidVirtualDataSourceQueryServiceImpl extends AbstractVirtualDataS
     private boolean printVDB = true;
     private boolean printDDL = true;
     private Map<String, TeiidDataSource> dataSourceServiceToTeiidConnectorMap;
+    /**
+     * A connector to be used with custom datasources which provide {@link CustomDomainMetaData}.
+     * Can be <code>null</code>.
+     */
+    private TeiidDataSource dataSetTeiidConnector;
+    /**
+     * @see TeiidVirtualDataSourceQueryServiceImpl#setDatabaseObjectTypesFilter(Set)
+     */
+    private Set<String> databaseObjectTypesFilter = ImmutableSet.of("TABLE");
 
     public ReportDataSourceServiceFactory getReportDataSourceServiceFactory() {
         return virtualReportDataSourceServiceFactory;
@@ -108,54 +125,79 @@ public class TeiidVirtualDataSourceQueryServiceImpl extends AbstractVirtualDataS
         this.engineService = engineService;
     }
 
-    /*
+    /**
     * get teiid import properties through spring injection
     */
     public Map<String, Map<String, String>> getImportPropertyMap() {
         return importPropertyMap;
     }
 
-    /*
+    /**
     * set teiid import properties through spring injection
     */
     public void setImportPropertyMap(Map<String, Map<String, String>> importPropertyMap) {
         this.importPropertyMap = importPropertyMap;
     }
 
-    /*
+    /**
     * get data source service to teiid connector properties map through spring injection
     */
     public Map<String, TeiidDataSource> getDataSourceServiceToTeiidConnectorMap() {
         return dataSourceServiceToTeiidConnectorMap;
     }
 
-    /*
+    /**
     * set data source service to teiid connector properties map through spring injection
     */
     public void setDataSourceServiceToTeiidConnectorMap(Map<String, TeiidDataSource> dataSourceServiceToTeiidConnectorMap) {
         this.dataSourceServiceToTeiidConnectorMap = dataSourceServiceToTeiidConnectorMap;
     }
 
-    /*
-    * retrieve teiid data source from custom data source based on dataSourceServiceToTeiidConnectorMap
-    */
+	/**
+     * Retrieve Teiid data source for which we have mapping in dataSourceServiceToTeiidConnectorMap or which implements CustomDomainMetadataProvider.
+     * The map is checked first, if no mapping is found we check if the datasource can provide CustomDomainMetadata.
+     * @return <code>null</code> if no mapping found
+     */
     private TeiidDataSource getTeiidDataSource(com.jaspersoft.jasperserver.api.common.virtualdatasourcequery.DataSource subDataSource) throws TranslatorException, ClassNotFoundException, NoSuchMethodException, InstantiationException,
             IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         if (getDataSourceServiceToTeiidConnectorMap() == null) return null;
         String serviceClassName = null;
         if (subDataSource instanceof CustomDataSource) serviceClassName = ((CustomDataSource) subDataSource).getServiceClass();
         if (serviceClassName == null) return null;
-        return getDataSourceServiceToTeiidConnectorMap().get(serviceClassName);
+        TeiidDataSource teiidDataSource = getDataSourceServiceToTeiidConnectorMap().get(serviceClassName);
+
+        // We support custom datasources which implement com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.CustomDomainMetaDataProvider
+        if (teiidDataSource == null
+                && isCustomDomainMetadataProvider((CustomDataSource) subDataSource)
+                && dataSetTeiidConnector != null) {
+        	teiidDataSource = dataSetTeiidConnector;
+        }
+        
+        return teiidDataSource;
     }
 
-    /*
-    * get a handle of repository service
-    */
+    /**
+     * Checks if the datasource provides metadata.
+     */
+    private boolean isCustomDomainMetadataProvider(CustomDataSource subDataSource) {
+        if (subDataSource instanceof CustomDataSourceImpl) {
+            ReportDataSource reportDataSource = ((CustomDataSourceImpl) subDataSource).getReportDataSource();
+            if (reportDataSource instanceof CustomReportDataSource) {
+                return engineService.isCustomDomainMetadataProvider(((CustomReportDataSource) reportDataSource));
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * get a handle of repository service
+     */
     public RepositoryService getRepositoryService()	{
 		return repositoryService;
 	}
 
-     /*
+    /**
      * set repository service
      */
 	public void setRepositoryService(RepositoryService repository) {
@@ -166,7 +208,7 @@ public class TeiidVirtualDataSourceQueryServiceImpl extends AbstractVirtualDataS
         return memoryConfig;
     }
 
-    /*
+    /**
      * set teiid memory config through spring injection
      */
     public void setMemoryConfig(TeiidMemoryConfigImpl memoryConfig) {
@@ -177,9 +219,9 @@ public class TeiidVirtualDataSourceQueryServiceImpl extends AbstractVirtualDataS
         return transactionManagerConfiguration;
     }
 
-    /*
-    * set transaction manager config through spring injection
-    */
+    /**
+     * set transaction manager config through spring injection
+     */
     public void setTransactionManagerConfiguration(TransactionManagerConfigurationImpl transactionManagerConfiguration) {
         this.transactionManagerConfiguration = transactionManagerConfiguration;
     }
@@ -216,7 +258,7 @@ public class TeiidVirtualDataSourceQueryServiceImpl extends AbstractVirtualDataS
         this.printDDL = printDDL;
     }
 
-    /*
+    /**
     * return to retrieve sub data source list by going through each sub datasource (instead of getting it from VDS)
     * Teiid creates "temp" tables in VDS.  Better to retrieve sub data source list from each sub DS.
     */
@@ -224,7 +266,7 @@ public class TeiidVirtualDataSourceQueryServiceImpl extends AbstractVirtualDataS
         return useSubDSTableList;
     }
 
-    /*
+    /**
     * set whether to retrieve sub data source list by going through each sub datasource or get it from VDS
     * Teiid creates "temp" tables in VDS.  Better to retrieve sub data source list from each sub DS.
     */
@@ -232,7 +274,7 @@ public class TeiidVirtualDataSourceQueryServiceImpl extends AbstractVirtualDataS
         this.useSubDSTableList = useSubDSTableList;
     }
 
-    /*
+    /**
     * set default translator config through spring injection
     */
     public static void setDefaultTranslatorConfig(TranslatorConfig defaultTranslatorConfig) {
@@ -243,7 +285,7 @@ public class TeiidVirtualDataSourceQueryServiceImpl extends AbstractVirtualDataS
         return defaultTranslatorConfig;
     }
 
-    /*
+    /**
     * set teiid translator config list through spring injection
     */
     public static void setTranslatorConfigList(List<TranslatorConfig> translatorConfigList) {
@@ -254,7 +296,7 @@ public class TeiidVirtualDataSourceQueryServiceImpl extends AbstractVirtualDataS
         return translatorConfigList;
     }
 
-    /*
+    /**
      * set teiid excluded schemas through spring injection
      */
     public static void setVirtualDataSourceConfigList(List<VirtualDataSourceConfig> virtualDataSourceConfigList) {
@@ -265,7 +307,7 @@ public class TeiidVirtualDataSourceQueryServiceImpl extends AbstractVirtualDataS
         return virtualDataSourceConfigList;
     }
 
-    /*
+    /**
     * set teiid log config list through spring injection
     */
     public static void setLogConfigList(List<LogConfig> logConfigList) {
@@ -339,7 +381,8 @@ public class TeiidVirtualDataSourceQueryServiceImpl extends AbstractVirtualDataS
                 // try to get the complete schemas list from each sub data source
                 Set availableSchemaList = null;
                 try {
-                    availableSchemaList = VirtualSQLDataSource.discoverNonEmptySchemas(getDataSource(subDataSources.get(i)).getConnection());
+                    Connection subDataSourceConnection = getDataSource(subDataSources.get(i)).getConnection();
+                    availableSchemaList = VirtualSQLDataSource.discoverNonEmptySchemas(subDataSourceConnection, databaseObjectTypesFilter);
                 } catch(SQLException ex) {
                     debug("Unable to read the schema list from data source!");
         //            throw new VirtualDataSourceException(ex);
@@ -625,12 +668,32 @@ public class TeiidVirtualDataSourceQueryServiceImpl extends AbstractVirtualDataS
         try {
             if (dataSource instanceof CustomDataSource) {
                 TeiidDataSource teiidDataSource = getTeiidDataSource(dataSource);
-                if (teiidDataSource != null) return teiidDataSource.getConnectionFactory(((CustomDataSource) dataSource).getPropertyMap());
+
+                if (teiidDataSource != null) {
+                    Map propertyMap = ((CustomDataSource) dataSource).getPropertyMap();
+                    // We create a new instance of the map to prevent modifications to the original map.
+                    // This also limits exposure of the datasource
+                    propertyMap = putDataSource(new HashMap(propertyMap), dataSource);
+
+                    return teiidDataSource.getConnectionFactory(propertyMap);
+                }
             }
         } catch (Exception ex) {
             throw new VirtualDataSourceException("Teiid Virtual Data Source Query Service - unable to create connection factory", ex);
         }
         return getDataSource(dataSource);
+    }
+    
+    private Map putDataSource(Map map, com.jaspersoft.jasperserver.api.common.virtualdatasourcequery.DataSource dataSource) {
+        if (dataSource instanceof DataSourceImpl) {
+            map.put(CustomDataSourceProps.CDS_RESOURCE, getResource(dataSource));
+        }
+        return map;
+    }
+    
+    private Resource getResource(com.jaspersoft.jasperserver.api.common.virtualdatasourcequery.DataSource dataSource) {
+        String uri = ((DataSourceImpl)dataSource).getReportDataSource().getURIString();
+        return repositoryService.getResource(engineService.getRuntimeExecutionContext(), uri);
     }
 
     // get javax.sql.DataSource from virtualdatasourcequery.DataSource
@@ -671,4 +734,22 @@ public class TeiidVirtualDataSourceQueryServiceImpl extends AbstractVirtualDataS
     public void afterPropertiesSet() throws Exception {
         init();
     }
+
+    /**
+     * Sets a connector to be used with custom datasources which provide {@link CustomDomainMetaData}
+     */
+	public void setDataSetTeiidConnector(TeiidDataSource dataSetTeiidConnector) {
+		this.dataSetTeiidConnector = dataSetTeiidConnector;
+	}
+
+    /**
+     * When determining if a schema is empty or not we query only object types from this set.
+     * A schema is considered empty if it doens't have any objects of these types.
+     * Default is <code>["TABLE"]</code>
+     * @see {@link DatabaseMetaData#getTableTypes}
+     */
+    public void setDatabaseObjectTypesFilter(Set<String> databaseObjectTypesFilter) {
+        this.databaseObjectTypesFilter = databaseObjectTypesFilter;
+    }
+
 }

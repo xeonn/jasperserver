@@ -27,4 +27,12 @@
             </map>
         </component>
     </class>
+
+<!-- create index JIFTPInfoProperties_repodest_id_index on JIFTPInfoProperties (repodest_id); -->
+<!-- replacing JIFTPInfoProperties_repodest_id_index with idx14_repodest_id_idx -->
+<database-object>
+	<create>create index idx14_repodest_id_idx on JIFTPInfoProperties (repodest_id)</create>
+	<drop>DROP INDEX idx14_repodest_id_idx ON JIFTPInfoProperties</drop>
+</database-object>
+
 </hibernate-mapping>

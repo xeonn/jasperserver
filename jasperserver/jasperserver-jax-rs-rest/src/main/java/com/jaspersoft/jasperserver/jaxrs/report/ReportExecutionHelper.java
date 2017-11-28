@@ -52,13 +52,22 @@ public class ReportExecutionHelper {
     }
 
     public static Response buildResponseFromOutputResource(ReportOutputResource outputResource, Boolean suppressContentDisposition) {
-        String contentType = outputResource.getContentType();
-        final Response.ResponseBuilder responseBuilder = Response.ok(outputResource.getData(), contentType);
-        if (!suppressContentDisposition && outputResource.getFileName() != null && !contentType.equals("text/html")) {
+        final Response.ResponseBuilder responseBuilder;
+        if (outputResource.getData() == null || outputResource.getData().length == 0) {
+            responseBuilder = Response.noContent();
+        } else {
+            String contentType = outputResource.getContentType();
+            responseBuilder = Response.ok(outputResource.getData(), contentType);
+            if (!suppressContentDisposition && outputResource.getFileName() != null && !contentType.equals("text/html")) {
                 responseBuilder.header("Content-Disposition", "attachment; filename=\"" + outputResource.getFileName() + "\"");
-        }
-        if(outputResource.getOutputFinal() != null){
-            responseBuilder.header("output-final", outputResource.getOutputFinal());
+            }
+            if (outputResource.getOutputFinal() != null) {
+                responseBuilder.header("output-final", outputResource.getOutputFinal());
+            }
+            final String pages = outputResource.getPages();
+            if (pages != null && !pages.isEmpty()) {
+                responseBuilder.header("report-pages", pages);
+            }
         }
         return responseBuilder.build();
     }

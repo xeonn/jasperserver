@@ -75,7 +75,7 @@ import static org.testng.Assert.*;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: ResourceDetailsJaxrsServiceTest.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: ResourceDetailsJaxrsServiceTest.java 55164 2015-05-06 20:54:37Z mchan $
  */
 public class ResourceDetailsJaxrsServiceTest {
     @InjectMocks
@@ -269,10 +269,20 @@ public class ResourceDetailsJaxrsServiceTest {
         Mockito.when(repositoryService.createResource(any(Resource.class), anyString(), anyBoolean())).thenReturn(created);
         Mockito.when(repositoryService.getUniqueName(anyString(), anyString())).thenReturn(name);
 
-        service.createResource(clientRes, uri, true);
+        service.createResource(clientRes, uri, true, false);
 
         Mockito.verify(serverConverter).toServer(clientRes, ToServerConversionOptions.getDefault().setOwnersUri(uri + Folder.SEPARATOR + name).setResetVersion(true));
         Mockito.verify(clientConverter).toClient(created, null);
+    }
+
+    @Test(groups = "POST")
+    public void testCreateResource_dryRun() throws Exception {
+        String name = "ups";
+        Mockito.when(repositoryService.getResource(anyString())).thenReturn(res);
+        Mockito.when(repositoryService.getUniqueName(anyString(), anyString())).thenReturn(name);
+
+        service.createResource(clientRes, uri, true, true);
+        Mockito.verify(repositoryService, never()).createResource(any(Resource.class), anyString(), anyBoolean());
     }
 
     @Test(groups = "COPY")

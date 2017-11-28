@@ -31,7 +31,7 @@ import net.sf.jasperreports.engine.JRParameter;
  * persisted input control objects.
  * 
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ReportInputControlInformation.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: ReportInputControlInformation.java 55164 2015-05-06 20:54:37Z mchan $
  */
 @JasperServerAPI
 public interface ReportInputControlInformation {
@@ -41,6 +41,12 @@ public interface ReportInputControlInformation {
 	 * @return label value
 	 */
 	String getPromptLabel();
+
+	/**
+	 * Gets a text string to be used as an input control description
+	 * @return description value
+	 */
+	String getDescription();
 
     /**
      * Gets string name of the JRParameter.

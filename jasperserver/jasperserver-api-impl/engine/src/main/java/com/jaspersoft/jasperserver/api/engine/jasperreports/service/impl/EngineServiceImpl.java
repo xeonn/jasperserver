@@ -28,6 +28,7 @@ import com.jaspersoft.jasperserver.api.common.domain.impl.ExecutionContextImpl;
 import com.jaspersoft.jasperserver.api.common.domain.impl.ValidationDetailImpl;
 import com.jaspersoft.jasperserver.api.common.domain.impl.ValidationResultImpl;
 import com.jaspersoft.jasperserver.api.common.util.TimeZoneContextHolder;
+import com.jaspersoft.jasperserver.api.common.util.diagnostic.FilterBy;
 import com.jaspersoft.jasperserver.api.engine.common.domain.Request;
 import com.jaspersoft.jasperserver.api.engine.common.domain.Result;
 import com.jaspersoft.jasperserver.api.engine.common.service.BuiltInParameterProvider;
@@ -60,6 +61,7 @@ import com.jaspersoft.jasperserver.api.engine.jasperreports.util.DefaultProtecti
 import com.jaspersoft.jasperserver.api.engine.jasperreports.util.InputControlLabelResolver;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.util.JRQueryExecuterAdapter;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.util.JarsClassLoader;
+import com.jaspersoft.jasperserver.api.engine.jasperreports.util.MaterializedDataParameter;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.util.MessageSourceLoader;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.util.ProtectionDomainProvider;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.util.ReportInputControlValuesInformationLoader;
@@ -135,11 +137,13 @@ import net.sf.jasperreports.repo.JasperDesignCache;
 import net.sf.jasperreports.web.servlets.AsyncJasperPrintAccessor;
 import net.sf.jasperreports.web.servlets.JasperPrintAccessor;
 import net.sf.jasperreports.web.servlets.SimpleJasperPrintAccessor;
+
 import org.apache.commons.collections.OrderedMap;
 import org.apache.commons.collections.map.ReferenceMap;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.MDC;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -147,6 +151,7 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -175,7 +180,7 @@ import java.util.jar.JarFile;
 /**
  *
  * @author Teodor Danciu (teodord@users.sourceforge.net)
- * @version $Id: EngineServiceImpl.java 51369 2014-11-12 13:59:41Z sergey.prilukin $
+ * @version $Id: EngineServiceImpl.java 55164 2015-05-06 20:54:37Z mchan $
  */
 public class EngineServiceImpl implements EngineService, ReportExecuter,
 		CompiledReportProvider, InternalReportCompiler, InitializingBean, Diagnostic
@@ -217,8 +222,7 @@ public class EngineServiceImpl implements EngineService, ReportExecuter,
     private Executor syncReportExecutorService =
 			SynchronousExecutor.INSTANCE;//default value
 
-	private Executor asyncReportExecutorService =
-			Executors.newCachedThreadPool();//default value
+	private Executor asyncReportExecutorService = new Log4jMdcCompatibleThreadPoolExecutor();
 	
 	private List<ReportExecutionListenerFactory> reportExecutionListenerFactories;
 
@@ -499,10 +503,13 @@ public class EngineServiceImpl implements EngineService, ReportExecuter,
 		ReportExecutionStatus status;
         if (request instanceof ReportUnitRequest) {
             status = new ReportExecutionStatus(request, ((ReportUnitRequest)request).getPropertyMap());
-            status.setReportURI(((ReportUnitRequest)request).getReportUnitUri());
+            String reportUnitUri = ((ReportUnitRequest) request).getReportUnitUri();
+            status.setReportURI(reportUnitUri);
+            MDC.put(FilterBy.RESOURCE_URI.name(), reportUnitUri);
             status.setOwner(securityContextProvider.getContextUser());
-
-        } else status = new ReportExecutionStatus(request);
+        } else {
+            status = new ReportExecutionStatus(request);
+        }
 
 		engineExecutions.put(request.getId(), status);
 		currentExecutionStatus.set(status);
@@ -515,6 +522,7 @@ public class EngineServiceImpl implements EngineService, ReportExecuter,
 		if (log.isDebugEnabled()) {
 			log.debug("Ended execution " + request.getId());
 		}
+        MDC.getContext().remove(FilterBy.RESOURCE_URI.name());
 	}
 
 	protected ReportExecutionStatus currentExecutionStatus() {
@@ -2014,11 +2022,17 @@ public class EngineServiceImpl implements EngineService, ReportExecuter,
         ReportUnit reportUnit = getRepositoryResource(context, reportUnitURI, ReportUnit.class);
         if (reportUnit != null) {
             addReportUnitTypeToAudit(reportUnit);
-            OrigContextClassLoader origContext = setContextClassLoader(context, reportUnit, false);
+            
+            RepositoryContextHandle repositoryContextHandle = setThreadRepositoryContext(context, reportUnit, reportUnit.getURIString());
             try {
-                jasperReport = getJasperReport(context, reportUnit, false);
+                OrigContextClassLoader origContext = setContextClassLoader(context, reportUnit, false, repositoryContextHandle);
+                try {
+                    jasperReport = getJasperReport(context, reportUnit, false);
+                } finally {
+                    revert(origContext);
+                }
             } finally {
-                revert(origContext);
+            	resetThreadRepositoryContext(repositoryContextHandle);
             }
         }
         return jasperReport;
@@ -2030,11 +2044,18 @@ public class EngineServiceImpl implements EngineService, ReportExecuter,
         if (container != null) {
             if (container instanceof ReportUnit) {
                 addReportUnitTypeToAudit(container);
-                OrigContextClassLoader origContext = setContextClassLoader(context, (ReportUnit)container, false);
+                
+                ReportUnit reportUnit = (ReportUnit) container;
+                RepositoryContextHandle repositoryContextHandle = setThreadRepositoryContext(context, reportUnit, reportUnit.getURIString());
                 try {
-                    jasperReport = getJasperReport(context, (ReportUnit)container, false);
+    				OrigContextClassLoader origContext = setContextClassLoader(context, reportUnit, false, repositoryContextHandle);
+                    try {
+                        jasperReport = getJasperReport(context, reportUnit, false);
+                    } finally {
+                        revert(origContext);
+                    }
                 } finally {
-                    revert(origContext);
+                	resetThreadRepositoryContext(repositoryContextHandle);
                 }
             } else {
                 throw new JSException("Unsupported report object " + container.getClass().getName());
@@ -2372,6 +2393,12 @@ public class EngineServiceImpl implements EngineService, ReportExecuter,
 			ReportInputControlInformation info = infos.getInputControlInformation(controlName);
 			if (snapshotParams.containsKey(controlName)) {
 				Object value = snapshotParams.get(controlName);
+				
+				// restore original relative date values
+				if (value instanceof MaterializedDataParameter) {
+					value = ((MaterializedDataParameter) value).getParameterValue();
+				}
+				
 				// check if it matches the expected type
 				if (matchesInputControlType(info, value)) {
 					info.setDefaultValue(value);
@@ -2509,6 +2536,7 @@ public class EngineServiceImpl implements EngineService, ReportExecuter,
 
             // try to get i18n label for input control
             String label = InputControlLabelResolver.resolve(inputControl.getLabel(), reportBundle, serverMessageSource);
+            String description = InputControlLabelResolver.resolve(inputControl.getDescription(), reportBundle, serverMessageSource);
 
             // try to get i18n labels for List Of Values input controls options
             ReportInputControlValuesInformation valuesInformation = null;
@@ -2524,12 +2552,13 @@ public class EngineServiceImpl implements EngineService, ReportExecuter,
                 jrInfo.setReportParameter(param);
                 jrInfo.setDefaultValue(jrDefaultValues.get(name));
                 jrInfo.setPromptLabel(label);
+				jrInfo.setDescription(description);
                 jrInfo.setReportInputControlValuesInformation(valuesInformation);
                 info = jrInfo;
             } else {
                 // input control is not assigned to any report parameter.
                 // Create an anonymous ReportInputControlInformation class which doesn't need the JRParameter.
-                info = createReportInputControlInformationWithoutParameter(inputControl.getName(), label, valuesInformation);
+                info = createReportInputControlInformationWithoutParameter(inputControl.getName(), label, description, valuesInformation);
             }
             result.setInputControlInformation(name, info);
         }
@@ -2538,8 +2567,8 @@ public class EngineServiceImpl implements EngineService, ReportExecuter,
 	}
 
     private ReportInputControlInformation createReportInputControlInformationWithoutParameter(final String name,
-                                final String label, final ReportInputControlValuesInformation valuesInformation) {
-        return new ReportInputControlWithoutParameterInformation(name, label, valuesInformation);
+                                final String label, final String description, final ReportInputControlValuesInformation valuesInformation) {
+        return new ReportInputControlWithoutParameterInformation(name, label, description, valuesInformation);
     }
 
     private ReportInputControlValuesInformation getReportInputControlValuesInformation(
@@ -2812,46 +2841,54 @@ public class EngineServiceImpl implements EngineService, ReportExecuter,
 		this.dataParameterContributors = dataParameterContributors;
 	}
 
-    /*
-     *  This function is used for retrieving the metadata layer of the data connector in form of TableSourceMetadata
-     *  TableSourceMetadata contains information JRFields, query, query language and field name mapping (actual JRField name, name used in domain)
-     *  Currently, this function only supports data adapter CustomReportDataSource object such as CSV, XLS and XLSX data adapter CustomReportDataSource object.
-     */
     public CustomDomainMetaData getMetaDataFromConnector(CustomReportDataSource customReportDataSource) throws Exception {
-        RepositoryContextHandle repositoryContextHandle = null;
-        try {
-            // only supports data adapter CustomReportDataSource object
-            CustomReportDataSourceServiceFactory factory = (CustomReportDataSourceServiceFactory) getDataSourceServiceFactories().getBean(customReportDataSource.getClass());
+        // only supports data adapter CustomReportDataSource object
+        CustomReportDataSourceServiceFactory factory =
+                (CustomReportDataSourceServiceFactory) getDataSourceServiceFactories().getBean(customReportDataSource.getClass());
+        CustomDataSourceDefinition dataSourceDefinition = factory.getDefinition(customReportDataSource);
+        CustomDomainMetaDataProvider metaDataProvider = getCustomDomainMetaDataProvider(customReportDataSource, factory, dataSourceDefinition);
 
-            CustomDomainMetaDataProvider customDomainMetaDataProvider = null;
-            CustomDataSourceDefinition dataSourceDefinition = factory.getDefinition(customReportDataSource);
-            if (dataSourceDefinition instanceof  CustomDomainMetaDataProvider) {
-                customDomainMetaDataProvider = (CustomDomainMetaDataProvider)dataSourceDefinition;
-            } else {
-                ReportDataSourceService customReportDataSourceService = factory.createService(customReportDataSource);
-                if (customReportDataSourceService instanceof CustomDomainMetaDataProvider) {
-                    customDomainMetaDataProvider = (CustomDomainMetaDataProvider)customReportDataSourceService;
-                }
-
-            }
-            if (customDomainMetaDataProvider != null) {
-                // setup thread repository context for looking up data source file from repo
-                if (dataSourceDefinition instanceof DataAdapterDefinition) {
-                    ((DataAdapterDefinition) dataSourceDefinition).setupThreadRepositoryContext(this, customReportDataSource);
-                }
-                // discover metadata from connector
-                CustomDomainMetaData tableSourceMetadata = customDomainMetaDataProvider.getCustomDomainMetaData(customReportDataSource);
-                if (log.isDebugEnabled()) {
-                    for (JRField field : tableSourceMetadata.getJRFieldList()) {
-                        log.debug("METADATA from CONNECTOR:  FIELD = " + field.getName() + "  TYPE = " + field.getValueClassName());
-                    }
-                }
-                return tableSourceMetadata;
-            } else return null;
-        } finally {
-            resetThreadRepositoryContext(repositoryContextHandle);
+        if (metaDataProvider == null) {
+            return null;
         }
+
+        // discover metadata from connector
+        CustomDomainMetaData metaData = metaDataProvider.getCustomDomainMetaData(customReportDataSource);
+        if (log.isDebugEnabled()) {
+            for (JRField field : metaData.getJRFieldList()) {
+                log.debug("METADATA from CONNECTOR:  FIELD = " + field.getName() + "  TYPE = " + field.getValueClassName());
+            }
+        }
+
+        return metaData;
     }
+
+    private CustomDomainMetaDataProvider getCustomDomainMetaDataProvider(CustomReportDataSource customReportDataSource,
+                                                                         CustomReportDataSourceServiceFactory factory,
+                                                                         CustomDataSourceDefinition dataSourceDefinition) {
+        CustomDomainMetaDataProvider metaDataProvider = null;
+        if (dataSourceDefinition instanceof CustomDomainMetaDataProvider) {
+            metaDataProvider = (CustomDomainMetaDataProvider) dataSourceDefinition;
+        } else {
+            ReportDataSourceService customReportDataSourceService = factory.createService(customReportDataSource);
+            if (customReportDataSourceService instanceof CustomDomainMetaDataProvider) {
+                metaDataProvider = (CustomDomainMetaDataProvider) customReportDataSourceService;
+            }
+        }
+
+        return metaDataProvider;
+    }
+
+    @Override
+    public boolean isCustomDomainMetadataProvider(CustomReportDataSource customReportDataSource) {
+        CustomReportDataSourceServiceFactory factory =
+                (CustomReportDataSourceServiceFactory) getDataSourceServiceFactories().getBean(customReportDataSource.getClass());
+        CustomDataSourceDefinition dataSourceDefinition = factory.getDefinition(customReportDataSource);
+        CustomDomainMetaDataProvider metaDataProvider = getCustomDomainMetaDataProvider(customReportDataSource, factory, dataSourceDefinition);
+
+        return metaDataProvider != null;
+    }
+
 	public boolean isRecordSizeof() {
 		return recordSizeof;
 	}
@@ -2866,24 +2903,6 @@ public class EngineServiceImpl implements EngineService, ReportExecuter,
 
     public void setJrxmlFixerList(List<JRXMLFixer> jrxmlFixerList) {
         this.jrxmlFixerList = jrxmlFixerList;
-    }
-
-    // return JRDataSource from data connector.  User can iterate the data from JRDataSource and JRField list (get it from TableSourceMetaData) for previewing
-    public JRDataSource getJRDataSource(CustomReportDataSource customReportDataSource) throws Exception  {
-        RepositoryContextHandle repositoryContextHandle = null;
-        try {
-            // only supports data adapter CustomReportDataSource object
-            if ((customReportDataSource).getServiceClass().equals(DataAdapterDefinition.DATA_ADAPTER_SERVICE_CLASS)) {
-                CustomReportDataSourceServiceFactory factory = (CustomReportDataSourceServiceFactory) getDataSourceServiceFactories().getBean(customReportDataSource.getClass());
-                DataAdapterDefinition dataSourceDefinition = (DataAdapterDefinition) factory.getDefinition( customReportDataSource);
-                // setup thread repository context for looking up data source file from repo
-                dataSourceDefinition.setupThreadRepositoryContext(this, customReportDataSource);
-                // discover metadata from connector
-                return dataSourceDefinition.getJRDataSource(customReportDataSource);
-            } else return null;
-        } finally {
-            resetThreadRepositoryContext(repositoryContextHandle);
-        }
     }
     
     public boolean isReportThumbnailServiceEnabled() {

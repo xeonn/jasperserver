@@ -9,7 +9,7 @@
     <parent>
         <groupId>com.jaspersoft.jasperserver</groupId>
         <artifactId>server</artifactId>
-        <version>6.0.1</version>
+        <version>6.1.0</version>
     </parent>
     <profiles>
         <!-- enable handling between internal and external builds -->    
@@ -26,7 +26,7 @@
                 <dependency>
                     <groupId>com.jaspersoft</groupId>
                     <artifactId>jrs-ui</artifactId>
-                    <version>1.0.8</version>
+                    <version>1.1.8</version>
                     <type>zip</type>
                 </dependency>
             </dependencies>
@@ -105,6 +105,150 @@
     </profiles>
     <dependencies>
         <dependency>
+            <groupId>com.jaspersoft.jasperreports</groupId>
+            <artifactId>jasperreports-customvisualization</artifactId>
+            <version>6.1.0</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>net.sf.jasperreports</groupId>
+                    <artifactId>jasperreports</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>net.sourceforge.jexcelapi</groupId>
+                    <artifactId>jxl</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>jackson-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>jackson-databind</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>jackson-annotations</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.xmlgraphics</groupId>
+                    <artifactId>batik-anim</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.xmlgraphics</groupId>
+                    <artifactId>batik-awt-util</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.xmlgraphics</groupId>
+                    <artifactId>batik-bridge</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.xmlgraphics</groupId>
+                    <artifactId>batik-codec</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.xmlgraphics</groupId>
+                    <artifactId>batik-css</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.xmlgraphics</groupId>
+                    <artifactId>batik-dom</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.xmlgraphics</groupId>
+                    <artifactId>batik-ext</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.xmlgraphics</groupId>
+                    <artifactId>batik-extension</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.xmlgraphics</groupId>
+                    <artifactId>batik-gui-util</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.xmlgraphics</groupId>
+                    <artifactId>batik-gvt</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.xmlgraphics</groupId>
+                    <artifactId>batik-parser</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.xmlgraphics</groupId>
+                    <artifactId>batik-rasterizer</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.xmlgraphics</groupId>
+                    <artifactId>batik-svg-dom</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.xmlgraphics</groupId>
+                    <artifactId>batik-svggen</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.xmlgraphics</groupId>
+                    <artifactId>batik-svgpp</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.xmlgraphics</groupId>
+                    <artifactId>batik-transcoder</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.xmlgraphics</groupId>
+                    <artifactId>batik-util</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.xmlgraphics</groupId>
+                    <artifactId>batik-xml</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>log4j</groupId>
+                    <artifactId>log4j</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.mozilla</groupId>
+                    <artifactId>rhino</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>xml-apis</groupId>
+                    <artifactId>xml-apis-ext</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>commons-io</groupId>
+                    <artifactId>commons-io</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>commons-collections</groupId>
+                    <artifactId>commons-collections</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.velocity</groupId>
+                    <artifactId>velocity</artifactId>
+                </exclusion>
+                  <exclusion>
+                    <groupId>bouncycastle</groupId>
+                    <artifactId>bcmail-jdk14</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>bouncycastle</groupId>
+                    <artifactId>bcprov-jdk14</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>bouncycastle</groupId>
+                    <artifactId>bctsp-jdk14</artifactId>
+
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
             <groupId>antlr</groupId>
             <artifactId>antlr</artifactId>
             <version>2.7.6</version>
@@ -135,12 +279,12 @@
         <dependency>
             <groupId>com.jaspersoft.jasperserver</groupId>
             <artifactId>jasperserver-hive-connector</artifactId>
-            <version>6.0.1</version>
+            <version>6.1.0</version>
         </dependency>
         <dependency>
             <groupId>com.jaspersoft.jasperserver</groupId>
             <artifactId>jasperserver-cassandra-connector</artifactId>
-            <version>6.0.1</version>
+            <version>6.1.0</version>
             <exclusions>
                 <exclusion>
                     <groupId>antlr</groupId>
@@ -185,6 +329,11 @@
         <dependency>
             <groupId>com.jaspersoft.jasperserver</groupId>
             <artifactId>jasperserver-remote-services</artifactId>
+        </dependency>
+        <dependency>
+        	<groupId>com.jaspersoft.jasperserver</groupId>
+        	<artifactId>jasperserver-custom-datasources</artifactId>
+        	<scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>${jpivot-groupId}</groupId>
@@ -355,20 +504,6 @@
             <version>1.1-beta-8</version>
         </dependency>
         <dependency>
-            <groupId>commons-httpclient</groupId>
-            <artifactId>commons-httpclient</artifactId>
-            <version>3.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>4.2.1</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-codec</groupId>
-            <artifactId>commons-codec</artifactId>
-        </dependency>
-        <dependency>
             <groupId>commons-fileupload</groupId>
             <artifactId>commons-fileupload</artifactId>
         </dependency>
@@ -405,12 +540,12 @@
         <dependency>
             <groupId>net.sf.jasperreports</groupId>
             <artifactId>jasperreports-chart-themes</artifactId>
-            <version>6.0.0</version>
+            <version>6.1.0</version>
         </dependency>
         <dependency>
             <groupId>net.sf.jasperreports</groupId>
             <artifactId>jasperreports-functions</artifactId>
-            <version>6.0.0</version>
+            <version>6.1.0</version>
         </dependency>
         <!-- bug 32641: fix for installation to JBoss 7. Because we have use deployment module to precisely    -->
         <!--            control batik jar dependencies used by jboss 7, we need to make sure the same jars are -->
@@ -568,7 +703,7 @@
         <dependency>
             <groupId>com.jaspersoft.connectors.cassandra</groupId>
             <artifactId>js-cassandracql3-datasource</artifactId>
-            <version>2.0.1</version>
+            <version>2.3</version>
             <exclusions>
                 <exclusion>
                     <groupId>commons-pool</groupId>                
@@ -579,7 +714,7 @@
         <dependency>
             <groupId>com.jaspersoft.connectors.mongodb</groupId>
             <artifactId>js-mongodb-datasource</artifactId>
-            <version>1.0.5</version>
+            <version>2.0.2</version>
             <exclusions>
                 <exclusion>
                     <groupId>commons-pool</groupId>                
@@ -590,12 +725,12 @@
         <dependency>
             <groupId>org.mongodb</groupId>
             <artifactId>mongo-java-driver</artifactId>
-            <version>2.11.3</version>
+            <version>2.12.3</version>
         </dependency>
         <dependency>
             <groupId>com.jaspersoft.jasperserver</groupId>
             <artifactId>jrs-mongodb-datasource</artifactId>
-            <version>6.0.1</version>
+            <version>6.1.0</version>
         </dependency>
 
         <!-- big data connector components END -->
@@ -615,6 +750,10 @@
         <dependency>
             <groupId>com.jaspersoft.jasperserver.crypto</groupId>
             <artifactId>js-crypto</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.jaspersoft.jasperserver</groupId>
+            <artifactId>jasperserver-ftp</artifactId>
         </dependency>
     </dependencies>
     <description>Jasper Server War Deployment</description>

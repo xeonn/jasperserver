@@ -21,8 +21,10 @@
 
 
 /**
- * @version: $Id: report.viewer.main.js 7999 2014-11-07 03:05:15Z tdanciu $
+ * @version: $Id: report.viewer.main.js 8900 2015-05-06 20:57:14Z yplakosh $
  */
+
+/* global Hash, __jrsConfigs__ */
 
 define(function (require) {
     "use strict";
@@ -83,9 +85,6 @@ define(function (require) {
                 };
 
             Report.initialize();
-
-                //this code allow custom code to listen when controls are actually initialized
-                jQuery(document).trigger('controls:initialized', []);
         });
     });
     });

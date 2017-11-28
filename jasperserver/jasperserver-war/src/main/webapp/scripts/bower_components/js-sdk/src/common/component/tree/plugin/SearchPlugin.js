@@ -22,7 +22,7 @@
 
 /**
  * @author: Zakhar Tomchenko
- * @version: $Id: SearchPlugin.js 307 2014-10-22 13:15:28Z psavushchik $
+ * @version: $Id: SearchPlugin.js 1137 2015-04-22 17:31:34Z obobruyk $
  */
 
 define(function(require){
@@ -120,6 +120,8 @@ define(function(require){
         }
     }, {
         treeInitialized: function(options) {
+            options = options || {};
+            
             var self = this;
             this.searchForm = new SearchForm({owner: this});
             if (options.dfdRenderTo) {

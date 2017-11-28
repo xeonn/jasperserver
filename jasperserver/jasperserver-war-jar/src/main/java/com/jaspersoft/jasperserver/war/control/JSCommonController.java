@@ -48,7 +48,7 @@ import java.util.Locale;
 
 /**
  * @author aztec
- * @version $Id: JSCommonController.java 51947 2014-12-11 14:38:38Z ogavavka $
+ * @version $Id: JSCommonController.java 55164 2015-05-06 20:54:37Z mchan $
  */
 public class JSCommonController extends JRBaseMultiActionController {
 	public static final String JSP_REQUEST_HANDLING_PREFIX = "jsp:";
@@ -184,7 +184,18 @@ public class JSCommonController extends JRBaseMultiActionController {
 
 
     public ModelAndView exitUser(HttpServletRequest req, HttpServletResponse res) {
-	String redirectURL = "/logout.html" + "?" + "showPasswordChange="+req.getParameter("showPasswordChange");
+		String redirectURL = "/logout.html";
+		if (req.getParameter("showPasswordChange") == null){
+			if (req.getParameter("weakPassword") != null){
+				redirectURL += "?weakPassword=" + req.getParameter("weakPassword");
+			}
+		} else {
+			redirectURL += "?showPasswordChange=" + req.getParameter("showPasswordChange");
+			if (req.getParameter("weakPassword") != null){
+				redirectURL += "&weakPassword=" + req.getParameter("weakPassword");
+			}
+		}
+
 	if (UserAuthorityServiceImpl.isUserSwitched()) {
 	    redirectURL = "/j_acegi_exit_user";
 	}
@@ -220,7 +231,19 @@ public class JSCommonController extends JRBaseMultiActionController {
 			return new ModelAndView("redirect:" + externalLogoutUrl);
 		}
 		else {
-			return new ModelAndView("redirect:/login.html" + "?" + "showPasswordChange="+req.getParameter("showPasswordChange"));
+			String redirectURL = "redirect:/login.html";
+			if (req.getParameter("showPasswordChange") == null){
+				if (req.getParameter("weakPassword") != null){
+					redirectURL += "?weakPassword=" + req.getParameter("weakPassword");
+				}
+			} else {
+				redirectURL += "?showPasswordChange=" + req.getParameter("showPasswordChange");
+				if (req.getParameter("weakPassword") != null){
+					redirectURL += "&weakPassword=" + req.getParameter("weakPassword");
+				}
+			}
+
+			return new ModelAndView(redirectURL);
 		}
 	}
 
