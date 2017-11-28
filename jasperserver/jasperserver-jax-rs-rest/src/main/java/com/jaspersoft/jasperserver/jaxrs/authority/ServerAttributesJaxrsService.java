@@ -36,20 +36,23 @@ import javax.annotation.Resource;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.ext.Providers;
+import java.io.InputStream;
 import java.util.Set;
 
 /**
  * @author Volodya Sabadosh
- * @version $Id: ServerAttributesJaxrsService.java 58870 2015-10-27 22:30:55Z esytnik $
+ * @version $Id: ServerAttributesJaxrsService.java 61296 2016-02-25 21:53:37Z mchan $
  */
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -57,6 +60,12 @@ import java.util.Set;
 public class ServerAttributesJaxrsService {
     @Resource(name = "attributesJaxrsService")
     private AttributesJaxrsService attributesJaxrsService;
+
+    @Context
+    private Providers providers;
+
+    @Context
+    private HttpHeaders httpHeaders;
 
     @GET
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON, "application/hal+json", "application/hal+xml"})
@@ -123,15 +132,16 @@ public class ServerAttributesJaxrsService {
 
     @PUT
     @Path("/{attrName}")
-    @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON, "application/hal+json", "application/hal+xml"})
-    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON, "application/hal+json", "application/hal+xml"})
-    public Response putAttribute(ClientAttribute attr,
+    @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON, "application/hal+xml", "application/hal+json"})
+    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON, "application/hal+xml","application/hal+json"})
+    public Response putAttribute(InputStream stream,
                                  @PathParam("attrName") String attrName,
                                  @HeaderParam(HttpHeaders.ACCEPT) String accept,
-                                 @HeaderParam(HttpHeaders.CONTENT_TYPE) String mediaType,
+                                 @HeaderParam(HttpHeaders.CONTENT_TYPE)MediaType mediaType,
                                  @QueryParam("_embedded") String embedded) throws RemoteException {
         HypermediaOptions hypermediaOptions = attributesJaxrsService.getHypermediaOptions(accept, embedded);
-        return attributesJaxrsService.putAttribute(attr, getHolder(), attrName, hypermediaOptions, mediaType);
+        ClientAttribute clientAttribute = AttributesJaxrsService.parseEntity(stream, mediaType, providers, httpHeaders);
+        return attributesJaxrsService.putAttribute(clientAttribute, getHolder(), attrName, hypermediaOptions, mediaType.toString());
     }
 
     @DELETE

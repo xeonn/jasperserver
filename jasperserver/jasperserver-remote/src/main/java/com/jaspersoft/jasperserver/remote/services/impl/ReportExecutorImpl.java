@@ -112,8 +112,6 @@ public class ReportExecutorImpl implements ReportExecutor {
     public ReportUnitResult runReport(String reportUnitUri, Map<String, Object> parameters,
             ReportExecutionOptions reportExecutionOptions) throws RemoteException {
         InputControlsContainer report = getResource(InputControlsContainer.class, reportUnitUri);
-        long currentTime = System.currentTimeMillis();
-        auditHelper.createAuditEvent("runReport");
         RunReportStrategy strategy = getStrategyForReport(report);
         if (strategy == null) {
             throw new RemoteException(new ErrorDescriptor()
@@ -135,8 +133,6 @@ public class ReportExecutorImpl implements ReportExecutor {
                     .setErrorCode("webservices.error.errorExecutingReportUnit").setParameters(report.getURI()));
         }
 
-        auditHelper.addPropertyToAuditEvent("runReport", "reportExecutionStartTime", new Date(currentTime));
-        auditHelper.addPropertyToAuditEvent("runReport", "reportExecutionTime", System.currentTimeMillis() - currentTime);
         return reportUnitResult;
     }
 
@@ -187,8 +183,8 @@ public class ReportExecutorImpl implements ReportExecutor {
                 final String pages = exportParameters.get(Argument.RUN_OUTPUT_PAGES).toString();
                 final int totalPages = jasperPrint.getPages().size();
                 throw new ExportExecutionRejectedException(new ErrorDescriptor().setMessage(
-                        "Pages out of range : " + pages + " of " + totalPages)
-                        .setErrorCode("export.pages.out.of.range").setParameters(pages, "" + totalPages));
+                        "Page number out of range : " + pages + " of " + totalPages + " (while exporting the report)")
+                        .setErrorCode("page.number.out.of.range").setParameters(pages, "" + totalPages));
             }
             throw new ExportExecutionRejectedException(e.getMessage());
         } catch (Exception e) {
@@ -320,6 +316,7 @@ public class ReportExecutorImpl implements ReportExecutor {
             request.setUseDataSnapshot(!(options.isFreshData() || options.isSaveDataSnapshot()));
 
             request.setAsynchronous(true);
+            request.setCreateAuditEvent(true);
 
             return request;
         }

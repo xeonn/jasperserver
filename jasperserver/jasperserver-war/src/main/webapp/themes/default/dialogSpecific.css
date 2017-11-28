@@ -6,10 +6,10 @@ tim sheiner & christie rixford
 */
 
 /*
-______________________________________________________________ 
+______________________________________________________________
 
- DIALOGS 
-______________________________________________________________ 
+ DIALOGS
+______________________________________________________________
 
 The rules in this file provide detailed and custom layout instructions
 for particular dialogs used by the application.
@@ -20,7 +20,7 @@ Dialog markup is created via templates, /jsp/templates/#[name of dialog]
 
 */
 
-/* 
+/*
 
 FLOATING DIALOGS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -310,7 +310,7 @@ FLOATING DIALOGS
 .saveAs .textArea textarea {
 	padding-left:2px;
 	padding-right:0;
-	overflow:auto; 
+	overflow:auto;
 	overflow:hidden \9; /* IE8 and IE9 */
 	*overflow:hidden;   /* IE7 */
 }
@@ -333,10 +333,10 @@ FLOATING DIALOGS
 	/*top:280px;*/
 /*}*/
 
-#saveDataViewAndReport.saveAs {
+#saveDataViewAndReport.saveAs.forReport{
     height: 650px;
     min-height: 435px;
-	min-width: 510px;
+	min-width: 600px;
 }
 
 .dualColumnContainer {
@@ -564,8 +564,8 @@ textarea[readonly]#viewQueryInput   {
 #commonGeneratorSelect.groupBox  {
     border: none;
 }
-    
-    
+
+
 /* #manageDataSource */
 
 .manageDataSource {
@@ -739,7 +739,7 @@ textarea[readonly]#viewQueryInput   {
 .sortDialog .list.fields li>.wrap {
 	margin:0 2% -1px 2px;
 	border:none;
-	border-radius:0; 
+	border-radius:0;
 }
 
 .sortDialog .collapsible>li {
@@ -747,8 +747,8 @@ textarea[readonly]#viewQueryInput   {
 }
 
 /* iPads (portrait and landscape) */
-@media only screen 
-and (min-device-width : 768px) 
+@media only screen
+and (min-device-width : 768px)
 and (max-device-width : 1024px) {
 
 	.sortDialog #sortOn .list.column.simple {
@@ -1157,7 +1157,7 @@ and (max-device-width : 1024px) {
 	height:550px;
 	min-height:500px;
 	min-width:490px; /* width needed to fit all buttons in other languages */
-	width:510px; 
+	width:510px;
 }
 
 .dialog.inputControls .groupBox .body {
@@ -1180,7 +1180,7 @@ and (max-device-width : 1024px) {
 
 .pane.inputControls .header>#savedValuesSelector {
 	width:auto;
-	line-height: 28px;	
+	line-height: 28px;
 }
 
 .pane.inputControls .header>#savedValuesSelector>select {
@@ -1284,7 +1284,7 @@ and (max-device-width : 1024px) {
 	margin-left:22px \9; /* IE8 and IE9 */
 }
 
-/* 
+/*
 
 PANES
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1489,7 +1489,7 @@ PANES
 
 @media screen and (-webkit-min-device-pixel-ratio:0) {
 /* Safari and Google Chrome only */
-	
+
 	.panel.nothingToDisplay.centered_horz,
 	.panel.nothingToDisplay.centered_vert {
 		position:absolute;
@@ -1548,7 +1548,7 @@ PANES
 #calcFieldMeasure.dialog .expressionEditorValidate.group {
 	margin-top:10px;
 	margin-bottom:10px;
-} 
+}
 
 #calcFieldMeasure.dialog .inputRow .group {
 	margin-top:20px;
@@ -1557,22 +1557,22 @@ PANES
 
 .summaryCalcSection {
     min-height: 100px;
-	-moz-box-sizing: border-box; 
-	-webkit-box-sizing: border-box; 
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
 	box-sizing: border-box;
 }
 
 .summaryCalcSection .inputRow {
 	width:100%;
-	-moz-box-sizing: border-box; 
-	-webkit-box-sizing: border-box; 
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
 	box-sizing: border-box;
 }
 
 .summaryCalcSection > .inputRow > .node {
 	width:50%;
-	-moz-box-sizing: border-box; 
-	-webkit-box-sizing: border-box; 
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
 	box-sizing: border-box;
 }
 

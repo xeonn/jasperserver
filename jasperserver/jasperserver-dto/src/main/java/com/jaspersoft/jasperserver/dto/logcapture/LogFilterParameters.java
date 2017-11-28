@@ -28,23 +28,25 @@ public class LogFilterParameters {
     public LogFilterParameters(LogFilterParameters other) {
         this.userId = other.getUserId();
         this.sessionId = other.getSessionId();
-        this.resourceAndSnapshotFilter = other.getResourceAndSnapshotFilter();
+        this.resourceAndSnapshotFilter = new ResourceAndSnapshotFilter(other.getResourceAndSnapshotFilter());
     }
 
     public String getUserId() {
         return userId;
     }
 
-    public void setUserId(String userId) {
+    public LogFilterParameters setUserId(String userId) {
         this.userId = userId;
+        return this;
     }
 
     public String getSessionId() {
         return sessionId;
     }
 
-    public void setSessionId(String sessionId) {
+    public LogFilterParameters setSessionId(String sessionId) {
         this.sessionId = sessionId;
+        return this;
     }
 
     @XmlElement(name = "resource")
@@ -52,7 +54,39 @@ public class LogFilterParameters {
         return resourceAndSnapshotFilter;
     }
 
-    public void setResourceAndSnapshotFilter(ResourceAndSnapshotFilter resourceAndSnapshotFilter) {
+    public LogFilterParameters setResourceAndSnapshotFilter(ResourceAndSnapshotFilter resourceAndSnapshotFilter) {
         this.resourceAndSnapshotFilter = resourceAndSnapshotFilter;
+        return this;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof LogFilterParameters)) return false;
+
+        LogFilterParameters that = (LogFilterParameters) o;
+
+        if (getUserId() != null ? !getUserId().equals(that.getUserId()) : that.getUserId() != null) return false;
+        if (getSessionId() != null ? !getSessionId().equals(that.getSessionId()) : that.getSessionId() != null)
+            return false;
+        return !(getResourceAndSnapshotFilter() != null ? !getResourceAndSnapshotFilter().equals(that.getResourceAndSnapshotFilter()) : that.getResourceAndSnapshotFilter() != null);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = getUserId() != null ? getUserId().hashCode() : 0;
+        result = 31 * result + (getSessionId() != null ? getSessionId().hashCode() : 0);
+        result = 31 * result + (getResourceAndSnapshotFilter() != null ? getResourceAndSnapshotFilter().hashCode() : 0);
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "LogFilterParameters{" +
+                "userId='" + userId + '\'' +
+                ", sessionId='" + sessionId + '\'' +
+                ", resourceAndSnapshotFilter=" + resourceAndSnapshotFilter +
+                '}';
     }
 }

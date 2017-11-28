@@ -374,6 +374,8 @@
     <!-- db props -->
     <property name="dbProps" value="${currentConf}/db.properties"/>
 
+
+
     <!-- app server props -->
     <property name="appSrvProps" value="${currentConf}/app.srv.properties"/>
 
@@ -515,13 +517,13 @@
                       <if>
                           <available type="dir" file="${importExportConfigPro}/lib"/>
                           <then>
-                              <copy toDir="${currentDbDir}/jdbc/"  overwrite="true">
+                              <copy toDir="${currentDbJDBCDir}/"  overwrite="true">
                                   <fileset dir="${importExportConfigPro}/lib" includes="jasperreports-pro-*.jar"/>
                               </copy>
                           </then>
                           <else>
                               <copy file="${currentConf}/../../install_resources/extra-jars/jswlstc-1.0.jar"
-                                    tofile="${currentDbDir}/jdbc/jasperreports-pro-tc-1.0.jar"
+                                    tofile="${currentDbJDBCDir}/jasperreports-pro-tc-1.0.jar"
                                     overwrite="true"/>
 
                           </else>
@@ -557,6 +559,21 @@
         </sequential>
     </macrodef>
 
+    <macrodef name="setCurrentDbJDBCDir">
+        <sequential>
+            <if>
+                <available file="${currentDbDir}/${jdbcDriverMaker}.jdbc" />
+                <then>
+                    <property name="currentDbJDBCDir" value="${currentDbDir}/${jdbcDriverMaker}.jdbc" />
+                </then>
+                <else>
+                    <property name="currentDbJDBCDir" value="${currentDbDir}/jdbc" />
+                </else>
+            </if>
+        </sequential>
+    </macrodef>
+
+
     <macrodef name="gen-config-if-required">
         <sequential>
             <if>
@@ -580,6 +597,9 @@
 
                     <!-- look up props for your db -->
                     <setCurrentDbDir />
+
+                    <!-- look up props for your db jdbc driver location -->
+                    <setCurrentDbJDBCDir />
 
                     <!-- set sql script dir -->
                     <property name="currentSqlDir" value="${sqlDir}/${dbType}"/>
@@ -611,11 +631,22 @@
                     <!-- look up props for your db -->
                     <setCurrentDbDir />
 
+                    <!-- look up props for your db jdbc driver location -->
+                    <setCurrentDbJDBCDir />
+
                     <!-- set sql script dir -->
                     <property name="currentSqlDir" value="${sqlDir}/${dbType}"/>
 
                     <!-- copy and load db props -->
-                    <filterCopyLoad file="${currentDbDir}/db.properties" toFile="${dbProps}"/>
+                    <if>
+                        <available file="${currentDbDir}/${jdbcDriverMaker}.db.properties"/>
+                        <then>
+                            <filterCopyLoad file="${currentDbDir}/${jdbcDriverMaker}.db.properties" toFile="${dbProps}"/>
+                        </then>
+                        <else>
+                            <filterCopyLoad file="${currentDbDir}/db.properties" toFile="${dbProps}"/>
+                        </else>
+                    </if>
 
                     <!-- copy and load app server props -->
                     <filterCopyLoad file="${templateDir}/app.srv.properties" toFile="${appSrvProps}"/>
@@ -693,7 +724,15 @@
                         </then>
                     </if>
 
-                    <filterCopyLoad file="${currentDbDir}/db.template.properties" toFile="${dbTemplateProps}"/>
+                    <if>
+                        <available file="${currentDbDir}/${jdbcDriverMaker}.db.template.properties"/>
+                        <then>
+                            <filterCopyLoad file="${currentDbDir}/${jdbcDriverMaker}.db.template.properties" toFile="${dbTemplateProps}"/>
+                        </then>
+                        <else>
+                            <filterCopyLoad file="${currentDbDir}/db.template.properties" toFile="${dbTemplateProps}"/>
+                        </else>
+                    </if>
 
                     <!-- load db script props by calling macro (will chk for Locale props too) -->
                     <chkAndSetLocaleDbSettings />

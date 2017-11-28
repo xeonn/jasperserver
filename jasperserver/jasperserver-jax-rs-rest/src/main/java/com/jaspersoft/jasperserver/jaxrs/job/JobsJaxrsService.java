@@ -72,7 +72,7 @@ import java.util.TimeZone;
  * JAX-RS service "jobs" implementation
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: JobsJaxrsService.java 55164 2015-05-06 20:54:37Z mchan $
+ * @version $Id: JobsJaxrsService.java 61296 2016-02-25 21:53:37Z mchan $
  */
 @Component
 @Scope("prototype")
@@ -323,6 +323,8 @@ public class JobsJaxrsService extends RemoteServiceWrapper<JobsService> {
      * @param exampleConverter - ReportJobModel in JSON format wrapped by JSON unmarshaller
      * @param startIndex       - block start index (pagination)
      * @param numberOfRows     - number of rows in a block (pagination)
+     * @param offset           - see {startIndex}
+     * @param limit            - see {numberOfRows}
      * @param sortType         - sorting column, possible values: NONE, SORTBY_JOBID, SORTBY_JOBNAME, SORTBY_REPORTURI, SORTBY_REPORTNAME,
      *                         SORTBY_REPORTFOLDER, SORTBY_OWNER, SORTBY_STATUS, SORTBY_LASTRUN, SORTBY_NEXTRUN
      * @param isAscending      - sorting direction, ascending if true
@@ -338,6 +340,8 @@ public class JobsJaxrsService extends RemoteServiceWrapper<JobsService> {
             @QueryParam("previousFireTime") final Date previousFireTime,
             @QueryParam("nextFireTime") final Date nextFireTime,
             @QueryParam("example") final ReportJobModelJsonParam exampleConverter,
+            @QueryParam("limit") final Integer limit,
+            @QueryParam("offset") final Integer offset,
             @QueryParam("startIndex") final Integer startIndex,
             @QueryParam("numberOfRows") final Integer numberOfRows,
             @QueryParam("sortType") final ReportJobModel.ReportJobSortType sortType,
@@ -346,30 +350,45 @@ public class JobsJaxrsService extends RemoteServiceWrapper<JobsService> {
         return callRemoteService(new ConcreteCaller<Response>() {
             public Response call(JobsService service) throws RemoteException {
                 ReportJobModel criteriaObject = exampleConverter != null ? exampleConverter.getObject() : null;
-                if (reportURI != null || owner != null || jobName != null || state != null || previousFireTime != null || nextFireTime != null) {
-                    if (criteriaObject == null)
+
+                if (reportURI != null
+                        || owner != null
+                        || jobName != null
+                        || state != null
+                        || previousFireTime != null
+                        || nextFireTime != null) {
+                    if (criteriaObject == null) {
                         criteriaObject = new ReportJobModel();
-                    if (reportURI != null && (criteriaObject.getSourceModel() == null || criteriaObject.getSourceModel().getReportUnitURI() == null)) {
-                        if (criteriaObject.getSourceModel() == null)
+                    }
+                    if (reportURI != null && (criteriaObject.getSourceModel() == null
+                            || criteriaObject.getSourceModel().getReportUnitURI() == null)) {
+                        if (criteriaObject.getSourceModel() == null) {
                             criteriaObject.setSourceModel(new ReportJobSourceModel());
+                        }
                         criteriaObject.getSourceModel().setReportUnitURI(reportURI);
                     }
-                    if (owner != null && criteriaObject.getUsername() == null)
+                    if (owner != null && criteriaObject.getUsername() == null) {
                         criteriaObject.setUsername(owner);
-                    if (jobName != null && criteriaObject.getLabel() == null)
+                    }
+                    if (jobName != null && criteriaObject.getLabel() == null) {
                         criteriaObject.setLabel(jobName);
-                    if (state != null) {
-                        //TODO state criteria
                     }
-                    if (previousFireTime != null) {
-                        //TODO previousFireTime criteria
-                    }
-                    if (nextFireTime != null) {
-                        //TODO nextFireTime criteria
-                    }
+
+                    if (state != null)              { /* TODO state criteria            */ }
+                    if (previousFireTime != null)   { /* TODO previousFireTime criteria */ }
+                    if (nextFireTime != null)       { /* TODO nextFireTime criteria     */ }
                 }
-                List<ReportJobSummary> result = service.getJobSummariesByExample(criteriaObject, startIndex, numberOfRows, sortType, isAscending);
-                return result != null && !result.isEmpty() ? Response.ok(new JobSummariesListWrapper(result)).build() : Response.status(Response.Status.NO_CONTENT).build();
+
+                List<ReportJobSummary> result = service.getJobSummariesByExample(
+                        criteriaObject,
+                        offset == null ? startIndex : offset,
+                        limit  == null ? numberOfRows : limit,
+                        sortType,
+                        isAscending);
+
+                return result != null && !result.isEmpty()
+                        ? Response.ok(new JobSummariesListWrapper(result)).build()
+                        : Response.status(Response.Status.NO_CONTENT).build();
             }
         });
     }

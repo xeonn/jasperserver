@@ -212,7 +212,7 @@
                     <arg value="-DartifactId=${maven.jdbc.artifactId}"/>
                     <arg value="-Dversion=${maven.jdbc.version}"/>
                     <arg value="-Dpackaging=jar"/>
-                    <arg value="-Dfile=${currentDbDir}/jdbc/${maven.jdbc.artifactId}-${maven.jdbc.version}.jar"/>
+                    <arg value="-Dfile=${currentDbJDBCDir}/${maven.jdbc.artifactId}-${maven.jdbc.version}.jar"/>
                     <!-- <arg value="-o"/> --> <!-- OFFLINE MODE -->
                 </runmaven>
             </then>
@@ -223,7 +223,7 @@
                     <arg value="-DartifactId=${maven.jdbc.artifactId}"/>
                     <arg value="-Dversion=${maven.jdbc.version}"/>
                     <arg value="-Dpackaging=jar"/>
-                    <arg value="-Dfile=${currentDbDir}/jdbc/${jdbcJar}"/>
+                    <arg value="-Dfile=${currentDbJDBCDir}/${jdbcJar}"/>
                     <!-- <arg value="-o"/> --> <!-- OFFLINE MODE -->
                 </runmaven>
             </else>

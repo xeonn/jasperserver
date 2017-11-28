@@ -21,7 +21,7 @@
 
 /**
  * @author: Olesya Bobruyko
- * @version: $Id: AttributesViewer.js 8911 2015-05-11 12:01:27Z obobruyk $
+ * @version: $Id: AttributesViewer.js 9909 2016-02-25 19:56:31Z dgorbenk $
  */
 
 define(function(require) {
@@ -70,8 +70,8 @@ define(function(require) {
             return this;
         },
 
-        setContext: function(value) {
-            return this.collection.setContext(value);
+        setContext: function(value, refreshAttributes) {
+            return this.collection.setContext(value, refreshAttributes);
         },
 
         show: function() {

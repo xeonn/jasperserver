@@ -26,6 +26,7 @@ import com.jaspersoft.jasperserver.api.common.domain.ValidationErrors;
 import com.jaspersoft.jasperserver.api.common.domain.impl.ExecutionContextImpl;
 import com.jaspersoft.jasperserver.api.common.domain.impl.ValidationErrorsImpl;
 import com.jaspersoft.jasperserver.api.common.util.ImportRunMonitor;
+import com.jaspersoft.jasperserver.api.common.util.diagnostic.DiagnosticSnapshotPropertyHelper;
 import com.jaspersoft.jasperserver.api.engine.common.service.ReportInputControlInformation;
 import com.jaspersoft.jasperserver.api.engine.common.service.ReportInputControlValueInformation;
 import com.jaspersoft.jasperserver.api.engine.common.service.ReportInputControlValuesInformation;
@@ -35,17 +36,14 @@ import com.jaspersoft.jasperserver.api.metadata.common.domain.*;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.client.InputControlImpl;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.client.ListOfValuesImpl;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.client.ListOfValuesItemImpl;
-import com.jaspersoft.jasperserver.api.metadata.user.domain.ObjectPermission;
-import com.jaspersoft.jasperserver.api.metadata.user.domain.client.ObjectPermissionImpl;
 import com.jaspersoft.jasperserver.api.metadata.user.service.ObjectPermissionService;
 import com.jaspersoft.jasperserver.api.security.internalAuth.InternalAuthenticationTokenImpl;
+import com.jaspersoft.jasperserver.dto.reports.inputcontrols.InputControlState;
+import com.jaspersoft.jasperserver.dto.reports.inputcontrols.ReportInputControl;
 import com.jaspersoft.jasperserver.war.cascade.cache.ControlLogicCacheManager;
 import com.jaspersoft.jasperserver.war.cascade.handlers.InputControlHandler;
 import com.jaspersoft.jasperserver.war.cascade.token.FilterResolver;
 import com.jaspersoft.jasperserver.war.common.JasperServerUtil;
-import com.jaspersoft.jasperserver.dto.reports.inputcontrols.InputControlState;
-import com.jaspersoft.jasperserver.dto.reports.inputcontrols.ReportInputControl;
-import net.sf.saxon.functions.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.GrantedAuthorityImpl;
@@ -53,7 +51,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.Collection;
 
 import static com.jaspersoft.jasperserver.war.cascade.handlers.converters.InputControlValueClassResolver.getValueClass;
 
@@ -250,6 +247,14 @@ public class GenericInputControlLogic<T extends InputControlsContainer> implemen
         if (requestParameters!=null&&requestParameters.containsKey(EhcacheEngineService.IC_REFRESH_KEY)) {
         	typedParameters.put(EhcacheEngineService.IC_REFRESH_KEY,"true");
         }
+
+        Boolean isDiagnostic = infos.getDiagnosticProperty();
+        if (isDiagnostic) {
+            typedParameters.put(
+                    DiagnosticSnapshotPropertyHelper.ATTRIBUTE_IS_DIAG_SNAPSHOT,
+                    String.valueOf(isDiagnostic));
+        }
+
         List<InputControlState> states = getValuesForInputControls(container, filterSelectedInputControls(inputControlIds, allControls),
                 dataSource, typedParameters, parameterTypes, infos);
         addValidationErrorsToInputControlStates(states, validationErrors, allControls);

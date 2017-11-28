@@ -21,7 +21,7 @@
 
 /**
  * @author: Dima Gorbenko
- * @version: $Id: RepositoryItemChooserDialogView.js 293 2015-10-27 19:17:37Z yplakosh $
+ * @version: $Id: RepositoryItemChooserDialogView.js 362 2016-02-25 19:27:36Z dgorbenk $
  */
 
 define(function (require) {
@@ -40,6 +40,7 @@ define(function (require) {
 		tabbedPanelTrait = require('common/component/panel/trait/tabbedPanelTrait'),
 
 		SearchTreePlugin = require('common/component/tree/plugin/SearchPlugin'),
+		TooltipPlugin = require('common/component/tree/plugin/TooltipPlugin'),
 		InfiniteScrollPlugin = require('common/component/tree/plugin/InfiniteScrollPlugin'),
 		NoSearchResultsMessagePlugin = require('common/component/tree/plugin/NoSearchResultsMessagePlugin'),
 
@@ -50,7 +51,8 @@ define(function (require) {
 
 		resourceDialogTemplate = require("text!./template/resourceDialogTemplate.htm"),
 		sidebarTreeLeafTemplate = require("text!./template/sidebarTreeLeafTemplate.htm"),
-		tabPanelButtonTemplate = require("text!./template/tabPanelButtonTemplate.htm")
+		tabPanelButtonTemplate = require("text!./template/tabPanelButtonTemplate.htm"),
+		treeTooltipTemplate = require("text!./template/treeTooltipTemplate.htm");
 
 
 	var LIST_ITEM_HEIGHT = 22;
@@ -76,10 +78,20 @@ define(function (require) {
 
 			var ResourcesTree = Tree
 				.use(InfiniteScrollPlugin)
+				.use(TooltipPlugin, {
+					i18n: i18n,
+					attachTo: this.$el,
+					contentTemplate: treeTooltipTemplate
+				})
 				.create();
 
 			var ResourcesTreeWithSearch = Tree
 				.use(NoSearchResultsMessagePlugin)
+				.use(TooltipPlugin, {
+					i18n: i18n,
+					attachTo: this.$el,
+					contentTemplate: treeTooltipTemplate
+				})
 				.use(SearchTreePlugin, {
 					dfdRenderTo: this._dfdRenderSerachFormTo
 				})
@@ -429,7 +441,14 @@ define(function (require) {
 			var urlParamPattern = new RegExp("[\\?&]" + name + "=([^&#]*)"),
 				paramValues = urlParamPattern.exec(location.search);
 			return paramValues == null ? "" : decodeURIComponent(paramValues[1].replace(/\+/g, " "));
-		}
+		},
+
+        remove: function () {
+            this.resourcesTreeView.remove();
+            this.resourcesListView.remove();
+
+            Dialog.prototype.remove.apply(this, arguments);
+        }
 	});
 
 	function cssClassItemProcessor(item) {

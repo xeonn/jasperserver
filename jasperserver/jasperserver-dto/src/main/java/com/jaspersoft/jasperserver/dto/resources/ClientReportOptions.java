@@ -25,7 +25,9 @@ import com.jaspersoft.jasperserver.dto.reports.ReportParameter;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author vsabadosh
@@ -64,8 +66,15 @@ public class ClientReportOptions extends ClientResource<ClientReportOptions> {
 
         ClientReportOptions that = (ClientReportOptions) o;
 
-        if (reportParameters != null ? !reportParameters.equals(that.reportParameters) : that.reportParameters != null)
-            return false;
+        if ((reportParameters != null && that.reportParameters == null)
+                || (reportParameters == null && that.reportParameters != null)) return false;
+        if (reportParameters != null && that.reportParameters != null) {
+            Set<ReportParameter> set1 = new  HashSet<ReportParameter>();
+            set1.addAll(reportParameters);
+            Set<ReportParameter> set2 = new HashSet<ReportParameter>();
+            set2.addAll(that.reportParameters);
+            if (!set1.equals(set2)) return false;
+        }
         if (reportUri != null ? !reportUri.equals(that.reportUri) : that.reportUri != null) return false;
 
         return true;

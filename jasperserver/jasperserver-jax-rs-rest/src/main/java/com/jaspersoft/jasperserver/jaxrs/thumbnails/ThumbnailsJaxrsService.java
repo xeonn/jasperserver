@@ -10,6 +10,7 @@ import com.jaspersoft.jasperserver.dto.thumbnails.ResourceThumbnailsListWrapper;
 import com.jaspersoft.jasperserver.remote.exception.RemoteException;
 import com.jaspersoft.jasperserver.remote.resources.converters.ResourceConverterProvider;
 import com.jaspersoft.jasperserver.remote.services.SingleRepositoryService;
+import com.jaspersoft.jasperserver.war.httpheaders.JRSExpiresHeader;
 import com.sun.jersey.core.spi.factory.ResponseBuilderImpl;
 import org.apache.commons.io.IOUtils;
 import org.bouncycastle.util.encoders.Base64;
@@ -39,7 +40,6 @@ public class ThumbnailsJaxrsService {
     public static final String PATH_PARAM_URI = "uri";
     public static final String QUERY_PARAM_URI = "uri";
     public static final String PATH_PARAM_DEFAULT_ALLOWED = "defaultAllowed";
-    public static final int TWENTY_FOUR_HOURS = 86400;
 
     @Resource(name = "${bean.thumbnailService}")
     private ReportThumbnailService thumbnailService;
@@ -54,16 +54,13 @@ public class ThumbnailsJaxrsService {
     @Context
     private HttpHeaders httpHeaders;
 
-    private CacheControl privateCacheControl = new CacheControl();
-    private CacheControl storeCacheControl = new CacheControl();
+    @Resource(name = "thumbnailsExpiresHeader")
+    private JRSExpiresHeader expiresHeader;
+
+    @Context
+    javax.servlet.http.HttpServletResponse response;
 
     public ThumbnailsJaxrsService() {
-        privateCacheControl.setMustRevalidate(true);
-        privateCacheControl.setNoStore(true);
-        privateCacheControl.setNoCache(true);
-        privateCacheControl.setMaxAge(0);
-
-        storeCacheControl.setMaxAge(TWENTY_FOUR_HOURS);
     }
 
     /**
@@ -84,7 +81,6 @@ public class ThumbnailsJaxrsService {
         if (defaultAllowed == null)
             defaultAllowed = false;
         Response.ResponseBuilder response = new ResponseBuilderImpl();
-        response.cacheControl(privateCacheControl);
 
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         com.jaspersoft.jasperserver.api.metadata.common.domain.Resource resource;
@@ -106,7 +102,8 @@ public class ThumbnailsJaxrsService {
                     return response.status(Response.Status.NO_CONTENT).build();
                 } else {
                     thumbnailStream = thumbnailService.getDefaultThumbnail();
-                    response.cacheControl(storeCacheControl);   // we want to cache default thumbnails
+
+                    cacheDefaultThumbnail(response);
                 }
             }
         }
@@ -122,6 +119,18 @@ public class ThumbnailsJaxrsService {
         }
 
         return response.status(Response.Status.OK).build();
+    }
+
+    /**
+     * we want to cache default thumbnails
+     * @param responseBuilder
+     */
+    public void cacheDefaultThumbnail(Response.ResponseBuilder responseBuilder) {
+        CacheControl storeCacheControl = new CacheControl();
+        storeCacheControl.setMaxAge((int) this.expiresHeader.getMaxAge());
+
+        this.response.setHeader(HttpHeaders.CACHE_CONTROL, ""); // Manually clean up previous value because jersey is adding new header
+        responseBuilder.cacheControl(storeCacheControl).expires(this.expiresHeader.getDate());
     }
 
     /**

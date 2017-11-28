@@ -30,7 +30,7 @@ import com.jaspersoft.jasperserver.api.engine.common.service.impl.QueryParameter
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ReportInputControlsInformationImpl.java 50801 2014-10-29 00:20:56Z inesterenko $
+ * @version $Id: ReportInputControlsInformationImpl.java 61296 2016-02-25 21:53:37Z mchan $
  */
 public class ReportInputControlsInformationImpl implements
 		ReportInputControlsInformation, Serializable {
@@ -38,6 +38,7 @@ public class ReportInputControlsInformationImpl implements
 	private static final long serialVersionUID = 1L;
 	
 	private Map<String, ReportInputControlInformation> infos = new HashMap<String, ReportInputControlInformation>();
+    private Boolean isDiagnostic = false;
 	
 	public ReportInputControlsInformationImpl() {
 	}
@@ -64,7 +65,17 @@ public class ReportInputControlsInformationImpl implements
         return defaultValues;
     }
 
-	public void setInputControlInformation(String name,
+    @Override
+    public boolean getDiagnosticProperty() {
+        return isDiagnostic;
+    }
+
+    @Override
+    public void setDiagnosticProperty(boolean isDiagnostic) {
+        this.isDiagnostic = isDiagnostic;
+    }
+
+    public void setInputControlInformation(String name,
 			ReportInputControlInformation info) {
 		infos.put(name, info);
 	}

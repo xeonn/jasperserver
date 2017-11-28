@@ -20,7 +20,7 @@
  */
 
 /**
- * @version: $Id: AttributesCollection.js 9599 2015-10-27 19:38:56Z yplakosh $
+ * @version: $Id: AttributesCollection.js 9939 2016-03-10 16:32:24Z dgorbenk $
  */
 
 define(function(require) {
@@ -62,7 +62,7 @@ define(function(require) {
             return data && data.attribute ? data.attribute : [];
         },
 
-        setContext: function(context) {
+        setContext: function(context, forceRefresh) {
             context = context || {
                 urlGETTemplate: this.urlGETTemplate,
                 urlPUTTemplate: this.urlPUTTemplate
@@ -70,11 +70,11 @@ define(function(require) {
 
             var dfd = new $.Deferred();
 
-            if (_.isEqual(this.context, context)) {
+            if (_.isEqual(this.context, context) && !forceRefresh) {
                 dfd.resolve();
             } else {
                 this.context = context;
-                this.fetch({reset: true, headers: {Accept: "application/attributes.collection.hal+json"}})
+                this.fetch({cache: false, reset: true, headers: {Accept: "application/attributes.collection.hal+json"}})
                     .done(dfd.resolve);
             }
 
@@ -114,6 +114,7 @@ define(function(require) {
             return request({
                 url: this.url(type) + this._concatNames(allModels),
                 type: "PUT",
+                cache: false,
                 contentType: contentType,
                 headers: {
                     Accept: contentType
@@ -150,6 +151,7 @@ define(function(require) {
                 url: this.url() + this._concatNames(models, omitId) + recursive + groups,
                 type: "GET",
                 dataType: "json",
+                cache: false,
                 contentType: contentType,
                 headers: {
                     Accept: contentType

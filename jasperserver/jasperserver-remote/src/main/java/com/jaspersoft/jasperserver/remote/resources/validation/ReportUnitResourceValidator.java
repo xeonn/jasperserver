@@ -45,7 +45,7 @@ import static com.jaspersoft.jasperserver.remote.resources.validation.Validation
  * <p></p>
  *
  * @author Zakhar.Tomchenco
- * @version $Id: ReportUnitResourceValidator.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: ReportUnitResourceValidator.java 61296 2016-02-25 21:53:37Z mchan $
  */
 @Component
 public class ReportUnitResourceValidator<T extends ReportUnit> extends GenericResourceValidator<T> {
@@ -80,6 +80,22 @@ public class ReportUnitResourceValidator<T extends ReportUnit> extends GenericRe
                     // in this case file content is mandatory
                     addMandatoryParameterNotFoundError(errors, "resources." + fileResource.getName() + ".content");
                 }
+            }
+        }
+
+        String inputControlRenderingView = resource.getInputControlRenderingView();
+        if (inputControlRenderingView != null && inputControlRenderingView.length() > 0) {
+            if (inputControlRenderingView.length() > 100) {
+                addIllegalParameterValueError(errors, "resources.inputControlRenderingView", inputControlRenderingView,
+                        "The JSP reference for input controls is too long. The maximum length is 100 characters");
+            }
+        }
+
+        String reportRenderingView = resource.getReportRenderingView();
+        if (reportRenderingView != null && reportRenderingView.length() > 0) {
+            if (reportRenderingView.length() > 100) {
+                addIllegalParameterValueError(errors, "resources.reportRenderingView", reportRenderingView,
+                        "The JSP reference for the report display is too long. The maximum length is 100 characters");
             }
         }
     }

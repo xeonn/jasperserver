@@ -48,6 +48,7 @@ import java.util.*;
  * User: Andrew Sokolnikov
  * Date: 11/29/12
  */
+@Deprecated
 public class StaticFilesCacheControlFilter implements Filter {
 
     public static final String URL_ENDS_WITH = "urlEndsWith";

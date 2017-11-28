@@ -24,6 +24,7 @@ import com.jaspersoft.jasperserver.dto.permissions.RepositoryPermission;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -36,6 +37,22 @@ import java.util.List;
 public class HypermediaAttributeEmbeddedContainer {
     private List<RepositoryPermission> repositoryPermissions;
 
+    public HypermediaAttributeEmbeddedContainer() {
+    }
+
+    public HypermediaAttributeEmbeddedContainer(HypermediaAttributeEmbeddedContainer other) {
+        if (other.repositoryPermissions != null) {
+            repositoryPermissions = new ArrayList<RepositoryPermission>(other.repositoryPermissions.size());
+            for (RepositoryPermission permission : other.repositoryPermissions) {
+                RepositoryPermission newPermission = null;
+                if (permission != null) {
+                    newPermission = new RepositoryPermission(permission);
+                }
+                repositoryPermissions.add(newPermission);
+            }
+        }
+    }
+
     @XmlElement(name = "permission")
     public List<RepositoryPermission> getRepositoryPermissions() {
         return repositoryPermissions;
@@ -46,4 +63,39 @@ public class HypermediaAttributeEmbeddedContainer {
         return this;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o instanceof HypermediaAttributeEmbeddedContainer) {
+            HypermediaAttributeEmbeddedContainer other = (HypermediaAttributeEmbeddedContainer) o;
+            if (repositoryPermissions == other.repositoryPermissions) {
+                return true;
+            }
+            return repositoryPermissions != null && repositoryPermissions.equals(other.repositoryPermissions);
+        }
+
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return repositoryPermissions != null ? repositoryPermissions.hashCode() : 0;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder content = new StringBuilder();
+        if (repositoryPermissions != null) {
+            for (RepositoryPermission permission : repositoryPermissions) {
+                if (content.length() > 0) {
+                    content.append(", ");
+                }
+                content.append(permission.toString());
+            }
+        }
+
+        return getClass().getSimpleName() + "{" +
+                "repositoryPermissions=[" + content +
+                "]}";
+    }
 }

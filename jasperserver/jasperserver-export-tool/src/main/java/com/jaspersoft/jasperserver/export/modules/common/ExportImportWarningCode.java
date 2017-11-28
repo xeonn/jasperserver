@@ -13,7 +13,8 @@ public enum ExportImportWarningCode {
     IMPORT_RESOURCE_DATA_MISSING("import.resource.data.missing"),
     IMPORT_RESOURCE_URI_TOO_LONG("import.resource.uri.too.long"),
     IMPORT_REFERENCE_RESOURCE_NOT_FOUND("import.reference.resource.not.found"),
-    IMPORT_ACCESS_DENIED("import.access.denied");
+    IMPORT_ACCESS_DENIED("import.access.denied"),
+    IMPORT_FOLDER_ATTACHED_NOT_EXIST_ORG("import.folder.attached.not.exist.org");
 
     private String warningCode;
 

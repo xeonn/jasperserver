@@ -21,7 +21,7 @@
 
 /**
  * @author: Olesya Bobruyko
- * @version: $Id: DesignerRowView.js 9218 2015-08-20 19:56:16Z yplakosh $
+ * @version: $Id: DesignerRowView.js 9909 2016-02-25 19:56:31Z dgorbenk $
  */
 
 define(function(require) {
@@ -176,8 +176,8 @@ define(function(require) {
             this.toggleActive();
         },
 
-        runValidation: function(options) {
-            this.validateModel() && this.triggerConfirmOpening(options);
+        runValidation: function(event, options) {
+            this.validateModel(options) && this.triggerConfirmOpening(options);
         },
 
         triggerConfirmOpening: function(options) {
@@ -216,16 +216,22 @@ define(function(require) {
             this.trigger("validate", options);
         },
 
-        validateModel: function() {
-            return this.model.isValid(true);
+        validateModel: function(options) {
+            options = options || {};
+
+            var modelIsValid = this.model.isValid(true);
+
+            !modelIsValid && options.dfd && options.dfd.reject();
+
+            return modelIsValid;
         },
 
         confirmState: function(confirm) {
-            this.stateConfirmed = confirm || true;
+            this.model.confirmState(confirm);
         },
 
         isStateConfirmed: function() {
-            return this.stateConfirmed;
+            return this.model.isStateConfirmed();
         },
 
         isInherited: function() {
@@ -257,6 +263,20 @@ define(function(require) {
                     }
                 }
             }
+        },
+
+        invokeFiltration: function() {
+            var model = this.model;
+
+            if (model.hasChanged("secure") || model.hasChanged("_embedded") && !this._isPermissionLimited()) {
+                return !this.editMode && model.hasChanged("inherited");
+            }
+        },
+
+        validateIfSecure: function() {
+            var nameChanged = this.getChangedProperties("name");
+
+            this.model.validateIfSecure = (this.model.validateSecureValue() && nameChanged) || false;
         },
 
         _onSaveSuccess: function() {

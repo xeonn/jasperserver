@@ -108,7 +108,6 @@ public class TeiidEmbeddedServer extends EmbeddedServer {
                 setXaTerminator(serverConfig.getXaTerminator());
             }
 		}
-		this.repo.odbcEnabled();
 
         this.memoryConfig = memoryConfig;
 		start(config);

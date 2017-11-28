@@ -23,6 +23,7 @@ package com.jaspersoft.jasperserver.dto.importexport;
 import com.jaspersoft.jasperserver.dto.common.WarningDescriptor;
 import com.jaspersoft.jasperserver.dto.common.ErrorDescriptor;
 
+import java.util.ArrayList;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.List;
@@ -35,13 +36,27 @@ public class State {
 
     String id;
     String message, phase;
-
     List<WarningDescriptor> warnings;
-
     ErrorDescriptor error;
 
     public State() {
-        super();
+
+    }
+
+    public State(State other) {
+        this.id = other.getId();
+        this.message = other.getMessage();
+        this.phase = other.getPhase();
+
+        if (other.getWarnings() != null) {
+            List<WarningDescriptor> otherWarnings = other.getWarnings();
+            ArrayList<WarningDescriptor> clonedWarnings = new ArrayList<WarningDescriptor>(otherWarnings.size());
+            for (WarningDescriptor otherWarning : otherWarnings) {
+                clonedWarnings.add(otherWarning);
+            }
+            this.warnings = clonedWarnings;
+        }
+        this.error = new ErrorDescriptor(other.getError());
     }
 
     @XmlElement(name = "id")
@@ -49,8 +64,9 @@ public class State {
         return id;
     }
 
-    public synchronized void setId(String id) {
+    public synchronized State setId(String id) {
         this.id = id;
+        return this;
     }
 
     @XmlElement(name = "phase")
@@ -58,8 +74,9 @@ public class State {
         return phase;
     }
 
-    public synchronized void setPhase(String phase) {
+    public synchronized State setPhase(String phase) {
         this.phase = phase;
+        return this;
     }
 
     @XmlElement(name = "message")
@@ -67,12 +84,14 @@ public class State {
         return message;
     }
 
-    public synchronized void setMessage(String message) {
+    public synchronized State setMessage(String message) {
         this.message = message;
+        return this;
     }
 
-    public synchronized void setWarnings(List<WarningDescriptor> warnings) {
+    public synchronized State setWarnings(List<WarningDescriptor> warnings) {
         this.warnings = warnings;
+        return this;
     }
 
     @XmlElement(name = "warnings")
@@ -88,25 +107,54 @@ public class State {
         if (error == null) {
             return null;
         } else {
-            ErrorDescriptor errorDescriptor = new ErrorDescriptor();
-            errorDescriptor.setMessage(error.getMessage());
-            errorDescriptor.setErrorCode(error.getErrorCode());
-            errorDescriptor.setParameters(error.getParameters());
-
+            ErrorDescriptor errorDescriptor = new ErrorDescriptor(this.error);
             return errorDescriptor;
         }
     }
 
-    public synchronized void setError(ErrorDescriptor error) {
+    public synchronized State setError(ErrorDescriptor error) {
         if (error == null) {
             this.error = null;
         } else {
-            ErrorDescriptor errorDescriptor = new ErrorDescriptor();
-            errorDescriptor.setMessage(error.getMessage());
-            errorDescriptor.setErrorCode(error.getErrorCode());
-            errorDescriptor.setParameters(error.getParameters());
-
-            this.error = error;
+            this.error = new ErrorDescriptor(error);
         }
+        return this;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof State)) return false;
+
+        State state = (State) o;
+
+        if (getId() != null ? !getId().equals(state.getId()) : state.getId() != null) return false;
+        if (getMessage() != null ? !getMessage().equals(state.getMessage()) : state.getMessage() != null) return false;
+        if (getPhase() != null ? !getPhase().equals(state.getPhase()) : state.getPhase() != null) return false;
+        if (getWarnings() != null ? !getWarnings().equals(state.getWarnings()) : state.getWarnings() != null)
+            return false;
+        return !(getError() != null ? !getError().equals(state.getError()) : state.getError() != null);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = getId() != null ? getId().hashCode() : 0;
+        result = 31 * result + (getMessage() != null ? getMessage().hashCode() : 0);
+        result = 31 * result + (getPhase() != null ? getPhase().hashCode() : 0);
+        result = 31 * result + (getWarnings() != null ? getWarnings().hashCode() : 0);
+        result = 31 * result + (getError() != null ? getError().hashCode() : 0);
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "State{" +
+                "id='" + id + '\'' +
+                ", message='" + message + '\'' +
+                ", phase='" + phase + '\'' +
+                ", warnings=" + warnings +
+                ", error=" + error +
+                '}';
     }
 }

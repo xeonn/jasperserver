@@ -23,7 +23,6 @@ package com.jaspersoft.jasperserver.jaxrs.bundle;
 
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Folder;
 import com.jaspersoft.jasperserver.jaxrs.common.RestConstants;
-import com.jaspersoft.jasperserver.jaxrs.poc.hypermedia.common.cache.CacheControlHelper;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.springframework.stereotype.Service;
@@ -34,14 +33,18 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import javax.ws.rs.core.*;
+import javax.ws.rs.ext.MessageBodyWriter;
+import javax.ws.rs.ext.Providers;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
+
+import static org.springframework.util.DigestUtils.md5DigestAsHex;
 
 /**
  * JAX-RS service "localization bundles" implementation.
@@ -53,7 +56,7 @@ import java.util.Map;
  * cache invalidated on change of the Accept-Language header
  *
  * @author Igor.Nesterenko, Zahar.Tomchenko
- * @version $Id: LocalizationBundleJaxrsService.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: LocalizationBundleJaxrsService.java 61296 2016-02-25 21:53:37Z mchan $
  */
 @Service
 @Path("/bundles")
@@ -63,6 +66,9 @@ public class LocalizationBundleJaxrsService {
 
     @Resource(name = "exposedMessageSource")
     private ExposedResourceBundleMessageSource messageSource;
+
+    @Context
+    private Providers providers;
 
     @Resource(name = "bundlePathsList")
     public void setBundleNames(List<String> bundlePathsList) {
@@ -74,9 +80,10 @@ public class LocalizationBundleJaxrsService {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getBundles(@QueryParam(RestConstants.QUERY_PARAM_EXPANDED) Boolean expanded, @Context HttpHeaders headers) throws JSONException {
+    public Response getBundles(@QueryParam(RestConstants.QUERY_PARAM_EXPANDED) Boolean expanded, @Context HttpHeaders headers, @Context Request request) throws JSONException {
         if (Boolean.TRUE.equals(expanded)) {
             Locale locale = headers.getAcceptableLanguages().get(0);
+
             JSONObject json = new JSONObject();
             for (String currentBundle : bundleNames) {
                 final Map<String, String> messages = messageSource.getAllMessagesForBaseName(currentBundle, locale);
@@ -86,7 +93,15 @@ public class LocalizationBundleJaxrsService {
                 }
                 json.put(currentBundle, currentMessages);
             }
-            return CacheControlHelper.enableLocaleAwareStaticCache(Response.ok(json)).build();
+
+            EntityTag etag = generateETag(json);
+            Response.ResponseBuilder response = request.evaluatePreconditions(etag);
+
+            if (response == null) {
+                response = Response.ok(json).tag(etag);
+            }
+
+            return response.build();
         } else {
             return Response.ok(bundleNames).build();
         }
@@ -95,16 +110,46 @@ public class LocalizationBundleJaxrsService {
     @GET
     @Path("/{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getBundle(@PathParam("name") String bundleName, @Context HttpHeaders headers) {
-
+    public Response getBundle(@PathParam("name") String bundleName, @Context HttpHeaders headers, @Context Request request) {
         Locale locale = headers.getAcceptableLanguages().get(0);
 
         Map<String, String> messages = messageSource.getAllMessagesForBaseName(bundleName, locale);
 
-        return CacheControlHelper
-                .enableLocaleAwareStaticCache(
-                        messages.isEmpty() ? Response.noContent() : Response.ok(messages)
-                )
-                .build();
+        EntityTag etag = generateETag(toJson(messages));
+        Response.ResponseBuilder response = request.evaluatePreconditions(etag);
+
+        if (response == null) {
+            response = messages.isEmpty() ? Response.noContent() : Response.ok(messages);
+        }
+
+        return response.tag(etag).build();
+    }
+
+    public byte[] toJson(Map<String, String> messages) {
+        MediaType mediaType = MediaType.APPLICATION_JSON_TYPE;
+
+        ByteArrayOutputStream entityStream = new ByteArrayOutputStream();
+        MessageBodyWriter<Map> messageBodyWriter = providers.getMessageBodyWriter(Map.class, Map.class, new Annotation[0], mediaType);
+
+        if (messageBodyWriter != null) {
+            try {
+                messageBodyWriter.writeTo(messages, Map.class, Map.class, new Annotation[0], mediaType, null, entityStream);
+                return entityStream.toByteArray();
+            } catch (IOException e) { }
+        }
+
+        return new JSONObject(messages).toString().getBytes();
+    }
+
+    protected EntityTag generateETag(JSONObject messagesJson) {
+        if (messagesJson == null) {
+            return null;
+        } else {
+            return generateETag(messagesJson.toString().getBytes());
+        }
+    }
+
+    protected EntityTag generateETag(byte[] bytes) {
+        return new EntityTag(md5DigestAsHex(bytes));
     }
 }

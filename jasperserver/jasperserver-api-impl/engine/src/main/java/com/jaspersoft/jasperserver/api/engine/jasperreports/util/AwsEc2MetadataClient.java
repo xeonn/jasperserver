@@ -26,6 +26,7 @@ import org.apache.commons.logging.LogFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.*;
@@ -60,6 +61,7 @@ public class AwsEc2MetadataClient {
     public static final String DOCUMENT_RESOURCE = "/latest/dynamic/instance-identity/document";
     public static final String ACCOUNT_ID = "accountId";
     public static final String AWS_DOMAIN = ".amazonaws.com";
+    public static final String USER_DATA = "/latest/user-data/";
     
     public static int SECOND = 1000;
 
@@ -263,6 +265,29 @@ public class AwsEc2MetadataClient {
         } finally {
             inputStream.close();
         }
+    }
+
+    public List<String> getEc2UserDataAsList() {
+        return parseValueAsList(readResource(USER_DATA));
+    }
+
+    public String getEc2UserData() {
+        return readResource(USER_DATA);
+    }
+
+    public String getEc2UserDataProperty(String propertyName,String defaultValue) {
+        Properties prop = new Properties();
+        try {
+            if (getEc2UserData()!=null) {
+                prop.load(new StringReader(getEc2UserData()));
+            } else {
+                return defaultValue;
+            }
+        } catch (Exception e) {
+//            e.printStackTrace();
+            return defaultValue;
+        }
+        return prop.getProperty(propertyName,null);
     }
 
 }

@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: controls.base.js 9551 2015-10-13 14:09:03Z dgorbenk $
+ * @version: $Id: controls.base.js 9909 2016-02-25 19:56:31Z dgorbenk $
  */
 
 /* global Template, layoutModule, $$, $break, _, dialogs, matchAny */
@@ -178,7 +178,7 @@ var ControlDialog = function(buttonActions) {
 //    }
 
     jQuery('#'+ControlsBase.INPUT_CONTROLS_DIALOG).on('mouseup touchend', 'button', function(evt) {
-        if (this.id && !this.id.empty()){
+        if (this.id && !this.id.empty() && !this.disabled){
             var action = it.buttonActions['button#'+this.id];
             action && action();
         }

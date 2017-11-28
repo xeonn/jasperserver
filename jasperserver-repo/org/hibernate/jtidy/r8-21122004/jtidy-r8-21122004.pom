@@ -1,0 +1,10 @@
+<project>
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.hibernate</groupId>
+	<artifactId>jtidy</artifactId>
+	<version>r8-21122004</version>
+	<packaging>jar</packaging>
+	<name>JTidy</name>
+	<url>http://jtidy.sourceforge.net</url>
+	<description>JTidy is a Java port of HTML Tidy, a HTML syntax checker and pretty printer. Like its non-Java cousin, JTidy can be used as a tool for cleaning up malformed and faulty HTML. In addition, JTidy provides a DOM parser for real-world HTML.</description>
+</project>

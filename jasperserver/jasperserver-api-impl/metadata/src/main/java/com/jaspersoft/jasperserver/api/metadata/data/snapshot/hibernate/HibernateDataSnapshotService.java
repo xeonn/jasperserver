@@ -20,10 +20,12 @@
  */
 package com.jaspersoft.jasperserver.api.metadata.data.snapshot.hibernate;
 
-import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
-
+import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
+import com.jaspersoft.jasperserver.api.common.util.diagnostic.DiagnosticSnapshotPropertyHelper;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.DataContainer;
+import com.jaspersoft.jasperserver.api.metadata.common.service.impl.HibernateDaoImpl;
+import com.jaspersoft.jasperserver.api.metadata.data.cache.*;
+import net.sf.jasperreports.data.cache.DataSnapshot;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Criteria;
@@ -35,24 +37,13 @@ import org.springframework.orm.hibernate3.HibernateCallback;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import net.sf.jasperreports.data.cache.DataSnapshot;
-
-import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.DataContainer;
-import com.jaspersoft.jasperserver.api.metadata.common.service.impl.HibernateDaoImpl;
-import com.jaspersoft.jasperserver.api.metadata.data.cache.DataCacheSnapshot;
-import com.jaspersoft.jasperserver.api.metadata.data.cache.DataCacheSnapshotData;
-import com.jaspersoft.jasperserver.api.metadata.data.cache.DataCacheSnapshotMetadata;
-import com.jaspersoft.jasperserver.api.metadata.data.cache.DataSnapshotContentsPersistenceService;
-import com.jaspersoft.jasperserver.api.metadata.data.cache.DataSnapshotPersistenceService;
-import com.jaspersoft.jasperserver.api.metadata.data.cache.DataSnapshotPersistentMetadata;
-import com.jaspersoft.jasperserver.api.metadata.data.cache.DataSnapshotSavedId;
-import com.jaspersoft.jasperserver.api.metadata.data.cache.DefaultDataCacheSnapshotMetadata;
-import com.jaspersoft.jasperserver.api.metadata.data.cache.DefaultDataSnapshotPersistentMetadata;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: HibernateDataSnapshotService.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: HibernateDataSnapshotService.java 61296 2016-02-25 21:53:37Z mchan $
  */
 public class HibernateDataSnapshotService extends HibernateDaoImpl implements DataSnapshotPersistenceService {
 
@@ -145,7 +136,14 @@ public class HibernateDataSnapshotService extends HibernateDaoImpl implements Da
 			}
 			return null;
 		}
-		
+
+		if (context != null &&
+				DiagnosticSnapshotPropertyHelper.isDiagSnapshotSet(context.getAttributes())) {
+			snapshotMeta.getParameters().put(
+					DiagnosticSnapshotPropertyHelper.ATTRIBUTE_IS_DIAG_SNAPSHOT,
+					String.valueOf(true));
+		}
+
 		DataCacheSnapshotData snapshot = new DataCacheSnapshotData();
 		snapshot.setMetadata(snapshotMeta);
 		snapshot.setSnapshotData(snapshotData);
@@ -208,20 +206,20 @@ public class HibernateDataSnapshotService extends HibernateDaoImpl implements Da
 		return getHibernateTemplate().execute(new HibernateCallback<Long>() {
 			public Long doInHibernate(Session session) throws HibernateException, SQLException {
 				PersistentDataSnapshot persistentSnapshot = new PersistentDataSnapshot();
-				
+
 				// saving the new snapshot
 				long contentsId = contentsPersistenceService.saveDataSnapshot(context, snapshot.getSnapshotData());
 				persistentSnapshot.setContentsId(contentsId);
-				
+
 				DataCacheSnapshotMetadata snapshotMeta = snapshot.getMetadata();
 				persistentSnapshot.setSnapshotDate(snapshotMeta.getSnapshotDate());
-				
+
 				Map<String, Object> paramsCopy = copyParams(snapshotMeta.getParameters());
 				persistentSnapshot.setDataParameters(paramsCopy);
-				
+
 				session.save(persistentSnapshot);
 				session.flush();
-				
+
 				long savedId = persistentSnapshot.getId();
 				int savedVersion = persistentSnapshot.getVersion();
 				if (log.isDebugEnabled()) {

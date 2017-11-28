@@ -156,17 +156,17 @@
                     <li class="leaf"><button id="asyncCancel" class="button capsule text up" disabled="disabled"><span class="wrap"><spring:message code="button.cancel.loading"/><span class="icon"></span></span></button></li>
                 </ul>
                 <ul class="list buttonSet">
-                    <li class="leaf" role="application"><button id="dataRefreshButton" type="submit" aria-label="<spring:message code="jasper.report.view.button.data.refresh" javaScriptEscape="true"/>" class="button capsule up"><span class="wrap"><span class="icon"></span></span></button></li>
+                    <li class="leaf" role="application"><button id="dataRefreshButton" type="submit" aria-label="<spring:message code="jasper.report.view.button.data.refresh" javaScriptEscape="true"/>" data-title="true" class="button capsule up"><span class="wrap"><span class="icon"></span></span></button></li>
                 </ul>
 
                 <div id="reportPartsController" style="display: none">
                     <div id="reportPartsContainer">
                     </div>
                     <div id="reportPartsNavigation" class="control search">
-                        <button id="part_prev" aria-label="<spring:message code="REPORT_VIEWER_PAGINATION_CONTROLS_PREVIOUS"/>" class="button action square move searchPrevious up" disabled="disabled">
+                        <button id="part_prev" aria-label="<spring:message code="REPORT_VIEWER_PAGINATION_CONTROLS_PREVIOUS"/>" data-title="true" class="button action square move searchPrevious up" disabled="disabled">
                             <span class="wrap"><span class="icon"></span></span>
                         </button>
-                        <button id="part_next" aria-label="<spring:message code="REPORT_VIEWER_PAGINATION_CONTROLS_NEXT"/>" class="button action square move searchNext up" disabled="disabled">
+                        <button id="part_next" aria-label="<spring:message code="REPORT_VIEWER_PAGINATION_CONTROLS_NEXT"/>"  data-title="true" class="button action square move searchNext up" disabled="disabled">
                             <span class="wrap"><span class="icon"></span></span>
                         </button>
                     </div>
@@ -218,26 +218,26 @@
                         <li class="node">
                             <ul class="list buttonSet">
                                 <c:if test="${isPro}">
-                                    <li class="leaf"><button id="fileOptions" class="button capsule mutton up first" aria-label="<spring:message code="button.save"/>" disabled="true"><span class="wrap"><span class="icon"></span><span class="indicator"></span></span></button></li>
+                                    <li class="leaf"><button id="fileOptions" class="button capsule mutton up first" aria-label="<spring:message code="button.save"/>"  data-title="true" disabled="true"><span class="wrap"><span class="icon"></span><span class="indicator"></span></span></button></li>
                                 </c:if>
                                 <c:if test="${!isPro}">
-                                    <li class="leaf"><button id="fileOptions" class="button capsule mutton up first" aria-label="<spring:message code="button.save"/> - <spring:message code="feature.pro.only"/>" disabled="true"><span class="wrap"><span class="icon"></span><span class="indicator"></span></span></button></li>
+                                    <li class="leaf"><button id="fileOptions" class="button capsule mutton up first" aria-label="<spring:message code="button.save"/> - <spring:message code="feature.pro.only"/>"  data-title="true" disabled="true"><span class="wrap"><span class="icon"></span><span class="indicator"></span></span></button></li>
                                 </c:if>
-                                <li class="leaf"><button id="export" class="button capsule mutton up last" disabled="disabled" aria-label="<spring:message code="button.export"/>"><span class="wrap"><span class="icon"></span><span class="indicator"></span></span></button></li>
+                                <li class="leaf"><button id="export" class="button capsule mutton up last" disabled="disabled" aria-label="<spring:message code="button.export"/>"  data-title="true"><span class="wrap"><span class="icon"></span><span class="indicator"></span></span></button></li>
                             </ul>
                         </li>
                         <li class="node">
                             <ul class="list buttonSet">
-                                <li class="leaf"><button id="undo" class="button capsule up first" disabled="disabled" aria-label="<spring:message code="button.undo"/>"><span class="wrap"><span class="icon"></span></span></button>
+                                <li class="leaf"><button id="undo" class="button capsule up first" disabled="disabled" aria-label="<spring:message code="button.undo"/>" data-title="true"><span class="wrap"><span class="icon"></span></span></button>
                                 </li>
-                                <li class="leaf"><button id="redo" class="button capsule up middle" disabled="disabled" aria-label="<spring:message code="button.redo"/>"><span class="wrap"><span class="icon"></span></span></button></li>
-                                <li class="leaf"><button id="undoAll" class="button capsule up last" disabled="disabled" aria-label="<spring:message code="button.undoAll"/>"><span class="wrap"><span class="icon"></span></span></button></li>
+                                <li class="leaf"><button id="redo" class="button capsule up middle" disabled="disabled" aria-label="<spring:message code="button.redo"/>" data-title="true"><span class="wrap"><span class="icon"></span></span></button></li>
+                                <li class="leaf"><button id="undoAll" class="button capsule up last" disabled="disabled" aria-label="<spring:message code="button.undoAll"/>" data-title="true"><span class="wrap"><span class="icon"></span></span></button></li>
                             </ul>
                         </li>
                         <li class="node conditional first">
                             <ul class="list buttonSet">
                                 <li id="controls" class="leaf ${controlsHidden}">
-                                    <button id="ICDialog" class="button capsule ${controlToggle} ${controlUp}" aria-label="<spring:message code="button.controls"/>">
+                                    <button id="ICDialog" class="button capsule ${controlToggle} ${controlUp}" aria-label="<spring:message code="button.controls"/>" data-title="true">
                                         <span class="wrap">
                                             <span class="icon"></span>
                                         </span>
@@ -249,7 +249,7 @@
                         <li class="node conditional second">
                             <ul class="list buttonSet">
                                 <li class="leaf">
-                                    <button id="bookmarksDialog" style="display: none;" class="button capsule up" aria-label="<spring:message code="button.bookmarks"/>">
+                                    <button id="bookmarksDialog" style="display: none;" class="button capsule up" aria-label="<spring:message code="button.bookmarks"/>" data-title="true">
                                         <span class="wrap">
                                             <span class="icon"></span>
                                         </span>
@@ -265,11 +265,11 @@
                         <!-- ========== ZOOM =========== -->
                         <div id="reportZoom" class="control zoom">
                             <span class="divider first"></span>
-                            <button id="zoom_out" aria-label="<spring:message code="button.zoomOut"/>" class="button action square move zoomOut up"><span class="wrap"><span class="icon"></span></span></button>
-                            <button id="zoom_in" aria-label="<spring:message code="button.zoomIn"/>" class="button action square move zoomIn up"><span class="wrap"><span class="icon"></span></span></button>
+                            <button id="zoom_out" aria-label="<spring:message code="button.zoomOut"/>" data-title="true" class="button action square move zoomOut up"><span class="wrap"><span class="icon"></span></span></button>
+                            <button id="zoom_in" aria-label="<spring:message code="button.zoomIn"/>" data-title="true" class="button action square move zoomIn up"><span class="wrap"><span class="icon"></span></span></button>
                             <label for="zoom_value" class="control input textPlus inline">
                                 <input id="zoom_value" type="text" value="100%" name="zoom_value" aria-label="<spring:message code="button.zoomOptions"/>">
-                                <button id="zoom_value_button" class="button disclosure" aria-label="<spring:message code="button.zoomOptions"/>">
+                                <button id="zoom_value_button" class="button disclosure" aria-label="<spring:message code="button.zoomOptions"/>" data-title="true">
                                     <span class="icon"></span>
                                 </button>
                             </label>
@@ -287,21 +287,21 @@
                                 {"key": "fit_page", "value": "<spring:message code="button.zoomOptions.option.fitPage" htmlEscape="true"/>"}
                             ]
                         </script>
-    
+
                         <!-- ========== REPORT SEARCH =========== -->
                         <div id="reportSearch" class="control search">
                             <span class="divider first"></span>
                             <label for="search_report" class="control input textPlus inline">
                                 <input id="search_report" type="text" placeholder="<spring:message code="button.searchReportPlaceholder"/>" aria-label="<spring:message code="button.searchReportTitle"/>" name="search_report">
-                                <button id="search_report_button" class="button search" aria-label="<spring:message code="button.searchReportTitle"/>">
+                                <button id="search_report_button" class="button search" aria-label="<spring:message code="button.searchReportTitle"/>" data-title="true">
                                     <span class="icon"></span>
                                 </button>
-                                <button id="search_options" class="button disclosure" aria-label="<spring:message code="button.searchOptions"/>">
+                                <button id="search_options" class="button disclosure" aria-label="<spring:message code="button.searchOptions"/>" data-title="true">
                                     <span class="icon"></span>
                                 </button>
                             </label>
-                            <button id="search_previous" aria-label="<spring:message code="button.searchPrevious"/>" class="button action square move searchPrevious up" disabled="disabled"><span class="wrap"><span class="icon"></span></span></button>
-                            <button id="search_next" aria-label="<spring:message code="button.searchNext"/>" class="button action square move searchNext up" disabled="disabled"><span class="wrap"><span class="icon"></span></span></button>
+                            <button id="search_previous" aria-label="<spring:message code="button.searchPrevious"/>" data-title="true" class="button action square move searchPrevious up" disabled="disabled"><span class="wrap"><span class="icon"></span></span></button>
+                            <button id="search_next" aria-label="<spring:message code="button.searchNext"/>" data-title="true" class="button action square move searchNext up" disabled="disabled"><span class="wrap"><span class="icon"></span></span></button>
                             <span class="divider last"></span>
                         </div>
                         <script type="application/json" id="reportSearchText">
@@ -310,22 +310,22 @@
                                 {"key": "wholeWordsOnly", "value": "<spring:message code="button.searchOptions.option.wholeWordsOnly" javaScriptEscape="true"/>"}
                             ]
                         </script>
-    
+
                         <!-- ========== PAGINATION =========== -->
                         <div id="pagination" class="control paging" role="application">
-                            <button id="page_first" type="submit" aria-label="<spring:message code="REPORT_VIEWER_PAGINATION_CONTROLS_FIRST" javaScriptEscape="true"/>" class="button action square move toLeft up" disabled="disabled"><span class="wrap"><span class="icon"></span></span></button>
-                            <button id="page_prev" type="submit" aria-label="<spring:message code="REPORT_VIEWER_PAGINATION_CONTROLS_PREVIOUS" javaScriptEscape="true"/>" class="button action square move left up" disabled="disabled"><span class="wrap"><span class="icon"></span></span></button>
+                            <button id="page_first" type="submit" aria-label="<spring:message code="REPORT_VIEWER_PAGINATION_CONTROLS_FIRST" javaScriptEscape="true"/>" data-title="true" class="button action square move toLeft up" disabled="disabled"><span class="wrap"><span class="icon"></span></span></button>
+                            <button id="page_prev" type="submit" aria-label="<spring:message code="REPORT_VIEWER_PAGINATION_CONTROLS_PREVIOUS" javaScriptEscape="true"/>" data-title="true" class="button action square move left up" disabled="disabled"><span class="wrap"><span class="icon"></span></span></button>
                             <label class="control input text inline" for="page_current" aria-label="<spring:message code="REPORT_VIEWER_PAGINATION_CONTROLS_CURRENT_PAGE" javaScriptEscape="true"/>">
                                 <span class="wrap"><spring:message code="jasper.report.view.page.intro"/></span>
                                 <input class="" id="page_current" type="text" name="currentPage" value=""/>
                                 <span class="wrap" id="page_total">&nbsp;</span>
                             </label>
-                            <button id="page_next" type="submit" aria-label="<spring:message code="REPORT_VIEWER_PAGINATION_CONTROLS_NEXT" javaScriptEscape="true"/>" class="button action square move right up" disabled="disabled"><span class="wrap"><span class="icon"></span></span></button>
-                            <button id="page_last" type="submit" aria-label="<spring:message code="REPORT_VIEWER_PAGINATION_CONTROLS_LAST" javaScriptEscape="true"/>" class="button action square move toRight up" disabled="disabled"><span class="wrap"><span class="icon"></span></span></button>
+                            <button id="page_next" type="submit" aria-label="<spring:message code="REPORT_VIEWER_PAGINATION_CONTROLS_NEXT" javaScriptEscape="true"/>" data-title="true" class="button action square move right up" disabled="disabled"><span class="wrap"><span class="icon"></span></span></button>
+                            <button id="page_last" type="submit" aria-label="<spring:message code="REPORT_VIEWER_PAGINATION_CONTROLS_LAST" javaScriptEscape="true"/>" data-title="true" class="button action square move toRight up" disabled="disabled"><span class="wrap"><span class="icon"></span></span></button>
                         </div>
                     </div>
                     <!-- ========== END RIGHT BUTTON SET =========== -->
-                    
+
                 </div>
                 <!-- ========== END VIEWER TOOLBAR =========== -->
 
@@ -396,7 +396,7 @@
                 </c:if--%>
 
             </t:putAttribute>
-            
+
         </t:insertTemplate>
 
         <!-- ========== INPUT CONTROLS DIALOG =========== -->

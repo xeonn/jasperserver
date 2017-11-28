@@ -315,11 +315,13 @@ public class TenantServiceImpl extends HibernateDaoImpl
             /* Excluding root parent from sub list. */
             criteria.add(Restrictions.ne("tenantId", parentTenant.getTenantId()));
         } else {
-            value = parentTenant.getTenantUri() + value;
+        	// escaping uri (but not special /%) to avoid bug #44445
+            value = databaseCharactersEscapeResolver.getEscapedText(parentTenant.getTenantUri()) + value;
         }
 
-        criteria.add(Restrictions.like("tenantUri", value));
-
+        // EXACT is used because we have built-in % characters already. Using Escaped like to avoid DB2 bug #44445
+        criteria.add(new IlikeEscapeAwareExpression("tenantUri", value, MatchMode.EXACT));
+ 
         if (sortBy != null){
             if (sortBy.equals("id")){
                 criteria.addOrder(Order.asc("tenantId"));
@@ -335,7 +337,8 @@ public class TenantServiceImpl extends HibernateDaoImpl
             for (;depth > 0; depth--){
                 boundary.append("/%");
             }
-            criteria.add(Restrictions.not(Restrictions.like("tenantUri", boundary.toString())));
+            // EXACT is used because we have built-in % characters already. Using Escaped like to avoid DB2 bug #44445
+            criteria.add(Restrictions.not(new IlikeEscapeAwareExpression("tenantUri", boundary.toString(), MatchMode.EXACT)));
         }
 
         if (text != null) {

@@ -20,11 +20,13 @@
 */
 package com.jaspersoft.jasperserver.war.cascade.handlers;
 
+import com.jaspersoft.jasperserver.api.common.util.diagnostic.DiagnosticSnapshotPropertyHelper;
 import com.jaspersoft.jasperserver.api.engine.common.service.ReportInputControlInformation;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.InputControl;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ListOfValuesItem;
 import com.jaspersoft.jasperserver.war.cascade.handlers.converters.DataConverterService;
 import com.jaspersoft.jasperserver.dto.reports.inputcontrols.InputControlOption;
+import org.apache.commons.collections.set.ListOrderedSet;
 import org.junit.Test;
 import org.unitils.UnitilsJUnit4;
 import org.unitils.inject.annotation.InjectInto;
@@ -42,12 +44,12 @@ import java.util.Map;
 import static com.jaspersoft.jasperserver.war.cascade.handlers.ParametersHelper.entry;
 import static com.jaspersoft.jasperserver.war.cascade.handlers.ParametersHelper.listOfValues;
 import static com.jaspersoft.jasperserver.war.cascade.handlers.ParametersHelper.map;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static com.jaspersoft.jasperserver.war.cascade.handlers.ParametersHelper.listOfOptions;
+import static org.junit.Assert.*;
 
 /**
  * @author Yaroslav.Kovalchyk
- * @version $Id: SingleSelectListInputControlHandlerTest.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: SingleSelectListInputControlHandlerTest.java 61296 2016-02-25 21:53:37Z mchan $
  */
 public class SingleSelectListInputControlHandlerTest extends UnitilsJUnit4 {
     @TestedObject
@@ -191,5 +193,105 @@ public class SingleSelectListInputControlHandlerTest extends UnitilsJUnit4 {
         assertEquals(selectedOptions.get(0).getValue(), selectedValue.toString());
     }
 
+    /**
+     *  diagnostic datasnapshot contains IC default values
+     *  chosen by user when run report under diagnostic
+     *
+     * @throws Exception
+     */
+    @Test
+    public void getStateOfInputControlFromSingleDefaultValueOfDiagnosticDatasnapshot() throws Exception {
+        final String parameterName = "testName";
+        final String valueForDefault = "Diagnostic";
+
+        final List<InputControlOption> defaultItems = new ArrayList<InputControlOption>() {{
+            add(new InputControlOption(valueForDefault, valueForDefault, true));
+        }};
+
+        inputControlMock.returns(parameterName).getName();
+        final InputControl inputControl = inputControlMock.getMock();
+        final HashMap<String, Class<?>> parameterTypes = new HashMap<String, Class<?>>();
+        Map<String, Object> inputParameters = map(
+                entry(DiagnosticSnapshotPropertyHelper.ATTRIBUTE_IS_DIAG_SNAPSHOT, Boolean.TRUE),
+                entry(parameterName, valueForDefault));
+
+        reportInputControlInformationMock.returns(valueForDefault).getDefaultValue();
+        final ReportInputControlInformation info = reportInputControlInformationMock.getMock();
+
+        final List<ListOfValuesItem> listOfValues = listOfValues(
+                Integer.valueOf(-2), Integer.valueOf(-1),
+                Integer.valueOf(0), Integer.valueOf(1), Integer.valueOf(2));
+        loader.returns(listOfValues).loadValues(inputControl, null, inputParameters, parameterTypes, info);
+
+        dataConverterService.returns(valueForDefault).formatSingleValue(valueForDefault, inputControl, info);
+        dataConverterService.returns(valueForDefault).convertSingleValue(valueForDefault, inputControl, info);
+        ////////////tested method call/////////////////
+        final List<InputControlOption> options = handler.getState(inputControl, null, inputParameters, parameterTypes, info).getOptions();
+        // state should have options
+        assertNotNull(options);
+        assertFalse("options not same list from db", options.size() == listOfValues.size() + 1);
+        assertTrue("option same list of defaults", options.contains(defaultItems.get(0)));
+
+        // options number is one item more then values because of nothing selected item.
+        assertEquals(defaultItems.size()+1, options.size());
+        List<InputControlOption> selectedOptions = new ArrayList<InputControlOption>();
+        for (InputControlOption currentOption : options) {
+            if (currentOption.isSelected()) selectedOptions.add(currentOption);
+        }
+        // only one item is selected
+        assertEquals(selectedOptions.size(), 1);
+    }
+
+    @Test
+    public void getStateOfInputControlFromMultiDefaultValueOfDiagnosticDatasnapshot() throws Exception {
+        final String parameterName = "testName";
+
+        final List<String> valuesForDefault = new ArrayList<String>() {{
+            add("Diag_01");
+            add("Diag_02");
+        }};
+
+        final ListOrderedSet defaultICValues = new ListOrderedSet(){{
+            addAll(valuesForDefault);
+        }};
+
+        final List<InputControlOption> defaultItems = listOfOptions(valuesForDefault, true);
+
+        inputControlMock.returns(parameterName).getName();
+        final InputControl inputControl = inputControlMock.getMock();
+        final HashMap<String, Class<?>> parameterTypes = new HashMap<String, Class<?>>();
+        Map<String, Object> inputParameters = map(
+                entry(DiagnosticSnapshotPropertyHelper.ATTRIBUTE_IS_DIAG_SNAPSHOT, Boolean.TRUE),
+                entry(parameterName, valuesForDefault.get(1)));
+
+        reportInputControlInformationMock.returns(defaultICValues).getDefaultValue();
+        final ReportInputControlInformation info = reportInputControlInformationMock.getMock();
+
+        final List<ListOfValuesItem> listOfValues = listOfValues(
+                Integer.valueOf(-2), Integer.valueOf(-1),
+                Integer.valueOf(0), Integer.valueOf(1), Integer.valueOf(2));
+        loader.returns(listOfValues).loadValues(inputControl, null, inputParameters, parameterTypes, info);
+
+        // dummy data conversion
+        dataConverterService.returns(valuesForDefault.get(0)).formatSingleValue(valuesForDefault.get(0), inputControl, info);
+        dataConverterService.returns(valuesForDefault.get(1)).formatSingleValue(valuesForDefault.get(1), inputControl, info);
+        dataConverterService.returns(valuesForDefault.get(0)).convertSingleValue(valuesForDefault.get(0), inputControl, info);
+        dataConverterService.returns(valuesForDefault.get(1)).convertSingleValue(valuesForDefault.get(1), inputControl, info);
+        ////////////tested method call/////////////////
+        final List<InputControlOption> options = handler.getState(inputControl, null, inputParameters, parameterTypes, info).getOptions();
+        // state should have options
+        assertNotNull(options);
+        assertFalse("options not same list from db", options.size() == listOfValues.size() + 1);
+        assertTrue("option same list of defaults", options.contains(defaultItems.get(1)));
+
+        // options number is one item more then values because of nothing selected item.
+        assertEquals(defaultItems.size()+1, options.size());
+        List<InputControlOption> selectedOptions = new ArrayList<InputControlOption>();
+        for (InputControlOption currentOption : options) {
+            if (currentOption.isSelected()) selectedOptions.add(currentOption);
+        }
+        // only one item is selected
+        assertEquals(selectedOptions.size(), 1);
+    }
 
 }

@@ -238,6 +238,7 @@
         <property name="moduleConfiguration"><ref bean="tenantModuleConfiguration"/></property>
         <property name="includeServerSettings" value="include-server-settings"/>
         <property name="tenantServiceUnsecured" ref="tenantService"/>
+        <property name="resourceModuleConfiguration" ref="resourceModuleConfiguration"/>
     </bean>
 
     <bean name="tenantModuleConfiguration"

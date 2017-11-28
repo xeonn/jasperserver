@@ -489,6 +489,7 @@
                 <value>com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.JdbcReportDataSource</value>
                 <value>com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.JndiJdbcReportDataSource</value>
                 <value>com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.VirtualReportDataSource</value>
+                <value>com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.AwsReportDataSource</value>
                 <value>com.jaspersoft.jasperserver.api.metadata.olap.domain.MondrianConnection</value>
                 <value>com.jaspersoft.jasperserver.api.metadata.olap.domain.JndiJdbcOlapDataSource</value>
                 <value>com.jaspersoft.jasperserver.api.metadata.olap.domain.JdbcOlapDataSource</value>

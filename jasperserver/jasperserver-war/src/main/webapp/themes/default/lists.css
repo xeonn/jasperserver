@@ -1970,6 +1970,7 @@ and (max-device-width : 1024px) {
 .list > li.selected > .wrap,
 .list > li.selected > .wrap.over {
     background-color: #1388d8;
+    color: #fff;
 }
 
 .list > li.selected > a.wrap,

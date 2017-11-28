@@ -183,7 +183,7 @@ Make sure you have compiled the jasperserver source code.
                               -->
                             <pathelement location="${importExportConfig}"/>
                             <fileset dir="${importExportLibDir}" includes="*.jar"/>
-                            <fileset dir="${currentDbDir}/jdbc" includes="${jdbcJar}"/>
+                            <fileset dir="${currentDbJDBCDir}" includes="${jdbcJar}"/>
                             <pathelement location="${currentConf}"/>
                         </classpath>
                     </java>
@@ -234,7 +234,7 @@ Make sure you have compiled the jasperserver source code.
                               -->
                             <pathelement location="${importExportConfig}"/>
                             <fileset dir="${importExportLibDir}" includes="*.jar"/>
-                            <fileset dir="${currentDbDir}/jdbc" includes="${jdbcJar}"/>
+                            <fileset dir="${currentDbJDBCDir}" includes="${jdbcJar}"/>
                             <pathelement location="${currentConf}"/>
                         </classpath>
                     </java>

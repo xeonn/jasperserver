@@ -678,6 +678,7 @@ define(function (require, exports, module) {
             $('body').on('mouseover', $.proxy(this._onMouseOut, this));
             $('body').on('mouseout', $.proxy(this._onMouseOver, this));
             $('body').on('mouseup', $.proxy(this._onMouseUp, this));
+            $('body').on('mouseover', '[aria-label]', $.proxy(this._onLabeledTagOver, this));
         },
 
         _bindTouchEvents: function () {
@@ -916,6 +917,7 @@ define(function (require, exports, module) {
         // from the node/element type, navtype, and explicit overrides, but NOT
         // the ancestors and defaults.
         _buildImmediateBehavior: function (element) {
+            var self = this;
             // Do something sensible if subfocus was unset and we got bad input.
             if (this.nullOrUndefined(element)) {
                 return this.defaultBehavior;
@@ -928,7 +930,9 @@ define(function (require, exports, module) {
             var nodeName = el.prop('nodeName');
             $.each(this.navtype_nodeNames, function (navtype, supportedNodeNames) {
                 if ($.inArray(nodeName, supportedNodeNames) > -1) {
-                    defaultNavtype = navtype;
+                    if (self.isNavigable(element)) {
+                        defaultNavtype = navtype;
+                    }
                 }
             });
             var nodeBehavior = {};
@@ -1316,10 +1320,24 @@ define(function (require, exports, module) {
             }
         },
 
+        // Callback run when cursor is over on element with aria-label attribute.
+        _onLabeledTagOver: function(ev) {
+            var $target = $(ev.currentTarget);
+
+            if ($target.attr("aria-label") && $target.data("title")) {
+                $target.attr("title", $target.attr("aria-label"));
+            }
+        },
+
         // Callback run when an element in the DOM has acquired focus.
         _onFocusIn: function (ev) {
             this._currentFocus = ev.target;
-            var fixedFocus = null;
+            var fixedFocus = null,
+                $target = $(ev.target);
+
+            if ($target.attr("aria-label")) {
+                $target.removeAttr("title");
+            }
 
             logger.info("stdnav._onFocusIn  ev.target==" + ev.target.nodeName + "#" + ev.target.id);
             this.updateDebugInfo();

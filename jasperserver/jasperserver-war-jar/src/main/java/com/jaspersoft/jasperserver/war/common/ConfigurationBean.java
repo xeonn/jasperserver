@@ -114,7 +114,9 @@ public class ConfigurationBean
     
     private boolean defaultDomainDependentsBlockAndUpdate;
     private boolean defaultDontUpdateDomainDependents;
-    
+
+    private Long maxFileSize;
+
     /**
 	 * @return Returns the reportLevelConfigurable.
 	 */
@@ -537,4 +539,11 @@ public class ConfigurationBean
         this.defaultDontUpdateDomainDependents = defaultDontUpdateDomainDependents;
     }
 
+    public Long getMaxFileSize() {
+        return maxFileSize;
+    }
+
+    public void setMaxFileSize(Long maxFileSize) {
+        this.maxFileSize = maxFileSize;
+    }
 }

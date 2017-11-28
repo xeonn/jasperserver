@@ -23,6 +23,7 @@ package com.jaspersoft.jasperserver.export.modules.repository;
 
 import com.jaspersoft.jasperserver.api.JSException;
 import com.jaspersoft.jasperserver.api.JSExceptionWrapper;
+import com.jaspersoft.jasperserver.api.common.util.diagnostic.DiagnosticSnapshotPropertyHelper;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Folder;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceLookup;
@@ -50,7 +51,7 @@ import java.util.*;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ResourceExporter.java 58870 2015-10-27 22:30:55Z esytnik $
+ * @version $Id: ResourceExporter.java 61296 2016-02-25 21:53:37Z mchan $
  */
 public class ResourceExporter extends BaseExporterModule implements ResourceExportHandler {
 	public static final String DIAGNOSTIC = "diagnostic";
@@ -477,9 +478,19 @@ public class ResourceExporter extends BaseExporterModule implements ResourceExpo
 		ResourceBean bean = (ResourceBean) configuration.getCastorBeanMappings().newObject(resource.getClass());
 
 		bean.setDiagnostic(hasParameter(DIAGNOSTIC));
-
+		// this works for report with diagnostic proposals
+		if (hasParameter(DIAGNOSTIC)) {
+			putAttributeToContext(
+					DiagnosticSnapshotPropertyHelper.ATTRIBUTE_IS_DIAG_SNAPSHOT);
+		}
 		bean.copyFrom(resource, this);
 		return bean;
+	}
+
+	private void  putAttributeToContext(String value) {
+		if (!getExecutionContext().getAttributes().contains(value)) {
+			getExecutionContext().getAttributes().add(value);
+		}
 	}
 
 	protected String getResourceFileName(Resource resource) {

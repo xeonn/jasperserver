@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: mng.common.js 9602 2015-10-29 14:06:10Z ztomchen $
+ * @version: $Id: mng.common.js 9909 2016-02-25 19:56:31Z dgorbenk $
  */
 
 /* global repositorySearch, SearchBox, toolbarButtonModule, toFunction, getAsFunction, localContext, isArray, JSCookie,
@@ -395,6 +395,7 @@ orgModule.initTenantsTreeEvents = function() {
             properties.changeDisable(false, ['#' + properties._EDIT_BUTTON_ID]);
 
             orgModule.fire(orgModule.Event.ENTITY_SELECT_AND_GET_DETAILS, {
+                refreshAttributes: true,
                 entityId: tenantId,
                 entityEvent: false
             });
@@ -698,14 +699,14 @@ orgModule.properties = {
             : this.saveButton.removeClassName("over").setAttribute("disabled", "disabled");
     },
 
-    show: function(value) {
+    show: function(value, refreshAttributes) {
         if (!this.locked) {
             if (this.attributesFacade) {
                 var self = this,
-                    isRoot = value.isRoot && value.isRoot(),
+                    isRoot = value && value.isRoot && value.isRoot(),
                     context = !isRoot ? value : this.options._.extend({}, value, {id: null});
 
-                this.attributesFacade.getCurrentView().setContext(context)
+                this.attributesFacade.getCurrentView().setContext(context, refreshAttributes)
                     .done(function() {
                         self.attributesFacade.render(isRoot);
                     });
@@ -943,6 +944,9 @@ orgModule.properties = {
             if (this.validate()) {
                 this.attributesFacade ? this.attributesFacade.getCurrentView().saveChildren().done(function() {
                     dfd.resolve()
+                }).fail(function() {
+                    dfd.reject();
+                    jQuery(".tab[tabid='#attributesTab']").trigger("mouseup");
                 }) : dfd.resolve();
 
                 dfd.done(function() {
@@ -1080,6 +1084,10 @@ orgModule.properties = {
         }
 
         return true;
+    },
+
+    setValuesProperty: function(name, value) {
+        this._value[name] = value;
     },
 
     getValue: function() {

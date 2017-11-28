@@ -1,7 +1,7 @@
 /**
  * @author fpang
  * @since Oct 10, 2014
- * @version $Id: DiagnosticSnapshotPropertyHelper.java 52124 2014-12-25 10:08:39Z ytymoshenko $
+ * @version $Id: DiagnosticSnapshotPropertyHelper.java 61296 2016-02-25 21:53:37Z mchan $
  *
  */
 
@@ -33,6 +33,7 @@ package com.jaspersoft.jasperserver.api.common.util.diagnostic;
 * /
 */
 
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -46,8 +47,7 @@ public class DiagnosticSnapshotPropertyHelper
 
 	public static boolean isDiagSnapshotSet(Map<String, Object> map)
 	{
-		String val = (String)map.get(ATTRIBUTE_IS_DIAG_SNAPSHOT);
-		return Boolean.valueOf(val);
+		return (map.get(ATTRIBUTE_IS_DIAG_SNAPSHOT) != null);
 	}
 	
 	public static boolean isDiagSnapshotSet(Properties props)
@@ -55,4 +55,9 @@ public class DiagnosticSnapshotPropertyHelper
 		String val = props.getProperty(ATTRIBUTE_IS_DIAG_SNAPSHOT);
 		return Boolean.valueOf(val);
 	}
+
+	public static boolean isDiagSnapshotSet(List<?> attrs) {
+		return attrs != null && attrs.contains(ATTRIBUTE_IS_DIAG_SNAPSHOT);
+	}
+
 }

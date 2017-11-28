@@ -21,7 +21,7 @@
 
 /**
  * @author: Olesya Bobruyko
- * @version: $Id: AttributesDesigner.js 9218 2015-08-20 19:56:16Z yplakosh $
+ * @version: $Id: AttributesDesigner.js 9909 2016-02-25 19:56:31Z dgorbenk $
  */
 
 define(function(require) {
@@ -48,7 +48,8 @@ define(function(require) {
 
         events: {
             "click @ui.addNewBtn": "_addNewChildView",
-            "mousedown .filterItems, .actions.table-column button, .permission.table-column select, .secure.table-column input": "_checkCurrentAttribute"
+            "mousedown .filterItems, .actions.table-column button, .permission.table-column select, .secure.table-column input": "_checkCurrentAttribute",
+            "focus .filterItems, .actions.table-column button, .permission.table-column select, .secure.table-column input": "_checkCurrentAttribute"
         },
 
         childEvents: {
@@ -67,6 +68,7 @@ define(function(require) {
             this.alertDialog = new AlertDialog();
             this.model = new Backbone.Model();
             this.changedModels = [];
+            this.overriddenInheritedModels = [];
 
             AttributesViewer.prototype.initialize.apply(this, arguments);
 
@@ -106,9 +108,11 @@ define(function(require) {
             this._validateNotAcceptedChildView().done(function() {
                 self.containsUnsavedItems()
                     ? self.collection.save(self.changedModels, updatedModels)
-                        .done(_.bind(self._successAjaxCallback, self))
-                        .fail(_.bind(self._errorAjaxCallback, self))
+                    .done(_.bind(self._successAjaxCallback, self))
+                    .fail(_.bind(self._errorAjaxCallback, self))
                     : self.saveDfD.resolve();
+            }).fail(function() {
+                self.saveDfD.reject();
             });
 
             return this.saveDfD;
@@ -118,7 +122,7 @@ define(function(require) {
             var validationDfD = new $.Deferred();
 
             this.currentChildView
-                ? this.currentChildView.runValidation({dfd: validationDfD})
+                ? this.currentChildView.runValidation(null, {dfd: validationDfD})
                 : validationDfD.resolve();
 
             return validationDfD;
@@ -170,7 +174,10 @@ define(function(require) {
                 index: this.collection.indexOf(model)
             };
 
-            this._saveChildViewToChangedList(view, !model.isNew());
+            !model.get("inherited")
+                ? this._saveChildViewToChangedList(view, !model.isNew())
+                : this._saveRemovedOverriddenInheritedModelToList(model);
+
             this._removeModel(model);
         },
 
@@ -231,7 +238,7 @@ define(function(require) {
 
             this._sendSearchRequest()
                 ? this._searchForInherited(_.union(this.deletedModels, this.renamedModels))
-                    .then(this.saveDfD.resolve, this.saveDfD.reject)
+                .then(this.saveDfD.resolve, this.saveDfD.reject)
                 : this.saveDfD.resolve();
 
             data && this._postProcessItems(data);
@@ -360,7 +367,7 @@ define(function(require) {
 
             this._filterInheritedViews && this._filterInheritedViews(data);
 
-            this._validateIfSecure(childView);
+            childView.validateIfSecure();
 
             childView.toggleIfModelIsValid().done(function() {
                 self._removeInheritedView && self._removeInheritedView(model);
@@ -395,6 +402,7 @@ define(function(require) {
 
         _resetChangedList: function() {
             this.changedModels.length = 0;
+            this.overriddenInheritedModels.length = 0;
 
             this._triggerChangeEvent();
         },
@@ -403,14 +411,6 @@ define(function(require) {
             this.toggleButtons && this.toggleButtons();
 
             this.trigger("change");
-        },
-
-        _validateIfSecure: function(childView) {
-            var isSecure = childView.model.get("secure"),
-                valueChanged = childView.getChangedProperties("value"),
-                nameChanged = childView.getChangedProperties("name");
-
-            childView.model.validateIfSecure = (!childView.model.isNew() && isSecure && !valueChanged && nameChanged) || false;
         },
 
         /******************************/
@@ -430,7 +430,13 @@ define(function(require) {
                 ? (!modelChanged && this._deleteViewFromChangedList(model))
                 : modelChanged && this.changedModels.push(model);
 
+            childView.invokeFiltration() && this._resetFilters && this._resetFilters();
+
             this._triggerChangeEvent();
+        },
+
+        _saveRemovedOverriddenInheritedModelToList: function(model) {
+            !_.contains(this.overriddenInheritedModels, model) && this.overriddenInheritedModels.push(model);
         },
 
         _openConfirm: function(childView, type, options) {
@@ -447,8 +453,7 @@ define(function(require) {
                     }));
                     break;
                 case confirmDialogTypesEnum.PERMISSION_CONFIRM:
-                    this._getPermissionConfirmContent &&
-                    confirmDialog.setContent(this._getPermissionConfirmContent(childView.editMode));
+                    confirmDialog.setContent(i18n["attributes.confirm.permission.dialog.text"]);
                     break;
             }
 
@@ -464,11 +469,23 @@ define(function(require) {
                 successCallback = _.bind(this._successValidationCallback, this, childView, dfd),
                 groupSearch = this._isServerLevel();
 
-            childView.getChangedProperties("name")
+            childView.getChangedProperties("name") && !this._sendValidateSearchRequest(model)
                 ? this.collection.validateSearch(model, this.changedModels, modelIsOriginallyInherited, groupSearch).then(successCallback)
                 : successCallback();
 
             return dfd;
+        },
+
+        _sendValidateSearchRequest: function(model) {
+            var deletedModels = this._filterChangeList("isDeleted"),
+                modelWithSameNameWasDeleted = _.filter(deletedModels, function(deletedModel) {
+                    return model.get("name") === deletedModel.get("name");
+                }).length,
+                changedModelsWithSameName = _.filter(this.changedModels, function(changedModel) {
+                    return model.get("name") === changedModel.get("name")
+                }).length;
+
+            return modelWithSameNameWasDeleted && !model.isDeleted && changedModelsWithSameName <= 2;
         },
 
         _setCurrentChildView: function(nextCurrentChildView) {

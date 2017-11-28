@@ -28,7 +28,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import net.sf.jasperreports.engine.util.JRProperties;
+import net.sf.jasperreports.engine.DefaultJasperReportsContext;
+import net.sf.jasperreports.engine.JRPropertiesUtil;
+import net.sf.jasperreports.engine.query.QueryExecuterFactory;
 
 import com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl.CustomReportDataSourceServiceFactory;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.CustomReportDataSource;
@@ -197,12 +199,13 @@ public class CustomDataSourceDefinition implements Serializable {
         if (queryExecuterMap == null) {
             return;
         }
+        JRPropertiesUtil propertiesUtil = JRPropertiesUtil.getInstance(DefaultJasperReportsContext.getInstance());
         Iterator<String> qei = queryExecuterMap.keySet().iterator();
         while (qei.hasNext()) {
             String lang = qei.next();
             String qefClassName = queryExecuterMap.get(lang);
             // set property that will allow jr to look up qe factory
-            JRProperties.setProperty(JRProperties.QUERY_EXECUTER_FACTORY_PREFIX + lang, qefClassName);
+			propertiesUtil.setProperty(QueryExecuterFactory.QUERY_EXECUTER_FACTORY_PREFIX + lang, qefClassName);
         }
     }
 

@@ -22,7 +22,7 @@
 
 /**
  * @author: Zakhar Tomchenko
- * @version: $Id: Tree.js 1760 2015-10-27 18:45:31Z yplakosh $
+ * @version: $Id: Tree.js 2296 2016-02-25 19:03:43Z dgorbenk $
  */
 
 define(function(require){
@@ -150,7 +150,7 @@ define(function(require){
         select: function(nodeId) {
             var level = this.getLevel(nodeId);
 
-            if (level) {
+            if (level && level.parent) {
                 var list = level.parent.list,
                     item = level.item;
 

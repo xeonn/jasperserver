@@ -20,17 +20,6 @@
  */
 package com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl;
 
-import java.util.Date;
-import java.util.Map;
-
-import net.sf.jasperreports.data.cache.DataCacheHandler;
-import net.sf.jasperreports.data.cache.DataSnapshot;
-import net.sf.jasperreports.data.cache.PopulatedSnapshotCacheHandler;
-import net.sf.jasperreports.engine.ReportContext;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
 import com.jaspersoft.jasperserver.api.common.util.diagnostic.DiagnosticSnapshotPropertyHelper;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.domain.impl.ReportUnitRequestBase;
@@ -41,10 +30,21 @@ import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 import com.jaspersoft.jasperserver.api.metadata.data.cache.DataCacheSnapshot;
 import com.jaspersoft.jasperserver.api.metadata.data.cache.DataSnapshotPersistentMetadata;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportUnit;
+import net.sf.jasperreports.data.cache.DataCacheHandler;
+import net.sf.jasperreports.data.cache.DataSnapshot;
+import net.sf.jasperreports.data.cache.PopulatedSnapshotCacheHandler;
+import net.sf.jasperreports.engine.ReportContext;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import java.util.Collection;
+import java.util.Date;
+import java.util.Map;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: StandardDataCacheProvider.java 54483 2015-04-21 03:18:31Z ytymoshe $
+ * @version $Id: StandardDataCacheProvider.java 61296 2016-02-25 21:53:37Z mchan $
  */
 public class StandardDataCacheProvider implements DataCacheProvider {
 	
@@ -56,15 +56,18 @@ public class StandardDataCacheProvider implements DataCacheProvider {
 
 	public DataCacheSnapshot setReportExecutionCache(ExecutionContext context, 
 			ReportUnitRequestBase request, ReportUnit reportUnit, Map<String, Object> dataParameters) {
-		if (!(request.isUseDataSnapshot() 
-				|| (dataSnapshotService.isSnapshotRecordingEnabled() && request.isRecordDataSnapshot()))) {
+		boolean doRecordDataSnapshot =
+				dataSnapshotService.isSnapshotRecordingEnabled() && request.isRecordDataSnapshot();
+		boolean isDiagnosticExport = dataSnapshotService.isDiagnosticSnapshotExportEnabled(reportUnit.getURIString());
+
+		if (!isDiagnosticExport && !(request.isUseDataSnapshot() || doRecordDataSnapshot)) {
 			// nothing to do
 			if (log.isDebugEnabled()) {
 				log.debug("no data caching");
 			}
 			return null;
 		}
-		
+
 		ReportContext reportContext = request.getReportContext();
 		if (reportContext == null) {
 			if (log.isDebugEnabled()) {
@@ -92,7 +95,7 @@ public class StandardDataCacheProvider implements DataCacheProvider {
 			
 			// use a cache handler that provides the snapshot
 			cacheHandler = new PopulatedSnapshotCacheHandler(dataSnapshot.getSnapshot());
-		} else if (dataSnapshotService.isSnapshotRecordingEnabled() && request.isRecordDataSnapshot()) {
+		} else if (isDiagnosticExport || doRecordDataSnapshot) {
 			if (log.isDebugEnabled()) {
 				log.debug("creating recording cache handler");
 			}
@@ -143,8 +146,12 @@ public class StandardDataCacheProvider implements DataCacheProvider {
 				cacheProvider.setHadSavedSnapshot(false);
 			}
 
+			boolean doRecordDataSnapshot =
+					dataSnapshotService.isSnapshotRecordingEnabled() && request.isRecordDataSnapshot();
+			boolean isDiagnosticExport = dataSnapshotService.isDiagnosticSnapshotExportEnabled(reportUnit.getURIString());
+
 			// create a recording cache handler
-			if (dataSnapshotService.isSnapshotRecordingEnabled() && request.isRecordDataSnapshot()) {
+			if (isDiagnosticExport || doRecordDataSnapshot) {
 				if (log.isDebugEnabled()) {
 					log.debug("creating recording cache handler");
 				}
@@ -254,7 +261,7 @@ public class StandardDataCacheProvider implements DataCacheProvider {
 			}
 			return null;
 		}
-		
+
 		boolean isDiagSnapshot = DiagnosticSnapshotPropertyHelper.isDiagSnapshotSet(persistentSnapshot.getSnapshotMetadata().getParameters());
 
 		if (!dataSnapshotService.isSnapshotPersistenceEnabledForReportUri(reportUnit.getURI().replaceAll("repo:", ""))
@@ -306,12 +313,29 @@ public class StandardDataCacheProvider implements DataCacheProvider {
 			Object value = dataParamsEntry.getValue();
 			Object snapshotValue = snapshotParams == null ? null : snapshotParams.get(key);
 			
-			if (value == null ? (snapshotValue != null) : (snapshotValue == null || !value.equals(snapshotValue))) {
+			if (!valuesEquals(value, snapshotValue)) {
 				match = false;
 				break;
 			}
 		}
 		return match;
+	}
+
+	private boolean valuesEquals(Object paramsValue, Object snapshotValue) {
+		if (paramsValue == null) {
+			return snapshotValue == null;
+		}
+		if(snapshotValue == null) {
+			return false;
+		}
+
+		if ((snapshotValue instanceof Collection<?>) &&
+				(paramsValue instanceof Collection<?>)) {
+			return CollectionUtils.isEqualCollection(
+					(Collection<?>) paramsValue, (Collection<?>) snapshotValue);
+		}
+
+		return snapshotValue.equals(paramsValue);
 	}
 
 	public void snapshotSaved(ExecutionContext context,

@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: repository.search.components.js 9490 2015-10-05 16:46:54Z obobruyk $
+ * @version: $Id: repository.search.components.js 9949 2016-03-12 00:56:58Z kpenn $
  */
 
 /* global repositorySearch, SearchBox, toolbarButtonModule, toFunction, getAsFunction, localContext, isArray, JSCookie,
@@ -133,7 +133,7 @@ repositorySearch.foldersPanel =  {
             dragPattern: '.draggable',
             selectOnMousedown: false
         });
-        
+
         disableSelectionWithoutCursorStyle($(this.getTreeId()).up(1));
 
         this.tree.observe('key:contextMenu', function(event) {
@@ -145,7 +145,7 @@ repositorySearch.foldersPanel =  {
             });
             Event.stop(event);
         });
- 
+
         this.tree.observe('key:escape', function(event) {
             actionModel.hideMenu();
             Event.stop(event);
@@ -154,12 +154,12 @@ repositorySearch.foldersPanel =  {
         this.tree.observe('tree:mouseover', function(event) {
             this.tree._overNode = event.memo.node;
         }.bindAsEventListener(this));
-       
+
         this.tree.observe('tree:mouseout', function(event) {
             this.tree.refreshDropTarget(false);
             this.tree._overNode == event.memo.node && (this.tree._overNode = null);
         }.bindAsEventListener(this));
-       
+
         this.tree.setDragStartState = function(node, draggable, event){
             dynamicTree.Tree.prototype.setDragStartState.call(this, node, draggable, event);
             var folder = new Folder(node);
@@ -170,14 +170,14 @@ repositorySearch.foldersPanel =  {
                 canFolderBeMoved(folder) && invokeFolderAction("MoveFolder", folder);
             }
         };
-            
+
         this.tree.setDragEndState = function(node, draggable, event){
             repositorySearch.CopyMoveController.cancel();
             this.refreshDropTarget(false);
             $(document.body).removeClassName(layoutModule.COPY_CLASS);
             dynamicTree.Tree.prototype.setDragEndState.call(this, node, draggable, event);
         };
-        
+
 
         this.tree.refreshDropTarget = function(allowed){
             if (this._overNode) {
@@ -185,7 +185,7 @@ repositorySearch.foldersPanel =  {
                 this._overNode.refreshStyle();
             }
         };
-        
+
 
         Droppables.remove(this.getTreeId());
         Droppables.add(this.getTreeId(),{
@@ -217,19 +217,19 @@ repositorySearch.foldersPanel =  {
             }).bind(this)
         });
 
-        
+
         this.tree.observe('server:error', function() {
             if (window.console) {
                 alert("Tree load error.");
             }
         });
 
-        
+
         this.tree.observe('childredPrefetched:loaded', function(event) {
             this.tree.openAndSelectNode(this._uri);
         }.bindAsEventListener(this));
 
-        
+
         this.tree.observe('tree:loaded', function(event) {
             this._canDoBrowse = false; // Forbid do browse to prevent initial browsing for each folder in the uri.
             if (this._uri == "/") {
@@ -245,7 +245,7 @@ repositorySearch.foldersPanel =  {
             this.doBrowse(); // Do initial browse.
         }.bindAsEventListener(this));
 
-        
+
         this.tree.observe('node:selected', function(event) {
             this._uri = event.memo.node.param.uri;
 
@@ -255,11 +255,11 @@ repositorySearch.foldersPanel =  {
             this.doBrowse();
         }.bindAsEventListener(this));
 
-        
+
         this.tree.observe('node:mouseup', function(event) {
             repositorySearch.model.setContextFolder(new Folder(event.memo.node));
         });
-        
+
 
         this.tree.showTreePrefetchNodes(this._uri);
 
@@ -366,7 +366,7 @@ repositorySearch.resultsPanel =  {
     LOADING_CLASS_NAME: 'loading',
 
     initialize: function (options) {
-    	var it = this;
+        var it = this;
         this._container = $(this._resultListId).up();
         this._header = $(this._resultListHeaderId);
 
@@ -384,7 +384,7 @@ repositorySearch.resultsPanel =  {
         this.getList().show();
 
         if(isSupportsTouch()){
-        	this._touchController = new TouchController(document.getElementById(this._resultListId), document.getElementById(this._resultsContainerId),{scrollbars:true});
+            this._touchController = new TouchController(document.getElementById(this._resultListId), document.getElementById(this._resultsContainerId),{scrollbars:true});
             jQuery('#'+this._resultListId).on('layout_update orientationchange',function(){
                 jQuery('#'+it._resultListId).css('min-width',jQuery('#'+it._resultsContainerId).width()+'px');
                 jQuery('#'+it._resultListId).width(jQuery('#'+it._resultsContainerId).width());
@@ -396,14 +396,14 @@ repositorySearch.resultsPanel =  {
                 id: this._container.identify(),
                 contentId: this._resultListId,
                 scroll: this._touchController
-            });        	
+            });
         } else {
             this._infiniteScroll = new InfiniteScroll({
                 id: this._container.identify(),
                 contentId: this._resultListId
-            });        	
+            });
         }
-        
+
         this._infiniteScroll.onLoad = function() {
             repositorySearch.fire(repositorySearch.Event.SEARCH_NEXT);
         };
@@ -546,7 +546,7 @@ repositorySearch.resultsPanel =  {
 
     _initDnD: function() {
         var list = this.getList();
-        
+
         list.setDragStartState = function(item, draggable, event) {
             dynamicList.List.prototype.setDragStartState.call(this, item, draggable, event);
 
@@ -801,7 +801,7 @@ repositorySearch.filtersPanel =  {
             this._touchController = new TouchController(document.getElementById(this._id), $(this._id).up());
         }
         //this._refreshScroll();
-        
+
         return this;
     },
 
@@ -1235,25 +1235,25 @@ ResourcePermissions.addMethod("_initControls", function() {
 
     var container = $(this._listId).up();
     if(isSupportsTouch()) {
-    	if(!this._touchController){
+        if(!this._touchController){
             this._touchController = new TouchController($(this._listId), $(this._listId).up(),{
-            	forceLayout: true
-            });    		
-    	}
+                forceLayout: true
+            });
+        }
     }
-    
+
     this._infiniteScroll = new InfiniteScroll({
         id: container.identify(),
         contentId: this._listId,
         scroll: this._touchController || undefined
     });
-    
+
     this._searchBox = new SearchBox({
         id: this._searchBoxId
     });
 
     var uri = this._resource.URIString;
-    
+
     this._infiniteScroll.onLoad = function() {
         if (!this._waiting) {
             repositorySearch.fire(repositorySearch.PermissionEvent.NEXT, {
@@ -1263,7 +1263,7 @@ ResourcePermissions.addMethod("_initControls", function() {
             });
         }
     }.bind(this);
-    
+
     this._searchBox.onSearch = function(text) {
         if (!this._waiting) {
             if (this.isChanged()) {
@@ -1284,7 +1284,7 @@ ResourcePermissions.addMethod("_initControls", function() {
 ResourcePermissions.addMethod("show", function() {
     if (!this._isVisible) {
         document.body.insert(this._dom);
-        
+
         this._initControls();
         this.list.setItems([]);
         this.list.show();
@@ -1300,7 +1300,7 @@ ResourcePermissions.addMethod("show", function() {
         });
 
         this._isVisible = true;
-        
+
         document.getElementById(this._listId).parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.style.height = '360px';
 
         dialogs.popup.show(this._dom);
@@ -1401,7 +1401,7 @@ ResourcePermissions.addMethod("_createItem", function(value) {
                 tooltipModule.hideJSTooltip(nameTooltip);
                 tooltipModule.cleanUp();
                 origRemove.apply(this);
-            };            
+            };
         }
 
 
@@ -1438,14 +1438,33 @@ ResourcePermissions.addMethod("_createItem", function(value) {
 ResourcePermissions.addMethod("addEntities", function(entities) {
     var items = entities.collect(this._createItem.bind(this));
     this.list.addItems(items);
-    this.list.refresh();    	
+    this.list.refresh();
     this._infiniteScroll.stopWaiting();
+});
+
+ResourcePermissions.addMethod("resetList", function(listId) {
+    // removes stdNav(508c) behavior for permissions list
+    // to correct a firefox-only issue with select elements in permissions list
+    // see http://jira.jaspersoft.com/browse/JRS-8471
+    var listUl = jQuery("#" + listId);
+    listUl.find("[js-nonmodal-tabindex]").removeAttr("js-nonmodal-tabindex");
+    listUl.find("[js-navtype]").attr("js-navtype", false);
+    listUl.find("[tabindex]").removeAttr("tabindex");
+});
+
+ResourcePermissions.addMethod("scrollReset", function() {
+    var listId = this._listId;
+    var resetList = this.resetList;
+    var scrollBody = jQuery("#" + this._listContainerId).find('.content').find('.body');
+    scrollBody.on('scroll', _.debounce(function () { resetList(listId); }, 100));
 });
 
 ResourcePermissions.addMethod("setEntities", function(entities) {
     this.list.setItems([]);
     this._touchController && this._touchController.reset();
     this.addEntities(entities);
+    this.resetList(this._listId);
+    this.scrollReset();
 });
 
 ResourcePermissions.addMethod("getChangedEntities", function() {
@@ -1598,7 +1617,7 @@ ResourceProperties.addMethod("_processTemplate", function() {
     this._dom = $(this.TEMPLATE_DOM_ID).cloneNode(true);
 
     this._dom.writeAttribute('id', null);
-	this._dom.addClassName('_activeResourcePropertiesDialog');
+    this._dom.addClassName('_activeResourcePropertiesDialog');
 
     var title = this._dom.select('.title')[0];
     title.update(title.innerHTML.strip() + ": " + xssUtil.escape(this._resource.label).truncate(50));
@@ -1630,7 +1649,7 @@ ResourceProperties.addMethod('_updateValueAndLabel', function(element, veSelecto
     var valueElement = element.select(veSelector)[0];
 
     valueElement.writeAttribute('id', null);
-	valueElement.writeAttribute('value', value);
+    valueElement.writeAttribute('value', value);
     valueElement.setValue ? valueElement.setValue(value) : valueElement.update(value);
 
     element.select(leSelector)[0].writeAttribute('for', valueElement.identify());
@@ -1813,17 +1832,17 @@ repositorySearch.showBulkDeleteResourcesConfirm = function(resources) {
     });
 
     var action = new repositorySearch.ServerAction.createResourceAction(repositorySearch.ResourceAction.DELETE, {resources: resources});
-    
+
     repositorySearch._showDeleteDialog(message, action);
 };
 
 repositorySearch._showDeleteDialog = function(message, action) {
     var confirmElement = $(repositorySearch.DeleteConfirmation.ID_DELETE_DIALOG_CONTAINER);
-    
+
     confirmElement.down('.body').update(message);
 
     dialogs.popupConfirm.show(confirmElement, true, {
-        okButtonSelector: '#' + repositorySearch.DeleteConfirmation.ID_DELETE_DIALOG_OK_BUTTON, 
+        okButtonSelector: '#' + repositorySearch.DeleteConfirmation.ID_DELETE_DIALOG_OK_BUTTON,
         cancelButtonSelector: '#' + repositorySearch.DeleteConfirmation.ID_DELETE_DIALOG_CANCEL_BUTTON
     });
 

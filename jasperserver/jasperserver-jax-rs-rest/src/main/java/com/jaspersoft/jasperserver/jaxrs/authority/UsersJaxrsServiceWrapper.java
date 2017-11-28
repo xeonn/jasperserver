@@ -33,10 +33,21 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.ext.Providers;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Set;
 
@@ -52,6 +63,12 @@ public class UsersJaxrsServiceWrapper {
 
     @Resource(name = "attributesJaxrsService")
     private AttributesJaxrsService attributesJaxrsService;
+
+    @Context
+    private Providers providers;
+
+    @Context
+    private HttpHeaders httpHeaders;
 
     @GET
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
@@ -147,14 +164,16 @@ public class UsersJaxrsServiceWrapper {
     @Path("/{name}/attributes/{attrName}")
     @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON, "application/hal+json", "application/hal+xml"})
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON, "application/hal+json", "application/hal+xml"})
-    public Response putAttribute(ClientAttribute attr,
+    public Response putAttribute(InputStream stream,
                                  @PathParam("name") String userName,
                                  @PathParam("attrName") String attrName,
                                  @HeaderParam(HttpHeaders.ACCEPT) String accept,
-                                 @HeaderParam(HttpHeaders.CONTENT_TYPE) String mediaType,
+                                 @HeaderParam(HttpHeaders.CONTENT_TYPE) MediaType mediaType,
                                  @QueryParam("_embedded") String embedded) throws RemoteException {
         HypermediaOptions hypermediaOptions = attributesJaxrsService.getHypermediaOptions(accept, embedded);
-        return attributesJaxrsService.putAttribute(attr, getHolder(userName), attrName, hypermediaOptions, mediaType);
+        ClientAttribute clientAttribute = AttributesJaxrsService.parseEntity(stream, mediaType, providers, httpHeaders);
+        return attributesJaxrsService
+                .putAttribute(clientAttribute, getHolder(userName), attrName, hypermediaOptions, mediaType.toString());
     }
 
 

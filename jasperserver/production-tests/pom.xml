@@ -10,7 +10,7 @@
     <parent>
         <groupId>com.jaspersoft.jasperserver</groupId>
         <artifactId>server</artifactId>
-        <version>6.2.0</version>
+        <version>6.2.1</version>
     </parent>
     <dependencies>
         <dependency>
@@ -220,7 +220,7 @@
         <dependency>
             <groupId>com.jaspersoft.jasperserver</groupId>
             <artifactId>jasperserver-war</artifactId>
-            <version>6.2.0</version>
+            <version>6.2.1</version>
             <type>war</type>
             <scope>test</scope>
         </dependency>
@@ -273,9 +273,26 @@
                     <groupId>org.mortbay.jetty</groupId>
                     <artifactId>servlet-api</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>org.apache.zookeeper</groupId>
+                    <artifactId>zookeeper</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.hive</groupId>
+                    <artifactId>hive-service</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
-
+        <dependency>
+            <groupId>org.apache.zookeeper</groupId>
+            <artifactId>zookeeper</artifactId>
+            <version>3.4.6</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.hive</groupId>
+            <artifactId>hive-service</artifactId>
+            <version>0.13.1</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

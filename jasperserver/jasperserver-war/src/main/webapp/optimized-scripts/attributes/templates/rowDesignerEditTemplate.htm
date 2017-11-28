@@ -2,7 +2,7 @@
     <span class="control firstInputGroup">
         <span class="name editMode control" data-bind="validationErrorClass:name">
             <div class="wrap">{{- i18n["attributes.name"]}}:</div>
-            <input type="text" data-bind="value:name, events:['keyup']" />
+            <input type="text" data-bind="value:name, events:['keyup'], disabled:inherited" />
             <span class="message warning" data-bind="validationErrorText:name" ></span>
         </span>
         <span class="value editMode control" data-bind="validationErrorClass:value">

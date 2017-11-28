@@ -70,7 +70,8 @@ define(function(require) {
 
 			this.renderMongoDbSpecificSection();
 			this.renderFileLocationSection();
-            this.renderTestConnectionSection();
+			this.renderTimezoneSection();
+			this.renderTestConnectionSection();
 
 			this.$el.find("[name=serverAddress]").focus();
 
@@ -140,7 +141,7 @@ define(function(require) {
 			}
 
 			// and now, under certain condition, we may create this button again
-			if (this.model.get("fileSourceType") === "repository") {
+            if (this.model.get("fileSourceType") === "repository" && !this.model.get("autoSchemaDefinition")) {
 
 				this.browseButton = resourceLocator.initialize({
 					i18n: i18n,

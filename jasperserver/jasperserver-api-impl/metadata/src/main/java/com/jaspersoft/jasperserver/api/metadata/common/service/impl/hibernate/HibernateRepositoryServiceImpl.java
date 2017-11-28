@@ -67,6 +67,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.criterion.*;
 import org.hibernate.mapping.Column;
 import org.hibernate.mapping.PersistentClass;
+import org.hibernate.metadata.ClassMetadata;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -85,7 +86,7 @@ import java.util.*;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: HibernateRepositoryServiceImpl.java 58878 2015-10-28 20:37:39Z esytnik $
+ * @version $Id: HibernateRepositoryServiceImpl.java 61296 2016-02-25 21:53:37Z mchan $
  */
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 public class HibernateRepositoryServiceImpl extends HibernateDaoImpl implements HibernateRepositoryService, ReferenceResolver, RepoManager, ApplicationContextAware {
@@ -1051,6 +1052,16 @@ public class HibernateRepositoryServiceImpl extends HibernateDaoImpl implements 
 			persistentClass = RepoResource.class;
 		} else {			
 			persistentClass = getPersistentClassMappings().getImplementationClass(filterClass);
+			// fixing SOAP bug by checking if persistentClass is mapped. 
+			try{
+				ClassMetadata meta = template.getSessionFactory().getClassMetadata(persistentClass);
+				if(meta==null){
+					persistentClass = RepoResource.class;
+				}
+			} catch(HibernateException e){
+				// class not mapped - use default
+				persistentClass = RepoResource.class;
+			}
 		}
 
 		// load resources one by one.
@@ -2656,10 +2667,12 @@ public class HibernateRepositoryServiceImpl extends HibernateDaoImpl implements 
         if (resources != null && !resources.isEmpty()) {
             getHibernateTemplate().deleteAll(resources);
         }
+        getHibernateTemplate().flush();
         // delete folders then
         if (folders != null && !folders.isEmpty()) {
             getHibernateTemplate().deleteAll(folders);
         }
+        getHibernateTemplate().flush();
     }
     
     	
@@ -2670,10 +2683,12 @@ public class HibernateRepositoryServiceImpl extends HibernateDaoImpl implements 
         if (folders != null && !folders.isEmpty()) {
             getHibernateTemplate().saveOrUpdateAll(folders);
         }
+        getHibernateTemplate().flush();
         // save resource then
         if (resources != null && !resources.isEmpty()) {
             getHibernateTemplate().saveOrUpdateAll(resources);
         }
+        getHibernateTemplate().flush();
     }
 
     public QueryModificationEvaluator getQueryModificationEvaluator() {

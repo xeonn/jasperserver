@@ -24,6 +24,7 @@ import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JRDataset;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRValueParameter;
+import net.sf.jasperreports.engine.JasperReportsContext;
 import net.sf.jasperreports.engine.query.JRJdbcQueryExecuter;
 import org.quartz.TriggerUtils;
 import org.quartz.DateBuilder;
@@ -38,7 +39,7 @@ import static com.jaspersoft.jasperserver.api.security.validators.Validator.vali
 
 /**
  * @author Ionut Nedelcu (ionutned@users.sourceforge.net)
- * @version $Id: JRTimezoneJdbcQueryExecuter.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: JRTimezoneJdbcQueryExecuter.java 61296 2016-02-25 21:53:37Z mchan $
  */
 public class JRTimezoneJdbcQueryExecuter extends JRJdbcQueryExecuter {
 
@@ -123,8 +124,8 @@ public class JRTimezoneJdbcQueryExecuter extends JRJdbcQueryExecuter {
 	private final TimezoneAdjustInfo timezoneAdjust;
 	private final boolean timezoneSet;
 
-	public JRTimezoneJdbcQueryExecuter(JRDataset dataset, Map map) {
-		super(dataset, map);
+	public JRTimezoneJdbcQueryExecuter(JasperReportsContext jasperReportsContext, JRDataset dataset, Map map) {
+		super(jasperReportsContext, dataset, map);
 
 		TimezoneAdjustInfo parentTimezoneAdjust = parentTimezone.isInherited()
 				? (TimezoneAdjustInfo) parentTimezone.get()

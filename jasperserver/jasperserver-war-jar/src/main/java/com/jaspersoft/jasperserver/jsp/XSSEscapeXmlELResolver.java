@@ -108,26 +108,43 @@ public class XSSEscapeXmlELResolver extends ELResolver {
 			// chain comes around.
 			excludeMe.set(Boolean.TRUE);
 			Object obj = context.getELResolver().getValue(context, base, property);
-			if (obj != null && isTypeSuitable(obj)) {
-				String objStr = obj.toString();
-				if (javaScriptEscape != null && javaScriptEscape) {
-					obj = JavaScriptUtils.javaScriptEscape(objStr);
-				}
-				else
-					obj = EscapeXssScript.escape(objStr);
+			if (obj != null) {
+                if (obj instanceof Object[]) {
+                    obj = escapeXSSArray((Object[])obj, javaScriptEscape);
+                }
+                else
+                    obj = escapeXSS(obj, javaScriptEscape);
 			}
 			return obj;
 		} finally {
 		  excludeMe.remove();
 		}
 	}
-    
+
+    private Object escapeXSSArray(Object[] objArr, Boolean javaScriptEscape) {
+        for (int k = 0; k < objArr.length; ++k) {
+            objArr[k] = escapeXSS(objArr[k], javaScriptEscape);
+        }
+        return objArr;
+    }
+
+    private Object escapeXSS(Object obj, Boolean javaScriptEscape) {
+        if (isTypeSuitable(obj)) {
+            if (javaScriptEscape != null && javaScriptEscape) {
+                return JavaScriptUtils.javaScriptEscape(obj.toString());
+            } else
+                return EscapeXssScript.escape(obj.toString());
+        }
+        else
+            return obj;
+    }
+
     private boolean isTypeSuitable(Object obj) {
-        return obj instanceof String 
-                || obj instanceof StringBuffer 
+        return obj instanceof String
+                || obj instanceof StringBuffer
                 || obj instanceof StringBuilder 
                 || obj instanceof Locale 
-                || obj instanceof JSONObject;         
+                || obj instanceof JSONObject;
     }
 
 	@Override

@@ -47,12 +47,12 @@
         <then>
 
           <echo>About to validate JDBC jar existence</echo>
-          <echo>  Look in: ${currentDbDir}/jdbc</echo>
+          <echo>  Look in: ${currentDbJDBCDir}</echo>
           
           <condition property="jdbcMoreThanOne">
             <!-- chk num jars greater or equal one -->
             <resourcecount when="ge" count="1">
-              <fileset id="jarNames"  dir="${currentDbDir}/jdbc" includes="*.jar"/>
+              <fileset id="jarNames"  dir="${currentDbJDBCDir}" includes="*.jar"/>
             </resourcecount>
           </condition>
       
@@ -101,13 +101,13 @@
             <echo>  maven.jdbc.artifactId=${maven.jdbc.artifactId}</echo>
             <echo>  maven.jdbc.version=${maven.jdbc.version}</echo>
             <if>
-              <available file="${currentDbDir}/jdbc/${jdbcJar}"/>
+              <available file="${currentDbJDBCDir}/${jdbcJar}"/>
               <then>
                 <echo>  Specified JDBC driver jar exists</echo>
               </then>
               <else>
                 <echo>  Specified JDBC driver jar not found on this path: </echo>
-                <echo>  ${currentDbDir}/jdbc/${jdbcJar}</echo>
+                <echo>  ${currentDbJDBCDir}/${jdbcJar}</echo>
 
                 <!-- chk if context is runSQL or deploy-webapp -->
                 <if>
@@ -158,7 +158,7 @@
       <echo>                                                                </echo>
       <echo> 2) Copy the JDBC driver to the following buildomatic location: </echo>
       <echo>                                                                </echo>
-      <echo>    ${currentDbDir}/jdbc  </echo>
+      <echo>    ${currentDbJDBCDir}  </echo>
       <echo>                                                                </echo>
       <echo> 3) Re-run this installation step                               </echo>
       <echo>                                                                </echo>              
@@ -174,7 +174,7 @@
       <echo>========== WARNING: no JDBC driver jar found  ================  </echo> 
       <echo>                                                                </echo>
       <echo> No JDBC driver found in the following location:                </echo>
-      <echo>   ${currentDbDir}/jdbc  </echo>
+      <echo>   ${currentDbJDBCDir}  </echo>
       <echo> Continuing execution. Make sure to add a JDBC driver to your   </echo>
       <echo> application server.                                            </echo>
       <echo>                                                                </echo>

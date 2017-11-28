@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: outputTabView.js 9604 2015-10-29 17:03:48Z tbidyuk $
+ * @version: $Id: outputTabView.js 9909 2016-02-25 19:56:31Z dgorbenk $
  */
 
 /* global outputRepository */
@@ -88,35 +88,13 @@ define(function (require) {
 		},
 
 		outputRepositoryButtonClick: function() {
-			var dfd = new $.Deferred(),
-				path = this.model.get("repositoryDestination").folderURI,
-				splittedPath = path.split("/"),
-				dialog = this.getFolderChooserDialog(),
-				foldersTree = dialog.foldersTree;
 
-
-			// if path looks like this -> /path/Samples/Reports, we need to cut Reports part to open
-			// only /path/Samples
-			var pathToOpen = splittedPath.splice(0, splittedPath.length - 1).join("/");
+			var dialog = this.getFolderChooserDialog();
 
 			dialog.open();
 
-			foldersTree.rootLevel.on("ready", function() {
-				dfd.done(function() {
-
-					foldersTree.select(path); // select /path/Samples/Reports
-
-					// scroll to item
-					var $tree = foldersTree.$el,
-						$scrollContainer = $tree.parent(),
-						selectedItem = foldersTree.getLevel(path).$el,
-						scrollTo = (selectedItem.offset().top - $tree.offset().top) - $scrollContainer.height() / 2;
-
-					$scrollContainer.scrollTop(scrollTo);
-				});
-
-				open.call(foldersTree, pathToOpen, dfd);
-			});
+			var $scrollContainer = dialog.foldersTree.$el.parent();
+			dialog.foldersTree._selectTreeNode(this.model.get("repositoryDestination").folderURI, $scrollContainer);
 		},
 
 		render: function() {
@@ -319,36 +297,4 @@ define(function (require) {
 			});
 		}
 	});
-
-	function open(path, dfd, index) {
-		var self = this,
-			splittedPath = path.split("/"),
-			level;
-
-		index = index || 0;
-
-		var pathFragment = splittedPath[index]
-			? path.match(new RegExp(".*" + "\\/" + splittedPath[index]))[0]
-			: "/";
-
-		level = this.getLevel(pathFragment);
-
-		// get out if it's the end of the path
-		if (index === splittedPath.length) {
-			return dfd.resolve(splittedPath);
-		}
-
-		if (level) { // if level exists open it and go ahead
-			if (level.collapsed) { // open if collapsed
-				level.once("ready", function() {
-					open.call(self, path, dfd, index + 1); // open next level
-				});
-
-				level.open();
-			} else {
-				open.call(this, path, dfd, index + 1);
-			}
-		}
-	}
-
 });

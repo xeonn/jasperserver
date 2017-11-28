@@ -76,7 +76,7 @@ import org.hibernate.criterion.MatchMode;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: HibernateReportJobsPersistenceService.java 58870 2015-10-27 22:30:55Z esytnik $
+ * @version $Id: HibernateReportJobsPersistenceService.java 61296 2016-02-25 21:53:37Z mchan $
  */
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 public class HibernateReportJobsPersistenceService extends HibernateDaoImpl
@@ -762,8 +762,7 @@ public class HibernateReportJobsPersistenceService extends HibernateDaoImpl
                 return (calendar1.compareTo(calendar2) == 0);
             }
             else if (model instanceof String) return  ((String) model).equalsIgnoreCase((String)value);
-            else model.equals(value);
-            return true;
+            else return model.equals(value);
         } catch (Exception ex) {
             return false;
         }

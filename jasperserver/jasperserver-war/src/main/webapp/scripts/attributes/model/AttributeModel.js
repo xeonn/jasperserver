@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: AttributeModel.js 9599 2015-10-27 19:38:56Z yplakosh $
+ * @version: $Id: AttributeModel.js 9909 2016-02-25 19:56:31Z dgorbenk $
  */
 
 define(function(require) {
@@ -227,12 +227,25 @@ define(function(require) {
         toJSON: function(options) {
             options = options || {};
 
-            var isValueNotChanged = this.getState().value === this.getState("confirmedState").value,
-                isSecure = this.get("secure"),
-                isNew = this.isNew() || this.isOverridden(),
-                attributes = Epoxy.Model.prototype.toJSON.apply(this, arguments);
+            var attributes = Epoxy.Model.prototype.toJSON.apply(this, arguments);
 
-            return (options.omitValue && !isNew && isValueNotChanged && isSecure && _.omit(attributes, "value")) || attributes;
+            return (options.omitValue && this.validateSecureValue() && _.omit(attributes, "value")) || attributes;
+        },
+
+        confirmState: function(confirm) {
+            this.stateConfirmed = confirm || true;
+        },
+
+        isStateConfirmed: function() {
+            return this.stateConfirmed;
+        },
+
+        validateSecureValue: function() {
+            var isEmptyValue = _.isEmpty(this.get("value")),
+                isSecure = this.get("secure"),
+                isNew = this.isNew() || this.isOverridden();
+
+            return !isNew && isSecure && isEmptyValue;
         }
     });
 

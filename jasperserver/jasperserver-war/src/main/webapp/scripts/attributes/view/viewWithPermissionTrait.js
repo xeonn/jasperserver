@@ -21,7 +21,7 @@
 
 /**
  * @author: Olesya Bobruyko
- * @version: $Id: viewWithPermissionTrait.js 8900 2015-05-06 20:57:14Z yplakosh $
+ * @version: $Id: viewWithPermissionTrait.js 9909 2016-02-25 19:56:31Z dgorbenk $
  */
 
 define(function(require) {
@@ -56,13 +56,11 @@ define(function(require) {
         },
 
         _onPermissionChange: function(model, value) {
-            var mask = maskMap[model.getPermission(value).mask],
-                confirmedState = model.getState("confirmedState"),
-                previousMask = maskMap[model.getPermission(confirmedState._embedded).mask];
+            var isPermissionLimited = this._isPermissionLimited(value);
 
             this._showPermissionConfirm(false);
 
-            if (this.modelChanged._embedded && (mask > previousMask)) {
+            if (this.modelChanged._embedded && isPermissionLimited) {
                 this.editMode ? this._showPermissionConfirm(true) : this._openPermissionConfirm();
             } else {
                 !this.editMode && model.setState("confirmedState");
@@ -71,6 +69,15 @@ define(function(require) {
 
         _showPermissionConfirm: function(value) {
             this.permissionConfirmShouldBeShown = value;
+        },
+
+        _isPermissionLimited: function(value) {
+            var model = this.model,
+                confirmedState = model.getState("confirmedState"),
+                mask = maskMap[model.getPermission(value).mask],
+                previousMask = maskMap[model.getPermission(confirmedState._embedded).mask];
+
+            return mask > previousMask;
         },
 
         _openPermissionConfirm: function(options) {

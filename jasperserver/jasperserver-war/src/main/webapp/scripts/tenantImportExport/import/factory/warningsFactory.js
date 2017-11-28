@@ -21,7 +21,7 @@
 
 /**
  * @author: Olesya Bobruyko
- * @version: $Id: warningsFactory.js 9421 2015-09-28 12:41:20Z obobruyk $
+ * @version: $Id: warningsFactory.js 9909 2016-02-25 19:56:31Z dgorbenk $
  */
 
 define(function(require) {
@@ -85,6 +85,20 @@ define(function(require) {
         {
             msg: i18n["import.reference.dependent.resource.not.found"],
             parameters: ["dependentResourceURI", "resourceURI"]
+        }
+    ];
+
+    errorCodeToMessageMap["import.resource.attached.not.exist.org"] = [
+        {
+            msg: i18n["import.resource.attached.not.exist.org"],
+            parameters: ["resourceURI"]
+        }
+    ];
+
+    errorCodeToMessageMap["import.folder.attached.not.exist.org"] = [
+        {
+            msg: i18n["import.folder.attached.not.exist.org"],
+            parameters: ["resourceURI"]
         }
     ];
 

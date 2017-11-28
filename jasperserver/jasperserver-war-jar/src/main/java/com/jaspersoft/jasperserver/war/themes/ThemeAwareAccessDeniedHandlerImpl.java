@@ -39,7 +39,12 @@ import java.io.IOException;
  * To make error page be able to use themes, this class injects ThemeResolver info into request
  *
  * User: asokolnikov
+ *
+ * @deprecated This class is not used any more but included to product for backward compatibility with customer's applicationContext-security.xml
+ * See http://bugzilla.jaspersoft.com/show_bug.cgi?id=32097 for details.
+ *
  */
+@Deprecated
 public class ThemeAwareAccessDeniedHandlerImpl extends AccessDeniedHandlerImpl {
 
     private ThemeResolver themeResolver;

@@ -32,6 +32,7 @@ import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -83,6 +84,15 @@ public class JdbcDriverServiceImplTest {
                 return null;
             }
         }).when(propertiesManagementService).setProperty(Matchers.anyString(), Matchers.anyString());
+
+        Mockito.doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocation) throws Throwable {
+                String key = (String) invocation.getArguments()[0];
+                propertiesManagementServiceProps.remove(key);
+                return null;
+            }
+        }).when(propertiesManagementService).remove(Matchers.anyString());
 
         //DriverManager mocks
         driversSet.clear();
@@ -149,11 +159,7 @@ public class JdbcDriverServiceImplTest {
         //Check expectations
         assertEquals(1, driversSet.size());
         assertEquals(TestJdbcDriver.class, driversSet.iterator().next().getClass());
-        assertEquals(1, propertiesManagementServiceProps.size());
-        assertEquals(String.format(JdbcDriverServiceImpl.SYSTEM_PROPERTIES_LIST_KEY_FORMAT, TEST_DRIVER_CLASS_NAME),
-                propertiesManagementServiceProps.keySet().iterator().next());
-        assertEquals(JdbcDriverServiceImpl.SYSTEM_CLASSLOADER_PATH,
-                propertiesManagementServiceProps.values().iterator().next());
+        assertEquals(0, propertiesManagementServiceProps.size());
     }
 
     /**
@@ -245,9 +251,8 @@ public class JdbcDriverServiceImplTest {
         assertEquals(1, driversSet.size());
         assertEquals(TestJdbcDriver.class, driversSet.iterator().next().getClass());
 
-        assertEquals(2, propertiesManagementServiceProps.size());
-        assertEquals(JdbcDriverServiceImpl.SYSTEM_CLASSLOADER_PATH,
-                propertiesManagementServiceProps.get(String.format(JdbcDriverServiceImpl.SYSTEM_PROPERTIES_LIST_KEY_FORMAT,
+        assertEquals(1, propertiesManagementServiceProps.size());
+        assertNull(propertiesManagementServiceProps.get(String.format(JdbcDriverServiceImpl.SYSTEM_PROPERTIES_LIST_KEY_FORMAT,
                         TEST_DRIVER_CLASS_NAME)));
         assertEquals("testjdbcdriver",
                 propertiesManagementServiceProps.get(String.format(JdbcDriverServiceImpl.SYSTEM_PROPERTIES_LIST_KEY_FORMAT,
@@ -279,10 +284,9 @@ public class JdbcDriverServiceImplTest {
         assertTrue(driver instanceof TestJdbcDriver);
         assertTrue(TestJdbcDriver.class.equals(driver.getClass()));
 
-        assertEquals(2, propertiesManagementServiceProps.size());
-        assertEquals(JdbcDriverServiceImpl.SYSTEM_CLASSLOADER_PATH,
-                propertiesManagementServiceProps.get(String.format(JdbcDriverServiceImpl.SYSTEM_PROPERTIES_LIST_KEY_FORMAT,
-                        TEST_DRIVER_CLASS_NAME)));
+        assertEquals(1, propertiesManagementServiceProps.size());
+        assertNull(propertiesManagementServiceProps.get(String.format(JdbcDriverServiceImpl.SYSTEM_PROPERTIES_LIST_KEY_FORMAT,
+                TEST_DRIVER_CLASS_NAME)));
         assertEquals("testjdbcdriver.jar",
                 propertiesManagementServiceProps.get(String.format(JdbcDriverServiceImpl.SYSTEM_PROPERTIES_LIST_KEY_FORMAT,
                         TEST_DRIVER_CLASS_NAME) + JdbcDriverServiceImpl.SYSTEM_PROPERTIES_PRESERVED_KEY_SUFFIX));
@@ -361,10 +365,7 @@ public class JdbcDriverServiceImplTest {
         //Check expectations
         assertEquals(1, driversSet.size());
         assertEquals(TestJdbcDriver.class, driversSet.iterator().next().getClass());
-        assertEquals(1, propertiesManagementServiceProps.size());
-        assertEquals(JdbcDriverServiceImpl.SYSTEM_CLASSLOADER_PATH,
-                propertiesManagementServiceProps.get(String.format(JdbcDriverServiceImpl.SYSTEM_PROPERTIES_LIST_KEY_FORMAT,
-                        TEST_DRIVER_CLASS_NAME)));
+        assertEquals(0, propertiesManagementServiceProps.size());
     }
 
     @Test
@@ -395,10 +396,7 @@ public class JdbcDriverServiceImplTest {
         //Check expectations
         assertEquals(1, driversSet.size());
         assertEquals(TestJdbcDriver.class, driversSet.iterator().next().getClass());
-        assertEquals(1, propertiesManagementServiceProps.size());
-        assertEquals(JdbcDriverServiceImpl.SYSTEM_CLASSLOADER_PATH,
-                propertiesManagementServiceProps.get(String.format(JdbcDriverServiceImpl.SYSTEM_PROPERTIES_LIST_KEY_FORMAT,
-                        TEST_DRIVER_CLASS_NAME)));
+        assertEquals(0, propertiesManagementServiceProps.size());
     }
 
     @Test
@@ -456,10 +454,9 @@ public class JdbcDriverServiceImplTest {
         assertEquals(1, driversSet.size());
         assertEquals(TestJdbcDriver.class, driversSet.iterator().next().getClass());
 
-        assertEquals(3, propertiesManagementServiceProps.size());
-        assertEquals(JdbcDriverServiceImpl.SYSTEM_CLASSLOADER_PATH,
-                propertiesManagementServiceProps.get(String.format(JdbcDriverServiceImpl.SYSTEM_PROPERTIES_LIST_KEY_FORMAT,
-                        TEST_DRIVER_CLASS_NAME)));
+        assertEquals(2, propertiesManagementServiceProps.size());
+        assertNull(propertiesManagementServiceProps.get(String.format(JdbcDriverServiceImpl.SYSTEM_PROPERTIES_LIST_KEY_FORMAT,
+                TEST_DRIVER_CLASS_NAME)));
         assertEquals("fakeurl",
                 propertiesManagementServiceProps.get(String.format(JdbcDriverServiceImpl.SYSTEM_PROPERTIES_LIST_KEY_FORMAT,
                         TEST_DRIVER_CLASS_NAME) + JdbcDriverServiceImpl.SYSTEM_PROPERTIES_PRESERVED_KEY_SUFFIX));
@@ -490,11 +487,10 @@ public class JdbcDriverServiceImplTest {
         Driver driver = driversSet.iterator().next();
         assertTrue(driver instanceof TestJdbcDriver);
 
-        assertEquals(2, propertiesManagementServiceProps.size());
+        assertEquals(1, propertiesManagementServiceProps.size());
 
-        assertEquals("[SYSTEM]",
-                propertiesManagementServiceProps.get(String.format(JdbcDriverServiceImpl.SYSTEM_PROPERTIES_LIST_KEY_FORMAT,
-                        TEST_DRIVER_CLASS_NAME)));
+        assertNull(propertiesManagementServiceProps.get(String.format(JdbcDriverServiceImpl.SYSTEM_PROPERTIES_LIST_KEY_FORMAT,
+                TEST_DRIVER_CLASS_NAME)));
     }
 
     @Test
@@ -508,9 +504,8 @@ public class JdbcDriverServiceImplTest {
         //Check expectations
         assertTrue(registered);
 
-        Mockito.verify(propertiesManagementService, Mockito.times(1)).setProperty(
-                Matchers.eq(String.format(JdbcDriverServiceImpl.SYSTEM_PROPERTIES_LIST_KEY_FORMAT, TEST_DRIVER_CLASS_NAME)),
-                Matchers.eq(JdbcDriverServiceImpl.SYSTEM_CLASSLOADER_PATH));
+        Mockito.verify(propertiesManagementService, Mockito.times(1)).getProperty(
+                Matchers.eq(String.format(JdbcDriverServiceImpl.SYSTEM_PROPERTIES_LIST_KEY_FORMAT, TEST_DRIVER_CLASS_NAME)));
     }
 
     @Test
@@ -605,7 +600,7 @@ public class JdbcDriverServiceImplTest {
         assertTrue(driverIterator.next() instanceof TestMultipleJarsJdbcDriver);
         assertTrue(driverIterator.next() instanceof JdbcDriverShim);
 
-        assertEquals(2, propertiesManagementServiceProps.size());
+        assertEquals(1, propertiesManagementServiceProps.size());
 
         Iterator<String> keySetIterator = propertiesManagementServiceProps.keySet().iterator();
         Iterator<String> valuesIterator = propertiesManagementServiceProps.values().iterator();
@@ -613,10 +608,6 @@ public class JdbcDriverServiceImplTest {
         assertEquals(String.format(f, TEST_DRIVER_CLASS_NAME),
                 keySetIterator.next());
         assertEquals("testjdbcdriver", valuesIterator.next());
-
-        assertEquals(String.format(f, TEST_MULTI_DRIVER_CLASS_NAME),
-                keySetIterator.next());
-        assertEquals("[SYSTEM]", valuesIterator.next());
     }
 
 /*    @Test

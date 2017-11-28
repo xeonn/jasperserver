@@ -13,6 +13,7 @@ import com.jaspersoft.jasperserver.api.metadata.common.domain.client.InputContro
 import com.jaspersoft.jasperserver.api.metadata.common.domain.client.ListOfValuesImpl;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.client.ListOfValuesItemImpl;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.client.QueryImpl;
+import com.jaspersoft.jasperserver.dto.reports.inputcontrols.InputControlOption;
 import net.sf.jasperreports.engine.JRParameter;
 import org.unitils.mock.Mock;
 import org.unitils.mock.MockUnitils;
@@ -492,4 +493,17 @@ public final class ParametersHelper {
         }
         return items;
     }
+
+    public static List<InputControlOption> listOfOptions(List<String> items, boolean isSelected) {
+        List<InputControlOption> options = new ArrayList<InputControlOption>();
+        for (String item : items) {
+            final InputControlOption option = new InputControlOption();
+            option.setLabel(item);
+            option.setValue(item);
+            option.setSelected(isSelected);
+            options.add(option);
+        }
+        return options;
+    }
+
 }

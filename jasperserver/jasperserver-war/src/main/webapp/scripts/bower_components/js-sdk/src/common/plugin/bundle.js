@@ -22,16 +22,19 @@
 
 /**
  * @author: Zakhar Tomchenko, Igor Nesterenko, Andrew Godovanec, Sergey Prilukin
- * @version: $Id: bundle.js 1605 2015-09-23 17:55:32Z inestere $
+ * @version: $Id: bundle.js 2296 2016-02-25 19:03:43Z dgorbenk $
  */
 
 define(function (require) {
     "use strict";
 
     var _ = require("underscore"),
-        requestSettings = require("requestSettings"),
+        requestSettings = _.cloneDeep(require("requestSettings")),
         request = require("request"),
         javaPropertiesParser = require("common/util/parse/javaProperties");
+
+    requestSettings.headers["Cache-Control"] = "private";
+    delete requestSettings.headers["Pragma"];
 
     return {
         load: function (name, req, onLoad, config) {

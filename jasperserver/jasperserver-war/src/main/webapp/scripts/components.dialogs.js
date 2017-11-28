@@ -22,7 +22,7 @@
 
 /**
  * @author: Yuriy Plakosh
- * @version: $Id: components.dialogs.js 9599 2015-10-27 19:38:56Z yplakosh $
+ * @version: $Id: components.dialogs.js 9909 2016-02-25 19:56:31Z dgorbenk $
  */
 
 /**
@@ -213,9 +213,9 @@ dialogs.popup = {
 
             if ('message' in options) {
                 // Update the displayed message in the dialog.
-                jQuery(elem).find('.body').text(options.message.unescapeHTML());                
+                jQuery(elem).find('.body').text(xssUtil.unescape(options.message));
             }
-            
+
             /*
              * Hack for all 4 sides drop shadow. Applying drop shadow effect directly on dialog.overlay element causes
              * cursor to be shifted out of inner input elements.
@@ -309,7 +309,7 @@ dialogs.popup = {
             // Restore keyboard focus to the element that had it prior to the
             // dialog.
             var jqPreDialogFocus=jQuery('.preDialogFocus');
-            if (jqPreDialogFocus.length>0){
+            if (jqPreDialogFocus.length && jqPreDialogFocus.is(":visible")){
                 jqPreDialogFocus[0].focus();
                 jqPreDialogFocus.removeClass('preDialogFocus');
             }

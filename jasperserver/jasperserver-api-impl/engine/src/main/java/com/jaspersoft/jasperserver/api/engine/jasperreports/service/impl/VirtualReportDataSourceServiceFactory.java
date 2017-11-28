@@ -37,7 +37,7 @@ import java.util.TimeZone;
 
 /**
  * @author Ivan Chan (ichan@jaspersoft.com)
- * @version $Id: VirtualReportDataSourceServiceFactory.java 50011 2014-10-09 16:57:26Z vzavadskii $
+ * @version $Id: VirtualReportDataSourceServiceFactory.java 60730 2016-02-09 19:02:32Z mchan $
  */
 public class VirtualReportDataSourceServiceFactory extends JdbcReportDataSourceServiceFactory {
 
@@ -91,8 +91,9 @@ public class VirtualReportDataSourceServiceFactory extends JdbcReportDataSourceS
     protected DataSource getPoolDataSource(String driverClass, String url, String username, String password) {
         PooledDataSource dataSource;
         // DO NOT use the JDBC data source pooling in JdbcReportDataSourceServiceFactory for JDBC sub data source
+        boolean isAutoCommit = (getAutoCommitUnsupportedDrivers().contains(driverClass) ? true : getDefaultAutoCommit());
         dataSource = getPooledJdbcDataSourceFactory().createPooledDataSource(
-                driverClass, url, username, password, getDefaultReadOnly(), getDefaultAutoCommit());
+                driverClass, url, username, password, getDefaultReadOnly(), isAutoCommit);
         return dataSource.getDataSource();
     }
 

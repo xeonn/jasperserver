@@ -98,8 +98,10 @@ define(function(require) {
             return this.selectedTenant;
         },
 
-        setTenant: function(tenant) {
-            this.selectedTenant = tenant;
+        setTenant: function(tenant, name, value) {
+            !name
+                ? (this.selectedTenant = tenant)
+                : (this.selectedTenant[name] = value);
         },
 
         selectTenant: function(tenantId) {
@@ -143,23 +145,25 @@ define(function(require) {
 
         _processItem: function(item, isNew, select) {
             var id = item.tenantId || item.id,
+                uri = item.tenantFolderUri || item.tenantUri,
+                label = item.tenantName,
                 value = {
                     id: id,
-                    label: item.tenantName,
-                    uri: item.tenantFolderUri,
-                    tenantUri: item.tenantFolderUri,
+                    label: label,
+                    uri: uri,
+                    tenantUri: uri,
                     parentId: item.parentId
                 };
 
             return isNew ? {
                 _node: true,
                 id: id,
-                label: item.tenantName,
+                label: label,
                 value: value
             } : {
                 id: item.tenantId,
                 addToSelection: select,
-                label: item.tenantName,
+                label: label,
                 value: value
             };
         },

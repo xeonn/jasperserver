@@ -247,10 +247,11 @@
     <bean id="exceptionTranslationFilter" class="org.springframework.security.web.access.ExceptionTranslationFilter">
         <constructor-arg ref="authenticationProcessingFilterEntryPoint"/>
         <property name="accessDeniedHandler">
-            <bean class="com.jaspersoft.jasperserver.war.themes.ThemeAwareAccessDeniedHandlerImpl">
+            <bean class="com.jaspersoft.jasperserver.war.JRSAccessDeniedHandlerImpl">
                 <property name="errorPage" value="/WEB-INF/jsp/modules/system/AccessDeniedPage.jsp"/>
                 <property name="themeResolver" ref="themeResolver"/>
                 <property name="themeSource" ref="themeSource"/>
+                <property name="localeResolver" ref="filterLocaleResolver"/>
             </bean>
         </property>
     </bean>

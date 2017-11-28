@@ -36,7 +36,7 @@
     <c:otherwise>
         <link rel="stylesheet" href="${pageContext.request.contextPath}/themes/reset.css" type="text/css" media="screen">
 
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/themeMinimalCss.css" type="text/css" media="screen,print"/>
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/<spring:theme code="themeMinimal.css"/>" type="text/css" media="screen,print"/>
 
         <!--[if IE 7.0]>
         <link rel="stylesheet" href="${pageContext.request.contextPath}/<spring:theme code="overrides_ie7.css"/>" type="text/css" media="screen"/>
@@ -50,7 +50,7 @@
         <link rel="stylesheet" href="${pageContext.request.contextPath}/<spring:theme code="overrides_ie.css"/>" type="text/css" media="screen"/>
         <![endif]-->
 
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/commonMinimalCss.css" type="text/css" media="screen,print"/>
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/<spring:theme code="commonMinimal.css"/>" type="text/css" media="screen,print"/>
 
         <link rel="stylesheet" href="${pageContext.request.contextPath}/<spring:theme code="panel.css"/>" type="text/css" media="screen,print"/>
         <link rel="stylesheet" href="${pageContext.request.contextPath}/<spring:theme code="menu.css"/>" type="text/css" media="screen,print"/>

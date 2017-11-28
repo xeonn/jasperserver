@@ -8,7 +8,7 @@
   <parent>
     <groupId>com.jaspersoft.jasperserver</groupId>
     <artifactId>server</artifactId>
-    <version>6.2.0</version>
+    <version>6.2.1</version>
   </parent>
   <description>JasperServer Core Utilities</description>
   <dependencies>

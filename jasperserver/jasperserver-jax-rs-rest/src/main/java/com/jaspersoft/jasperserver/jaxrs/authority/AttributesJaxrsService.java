@@ -20,6 +20,7 @@
 */
 package com.jaspersoft.jasperserver.jaxrs.authority;
 
+import com.jaspersoft.jasperserver.api.JSExceptionWrapper;
 import com.jaspersoft.jasperserver.api.metadata.user.service.AttributesSearchCriteria;
 import com.jaspersoft.jasperserver.api.metadata.user.service.AttributesSearchResult;
 import com.jaspersoft.jasperserver.dto.authority.ClientAttribute;
@@ -36,7 +37,14 @@ import com.jaspersoft.jasperserver.remote.services.AttributesService;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.ext.MessageBodyReader;
+import javax.ws.rs.ext.Providers;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -46,11 +54,12 @@ import java.util.regex.Pattern;
 
 /**
  * @author Volodya Sabadosh
- * @version $Id: AttributesJaxrsService.java 58870 2015-10-27 22:30:55Z esytnik $
+ * @version $Id: AttributesJaxrsService.java 61296 2016-02-25 21:53:37Z mchan $
  */
 @Component("attributesJaxrsService")
 public class AttributesJaxrsService {
     public static String HAL_FORMAT = "hal+";
+    public static String HAL_JSON_FORMAT = "hal+json";
     private Pattern empty = Pattern.compile("^\\s*$");
 
     @Resource
@@ -87,7 +96,7 @@ public class AttributesJaxrsService {
 
     public Response putAttributes(List<HypermediaAttribute> newCollection, RecipientIdentity recipientIdentity,
                                   Set<String> attrNames, HypermediaOptions hypermediaOptions, String mediaType) throws RemoteException {
-        if (!mediaType.contains(HAL_FORMAT)) {
+        if (!mediaType.contains(HAL_FORMAT) && newCollection != null) {
             for (HypermediaAttribute hypermediaAttribute : newCollection) {
                 hypermediaAttribute.setEmbedded(null);
                 }
@@ -140,13 +149,7 @@ public class AttributesJaxrsService {
     }
 
     public Response deleteAttribute(RecipientIdentity recipientIdentity, String attrName) throws RemoteException {
-        List<ClientAttribute> existingAttributes = attributesService.getAttributes(recipientIdentity,
-                Collections.singleton(attrName), false);
-        if (existingAttributes == null || existingAttributes.size() == 0) {
-            throw new ResourceNotFoundException(attrName);
-        } else {
-            attributesService.deleteAttributes(recipientIdentity,  Collections.singleton(attrName));
-        }
+        attributesService.deleteAttributes(recipientIdentity,  Collections.singleton(attrName));
 
         return Response.noContent().build();
     }
@@ -201,4 +204,36 @@ public class AttributesJaxrsService {
         return val == null || empty.matcher(val).matches();
     }
 
+    public static ClientAttribute parseEntity(InputStream entityStream, MediaType mediaType,
+                                              Providers providers, HttpHeaders httpHeaders) throws IllegalParameterValueException {
+        Annotation annotations[] = new Annotation[0];
+        Class clientTypeClass = ClientAttribute.class;
+
+        /*
+          TODO
+          Fix for bug 44605. For XML input type, if there is '_embedded' field in the input,
+          Jersey automatically creates a HypermediaAttribute instance,
+          because the ClientAttribute class has the @XmlSeeAlso({HypermediaAttribute.class}) annotation.
+          JSON MessageBodyReader does not "understand" the @XmlSeeAlso annotation,
+          so, for the hal+json format, we should implicitly set HypermediaAttribute.class.
+          If we set HypermediaAttribute.class to the 'readFrom' method,
+          it always does unmarshal to the ClientAttribute.class instance
+          regardless of what type we put to the method.
+         */
+        if (mediaType.toString().contains(HAL_JSON_FORMAT)) {
+            clientTypeClass = HypermediaAttribute.class;
+        }
+        MessageBodyReader reader =
+                providers.getMessageBodyReader(clientTypeClass, clientTypeClass, annotations, mediaType);
+        if (reader == null) {
+            throw new IllegalArgumentException("No available MessageBodyReader for class " +
+                    clientTypeClass.getName() + " and media type " + mediaType);
+        }
+        try {
+            return (ClientAttribute) reader.readFrom(clientTypeClass, clientTypeClass, annotations, mediaType, httpHeaders.getRequestHeaders(),
+                    entityStream);
+        } catch (IOException e) {
+            throw new JSExceptionWrapper(e);
+        }
+    }
 }

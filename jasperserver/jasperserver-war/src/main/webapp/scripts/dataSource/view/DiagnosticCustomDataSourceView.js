@@ -24,6 +24,7 @@ define(function(require) {
 
     var BaseDataSourceView = require("dataSource/view/BaseDataSourceView"),
         _ = require("underscore"),
+        i18n = require("bundle!all"),
 		CustomDataSourceModel = require("dataSource/model/CustomDataSourceModel"),
 		InternalDiagnosticTemplate = require("text!dataSource/template/InternalDiagnosticTemplate.htm");
 
@@ -42,7 +43,7 @@ define(function(require) {
         },
 
 		renderBlankBody: function() {
-			this.$el.append(_.template(InternalDiagnosticTemplate));
+			this.$el.append(_.template(InternalDiagnosticTemplate, {i18n: i18n}));
 		}
 	});
 });

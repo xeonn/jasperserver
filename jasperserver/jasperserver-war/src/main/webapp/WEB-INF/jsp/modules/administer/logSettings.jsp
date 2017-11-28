@@ -40,14 +40,14 @@
             <t:putAttribute name="containerTitle"><spring:message code="menu.log.Settings"/></t:putAttribute>
             <t:putAttribute name="bodyClass" value=""/>
             <t:putAttribute name="bodyContent">
-                <ul class="list setLeft tabular threeColumn">
+                <ul class="list setLeft js-logSettings tabular threeColumn">
                     <c:forEach var="logger" items="${loggers}" varStatus="n">
                         <li class="list">
                             <div class="wrap"><b class="icon" title=""></b>
                                 <p class="column one">${loggerDesc[logger.key]}</p>
-                                <p class="column two">${logger.key}</p>
+                                <p class="column two"><spring:message javaScriptEscape="true" text="${logger.key}"/></p>
                                 <p class="column three">
-                                    <select onchange="setLevel('${logger.key}', this.options[this.selectedIndex].value)">
+                                    <select>
                                         <c:forEach var="level" items="ERROR,WARN,INFO,DEBUG">
                                             <option value="${level}" <c:if test="${logger.value == level}">selected="selected"</c:if>>${level}</option>
                                         </c:forEach>
@@ -62,7 +62,7 @@
                             <p class="column one">&nbsp;</p>
                             <p class="column two"><input type="text" size="80" value="" id="newLoggerName" class="fnormal"/></p>
                             <p class="column three">
-                                <select onchange="setLevel(getElementById('newLoggerName').value, this.options[this.selectedIndex].value)">
+                                <select class="js-newLogger">
                                     <c:forEach var="level" items="ERROR,WARN,INFO,DEBUG">
                                         <option value="${level}">${level}</option>
                                     </c:forEach>

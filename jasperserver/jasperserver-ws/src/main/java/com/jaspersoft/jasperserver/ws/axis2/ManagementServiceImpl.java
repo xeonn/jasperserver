@@ -1271,7 +1271,7 @@ public class ManagementServiceImpl implements RepositoryServiceContext, BeanFact
                     					+ transformerKey);
                     		}
 
-                    		GenericElementReportTransformer.transformGenericElements(
+                    		GenericElementReportTransformer.transformGenericElements(jasperReportsContext,
                     				jasperPrint, transformerKey);
                     	}
 

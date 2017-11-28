@@ -49,7 +49,7 @@ import java.util.*;
 
 /**
  * @author Yaroslav.Kovalchyk
- * @version $Id: JobsServiceImpl.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: JobsServiceImpl.java 61296 2016-02-25 21:53:37Z mchan $
  */
 @Component("jobsService")
 public class JobsServiceImpl implements JobsService {
@@ -200,15 +200,14 @@ public class JobsServiceImpl implements JobsService {
                     break;
                 case daily: {
                     DailyCalendar dailyCalendar = (DailyCalendar) calendar;
-                    java.util.Calendar simpleCalendar = (dailyCalendar.getTimeZone() == null) ?
-                            java.util.Calendar.getInstance() :
-                            java.util.Calendar.getInstance(dailyCalendar.getTimeZone());
+                    dailyCalendar.setTimeZone(TimeZone.getTimeZone("GMT"));
+                    java.util.Calendar simpleCalendar = java.util.Calendar.getInstance(TimeZone.getTimeZone("GMT"));
                     simpleCalendar.setTime(new Date(dailyCalendar.getTimeRangeStartingTimeInMillis(simpleCalendar.getTimeInMillis())));
+                    simpleCalendar.setTimeZone(dailyCalendar.getTimeZone());
                     jobCalendar.setRangeStartingCalendar(simpleCalendar);
-                    simpleCalendar = (dailyCalendar.getTimeZone() == null) ?
-                            java.util.Calendar.getInstance() :
-                            java.util.Calendar.getInstance(dailyCalendar.getTimeZone());
+                    simpleCalendar = java.util.Calendar.getInstance(TimeZone.getTimeZone("GMT"));
                     simpleCalendar.setTime(new Date(dailyCalendar.getTimeRangeEndingTimeInMillis(simpleCalendar.getTimeInMillis())));
+                    simpleCalendar.setTimeZone(dailyCalendar.getTimeZone());
                     jobCalendar.setRangeEndingCalendar(simpleCalendar);
                     jobCalendar.setInvertTimeRange(dailyCalendar.getInvertTimeRange());
                 }

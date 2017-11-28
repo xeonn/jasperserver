@@ -107,10 +107,21 @@
         <filter-name>GlassFishFilter</filter-name>
         <filter-class>com.jaspersoft.jasperserver.war.GlassFishSessionFilter</filter-class>
     </filter-->
-    
+
     <filter>
         <filter-name>p3pFilter</filter-name>
         <filter-class>com.jaspersoft.jasperserver.war.P3PFilter</filter-class>
+    </filter>
+
+    <filter>
+        <filter-name>resourceHTTPHeadersFilter</filter-name>
+        <filter-class>
+            org.springframework.web.filter.DelegatingFilterProxy
+        </filter-class>
+        <init-param>
+            <param-name>targetFilterLifecycle</param-name>
+            <param-value>true</param-value>
+        </init-param>
     </filter>
 
     <filter>
@@ -164,7 +175,12 @@
       <url-pattern>/*</url-pattern>
   </filter-mapping>
 
-  <filter-mapping>
+    <filter-mapping>
+        <filter-name>resourceHTTPHeadersFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+    <filter-mapping>
       <filter-name>characterEncodingProxyFilter</filter-name>
       <url-pattern>/*</url-pattern>
   </filter-mapping>
@@ -235,31 +251,6 @@
     <filter-name>JPivotController</filter-name>
     <url-pattern>/olap/viewOlap.html</url-pattern>
   </filter-mapping>
-
-    <filter> <!--  -->
-        <filter-name>StaticFilesCacheControlFilter</filter-name>
-        <filter-class>com.jaspersoft.jasperserver.war.StaticFilesCacheControlFilter</filter-class>
-        <init-param>
-            <param-name>urlEndsWith</param-name>
-            <param-value>.js .htm</param-value>
-        </init-param>
-        <!--<init-param>-->
-            <!--<param-name>urlStartsWith</param-name>-->
-            <!--<param-value>/rest_v2/bundles</param-value>-->
-        <!--</init-param>-->
-        <init-param>
-            <param-name>excludePageFromCacheRegex</param-name>
-            <param-value>/index\.htm</param-value>
-        </init-param>
-        <init-param>
-            <param-name>expiresAfterAccessInSecs</param-name>
-            <param-value>86400</param-value>
-        </init-param>
-    </filter>
-    <filter-mapping>
-        <filter-name>StaticFilesCacheControlFilter</filter-name>
-        <url-pattern>/*</url-pattern>
-    </filter-mapping>
 
     <!-- dispatcher servlet for the application -->
     <servlet>
@@ -461,6 +452,10 @@
             <param-name>com.sun.jersey.config.property.WadlGeneratorConfig</param-name>
             <param-value>com.jaspersoft.jasperserver.jaxrs.wadl.JasperServerWadlGeneratorConfig</param-value>
         </init-param>
+        <init-param>
+            <param-name>com.sun.jersey.spi.container.ContainerResponseFilters</param-name>
+            <param-value>com.jaspersoft.jasperserver.jaxrs.common.JasperServerContainerResponseFilter</param-value>
+        </init-param>
         <!--Enable to log request/responces-->
         <!--<init-param>-->
             <!--<param-name>com.sun.jersey.spi.container.ContainerRequestFilters</param-name>-->
@@ -482,10 +477,6 @@
     <servlet>
         <servlet-name>AppThemeServlet</servlet-name>
         <servlet-class>com.jaspersoft.jasperserver.war.themes.ThemeResolverServlet</servlet-class>
-        <init-param>
-            <param-name>expiresAfterAccessInSecs</param-name>
-            <param-value>86400</param-value>
-        </init-param>
     </servlet>
     <servlet-mapping>
         <servlet-name>AppThemeServlet</servlet-name>

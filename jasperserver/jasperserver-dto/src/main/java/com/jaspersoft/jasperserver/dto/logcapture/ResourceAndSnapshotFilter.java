@@ -27,7 +27,7 @@ import javax.xml.bind.annotation.*;
 
 /**
  * @author Yakiv Tymoshenko
- * @version $Id: ResourceAndSnapshotFilter.java 56967 2015-08-20 23:20:53Z esytnik $
+ * @version $Id: ResourceAndSnapshotFilter.java 61296 2016-02-25 21:53:37Z mchan $
  * @since 10.02.2015
  */
 @XmlRootElement
@@ -53,13 +53,30 @@ public class ResourceAndSnapshotFilter {
                 && (includeDataSnapshots && resourceUri != null && resourceUri.length() > 0);
     }
 
+    public boolean exportDatasnapshotEnabled() {
+        return Boolean.TRUE.equals(includeDataSnapshots) && resourceUriSet();
+    }
+
+    public boolean resourceUriSet() {
+        if (resourceUri == null || resourceUri.trim().isEmpty()) {
+            return false;
+        }
+        return true;
+    }
+
+    public boolean resourceUriMatch(String otherUri) {
+        return resourceUriSet() && resourceUri.equals(otherUri);
+    }
+
+
     @XmlElement(name = "uri")
     public String getResourceUri() {
         return resourceUri;
     }
 
-    public void setResourceUri(String resourceUri) {
+    public ResourceAndSnapshotFilter setResourceUri(String resourceUri) {
         this.resourceUri = resourceUri;
+        return this;
     }
 
     @XmlElement(name = "includeDataSnapshot")
@@ -67,7 +84,36 @@ public class ResourceAndSnapshotFilter {
         return includeDataSnapshots;
     }
 
-    public void setIncludeDataSnapshots(Boolean includeDataSnapshots) {
+    public ResourceAndSnapshotFilter setIncludeDataSnapshots(Boolean includeDataSnapshots) {
         this.includeDataSnapshots = includeDataSnapshots;
+        return this;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ResourceAndSnapshotFilter)) return false;
+
+        ResourceAndSnapshotFilter that = (ResourceAndSnapshotFilter) o;
+
+        if (getResourceUri() != null ? !getResourceUri().equals(that.getResourceUri()) : that.getResourceUri() != null)
+            return false;
+        return !(getIncludeDataSnapshots() != null ? !getIncludeDataSnapshots().equals(that.getIncludeDataSnapshots()) : that.getIncludeDataSnapshots() != null);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = getResourceUri() != null ? getResourceUri().hashCode() : 0;
+        result = 31 * result + (getIncludeDataSnapshots() != null ? getIncludeDataSnapshots().hashCode() : 0);
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "ResourceAndSnapshotFilter{" +
+                "resourceUri='" + resourceUri + '\'' +
+                ", includeDataSnapshots=" + includeDataSnapshots +
+                '}';
     }
 }

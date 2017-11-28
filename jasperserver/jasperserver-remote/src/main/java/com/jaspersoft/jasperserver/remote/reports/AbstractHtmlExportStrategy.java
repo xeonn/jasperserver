@@ -66,7 +66,7 @@ import java.util.Map;
  * <p></p>
  *
  * @author yaroslav.kovalchyk
- * @version $Id: AbstractHtmlExportStrategy.java 57603 2015-09-15 17:20:48Z psavushc $
+ * @version $Id: AbstractHtmlExportStrategy.java 61296 2016-02-25 21:53:37Z mchan $
  */
 public abstract class AbstractHtmlExportStrategy implements HtmlExportStrategy {
     private final static Log log = LogFactory.getLog(FullHtmlExportStrategy.class);
@@ -132,11 +132,10 @@ public abstract class AbstractHtmlExportStrategy implements HtmlExportStrategy {
             		|| JRAbstractExporter.EXCEPTION_MESSAGE_KEY_END_PAGE_INDEX_OUT_OF_RANGE.equals(e.getMessageKey())) {
                 final String pagesString = pages.toString();
                 throw new RemoteException(new ErrorDescriptor().setMessage(
-                        "Page out of range. Requested: "
-                                + pagesString + (reportExecution.getTotalPages() != null
-                                ? " Total pages: " + reportExecution.getTotalPages() : ""))
-                        .setErrorCode("export.pages.out.of.range")
-                        .setParameters(pagesString, reportExecution.getTotalPages()));
+                        "Page number out of range : " + pagesString + " of "
+                        + (reportExecution.getTotalPages() != null ? " Total pages: " + reportExecution.getTotalPages() : "")
+                        + " (while exporting the report)").setErrorCode("page.number.out.of.range")
+                        .setParameters(pages, "" + reportExecution.getTotalPages()));
             } else {
                 throw new RemoteException(e, secureExceptionHandler);
             }

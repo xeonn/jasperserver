@@ -46,6 +46,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -54,7 +55,7 @@ import java.util.Set;
 
 /**
  * @author Volodya Sabadosh
- * @version $Id: AttributesServiceImpl.java 58870 2015-10-27 22:30:55Z esytnik $
+ * @version $Id: AttributesServiceImpl.java 61296 2016-02-25 21:53:37Z mchan $
  */
 @Component("attributesService")
 public class AttributesServiceImpl implements AttributesService {
@@ -143,13 +144,9 @@ public class AttributesServiceImpl implements AttributesService {
         List<ProfileAttribute> attributesToDelete = new ArrayList<ProfileAttribute>();
         List<ClientAttribute> attributesToPut;
 
-        Set<String> newAttributesNamesSet = new HashSet<String>();
+        Set<String> newAttributesNamesSet = createUniqueNamesSet(attributes);
 
         if (attributes != null) {
-            for (ClientAttribute attribute : attributes) {
-                newAttributesNamesSet.add(attribute.getName());
-            }
-
             attributesToPut = new LinkedList<ClientAttribute>(attributes);
         } else {
             attributesToPut = new LinkedList<ClientAttribute>();
@@ -282,4 +279,34 @@ public class AttributesServiceImpl implements AttributesService {
         return repositoryPermissions;
     }
 
+    /**
+     * @throws com.jaspersoft.jasperserver.remote.exception.RemoteException
+     * if the list contains duplicate names
+     */
+    protected Set<String> createUniqueNamesSet(List<? extends ClientAttribute> attributes) {
+        Set<String> names = new HashSet<String>();
+
+        if (attributes != null) {
+            Set<String> duplicates = new HashSet<String>();
+            for (ClientAttribute attribute : attributes) {
+                if (attribute != null && attribute.getName() != null) {
+                    if (names.contains(attribute.getName())) {
+                        duplicates.add(attribute.getName());
+                    } else {
+                        names.add(attribute.getName());
+                    }
+                }
+            }
+            if (!duplicates.isEmpty()) {
+                String[] duplicateNames = duplicates.toArray(new String[duplicates.size()]);
+                Arrays.sort(duplicateNames);
+                throw new RemoteException(new ErrorDescriptor()
+                        .setErrorCode("collection.has.duplicates")
+                        .setMessage("Collection of attributes contains duplicated names")
+                        .setParameters(duplicateNames));
+            }
+        }
+
+        return names;
+    }
 }

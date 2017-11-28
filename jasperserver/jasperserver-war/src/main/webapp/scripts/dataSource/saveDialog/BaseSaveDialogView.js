@@ -22,22 +22,24 @@
 
 /**
  * @author: Dima Gorbenko
- * @version: $Id: BaseSaveDialogView.js 9614 2015-11-09 16:51:06Z dgorbenk $
+ * @version: $Id: BaseSaveDialogView.js 9909 2016-02-25 19:56:31Z dgorbenk $
  */
 
-/* global dialogs, dynamicTree */
+/* global dialogs */
 
 define(function (require){
 
     "use strict";
 
-    var _ = require('underscore'),
+    var $ = require("jquery"),
+        _ = require('underscore'),
         i18n = require('bundle!all'),
 	    browserDetection = require("common/util/browserDetection"),
         ResourceModel = require("bi/repo/model/RepositoryResourceModel"),
         DialogWithModelInputValidation = require("common/component/dialog/DialogWithModelInputValidation"),
 		jrsConfigs = require('jrs.configs'),
-
+		treeFactory = require("bi/repo/dialog/RepositoryChooserDialog/RepositoryFolderTreeFactory"),
+		tooltipTemplate = require("text!bi/repo/dialog/RepositoryChooserDialog/template/repositoryFolderChooserDialogTooltipTemplate.htm"),
 		baseSaveDialogTemplate = require('text!dataSource/saveDialog/template/baseSaveDialogTemplate.htm');
 
     return DialogWithModelInputValidation.extend({
@@ -95,7 +97,7 @@ define(function (require){
             if (_.isUndefined(this.preSelectedFolder) || !this.preSelectedFolder) {
                 this.preSelectedFolder = "/";
             }
-            if(!options.skipLocation){
+            if (!options.skipLocation){
                 this.initializeTree();
             }
 
@@ -167,62 +169,28 @@ define(function (require){
 
         initializeTree: function () {
 
-            // prepare special ID to use old tree
-            var self = this, treeId = _.uniqueId("baseSaveDialogTree");
-            this.$contentContainer.find(".control.groupBox .folders").attr("id", treeId);
+			this.foldersTree = treeFactory({
+				contextPath: jrsConfigs.contextPath,
+				tooltipContentTemplate: tooltipTemplate
+			});
 
-            var saveAsTree = this.getSaveAsTree(treeId);
-            saveAsTree.observe("node:selected", function (event) {
-                self.model.set("parentFolderUri", event.memo.node.param.uri);
-            });
-            saveAsTree.showTreePrefetchNodes(this.preSelectedFolder, function() {
-                saveAsTree.openAndSelectNode(self.preSelectedFolder);
-            });
-        },
+			this.listenTo(this.foldersTree, "selection:change", function(selection){
+				var parentFolderUri;
 
-        getSaveAsTree: function(treeId) {
+				if (selection && _.isArray(selection) && selection[0] && selection[0].uri) {
+					parentFolderUri = selection[0].uri;
+				}
+				if (!parentFolderUri) {
+					return;
+				}
 
-            var options = this.options,
-                saveAsTree,
-                providerId = "repositoryExplorerTreeFoldersProvider",
-                flowId = "treeFlow";
+				this.model.set("parentFolderUri", parentFolderUri);
+			});
 
-            if (jrsConfigs.isProVersion) {
-                providerId = "adhocRepositoryTreeFoldersProvider";
-                flowId = "adhocTreeFlow";
-            }
-            saveAsTree = dynamicTree.createRepositoryTree(treeId, {
-                providerId: providerId,
-                organizationId: options.organizationName ? options.organizationName : jrsConfigs.organizationName ? jrsConfigs.organizationName : "Organization",
-                rootUri: '/',
-                urlGetNode: 'flow.html?_flowId=' + flowId + '&method=getNode',
-                urlGetChildren: 'flow.html?_flowId=' + flowId + '&method=getChildren',
-                treeErrorHandlerFn: function () {}
-            });
+			this.$el.find(".treeBox .folders").append(this.foldersTree.render().el);
 
-
-            var superModifyRootObject = saveAsTree.modifyRootObject;
-            var setReadOnly = saveAsTree.modifyRootObject = function(rootObj, isChildrenCallback, parentNode, skipSuper){
-                var children = isChildrenCallback ? rootObj : rootObj.children;
-                for (var i = 0, l = children.length; i<l; i++){
-                    if (!children[i].extra.isWritable) {
-                        children[i].cssClass = "readonly";
-                    }
-                    children[i].children && setReadOnly(children[i], false, children[i], true);
-                }
-
-                if (isChildrenCallback){
-                    rootObj = children;
-                } else {
-                    rootObj.children = children;
-                }
-
-                if (!skipSuper){
-                    return superModifyRootObject.call(this, rootObj, isChildrenCallback, parentNode);
-                }
-            };
-
-            return saveAsTree;
+	        var $scrollContainer = this.foldersTree.$el.parent().parent().parent();
+	        this.foldersTree._selectTreeNode(this.preSelectedFolder, $scrollContainer);
         },
 
 		startSaveDialog: function() {
@@ -414,5 +382,4 @@ define(function (require){
 			}
         }
     });
-
 });

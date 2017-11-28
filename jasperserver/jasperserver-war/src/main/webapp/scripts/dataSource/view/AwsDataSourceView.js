@@ -208,6 +208,9 @@ define(function(require) {
                 if (ajaxAgent.responseText.indexOf("AWS Access Key is invalid") !== -1) {
 	                error = i18n["error.aws.key.is.invalid"];
                 }
+                if (ajaxAgent.responseText.indexOf("AWS Secret Key is invalid") !== -1) {
+                    error = i18n["error.aws.secret.key.is.invalid"];
+                }
                 if (ajaxAgent.responseText.indexOf("The security token included in the request is invalid") !== -1) {
 	                error = i18n["error.security.token.is.invalid"];
                 }

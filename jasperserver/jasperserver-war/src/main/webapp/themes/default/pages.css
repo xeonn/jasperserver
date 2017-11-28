@@ -163,7 +163,7 @@
 	border-right: 1px solid #e3e3e3;
 	display: block;
 	left: 0;
-	min-width: 200px;
+	min-width: 199px;
 	right: auto;
 	width: 200px;
 }
@@ -173,7 +173,7 @@
 .row.threeColumn>.tertiary.column {
 	border-left: 1px solid #e3e3e3;
 	display: block;
-	left: auto;	
+	left: auto;
 	min-width: 200px;
 	right: 0;
 	width: 200px;
@@ -243,7 +243,7 @@ ROW LAYOUTS Row elements can be used to create parent context's for columns for 
 
 .column .body.twoPanes {
 	overflow: hidden;
-} 
+}
 
 .twoPanes .panel.pane {
 	margin-bottom: 0;
@@ -294,7 +294,7 @@ ROW LAYOUTS Row elements can be used to create parent context's for columns for 
 
 .column .body.threeRow {
 	overflow: hidden;
-} 
+}
 
 .threeRow .pane {
 	position: absolute;
@@ -319,9 +319,9 @@ ROW LAYOUTS Row elements can be used to create parent context's for columns for 
 /*
  * From: flow.css
  */
- 
-/* .flow 
-NOTE: .flow layout classes are used by .wizards as well 
+
+/* .flow
+NOTE: .flow layout classes are used by .wizards as well
 */
 
 .body.flow {
@@ -354,9 +354,9 @@ NOTE: .flow layout classes are used by .wizards as well
 	float: none;
 	*margin-right: 4px; /* IE7 */
 	zoom:1; /* IE */
-	
+
     /* font-weight: bold; */  /* DELETE IF NO PROBLEMS */
-} 
+}
 
 .flow #stepDisplay {
 	display: inline-block;
@@ -425,11 +425,11 @@ flow #flowControls .tabSet {
 
 
 .flow .inputs > .column {
-	margin-left: 10px;	
+	margin-left: 10px;
 }
 
 .flow .inputs > .column.decorated {
-	margin-top: 5px;	
+	margin-top: 5px;
 }
 
 .flow .twoColumn_equal > .column > .sizer,

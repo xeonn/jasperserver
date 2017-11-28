@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: mng.main.js 9665 2015-11-23 14:57:00Z dgorbenk $
+ * @version: $Id: mng.main.js 9909 2016-02-25 19:56:31Z dgorbenk $
  */
 
 /* global orgModule, isProVersion, alert, _  */
@@ -133,7 +133,8 @@ orgModule.manager = {
             var entityEvent = event.memo.entityEvent,
                 isCtrlHeld = event.memo.isCtrlHeld,
                 cancelIfEdit = event.memo.cancelIfEdit,
-                entities = orgModule.entityList.getSelectedEntities();
+                entities = orgModule.entityList.getSelectedEntities(),
+                refreshAttributes = event.memo.refreshAttributes;
 
             if (entities.length > 1) {
                 orgModule.properties.hide();
@@ -153,6 +154,7 @@ orgModule.manager = {
                 }
 
                 entityName && invokeServerAction(orgModule.ActionMap.SELECT_AND_GET_DETAILS, {
+                    refreshAttributes: refreshAttributes,
                     entity: entityName
                 });
             }
@@ -174,12 +176,13 @@ orgModule.manager = {
 
         orgModule.observe("entity:detailsLoaded", function(event) {
             var entity = this.entityJsonToObject(event.memo.responseData),
-                properties = orgModule.properties;
+                properties = orgModule.properties,
+                refreshAttributes = event.memo.inputData.refreshAttributes;
 
             orgModule.entityList.update(entity.getNameWithTenant(), entity);
 
             properties.setDetailsLoadedEntity(entity);
-            properties.show(entity);
+            properties.show(entity, refreshAttributes);
             !properties.locked && properties.setProperties(entity);
 
             orgModule.entityList.toolbar.refresh();

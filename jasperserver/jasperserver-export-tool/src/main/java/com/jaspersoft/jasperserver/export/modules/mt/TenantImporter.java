@@ -29,6 +29,7 @@ import com.jaspersoft.jasperserver.export.modules.BaseImporterModule;
 import com.jaspersoft.jasperserver.export.modules.ImporterModuleContext;
 import com.jaspersoft.jasperserver.export.modules.common.ProfileAttributeBean;
 import com.jaspersoft.jasperserver.export.modules.mt.beans.TenantBean;
+import com.jaspersoft.jasperserver.export.modules.repository.ResourceModuleConfiguration;
 import com.jaspersoft.jasperserver.export.service.ImportExportService;
 import com.jaspersoft.jasperserver.export.service.impl.ImportExportServiceImpl;
 import org.apache.commons.lang3.StringUtils;
@@ -49,6 +50,7 @@ public class TenantImporter extends BaseImporterModule
 	protected static final Log log = LogFactory.getLog(TenantImporter.class);
 	
 	private TenantModuleConfiguration moduleConfiguration;
+    protected ResourceModuleConfiguration resourceModuleConfiguration;
     private String updateArg;
     private String includeServerSettings;
     private TenantService tenantServiceUnsecured;
@@ -111,7 +113,8 @@ public class TenantImporter extends BaseImporterModule
         return existingTenant;
     }
 
-    protected void process(String tenantId) {
+    protected Tenant process(String tenantId) {
+        Tenant result = null;
         Tenant existingTenant = defineExistingTenant(tenantId);
 
         if (existingTenant != null) {
@@ -119,6 +122,7 @@ public class TenantImporter extends BaseImporterModule
                 TenantBean tenantBean = getTenantBean(tenantId);
 
                 updateTenant(existingTenant, tenantBean);
+                result = existingTenant;
             } else {
                 commandOut.info("Tenant " + tenantId + " already exists, skipping");
             }
@@ -143,13 +147,15 @@ public class TenantImporter extends BaseImporterModule
 
                 TenantBean tenantBean = getTenantBean(tenantId);
 
-                createTenant(tenantBean);
+                result = createTenant(tenantBean);
                 commandOut.info("Imported tenant " + tenantId);
             } else {
                 commandOut.warn("This feature is unavailable under the current license. " +
                         "Please contact support at Jaspersoft.com for help.");
             }
         }
+
+        return result;
     }
 
     protected String getTenantFileName(String tenantId) {
@@ -171,10 +177,19 @@ public class TenantImporter extends BaseImporterModule
         if (tenant.getTheme() == null) {
             tenant.setTheme(getModuleConfiguration().getTenantExportConfiguration().getDefaultThemeName());
         }
-        getTenantService().putTenant(executionContext, tenant);
-        saveProfileAttributes(moduleConfiguration.getAttributeService(), tenant, tenantBean.getAttributes());
+        if (putCreatingTenant(tenant, tenantBean)) {
+            saveProfileAttributes(moduleConfiguration.getAttributeService(), tenant, tenantBean.getAttributes());
+        } else {
+            commandOut.warn("TenantImporter.createTenant: " +
+                    "Profile attributes were skipped for not created tenant " + tenant.getId());
+        }
 
         return tenant;
+    }
+
+    protected boolean putCreatingTenant(Tenant tenant, TenantBean tenantBean) {
+        getTenantService().putTenant(executionContext, tenant);
+        return true;
     }
 
     private void updateTenant(Tenant existing, TenantBean newTenant) {
@@ -211,6 +226,10 @@ public class TenantImporter extends BaseImporterModule
 
     public TenantModuleConfiguration getModuleConfiguration() {
         return moduleConfiguration;
+    }
+
+    public void setResourceModuleConfiguration(ResourceModuleConfiguration resourceModuleConfiguration) {
+        this.resourceModuleConfiguration = resourceModuleConfiguration;
     }
 
     public void setModuleConfiguration(TenantModuleConfiguration moduleConfiguration) {

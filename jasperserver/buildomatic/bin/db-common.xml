@@ -645,7 +645,7 @@
         <echo message="Jars loaded from property foodJarsDir: ${foodJarsDir}"/>
         <echo message="foodMartData: ${foodMartData}"/>
         <echo message="jdbcJar: ${jdbcJar}" />
-        <echo message="Using jdbc Jar: ${currentDbDir}/jdbc/${jdbcJar}" />
+        <echo message="Using jdbc Jar: ${currentDbJDBCDir}/${jdbcJar}" />
         <echo message=" "/>
 
         <java classname="com.jaspersoft.buildomatic.loader.MondrianFoodMartLoader" failonerror="true" fork="true" inputstring="">
@@ -661,7 +661,7 @@
 
             <classpath>
                 <fileset dir="${basedir}/target" includes="*.jar"/>
-                <fileset dir="${currentDbDir}/jdbc" includes="${jdbcJar}"/>
+                <fileset dir="${currentDbJDBCDir}" includes="${jdbcJar}"/>
                 <fileset dir="${foodJarsDir}" includes="*.jar"/>
             </classpath>
          </java>

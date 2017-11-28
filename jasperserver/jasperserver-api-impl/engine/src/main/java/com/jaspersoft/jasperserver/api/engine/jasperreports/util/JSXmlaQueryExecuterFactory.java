@@ -32,14 +32,14 @@ import net.sf.jasperreports.olap.xmla.JRXmlaQueryExecuterFactory;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: JSXmlaQueryExecuterFactory.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: JSXmlaQueryExecuterFactory.java 61296 2016-02-25 21:53:37Z mchan $
  */
 public class JSXmlaQueryExecuterFactory extends JRXmlaQueryExecuterFactory {
 
 	@Override
 	public JRQueryExecuter createQueryExecuter(JasperReportsContext jasperReportsContext, JRDataset dataset, Map<String, ? extends JRValueParameter> parameters)
 			throws JRException {
-		return new JSXmlaQueryExecuter(dataset, parameters);
+		return new JSXmlaQueryExecuter(jasperReportsContext, dataset, parameters);
 	}
 
 }

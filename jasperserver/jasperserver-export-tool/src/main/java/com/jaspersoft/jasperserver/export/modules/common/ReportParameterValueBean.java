@@ -21,18 +21,18 @@
 
 package com.jaspersoft.jasperserver.export.modules.common;
 
+import com.jaspersoft.jasperserver.api.JSExceptionWrapper;
+import org.exolab.castor.types.AnyNode;
+import org.exolab.castor.types.DateTime;
+
+import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import org.exolab.castor.types.AnyNode;
-import org.exolab.castor.types.DateTime;
-
-import com.jaspersoft.jasperserver.api.JSExceptionWrapper;
-
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ReportParameterValueBean.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: ReportParameterValueBean.java 61296 2016-02-25 21:53:37Z mchan $
  */
 public class ReportParameterValueBean {
 
@@ -75,6 +75,16 @@ public class ReportParameterValueBean {
 								DateTime dateTime = new DateTime(strValue);
 								values[i] = dateTime.toDate();
 							} catch (ParseException e) {
+								throw new JSExceptionWrapper(e);
+							}
+						}
+					} else if ("sql-time".equals(type)) {
+						String strValue = node.getStringValue();
+						if (strValue != null) {
+							try {
+								Time time = Time.valueOf(strValue);
+								values[i] = time;
+							} catch (IllegalArgumentException e) {
 								throw new JSExceptionWrapper(e);
 							}
 						}

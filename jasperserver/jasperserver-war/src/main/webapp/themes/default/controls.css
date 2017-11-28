@@ -233,7 +233,7 @@ fieldset .sectionHeader {
 .textArea,
 .picker input,
 .browser {
-	width: 100%;	/* NEW */
+	width:100%;/* NEW */
 	/* width: 97% \9;	IE8 */
 }
 

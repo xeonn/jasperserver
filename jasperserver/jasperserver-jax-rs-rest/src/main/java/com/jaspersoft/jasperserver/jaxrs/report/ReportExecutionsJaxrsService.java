@@ -42,6 +42,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -81,6 +82,19 @@ public class ReportExecutionsJaxrsService extends RemoteServiceWrapper<RunReport
             @Override
             public Response call(RunReportService remoteService) throws RemoteException {
                 return Response.ok(remoteService.getReportExecution(executionId)).build();
+            }
+        });
+    }
+
+    @DELETE
+    @Path("/{executionId}")
+    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    public Response deleteReportExecution(@PathParam("executionId") final String executionId) {
+        return callRemoteService(new ConcreteCaller<Response>() {
+            @Override
+            public Response call(RunReportService remoteService) throws RemoteException {
+                remoteService.deleteReportExecution(executionId);
+                return Response.status(Response.Status.NO_CONTENT).build();
             }
         });
     }

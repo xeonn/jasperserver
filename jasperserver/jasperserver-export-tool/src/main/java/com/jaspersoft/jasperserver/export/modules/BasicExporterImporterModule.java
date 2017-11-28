@@ -24,6 +24,7 @@ import com.jaspersoft.jasperserver.api.JSException;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.Role;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
 import com.jaspersoft.jasperserver.api.metadata.user.service.ObjectPermissionService;
+import com.jaspersoft.jasperserver.api.metadata.user.service.impl.AclPermissionsSecurityChecker;
 import com.jaspersoft.jasperserver.export.modules.repository.beans.PermissionRecipient;
 
 /**
@@ -36,7 +37,15 @@ public abstract class BasicExporterImporterModule {
     protected String permissionRecipientUser;
 
     protected ObjectPermissionService permissionService;
+    protected AclPermissionsSecurityChecker aclSecurityChecker;
 
+    public AclPermissionsSecurityChecker getAclSecurityChecker() {
+        return aclSecurityChecker;
+    }
+
+    public void setAclSecurityChecker(AclPermissionsSecurityChecker aclSecurityChecker) {
+        this.aclSecurityChecker = aclSecurityChecker;
+    }
 
     public String getPermissionRecipientRole() {
         return permissionRecipientRole;

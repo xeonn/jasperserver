@@ -21,7 +21,7 @@
 
 /**
  * @author: Olesya Bobruyko
- * @version: $Id: designerInheritedTrait.js 9218 2015-08-20 19:56:16Z yplakosh $
+ * @version: $Id: designerInheritedTrait.js 9909 2016-02-25 19:56:31Z dgorbenk $
  */
 
 define(function(require) {
@@ -45,7 +45,7 @@ define(function(require) {
 
         _revertInheritedRemoval: function(name) {
             if (!this._findInheriteds(name)) {
-                var inheritedModel = this._findOriginallyInheritedModelByName(this.changedModels, name);
+                var inheritedModel = this._findOriginallyInheritedModelByName(_.union(this.changedModels, this.overriddenInheritedModels), name);
                 inheritedModel && this.revertViewRemoval(inheritedModel);
             }
         },
@@ -55,8 +55,10 @@ define(function(require) {
 
             return this.collection.search(models)
                 .done(function(data) {
-                    self._filterInheritedViews(data);
-                    self.collection.addItemsToCollection(self.filteredInheriteds);
+                    if (data) {
+                        self._filterInheritedViews(data);
+                        self.collection.addItemsToCollection(self.filteredInheriteds);
+                    }
                 });
         },
 

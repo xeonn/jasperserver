@@ -68,12 +68,11 @@ import java.util.Set;
  * Implementation of {@link RepositorySearchService}.
  *
  * @author Yuriy Plakosh
- * @version $Id: RepositorySearchServiceImpl.java 55164 2015-05-06 20:54:37Z mchan $
+ * @version $Id: RepositorySearchServiceImpl.java 61510 2016-03-03 09:36:22Z ykovalch $
  */
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 public class RepositorySearchServiceImpl implements RepositorySearchService, Diagnostic {
     private static final Log log = LogFactory.getLog(RepositorySearchServiceImpl.class);
-    public static final String PARAM_SORT_BY_POPULARITY = "popularity";
 
     protected RepositoryService repositoryService;
     private ResourceService resourceService;

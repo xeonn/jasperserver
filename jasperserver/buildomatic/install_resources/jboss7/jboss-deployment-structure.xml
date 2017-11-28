@@ -23,6 +23,15 @@
     <!-- This corresponds to the top level deployment. For a war this is the war's module, for an ear -->
     <!-- This is the top level ear module, which contains all the classes in the EAR's lib folder     -->
     <deployment>
+
+        <!-- http://bugzilla.jaspersoft.com/show_bug.cgi?id=44406
+                2016-08-01 sblazhyi
+                        Exclude the jboss resteasy as we use jersey
+        -->
+        <exclude-subsystems>
+            <subsystem name="resteasy"/>
+        </exclude-subsystems>
+
         <!-- Exclusions allow you to prevent the server from automatically adding some dependencies
               [dlitvak issue 26714]
               Reference:  https://community.jboss.org/thread/195902  -->
@@ -74,6 +83,28 @@
             <module name="javax.faces.api"/>
             <module name="javax.servlet.jstl.api"/>
             <module name="javax.xml.bind.api"/>
+
+            <!-- http://bugzilla.jaspersoft.com/show_bug.cgi?id=44406
+                    2016-08-01 sblazhyi
+                            Exclude the jboss ws packages & its dependants
+            -->
+            <module name="javaee.api"/>
+            <module name="org.jboss.resteasy.async-http-servlet-30"/>
+            <module name="org.jboss.resteasy.resteasy-validator-provider-11"/>
+            <module name="org.jboss.ws.api"/>
+            <module name="org.jboss.ws.spi"/>
+            <module name="org.jboss.as.jaxrs"/>
+            <module name="org.jboss.resteasy.jackson-provider"/>
+            <module name="org.jboss.resteasy.resteasy-hibernatevalidator-provider"/>
+            <module name="org.codehaus.jackson.jackson-core-asl"/>
+            <module name="org.codehaus.jackson.jackson-jaxrs"/>
+            <module name="org.codehaus.jackson.jackson-mapper-asl"/>
+            <module name="org.codehaus.jackson.jackson-xc"/>
+            <module name="org.codehaus.jettison"/>
+            <module name="javax.ws.rs.api"/>
+
+            <!--  http://bugzilla.jaspersoft.com/show_bug.cgi?id=44994 -->
+            <module name="javax.annotation"/>
         </exclusions>
 
 
@@ -145,6 +176,9 @@
             <system>
                 <paths>
                     <path name="com/sun/management"/>
+
+                    <!--  http://bugzilla.jaspersoft.com/show_bug.cgi?id=44994 -->
+                    <path name="javax/annotation"/>
                 </paths>
             </system>
         </dependencies>
@@ -224,6 +258,7 @@
             <resource-root path="WEB-INF/lib/commons-logging-1.1.1.jar" use-physical-code-source="true"/>
             <resource-root path="WEB-INF/lib/commons-logging-api-1.1.jar" use-physical-code-source="true"/>
 
+            <resource-root path="WEB-INF/lib/jsr311-api-1.1.jar" use-physical-code-source="true"/>
         </resources>
     </deployment>
 

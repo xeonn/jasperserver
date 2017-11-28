@@ -4,7 +4,7 @@
     <groupId>com.jaspersoft.jasperserver</groupId>
     <artifactId>jasperserver-ws-sample-war</artifactId>
     <packaging>war</packaging>
-    <version>6.2.0</version>
+    <version>6.2.1</version>
     <name>Jasper Server WS Sample WAR</name>
     <url>http://www.jaspersoft.com</url>
 
@@ -49,6 +49,6 @@
 	<parent>
         <groupId>com.jaspersoft.jasperserver</groupId>
         <artifactId>jasperserver-ws-sample</artifactId>
-        <version>6.2.0</version>
+        <version>6.2.1</version>
     </parent>
 </project>

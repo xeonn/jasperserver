@@ -70,6 +70,8 @@ define(function (require) {
                 if (selectedFiles >= inputs.length) {
                     this.addFileInput();
                 }
+
+                this.$("button.primary").removeClass("disabled").attr("disabled", null);
             }
         },
 
@@ -88,6 +90,8 @@ define(function (require) {
                 }
             });
 
+            this.$("button.primary").addClass("disabled").attr("disabled", "disabled");
+
             return this;
         },
 
@@ -100,7 +104,7 @@ define(function (require) {
 
         onErrorCallback: function(response){
             var errorMessage;
-            var response = response.responseJSON ? response.responseJSON : response;
+            response = response.responseJSON ? response.responseJSON : response;
 
             if ("illegal.parameter.value.error" === response.errorCode && response.parameters
                 && response.parameters.length && "className" === response.parameters[0]) {

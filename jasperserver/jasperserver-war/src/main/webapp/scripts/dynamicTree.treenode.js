@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: dynamicTree.treenode.js 9400 2015-09-23 21:10:46Z inestere $
+ * @version: $Id: dynamicTree.treenode.js 9909 2016-02-25 19:56:31Z dgorbenk $
  */
 
 /* global dynamicTree, isArray, layoutModule, cancelEventBubbling, isIPad */
@@ -554,7 +554,12 @@ dynamicTree.TreeNode.addMethod('select', function(event, focus, options) {
  * focus on this node's element
  */
 dynamicTree.TreeNode.addMethod('focus', function() {
-	!isIPad() && this._getElement() && this._getElement().focus();
+    var self = this;
+    if (!isIPad() && this._getElement()) {
+        setTimeout(function() {
+            self._getElement().focus()
+        }, 100);
+    }
 });
 /**
  * Returns true if this node is selected in the tree.

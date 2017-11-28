@@ -70,7 +70,7 @@
             <c:if test="${pageProperties['meta.noMenu']==null}">
                <div id="mainNavigation" tabindex="2" class="menuRoot menu horizontal primaryNav" js-navtype="actionmenu" role="menubar" aria-label="Main Menu"><!--FIXME ARIA i18n -->
                    <ul id="navigationOptions" js-navtype="actionmenu" data-component-type="navigation">
-                       <li id="main_home" js-navtype="actionmenu" role="menuitem" class="leaf hidden" aria-label="<spring:message code="menu.home"/>">
+                       <li id="main_home" js-navtype="actionmenu" role="menuitem" class="leaf hidden" aria-label="<spring:message code="menu.home"/>" data-title="true">
                            <p class="wrap button"><span class="icon"></span><spring:message code="menu.home"/></p>
                        </li>
                        <c:if test='<%= !((NavigationActionModelSupport)application.getAttribute("concreteNavigationActionModelSupport")).banUserRole() %>'>
@@ -122,7 +122,7 @@
                     <t:putAttribute name="containerID" value="globalSearch"/>
                     <t:putAttribute name="containerAttr" value="data-component-type='search'"/>
                     <t:putAttribute name="inputID" value="searchInput"/>
-                    <t:putAttribute name="accClass" value="stdnavinitialfocus"/> 
+                    <t:putAttribute name="accClass" value="stdnavinitialfocus"/>
                     <t:putAttribute name="inputTabindex" value="1"/>
                 </t:insertTemplate>
             </div>

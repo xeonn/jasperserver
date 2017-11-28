@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: login.main.js 8179 2015-01-27 12:34:21Z psavushchik $
+ * @version: $Id: login.main.js 9909 2016-02-25 19:56:31Z dgorbenk $
  */
 
 /* global isIPad */
@@ -84,7 +84,6 @@ define(function(require) {
             var orientation = window.orientation;
             switch (orientation) {
                 case 0:
-                    jQuery('#welcome').get(0).style.webkitTransform = 'scale(0.8) translate3d(-60px,0,0)';
                     jQuery('h2.textAccent').css('font-size', '14px').parent().css('width', '39%');
                     jQuery('#copy').css('width', '600px');
                     jQuery('#loginForm').css({
@@ -93,12 +92,10 @@ define(function(require) {
                     });
                     break;
                 case 90:
-                    jQuery('#welcome').get(0).style.webkitTransform = 'scale(1.0) translate3d(0,0,0)';
                     jQuery('h2.textAccent').css('font-size', '16px').parent().css('width', '46%');
                     jQuery('#copy').css('width', '766px');
                     break;
                 case -90:
-                    jQuery('#welcome').get(0).style.webkitTransform = 'scale(1.0) translate3d(0,0,0)';
                     jQuery('h2.textAccent').css('font-size', '16px').parent().css('width', '46%');
                     jQuery('#copy').css('width', '766px');
                     break;
@@ -108,7 +105,6 @@ define(function(require) {
                 var orientation = window.orientation;
                 switch (orientation) {
                     case 0:
-                        jQuery('#welcome').get(0).style.webkitTransform = 'scale(0.75) translate3d(-60px,0,0)';
                         jQuery('h2.textAccent').css('font-size', '14px').parent().css('width', '39%');
                         jQuery('#copy').css('width', '600px');
                         jQuery('#loginForm').css({
@@ -117,7 +113,6 @@ define(function(require) {
                         });
                         break;
                     case 90:
-                        jQuery('#welcome').get(0).style.webkitTransform = 'scale(1.0) translate3d(0,0,0)';
                         jQuery('h2.textAccent').css('font-size', '16px').parent().css('width', '46%');
                         jQuery('#copy').css('width', '766px');
                         jQuery('#loginForm').css({
@@ -126,7 +121,6 @@ define(function(require) {
                         });
                         break;
                     case -90:
-                        jQuery('#welcome').get(0).style.webkitTransform = 'scale(1.0) translate3d(0,0,0)';
                         jQuery('h2.textAccent').css('font-size', '16px').parent().css('width', '46%');
                         jQuery('#copy').css('width', '766px');
                         jQuery('#loginForm').css({

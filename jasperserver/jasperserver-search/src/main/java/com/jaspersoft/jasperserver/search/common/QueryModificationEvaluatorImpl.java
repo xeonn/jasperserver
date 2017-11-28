@@ -22,16 +22,20 @@ package com.jaspersoft.jasperserver.search.common;
 
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
 import com.jaspersoft.jasperserver.api.search.QueryModificationEvaluator;
+import com.jaspersoft.jasperserver.api.search.SearchFilter;
 import com.jaspersoft.jasperserver.search.filter.AccessTypeFilter;
 import com.jaspersoft.jasperserver.search.filter.FolderFilter;
 import com.jaspersoft.jasperserver.search.service.RepositorySearchCriteria;
+import com.jaspersoft.jasperserver.search.service.RepositorySearchService;
+
+import java.util.List;
 
 /**
  * Implementation of {@link QueryModificationEvaluator}.
  *
  * @author Chaim Arbiv
  * @author Yuriy Plakosh
- * @version $Id: QueryModificationEvaluatorImpl.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: QueryModificationEvaluatorImpl.java 61510 2016-03-03 09:36:22Z ykovalch $
  * @since 4.7
  *
  * @see com.jaspersoft.jasperserver.api.search.QueryModificationEvaluator;
@@ -64,10 +68,16 @@ public class QueryModificationEvaluatorImpl implements QueryModificationEvaluato
 
         if (!use){
             RepositorySearchCriteria searchCriteria = getTypedAttribute(context, RepositorySearchCriteria.class);
-            use = searchCriteria != null && searchCriteria.getCustomFilters() != null && (!searchCriteria.getCustomFilters().isEmpty()
-                    // this code is a trick, done on order to not refactor search itself to give it ability to work both on UI and Web services properly
-                    // but this should be done in future  ... I hope
-                    && !(searchCriteria.getCustomFilters().size() == 1 && searchCriteria.getCustomFilters().contains(folderFilter)));
+            if(searchCriteria != null){
+                final List<SearchFilter> customFilters = searchCriteria.getCustomFilters();
+                use = customFilters != null && (!customFilters.isEmpty()
+                        // this code is a trick, done on order to not refactor search itself to give it ability to work both on UI and Web services properly
+                        // but this should be done in future  ... I hope
+                        && !(customFilters.size() == 1 && customFilters.contains(folderFilter)));
+                if(!use){
+                    use = RepositorySearchService.PARAM_SORT_BY_POPULARITY.equals(searchCriteria.getSortBy());
+                }
+            }
         }
         return use;
     }

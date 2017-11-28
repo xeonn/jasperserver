@@ -78,10 +78,10 @@
                 <t:putAttribute name="bodyContent">
                     <div id="welcome" class="row">
                         <h1>
-                            <span class="logo" aria-label="TIBCO Jaspersoft"></span>  
-                        	<!-- <spring:message code='LOGIN_WELCOME_OS'/> -->
-                        	       	
-                        
+                            <span class="logo" aria-label="TIBCO Jaspersoft"></span>
+                        	<span class="text"><spring:message code='LOGIN_WELCOME_OS'/></span>
+
+
                         </h1>
                     </div>
 <%--

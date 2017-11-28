@@ -34,6 +34,15 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class HypermediaAttributeLinks {
     private Link permission;
 
+    public HypermediaAttributeLinks() {
+    }
+
+    public HypermediaAttributeLinks(HypermediaAttributeLinks other) {
+        if (other.getPermission() != null) {
+            this.permission = new Link(other.getPermission());
+        }
+    }
+
     @XmlElement(name = "permission")
     public Link getPermission() {
         return permission;
@@ -44,4 +53,25 @@ public class HypermediaAttributeLinks {
         return this;
     }
 
+    @Override
+    public int hashCode() {
+        return permission == null ? 0 : permission.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj instanceof HypermediaAttributeLinks) {
+            HypermediaAttributeLinks other = (HypermediaAttributeLinks) obj;
+            return permission == other.permission || (permission != null && permission.equals(other.permission));
+        }
+        return false;
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "{" +
+                "permission=" + permission +
+                '}';
+    }
 }

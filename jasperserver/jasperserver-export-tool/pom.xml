@@ -9,7 +9,7 @@
     <parent>
         <groupId>com.jaspersoft.jasperserver</groupId>
         <artifactId>server</artifactId>
-        <version>6.2.0</version>
+        <version>6.2.1</version>
     </parent>
     <description>Jasper Server Repository Export Import Tool</description>
     <dependencies>
@@ -49,7 +49,7 @@
         <dependency>
             <groupId>commons-collections</groupId>
             <artifactId>commons-collections</artifactId>
-            <version>3.2</version>
+            <version>3.2.2</version>
         </dependency>
         <dependency>
             <groupId>org.codehaus.castor</groupId>

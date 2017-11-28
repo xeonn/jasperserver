@@ -116,14 +116,16 @@ public class BaseFormAction extends FormAction {
             state.updateResultState(0, manager.getResultsCount());
         }
 
-        List entities;
-        if (state.getResultIndex() >= state.getResultsCount()) {
-            entities = Collections.emptyList();
-        } else {
-            entities = manager.getResults(state.getResultIndex(), maxResults);
-        }
+        List entities = new ArrayList(maxResults);
+        do {
+            List accessibleResults = manager.getResults(state.getResultIndex(), maxResults);
 
-        state.updateResultState(state.getResultIndex() + entities.size(), state.getResultsCount());
+            for (Object entity : accessibleResults) {
+                entities.add(entity);
+            }
+
+            state.updateResultState(state.getResultIndex() + maxResults, state.getResultsCount());
+        } while (entities.size() < maxResults && state.getResultIndex() < state.getResultsCount());
 
         return entities;
     }

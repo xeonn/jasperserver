@@ -10,7 +10,7 @@
     <parent>
         <groupId>com.jaspersoft.jasperserver</groupId>
         <artifactId>jasperserver-api-impl</artifactId>
-        <version>6.2.0</version>
+        <version>6.2.1</version>
     </parent>
     <dependencies>
         <dependency>
@@ -21,27 +21,22 @@
 	    <dependency>
             <groupId>org.jboss.teiid</groupId>
             <artifactId>teiid-api</artifactId>
-            <version>8.11.1</version>
         </dependency>
         <dependency>
             <groupId>org.jboss.teiid</groupId>
             <artifactId>teiid-client</artifactId>
-            <version>8.11.1</version>
         </dependency>
         <dependency>
             <groupId>org.jboss.teiid</groupId>
             <artifactId>teiid-common-core</artifactId>
-            <version>8.11.1</version>
         </dependency>
         <dependency>
             <groupId>org.jboss.teiid</groupId>
             <artifactId>teiid-metadata</artifactId>
-            <version>8.11.1</version>
         </dependency>
         <dependency>
             <groupId>org.jboss.teiid</groupId>
             <artifactId>teiid-engine</artifactId>
-            <version>8.11.1</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.jboss.as</groupId>
@@ -68,7 +63,6 @@
         <dependency>
             <groupId>org.jboss.teiid</groupId>
             <artifactId>teiid-runtime</artifactId>
-            <version>8.11.1</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.rhq.helpers</groupId>
@@ -95,120 +89,15 @@
         <dependency>
             <groupId>org.jboss.teiid.connectors</groupId>
             <artifactId>translator-jdbc</artifactId>
-            <version>8.11.1</version>
         </dependency>
         <dependency>
             <groupId>org.jboss.teiid.connectors</groupId>
             <artifactId>connector-file</artifactId>
             <classifier>lib</classifier>
-            <version>8.11.1</version>
-        </dependency>
-        <!--  MONGODB DEPENDENCIES  -->
-        <!--  dependency>
-          <groupId>org.mongodb</groupId>
-          <artifactId>mongo-java-driver</artifactId>
-          <version>2.12.3</version>
         </dependency>
         <dependency>
-            <groupId>org.jboss.teiid.connectors</groupId>
-            <artifactId>mongodb-api</artifactId>
-            <version>8.11.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.teiid.connectors</groupId>
-            <artifactId>connector-mongodb</artifactId>
-            <classifier>lib</classifier>
-            <version>8.11.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.teiid.connectors</groupId>
-            <artifactId>translator-mongodb</artifactId>
-            <version>8.11.1</version>
-        </dependency -->
-        <!--  CASSANDRA DEPENDENCIES  -->
-        <!-- dependency>
-            <groupId>org.apache.cassandra</groupId>
-            <artifactId>cassandra-all</artifactId>
-            <version>1.2.9</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>net.jpountz.lz4</groupId>
-                    <artifactId>lz4</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.ning</groupId>
-                    <artifactId>compress-lzf</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>commons-cli</groupId>
-                    <artifactId>commons-cli</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>commons-codec</groupId>
-                    <artifactId>commons-codec</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>commons-cli</groupId>
-                    <artifactId>commons-cli</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>commons-lang</groupId>
-                    <artifactId>commons-lang</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.apache.cassandra.deps</groupId>
-                    <artifactId>avro</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.apache.cassandra.deps</groupId>
-                    <artifactId>avro</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>jline</groupId>
-                    <artifactId>jline</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.googlecode.json-simple</groupId>
-                    <artifactId>json-simple</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.github.stephenc.high-scale-lib</groupId>
-                    <artifactId>high-scale-lib</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.yaml</groupId>
-                    <artifactId>snakeyaml</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>edu.stanford.ppl</groupId>
-                    <artifactId>snaptree</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.mindrot</groupId>
-                    <artifactId>jbcrypt</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.apache.cassandra</groupId>
-                    <artifactId>cassandra-thrift</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.github.stephenc</groupId>
-                    <artifactId>jamm</artifactId>
-                </exclusion>
-                <exclusion>
                     <groupId>org.apache.thrift</groupId>
                     <artifactId>libthrift</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency -->
-        <!-- dependency>
-            <groupId>com.datastax.cassandra</groupId>
-            <artifactId>cassandra-driver-core</artifactId>
-            <version>1.0.6-dse</version>
-        </dependency -->
-        <dependency>
-            <groupId>org.apache.thrift</groupId>
-            <artifactId>libthrift</artifactId>
             <version>0.9.0</version>
         </dependency>
         <dependency>
@@ -224,7 +113,6 @@
         <dependency>
             <groupId>org.jboss.teiid.connectors</groupId>
             <artifactId>translator-cassandra</artifactId>
-            <version>8.11.1</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.datastax.cassandra</groupId>
@@ -236,30 +124,15 @@
             <groupId>org.jboss.teiid.connectors</groupId>
             <artifactId>connector-cassandra</artifactId>
             <classifier>lib</classifier>
-            <version>8.11.1</version>
         </dependency>
         <!-- HIVE CONNECTOR  -->
         <dependency>
             <groupId>org.jboss.teiid.connectors</groupId>
             <artifactId>translator-hive</artifactId>
-            <version>8.11.1</version>
-        </dependency>
-        <!-- OTHER CONNECTOR>
-        <dependency>
-            <groupId>org.jboss.teiid.connectors</groupId>
-            <artifactId>translator-file</artifactId>
-            <version>8.11.1</version>
-        </dependency -->
-		<!-- TEIID DEPENDENCIES  -->
-        <dependency>
-            <groupId>javax.resource</groupId>
-            <artifactId>connector-api</artifactId>
-            <version>1.5</version>
         </dependency>
         <dependency>
             <groupId>org.infinispan</groupId>
             <artifactId>infinispan-core</artifactId>
-            <version>5.1.2.FINAL</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.jboss.spec.javax.transaction</groupId>
@@ -283,27 +156,6 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <dependency>
-            <groupId>org.jboss.logging</groupId>
-            <artifactId>jboss-logging</artifactId>
-            <version>3.1.2.GA</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.modules</groupId>
-            <artifactId>jboss-modules</artifactId>
-            <version>1.3.0.Final</version>
-        </dependency>
-		<dependency>
-            <groupId>org.jgroups</groupId>
-            <artifactId>jgroups</artifactId>
-            <version>3.2.7.Final</version>
-        </dependency>
-		<!--  dependency>
-            <groupId>org.jboss.logging</groupId>
-            <artifactId>jboss-logging</artifactId>
-            <version>3.1.2.GA</version>
-        </dependency  -->
-		<!--  ********************************  -->
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-core</artifactId>
@@ -378,7 +230,7 @@
         <dependency>
             <groupId>commons-collections</groupId>
             <artifactId>commons-collections</artifactId>
-            <version>3.2</version>
+            <version>3.2.2</version>
         </dependency>
         <dependency>
             <groupId>javax.activation</groupId>

@@ -21,6 +21,12 @@
 package com.jaspersoft.jasperserver.api.security.externalAuth.wrappers.spring.ldap;
 
 import com.jaspersoft.jasperserver.api.JasperServerAPI;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.ldap.authentication.LdapAuthenticationProvider;
 import org.springframework.security.ldap.authentication.LdapAuthenticator;
 import org.springframework.security.ldap.userdetails.LdapAuthoritiesPopulator;
@@ -28,11 +34,13 @@ import org.springframework.security.ldap.userdetails.LdapAuthoritiesPopulator;
 /**
  * Wrapper class for org.springframework.security.ldap.authentication.LdapAuthenticationProvider
  * @author dlitvak
- * @version $Id$
+ * @version $Id: JSLdapAuthenticationProvider.java 61296 2016-02-25 21:53:37Z mchan $
  * @since 6.0
  */
 @JasperServerAPI
 public class JSLdapAuthenticationProvider extends LdapAuthenticationProvider {
+    private static final Logger logger = LogManager.getLogger(JSLdapAuthenticationProvider.class);
+
 	public JSLdapAuthenticationProvider(LdapAuthenticator authenticator, LdapAuthoritiesPopulator authoritiesPopulator) {
 		super(authenticator, authoritiesPopulator);
 	}
@@ -40,4 +48,19 @@ public class JSLdapAuthenticationProvider extends LdapAuthenticationProvider {
 	public JSLdapAuthenticationProvider(LdapAuthenticator authenticator) {
 		super(authenticator);
 	}
+
+    @Override
+    public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+        try {
+            return super.authenticate(authentication);
+        }
+        catch (IncorrectResultSizeDataAccessException irsdae) {
+            logger.error(irsdae.getMessage());
+            throw new BadCredentialsException("Found more than 1 user for the supplied credentials!", irsdae);
+        }
+        catch (AuthenticationException e) {
+            logger.warn(e.getMessage());
+            throw e;
+        }
+    }
 }

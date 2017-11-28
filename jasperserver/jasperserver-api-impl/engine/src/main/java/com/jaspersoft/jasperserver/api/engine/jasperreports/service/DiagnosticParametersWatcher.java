@@ -26,10 +26,12 @@ package com.jaspersoft.jasperserver.api.engine.jasperreports.service;
 
 /**
  * @author Yakiv Tymoshenko
- * @version $Id: DiagnosticParametersWatcher.java 54483 2015-04-21 03:18:31Z ytymoshe $
+ * @version $Id: DiagnosticParametersWatcher.java 61296 2016-02-25 21:53:37Z mchan $
  * @since 01.10.14
  */
 public interface DiagnosticParametersWatcher {
 
     boolean isResourceUriWatched(String resourceUri);
+
+    boolean isSnapshotExportEnabled(String reportUri);
 }

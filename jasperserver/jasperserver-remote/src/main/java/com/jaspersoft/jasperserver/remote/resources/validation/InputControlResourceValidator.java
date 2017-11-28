@@ -92,6 +92,15 @@ public class InputControlResourceValidator extends GenericResourceValidator<Inpu
     protected void internalValidate(InputControl resource, ValidationErrors errors) {
         String type = Integer.toString(resource.getInputControlType());
         Map<String, Object> config = inputControlTypeConfiguration.get(type);
+
+        for (String visibleColumn : resource.getQueryVisibleColumns()){
+            if (visibleColumn.isEmpty()) {
+                addIllegalParameterValueError(errors, "visibleColumns", Arrays.toString(resource.getQueryVisibleColumns()),
+                    "'queryVisibleColumns' should not contain an empty value");
+                break;
+            }
+        }
+
         if (config == null) {
             addIllegalParameterValueError(errors, "type", type, "The type " + type + " is invalid");
         } else {

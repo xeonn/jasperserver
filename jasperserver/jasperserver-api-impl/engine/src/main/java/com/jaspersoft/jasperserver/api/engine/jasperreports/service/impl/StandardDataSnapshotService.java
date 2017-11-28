@@ -43,7 +43,7 @@ import java.util.regex.Pattern;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: StandardDataSnapshotService.java 54648 2015-04-23 12:22:57Z vsabados $
+ * @version $Id: StandardDataSnapshotService.java 61296 2016-02-25 21:53:37Z mchan $
  */
 @Component
 public class StandardDataSnapshotService implements DataSnapshotService {
@@ -430,6 +430,17 @@ public class StandardDataSnapshotService implements DataSnapshotService {
 		this.snapshotRecordingEnabled = snapshotRecordingEnabled;
 	}
 
+	@Override
+	public boolean isSnapshotRecordingEnabledForReportUri(String reportUri) {
+		return isDiagnosticSnapshotExportEnabled(reportUri) && isCreatingSnapshot() || snapshotRecordingEnabled;
+	}
+
+	@Override
+	public boolean isDiagnosticSnapshotExportEnabled(String reportUri) {
+		return diagnosticParametersWatcher != null
+				&& diagnosticParametersWatcher.isSnapshotExportEnabled(reportUri);
+	}
+
 	public boolean isSnapshotPersistenceEnabled() {
 		return snapshotPersistenceEnabled;
 	}
@@ -449,7 +460,8 @@ public class StandardDataSnapshotService implements DataSnapshotService {
     }
 
     private boolean isCurrentReportUriBeingWatchedByDiagnostics(String reportUri) {
-        return diagnosticParametersWatcher != null && diagnosticParametersWatcher.isResourceUriWatched(reportUri);
+        return diagnosticParametersWatcher != null
+				&& diagnosticParametersWatcher.isResourceUriWatched(reportUri);
     }
 
     private boolean isCreatingSnapshot() {

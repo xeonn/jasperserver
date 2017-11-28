@@ -20,7 +20,7 @@
         <property name="progressiveStreaming" value="${db2.progressiveStreaming}"/>
         <property name="progresssiveLocators" value="${db2.progresssiveLocators}"/>
 		<property name="JDBC30DataSource" value="true"/>
-        <property name="AlernateId" value="${js.dbName}"/>
+        <property name="AlternateID" value="${js.dbName}"/>
     </jdbc-connection-pool>
 
     <jdbc-resource enabled="true" jndi-name="${js.jndi}" object-type="user" pool-name="jasperserver_pool"/>
@@ -39,7 +39,7 @@
         <property name="portNumber" value="${dbPort}"/>
         <property name="currentSchema" value="${sugarcrm.dbName}"/>
 		 <property name="JDBC30DataSource" value="true"/>
-        <property name="AlernateId" value="${sugarcrm.dbName}"/>
+        <property name="AlternateID" value="${sugarcrm.dbName}"/>
     </jdbc-connection-pool>
 
     <jdbc-resource enabled="true" jndi-name="${sugarcrm.jndi}" object-type="user" pool-name="sugarcrm_pool"/>
@@ -58,7 +58,7 @@
         <property name="portNumber" value="${dbPort}"/>
         <property name="currentSchema" value="${foodmart.dbName}"/>
 		<property name="JDBC30DataSource" value="true"/>
-        <property name="AlernateId" value="${foodmart.dbName}"/>
+        <property name="AlternateID" value="${foodmart.dbName}"/>
     </jdbc-connection-pool>
 
     <jdbc-resource enabled="true" jndi-name="${foodmart.jndi}" object-type="user" pool-name="foodmart_pool"/>

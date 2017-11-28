@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: administer.logging.js 8179 2015-01-27 12:34:21Z psavushchik $
+ * @version: $Id: administer.logging.js 9909 2016-02-25 19:56:31Z dgorbenk $
  */
 
 /* global layoutModule, webHelpModule, matchAny, Administer */
@@ -36,6 +36,8 @@ var logging = {
     },
 
     initEvents: function() {
+        var self = this;
+
         $('display').observe('click', function(e) {
             var elem = e.element();
 
@@ -52,8 +54,24 @@ var logging = {
             }
 
         });
-    }
 
+        jQuery(".js-logSettings select").on("change", function(e) {
+            var $el = jQuery(e.target),
+                loggerName;
+
+            if ($el.hasClass("js-newLogger")) {
+                loggerName = jQuery("#newLoggerName").val();
+            } else {
+                loggerName = $el.parent().prev().text();
+            }
+
+            self._setLevel(encodeURIComponent(loggerName), $el.val());
+        });
+    },
+
+    _setLevel: function(logger, level) {
+        document.location = 'log_settings.html?logger=' + logger + '&level=' + level;
+    }
 };
 
 if (typeof require === "undefined") {
@@ -61,8 +79,4 @@ if (typeof require === "undefined") {
     document.observe('dom:loaded', function() {
         logging.initialize();
     });
-}
-
-function setLevel(logger, level) {
-    document.location = 'log_settings.html?logger=' + logger + '&level=' + level;
 }

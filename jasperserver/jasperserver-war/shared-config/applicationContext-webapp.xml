@@ -3,10 +3,14 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:p="http://www.springframework.org/schema/p"
        xsi:schemaLocation="
 http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd
 http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.1.xsd">
-  
+
+    <context:component-scan base-package="com.jaspersoft.jasperserver.war.httpheaders"/>
   <!-- Tiles 2 integration. -->
   <bean class="com.jaspersoft.jasperserver.war.tiles2.SpringTilesConfigurer" />
 
@@ -379,19 +383,48 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
                 </entry>
             </util:map>
         </entry>
-        <!-- entry key="salesforce">
+        <entry key="cassandra_simba">
             <util:map>
-                <entry key="label" value="Salesforce"/>
-                <entry key="jdbcUrl" value="jdbc:tibcosoftware://$[dbHost]:SecurityToken=$[securityToken];TransactionMode=ignore"/>
-                <entry key="jdbcDriverClass" value="tibcosoftware.jdbc.salesforce.SalesforceDriver"/>
+                <entry key="label" value="Cassandra"/>
+                <entry key="jdbcUrl" value="jdbc:cassandra://$[dbHost]:$[dbPort];DefaultKeyspace=$[defaultKeySpace]"/>
+                <entry key="jdbcDriverClass" value="com.simba.cassandra.jdbc4.Driver"/>
                 <entry key="defaultValues">
                     <util:map>
-                        <entry key="dbHost" value="my.salesforce.com"/>
-                        <entry key="securityToken" value="Token"/>
+                        <entry key="dbHost" value="localhost"/>
+                        <entry key="dbPort" value="9042"/>
+                        <entry key="defaultKeySpace" value=""/>
                     </util:map>
                 </entry>
             </util:map>
-        </entry -->
+        </entry>
+        <entry key="impala_simba">
+            <util:map>
+                <entry key="label" value="Impala"/>
+                <entry key="jdbcUrl" value="jdbc:impala://$[dbHost]:$[dbPort]/$[schemaName]"/>
+                <entry key="jdbcDriverClass" value="com.simba.impala.jdbc4.Driver"/>
+                <entry key="defaultValues">
+                    <util:map>
+                        <entry key="dbHost" value="localhost"/>
+                        <entry key="dbPort" value="21050"/>
+                        <entry key="schemaName" value="default"/>
+                    </util:map>
+                </entry>
+            </util:map>
+        </entry>
+        <entry key="salesforce">
+            <util:map>
+                <entry key="label" value="Salesforce"/>
+                <entry key="jdbcUrl" value="jdbc:tibcosoftware:sforce://$[dbHost];SecurityToken=$[securityToken];TransactionMode=ignore;StmtCallLimit=$[stmtCallLimit];databaseName=#{ systemProperties['java.io.tmpdir'] }#{ systemProperties['file.separator'] }Salesforce"/>
+                <entry key="jdbcDriverClass" value="tibcosoftware.jdbc.sforce.SForceDriver"/>
+                <entry key="defaultValues">
+                    <util:map>
+                        <entry key="dbHost" value=""/>
+                        <entry key="securityToken" value=""/>
+                        <entry key="stmtCallLimit" value="1000"/>
+                    </util:map>
+                </entry>
+            </util:map>
+        </entry>
       <entry key="redshift">
           <util:map>
               <entry key="label" value="Redshift"/>
@@ -570,6 +603,114 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
            </Measure>
         -->
         <property name="rolapAnnotationGroupMarker" value="AnalyzerBusinessGroup"/>
+    </bean>
+
+    <!--
+    This rules to apply HTTP headers to the response. The rule it self consist of HTTP method together with regexp pattern of the URL.
+    Most specific rules should be first. Only headers from first matching rule will be applied to the response.
+    -->
+    <bean id="staticResourcesExpiresHeader" p:maxAge="31536000" class="com.jaspersoft.jasperserver.war.httpheaders.JRSExpiresHeader" />
+    <bean id="thumbnailsExpiresHeader" p:maxAge="86400" class="com.jaspersoft.jasperserver.war.httpheaders.JRSExpiresHeader" />
+    <bean id="thumbnailsListExpiresHeader" p:maxAge="300000" class="com.jaspersoft.jasperserver.war.httpheaders.JRSExpiresHeader" />
+
+    <bean id="resourceHTTPHeadersFilter" class="com.jaspersoft.jasperserver.war.httpheaders.ResourceHTTPHeadersFilter">
+        <property name="headersRules">
+            <list>
+                <bean p:method="GET" p:urlPattern="/index\.htm" class="com.jaspersoft.jasperserver.war.httpheaders.HeadersRule">
+                    <property name="headers">
+                        <list>
+                            <bean class="org.apache.http.message.BasicHeader">
+                                <constructor-arg value="Cache-Control"/>
+                                <constructor-arg value="private"/>
+                            </bean>
+                        </list>
+                    </property>
+                </bean>
+                <bean p:method="GET" p:urlPattern="/rest_v2/export/[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/state\??.*" class="com.jaspersoft.jasperserver.war.httpheaders.HeadersRule">
+                    <property name="headers">
+                        <list>
+                            <bean class="org.apache.http.message.BasicHeader">
+                                <constructor-arg value="Cache-Control"/>
+                                <constructor-arg value="no-cache,no-store"/>
+                            </bean>
+                            <bean class="org.apache.http.message.BasicHeader">
+                                <constructor-arg value="Pragma"/>
+                                <constructor-arg value="no-cache"/>
+                            </bean>
+                        </list>
+                    </property>
+                </bean>
+                <bean p:method="GET" p:urlPattern="/rest_v2/import/[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/state\??.*" class="com.jaspersoft.jasperserver.war.httpheaders.HeadersRule">
+                    <property name="headers">
+                        <list>
+                            <bean class="org.apache.http.message.BasicHeader">
+                                <constructor-arg value="Cache-Control"/>
+                                <constructor-arg value="no-cache,no-store"/>
+                            </bean>
+                            <bean class="org.apache.http.message.BasicHeader">
+                                <constructor-arg value="Pragma"/>
+                                <constructor-arg value="no-cache"/>
+                            </bean>
+                        </list>
+                    </property>
+                </bean>
+                <bean p:method="GET" p:urlPattern="/rest_v2/bundles(/.+|\?.*&amp;?expanded=true)" class="com.jaspersoft.jasperserver.war.httpheaders.HeadersRule">
+                    <property name="headers">
+                        <list>
+                            <bean class="org.apache.http.message.BasicHeader">
+                                <constructor-arg value="Cache-Control"/>
+                                <constructor-arg value="no-transform,max-age=#{staticResourcesExpiresHeader.maxAge}"/>
+                            </bean>
+                            <bean class="org.apache.http.message.BasicHeader">
+                                <constructor-arg value="Vary"/>
+                                <constructor-arg value="Accept-Language"/>
+                            </bean>
+                        </list>
+                    </property>
+                </bean>
+                <bean p:method="GET" p:urlPattern="/rest_v2/thumbnails/.+" class="com.jaspersoft.jasperserver.war.httpheaders.HeadersRule">
+                    <property name="headers">
+                        <list>
+                            <bean class="org.apache.http.message.BasicHeader">
+                                <constructor-arg value="Cache-Control"/>
+                                <constructor-arg value="private,no-cache,no-store,max-age=0,must-revalidate"/>
+                            </bean>
+                        </list>
+                    </property>
+                </bean>
+                <bean p:method="POST" p:urlPattern="/rest_v2/thumbnails" class="com.jaspersoft.jasperserver.war.httpheaders.HeadersRule">
+                    <property name="headers">
+                        <list>
+                            <bean class="org.apache.http.message.BasicHeader">
+                                <constructor-arg value="Cache-Control"/>
+                                <constructor-arg value="max-age=#{thumbnailsListExpiresHeader.maxAge},public"/>
+                            </bean>
+                            <bean class="org.apache.http.message.BasicHeader">
+                                <constructor-arg value="Pragma"/>
+                                <constructor-arg value=""/>
+                            </bean>
+                            <ref local="thumbnailsListExpiresHeader" />
+                        </list>
+                    </property>
+                </bean>
+                <bean p:method="GET" p:urlPattern="/.*?\.([hH][tT][mM]|[jJ][sS]|[cC][sS][sS]|[pP][nN][gG]|[gG][iI][fF])$"
+                      class="com.jaspersoft.jasperserver.war.httpheaders.HeadersRule">
+                    <property name="headers">
+                        <list>
+                            <bean class="org.apache.http.message.BasicHeader">
+                                <constructor-arg value="Cache-Control"/>
+                                <constructor-arg value="max-age=#{staticResourcesExpiresHeader.maxAge},public"/>
+                            </bean>
+                            <bean class="org.apache.http.message.BasicHeader">
+                                <constructor-arg value="Pragma"/>
+                                <constructor-arg value=""/>
+                            </bean>
+                            <ref local="staticResourcesExpiresHeader" />
+                        </list>
+                    </property>
+                </bean>
+            </list>
+        </property>
     </bean>
 
 </beans>

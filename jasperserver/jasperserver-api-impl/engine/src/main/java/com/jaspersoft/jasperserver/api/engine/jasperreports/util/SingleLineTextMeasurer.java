@@ -35,12 +35,13 @@ import java.util.StringTokenizer;
 
 import net.sf.jasperreports.engine.JRCommonText;
 import net.sf.jasperreports.engine.JRPropertiesHolder;
+import net.sf.jasperreports.engine.JRPropertiesUtil;
 import net.sf.jasperreports.engine.JRRuntimeException;
 import net.sf.jasperreports.engine.JRTextElement;
+import net.sf.jasperreports.engine.JasperReportsContext;
 import net.sf.jasperreports.engine.export.AwtTextRenderer;
 import net.sf.jasperreports.engine.fill.JRMeasuredText;
 import net.sf.jasperreports.engine.fill.JRTextMeasurer;
-import net.sf.jasperreports.engine.util.JRProperties;
 import net.sf.jasperreports.engine.util.JRStyledText;
 import net.sf.jasperreports.engine.util.MaxFontSizeFinder;
 
@@ -48,7 +49,7 @@ import net.sf.jasperreports.engine.util.MaxFontSizeFinder;
  * Slightly modified Text Measurer to support single line outputs.
  * 
  * @author Jun-Sun Whang
- * @version $Id: SingleLineTextMeasurer.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: SingleLineTextMeasurer.java 61296 2016-02-25 21:53:37Z mchan $
  */
 public class SingleLineTextMeasurer implements JRTextMeasurer {
 
@@ -57,6 +58,7 @@ public class SingleLineTextMeasurer implements JRTextMeasurer {
 	 */
 	private static final FontRenderContext FONT_RENDER_CONTEXT = AwtTextRenderer.LINE_BREAK_FONT_RENDER_CONTEXT;
 
+	private JasperReportsContext jasperReportsContext;
 	private JRCommonText textElement;
 	private JRPropertiesHolder propertiesHolder;
 
@@ -145,7 +147,8 @@ public class SingleLineTextMeasurer implements JRTextMeasurer {
 	/**
 	 * 
 	 */
-	public SingleLineTextMeasurer(JRCommonText textElement) {
+	public SingleLineTextMeasurer(JasperReportsContext jasperReportsContext, JRCommonText textElement) {
+		this.jasperReportsContext = jasperReportsContext;
 		this.textElement = textElement;
 		this.propertiesHolder = textElement instanceof JRPropertiesHolder ? (JRPropertiesHolder) textElement
 				: null;
@@ -474,12 +477,14 @@ public class SingleLineTextMeasurer implements JRTextMeasurer {
 	}
 
 	protected boolean isToTruncateAtChar() {
-		return JRProperties.getBooleanProperty(propertiesHolder,
+		//FIXME do not read each time
+		return JRPropertiesUtil.getInstance(jasperReportsContext).getBooleanProperty(propertiesHolder, 
 				JRTextElement.PROPERTY_TRUNCATE_AT_CHAR, false);
 	}
 
 	protected String getTruncateSuffix() {
-		String truncateSuffx = JRProperties.getProperty(propertiesHolder,
+		//FIXME do not read each time
+		String truncateSuffx = JRPropertiesUtil.getInstance(jasperReportsContext).getProperty(propertiesHolder,
 				JRTextElement.PROPERTY_TRUNCATE_SUFFIX);
 		if (truncateSuffx != null) {
 			truncateSuffx = truncateSuffx.trim();

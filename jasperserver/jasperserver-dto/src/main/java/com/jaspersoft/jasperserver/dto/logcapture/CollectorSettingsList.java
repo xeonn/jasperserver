@@ -5,6 +5,7 @@
  */
 package com.jaspersoft.jasperserver.dto.logcapture;
 
+import java.util.ArrayList;
 import javax.xml.bind.annotation.*;
 import java.util.List;
 
@@ -21,8 +22,19 @@ public class CollectorSettingsList {
     public CollectorSettingsList() {
     }
 
+    public CollectorSettingsList(CollectorSettingsList other) {
+        this(other.getCollectorSettingsList());
+    }
+
+
     public CollectorSettingsList(List<CollectorSettings> collectorSettingsList) {
-        this.collectorSettingsList = collectorSettingsList;
+        if (collectorSettingsList != null) {
+            List<CollectorSettings> clonedCollectorSettingsList = new ArrayList<CollectorSettings>(collectorSettingsList.size());
+            for (CollectorSettings collectorSettings : collectorSettingsList) {
+                clonedCollectorSettingsList.add(new CollectorSettings(collectorSettings));
+            }
+            this.collectorSettingsList = clonedCollectorSettingsList;
+        }
     }
 
     @XmlElementWrapper(name = "CollectorSettingsList")
@@ -31,7 +43,31 @@ public class CollectorSettingsList {
         return collectorSettingsList;
     }
 
-    public void setCollectorSettingsList(List<CollectorSettings> collectorSettingsList) {
+    public CollectorSettingsList setCollectorSettingsList(List<CollectorSettings> collectorSettingsList) {
         this.collectorSettingsList = collectorSettingsList;
+        return this;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof CollectorSettingsList)) return false;
+
+        CollectorSettingsList that = (CollectorSettingsList) o;
+
+        return !(getCollectorSettingsList() != null ? !getCollectorSettingsList().equals(that.getCollectorSettingsList()) : that.getCollectorSettingsList() != null);
+
+    }
+
+    @Override
+    public int hashCode() {
+        return getCollectorSettingsList() != null ? getCollectorSettingsList().hashCode() : 0;
+    }
+
+    @Override
+    public String toString() {
+        return "CollectorSettingsList{" +
+                "collectorSettingsList=" + collectorSettingsList +
+                '}';
     }
 }

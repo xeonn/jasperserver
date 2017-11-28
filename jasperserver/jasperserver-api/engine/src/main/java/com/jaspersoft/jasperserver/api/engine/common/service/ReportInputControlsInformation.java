@@ -31,7 +31,7 @@ import java.util.Set;
  * Represents a list of ReportInputControlInformation objects associated with a ReportUnit
  * 
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ReportInputControlsInformation.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: ReportInputControlsInformation.java 61296 2016-02-25 21:53:37Z mchan $
  */
 @JasperServerAPI
 public interface ReportInputControlsInformation {
@@ -53,5 +53,15 @@ public interface ReportInputControlsInformation {
      * @return default parameters map
      */
     Map<String, Object> getDefaultValuesMap();
-	
+
+	/**
+	 * Used for query input controls in diagnostic proposals
+	 * @return  is that input controls have to use diagnostic datasnapshot data
+	 */
+	boolean getDiagnosticProperty();
+
+	/**
+	 * Used for query input controls in diagnostic proposals
+	 */
+	void setDiagnosticProperty(boolean isDiagnostic);
 }

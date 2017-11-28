@@ -4,7 +4,7 @@
     <groupId>com.jaspersoft.jasperserver</groupId>
     <artifactId>jasperserver-ws-sample-jar</artifactId>
     <packaging>jar</packaging>
-    <version>6.2.0</version>
+    <version>6.2.1</version>
     <name>Jasper Server WS Sample JAR</name>
     <url>http://www.jaspersoft.com</url>
 
@@ -23,7 +23,7 @@
         <dependency>
             <groupId>net.sf.jasperreports</groupId>
             <artifactId>jasperreports</artifactId>
-            <version>6.2.0</version>
+            <version>6.2.1</version>
             <exclusions>
                 <exclusion>
                     <groupId>xml-apis</groupId>
@@ -68,6 +68,6 @@
 	<parent>
         <groupId>com.jaspersoft.jasperserver</groupId>
         <artifactId>jasperserver-ws-sample</artifactId>
-        <version>6.2.0</version>
+        <version>6.2.1</version>
     </parent>
 </project>

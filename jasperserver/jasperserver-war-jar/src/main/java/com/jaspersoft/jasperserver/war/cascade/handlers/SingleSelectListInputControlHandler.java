@@ -20,31 +20,30 @@
 */
 package com.jaspersoft.jasperserver.war.cascade.handlers;
 
+import com.jaspersoft.jasperserver.api.common.util.diagnostic.DiagnosticSnapshotPropertyHelper;
 import com.jaspersoft.jasperserver.api.engine.common.service.ReportInputControlInformation;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.DataType;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.InputControl;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ListOfValuesItem;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceReference;
-import com.jaspersoft.jasperserver.war.cascade.CascadeResourceNotFoundException;
-import com.jaspersoft.jasperserver.war.cascade.InputControlValidationException;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.client.ListOfValuesItemImpl;
 import com.jaspersoft.jasperserver.dto.reports.inputcontrols.InputControlOption;
 import com.jaspersoft.jasperserver.dto.reports.inputcontrols.InputControlState;
 import com.jaspersoft.jasperserver.dto.reports.inputcontrols.ReportInputControl;
+import com.jaspersoft.jasperserver.war.cascade.CascadeResourceNotFoundException;
+import com.jaspersoft.jasperserver.war.cascade.InputControlValidationException;
+import org.apache.commons.collections.set.ListOrderedSet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static com.jaspersoft.jasperserver.war.cascade.handlers.NumberUtils.toBigDecimal;
 
 /**
  * @author Yaroslav.Kovalchyk
- * @version $Id: SingleSelectListInputControlHandler.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: SingleSelectListInputControlHandler.java 61296 2016-02-25 21:53:37Z mchan $
  */
 public class SingleSelectListInputControlHandler extends BasicInputControlHandler {
 
@@ -114,7 +113,15 @@ public class SingleSelectListInputControlHandler extends BasicInputControlHandle
      */
     @Override
     protected void fillStateValue(InputControlState state, InputControl inputControl, ResourceReference dataSource, Map<String, Object> parameters, ReportInputControlInformation info, Map<String, Class<?>> parameterTypes) throws CascadeResourceNotFoundException {
-        List<ListOfValuesItem> values = loader.loadValues(inputControl, dataSource, parameters, parameterTypes, info);
+        List<ListOfValuesItem> values = null;
+        if (DiagnosticSnapshotPropertyHelper.isDiagSnapshotSet(parameters)) {
+            //  If datasnapshot is available then default values for IC
+            // will be loaded from datasnapshot parameters, this logic is counting on that.
+            values = generateValuesFromDefaultValues(info);
+            inputControl.setReadOnly(true);
+        } else {
+            values = loader.loadValues(inputControl, dataSource, parameters, parameterTypes, info);
+        }
         final DataType dataType = inputControl.getDataType() != null ? cachedRepositoryService.getResource(DataType.class, inputControl.getDataType()) : null;
         List<InputControlOption> options = new ArrayList<InputControlOption>();
         InputControlOption nothingOption = null;
@@ -198,6 +205,25 @@ public class SingleSelectListInputControlHandler extends BasicInputControlHandle
             // selected values are exist, update incoming parameters
             parameters.put(controlName, getConcreteSelectedValue(selectedValues));
         }
+    }
+
+    private List<ListOfValuesItem> generateValuesFromDefaultValues(ReportInputControlInformation info) {
+        List<ListOfValuesItem> result = new ArrayList<ListOfValuesItem>();
+        List<String> mid;
+        if (info.getDefaultValue() instanceof Collection<?>) {
+            mid =  ((ListOrderedSet)info.getDefaultValue()).asList();
+        } else {
+            mid = Arrays.asList(new String[] {(String)info.getDefaultValue()});
+        }
+        String value;
+        for (int i = 0; i < mid.size(); i++) {
+            value = mid.get(i);
+            ListOfValuesItem item = new ListOfValuesItemImpl();
+            item.setLabel(value);
+            item.setValue(value);
+            result.add(item);
+        }
+        return result;
     }
 
 

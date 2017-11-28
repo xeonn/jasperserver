@@ -74,7 +74,7 @@ import java.util.regex.Pattern;
  * so they will not be registered twice.
  *
  * @author Sergey Prilukin (sprilukin@jaspersoft.com)
- * @version $Id: JdbcDriverServiceImpl.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: JdbcDriverServiceImpl.java 61296 2016-02-25 21:53:37Z mchan $
  */
 public class JdbcDriverServiceImpl implements JdbcDriverService, ApplicationContextAware {
     protected final Log logger = LogFactory.getLog(getClass());
@@ -627,7 +627,7 @@ public class JdbcDriverServiceImpl implements JdbcDriverService, ApplicationCont
             String driverNameKey = String.format(SYSTEM_PROPERTIES_LIST_KEY_FORMAT, driverClassName);
 
             if (!url.equals(oldUrl)) {
-                if (oldUrl != null) {
+                if (oldUrl != null && !oldUrl.equals(SYSTEM_CLASSLOADER_PATH)) {
                     String preservedDriverNameKey =
                             String.format("%s%s", driverNameKey, SYSTEM_PROPERTIES_PRESERVED_KEY_SUFFIX);
                     logger.info(String.format("Existing mapping for [%s] will be saved as [%s]",
@@ -635,7 +635,13 @@ public class JdbcDriverServiceImpl implements JdbcDriverService, ApplicationCont
                     getPropertiesManagementService().setProperty(preservedDriverNameKey, oldUrl);
                 }
 
-                getPropertiesManagementService().setProperty(driverNameKey, url);
+                if (url.equals(SYSTEM_CLASSLOADER_PATH)) {
+                    if (getPropertiesManagementService().getProperty(driverNameKey) != null) {
+                        getPropertiesManagementService().remove(driverNameKey);
+                    }
+                } else {
+                    getPropertiesManagementService().setProperty(driverNameKey, url);
+                }
             }
         }
     }

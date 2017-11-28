@@ -2,7 +2,7 @@
  * <p></p>
  *
  * @author Zakhar.Tomchenco
- * @version $Id: TreeDataLayer.js 1605 2015-09-23 17:55:32Z inestere $
+ * @version $Id: TreeDataLayer.js 2389 2016-03-10 16:31:32Z dgorbenk $
  */
 
 define(function(require){
@@ -66,6 +66,7 @@ define(function(require){
                         Accept: this.accept || "application/json",
                         "Content-Type": this.contentType || undefined
                     },
+                    cache: false,
                     data: this.data || undefined,
                     url: this.getDataUri(options)
                 }).done(function() {

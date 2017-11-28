@@ -101,7 +101,7 @@ import java.util.regex.Pattern;
  * Run a report unit using the passing in parameters and options
  *
  * @author ykovalchyk
- * @version $Id: RunReportServiceImpl.java 58870 2015-10-27 22:30:55Z esytnik $
+ * @version $Id: RunReportServiceImpl.java 61296 2016-02-25 21:53:37Z mchan $
  */
 @Service("runReportService")
 @Scope(value = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)
@@ -316,18 +316,18 @@ public class RunReportServiceImpl implements RunReportService, Serializable, Dis
         }
         executions.put(requestId, execution);
         startReportExecution(execution);
-        if (exportOptions != null && exportOptions.getOutputFormat() != null && !exportOptions.getOutputFormat().isEmpty()) {
-            if(!options.isAsync()){
-                // wait till report execution is complete
-                try{
-                    execution.getFinalReportUnitResult().getJasperPrintAccessor().getFinalJasperPrint();
-                } catch (RemoteException e){
-                    throw e;
-                } catch (Exception e){
-                    // if report fails in non async mode, then send error immediately
-                    throw new IllegalParameterValueException(secureExceptionHandler.handleException(e));
-                }
+        if(!options.isAsync()){
+            // wait till report execution is complete
+            try{
+                execution.getFinalReportUnitResult().getJasperPrintAccessor().getFinalJasperPrint();
+            } catch (RemoteException e){
+                throw e;
+            } catch (Exception e){
+                // if report fails in non async mode, then send error immediately
+                throw new IllegalParameterValueException(secureExceptionHandler.handleException(e));
             }
+        }
+        if (exportOptions != null && exportOptions.getOutputFormat() != null && !exportOptions.getOutputFormat().isEmpty()) {
             final ExportExecution exportExecution = executeExport(exportOptions, execution);
             if (!options.isAsync()) {
                 // wait till export is complete
@@ -627,6 +627,26 @@ public class RunReportServiceImpl implements RunReportService, Serializable, Dis
             reportExecution.setStatus(ExecutionStatus.cancelled);
         }
         return cancelled;
+    }
+
+    public Boolean deleteReportExecution(String requestId) throws RemoteException {
+        try {
+            if (executions.containsKey(requestId)) {
+                cancelReportExecution(requestId);
+                ReportExecution execution = executions.get(requestId);
+                execution.reset();
+                if (execution.getStatus() == ExecutionStatus.ready || execution.getStatus() == ExecutionStatus.cancelled) {
+                    virtualizerFactory.disposeReport(execution.getFinalReportUnitResult());
+                }
+            }
+            return (executions.remove(requestId) != null);
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Exception e1) {
+            throw new RemoteException(
+                    new ErrorDescriptor().setErrorCode("Unexpected error while removing ReportExecution")
+                            .setParameters(e1.getMessage()), e1);
+        }
     }
 
     @Override

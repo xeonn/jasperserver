@@ -28,6 +28,7 @@ import javax.xml.soap.MimeHeaders;
 import javax.xml.soap.SOAPMessage;
 
 import net.sf.jasperreports.engine.JRDataset;
+import net.sf.jasperreports.engine.JasperReportsContext;
 import net.sf.jasperreports.olap.xmla.JRXmlaQueryExecuter;
 import net.sf.jasperreports.olap.xmla.JRXmlaQueryExecuterFactory;
 
@@ -35,12 +36,12 @@ import org.w3c.tools.codec.Base64Encoder;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: JSXmlaQueryExecuter.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: JSXmlaQueryExecuter.java 61296 2016-02-25 21:53:37Z mchan $
  */
 public class JSXmlaQueryExecuter extends JRXmlaQueryExecuter {
 
-	public JSXmlaQueryExecuter(JRDataset dataset, Map parametersMap) {
-		super(dataset, parametersMap);
+	public JSXmlaQueryExecuter(JasperReportsContext jasperReportsContext, JRDataset dataset, Map parametersMap) {
+		super(jasperReportsContext, dataset, parametersMap);
 	}
 
 	@Override

@@ -22,7 +22,7 @@
 
 /**
  * @author: Zakhar Tomchenko, Igor Nesterenko, Andrew Godovanec, Sergey Prilukin
- * @version: $Id: bundle.js 9072 2015-07-15 23:11:16Z psavushc $
+ * @version: $Id: bundle.js 9909 2016-02-25 19:56:31Z dgorbenk $
  */
 
 define(function (require) {
@@ -52,6 +52,11 @@ define(function (require) {
             dataType: "json",
             url: urlRoot + urlSuffix
         });
+
+        // Changing default Cache Control directiove to have posebility decide caching on the server
+        // Default value was 'no-cache'
+        settings.headers["Cache-Control"] = "private";
+        delete settings.headers["Pragma"];
 
         request(settings).then(function(resp) {
             callback(MERGED_BUNDLES_NAME !== bundleName ? resp : _(resp).reduce(function(memo, bundle) {

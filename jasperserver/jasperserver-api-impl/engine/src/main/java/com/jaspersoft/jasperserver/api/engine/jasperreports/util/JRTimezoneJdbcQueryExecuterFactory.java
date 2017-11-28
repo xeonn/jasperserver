@@ -48,7 +48,7 @@ public class JRTimezoneJdbcQueryExecuterFactory extends JRJdbcQueryExecuterFacto
 
 	public JRQueryExecuter createQueryExecuter(JasperReportsContext jasperReportsContext, JRDataset dataset, Map<String, ? extends JRValueParameter> parameters) throws JRException
 	{
-		return new JRTimezoneJdbcQueryExecuter(dataset, parameters);
+		return new JRTimezoneJdbcQueryExecuter(jasperReportsContext, dataset, parameters);
 	}
 
 }

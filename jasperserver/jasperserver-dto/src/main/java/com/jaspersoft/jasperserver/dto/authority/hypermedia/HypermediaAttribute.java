@@ -19,7 +19,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 package com.jaspersoft.jasperserver.dto.authority.hypermedia;
+
 import com.jaspersoft.jasperserver.dto.authority.ClientAttribute;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -27,9 +29,9 @@ import javax.xml.bind.annotation.XmlRootElement;
  * <p></p>
  *
  * @author Volodya Sabadosh
- * @version $Id: HypermediaAttribute.java 58870 2015-10-27 22:30:55Z esytnik $
+ * @version $Id: HypermediaAttribute.java 61296 2016-02-25 21:53:37Z mchan $
  */
-@XmlRootElement(name = "hypermediaAttribute")
+@XmlRootElement(name = "attribute")
 public class HypermediaAttribute extends ClientAttribute {
     private HypermediaAttributeEmbeddedContainer embedded;
     private HypermediaAttributeLinks links;
@@ -39,6 +41,16 @@ public class HypermediaAttribute extends ClientAttribute {
     }
 
     public HypermediaAttribute() {
+    }
+
+    public HypermediaAttribute(HypermediaAttribute other) {
+        super(other);
+        if (other.getEmbedded() != null) {
+            this.setEmbedded(new HypermediaAttributeEmbeddedContainer(other.getEmbedded()));
+        }
+        if (other.getLinks() != null) {
+            this.setLinks(new HypermediaAttributeLinks(other.getLinks()));
+        }
     }
 
     @XmlElement(name = "_embedded")
@@ -61,4 +73,32 @@ public class HypermediaAttribute extends ClientAttribute {
         return this;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof HypermediaAttribute)) return false;
+        if (!super.equals(o)) return false;
+
+        HypermediaAttribute attribute = (HypermediaAttribute) o;
+
+        if (embedded != null ? !embedded.equals(attribute.embedded) : attribute.embedded != null) return false;
+        return !(links != null ? !links.equals(attribute.links) : attribute.links != null);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (embedded != null ? embedded.hashCode() : 0);
+        result = 31 * result + (links != null ? links.hashCode() : 0);
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "{" +
+                "embedded=" + embedded +
+                ", links=" + links +
+                "}" + super.toString();
+    }
 }

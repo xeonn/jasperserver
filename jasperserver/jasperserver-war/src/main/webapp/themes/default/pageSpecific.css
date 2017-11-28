@@ -137,6 +137,9 @@
 }
 
 #loginPage #welcome .text {
+    color: #fff;
+    font-size: 26px;
+    font-weight: normal;
     display: none;
 }
 
@@ -729,6 +732,9 @@ text-align:right;
 
 .dataSourceSaveDialog .treeBox > .content > .body {
     padding: 6px;
+}
+.dataSourceSaveDialog .treeBox .folders .folders {
+       margin-left: 5px;
 }
 
 .dataSourceSaveDialog.panel.dialog .content .subcontainer {
@@ -1864,6 +1870,7 @@ and (orientation:landscape) {
 @media screen and (-webkit-min-device-pixel-ratio:0) {
     #dataChooserPreFilters .control.pickWells > .availableValues>select {
         top:46px;
+        overflow-y: auto;
     }
 }
 
@@ -2139,6 +2146,10 @@ and (max-device-width : 1024px) {
     background-position:0 -30px;
 }
 
+#mainTableContainer #canvasTable .caption {
+    height: 40px;
+}
+
 #designer #titleCaption {
     height: 2.5em;
     line-height: 2.5em;
@@ -2147,10 +2158,21 @@ and (max-device-width : 1024px) {
     /* padding prevents overlap with new options button */
     padding-left:50px;
     padding-right:50px;
+    position: absolute;
+    width: 100%;
+    margin-left: 0px;
+    margin-right: 0px;
 }
 
 #designer #titleCaption > input {
-    position:relative;top:8px;
+    min-width: 500px;
+    position: absolute;
+    top:8px;
+    width: calc(100% - 50px);
+}
+
+#designer #titleCaption.highChartsTitle > input {
+    width: calc(100% - 60px);
 }
 
 #designer .OLAP {
@@ -3819,6 +3841,19 @@ li.dragging.measure {
     min-width: 420px;
 }
 
+
+
+/* fix to Properties panel / Horizontal scroll bar not showing on IE (see bug 45034)*/
+@media screen\0 {
+    .column.tertiary .node {overflow: visible;}
+}
+@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+    .column.tertiary .node {overflow: visible;}
+}
+
+
+
+
 /*
  * From: messageDetail.css
  */
@@ -4515,7 +4550,11 @@ li.dragging.measure {
 #reportViewFrame.column.decorated > .content > .body {
     min-width: 950px;
     overflow-x: auto;
-} /* NEW */
+}
+
+div.body.swipeScroll {position:absolute !important;}
+
+/* NEW */
 
 @media only screen
 and (min-device-width : 768px)
@@ -4640,10 +4679,6 @@ and (max-device-width : 1024px) {
     *width:98%;
     margin-left:0;
 }
-
-#reportViewer #saveAs {
-     width: 510px;
- }
 
 #reportViewer .saveAs > .content > .body .groupBox {
     top: 170px;
@@ -5359,6 +5394,10 @@ and (orientation:portrait) {
 	overflow:hidden;
 }
 
+.schedulerApp .outputTab #outputFormat {
+    width: 580px;
+}
+
 .schedulerApp .outputTab #outputFormat > .list.inputSet > .leaf {
 	clear:none;
 	float:left;
@@ -5557,8 +5596,8 @@ and (orientation:portrait) {
 
 .authorityPicker > .list.disabled {
     opacity: 1;
-    /* this list is somehow getting a double-disabled effect; 
-       full opacity is required for item selections within 
+    /* this list is somehow getting a double-disabled effect;
+       full opacity is required for item selections within
        this element to be visible */
 }
 
@@ -7004,7 +7043,8 @@ input[type="text"].mSelect-input {
 .LogCollectors .collectorsList .actionIcons .stop.stopped,
 .LogCollectors .collectorsList .actionIcons .download,
 .LogCollectors .collectorsList .actionIcons .download.notAvailable,
-.LogCollectors .collectorsList .actionIcons .remove {
+.LogCollectors .collectorsList .actionIcons .remove,
+.LogCollectors .collectorsList .actionIcons .remove.notAvailable {
     background-image: url(images/log_collectors.png);
     background-repeat: none;
 }
@@ -7039,6 +7079,11 @@ input[type="text"].mSelect-input {
 .LogCollectors .collectorsList .actionIcons .remove {
     background-position: -52px 1px;
     right: 6px;
+}
+
+.LogCollectors .collectorsList .actionIcons .remove.notAvailable {
+    background-position: -115px 1px;
+    cursor: default;
 }
 
 .LogCollectors .nothingToDisplay.panel.info {
@@ -7203,6 +7248,7 @@ input[type="text"].mSelect-input {
 #advancedSection td input,
 .advancedSection td textarea {
     margin-top: 5px;
+    overflow: auto;
     width: 100%;
 }
 

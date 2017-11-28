@@ -51,7 +51,7 @@ define(function (require) {
                 if (phase == STATE.INPROGRESS && _.isUndefined(self.interval)) {
 
                     self.interval = window.setInterval(function () {
-                        self.fetch().fail(_.bind(self.stopPolling, self));
+                        self.fetch({cache: false}).fail(_.bind(self.stopPolling, self));
                     }, 1000);
                 } else {
                     self.stopPolling();

@@ -43,7 +43,21 @@
         <value>/public</value>
     </util:list>
 
+    <util:list id="restrictedFolderNames">
+        <value>/public</value>
+    </util:list>
+
+    <util:list id="restrictedFoldersForCreation">
+        <value></value>
+        <value>/</value>
+        <value>org_template</value>
+        <value>organizations</value>
+    </util:list>
+
     <!-- Hibernate SessionFactory -->
+    <!-- Hibernate SessionFactory
+    If internal ActiveMQ server is used then you must add dependency 'depends-on="broker-1"' for sessionFactory or it will fail to start
+    -->
     <bean id="sessionFactory" class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
         <property name="dataSource" ref="dataSource"/>
         <property name="mappingResources">
@@ -560,14 +574,22 @@
         <property name="pooledJdbcDataSourceFactory">
             <ref bean="dbcpJdbcDataSourceFactory"/>
         </property>
+        <property name="autoCommitUnsupportedDrivers">
+            <set>
+                <value>com.simba.cassandra.jdbc4.Driver</value>
+                <value>com.simba.impala.jdbc4.Driver</value>
+            </set>
+        </property>
+        <property name="driverAuthMethMap">
+            <map>
+                <entry key="com.simba.cassandra.jdbc4.Driver" value="1"/>
+                <entry key="com.simba.impala.jdbc4.Driver" value="3"/>
+            </map>
+        </property>
         <property name="poolTimeout" value="900"/>
     </bean>
 
-    <bean id="mongoDbJDBCReportDataSourceServiceFactory" class="com.jaspersoft.jasperserver.api.engine.jasperreports.util.MongoDbJDBCReportDataSourceServiceFactory">
-        <property name="pooledJdbcDataSourceFactory">
-            <ref bean="dbcpJdbcDataSourceFactory"/>
-        </property>
-        <property name="poolTimeout" value="900"/>
+    <bean id="mongoDbJDBCReportDataSourceServiceFactory" class="com.jaspersoft.jasperserver.api.engine.jasperreports.util.MongoDbJDBCReportDataSourceServiceFactory" parent="jdbcDataSourceServiceFactory">
         <property name="mongoDBJDBCSchemaDefinitionTimeoutInMinute" value="1440"/>
         <property name="schemaDefinitionDirectory" value="#{ systemProperties['java.io.tmpdir'] }"/>
         <property name="repositoryService">
@@ -1032,6 +1054,12 @@
 
     <bean id="objectPermissionsRepositoryListener" class="com.jaspersoft.jasperserver.api.metadata.user.service.impl.ObjectPermissionsRepositoryListener">
         <property name="permissionsService" ref="${bean.objectPermissionServiceInternal}"/>
+        <property name="patternsToSkip">
+            <util:list value-type="java.lang.String" list-class="java.util.ArrayList">
+                <!-- individual theme resources don't have permissions assigned, skipping the check for performance reasons -->
+                <value>.*/themes/.*</value>
+            </util:list>
+        </property>
     </bean>
     
     <bean class="com.jaspersoft.jasperserver.api.metadata.common.service.ResourceEventListenerProcessor" lazy-init="false">
@@ -1391,7 +1419,7 @@
             <value><![CDATA[[\|&+*?\<\>/\\]]]></value>
         </property>
         <property name="tenantIdNotSupportedSymbols">
-            <value><![CDATA[[~!\+\-#\$%\^\|\s]]]></value>
+            <value><![CDATA[[~!\/\\\+\-#\$%\^\|\s]]]></value>
         </property>
         <property name="resourceIdNotSupportedSymbols">
             <value><![CDATA[[~!#\$%^|\s`@&*()\-+={}\[\]:;"'\<\>,?/\|\\]]]></value>
@@ -1419,6 +1447,9 @@
         <property name="defaultAddToDomainDependents" value="true"/>
         <property name="defaultDomainDependentsBlockAndUpdate" value="true"/>
         <property name="enableAccessibility" value="true"/>
+        <!-- max upload file size in bytes. -1 means no limit -->
+        <property name="maxFileSize" value="-1"/>
+
     </bean>
 
     <!-- report virtualizers -->
@@ -1749,6 +1780,7 @@
         <value>ap-southeast-1.amazonaws.com</value>
         <value>ap-southeast-2.amazonaws.com</value>
         <value>ap-northeast-1.amazonaws.com</value>
+        <value>ap-northeast-2.amazonaws.com</value>
         <value>sa-east-1.amazonaws.com</value>
     </util:list>
 

@@ -32,9 +32,11 @@ import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
 import com.jaspersoft.jasperserver.api.metadata.user.service.ObjectPermissionService;
 import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributeService;
 import com.jaspersoft.jasperserver.api.metadata.user.service.UserAuthorityService;
+import com.jaspersoft.jasperserver.dto.common.WarningDescriptor;
 import com.jaspersoft.jasperserver.export.Parameters;
 import com.jaspersoft.jasperserver.export.io.ImportInput;
 import com.jaspersoft.jasperserver.export.io.ObjectSerializer;
+import com.jaspersoft.jasperserver.export.modules.common.ExportImportWarningCode;
 import com.jaspersoft.jasperserver.export.modules.common.ProfileAttributeBean;
 import com.jaspersoft.jasperserver.export.modules.common.TenantQualifiedName;
 import com.jaspersoft.jasperserver.export.modules.common.TenantStrHolderPattern;
@@ -54,7 +56,7 @@ import java.util.Map;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: BaseImporterModule.java 58265 2015-10-05 16:13:56Z vzavadsk $
+ * @version $Id: BaseImporterModule.java 61296 2016-02-25 21:53:37Z mchan $
  */
 public abstract class BaseImporterModule extends BasicExporterImporterModule implements ImporterModule {
 
@@ -317,5 +319,13 @@ public abstract class BaseImporterModule extends BasicExporterImporterModule imp
 		}
 
 		return permissionRecipient;
+	}
+
+	protected void logWarning(ExportImportWarningCode warningCode, String[] parameters, String message) {
+		if (importContext.getImportTask().getWarnings() != null) {
+			importContext.getImportTask().getWarnings()
+					.add(new WarningDescriptor(warningCode.toString(), parameters, message));
+		}
+		commandOut.warn(message);
 	}
 }

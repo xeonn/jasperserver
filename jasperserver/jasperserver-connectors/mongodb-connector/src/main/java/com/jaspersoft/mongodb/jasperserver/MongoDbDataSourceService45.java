@@ -75,7 +75,7 @@ public class MongoDbDataSourceService45 implements ReportDataSourceService {
             createConnection();
             parameters.put(JRParameter.REPORT_CONNECTION, connection);
         } catch (Exception e) {
-            logger.error(e);
+            logger.error("Cannot set report parameter values for mongo URI " + mongoURI + "; Caused by: " + e.getMessage(), e);
         }
     }
 
@@ -92,7 +92,7 @@ public class MongoDbDataSourceService45 implements ReportDataSourceService {
                 logger.debug("MongoDB connection created");
             }
         } catch (Exception e) {
-            logger.error(e);
+            logger.error("Cannot create or borrow a connection for mongo URI " + mongoURI + "; Caused by: " + e.getMessage(), e);
             throw new JRException(e.getMessage());
         }
     }

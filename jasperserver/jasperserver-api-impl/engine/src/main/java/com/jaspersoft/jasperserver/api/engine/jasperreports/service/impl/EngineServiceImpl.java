@@ -28,6 +28,7 @@ import com.jaspersoft.jasperserver.api.common.domain.impl.ExecutionContextImpl;
 import com.jaspersoft.jasperserver.api.common.domain.impl.ValidationDetailImpl;
 import com.jaspersoft.jasperserver.api.common.domain.impl.ValidationResultImpl;
 import com.jaspersoft.jasperserver.api.common.util.TimeZoneContextHolder;
+import com.jaspersoft.jasperserver.api.common.util.diagnostic.DiagnosticSnapshotPropertyHelper;
 import com.jaspersoft.jasperserver.api.common.util.diagnostic.FilterBy;
 import com.jaspersoft.jasperserver.api.engine.common.domain.Request;
 import com.jaspersoft.jasperserver.api.engine.common.domain.Result;
@@ -197,7 +198,7 @@ import java.util.jar.JarFile;
 /**
  *
  * @author Teodor Danciu (teodord@users.sourceforge.net)
- * @version $Id: EngineServiceImpl.java 58870 2015-10-27 22:30:55Z esytnik $
+ * @version $Id: EngineServiceImpl.java 61296 2016-02-25 21:53:37Z mchan $
  */
 public class EngineServiceImpl implements EngineService, ReportExecuter,
 		CompiledReportProvider, InternalReportCompiler, InitializingBean, Diagnostic
@@ -2422,7 +2423,11 @@ public class EngineServiceImpl implements EngineService, ReportExecuter,
 		if (snapshotParams == null || snapshotParams.isEmpty()) {
 			return;
 		}
-		
+
+		if (DiagnosticSnapshotPropertyHelper.isDiagSnapshotSet(snapshotParams)) {
+			infos.setDiagnosticProperty(true);
+		}
+
 		if (log.isDebugEnabled()) {
 			log.debug("setting default param values for " + reportUnit.getURIString()
 					+ " from data snapshot " + reportUnit.getDataSnapshotId());
@@ -2587,7 +2592,7 @@ public class EngineServiceImpl implements EngineService, ReportExecuter,
             ReportInputControlInformation info;
             boolean useGlobalDefaultValue = true;
             if (param != null) {
-                useGlobalDefaultValue = !jrDefaultValues.containsKey(name);
+                useGlobalDefaultValue = jrDefaultValues.get(name) == null && param.getDefaultValueExpression() == null;
                 JasperReportInputControlInformation jrInfo = new JasperReportInputControlInformation();
                 jrInfo.setReportParameter(param);
                 jrInfo.setDefaultValue(jrDefaultValues.get(name));

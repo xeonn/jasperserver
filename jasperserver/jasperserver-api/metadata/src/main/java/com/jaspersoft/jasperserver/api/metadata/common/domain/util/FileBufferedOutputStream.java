@@ -21,6 +21,9 @@
 
 package com.jaspersoft.jasperserver.api.metadata.common.domain.util;
 
+import net.sf.jasperreports.engine.DefaultJasperReportsContext;
+import net.sf.jasperreports.engine.JRPropertiesUtil;
+
 /**
  * Borrowed from JasperReports class of the same name. 
  * 
@@ -28,8 +31,6 @@ package com.jaspersoft.jasperserver.api.metadata.common.domain.util;
  * 
  * @author swood
  */
-
-import net.sf.jasperreports.engine.util.JRProperties;
         
 import com.jaspersoft.jasperserver.api.JSException;
 import java.io.BufferedInputStream;
@@ -52,7 +53,7 @@ import org.apache.commons.logging.LogFactory;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: FileBufferedOutputStream.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: FileBufferedOutputStream.java 61296 2016-02-25 21:53:37Z mchan $
  */
 public class FileBufferedOutputStream extends OutputStream 
 {
@@ -62,7 +63,7 @@ public class FileBufferedOutputStream extends OutputStream
 	/**
 	 * Specifies the maximum in-memory buffer length that triggers the creation of a temporary file on disk to store further content sent to this output stream.  
 	 */
-	public static final String PROPERTY_MEMORY_THRESHOLD = JRProperties.PROPERTY_PREFIX + "file.buffer.os.memory.threshold";
+	public static final String PROPERTY_MEMORY_THRESHOLD = JRPropertiesUtil.PROPERTY_PREFIX + "file.buffer.os.memory.threshold";
 	//public static final int DEFAULT_MEMORY_THRESHOLD = 1 << 18;
 	public static final int INFINIT_MEMORY_THRESHOLD = -1;
 	public static final int DEFAULT_INITIAL_MEMORY_BUFFER_SIZE = 1 << 16;
@@ -82,7 +83,7 @@ public class FileBufferedOutputStream extends OutputStream
 	private final WeakHashMap<DataStream, Boolean> inputStreams;
 	
 	public FileBufferedOutputStream() {
-		this(JRProperties.getIntegerProperty(PROPERTY_MEMORY_THRESHOLD, INFINIT_MEMORY_THRESHOLD), DEFAULT_INITIAL_MEMORY_BUFFER_SIZE, DEFAULT_INPUT_BUFFER_LENGTH);
+		this(JRPropertiesUtil.getInstance(DefaultJasperReportsContext.getInstance()).getIntegerProperty(PROPERTY_MEMORY_THRESHOLD, INFINIT_MEMORY_THRESHOLD), DEFAULT_INITIAL_MEMORY_BUFFER_SIZE, DEFAULT_INPUT_BUFFER_LENGTH);
 	}
 	
 	public FileBufferedOutputStream(int memoryThreshold) {

@@ -28,24 +28,32 @@ import com.jaspersoft.jasperserver.api.metadata.common.service.impl.RepositoryLi
 import com.jaspersoft.jasperserver.api.metadata.common.service.impl.ResourceCopiedEvent;
 import com.jaspersoft.jasperserver.api.metadata.common.service.impl.ResourceMoveEvent;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.regex.Pattern;
+
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ObjectPermissionsRepositoryListener.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: ObjectPermissionsRepositoryListener.java 61296 2016-02-25 21:53:37Z mchan $
  */
 public class ObjectPermissionsRepositoryListener extends RepositoryEventListenerSupport implements RepositoryListener {
 
 	private ObjectPermissionServiceInternal permissionsService;
-	
+	private List<Pattern> patternsToSkip;
+
 	public void onResourceDelete(Class resourceItf, String resourceURI) {
         // We do not remove permissions when upgrading because the new resources will be created with the same URI and
         // they will have the same permissions.
-        if (!UpgradeRunMonitor.isUpgradeRun()) {
+        if (!UpgradeRunMonitor.isUpgradeRun() && !skipPermissionProcessing(resourceURI)) {
             getPermissionsService().deleteObjectPermissionForRepositoryPath(null, resourceURI);
         }
 	}
 
 	public void onFolderDelete(String folderURI) {
-		getPermissionsService().deleteObjectPermissionForRepositoryPath(null, folderURI);
+        if (!skipPermissionProcessing(folderURI)) {
+            getPermissionsService().deleteObjectPermissionForRepositoryPath(null, folderURI);
+        }
 	}
 
 	public ObjectPermissionServiceInternal getPermissionsService() {
@@ -70,4 +78,25 @@ public class ObjectPermissionsRepositoryListener extends RepositoryEventListener
 		// NOP
 	}
 
+    public void setPatternsToSkip(List<String> patternsToSkip) {
+        if (patternsToSkip != null) {
+            List<Pattern> patterns = new ArrayList<Pattern>();
+            for (String pattern : patternsToSkip) {
+                patterns.add(Pattern.compile(pattern));
+            }
+            this.patternsToSkip = Collections.unmodifiableList(patterns);
+        }
+    }
+
+    private boolean skipPermissionProcessing(String uri) {
+        if (uri == null || patternsToSkip == null || patternsToSkip.isEmpty()) {
+            return false;
+        }
+        for (Pattern pattern : patternsToSkip) {
+            if (pattern.matcher(uri).matches()) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

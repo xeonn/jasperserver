@@ -20,10 +20,7 @@
  */
 package com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.TimeZone;
+import java.util.*;
 import javax.sql.DataSource;
 
 import com.jaspersoft.jasperserver.api.common.util.TibcoDriverManager;
@@ -39,11 +36,12 @@ import com.jaspersoft.jasperserver.api.metadata.jasperreports.service.ReportData
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: JdbcReportDataSourceServiceFactory.java 58828 2015-10-24 00:23:32Z mchan $
+ * @version $Id: JdbcReportDataSourceServiceFactory.java 60730 2016-02-09 19:02:32Z mchan $
  */
 public class JdbcReportDataSourceServiceFactory implements ReportDataSourceServiceFactory {
 
     private static final Log log = LogFactory.getLog(JdbcReportDataSourceServiceFactory.class);
+
 
 	protected static class PooledDataSourcesCache {
 
@@ -107,7 +105,8 @@ public class JdbcReportDataSourceServiceFactory implements ReportDataSourceServi
 	private PooledJdbcDataSourceFactory pooledJdbcDataSourceFactory;
 	private PooledDataSourcesCache poolDataSources;
 	private int poolTimeout;
-	
+    private Set<String> autoCommitUnsupportedDrivers = new HashSet<String>(); // protect from NPE
+    private Map<String, String> driverAuthMethMap = new HashMap<String, String>(); // protect from NPE
 	private boolean defaultReadOnly = true;
 	private boolean defaultAutoCommit = false;
 
@@ -128,11 +127,17 @@ public class JdbcReportDataSourceServiceFactory implements ReportDataSourceServi
         String driverClass = jdbcDataSource.getDriverClass();
         String userName = jdbcDataSource.getUsername();
         String password = jdbcDataSource.getPassword();
+        String connectionUrl = jdbcDataSource.getConnectionUrl();
         if (driverClass.startsWith("tibcosoftware.jdbc")) {
             userName = (( (userName != null) && (!userName.isEmpty())) ? userName : "dummy");
             password = (( (password != null) && (!password.isEmpty())) ? password : "dummy");
+        } else if (driverAuthMethMap.get(driverClass) != null) {
+            if (connectionUrl.toLowerCase().indexOf("authmech") < 0) {
+                connectionUrl = connectionUrl + (connectionUrl.endsWith(";") ? "authmech=" : ";authmech=") +
+                        (( (userName != null) && (!userName.isEmpty())) ? driverAuthMethMap.get(driverClass) : "0");
+            }
         }
-        DataSource dataSource = getPoolDataSource(driverClass, jdbcDataSource.getConnectionUrl(), userName, password);
+        DataSource dataSource = getPoolDataSource(driverClass, connectionUrl, userName, password);
 
 
 		return new JdbcDataSourceService(dataSource, getTimeZoneByDataSourceTimeZone(jdbcDataSource.getTimezone()));
@@ -150,9 +155,10 @@ public class JdbcReportDataSourceServiceFactory implements ReportDataSourceServi
 				if (log.isDebugEnabled()) {
 					log.debug("Creating connection pool for " + poolKey + ".");
 				}
+                boolean isAutoCommit = (getAutoCommitUnsupportedDrivers().contains(driverClass) ? true : defaultAutoCommit);
 				dataSource = pooledJdbcDataSourceFactory.createPooledDataSource(
 						driverClass, url, username, password,
-						defaultReadOnly, defaultAutoCommit);
+						defaultReadOnly, isAutoCommit);
 				poolDataSources.put(poolKey, dataSource, now);
 			} else {
 				if (log.isDebugEnabled()) {
@@ -282,4 +288,20 @@ public class JdbcReportDataSourceServiceFactory implements ReportDataSourceServi
 	public void setDefaultAutoCommit(boolean defaultAutoCommit) {
 		this.defaultAutoCommit = defaultAutoCommit;
 	}
+
+    public Set<String> getAutoCommitUnsupportedDrivers() {
+        return autoCommitUnsupportedDrivers;
+    }
+
+    public void setAutoCommitUnsupportedDrivers(Set<String> autoCommitUnsupportedDrivers) {
+        this.autoCommitUnsupportedDrivers = autoCommitUnsupportedDrivers;
+    }
+
+    public Map<String, String> getDriverAuthMethMap() {
+        return driverAuthMethMap;
+    }
+
+    public void setDriverAuthMethMap(Map<String, String> driverAuthMethMap) {
+        this.driverAuthMethMap = driverAuthMethMap;
+    }
 }

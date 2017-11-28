@@ -45,9 +45,9 @@ define(function(require) {
         events: {
             "keyup input[type='text'][class!='dataSourceID'], textarea": "updateModelProperty",
             "change input[type='text'][class!='dataSourceID'], textarea, select": "updateModelProperty",
-            "click #right": "chooseTreeNodes",
-            "click #left": "removeSelectedSubDataSources",
-            "click #toLeft": "removeAllSubDataSources"
+            "click [name=toRight]": "chooseTreeNodes",
+            "click [name=toLeft]": "removeSelectedSubDataSources",
+            "click [name=allToLeft]": "removeAllSubDataSources"
         },
 
         initialize: function(options) {
@@ -69,7 +69,7 @@ define(function(require) {
         chooseTreeNodes: function(e) {
 			e.preventDefault();
 
-            this.$("#right").attr("disabled", "disabled").removeClass("over");
+            this.$("[name=toRight]").attr("disabled", "disabled").removeClass("over");
 
             var self = this, nodes = this.subDataSourcesTree.selectedNodes,
                 models = _.compact(_.map(nodes, function(node) {
@@ -140,14 +140,14 @@ define(function(require) {
 
         updateAllToLeftButtonState: function() {
             if (this.hasDependedResources || this.selectedSubDataSourcesList.getListLength() === 0) {
-				this.$("#toLeft").attr("disabled", "disabled").removeClass("over");
+				this.$("[name=allToLeft]").attr("disabled", "disabled").removeClass("over");
             } else {
-				this.$("#toLeft").removeAttr("disabled");
+				this.$("[name=allToLeft]").removeAttr("disabled");
             }
         },
 
         updateRightButtonState: function() {
-            var $btn = this.$("#right"),
+            var $btn = this.$("[name=toRight]"),
                 nodes = this.subDataSourcesTree.selectedNodes,
                 hasMovables = false,
                 hasUnmovables = false;
@@ -170,7 +170,7 @@ define(function(require) {
 
         updateLeftButtonState: function() {
             var models = this.selectedSubDataSourcesList.getSelectedModels(),
-                $btn = this.$("#left");
+                $btn = this.$("[name=toLeft]");
 
             if(models.length > 0) {
                 $btn.removeAttr("disabled");

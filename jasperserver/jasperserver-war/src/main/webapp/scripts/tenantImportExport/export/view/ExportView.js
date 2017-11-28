@@ -406,8 +406,11 @@ define(function(require) {
         this.listenTo(this.model, "change:includeSubOrganizations", this.filterAuthoritiesBySubOrgs);
     }
 
-    function downloadFile(){
-        window.location.href = this.model.url() + "/" + this.stateModel.id + "/" + this.model.get("fileName");
+    function downloadFile() {
+        var iframe = document.createElement("iframe");
+        iframe.src = this.model.url() + "/" + this.stateModel.id + "/" + this.model.get("fileName");
+        iframe.style.display = "none";
+        $("body").append(iframe);
     }
 
     function cancelExportTask(phase) {

@@ -26,7 +26,6 @@
  */
 
 define(function (require) {
-//    "use strict";
 
     /*
      This map is used to escape certain chars in the HTML output. This disables javascript in HTML context (XSS attacks).

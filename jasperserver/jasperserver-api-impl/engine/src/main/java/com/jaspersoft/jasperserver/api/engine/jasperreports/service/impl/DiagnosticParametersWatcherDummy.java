@@ -25,7 +25,7 @@ import com.jaspersoft.jasperserver.api.engine.jasperreports.service.DiagnosticPa
 
 /**
  * @author Yakiv Tymoshenko
- * @version $Id: DiagnosticParametersWatcherDummy.java 54486 2015-04-21 05:24:32Z ytymoshe $
+ * @version $Id: DiagnosticParametersWatcherDummy.java 61296 2016-02-25 21:53:37Z mchan $
  * @since 01.10.14
  */
 public class DiagnosticParametersWatcherDummy implements DiagnosticParametersWatcher {
@@ -33,6 +33,11 @@ public class DiagnosticParametersWatcherDummy implements DiagnosticParametersWat
     @Override
     public boolean isResourceUriWatched(String resourceUri) {
         // Always false for CE.
+        return false;
+    }
+
+    @Override
+    public boolean isSnapshotExportEnabled(String reportUri) {
         return false;
     }
 }

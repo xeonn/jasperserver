@@ -21,17 +21,19 @@
 package com.jaspersoft.jasperserver.api.engine.jasperreports.util;
 
 import net.sf.jasperreports.engine.JRCommonText;
+import net.sf.jasperreports.engine.JasperReportsContext;
 import net.sf.jasperreports.engine.fill.JRTextMeasurer;
-import net.sf.jasperreports.engine.fill.JRTextMeasurerFactory;
+import net.sf.jasperreports.engine.util.AbstractTextMeasurerFactory;
 
 /**
  * @author Jun-Sun Whang
- * @version $Id: SingleLineTextMeasurerFactory.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: SingleLineTextMeasurerFactory.java 61296 2016-02-25 21:53:37Z mchan $
  */
-public class SingleLineTextMeasurerFactory implements JRTextMeasurerFactory {
+public class SingleLineTextMeasurerFactory extends AbstractTextMeasurerFactory {
 
-	public JRTextMeasurer createMeasurer(JRCommonText text) {
-		return new SingleLineTextMeasurer(text);
+	@Override
+	public JRTextMeasurer createMeasurer(JasperReportsContext jasperReportsContext, JRCommonText text) {
+		return new SingleLineTextMeasurer(jasperReportsContext, text);
 	}
 
 }

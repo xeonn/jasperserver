@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: SubDataSourcesListView.js 8790 2015-04-22 21:28:09Z obobruyk $
+ * @version: $Id: SubDataSourcesListView.js 9909 2016-02-25 19:56:31Z dgorbenk $
  */
 
 /* global disableSelectionWithoutCursorStyle, enableSelection */
@@ -115,7 +115,15 @@ define(function (require) {
 
             if (modelsToAdd.length) {
                 _.each(modelsToAdd, function(model) {
-                    self.addSubview(model);
+
+	                var view = new SubDataSourceItemView({
+		                model: model
+	                });
+
+	                self.subviews.push(view);
+
+	                self._list.addItems([view.getListItem()]);
+	                self._list.show();
                 });
 
                 this._list.show();
@@ -127,6 +135,12 @@ define(function (require) {
                         self._list.selectItem(view.getListItem(), true);
                     });
                 }
+
+	            _.each(this.subviews, function(view) {
+		            // ListItem._getElement() is pointing to correct element only after we added it to the List
+		            // so here we wait for DOM of List to be updated and then set root el for subview
+		            _.defer(_.bind(view.setRootElement, view));
+	            });
             }
 
             if (modelsToRemove.length) {
@@ -173,21 +187,6 @@ define(function (require) {
                 view.remove();
                 this._list.show();
             }
-        },
-
-        addSubview: function(model) {
-            var view = new SubDataSourceItemView({
-				model: model
-			});
-
-            this.subviews.push(view);
-
-            this._list.addItems([view.getListItem()]);
-            this._list.show();
-
-            // ListItem._getElement() is pointing to correct element only after we added it to the List
-            // so here we wait for DOM of List to be updated and then set root el for subview
-            _.defer(_.bind(view.setRootElement, view));
         },
 
         removeSubviews: function() {

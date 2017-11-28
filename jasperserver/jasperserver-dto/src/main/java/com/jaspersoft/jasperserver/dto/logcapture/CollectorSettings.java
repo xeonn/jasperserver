@@ -16,7 +16,7 @@ import java.io.File;
  * DTO for Diagnostic Collector's settings.
  *
  * @author Yakiv Tymoshenko
- * @version $Id: CollectorSettings.java 56967 2015-08-20 23:20:53Z esytnik $
+ * @version $Id: CollectorSettings.java 61296 2016-02-25 21:53:37Z mchan $
  * @since 11.08.14
  */
 @XmlRootElement
@@ -54,7 +54,7 @@ public class CollectorSettings {
         this.name = other.getName();
         this.verbosity = other.getVerbosity();
         this.status = other.getStatus();
-        this.logFilterParameters = other.getLogFilterParameters();
+        this.logFilterParameters = new LogFilterParameters(other.getLogFilterParameters());
     }
 
     /*
@@ -65,7 +65,8 @@ public class CollectorSettings {
             return false;
         }
         ResourceAndSnapshotFilter resourceAndSnapshotFilter = logFilterParameters.getResourceAndSnapshotFilter();
-        return resourceAndSnapshotFilter != null && resourceAndSnapshotFilter.exportEnabled();
+        return resourceAndSnapshotFilter != null
+                && resourceAndSnapshotFilter.exportDatasnapshotEnabled();
     }
 
     @Override
@@ -103,24 +104,27 @@ public class CollectorSettings {
 
     // Getter required for correct json/xml transformation by jaxb.
     @SuppressWarnings("unused")
-    public void setLogFilterParameters(LogFilterParameters logFilterParameters) {
+    public CollectorSettings setLogFilterParameters(LogFilterParameters logFilterParameters) {
         this.logFilterParameters = logFilterParameters;
+        return  this;
     }
 
     public String getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public CollectorSettings setId(String id) {
         this.id = id;
+        return  this;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
+    public CollectorSettings setName(String name) {
         this.name = name;
+        return this;
     }
 
     public String getVerbosity() {
@@ -129,15 +133,19 @@ public class CollectorSettings {
 
     // Getter required for correct json/xml transformation by jaxb
     @SuppressWarnings("unused")
-    public void setVerbosity(String verbosity) {
+    public CollectorSettings setVerbosity(String verbosity) {
         this.verbosity = verbosity;
+        return this;
     }
 
     public String getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public CollectorSettings setStatus(String status) {
         this.status = status;
+        return this;
     }
+
+
 }

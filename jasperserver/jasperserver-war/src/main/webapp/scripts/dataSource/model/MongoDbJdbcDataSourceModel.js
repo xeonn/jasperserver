@@ -39,7 +39,8 @@ define(function (require) {
 
             _.extend(defaults, CustomDataSourceModel.prototype.defaults, {
 	            dataSourceName: "mongoDbJDBCDataSource",
-	            fileSourceType: "repository"
+	            fileSourceType: "repository",
+	            timeZone: ""
             });
 
             return defaults;
@@ -126,6 +127,12 @@ define(function (require) {
 			    model.autoSchemaDefinition = true;
 		    }
 
+		    // fix for timeZone: server side expects timezone to be passed in custom fields by name "timeZone"
+		    // while the section on UI renders it with name='timezone' which creates variable 'timeZone'
+		    // What we need is to rename field from 'timeZone' to 'timezone'
+		    model.timezone = model.timeZone;
+		    delete model.timeZone;
+
 		    return model;
 	    },
 
@@ -155,6 +162,12 @@ define(function (require) {
 			    delete data.fileSourceType;
 		    }
 		    delete data.autoSchemaDefinition;
+
+		    // fix for timeZone: server side expects timezone to be passed in custom fields by name "timeZone"
+		    // while the section on UI renders it with name='timezone' which creates variable 'timeZone'
+		    // What we need is to rename field from 'timezone' to 'timeZone'
+		    data.timeZone = data.timezone;
+		    delete data.timezone;
 
 		    data = CustomDataSourceModel.prototype.customFieldsToJSON.call(this, data, customFields);
 

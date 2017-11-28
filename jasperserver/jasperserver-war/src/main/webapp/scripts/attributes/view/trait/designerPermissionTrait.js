@@ -21,13 +21,12 @@
 
 /**
  * @author: Olesya Bobruyko
- * @version: $Id: designerPermissionTrait.js 8900 2015-05-06 20:57:14Z yplakosh $
+ * @version: $Id: designerPermissionTrait.js 9909 2016-02-25 19:56:31Z dgorbenk $
  */
 
 define(function(require) {
 
-    var i18n = require("bundle!AttributesBundle"),
-        confirmDialogTypesEnum = require("serverSettingsCommon/enum/confirmDialogTypesEnum");
+    var confirmDialogTypesEnum = require("serverSettingsCommon/enum/confirmDialogTypesEnum");
 
     return {
 
@@ -37,20 +36,19 @@ define(function(require) {
         },
 
         _onPermissionConfirm: function() {
-            this.currentChildView
-                ? this.currentChildView.triggerModelValidation({dfd: this.validateDfD})
-                : this.model.get("changedChildView").model.setState("confirmedState");
+            var changedChildViewModel;
+
+            if (this.currentChildView) {
+                this.currentChildView.triggerModelValidation({dfd: this.validateDfD})
+            } else {
+                changedChildViewModel = this.model.get("changedChildView").model;
+                changedChildViewModel.setState("confirmedState");
+                changedChildViewModel.hasChanged("inherited") && this._resetFilters && this._resetFilters();
+            }
         },
 
         _onPermissionCancel: function() {
             this._revertChangedModelProperty("_embedded");
-        },
-
-        _getPermissionConfirmContent: function(editMode) {
-            var mode = editMode ? "edit" : "view",
-                textPropertyName = "attributes.confirm.permission.dialog." + mode + ".mode.text";
-
-            return i18n[textPropertyName];
         },
 
         _showPermissionConfirm: function(childView) {

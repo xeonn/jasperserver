@@ -43,6 +43,15 @@
         <entry key="securityToken">
             <value><![CDATA[^([\p{L}\p{M}\p{N}\s_.,\-}{]|#{ attributePlaceholderPatternUI })+$]]></value>
         </entry>
+        <entry key="stmtCallLimit">
+            <value><![CDATA[^([\p{L}\p{M}\p{N}\s_.,\-}{]|#{ attributePlaceholderPatternUI })+$]]></value>
+        </entry>
+        <entry key="authMech">
+            <value><![CDATA[^([0|1|2]{1}|#{ attributePlaceholderPatternUI })$]]></value>
+        </entry>
+        <entry key="defaultKeySpace">
+            <value><![CDATA[^([\p{L}\p{M}\p{N}\s_.,\-}{]|#{ attributePlaceholderPatternUI })+$]]></value>
+        </entry>
         <entry key="driverType">
             <value><![CDATA[^([1|2|3|4]{1}|#{ attributePlaceholderPatternUI })$]]></value>
         </entry>

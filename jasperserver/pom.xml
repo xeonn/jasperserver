@@ -6,7 +6,7 @@
     <artifactId>server</artifactId>
     <packaging>pom</packaging>
     <name>Jasper Server</name>
-    <version>6.2.0</version>
+    <version>6.2.1</version>
     <url>http://www.jaspersoft.com</url>
     <profiles>
       <profile>
@@ -157,6 +157,11 @@
     <dependency>
       <groupId>commons-logging</groupId>
       <artifactId>commons-logging</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId> <!-- has few bugs corrected - for example, Java string escaping -->
+      <artifactId>commons-lang3</artifactId>
+      <version>3.0</version>
     </dependency>
   </dependencies>
   <dependencyManagement>
@@ -422,7 +427,7 @@
       <dependency>
         <groupId>xalan</groupId>
         <artifactId>xalan</artifactId>
-        <version>2.7.1</version>
+        <version>2.7.2</version>
       </dependency>
       <dependency>
         <groupId>xerces</groupId>
@@ -432,7 +437,7 @@
       <dependency>
         <groupId>xalan</groupId>
         <artifactId>serializer</artifactId>
-        <version>2.7.1</version>
+        <version>2.7.2</version>
       </dependency>
       <dependency>
         <groupId>dom4j</groupId>
@@ -558,7 +563,7 @@
       <dependency>
         <groupId>net.sf.jasperreports</groupId>
         <artifactId>jasperreports</artifactId>
-        <version>6.2.0</version>
+        <version>6.2.1</version>
         <exclusions>
             <exclusion>
                 <groupId>xml-apis</groupId>
@@ -599,7 +604,7 @@
       <dependency>
         <groupId>com.lowagie</groupId>
         <artifactId>itext</artifactId>
-        <version>2.1.7.js4</version>
+        <version>2.1.7.js5</version>
         <exclusions>
           <!-- already present in JRS under org.bouncycastle -->
           <exclusion>
@@ -651,8 +656,98 @@
       <dependency>
         <groupId>com.jaspersoft.connectors.mongodb</groupId>
         <artifactId>js-mongodb-datasource</artifactId>
-        <version>2.0.3</version>
+        <version>2.0.5</version>
       </dependency>
+      <dependency>
+          <groupId>org.mongodb</groupId>
+          <artifactId>mongo-java-driver</artifactId>
+          <version>2.14.1</version>
+      </dependency>
+      <dependency>
+          <groupId>org.jboss.teiid</groupId>
+          <artifactId>teiid-client</artifactId>
+          <version>${teiid.version}</version>
+      </dependency>
+      <dependency>
+          <groupId>org.jboss.teiid</groupId>
+          <artifactId>teiid-metadata</artifactId>
+          <version>${teiid.version}</version>
+      </dependency>
+      <dependency>
+          <groupId>org.jboss.teiid</groupId>
+          <artifactId>teiid-engine</artifactId>
+          <version>${teiid.version}</version>
+      </dependency>
+      <dependency>
+          <groupId>org.jboss.teiid</groupId>
+          <artifactId>teiid-runtime</artifactId>
+          <version>${teiid.version}</version>
+      </dependency>
+        <dependency>
+          <groupId>org.jboss.teiid</groupId>
+          <artifactId>teiid-admin</artifactId>
+          <version>${teiid.version}</version>
+        </dependency>
+      <dependency>
+          <groupId>org.jboss.teiid</groupId>
+          <artifactId>teiid-api</artifactId>
+          <version>${teiid.version}</version>
+      </dependency>
+      <dependency>
+          <groupId>org.jboss.teiid</groupId>
+          <artifactId>teiid-common-core</artifactId>
+          <version>${teiid.version}</version>
+      </dependency>
+        <dependency>
+          <groupId>org.jboss.teiid.connectors</groupId>
+          <artifactId>translator-jdbc</artifactId>
+          <version>${teiid.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.jboss.teiid.connectors</groupId>
+          <artifactId>connector-file</artifactId>
+          <classifier>lib</classifier>
+          <version>${teiid.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.jboss.teiid.connectors</groupId>
+          <artifactId>translator-cassandra</artifactId>
+          <version>${teiid.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.jboss.teiid.connectors</groupId>
+          <artifactId>connector-cassandra</artifactId>
+          <classifier>lib</classifier>
+          <version>${teiid.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.jboss.teiid.connectors</groupId>
+          <artifactId>translator-hive</artifactId>
+          <version>${teiid.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.infinispan</groupId>
+          <artifactId>infinispan-core</artifactId>
+          <!--version>5.2.11.Final</version-->
+          <version>5.1.2.FINAL</version>
+        </dependency>
+        <dependency>
+          <groupId>javax.resource</groupId>
+          <artifactId>connector-api</artifactId>
+          <version>1.5</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.logging</groupId>
+            <artifactId>jboss-logging</artifactId>
+            <version>3.1.4.GA-redhat-1</version>
+            <!--version>3.1.2.GA</version-->
+        </dependency>
+		<dependency>
+            <groupId>org.jgroups</groupId>
+            <artifactId>jgroups</artifactId>
+            <version>3.2.13.Final-redhat-1</version>
+            <!--version>3.2.7.Final</version-->
+        </dependency>
     </dependencies>
   </dependencyManagement>
   <distributionManagement>
@@ -675,6 +770,8 @@
     <my.build.directory>target</my.build.directory>
     <spring.version>3.2.13.RELEASE</spring.version>
     <spring.security.version>3.2.5.RELEASE</spring.security.version>
+    <spring.integration.version>3.0.7.RELEASE</spring.integration.version>
     <aws-java-sdk.version>1.9.31</aws-java-sdk.version>
+    <teiid.version>8.12.3</teiid.version>
   </properties>
 </project>

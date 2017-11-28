@@ -34,9 +34,10 @@ import java.util.List;
  * Repository search service.
  *
  * @author Yuriy Plakosh
- * @version $Id: RepositorySearchService.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: RepositorySearchService.java 61510 2016-03-03 09:36:22Z ykovalch $
  */
 public interface RepositorySearchService {
+    public static final String PARAM_SORT_BY_POPULARITY = "popularity";
     public int getResultsCount(final ExecutionContext context, final SearchCriteriaFactory searchCriteriaFactory,
         final List<SearchFilter> filters, final SearchSorter sorter);
 

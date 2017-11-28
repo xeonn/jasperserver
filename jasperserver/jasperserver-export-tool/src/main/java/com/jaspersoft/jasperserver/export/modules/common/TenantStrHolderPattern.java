@@ -31,7 +31,7 @@ import static com.jaspersoft.jasperserver.api.metadata.user.service.TenantServic
 /**
  * @author Vlad Zavadskii
  * @author askorodumov
- * @version $Id: TenantStrHolderPattern.java 58265 2015-10-05 16:13:56Z vzavadsk $
+ * @version $Id: TenantStrHolderPattern.java 61296 2016-02-25 21:53:37Z mchan $
  */
 public enum TenantStrHolderPattern {
 
@@ -111,6 +111,9 @@ public enum TenantStrHolderPattern {
         return sb.toString();
     }
 
+    public Pattern getPattern() {
+        return pattern;
+    }
 
     protected Pattern pattern;
     protected int group;

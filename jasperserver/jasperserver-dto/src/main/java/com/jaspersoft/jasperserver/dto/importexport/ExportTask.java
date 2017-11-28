@@ -20,6 +20,7 @@
  */
 package com.jaspersoft.jasperserver.dto.importexport;
 
+import java.util.ArrayList;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -57,59 +58,126 @@ public class ExportTask {
     @XmlElement(name = "organization")
     private String organization;
 
+    public ExportTask() {
+    }
+
+    public ExportTask(ExportTask other) {
+        this.exportParams = (other.exportParams != null) ? new ArrayList<String>(other.exportParams) : null;
+        this.urisOfResources = (other.urisOfResources != null) ? new ArrayList<String>(other.urisOfResources) : null;
+        this.urisOfScheduledJobs = (other.urisOfScheduledJobs != null) ? new ArrayList<String>(other.urisOfScheduledJobs) : null;
+        this.rolesToExport = (other.rolesToExport != null) ? new ArrayList<String>(other.rolesToExport) : null;
+        this.usersToExport = (other.usersToExport != null) ? new ArrayList<String>(other.usersToExport) : null;
+        this.resourceTypes = (other.resourceTypes != null) ? new ArrayList<String>(other.resourceTypes) : null;
+        this.organization = other.getOrganization();
+    }
+
     public List<String> getParameters() {
         return exportParams;
     }
 
-    public void setParameters(List<String> exportParams) {
+    public ExportTask setParameters(List<String> exportParams) {
         this.exportParams = exportParams;
+        return this;
     }
 
     public List<String> getUris() {
         return urisOfResources;
     }
 
-    public void setUris(List<String> urisOfResources) {
+    public ExportTask setUris(List<String> urisOfResources) {
         this.urisOfResources = urisOfResources;
+        return this;
     }
 
     public List<String> getScheduledJobs() {
         return urisOfScheduledJobs;
     }
 
-    public void setScheduledJobs(List<String> urisOfScheduledJobs) {
+    public ExportTask setScheduledJobs(List<String> urisOfScheduledJobs) {
         this.urisOfScheduledJobs = urisOfScheduledJobs;
+        return this;
     }
 
     public List<String> getRoles() {
         return rolesToExport;
     }
 
-    public void setRoles(List<String> rolesToExport) {
+    public ExportTask setRoles(List<String> rolesToExport) {
         this.rolesToExport = rolesToExport;
+        return this;
     }
 
     public List<String> getUsers() {
         return usersToExport;
     }
 
-    public void setUsers(List<String> usersToExport) {
+    public ExportTask setUsers(List<String> usersToExport) {
         this.usersToExport = usersToExport;
+        return this;
     }
 
     public String getOrganization() {
         return organization;
     }
 
-    public void setOrganization(String organization) {
+    public ExportTask setOrganization(String organization) {
         this.organization = organization;
+        return this;
     }
 
     public List<String> getResourceTypes() {
         return resourceTypes;
     }
 
-    public void setResourceTypes(List<String> resourceTypes) {
+    public ExportTask setResourceTypes(List<String> resourceTypes) {
         this.resourceTypes = resourceTypes;
+        return this;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ExportTask)) return false;
+
+        ExportTask that = (ExportTask) o;
+
+        if (exportParams != null ? !exportParams.equals(that.exportParams) : that.exportParams != null) return false;
+        if (urisOfResources != null ? !urisOfResources.equals(that.urisOfResources) : that.urisOfResources != null)
+            return false;
+        if (urisOfScheduledJobs != null ? !urisOfScheduledJobs.equals(that.urisOfScheduledJobs) : that.urisOfScheduledJobs != null)
+            return false;
+        if (rolesToExport != null ? !rolesToExport.equals(that.rolesToExport) : that.rolesToExport != null)
+            return false;
+        if (usersToExport != null ? !usersToExport.equals(that.usersToExport) : that.usersToExport != null)
+            return false;
+        if (getResourceTypes() != null ? !getResourceTypes().equals(that.getResourceTypes()) : that.getResourceTypes() != null)
+            return false;
+        return !(getOrganization() != null ? !getOrganization().equals(that.getOrganization()) : that.getOrganization() != null);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = exportParams != null ? exportParams.hashCode() : 0;
+        result = 31 * result + (urisOfResources != null ? urisOfResources.hashCode() : 0);
+        result = 31 * result + (urisOfScheduledJobs != null ? urisOfScheduledJobs.hashCode() : 0);
+        result = 31 * result + (rolesToExport != null ? rolesToExport.hashCode() : 0);
+        result = 31 * result + (usersToExport != null ? usersToExport.hashCode() : 0);
+        result = 31 * result + (getResourceTypes() != null ? getResourceTypes().hashCode() : 0);
+        result = 31 * result + (getOrganization() != null ? getOrganization().hashCode() : 0);
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "ExportTask{" +
+                "exportParams=" + exportParams +
+                ", urisOfResources=" + urisOfResources +
+                ", urisOfScheduledJobs=" + urisOfScheduledJobs +
+                ", rolesToExport=" + rolesToExport +
+                ", usersToExport=" + usersToExport +
+                ", resourceTypes=" + resourceTypes +
+                ", organization='" + organization + '\'' +
+                '}';
     }
 }

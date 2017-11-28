@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: list.base.js 9400 2015-09-23 21:10:46Z inestere $
+ * @version: $Id: list.base.js 9944 2016-03-11 00:47:48Z kpenn $
  */
 
 /* global layoutModule, buttonManager, isNotNullORUndefined, matchAny, deepClone, Mustache, JSTooltip, _,
@@ -176,7 +176,7 @@ dynamicList.ListItem.addMethod('setList', function (list) {
     if (!list){
         // This function should no longer be used for this purpose.
         // Use "unsetList" instead.
-        // FIXME: Turn this on when logging is added to this module! 
+        // FIXME: Turn this on when logging is added to this module!
         // this.logger.warn("deprecated use case");
     }
 
@@ -408,7 +408,7 @@ dynamicList.ListItem.addMethod('processTemplate', function (element) {
     } else {
         wrapper.childNodes[elementsCount].data = this.getLabel();
     }
-    //	$(wrapper.parentNode).writeAttribute("tabIndex",-1);
+    //  $(wrapper.parentNode).writeAttribute("tabIndex",-1);
 
     return element;
 });
@@ -857,7 +857,7 @@ dynamicList.List.addMethod('setItems', function (items) {
     // if none exists, which in turn may add the cursor to the selection set,
     // depending on list options.  THAT, in turn, could fire user callbacks
     // that appear to run on items that are about to be replaced.  That could
-    // (and did) cause Filter problems on the Search Results page. 
+    // (and did) cause Filter problems on the Search Results page.
     var oldCursor=this.cursor;
     var listEl=this._getElement();
     var hadFocus=false;
@@ -980,7 +980,7 @@ dynamicList.List.addMethod('removeItems', function (items) {
         // avoid changing the cursor prematurely.  This avoids callers reacting
         // to selection/deselection events (which occur as a result of the cursor
         // change on lists with alwaysSelectCursor style) on items that do not
-        // exist by the time they attempt to handle those events. 
+        // exist by the time they attempt to handle those events.
         this._removeItemFromSelected(item);
         if (newCursor===item){
             // If we are removing the cursor (or the prospective new cursor),
@@ -1274,7 +1274,7 @@ dynamicList.List.addMethod('scrollDownTo', function (item) {
     var scrollEl = this._getElement().parentNode;
     if (!scrollEl || !item || !item._getElement()) {
         // Keep the testing framework happy; normally these would never be
-        // detatched from the DOM. 
+        // detatched from the DOM.
         return;
     }
     var scrollTop = scrollEl.scrollTop;
@@ -1303,7 +1303,7 @@ dynamicList.List.addMethod('scrollUpTo', function (item) {
     var scrollEl = this._getElement().parentNode;
     if (!scrollEl || !item || !item._getElement()) {
         // Keep the testing framework happy; normally these would never be
-        // detatched from the DOM. 
+        // detatched from the DOM.
         return;
     }
     var scrollTop = scrollEl.scrollTop;
@@ -1636,9 +1636,12 @@ dynamicList.List.addMethod('show', function () {
 
     this._getElement().update();
 
-    this.getItems().each(function (item, index) {
+    var items = this.getItems();
+    var itemsAmount = items.length;
+
+    items.each(function (item, index) {
         item.first = index === 0;
-        item.last = index === (this.getItems().length - 1);
+        item.last = index === (itemsAmount - 1);
 
         item.show(this._getElement());
     }.bind(this));
@@ -1666,7 +1669,7 @@ dynamicList.List.addMethod('refresh', function () {
         scrollTop;
     if (!scrollEl) {
         // Keep the testing framework happy; normally these would never be
-        // detatched from the DOM. 
+        // detatched from the DOM.
         scrollTop = 0;
     } else {
         scrollTop = scrollEl.scrollTop;
@@ -2033,7 +2036,7 @@ dynamicList.List.addMethod('_mousedownHandler', function (event) {
 
     if (event.touches && event.touches.length == 2) {
         this.twofingers = true;
-        //var li = jQuery(element).parents('li:first');     
+        //var li = jQuery(element).parents('li:first');
         //li.hasClass('selected') && document.fire(layoutModule.ELEMENT_CONTEXTMENU, {targetEvent: event, node: element});
         //return;
     } else {

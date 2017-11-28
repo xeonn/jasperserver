@@ -52,7 +52,6 @@ import java.text.SimpleDateFormat;
 public class ThemeResolverServlet extends HttpServlet {
 
     public static final String DATE_FORMAT_PATTERN = "EEE, d MMM yyyy HH:mm:ss z";
-    public static final String EXPIRES_AFTER_ACCESS_IN_SECS = "expiresAfterAccessInSecs";
 
     // All HTTP date/time stamps MUST be represented in Greenwich Mean Time (GMT), without exception.
     // See: http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.3.1
@@ -62,7 +61,6 @@ public class ThemeResolverServlet extends HttpServlet {
 
     private ThemeCache themeCache;
     private ServletContext servletContext;
-    private int expiresInSecs = 0;
 
     // keeps thread unsafe instances of DateFormat
     private static final ThreadLocal<Map<Locale, DateFormat>> lastDateFormat = new ThreadLocal<Map<Locale, DateFormat>>();
@@ -100,10 +98,7 @@ public class ThemeResolverServlet extends HttpServlet {
         // Set cache controlling HTTP Response Headers
         DateFormat df = getFormat(Locale.ENGLISH);
 
-        resp.setHeader("Cache-Control", "max-age=" + expiresInSecs + ", public");
-        resp.setHeader("Pragma", "");
         resp.setHeader("Last-Modified", df.format(lastModified));
-        resp.setHeader("Expires", df.format(new Date(new Date().getTime() + expiresInSecs * 1000)));
 
         // Send 304 if resource has not been modified since last time requested
         String ifModSince = req.getHeader("If-Modified-Since");
@@ -147,14 +142,5 @@ public class ThemeResolverServlet extends HttpServlet {
 
         WebApplicationContext ctx = WebApplicationContextUtils.getWebApplicationContext(config.getServletContext());
         themeCache = (ThemeCache) ctx.getBean("themeCache");
-
-        String value = config.getInitParameter(EXPIRES_AFTER_ACCESS_IN_SECS);
-        try {
-            expiresInSecs = Integer.parseInt(value);
-            log.debug("Expires in seconds set : " + expiresInSecs);
-        } catch (Exception ex) {
-            log.error(EXPIRES_AFTER_ACCESS_IN_SECS + " should be a non-negative integer", ex);
-        }
-
     }
 }

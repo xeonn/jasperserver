@@ -18,6 +18,7 @@ import com.jaspersoft.jasperserver.dto.authority.ClientAttribute;
 import com.jaspersoft.jasperserver.dto.authority.hypermedia.HypermediaAttribute;
 import com.jaspersoft.jasperserver.dto.authority.hypermedia.HypermediaAttributeEmbeddedContainer;
 import com.jaspersoft.jasperserver.dto.permissions.RepositoryPermission;
+import com.jaspersoft.jasperserver.remote.exception.RemoteException;
 import com.jaspersoft.jasperserver.remote.helpers.RecipientIdentity;
 import com.jaspersoft.jasperserver.remote.helpers.RecipientIdentityResolver;
 import com.jaspersoft.jasperserver.remote.resources.converters.PermissionConverter;
@@ -58,7 +59,7 @@ import static org.mockito.Mockito.when;
  * An unit-test for the AttributesServiceImpl class
  *
  * @author askorodumov
- * @version $Id: AttributesServiceImplTest.java 58870 2015-10-27 22:30:55Z esytnik $
+ * @version $Id: AttributesServiceImplTest.java 61296 2016-02-25 21:53:37Z mchan $
  */
 public class AttributesServiceImplTest {
     @Mock
@@ -1047,6 +1048,28 @@ public class AttributesServiceImplTest {
         public String getType() {
             return instance.getType();
         }
+    }
+
+    @Test(expectedExceptions = {RemoteException.class})
+    public void putAttributes_listTakesTwoAttributesWithSameName_exception() {
+        AttributesSearchResult<ProfileAttribute> searchResult = new AttributesSearchResultImpl<ProfileAttribute>();
+        searchResult.setList(Arrays.asList(attributeA, attributeB));
+        searchResult.setTotalCount(2);
+
+        AttributesSearchCriteria searchCriteria = new AttributesSearchCriteria.Builder().build();
+
+        when(profileAttributeService.getProfileAttributesForPrincipal(
+                any(ExecutionContext.class), eq(recipient), eq(searchCriteria)))
+                .thenReturn(searchResult);
+
+        ClientAttribute attribute1 = new ClientAttribute(clientAttributeC);
+        ClientAttribute attribute2 = new ClientAttribute(clientAttributeC);
+
+        service.putAttributes(
+                recipientIdentity,
+                Arrays.asList(attribute1, attribute2),
+                null,
+                false);
     }
 
     private static ObjectPermission createObjectPermission(String URI, Object recipient, int mask) {

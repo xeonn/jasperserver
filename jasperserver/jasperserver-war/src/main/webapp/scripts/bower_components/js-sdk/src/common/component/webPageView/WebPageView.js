@@ -22,7 +22,7 @@
 
 /**
  * @author: Kostiantyn Tsaregradskyi
- * @version: $Id: WebPageView.js 1618 2015-09-29 12:06:41Z ztomchen $
+ * @version: $Id: WebPageView.js 2348 2016-03-02 19:24:51Z ztomchen $
  */
 
 define(function (require) {
@@ -87,21 +87,16 @@ define(function (require) {
         },
 
         initialize: function() {
-            var self = this;
             this.$iframe = $("<iframe></iframe>")
                 .addClass("externalUrlIframe");
-
-            this.$iframe.on("load", function(){
-                $(this).blur();
-                $(this).parent().focus();
-                self.trigger("load");
-            });
 
             this.$el.html(this.$iframe);
 
             this.$el.addClass("invisible");
 
             $("body").append(this.$el);
+
+            this.listenToReadyStateCompete();
 
             this.setScrolling(this.scrolling, {silent: true});
 
@@ -112,6 +107,33 @@ define(function (require) {
                     this.render(this.renderTo);
                 }
             }
+        },
+
+        listenToReadyStateCompete: function () {
+            var doc = this.$iframe[0].contentDocument || this.$iframe[0].contentWindow,
+                self = this;
+
+            this.$iframe.on("load", function(){
+                clearInterval(self._loadingTimerId);
+
+                $(this).blur();
+                $(this).parent().focus();
+                self.trigger("load");
+            });
+
+            if (doc.document) {
+                doc = doc.document;
+            }
+            // Some browsers like Safari does not emit "load" event, se we need this as fallback.
+            this._loadingTimerId = setInterval(function() {
+                if (doc.readyState == 'complete') {
+                    clearInterval(self._loadingTimerId);
+
+                    self.$iframe.blur();
+                    self.$iframe.parent().focus();
+                    self.trigger("load");
+                }
+            }, 300);
         },
 
         /**
@@ -243,7 +265,7 @@ define(function (require) {
          */
         remove: function() {
             this._loadingTimeoutId && clearTimeout(this._loadingTimeoutId);
-
+            this._loadingTimerId && clearTimeout(this._loadingTimerId);
             this.$iframe.off("load");
 
             /**

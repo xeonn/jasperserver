@@ -41,7 +41,7 @@ import java.util.List;
  * </p>
  * 
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ReportJobMailNotification.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: ReportJobMailNotification.java 61296 2016-02-25 21:53:37Z mchan $
  * @since 1.0
  * @see ReportJob#getMailNotification()
  */
@@ -438,6 +438,8 @@ public class ReportJobMailNotification implements Serializable {
         l = jobMail.getToAddresses();
         if (l != null) this.setToAddresses(new ArrayList(l));
         this.setSkipEmptyReports(jobMail.isSkipEmptyReports());
+		this.setMessageTextWhenJobFails(jobMail.getMessageTextWhenJobFails());
+		this.setIncludingStackTraceWhenJobFails(jobMail.includingStackTraceWhenJobFails);
     }
   }
 

@@ -39,7 +39,7 @@ import org.apache.commons.logging.LogFactory;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: JSMdxQueryExecuterFactory.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: JSMdxQueryExecuterFactory.java 61296 2016-02-25 21:53:37Z mchan $
  */
 public class JSMdxQueryExecuterFactory extends JRMdxQueryExecuterFactory {
 	
@@ -56,7 +56,7 @@ public class JSMdxQueryExecuterFactory extends JRMdxQueryExecuterFactory {
 		else if (getParameterValue(parameters, 
 				JRXmlaQueryExecuterFactory.PARAMETER_XMLA_URL) != null) {
 			//creating a JS XMLA query executer
-			queryExecuter = new JSXmlaQueryExecuter(dataset, parameters);
+			queryExecuter = new JSXmlaQueryExecuter(jasperReportsContext, dataset, parameters);
 		}
 		else {
 			log.warn("No Mondrian connection or XMLA URL set for MDX query");

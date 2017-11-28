@@ -33,7 +33,7 @@ import java.util.Set;
  * Facade service to run reports
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: RunReportService.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: RunReportService.java 61296 2016-02-25 21:53:37Z mchan $
  */
 public interface RunReportService {
 
@@ -158,5 +158,13 @@ public interface RunReportService {
      * @throws RemoteException if any error occurs
      */
     Boolean cancelReportExecution(String executionId) throws RemoteException;
+
+    /**
+     * Remove report execution from session.
+     *
+     * @param executionId - report execution ID
+     * @throws RemoteException if any error occurs
+     */
+    Boolean deleteReportExecution(String executionId) throws RemoteException;
 
 }

@@ -31,7 +31,9 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.ext.Providers;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -50,7 +52,7 @@ import static org.testng.Assert.assertTrue;
  * <p></p>
  *
  * @author yaroslav.kovalchyk
- * @version $Id: LocalizationBundleJaxrsServiceTest.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: LocalizationBundleJaxrsServiceTest.java 61296 2016-02-25 21:53:37Z mchan $
  */
 public class LocalizationBundleJaxrsServiceTest {
     private static final String BUNDLE1_NAME = "bundle1";
@@ -63,6 +65,10 @@ public class LocalizationBundleJaxrsServiceTest {
     private ExposedResourceBundleMessageSource messageSource;
     @Mock
     private HttpHeaders httpHeaders;
+    @Mock
+    private Request request;
+    @Mock
+    private Providers providers;
     private Locale locale = Locale.US;
     private Map<String, String> bundle1 = new HashMap<String, String>() {{
         put(BUNDLE1_NAME + ".key1", BUNDLE1_NAME + ".message1");
@@ -127,7 +133,7 @@ public class LocalizationBundleJaxrsServiceTest {
 
     @Test(dependsOnMethods = "setBundleNames")
     public void getBundles_expandedFalse() throws JSONException {
-        final Response response = service.getBundles(false, httpHeaders);
+        final Response response = service.getBundles(false, httpHeaders, request);
         assertNotNull(response);
         final Object entity = response.getEntity();
         assertSame(entity, service.bundleNames);
@@ -135,7 +141,7 @@ public class LocalizationBundleJaxrsServiceTest {
 
     @Test(dependsOnMethods = "setBundleNames")
     public void getBundles_expandedTrue() throws JSONException {
-        final Response response = service.getBundles(true, httpHeaders);
+        final Response response = service.getBundles(true, httpHeaders, request);
         assertNotNull(response);
         assertTrue(response.getEntity() instanceof JSONObject);
         JSONObject json = (JSONObject) response.getEntity();
@@ -148,10 +154,10 @@ public class LocalizationBundleJaxrsServiceTest {
 
     @Test(dependsOnMethods = "setBundleNames")
     public void getBundle() throws JSONException{
-        assertSame(service.getBundle(BUNDLE1_NAME, httpHeaders).getEntity(), bundle1);
-        assertSame(service.getBundle(BUNDLE2_NAME, httpHeaders).getEntity(), bundle2);
-        assertSame(service.getBundle(BUNDLE3_NAME, httpHeaders).getEntity(), bundle3);
-        assertSame(service.getBundle(BUNDLE4_NAME, httpHeaders).getEntity(), bundle4);
+        assertSame(service.getBundle(BUNDLE1_NAME, httpHeaders, request).getEntity(), bundle1);
+        assertSame(service.getBundle(BUNDLE2_NAME, httpHeaders, request).getEntity(), bundle2);
+        assertSame(service.getBundle(BUNDLE3_NAME, httpHeaders, request).getEntity(), bundle3);
+        assertSame(service.getBundle(BUNDLE4_NAME, httpHeaders, request).getEntity(), bundle4);
     }
 
     private void assertBundle(JSONObject json, Map<String, String> bundle) throws JSONException {

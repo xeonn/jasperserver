@@ -39,7 +39,6 @@ import com.jaspersoft.jasperserver.api.metadata.user.service.TenantService;
 import com.jaspersoft.jasperserver.core.util.PathUtils;
 import com.jaspersoft.jasperserver.core.util.PathUtils.SplittedPath;
 import com.jaspersoft.jasperserver.dto.common.BrokenDependenciesStrategy;
-import com.jaspersoft.jasperserver.dto.common.WarningDescriptor;
 import com.jaspersoft.jasperserver.export.modules.BaseImporterModule;
 import com.jaspersoft.jasperserver.export.modules.ImporterModuleContext;
 import com.jaspersoft.jasperserver.export.modules.common.ExportImportWarningCode;
@@ -76,7 +75,7 @@ import java.util.regex.Pattern;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ResourceImporter.java 59074 2015-11-12 20:09:18Z vsabados $
+ * @version $Id: ResourceImporter.java 61296 2016-02-25 21:53:37Z mchan $
  */
 public class ResourceImporter extends BaseImporterModule implements ResourceImportHandler, InitializingBean {
 	
@@ -277,8 +276,8 @@ public class ResourceImporter extends BaseImporterModule implements ResourceImpo
 		}
 
 		if (!(rootSubTenantFolderUris.contains(tenantFolderUri) || tenantFolderUri.equals(""))) {
-			String msg = "Resource with the uri \"" + importUri + "\" is attached to not existing organization. Not imported";
-			logWarning(ExportImportWarningCode.IMPORT_RESOURCE_ATTACHED_NOT_EXIST_ORG, new String[]{importUri}, msg);
+			String msg = "Folder with the uri \"" + importUri + "\" is attached to not existing organization. Not imported";
+			logWarning(ExportImportWarningCode.IMPORT_FOLDER_ATTACHED_NOT_EXIST_ORG, new String[]{importUri}, msg);
 			return;
 		}
 
@@ -492,82 +491,60 @@ public class ResourceImporter extends BaseImporterModule implements ResourceImpo
 				Resource resource = null;
 				try {
 					resource = repository.getResource(executionContext, importUri);
-				} catch (Exception e) {
-					if (handledException(e, importUri)) {
-						importedURIs.add(uri);
-						return importUri;
-					} else {
-						throwRuntimeException(e);
+
+					if (executionContext.getAttributes() == null) {
+						executionContext.setAttributes(new ArrayList());
 					}
-				}
-
-				if (executionContext.getAttributes() == null) {
-                    executionContext.setAttributes(new ArrayList());
-                }
-                if (!executionContext.getAttributes().contains(RepositoryService.IS_IMPORTING)) {
-                    executionContext.getAttributes().add(RepositoryService.IS_IMPORTING);
-                }
-
-				if (resource == null) {
-					ensureParent(uri);
-					
-					ResourceBean bean = readResourceBean(uri);
-					resource = createResource(bean);
-
-                    commandOut.debug("About to save resource " + importUri);
-					boolean saved = false;
-                    try {
-                        repository.saveResource(executionContext, resource);
-						saved = true;
-                    } catch (Exception er) {
-						if (!handledException(er, resource.getURIString())) {
-							throwRuntimeException(er);
-						}
+					if (!executionContext.getAttributes().contains(RepositoryService.IS_IMPORTING)) {
+						executionContext.getAttributes().add(RepositoryService.IS_IMPORTING);
 					}
 
-					if (saved) {
+					if (resource == null) {
+						ensureParent(uri);
+
+						ResourceBean bean = readResourceBean(uri);
+						resource = createResource(bean);
+
+						commandOut.debug("About to save resource " + importUri);
+
+						repository.saveResource(executionContext, resource);
+
 						setPermissions(resource, bean.getPermissions(), false);
 						commandOut.info("Imported resource " + importUri);
-					}
-				} else if (update) {
-					registerUpdateResource(importUri);
-					
-					ResourceBean bean = readResourceBean(uri);
-					Resource updated = createResource(bean);
-					
-					if (resource.isSameType(updated)) {
-						// We need to re-read the object to get the latest version
-						// this is a fix to bug # 27803
-						// http://bugzilla.jaspersoft.com/show_bug.cgi?id=27803
-						Resource resource2 = repository.getResource(executionContext, importUri);
-						updated.setVersion(resource2.getVersion());
-						handleSubResources(resource, updated);
-                        commandOut.debug("About to save resource " + importUri);
-						boolean saved = false;
-                        try {
-                            repository.saveResource(executionContext, updated);
-							saved = true;
-                        } catch (Exception er) {
-							if (!handledException(er, resource.getURIString())) {
-								throwRuntimeException(er);
-							}
-						}
+					} else if (update) {
+						registerUpdateResource(importUri);
 
-						if (saved) {
+						ResourceBean bean = readResourceBean(uri);
+						Resource updated = createResource(bean);
+
+						if (resource.isSameType(updated)) {
+							// We need to re-read the object to get the latest version
+							// this is a fix to bug # 27803
+							// http://bugzilla.jaspersoft.com/show_bug.cgi?id=27803
+							Resource resource2 = repository.getResource(executionContext, importUri);
+							updated.setVersion(resource2.getVersion());
+							handleSubResources(resource, updated);
+							commandOut.debug("About to save resource " + importUri);
+							repository.saveResource(executionContext, updated);
+
 							if (bean.isExportedWithPermissions()) {
 								deleteObjectPermissions(resource);
 							}
 							setPermissions(resource, bean.getPermissions(), false);
 
 							commandOut.info("Updated resource " + importUri);
+						} else {
+							String warningMessage = "Resource \"" + importUri + "\" already exists in " +
+									"the repository and has a different type than in the catalog, not updating";
+							logWarning(ExportImportWarningCode.IMPORT_RESOURCE_DIFFERENT_TYPE, new String[]{importUri}, warningMessage);
 						}
 					} else {
-						String warningMessage = "Resource \"" + importUri + "\" already exists in " +
-								"the repository and has a different type than in the catalog, not updating";
-						logWarning(ExportImportWarningCode.IMPORT_RESOURCE_DIFFERENT_TYPE, new String[]{importUri}, warningMessage);
+						commandOut.warn("Resource \"" + importUri + "\" already exists, not importing");
 					}
-				} else {
-					commandOut.warn("Resource \"" + importUri + "\" already exists, not importing");
+				} catch (Exception er) {
+					if (!handledException(er, resource == null ? importUri : resource.getURIString())) {
+						throwRuntimeException(er);
+					}
 				}
 
                 if (importingSettings) {
@@ -661,17 +638,11 @@ public class ResourceImporter extends BaseImporterModule implements ResourceImpo
 
 	protected String extractResourceUriFromException(JSException jsException) {
 		if (jsException.getArgs() != null && jsException.getArgs().length > 0 && jsException.getArgs()[0] instanceof String) {
-			return (String) jsException.getArgs()[0];
+			String uri = (String) jsException.getArgs()[0];
+			if (StringUtils.isEmpty(uri))
+				return uri.replace("\"","");
 		}
 		return null;
-	}
-
-	protected void logWarning(ExportImportWarningCode warningCode, String[] parameters, String message) {
-		if (importContext.getImportTask().getWarnings() != null) {
-			importContext.getImportTask().getWarnings()
-					.add(new WarningDescriptor(warningCode.toString(), parameters, message));
-		}
-		commandOut.warn(message);
 	}
 
 	private void throwRuntimeException(Exception ex) {

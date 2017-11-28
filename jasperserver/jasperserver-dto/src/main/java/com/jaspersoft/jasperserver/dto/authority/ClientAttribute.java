@@ -39,8 +39,8 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 public class ClientAttribute {
     private String name;
     private String value;
-    private Boolean secure = null;
-    private Boolean inherited = null;
+    private Boolean secure = false;
+    private Boolean inherited = false;
     private String description;
     private Integer permissionMask;
     private String holder;
@@ -126,28 +126,36 @@ public class ClientAttribute {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof ClientAttribute)) return false;
 
         ClientAttribute that = (ClientAttribute) o;
 
         if (name != null ? !name.equals(that.name) : that.name != null) return false;
         if (value != null ? !value.equals(that.value) : that.value != null) return false;
-        if (holder != null ? !holder.equals(that.holder) : that.holder != null) return false;
+        if (secure != null ? !secure.equals(that.secure) : that.secure != null) return false;
+        if (inherited != null ? !inherited.equals(that.inherited) : that.inherited != null) return false;
+        if (description != null ? !description.equals(that.description) : that.description != null) return false;
+        if (permissionMask != null ? !permissionMask.equals(that.permissionMask) : that.permissionMask != null)
+            return false;
+        return !(holder != null ? !holder.equals(that.holder) : that.holder != null);
 
-        return true;
     }
 
     @Override
     public int hashCode() {
         int result = name != null ? name.hashCode() : 0;
         result = 31 * result + (value != null ? value.hashCode() : 0);
+        result = 31 * result + (secure != null ? secure.hashCode() : 0);
+        result = 31 * result + (inherited != null ? inherited.hashCode() : 0);
+        result = 31 * result + (description != null ? description.hashCode() : 0);
+        result = 31 * result + (permissionMask != null ? permissionMask.hashCode() : 0);
         result = 31 * result + (holder != null ? holder.hashCode() : 0);
         return result;
     }
 
     @Override
     public String toString() {
-        return "ClientAttribute{" +
+        return getClass().getSimpleName() + "{" +
                 "name='" + name + '\'' +
                 ", value='" + value + '\'' +
                 ", secure='" + secure + '\'' +
