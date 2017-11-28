@@ -9,7 +9,7 @@
     <parent>
         <groupId>com.jaspersoft.jasperserver</groupId>
         <artifactId>server</artifactId>
-        <version>6.1.0</version>
+        <version>6.1.1</version>
     </parent>
     <description>Jasper Server Repository Export Import Tool</description>
     <dependencies>
@@ -63,6 +63,10 @@
                     <groupId>org.springframework</groupId>
                     <artifactId>spring-context</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>stax</groupId>
+                    <artifactId>stax-api</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -83,4 +87,5 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
 </project>

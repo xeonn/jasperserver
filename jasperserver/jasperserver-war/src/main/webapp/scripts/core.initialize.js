@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: core.initialize.js 8179 2015-01-27 12:34:21Z psavushchik $
+ * @version: $Id: core.initialize.js 9192 2015-08-12 19:52:08Z yplakosh $
  */
 
 /* global layoutModule, primaryNavModule, actionModel */
@@ -33,6 +33,7 @@ var initModule = {};
  */
 initModule.pageInit = function() {
     layoutModule.initialize();
+    // *!* FIXME: Is this being called twice?  see commons.main.js
     primaryNavModule.initializeNavigation(); //navigation setup
     actionModel.initializeOneTimeMenuHandlers(); //menu setup
     //isNotNullORUndefined(window.accessibilityModule) && accessibilityModule.initialize();

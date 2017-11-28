@@ -90,7 +90,11 @@ Default rendering HTML fragment for a JR report called from the JasperViewerTag.
               jsonExporter.exportReport();
 
               String serializedJson = sw.getBuffer().toString();
-              out.write("<span id=\"reportComponents\" style=\"display:none\">" + serializedJson.replaceAll("\\s","") + "</span>");
+              serializedJson = serializedJson.replaceAll("\\s","");
+        %>
+              <c:set var="escapedComponentsJson" value="<%= serializedJson %>" />
+              <span id="reportComponents" style="display:none">${escapedComponentsJson}</span>
+        <%
           }
         %>
 

@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: viewer.js 8912 2015-05-13 10:07:04Z nmarcu $
+ * @version: $Id: viewer.js 9192 2015-08-12 19:52:08Z yplakosh $
  */
 
 /* global dialogs, alert, console, buttonManager, Report */
@@ -966,6 +966,17 @@ define(function(require) {
                 topOfThePageControls.insertBefore(jQuery("#reportContainer").children()[0]);
             }
 
+            // ARIA fixups
+            $('table.jrPage').prop('tabindex', '"0"');
+            // Prevent screen-readers from guessing that our table is used only for layout purposes,
+            // because of all the blank cells at the edges 
+            $('table.jrPage').attr('role', 'grid');
+            $('table.jrPage tr').attr('role', 'row');
+            $('table.jrPage tbody tr').attr('role', 'row');
+            $('table.jrPage tr th').attr('role', 'columnheader');
+            $('table.jrPage tbody tr th').attr('role', 'columnheader');
+            $('table.jrPage tr td').attr('role', 'gridcell');
+            $('table.jrPage tbody tr td').attr('role', 'gridcell');
 
             /*
                 Extract scripts in textarea tags.
@@ -1021,12 +1032,34 @@ define(function(require) {
                         it.render($(htm).removeClass("hidden").html());
                         $('table.jrPage').css({'margin-left': 'auto', 'margin-right': 'auto'}); /* FIXME: remove or place inside CSS file */
                         it.dfds['jive.inactive'].resolve();
+                        // Give the table a tabindex so that Standard Navigation can work with it.
+                        $('table.jrPage').prop('tabindex', '"0"');
+                        // Prevent screen-readers from guessing that our table is used only for layout purposes,
+                        // because of all the blank cells at the edges 
+                        $('table.jrPage').attr('role', 'grid');
+                        $('table.jrPage tr').attr('role', 'row');
+                        $('table.jrPage tbody tr').attr('role', 'row');
+                        $('table.jrPage tr th').attr('role', 'columnheader');
+                        $('table.jrPage tbody tr th').attr('role', 'columnheader');
+                        $('table.jrPage tr td').attr('role', 'gridcell');
+                        $('table.jrPage tbody tr td').attr('role', 'gridcell');
                     } else {
                         it.renderReportLater = true;
                     }
                 } else {
                     it.render($(htm).removeClass("hidden").html());
                     $('table.jrPage').css({'margin-left': 'auto', 'margin-right': 'auto'}); /* FIXME: remove or place inside CSS file */
+                    // Give the table a tabindex so that Standard Navigation can work with it.
+                    $('table.jrPage').prop('tabindex', '"0"');
+                    // Prevent screen-readers from guessing that our table is used only for layout purposes,
+                    // because of all the blank cells at the edges 
+                    $('table.jrPage').attr('role', 'grid');
+                    $('table.jrPage tr').attr('role', 'row');
+                    $('table.jrPage tbody tr').attr('role', 'row');
+                    $('table.jrPage tr th').attr('role', 'columnheader');
+                    $('table.jrPage tbody tr th').attr('role', 'columnheader');
+                    $('table.jrPage tr td').attr('role', 'gridcell');
+                    $('table.jrPage tbody tr td').attr('role', 'gridcell');
                     it.dfds['jive.inactive'].resolve();
                 }
 

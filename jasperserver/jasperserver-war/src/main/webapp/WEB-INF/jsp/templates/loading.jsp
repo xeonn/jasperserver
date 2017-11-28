@@ -48,7 +48,7 @@ Usage:
     <t:putAttribute name="containerTitle"><spring:message code='jsp.wait'/></t:putAttribute>
     <t:putAttribute name="headerClass" value="mover"/>
     <t:putAttribute name="bodyContent">
-        <p class="message"><spring:message code='jsp.loading'/></p>
+        <p class="message" role="alert" aria-live="assertive"><spring:message code='jsp.loading'/></p>
         <button id="cancel" class="button action up"><span class="wrap"><spring:message code="button.cancel"/></span><span class="icon"></span></button>
     </t:putAttribute>   
 </t:insertTemplate>

@@ -22,6 +22,8 @@
 package com.jaspersoft.jasperserver.api.metadata.user.domain.client;
 
 import com.jaspersoft.jasperserver.api.metadata.user.domain.Tenant;
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
@@ -134,4 +136,41 @@ public class TenantImpl implements Tenant, Serializable {
     public void setTheme(String theme) {
         this.theme = theme;
     }
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!(obj instanceof Tenant))
+			return false;
+
+		Tenant that = (Tenant) obj;
+
+		return new EqualsBuilder()
+				.append(getId(), that.getId())
+				.append(getAlias(), that.getAlias())
+				.append(getParentId(), that.getParentId())
+				.append(getTenantName(), that.getTenantName())
+				.append(getTenantDesc(), that.getTenantDesc())
+				.append(getTenantNote(), that.getTenantNote())
+				.append(getTenantUri(), that.getTenantUri())
+				.append(getTenantFolderUri(), that.getTenantFolderUri())
+				.append(getTheme(), that.getTheme())
+				.isEquals();
+	}
+
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder()
+				.append(getId())
+				.append(getAlias())
+				.append(getParentId())
+				.append(getTenantName())
+				.append(getTenantDesc())
+				.append(getTenantNote())
+				.append(getTenantUri())
+				.append(getTenantFolderUri())
+				.append(getTheme())
+				.hashCode();
+	}
 }

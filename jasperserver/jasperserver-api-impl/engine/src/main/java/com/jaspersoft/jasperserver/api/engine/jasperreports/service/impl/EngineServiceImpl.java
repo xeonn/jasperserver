@@ -55,7 +55,6 @@ import com.jaspersoft.jasperserver.api.engine.jasperreports.domain.impl.TrialRep
 import com.jaspersoft.jasperserver.api.engine.jasperreports.service.DataCacheProvider;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.service.InputControlsInfoExtractor;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.util.CustomDataSourceDefinition;
-import com.jaspersoft.jasperserver.api.engine.jasperreports.util.DataAdapterDefinition;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.util.DataSourceServiceFactory;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.util.DefaultProtectionDomainProvider;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.util.InputControlLabelResolver;
@@ -84,6 +83,7 @@ import com.jaspersoft.jasperserver.api.logging.diagnostic.service.DiagnosticCall
 import com.jaspersoft.jasperserver.api.metadata.common.domain.*;
 import com.jaspersoft.jasperserver.api.metadata.common.service.*;
 import com.jaspersoft.jasperserver.api.metadata.common.service.impl.AsyncThumbnailCreator;
+import com.jaspersoft.jasperserver.api.metadata.common.service.impl.ExecutorServiceWrapper;
 import com.jaspersoft.jasperserver.api.metadata.data.cache.DataCacheSnapshot;
 import com.jaspersoft.jasperserver.api.metadata.data.cache.DataSnapshotPersistentMetadata;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.CustomDomainMetaData;
@@ -92,11 +92,9 @@ import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.CustomRepor
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.DataView;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportDataSource;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportUnit;
-import com.jaspersoft.jasperserver.api.metadata.jasperreports.service.CustomReportDataSourceService;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.service.ReportDataSourceService;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.service.ReportDataSourceServiceFactory;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
-import com.jaspersoft.jasperserver.api.metadata.user.service.TenantService;
 import com.jaspersoft.jasperserver.api.metadata.view.domain.FilterCriteria;
 
 import net.sf.ehcache.pool.SizeOfEngine;
@@ -170,6 +168,7 @@ import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicLong;
@@ -180,7 +179,7 @@ import java.util.jar.JarFile;
 /**
  *
  * @author Teodor Danciu (teodord@users.sourceforge.net)
- * @version $Id: EngineServiceImpl.java 55164 2015-05-06 20:54:37Z mchan $
+ * @version $Id: EngineServiceImpl.java 56967 2015-08-20 23:20:53Z esytnik $
  */
 public class EngineServiceImpl implements EngineService, ReportExecuter,
 		CompiledReportProvider, InternalReportCompiler, InitializingBean, Diagnostic
@@ -222,7 +221,7 @@ public class EngineServiceImpl implements EngineService, ReportExecuter,
     private Executor syncReportExecutorService =
 			SynchronousExecutor.INSTANCE;//default value
 
-	private Executor asyncReportExecutorService = new Log4jMdcCompatibleThreadPoolExecutor();
+	private Executor asyncReportExecutorService = new DiagnosticLoggingContextCompatibleExecutorService(Executors.newCachedThreadPool());
 	
 	private List<ReportExecutionListenerFactory> reportExecutionListenerFactories;
 
@@ -362,7 +361,7 @@ public class EngineServiceImpl implements EngineService, ReportExecuter,
                 .addDiagnosticAttribute(DiagnosticAttributeBuilder.RUNNING_REPORT_ASYNCTASKCOUNT, new DiagnosticCallback<Long>() {
                     @Override
                     public Long getDiagnosticAttributeValue() {
-                        if (asyncReportExecutorService instanceof ThreadPoolExecutor) {
+                        if (asyncReportExecutorService instanceof ThreadPoolExecutor || hasWrappedThreadPoolExecutor(asyncReportExecutorService)) {
                             return startAsyncReportExecutionCount.get();
                         }
                         return 0L;
@@ -373,6 +372,9 @@ public class EngineServiceImpl implements EngineService, ReportExecuter,
                     public Integer getDiagnosticAttributeValue() {
                         if (asyncReportExecutorService instanceof ThreadPoolExecutor) {
                             return ((ThreadPoolExecutor) (asyncReportExecutorService)).getPoolSize();
+                        } else if (hasWrappedThreadPoolExecutor(asyncReportExecutorService)) {
+                            ExecutorService wrappedExecutorService = ((ExecutorServiceWrapper) asyncReportExecutorService).getWrappedExecutorService();
+                            return ((ThreadPoolExecutor) wrappedExecutorService).getPoolSize();
                         }
                         return 0;
                     }
@@ -406,6 +408,16 @@ public class EngineServiceImpl implements EngineService, ReportExecuter,
                     }
                 }).build();
     }
+
+    private boolean hasWrappedThreadPoolExecutor(Executor executor) {
+        if (executor instanceof ExecutorServiceWrapper) {
+            ExecutorService wrappedExecutorService = ((ExecutorServiceWrapper) executor).getWrappedExecutorService();
+            return wrappedExecutorService instanceof ThreadPoolExecutor;
+        }
+        return false;
+    }
+
+
 
     protected final class TempJarFileCacheObject implements ObjectCache {
 		public boolean isValid(Object o) {
@@ -2870,9 +2882,11 @@ public class EngineServiceImpl implements EngineService, ReportExecuter,
         if (dataSourceDefinition instanceof CustomDomainMetaDataProvider) {
             metaDataProvider = (CustomDomainMetaDataProvider) dataSourceDefinition;
         } else {
-            ReportDataSourceService customReportDataSourceService = factory.createService(customReportDataSource);
-            if (customReportDataSourceService instanceof CustomDomainMetaDataProvider) {
-                metaDataProvider = (CustomDomainMetaDataProvider) customReportDataSourceService;
+            if (isCustomDomainMetadataProvider(customReportDataSource)) {
+                ReportDataSourceService customReportDataSourceService = factory.createService(customReportDataSource);
+                if (customReportDataSourceService instanceof CustomDomainMetaDataProvider) {
+                    metaDataProvider = (CustomDomainMetaDataProvider) customReportDataSourceService;
+                }
             }
         }
 
@@ -2884,10 +2898,24 @@ public class EngineServiceImpl implements EngineService, ReportExecuter,
         CustomReportDataSourceServiceFactory factory =
                 (CustomReportDataSourceServiceFactory) getDataSourceServiceFactories().getBean(customReportDataSource.getClass());
         CustomDataSourceDefinition dataSourceDefinition = factory.getDefinition(customReportDataSource);
-        CustomDomainMetaDataProvider metaDataProvider = getCustomDomainMetaDataProvider(customReportDataSource, factory, dataSourceDefinition);
 
-        return metaDataProvider != null;
+        if (dataSourceDefinition instanceof CustomDomainMetaDataProvider) {
+            return true;
+        }
+        
+        try {
+            if (CustomDomainMetaDataProvider.class.isAssignableFrom(Class.forName(dataSourceDefinition.getServiceClassName()))) {
+                return true;
+            }
+        } catch (ClassNotFoundException e) {
+            log.error("Cannot load custom datasource service class: " + dataSourceDefinition.getServiceClassName()
+                    + " for datasource: " + customReportDataSource.getURIString(), e);
+        }
+
+        return false;
     }
+    
+    
 
 	public boolean isRecordSizeof() {
 		return recordSizeof;

@@ -145,7 +145,6 @@
                 <!-- Types of CustomDataSource which can be joined to virtual DS -->
                 <value>com.jaspersoft.cassandra.jasperserver.CassandraDataSourceService</value>
                 <value>com.jaspersoft.hadoop.hive.jasperserver.HiveDataSourceService</value>
-                <value>com.jaspersoft.mongodb.jasperserver.MongoDbDataSourceService</value>
             </list>
         </property>
     </bean>

@@ -74,7 +74,7 @@
     </bean>
 
     <bean id="multiSelectQueryNumberInputControl" class="com.jaspersoft.jasperserver.war.cascade.utils.InputControlMock">
-        <property name="type" ref="TYPE_MULTI_SELECT_QUERY"/>
+        <property name="inputControlType" ref="TYPE_MULTI_SELECT_QUERY"/>
     </bean>
 
     <bean id="orderInputControl" parent="multiSelectQueryNumberInputControl">

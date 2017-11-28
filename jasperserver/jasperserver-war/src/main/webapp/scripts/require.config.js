@@ -9,6 +9,9 @@ requirejs.config(
       enabled: true,
       level: 'error',
       appenders: ['console']
+    },
+    stdnav: {
+    
     }
   },
   paths: {
@@ -70,6 +73,13 @@ requirejs.config(
     csslink: 'bower_components/js-sdk/src/common/plugin/csslink',
     vizShim: 'bower_components/js-sdk/src/common/plugin/vizShim',
     logger: 'bower_components/js-sdk/src/common/logging/logger',
+    stdnav: 'bower_components/js-sdk/src/common/stdnav/stdnav',
+    stdnavPluginAnchor: 'bower_components/js-sdk/src/common/stdnav/plugins/stdnavPluginAnchor',
+    stdnavPluginButton: 'bower_components/js-sdk/src/common/stdnav/plugins/stdnavPluginButton',
+    stdnavPluginForms: 'bower_components/js-sdk/src/common/stdnav/plugins/stdnavPluginForms',
+    stdnavPluginGrid: 'bower_components/js-sdk/src/common/stdnav/plugins/stdnavPluginGrid',
+    stdnavPluginList: 'bower_components/js-sdk/src/common/stdnav/plugins/stdnavPluginList',
+    stdnavPluginTable: 'bower_components/js-sdk/src/common/stdnav/plugins/stdnavPluginTable',
     'jquery-ui-custom-css': 'bower_components/jquery-ui/themes/redmond/jquery-ui-1.10.4-custom.css',
     'jquery-ui-custom-css-visualizejs': 'bower_components/jquery-ui/themes/redmond/jquery-ui-1.10.4-custom-visualizejs.css',
     mustache: 'bower_components/mustache/mustache',
@@ -88,6 +98,8 @@ requirejs.config(
     'components.dynamicTree': 'dynamicTree.treesupport',
     'component.repository.search': 'repository.search.actions',
     'report.view': 'report.view.runtime',
+    stdnavPluginActionMenu: 'stdnav/plugins/stdnavPluginActionMenu',
+    stdnavPluginDynamicList: 'stdnav/plugins/stdnavPluginDynamicList',
     'wcf.scroll': '../wcf/scroller',
     'csrf.guard': '../JavaScriptServlet?noext',
     'report.global': '../reportresource?resource=net/sf/jasperreports/web/servlets/resources/jasperreports-global.js',
@@ -103,6 +115,11 @@ requirejs.config(
     'jasperreports-loader': 'reportViewer/jasperreports-loader'
   },
   shim: {
+    jquery: {
+      init: function () {
+                return jQuery.noConflict();
+            }
+    },
     'backbone.original': {
       deps: ['underscore','json3'],
       exports: 'Backbone',

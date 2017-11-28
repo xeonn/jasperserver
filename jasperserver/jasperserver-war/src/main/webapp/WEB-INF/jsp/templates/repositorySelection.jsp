@@ -56,7 +56,7 @@ Usage:
             </t:insertTemplate>
     </t:putAttribute>
     <t:putAttribute name="footerContent">
-         <button class="button action primary up okButton"><span class="wrap">${okButtonLabel}<span class="icon"></span></button>
-         <button class="button action up cancelButton"><span class="wrap"><spring:message code="button.cancel"/><span class="icon"></span></button>
+         <button class="button action primary up okButton"><span class="wrap">${okButtonLabel}</span><span class="icon"></span></button>
+         <button class="button action up cancelButton"><span class="wrap"><spring:message code="button.cancel"/></span><span class="icon"></span></button>
     </t:putAttribute>
 </t:insertTemplate>

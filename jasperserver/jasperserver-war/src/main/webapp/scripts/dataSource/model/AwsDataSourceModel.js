@@ -22,7 +22,7 @@
 
 /**
  * @author: Dima Gorbenko
- * @version: $Id: AwsDataSourceModel.js 8790 2015-04-22 21:28:09Z obobruyk $
+ * @version: $Id: AwsDataSourceModel.js 9218 2015-08-20 19:56:16Z yplakosh $
  */
 
 /* global XRegExp */
@@ -68,7 +68,17 @@ define(function (require) {
         validation: (function() {
             var validation = {};
 
-            _.extend(validation, JdbcDataSourceModel.prototype.validation, {
+            _.extend(validation, {
+	            connectionUrl: [
+		            {
+			            required: true,
+			            msg: i18n["ReportDataSourceValidator.error.not.empty.reportDataSource.connectionUrl"]
+		            },
+		            {
+			            xRegExpPattern: XRegExp(dataSourcePatterns.forbidWhitespacesPattern),
+			            msg: i18n["ReportDataSourceValidator.error.invalid.chars.reportDataSource.connectionUrl"]
+		            }
+	            ],
                 username: [
                     {
                         required: true,

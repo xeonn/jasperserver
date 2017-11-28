@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: commons.main.js 7762 2014-09-19 10:16:02Z sergey.prilukin $
+ * @version: $Id: commons.main.js 9192 2015-08-12 19:52:08Z yplakosh $
  */
 
 define(function(require){
@@ -33,17 +33,24 @@ define(function(require){
     require("core.accessibility");
     require("core.events.bis");
     require("core.key.events");
+    var stdnav = require("stdnav");
 
-    var actionModel = require("actionModel.modelGenerator"),
-        primaryNavigation = require("actionModel.primaryNavigation"),
-        globalSearch = require("repository.search.globalSearchBoxInit"),
-        layoutModule = require("core.layout"),
-        jrsConfigs = require("jrs.configs");
+    var actionModel = require("actionModel.modelGenerator");
+    var primaryNavigation = require("actionModel.primaryNavigation");
+    var globalSearch = require("repository.search.globalSearchBoxInit");
+    var layoutModule = require("core.layout");
+    var jrsConfigs = require("jrs.configs");
 
     domReady(function(){
         layoutModule.initialize();
         primaryNavigation.initializeNavigation(); //navigation setup
         actionModel.initializeOneTimeMenuHandlers(); //menu setup
+
+        // JRS-specific stdnav plugins from jrs-ui
+        var stdnavPluginActionMenu = require("stdnavPluginActionMenu");
+        var stdnavPluginDynamicList = require("stdnavPluginDynamicList");
+        stdnavPluginActionMenu.activate(stdnav);
+        stdnavPluginDynamicList.activate(stdnav);
 
         jrsConfigs.initAdditionalUIComponents && globalSearch.initialize();
         //isNotNullORUndefined(window.accessibilityModule) && accessibilityModule.initialize();

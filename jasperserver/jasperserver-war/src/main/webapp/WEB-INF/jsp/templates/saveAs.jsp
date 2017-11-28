@@ -66,7 +66,17 @@ Usage:
 
     </t:putAttribute>
     <t:putAttribute name="footerContent">
-         <button id="saveAsBtnSave" class="button action primary up"><span class="wrap"><spring:message code="dialog.file.save"/><span class="icon"></span></button>
-         <button id="saveAsBtnCancel" class="button action up"><span class="wrap"><spring:message code="dialog.file.cancel"/><span class="icon"></span></button>
+         <button id="saveAsBtnSave" class="button action primary up">
+            <span class="wrap">
+                <spring:message code="dialog.file.save"/>
+                <span class="icon"></span>
+            </span>
+         </button>
+         <button id="saveAsBtnCancel" class="button action up">
+            <span class="wrap">
+                <spring:message code="dialog.file.cancel"/>
+                <span class="icon"></span>
+            </span>
+         </button>
     </t:putAttribute>
 </t:insertTemplate>

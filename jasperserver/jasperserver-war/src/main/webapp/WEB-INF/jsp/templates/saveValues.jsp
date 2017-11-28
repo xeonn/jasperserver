@@ -48,9 +48,11 @@ Usage:
     <t:putAttribute name="bodyContent">
 
             <label class="control input text" accesskey="o" for="savedValuesName" title="<spring:message code="dialog.file.name.title" javaScriptEscape="true"/>">
-                <span class="wrap"><spring:message code='dialog.saveValues.nameForSavedValues' javaScriptEscape="true"/> (<spring:message code='required.field' javaScriptEscape="true"/>):</span>
+                <span class="wrap">
+                    <spring:message code='dialog.saveValues.nameForSavedValues' javaScriptEscape="true"/> (<spring:message code='required.field' javaScriptEscape="true"/>):
+                </span>
                 <input class="" id="savedValuesName" type="text" value=""/>
-                <span class="message warning">error message here</span>
+                <span class="message warning"></span>
             </label>
 
     </t:putAttribute>

@@ -26,12 +26,15 @@ import com.jaspersoft.jasperserver.api.metadata.common.domain.Folder;
 import com.jaspersoft.jasperserver.api.search.SearchCriteria;
 import com.jaspersoft.jasperserver.search.filter.BaseSearchFilter;
 import com.jaspersoft.jasperserver.search.service.RepositorySearchCriteria;
+
 import org.hibernate.criterion.Restrictions;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author: Igor.Nesterenko
@@ -60,7 +63,17 @@ public class ExcludeFolderFilter extends BaseSearchFilter {
         RepositorySearchCriteria repositorySearchCriteria = getTypedAttribute(context, RepositorySearchCriteria.class);
 
         if (repositorySearchCriteria != null && repositorySearchCriteria.getExcludeRelativePaths() != null){
-            return repositorySearchCriteria.getExcludeRelativePaths();
+        	// check and fix duplicates
+        	List<String> result = repositorySearchCriteria.getExcludeRelativePaths();
+        	Set<String> processed = new HashSet<String>(result.size());
+        	processed.addAll(result);
+        	if(result.size()>processed.size()){ // there was reduction to the number of results = there were duplicates
+        		result.clear();
+        		result.addAll(processed);
+        		repositorySearchCriteria.setExcludeRelativePaths(result);
+        	}
+        	// return duplicate-free result
+        	return result;
         }
 
         return Collections.emptyList();

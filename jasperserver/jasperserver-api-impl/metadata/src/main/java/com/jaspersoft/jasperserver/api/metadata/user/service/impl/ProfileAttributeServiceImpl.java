@@ -64,7 +64,7 @@ import java.util.*;
  * Manages attributes for principals - Users, Roles.
  *
  * @author sbirney
- * @version $Id: ProfileAttributeServiceImpl.java 55418 2015-05-19 11:33:19Z svnaskorodu $
+ * @version $Id: ProfileAttributeServiceImpl.java 56967 2015-08-20 23:20:53Z esytnik $
  */
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 public class ProfileAttributeServiceImpl extends HibernateDaoImpl
@@ -281,7 +281,9 @@ public class ProfileAttributeServiceImpl extends HibernateDaoImpl
         // Given the object and the recipient, find the permission
         RepoProfileAttribute existingPerm = getRepoProfileAttribute(attr);
         if (existingPerm != null) {
-            return (ProfileAttribute) existingPerm.toClient(getObjectMappingFactory());
+            ProfileAttribute profileAttribute = (ProfileAttribute) existingPerm.toClient(getObjectMappingFactory());
+            profileAttribute.setGroup(getChangerName(attr.getAttrName()));
+            return profileAttribute;
         } else if (isServerPrincipal(attr.getPrincipal())) {
             return getServerAttribute(context, attr);
         }
@@ -295,6 +297,11 @@ public class ProfileAttributeServiceImpl extends HibernateDaoImpl
     public List<ProfileAttribute> getCurrentUserProfileAttributes(ExecutionContext executionContext, ProfileAttributeCategory category) {
         Object principal;
         boolean effectiveAttributes = false;
+
+        // Return an empty profile attributes for Anonymous user for any category
+        if (ProfileAttributeCategory.USER.getPrincipal(getObjectMappingFactory()) == null) {
+            return new ArrayList<ProfileAttribute>();
+        }
 
         if (category != null && category != ProfileAttributeCategory.HIERARCHICAL) {
             if (!profileAttributeCategories.contains(category)) {
@@ -388,6 +395,9 @@ public class ProfileAttributeServiceImpl extends HibernateDaoImpl
                                                                                   Object principal,
                                                                                   AttributesSearchCriteria searchCriteria) {
         List<ProfileAttribute> profileAttributes = new ArrayList<ProfileAttribute>();
+        if (principal == null) {
+            return new AttributesSearchResultImpl<ProfileAttribute>();
+        }
 
         // Given the principalObject to find the attributes
         final IdedObject principalObject = (IdedObject) getPersistentObject(principal);
@@ -708,19 +718,15 @@ public class ProfileAttributeServiceImpl extends HibernateDaoImpl
     public void applyProfileAttributes() {
         log.info("Applying all configuration properties");
 
-        RepoTenant rootTenant = tenantPersistenceResolver.getPersistentTenant(
-                TenantService.ORGANIZATIONS, false);
+        RepoTenant rootTenant = tenantPersistenceResolver.getPersistentTenant(TenantService.ORGANIZATIONS, false);
 
         // Apply attributes only if "root" tenant exists
         if (rootTenant != null) {
-            List<ProfileAttribute> profileAttributes = getClientProfileAttributes(
-                    null,
-                    rootTenant,
+            List<ProfileAttribute> profileAttributes = getClientProfileAttributes(null, rootTenant,
                     new AttributesSearchCriteria.Builder()
                             .setEffective(false)
-                            .setSkipServerSettings(true)
-                            .build()
-            ).getList();
+                            .setSkipServerSettings(false)
+                            .build()).getList();
 
             for (ProfileAttribute profileAttribute : profileAttributes) {
                 applyServerSetting(profileAttribute);
@@ -844,6 +850,11 @@ public class ProfileAttributeServiceImpl extends HibernateDaoImpl
                     || searchCriteria.getGroups().contains(attrGroup)
                     || !attrGroup.equals(ProfileAttributeGroup.CUSTOM.toString())
                     && searchCriteria.getGroups().contains(ProfileAttributeGroup.CUSTOM_SERVER_SETTINGS.toString())) {
+
+                if (searchCriteria.isSkipServerSettings() &&
+                        !attrGroup.equals(ProfileAttributeGroup.CUSTOM.toString())) {
+                    continue;
+                }
 
                 ProfileAttribute clientProfileAttribute = (ProfileAttribute) profileAttribute.toClient(getObjectMappingFactory());
                 clientProfileAttribute.setGroup(attrGroup);

@@ -43,7 +43,7 @@
     </bean>
 
     <bean id="stringInputControl" class="com.jaspersoft.jasperserver.war.cascade.utils.InputControlMock">
-        <property name="type" ref="TYPE_SINGLE_VALUE"/>
+        <property name="inputControlType" ref="TYPE_SINGLE_VALUE"/>
         <property name="name" value="String"/>
         <property name="label" value="String"/>
     </bean>

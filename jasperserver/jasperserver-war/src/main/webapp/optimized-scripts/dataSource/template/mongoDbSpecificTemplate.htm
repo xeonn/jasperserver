@@ -1,41 +1,30 @@
-<fieldset class="group shortFields mongoDbJdbcSpecificFields">
+<fieldset name="customFieldsContainer" class="group shortFields">
 
-	<legend class="offLeft"><span></span></legend>
+	<legend class="offLeft"><span>Access Properties</span></legend>
 
-	<label title="{{- i18n['resource.datasource.mongoJdbc.host'] }}" class="control input text">
-		<span class="wrap">{{- i18n["resource.datasource.mongoJdbc.host"]}} ({{- i18n['required.field']}}):</span>
-		<input type="text" value="{{- modelAttributes.serverAddress }}" name="serverAddress">
-		<span class="message warning"></span>
+
+
+
+	<label title="MongoDB URI (required)" class="control input text">
+		<span class="wrap">{{- i18n['MongoDbDataSource.properties.mongoURI'] }} ({{- i18n['required.field']}}):</span>
+		<input name="mongoURI" type="text" size="40" class="fnormal" value="{{- modelAttributes.mongoURI }}">
 		<span class="message hint"></span>
+		<span class="message warning"></span>
 	</label>
 
-	<label title="{{- i18n['resource.datasource.mongoJdbc.port.number'] }}" class="control input text">
-		<span class="wrap">{{- i18n["resource.datasource.mongoJdbc.port.number"]}} ({{- i18n['required.field']}}):</span>
-		<input type="text" value="{{- modelAttributes.portNumber }}" name="portNumber">
-		<span class="message warning"></span>
+
+	<label title="User Name (optional)" class="control input text">
+		<span class="wrap">{{- i18n['MongoDbDataSource.properties.username'] }} ({{- i18n['optional.field']}}):</span>
+		<input name="username" type="text" size="40" class="fnormal" value="{{- modelAttributes.username }}">
 		<span class="message hint"></span>
+		<span class="message warning"></span>
 	</label>
 
-	<label title="{{- i18n['resource.datasource.mongoJdbc.database.name'] }}" class="control input text">
-		<span class="wrap">{{- i18n["resource.datasource.mongoJdbc.database.name"]}}:</span>
-		<input type="text" value="{{- modelAttributes.database }}" name="database">
-		<span class="message warning"></span>
+	<label title="Password (optional)" class="control input text">
+		<span class="wrap">{{- i18n['MongoDbDataSource.properties.password'] }} ({{- i18n['optional.field']}}):</span>
+		<input name="password" type="password" size="40" class="fnormal" value="{{- modelAttributes.password }}">
 		<span class="message hint"></span>
+		<span class="message warning"></span>
 	</label>
 
-	<label title="{{- i18n['resource.datasource.mongoJdbc.user.name'] }}" class="control input text">
-		<span class="wrap">{{- i18n["resource.datasource.mongoJdbc.user.name"]}}:</span>
-		<input type="text" value="{{- modelAttributes.username }}" name="username">
-		<span class="message warning"></span>
-		<span class="message hint"></span>
-	</label>
-
-	<label title="{{- i18n['resource.datasource.mongoJdbc.password'] }}" class="control input text">
-		<span class="wrap">{{- i18n["resource.datasource.mongoJdbc.password"]}}:</span>
-		<input type="password" value="{{- modelAttributes.password }}" name="password">
-		<span class="message warning"></span>
-		<span class="message hint"></span>
-	</label>
-
-	<div name="fileLocationContainer" class="section"></div>
 </fieldset>

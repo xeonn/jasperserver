@@ -15,7 +15,7 @@
         <property name="creationDate" column="creation_date" type="timestamp"/>
 		<component name="source" class="com.jaspersoft.jasperserver.api.engine.scheduling.hibernate.PersistentReportJobSource">
 			<property name="reportUnitURI" column="report_unit_uri" not-null="true" type="string" length="250"/>
-			<map name="parametersMap" table="JIReportJobParameter">
+			<map name="parametersMap" table="JIReportJobParameter" fetch="subselect">
 				<key column="job_id"/>
 				<map-key column="parameter_name" type="string" length="100"/>
 				<element column="parameter_value" type="serializable" length="20971520"/>
@@ -23,7 +23,7 @@
 		</component>
 		<many-to-one column="job_trigger" name="trigger" class="com.jaspersoft.jasperserver.api.engine.scheduling.hibernate.PersistentReportJobTrigger" not-null="true"/>
 		<property name="baseOutputFilename" column="base_output_name" type="string" length="100" not-null="true"/>
-		<set name="outputFormats" table="JIReportJobOutputFormat">
+		<set name="outputFormats" table="JIReportJobOutputFormat" fetch="subselect">
 			<key column="report_job_id"/>
 			<element type="byte" column="output_format" not-null="true"/>
 		</set>

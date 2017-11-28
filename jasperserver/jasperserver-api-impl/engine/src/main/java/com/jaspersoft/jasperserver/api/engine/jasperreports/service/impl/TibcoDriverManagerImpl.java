@@ -57,6 +57,7 @@ public class TibcoDriverManagerImpl implements TibcoDriverManager {
     private Boolean isWebLogic;
     private Boolean isLicenseManagerAvailable;
     private Object LicenseManager;
+    private static String[] SUPPORTED_TIBCO_DS = new String[] {"db2", "hive", "impala", "mongodb", "oracle", "redshift", "salesforce", "sqlserver"};
 
 
     private TibcoDriverManagerImpl() {
@@ -70,6 +71,16 @@ public class TibcoDriverManagerImpl implements TibcoDriverManager {
     }
 
     public Connection unlockConnection(Connection connection) throws java.sql.SQLException {
+        try {
+            if (connection != null && (Boolean) isTibcoConnection().invoke(null, connection)) {
+                try {
+                    isProVersion();
+                } catch (Exception ex){
+                    ex.printStackTrace();
+                    throw new SQLException("Tibco drivers are not available for your JRS version.");
+                }
+            }
+        } catch (Exception ex1) {}
         return connection;
     }
 
@@ -226,12 +237,16 @@ public class TibcoDriverManagerImpl implements TibcoDriverManager {
 
     private Class getJNDIConnectionUtil() {
         if (tibcoDriverExists == null) {
-            try {
-                jndiConnectionUtil = Class.forName("tibcosoftware.jdbc.common.JNDIConnectionUtil");
-                tibcoDriverExists = true;
-            } catch (Throwable ex) {
-                tibcoDriverExists = false;
+            for (String supportDS : SUPPORTED_TIBCO_DS) {
+                try {
+                    jndiConnectionUtil = Class.forName("tibcosoftware.jdbc.common." + supportDS + ".JNDIConnectionUtil");
+                    tibcoDriverExists = true;
+                    return jndiConnectionUtil;
+                } catch (Throwable ex) {
+
+                }
             }
+            tibcoDriverExists = false;
         }
         return jndiConnectionUtil;
     }
@@ -266,7 +281,7 @@ public class TibcoDriverManagerImpl implements TibcoDriverManager {
         } catch (Throwable ex2) {};
     }
 
-    private Object getLicenseManager() {
+    private Object getLicenseManager() throws Exception {
         if (isLicenseManagerAvailable == null) {
             try {
                 Method LicenseManagerMethod = Class.forName("com.jaspersoft.jasperreports.license.LicenseManager").getMethod("cachedInstance", JasperReportsContext.class);
@@ -279,6 +294,11 @@ public class TibcoDriverManagerImpl implements TibcoDriverManager {
         return LicenseManager;
     }
 
+    private boolean isProVersion() throws Exception {
+        Class.forName("com.jaspersoft.commons.semantic.datasource.SemanticLayerDataSource");
+        return true;
+    }
+
     static public void preLoadDrivers() {
         printLog("Pre-load Drivers");
         registerDriver("tibcosoftware.jdbc.oracle.OracleDriver");
@@ -288,6 +308,7 @@ public class TibcoDriverManagerImpl implements TibcoDriverManager {
         registerDriver("tibcosoftware.jdbc.impala.ImpalaDriver");
         registerDriver("tibcosoftware.jdbc.mongodb.MongoDBDriver");
         registerDriver("tibcosoftware.jdbc.redshift.RedshiftDriver");
+        registerDriver("tibcosoftware.jdbc.salesforce.SalesforceDriver");
         deregisterTibcosoftwareincDrivers();
     }
 
@@ -340,5 +361,6 @@ public class TibcoDriverManagerImpl implements TibcoDriverManager {
             }
         }
     }
+
 }
 

@@ -22,7 +22,7 @@
 
 /**
  * @author: Kostiantyn Tsaregradskyi
- * @version: $Id: RequestBiComponentError.js 812 2015-01-27 11:01:30Z psavushchik $
+ * @version: $Id: RequestBiComponentError.js 1495 2015-08-20 18:58:48Z yplakosh $
  */
 
 define(function (require) {
@@ -66,6 +66,14 @@ define(function (require) {
                 } else {
                     msg += (" : " + responseJson.message);
                 }
+
+                if (responseJson.result && responseJson.result.msg ) {
+                    errorCode = responseJson.result.msg;
+                    if (responseJson.result.devmsg ) {
+                        msg = responseJson.result.devmsg;
+                    }
+                }
+
             }
 
             BiComponentError.prototype.constructor.call(this, errorCode, msg, parameters);

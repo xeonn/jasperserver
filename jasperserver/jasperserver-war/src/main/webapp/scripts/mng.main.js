@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: mng.main.js 8900 2015-05-06 20:57:14Z yplakosh $
+ * @version: $Id: mng.main.js 9192 2015-08-12 19:52:08Z yplakosh $
  */
 
 /* global orgModule, isProVersion, alert,  */
@@ -221,6 +221,7 @@ orgModule.manager = {
                 var entity = this.entityJsonToObject(entityJson.evalJSON());
 
                 orgModule.entityList.addEntities([entity]);
+                orgModule.entityList.deselectAll();
                 orgModule.entityList.selectEntity(entity.getNameWithTenant());
             }
         }.bindAsEventListener(this));

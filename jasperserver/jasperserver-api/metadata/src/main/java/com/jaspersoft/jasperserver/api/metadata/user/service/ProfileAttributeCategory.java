@@ -31,7 +31,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
  * Represents a category for profile attribute
  *
  * @author Vlad Zavadskii
- * @version $Id: ProfileAttributeCategory.java 51947 2014-12-11 14:38:38Z ogavavka $
+ * @version $Id: ProfileAttributeCategory.java 56967 2015-08-20 23:20:53Z esytnik $
  */
 public enum ProfileAttributeCategory {
     USER("User Profile") {
@@ -59,7 +59,17 @@ public enum ProfileAttributeCategory {
     SERVER("Server Profile") {
         @Override
         public Object getPrincipal(ResourceFactory resourceFactory) {
-            return resourceFactory.newObject(Tenant.class);
+            Tenant tenant = (Tenant) resourceFactory.newObject(Tenant.class);
+            tenant.setId(TenantService.ORGANIZATIONS);
+            tenant.setAlias(TenantService.ORGANIZATIONS);
+            tenant.setTenantName("root");
+            tenant.setTenantDesc(TenantService.ORGANIZATIONS);
+            tenant.setTenantNote(" ");
+            tenant.setTenantUri("/");
+            tenant.setTenantFolderUri("/");
+            tenant.setTheme("default");
+
+            return tenant;
         }
     },
 
@@ -78,7 +88,11 @@ public enum ProfileAttributeCategory {
 
     private static User getCurrentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        return (auth != null) ? (User) auth.getPrincipal() : null;
+        if (auth != null && auth.getPrincipal() instanceof User) {
+            return (User) auth.getPrincipal();
+        } else {
+            return null;
+        }
     }
 
     public String getLabel() {

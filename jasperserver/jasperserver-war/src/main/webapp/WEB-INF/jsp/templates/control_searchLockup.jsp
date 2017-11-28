@@ -28,6 +28,7 @@ Usage:
         <t:putAttribute name="containerID" value="[OPTIONAL]"/>
         <t:putAttribute name="containerClass" value="[OPTIONAL]"/>
         <t:putAttribute name="inputID" value="[OPTIONAL]"/>
+        <t:putAttribute name="inputTabindex" value="[OPTIONAL]"/>
     </t:insertTemplate>
 
 --%>
@@ -40,21 +41,28 @@ Usage:
 <t:useAttribute id="containerClass" name="containerClass" classname="java.lang.String" ignore="true"/>
 <t:useAttribute id="containerAttr" name="containerAttr" classname="java.lang.String" ignore="true"/>
 <t:useAttribute id="inputID" name="inputID" classname="java.lang.String" ignore="true"/>
+<t:useAttribute id="accClass" name="accClass" classname="java.lang.String" ignore="true"/>
+<t:useAttribute id="inputTabindex" name="inputTabindex" classname="java.lang.String" ignore="true"/>
 
 <%--/WEB-INF/jsp/templates/control_searchLockup.jsp revision A--%>
 <c:choose>
 <c:when test="${isIPad}">
-<span id="${containerID}" class="control searchLockup ${containerClass}" ${containerAttr}>
-	<label for="${inputID}" class="offLeft"><spring:message code="button.search" javaScriptEscape="true"/></label>
-    <div class="wrap"><input type="text" class="" id="${inputID}" tabIndex="-1"/></div>
+<span id="${containerID}" class="control searchLockup ${containerClass}" ${containerAttr} ${accClass}>
+    <label for="${inputID}" class="offLeft"><spring:message code="button.search" javaScriptEscape="true"/></label>
+    <div class="wrap">
+        <input type="text" class="${accClass}" id="${inputID}" tabindex="${inputTabindex}"/>
+    </div>
     <b class="right"><a class="button searchClear"></a></b>
     <a class="button search up"></a>
 </span>
+
 </c:when>
 <c:otherwise>
 <span id="${containerID}" class="control searchLockup ${containerClass}" ${containerAttr}>
-	<label for="${inputID}" class="offLeft"><spring:message code="button.search" javaScriptEscape="true"/></label>
-    <div class="wrap"><input type="text" class="" id="${inputID}" tabIndex="-1"/></div>
+    <label for="${inputID}" class="offLeft"><spring:message code="button.search" javaScriptEscape="true"/></label>
+    <div class="wrap">
+        <input type="text" class="${accClass}" id="${inputID}" tabindex="${inputTabindex}"/>
+    </div>
     <b class="right"><a class="button searchClear"></a></b>
     <a class="button search up"></a>
 </span>

@@ -28,6 +28,7 @@
         username="${js.dbUsername}" password="${escapeXML:js.dbPassword}"
         driverClassName="${jdbcDriverClass}"
         accessToUnderlyingConnectionAllowed = "true"
+        validationQuery="${jdbcTestTableQuery}"
         testOnBorrow="true"
         url="${js.jdbcUrl}"
         factory="${tomcatBasicDatasourceFactory}"
@@ -38,6 +39,7 @@
         username="${sugarcrm.dbUsername}" password="${escapeXML:sugarcrm.dbPassword}"
         driverClassName="${jdbcDriverClass}"
         accessToUnderlyingConnectionAllowed = "true"
+        validationQuery="${jdbcTestTableQuery}"
         testOnBorrow="true"
         url="${sugarcrm.jdbcUrl}"
         factory="${tomcatBasicDatasourceFactory}"/>
@@ -47,6 +49,7 @@
         username="${foodmart.dbUsername}" password="${escapeXML:foodmart.dbPassword}"
         driverClassName="${jdbcDriverClass}"
         accessToUnderlyingConnectionAllowed = "true"
+        validationQuery="${jdbcTestTableQuery}"
         testOnBorrow="true"
         url="${foodmart.jdbcUrl}"
         factory="${tomcatBasicDatasourceFactory}"/>

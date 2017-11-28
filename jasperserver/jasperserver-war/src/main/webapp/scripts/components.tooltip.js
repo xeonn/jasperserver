@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: components.tooltip.js 8900 2015-05-06 20:57:14Z yplakosh $
+ * @version: $Id: components.tooltip.js 9218 2015-08-20 19:56:16Z yplakosh $
  */
 
 /* global isArray, _, getBoxOffsets, getScrollLeft, getScrollTop, layoutModule
@@ -74,6 +74,9 @@ function JSTooltip(element, options) {
             this.loadTextCallback = options.loadTextCallback;
             this.loadTextExecuted = false;
         }
+
+        this.disabled = false;
+        this.removed = false;
 
         if (this.templateId) {
             this._toAttribute(this.TOOLTIP_TEMPLATE, this.templateId);
@@ -239,6 +242,29 @@ JSTooltip.addMethod("hide", function() {
     }
 });
 
+JSTooltip.addMethod("disable", function() {
+    tooltipModule.hideJSTooltip(this.srcElement);
+    this.disabled = true;
+});
+
+JSTooltip.addMethod("enable", function() {
+    this.disabled = false;
+    tooltipModule.showJSTooltip(this.srcElement, this.offsets);
+});
+
+JSTooltip.addMethod("remove", function() {
+    var index = tooltipModule.tooltips.indexOf(this.srcElement.jsTooltip);
+    if (index !== -1) {
+        tooltipModule.hideJSTooltip(this.srcElement);
+        tooltipModule.tooltips.splice(index, 1);
+    }
+    this.removed = true;
+});
+
+JSTooltip.addMethod("isRemoved", function() {
+    return this.removed;
+});
+
 var tooltipModule = {
     TOOLTIP_PATTERN: "*[tooltiptext] > *",
     ELEMENT_WITH_TOOLTIP_PATTERN: "*[tooltiptext]",
@@ -251,24 +277,25 @@ var tooltipModule = {
     showJSTooltip: function(element, offsets) {
         if (!element.jsTooltip) {
             element.jsTooltip = new JSTooltip(element, {});
+        } else if (!element.jsTooltip.disabled) {
+            this.actualX = offsets[0];
+            this.actualY = offsets[1];
+
+            this.cleanUp();
+
+            var appearDelay = jQuery(element).attr("tooltipappeardelay");
+            appearDelay = appearDelay ? parseInt(appearDelay) : 1000;
+
+            element.jsTooltip.timer && clearTimeout(element.jsTooltip.timer);
+            element.jsTooltip.timer = setTimeout(function() {
+                element.jsTooltip.show([tooltipModule.actualX, tooltipModule.actualY]);
+            }, appearDelay);
+
+            jQuery(element).on("mousemove", function(evt){
+                tooltipModule.actualX = evt.clientX;
+                tooltipModule.actualY = evt.clientY;
+            });
         }
-        this.actualX = offsets[0];
-        this.actualY = offsets[1];
-
-        this.cleanUp();
-
-		var appearDelay = jQuery(element).attr("tooltipappeardelay");
-		appearDelay = appearDelay ? parseInt(appearDelay) : 1000;
-
-        element.jsTooltip.timer && clearTimeout(element.jsTooltip.timer);
-        element.jsTooltip.timer = setTimeout(function() {
-            element.jsTooltip.show([tooltipModule.actualX, tooltipModule.actualY]);
-        }, appearDelay);
-		
-        jQuery(element).on("mousemove", function(evt){
-            tooltipModule.actualX = evt.clientX;
-            tooltipModule.actualY = evt.clientY;
-        });
     },
 
     hideJSTooltip: function(element) {

@@ -21,6 +21,7 @@
 package com.jaspersoft.jasperserver.api.engine.jasperreports.util;
 
 import com.jaspersoft.jasperserver.api.JSException;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.client.FileResourceImpl;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.CustomJdbcReportDataSourceProvider;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl.JdbcDataSourceService;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl.JdbcReportDataSourceServiceFactory;
@@ -37,13 +38,17 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import javax.sql.DataSource;
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Iterator;
-import java.util.List;
+import java.sql.DriverManager;
+import java.util.*;
 
 /**
  * Created by IntelliJ IDEA.
@@ -56,6 +61,7 @@ public class MongoDbJDBCReportDataSourceServiceFactory extends JdbcReportDataSou
 
 	private static final Log log = LogFactory.getLog(MongoDbJDBCReportDataSourceServiceFactory.class);
     private RepositoryService repositoryService;
+
     private String schemaDefinitionDirectory;
     private PooledObjectCache jdbcSchemaCache = new PooledObjectCache();
     private int mongoDBJDBCSchemaDefinitionTimeoutInMinute;
@@ -79,7 +85,6 @@ public class MongoDbJDBCReportDataSourceServiceFactory extends JdbcReportDataSou
 
 	public JdbcReportDataSource getJdbcReportDataSource(CustomReportDataSource customReportDataSource) {
         String driverClass = "tibcosoftware.jdbc.mongodb.MongoDBDriver";
-
         String url = "jdbc:tibcosoftware:mongodb://";
         String serverAddress = ((String) customReportDataSource.getPropertyMap().get("serverAddress"));
         if (serverAddress != null) serverAddress.trim();
@@ -90,24 +95,52 @@ public class MongoDbJDBCReportDataSourceServiceFactory extends JdbcReportDataSou
         String userName = ((String) customReportDataSource.getPropertyMap().get("username"));
         String password = ((String) customReportDataSource.getPropertyMap().get("password"));
         String database = ((String) customReportDataSource.getPropertyMap().get("database"));
-
+        String connectionOptions = ((String) customReportDataSource.getPropertyMap().get("connectionOptions"));
         String schemaDefinition = null;
 
         // read resource from repo
         if ((customReportDataSource.getResources() != null) && (customReportDataSource.getResources().size() >= 1)) {
             ResourceReference resourceReference = customReportDataSource.getResources().get(MongoDbJDBCDataSourceDefinition.DATA_FILE_RESOURCE_ALIAS);
 
-            debug("MongoDB JDBC directory = " + schemaDefinitionDirectory);
+            if (resourceReference.isLocal()) {
+                FileResource fileResource = (FileResource) resourceReference.getLocalResource();
 
-            schemaDefinition = saveResourceToDisk(resourceReference);
+                // custom data source has changed.  need to reset local resource
+                Date cdsLastUpdateDate = customReportDataSource.getUpdateDate();
+                Date fileResourceUpdateDate = fileResource.getUpdateDate();
+                if (cdsLastUpdateDate != null && cdsLastUpdateDate.toString() != null && fileResourceUpdateDate != null && fileResourceUpdateDate.toString() != null && cdsLastUpdateDate.after(fileResourceUpdateDate)) resourceReference = null;
+
+            }
+            if (resourceReference != null) {
+                debug("REPO RESOURCE = " + resourceReference.getReferenceURI());
+                debug("MongoDB JDBC directory = " + schemaDefinitionDirectory);
+                schemaDefinition = saveResourceToDisk(resourceReference);
+
+            }
         }
-
-        if (schemaDefinition == null) schemaDefinition = ((String) customReportDataSource.getPropertyMap().get(MongoDbJDBCDataSourceDefinition.FILE_NAME_PROP));
+        boolean uploadSchemaToRepo = false;
+        if (schemaDefinition == null) {
+            schemaDefinition = ((String) customReportDataSource.getPropertyMap().get(MongoDbJDBCDataSourceDefinition.FILE_NAME_PROP));
+            // reset schemaDefinition for testing
+            // schemaDefinition = null;
+            // schema file doesn't exist.  create new schema file
+            if ((schemaDefinition == null) || schemaDefinition.equals("")) {
+                String schemaKey = customReportDataSource.getURIString() + "_" + customReportDataSource.getCreationDate() + "_" + customReportDataSource.getUpdateDate();
+                debug("Create MongoDB JBDC Key = " + schemaKey);
+                String schemaPrefix = "mongodbJDBC-" + schemaKey.hashCode() + ".";
+                File outputLocation = new File(schemaDefinitionDirectory, schemaPrefix + "config");
+                schemaDefinition = outputLocation.getAbsolutePath();
+                debug("New schema definition location = " + schemaDefinition);
+                uploadSchemaToRepo = true;
+            }
+        }
         debug("Schema Definition on disk = " + schemaDefinition);
         if (userName != null && password != null) url = url + ";User=" + userName + ";Password=" + password;
         if (database != null) url = url + ";DatabaseName=" + database;
         if (schemaDefinition != null) url = url + ";SchemaDefinition=" + schemaDefinition;
+        if (connectionOptions != null) url = url + ";" + connectionOptions;
 
+        debug("CONNECT URL = " + url);
         JdbcReportDataSourceImpl jdbcReportDataSource = new JdbcReportDataSourceImpl();
         jdbcReportDataSource.setConnectionUrl(url);
         jdbcReportDataSource.setDriverClass(driverClass);
@@ -115,9 +148,64 @@ public class MongoDbJDBCReportDataSourceServiceFactory extends JdbcReportDataSou
         jdbcReportDataSource.setUsername(userName);
         jdbcReportDataSource.setName(customReportDataSource.getName());
 
+        if (uploadSchemaToRepo) {
+            createAndUploadSchemaToRepo(customReportDataSource, jdbcReportDataSource);
+        }
+
 		return jdbcReportDataSource;
 	}
 
+    private void createAndUploadSchemaToRepo(CustomReportDataSource customReportDataSource, JdbcReportDataSourceImpl jdbcReportDataSource) {
+        try {
+            Class.forName(jdbcReportDataSource.getDriverClass());
+            DriverManager.getConnection(jdbcReportDataSource.getConnectionUrl(), jdbcReportDataSource.getUsername(), jdbcReportDataSource.getPassword());
+            saveFileToResource(customReportDataSource, jdbcReportDataSource);
+        } catch (Exception ex) {
+            ex.getStackTrace();
+        }
+
+    }
+
+
+    private void saveFileToResource(CustomReportDataSource customReportDataSource, JdbcReportDataSource jdbcReportDataSource) {
+        if ((customReportDataSource.getResources() != null) && (customReportDataSource.getResources().size() >= 1)) return;
+        debug("SAVE FILE TO RESOURCE...");
+        String diskFile = getPropertyValue(jdbcReportDataSource.getConnectionUrl(), "SchemaDefinition");
+        FileResourceImpl fileResourceImpl = new FileResourceImpl();
+        fileResourceImpl.setFileType(".config");
+        fileResourceImpl.setName(customReportDataSource.getName() + "_SCHEMA");
+        fileResourceImpl.setLabel(customReportDataSource.getName() + "_SCHEMA");
+        fileResourceImpl.setParentFolder(customReportDataSource.getParentFolder());
+
+        try {
+            FileInputStream data = new FileInputStream(diskFile);
+            ByteArrayOutputStream output = new ByteArrayOutputStream();
+            byte [] buffer = new byte[256];
+            int bytesRead = 0;
+            while((bytesRead = data.read(buffer)) != -1)
+            {
+                output.write(buffer, 0, bytesRead);
+            }
+            output.close();
+            data.close();
+            fileResourceImpl.setData(output.toByteArray());
+
+        /***
+            repositoryService.saveResource(null, fileResourceImpl);
+            ResourceReference resourceReference = new ResourceReference(fileResourceImpl.getURI());
+        **/
+            ResourceReference resourceReference = new ResourceReference(fileResourceImpl);
+            HashMap<String, ResourceReference> resources = new HashMap<String, ResourceReference>();
+            resources.put(MongoDbJDBCDataSourceDefinition.DATA_FILE_RESOURCE_ALIAS, resourceReference);
+            customReportDataSource.setResources(resources);
+
+            repositoryService.saveResource(null, customReportDataSource);
+            debug("Custom DS IS SAVED...");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
 
     private String saveResourceToDisk(ResourceReference resourceReference) {
         long now = System.currentTimeMillis();
@@ -299,6 +387,18 @@ public class MongoDbJDBCReportDataSourceServiceFactory extends JdbcReportDataSou
                 }
             }
         }
+    }
+
+    private String getPropertyValue(String url, String propertyKey) {
+        String[] allProperties = url.split(";");
+        Map<String, String> jrsPropertiesMap = new HashMap<String, String>();
+        for (String prop : allProperties) {
+            if (prop.toLowerCase().startsWith(propertyKey.toLowerCase())) {
+                String[] propParts = prop.split("=");
+                return propParts[1];
+            }
+        }
+        return null;
     }
 
 }

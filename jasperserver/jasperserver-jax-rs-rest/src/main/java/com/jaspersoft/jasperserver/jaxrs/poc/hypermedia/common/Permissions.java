@@ -32,7 +32,8 @@ public enum Permissions{
     WRITE(4),
     CREATE(8),
     DELETE(16),
-    RUN(30);
+    RUN(30); // TODO: Sergey P.: there is no such permission as RUN.
+             // here it's a combination of READ+WRITE+CREATE+DELETE so it's useless
 
     Integer mask;
 

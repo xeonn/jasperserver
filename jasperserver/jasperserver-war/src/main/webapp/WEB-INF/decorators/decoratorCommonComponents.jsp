@@ -34,6 +34,8 @@
     <t:putAttribute name="containerID" value="globalSearch"/>
     <t:putAttribute name="containerAttr" value="data-tab-index='1' data-component-type='search'"/>
     <t:putAttribute name="inputID" value="searchInput"/>
+    <t:putAttribute name="accClass" value="stdnavinitialfocus"/> 
+    <t:putAttribute name="inputTabindex" value="1"/>
 </t:insertTemplate>
 
 <c:if test="${isProVersion}">
@@ -51,8 +53,8 @@
 authorization for logged in user
 ***********************************************************************
 --%>
-<ul id="metaLinks" class="horizontal">
-    <li id="userID">
+<ul id="metaLinks" class="horizontal" tabindex="3" role="menubar">
+    <li id="userID" tabindex="-1" role="menuitem">
         <authz:authorize ifNotGranted="ROLE_ANONYMOUS">
             <span id="casted">
                 <c:if test="<%= com.jaspersoft.jasperserver.api.metadata.user.service.impl.UserAuthorityServiceImpl.isUserSwitched() %>">
@@ -67,6 +69,6 @@ authorization for logged in user
         </authz:authorize>
     </li>
     <c:set var="isShowHelp" scope="page"><%= WebHelpLookup.getInstance().isShowHelpTrue() %></c:set>
-	<c:if test="${isProVersion && isShowHelp}"><li id="help"><a href="#" id="helpLink"><spring:message code="decorator.helpLink"/></a></li></c:if>
-    <li id="main_logOut" class="last"><a id="main_logOut_link" href="#" onclick="javascript:return false;"><spring:message code="menu.logout"/></a></li>
+	<c:if test="${isProVersion && isShowHelp}"><li id="help" tabindex="-1" role="menuitem"><a href="#" id="helpLink"><spring:message code="decorator.helpLink"/></a></li></c:if>
+    <li id="main_logOut" tabindex="-1" class="last" role="menuitem"><a id="main_logOut_link" href="#" onclick="javascript:return false;"><spring:message code="menu.logout"/></a></li>
 </ul>

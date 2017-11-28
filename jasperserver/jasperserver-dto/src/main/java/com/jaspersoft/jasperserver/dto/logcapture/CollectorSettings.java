@@ -16,7 +16,7 @@ import java.io.File;
  * DTO for Diagnostic Collector's settings.
  *
  * @author Yakiv Tymoshenko
- * @version $Id: CollectorSettings.java 52432 2015-02-10 13:43:17Z ytymoshenko $
+ * @version $Id: CollectorSettings.java 56967 2015-08-20 23:20:53Z esytnik $
  * @since 11.08.14
  */
 @XmlRootElement
@@ -57,8 +57,15 @@ public class CollectorSettings {
         this.logFilterParameters = other.getLogFilterParameters();
     }
 
-    public boolean isExportEnabled() {
-        return logFilterParameters.getResourceAndSnapshotFilter().isExportEnabled();
+    /*
+        Don't name it "isExportEnabled" because it would look like a property in resulting JSON/XML.
+     */
+    public boolean exportEnabled() {
+        if (logFilterParameters == null) {
+            return false;
+        }
+        ResourceAndSnapshotFilter resourceAndSnapshotFilter = logFilterParameters.getResourceAndSnapshotFilter();
+        return resourceAndSnapshotFilter != null && resourceAndSnapshotFilter.exportEnabled();
     }
 
     @Override

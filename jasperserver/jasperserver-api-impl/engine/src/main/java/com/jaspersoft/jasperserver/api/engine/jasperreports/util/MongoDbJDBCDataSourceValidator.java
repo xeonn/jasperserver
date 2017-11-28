@@ -2,6 +2,7 @@ package com.jaspersoft.jasperserver.api.engine.jasperreports.util;
 
 
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.CustomReportDataSource;
+import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributesResolver;
 import org.springframework.validation.Errors;
 
 import java.io.File;
@@ -15,6 +16,7 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class MongoDbJDBCDataSourceValidator implements CustomDataSourceValidator {
+    private ProfileAttributesResolver profileAttributesResolver;
 
 	public void validatePropertyValues(CustomReportDataSource ds, Errors errors) {
 		String filePath = null;
@@ -26,8 +28,7 @@ public class MongoDbJDBCDataSourceValidator implements CustomDataSourceValidator
             portNumber = (String) ds.getPropertyMap().get("portNumber");
 		}
 		if (filePath == null || filePath.length() == 0) {
-            // file path can be null if data file resources is linked to the data source
-            if(ds.getResources().get(TextDataSourceDefinition.DATA_FILE_RESOURCE_ALIAS) == null) reject(errors, "fileName", "Please enter file path");
+            // file path can be null if data file resources is linked to the data source or auto generated
 		} else {
             if (filePath.toLowerCase().startsWith("ftp:")) {
                 int idx1 = filePath.indexOf(":", 6);
@@ -51,10 +52,12 @@ public class MongoDbJDBCDataSourceValidator implements CustomDataSourceValidator
                 }
             }
         }
-        try {
-            Integer.parseInt(portNumber);
-        } catch (Exception ex) {
-            reject(errors, "portNumber", "invalid.port.number");
+        if (!profileAttributesResolver.containsAttribute(portNumber)) {
+            try {
+                Integer.parseInt(portNumber);
+            } catch (Exception ex) {
+                reject(errors, "portNumber", "invalid.port.number");
+            }
         }
 	}
 
@@ -65,5 +68,7 @@ public class MongoDbJDBCDataSourceValidator implements CustomDataSourceValidator
         else System.out.println("textDataSource.propertyMap[" + name + "] - " + reason);
 	}
 
-
+    public void setProfileAttributesResolver(ProfileAttributesResolver profileAttributesResolver) {
+        this.profileAttributesResolver = profileAttributesResolver;
+    }
 }

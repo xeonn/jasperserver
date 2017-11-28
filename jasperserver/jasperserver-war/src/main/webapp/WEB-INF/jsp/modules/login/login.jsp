@@ -78,7 +78,7 @@
                 <t:putAttribute name="bodyContent">
                     <div id="welcome" class="row">
                         <h1>
-                        	<span class="logo">TIBCO Jaspersoft</span>  
+                            <span class="logo" aria-label="TIBCO Jaspersoft"></span>  
                         	<!-- <spring:message code='LOGIN_WELCOME_OS'/> -->
                         	       	
                         

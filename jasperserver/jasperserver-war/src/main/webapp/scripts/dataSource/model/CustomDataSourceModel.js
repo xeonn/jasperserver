@@ -65,76 +65,84 @@ define(function(require) {
 		},
 
         getCustomFieldsDefinition: function() {
-            var headers = {},
-                self = this;
+            var headers = {}, dfr;
 
             _.extend(headers, requestSettings, { "Accept": "application/json" });
 
-            return $.ajax({
+            dfr = $.ajax({
                 type: "GET",
                 headers: headers,
                 url: jrsConfigs.contextPath + "/rest_v2/customDataSources/" + this.get("dataSourceName")
-            }).done(function(response) {
+            })
+            .done(_.bind(this.getCustomFieldsDefinitionDone, this))
+            .fail(_.bind(this.getCustomFieldsDefinitionFail, this));
 
-                if (response && response.propertyDefinitions && _.isArray(response.propertyDefinitions)) {
-                    self.resetValidation(); // reset validation to initial state
+            return dfr;
+        },
 
-                    self.testable = !!response.testable;
-                    self.queryTypes = response.queryTypes ? response.queryTypes : null;
+        getCustomFieldsDefinitionDone: function(response) {
+            var self = this;
 
-                    _.each(response.propertyDefinitions, function(definition) {
-                        var validationRule = {};
+            if (response && response.propertyDefinitions && _.isArray(response.propertyDefinitions)) {
+                this.resetValidation(); // reset validation to initial state
 
-                        if (definition.properties) {
-                            definition.properties = _(definition.properties).reduce(function(memo, property) {
-                                memo[property.key] = property.value;
-                                return memo;
-                            }, {});
-                        }
+                this.testable = !!response.testable;
+                this.queryTypes = response.queryTypes ? response.queryTypes : null;
 
-                        self.customFields.push(definition);
-                        self.defaults[definition.name] = definition.defaultValue;
+                _.each(response.propertyDefinitions, function(definition) {
+                    var validationRule = {};
 
-                        if (!self.options.isEditMode) {
-                            self.set(definition.name, definition.defaultValue);
-                        }
-
-                        if (definition.name === "password" && self.options.isEditMode && !self.isNew()) {
-                            self.set("password", jasperserverConfig["input.password.substitution"]);
-                        }
-
-                        // now, extend the validation object with required fields
-                        if (definition.properties && definition.properties.mandatory) {
-                            validationRule[definition.name] = {
-                                required: true,
-                                msg: i18n[self.get("dataSourceName") + "." + definition.name + ".required"] || i18n["required.field.specify.value"]
-                            };
-                            _.extend(self.validation, validationRule);
-                        }
-                    });
-                }
-
-                if (!self.options.isEditMode) {
-                    self.set(self.parse(self.attributes), {silent: true});
-                }
-
-                self.initialization.resolve();
-            }).fail(function(xhr) {
-                var response = false, msg = "Failed to load custom data source definition. ";
-                try {
-                    response = JSON.parse(xhr.responseText);
-                } catch (e) {
-                }
-                if (response) {
-                    if (response[0] && response[0].errorCode) {
-                        msg += "<br/>The reason is: " + response[0].errorCode;
-                    } else if (response.message) {
-                        msg += "<br/>The reason is: " + response.message;
+                    if (definition.properties) {
+                        definition.properties = _(definition.properties).reduce(function(memo, property) {
+                            memo[property.key] = property.value;
+                            return memo;
+                        }, {});
                     }
-                    msg += "<br/><br/>The full response from the server is: " + xhr.responseText;
+
+                    self.customFields.push(definition);
+                    self.defaults[definition.name] = definition.defaultValue;
+
+                    if (!self.options.isEditMode) {
+                        self.set(definition.name, definition.defaultValue);
+                    }
+
+                    if (definition.name === "password" && self.options.isEditMode && !self.isNew()) {
+                        self.set("password", jasperserverConfig["input.password.substitution"]);
+                    }
+
+                    // now, extend the validation object with required fields
+                    if (definition.properties && definition.properties.mandatory) {
+                        validationRule[definition.name] = {
+                            required: true,
+                            msg: i18n[self.get("dataSourceName") + "." + definition.name + ".required"] || i18n["required.field.specify.value"]
+                        };
+                        _.extend(self.validation, validationRule);
+                    }
+                });
+            }
+
+            if (!this.options.isEditMode) {
+                this.set(this.parse(this.attributes), {silent: true});
+            }
+
+            this.initialization.resolve();
+        },
+
+        getCustomFieldsDefinitionFail: function(xhr) {
+            var response = false, msg = "Failed to load custom data source definition. ";
+            try {
+                response = JSON.parse(xhr.responseText);
+            } catch (e) {
+            }
+            if (response) {
+                if (response[0] && response[0].errorCode) {
+                    msg += "<br/>The reason is: " + response[0].errorCode;
+                } else if (response.message) {
+                    msg += "<br/>The reason is: " + response.message;
                 }
-                dialogs.errorPopup.show(msg);
-            });
+                msg += "<br/><br/>The full response from the server is: " + xhr.responseText;
+            }
+            dialogs.errorPopup.show(msg);
         },
 
         parse: function(response) {

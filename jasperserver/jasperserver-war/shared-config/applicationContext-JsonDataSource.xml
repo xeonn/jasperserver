@@ -22,6 +22,7 @@
 				<value>numberPattern</value>
 				<value>locale</value>
 				<value>datePattern</value>
+				<value>dataFile</value>
 			</set>
 		</property>
 		<property name="propertyDefaultValueMap">

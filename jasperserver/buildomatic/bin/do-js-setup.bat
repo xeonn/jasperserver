@@ -21,7 +21,7 @@ IF %ARGUMENT_COUNT% LSS 4 (
   CALL :fail "Invalid argument count"
   EXIT /b 1
 )
-IF %ARGUMENT_COUNT% GTR 7 (
+IF %ARGUMENT_COUNT% GTR 8 (
   CALL :fail "Invalid argument count"
   EXIT /b 1
 )
@@ -40,17 +40,22 @@ IF NOT "%JS_EDITION%"=="ce" IF NOT "%JS_EDITION%"=="pro" (
 
 SET JS_OPTION=%3
 SET JS_ANT_TARGET=%4
-SET JS_ANT_UPGRADE_STRATEGY_OPTION=-Dstrategy=%5
+
+SETLOCAL ENABLEDELAYEDEXPANSION
 IF "%JS_SETUP_MODE%"=="upgrade" (
-  SET JS_ANT_OPTIONS=%JS_ANT_UPGRADE_STRATEGY_OPTION%
+  SET _JS_ANT_OPTIONS=-Dstrategy=%5
   IF "%5"=="standard" IF NOT ""%6""=="""" (
-    SET JS_ANT_OPTIONS=%JS_ANT_UPGRADE_STRATEGY_OPTION% -DimportFile=%6
-	IF NOT ""%7""=="""" (
-		SET JS_ANT_OPTIONS=%JS_ANT_UPGRADE_STRATEGY_OPTION% -DimportFile=%6 -DincludeAccessEvents=%7
-	)
+    SET _JS_ANT_OPTIONS=!_JS_ANT_OPTIONS! -DimportFile=%6
+    FOR %%X IN (%*) DO (
+      IF "%%X"=="include-access-events" ( SET _IMPORT_ARGS=--%%X !_IMPORT_ARGS!)
+      IF "%%X"=="include-server-settings" ( SET _IMPORT_ARGS=--%%X !_IMPORT_ARGS!)
+    )
+    IF NOT "!_IMPORT_ARGS!"=="" (
+      SET _JS_ANT_OPTIONS=!_JS_ANT_OPTIONS! -DimportArgs="!_IMPORT_ARGS!"
+    )
   )
 )
-SET JS_ANT_OPTIONS=%JS_ANT_OPTIONS% -Djs.setup.mode=%JS_SETUP_MODE%
+ENDLOCAL & SET JS_ANT_OPTIONS=%_JS_ANT_OPTIONS% -Djs.setup.mode=%JS_SETUP_MODE%
 
 rem
 rem Initializing time variable.

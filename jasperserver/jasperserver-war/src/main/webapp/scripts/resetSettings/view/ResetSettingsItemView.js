@@ -21,14 +21,15 @@
 
 /**
  * @author: Olesya Bobruyko
- * @version: $Id: ResetSettingsItemView.js 8889 2015-05-05 14:07:05Z obobruyk $
+ * @version: $Id: ResetSettingsItemView.js 9218 2015-08-20 19:56:16Z yplakosh $
  */
 
 define(function(require) {
     var _ = require("underscore"),
         BaseRow = require("common/component/baseTable/childView/BaseRow"),
         confirmDialogTypesEnum = require("serverSettingsCommon/enum/confirmDialogTypesEnum"),
-        itemViewTemplate = require("text!resetSettings/templates/itemViewTemplate.htm");
+        itemViewTemplate = require("text!resetSettings/templates/itemViewTemplate.htm"),
+        DeleteConfirm = require("serverSettingsCommon/behaviors/DeleteConfirmBehavior");
 
 
     var ResetSettingsItemView = BaseRow.extend({
@@ -37,23 +38,11 @@ define(function(require) {
 
         template: _.template(itemViewTemplate),
 
-        events: {
-            "click .delete": "_onDeleteClick",
-            "mouseover": "_onMouseOver",
-            "mouseout": "_onMouseOut"
-        },
-
-        _onMouseOver: function(e) {
-            this.trigger("mouseover", this.model, e);
-        },
-
-        _onMouseOut: function(e) {
-            this.trigger("mouseout", this.model, e);
-        },
-
-        _onDeleteClick: function(e) {
-            this.trigger("open:confirm", confirmDialogTypesEnum.DELETE_CONFIRM, this, this.model);
-        }
+        behaviors: _.extend(BaseRow.prototype.behaviors, {
+            DeleteConfirm: {
+                behaviorClass: DeleteConfirm
+            }
+        })
     });
 
     return ResetSettingsItemView;

@@ -8,7 +8,7 @@
         </id>
         <version column="version" unsaved-value="negative" name="version"/>
         <property name="recipient" type="byte" column="recipient" not-null="true"/>
-        <list name="toAddresses" table="JIReportAlertToAddress">
+        <list name="toAddresses" table="JIReportAlertToAddress" fetch="subselect">
             <key column="alert_id"/>
             <list-index column="to_address_idx"/>
             <element column="to_address" type="string" length="100" not-null="true"/>

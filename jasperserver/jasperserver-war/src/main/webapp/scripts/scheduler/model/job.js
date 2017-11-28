@@ -21,12 +21,14 @@
 
 
 /**
- * @version: $Id: job.js 8900 2015-05-06 20:57:14Z yplakosh $
+ * @version: $Id: job.js 9273 2015-08-31 21:51:50Z dgorbenk $
  */
 
 /* global getTZOffset, isIE8 */
 
 define('scheduler/model/job', function (require) {
+
+	"use strict";
 
     var EMAIL_SEPARATOR = ",";
     var SERVICE_DATE_PATTERN_MOMENTJS_FORMAT = "YYYY-MM-DD HH:mm";
@@ -36,23 +38,75 @@ define('scheduler/model/job', function (require) {
         _ = require("underscore"),
         Backbone = require('backbone'),
 	    Encoding = require("encoding"),
-        timepicker = require('common/jquery/extension/timepickerExt'),
-        datepicker = require('common/jquery/extension/datepickerExt'),
         config = require('jrs.configs'),
         moment = require("moment");
 
-	// prepare a pattern for momentjs library for date validation based on our i18n settings
-	// 'calendar.timepicker.dateFormat' is referencing 'calendar.date.format' from jasperserver_config.properties file
-	var momentDateFormat = config.calendar.timepicker.dateFormat
-		.replace("yy", "yyyy")// momentjs uses four "y" instead of one "y" for full year code
-		.replace("yyyy", "YYYY")// momentjs uses capital "Y" instead of letter "y" for years
-		.replace("mm", "MM")// momentjs uses capital "M" instead of letter "m" for "Month number: 1..12"
-		.replace("dd", "DD");// momentjs uses capital "D" instead of letter "d" for "Day of month: 1..31"
-	
-	// time format is the same for moemntjs which we use
+	require('common/jquery/extension/timepickerExt');
+	require('common/jquery/extension/datepickerExt');
+
+	/*
+	 Prepare a pattern for momentjs library for date validation based on our i18n settings.
+	 For the base we take 'calendar.timepicker.dateFormat' variable which is referencing
+	 'calendar.date.format' from jasperserver_config.properties file.
+
+	 MomentJS docs: http://momentjs.com/docs/#/displaying/format/
+	 DateTimePicker docs: http://api.jqueryui.com/datepicker/#utility-formatDate
+
+	 #   JQUERY DATE-TIME-PICKER                  MOMENTJS
+	 # ==========================================================
+	 # d  - day of month (no leading zero)  ---> D
+	 # dd - day of month (two digit)        ---> DD
+	 # o  - day of year (no leading zeros)  ---> DDD
+	 # oo - day of year (three digit)       ---> DDDD
+	 # D  - day name short                  ---> ddd
+	 # DD - day name long                   ---> dddd
+	 # m  - month of year (no leading zero) ---> M
+	 # mm - month of year (two digit)       ---> MM
+	 # M  - month name short                ---> MMM
+	 # MM - month name long                 ---> MMMM
+	 # y  - year (two digit)                ---> YY
+	 # yy - year (four digit)               ---> YYYY
+	*/
+
+	var convertFormatFromDateTimePickerToMomentJs = function (format) {
+
+		var i, conversion = [
+			{id: 0, value: "dd", key: "day-of-month-2", result: "DD"},
+			{id: 1, value: "DD", key: "day-of-week", result: "dddd"},
+			{id: 2, value: "mm", key: "month-2", result: "MM"},
+			{id: 3, value: "MM", key: "month-name", result: "MMMM"},
+			{id: 4, value: "yy", key: "year-4", result: "YYYY"},
+			{id: 5, value: "d", key: "day-of-month-1", result: "D"},
+			{id: 6, value: "D", key: "day-of-week-abbr", result: "ddd"},
+			{id: 7, value: "m", key: "month-1", result: "M"},
+			{id: 8, value: "M", key: "month-name-abbr", result: "MMM"},
+			{id: 9, value: "y", key: "year-2", result: "YY"},
+			{id: 10, value: "oo", key: "day-of-year-2", result: "DDDD"},
+			{id: 11, value: "o", key: "day-of-year-1", result: "DDD"}
+		];
+
+		for (i = 0; i < conversion.length; i++) {
+			format = format.replace(
+				new RegExp(conversion[i].value, "g"),
+				"{" + conversion[i].id + "}");
+		}
+
+		for (i = 0; i < conversion.length; i++) {
+			format = format.replace(
+				new RegExp("\\{" + conversion[i].id + "\\}", "g"),
+				conversion[i].result);
+		}
+
+		return format;
+	};
+
+	var momentDateFormat = convertFormatFromDateTimePickerToMomentJs(config.calendar.timepicker.dateFormat);
+
+	// time format is the same for momentjs which we use for DateTimePicker
 	// 'calendar.timepicker.timeFormat' is referencing 'calendar.time.format' from jasperserver_config.properties file
 	var momentTimeFormat = config.calendar.timepicker.timeFormat
-		.replace(":ss", ""); // in Scheduler we don't use "seconds", so momentjs should not take seconds into consideration
+		.replace(":ss", ""); // in Scheduler we don't use "seconds", so momentjs should not take seconds into account
+
 	// now, compose date and time into one pattern
 	var MOMENTJS_PARSE_UI_DATE_PATTERN = momentDateFormat + " " + momentTimeFormat;
 
@@ -1048,13 +1102,18 @@ define('scheduler/model/job', function (require) {
         save: function(data, options){
             var timer,
                 t = this,
+                self = this,
                 count = 1,
                 save = function(){
                     // call parent's save method
                     Backbone.Model.prototype.save.call(t, data, options);
                 },
                 check = function(err){
-                    if (err) return;
+                    if (err) {
+	                    // failed to pass check of validation of Input Controls
+	                    self.trigger("saveValidationFailed");
+	                    return;
+                    }
                     --count;
                     timer && clearTimeout(timer);
                     timer = setTimeout(function(){
@@ -1158,6 +1217,7 @@ define('scheduler/model/job', function (require) {
 
             if (!t.get('repositoryDestination') || !t.get('repositoryDestination').outputLocalFolder){
                 if ('function' === typeof callback) callback();
+                t.trigger("saveValidationFailed");
                 return;
             }
 

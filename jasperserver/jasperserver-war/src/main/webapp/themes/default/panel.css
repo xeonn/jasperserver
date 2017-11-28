@@ -73,3 +73,9 @@
 .tabbedPanel > .header > .tabHeaderContainer > button.active {
     border: thin solid red;
 }
+
+div.subcontainer div.j-view-port-chunk > ul {
+    padding: 0px;
+}
+
+

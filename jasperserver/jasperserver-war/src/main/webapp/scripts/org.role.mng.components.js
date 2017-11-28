@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: org.role.mng.components.js 8900 2015-05-06 20:57:14Z yplakosh $
+ * @version: $Id: org.role.mng.components.js 9192 2015-08-12 19:52:08Z yplakosh $
  */
 
 /* global orgModule, layoutModule, webHelpModule, localContext, isProVersion, invokeClientAction,
@@ -280,7 +280,7 @@ orgModule.roleManager.addDialog = {
             orgModule.createBlankValidator(this.roleName, "roleNameIsEmpty"),
             this.roleName.inputValidator
         ];
-        
+
         this.addRole.observe('keyup', function(event) {
             var input = event.element();
 

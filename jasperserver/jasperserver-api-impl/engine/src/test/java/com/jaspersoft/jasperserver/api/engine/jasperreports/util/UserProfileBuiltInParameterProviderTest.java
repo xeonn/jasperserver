@@ -44,9 +44,9 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
-
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -59,14 +59,18 @@ import static org.testng.Assert.assertTrue;
  * <p></p>
  *
  * @author Vlad Zavadskii
- * @version $Id: UserProfileBuiltInParameterProviderTest.java 54590 2015-04-22 17:55:42Z vzavadsk $
+ * @version $Id: UserProfileBuiltInParameterProviderTest.java 56967 2015-08-20 23:20:53Z esytnik $
  */
 public class UserProfileBuiltInParameterProviderTest {
     @InjectMocks
     private UserProfileBuiltInParameterProvider userProfileBuiltInParameterProvider = new UserProfileBuiltInParameterProvider() {
         @Override
         protected MetadataUserDetails getUserDetails() {
-            return new MetadataUserDetails(user);
+            if (user != null) {
+                return new MetadataUserDetails(user);
+            }
+
+            return null;
         }
     };
     @Mock
@@ -441,6 +445,47 @@ public class UserProfileBuiltInParameterProviderTest {
         for (String attribute : attributesWithLowerCase) {
             Object value = userProfileBuiltInParameterProvider.getParameter(null, null, null, attribute);
             assertNull(value);
+        }
+    }
+
+    @Test
+    public void getParameters_withAnonymousUser_passed() {
+        reset(profileAttributeService);
+        user = null;
+
+        final String[] stringAttributes = {
+                "LoggedInUsername",
+                "LoggedInUserFullname",
+                "LoggedInUserEmailAddress",
+                "LoggedInUserTenantId"
+        };
+        final String[] booleanAttributes = {
+                "LoggedInUserEnabled",
+                "LoggedInUserExternallyDefined"
+        };
+        final String[] collectionAttributes = {
+                "LoggedInUserRoles",
+                "LoggedInUserAttributes",
+                "LoggedInUserAttributeNames",
+                "LoggedInUserAttributeValues"
+        };
+
+        assertNull(userProfileBuiltInParameterProvider.getUserDetails());
+
+        for (String attribute : stringAttributes) {
+            Object value = userProfileBuiltInParameterProvider.getParameter(null, null, null, attribute)[1];
+            assertEquals(value, "");
+        }
+
+        for (String attribute : booleanAttributes) {
+            Boolean value = (Boolean) userProfileBuiltInParameterProvider.getParameter(null, null, null, attribute)[1];
+            assertFalse(value);
+        }
+
+        Collection<Object> emptyCollection = new ArrayList<Object>();
+        for (String attribute : collectionAttributes) {
+            Object value = userProfileBuiltInParameterProvider.getParameter(null, null, null, attribute)[1];
+            assertEquals(value, emptyCollection);
         }
     }
 }

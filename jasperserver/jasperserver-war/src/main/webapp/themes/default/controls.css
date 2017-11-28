@@ -333,6 +333,7 @@ select,
 
 .input input,
 .picker input,
+input[type=password],
 input[type=text] {
 	padding:2px 3px;
 }
@@ -1603,7 +1604,6 @@ input.booleanComboInput{
 .tabSet.vertical.buttons .selected .button,
 .tabSet.vertical.buttons .selected .button.over,
 .tabSet.vertical.buttons .selected .button.pressed,
-.tabSet.vertical.buttons .button.over,
 .tabSet.vertical.buttons .button.pressed,
 .tabSet.vertical.buttons .button.over {
 	background-color: #195b8a;

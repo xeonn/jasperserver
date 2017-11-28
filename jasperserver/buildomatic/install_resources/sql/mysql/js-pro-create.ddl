@@ -1471,13 +1471,7 @@
 
     create index idx20_mondrianConnection_idx on JIMondrianXMLADefinition (mondrianConnection);
 
-    create index idx23_olapClientConnection_idx on JIOlapUnit (olapClientConnection);
-
-    create index idx12_bundle_id_idx on JIDomainDatasourceBundle (bundle_id);
-
-    create index idx13_ref_id_idx on JIDomainDatasourceDSRef (ref_id);
-
-    create index JIFileResource_reference_index on JIFileResource (reference);
+    create index idxA1_resource_id_idx on JICustomDatasourceResource (resource_id);
 
     create index JIInputControl_data_type_index on JIInputControl (data_type);
 
@@ -1487,9 +1481,11 @@
 
     create index idx15_input_ctrl_id_idx on JIInputControlQueryColumn (input_control_id);
 
-    create index idxA1_resource_id_idx on JICustomDatasourceResource (resource_id);
-
     create index JIQuery_dataSource_index on JIQuery (dataSource);
+
+    create index idx12_bundle_id_idx on JIDomainDatasourceBundle (bundle_id);
+
+    create index idx13_ref_id_idx on JIDomainDatasourceDSRef (ref_id);
 
     create index JIReportUnit_mainReport_index on JIReportUnit (mainReport);
 
@@ -1504,6 +1500,10 @@
     create index idx32_report_unit_id_idx on JIReportUnitResource (report_unit_id);
 
     create index idx33_resource_id_idx on JIReportUnitResource (resource_id);
+
+    create index idx23_olapClientConnection_idx on JIOlapUnit (olapClientConnection);
+
+    create index JIFileResource_reference_index on JIFileResource (reference);
 
     create index idx5_adhocStateId_idx on JIAdhocReportUnit (adhocStateId);
 

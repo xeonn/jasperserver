@@ -60,11 +60,11 @@
         <div id="frame" class="setMyHeight pod rndCorners-all">
             <div class="header rndCorners-top">
                 <div class="navigation">
-                    <ul class="sections">
-                        <li><h4>Home</h4></li>
-                        <li><h4>View</h4></li>
-                        <li><h4>Manage</h4></li>
-                        <li><h4>Create</h4></li>
+                    <ul class="sections" role="menubar">
+                        <li tabindex="0" role="menuitem"><h4>Home</h4></li>
+                        <li tabindex="-1" role="menuitem"><h4>View</h4></li>
+                        <li tabindex="-1" role="menuitem"><h4>Manage</h4></li>
+                        <li tabindex="-1" role="menuitem"><h4>Create</h4></li>
                     </ul>
                 </div>
             </div>

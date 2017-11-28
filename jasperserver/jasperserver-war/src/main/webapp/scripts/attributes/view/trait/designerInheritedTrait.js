@@ -21,7 +21,7 @@
 
 /**
  * @author: Olesya Bobruyko
- * @version: $Id: designerInheritedTrait.js 8900 2015-05-06 20:57:14Z yplakosh $
+ * @version: $Id: designerInheritedTrait.js 9218 2015-08-20 19:56:16Z yplakosh $
  */
 
 define(function(require) {
@@ -29,22 +29,14 @@ define(function(require) {
     var _ = require("underscore");
 
     return {
-        _findInheritedViewByName: function(views, name) {
-            return _.find(views, function(view) {
-                return view.isInherited() && view.model.get("name") === name;
+        _findOriginallyInheritedModelByName: function(models, name) {
+            return _.find(models, function(model) {
+                return model.isOriginallyInherited() && model.get("name") === name;
             });
         },
 
         _filterInheritedViews: function(data) {
-            if (data) {
-                var attributes = data.attribute;
-
-                this.inheritedAttributes = _.filter(attributes, function(attribute) {
-                    return attribute.inherited && !this._findInheriteds(attribute.name);
-                }, this);
-            } else {
-                this.inheritedAttributes = null;
-            }
+            this.filteredInheriteds = this.collection.filterInheritedAttributes(data);
         },
 
         _findInheriteds: function(name) {
@@ -53,8 +45,8 @@ define(function(require) {
 
         _revertInheritedRemoval: function(name) {
             if (!this._findInheriteds(name)) {
-                var inheritedView = this._findInheritedViewByName(this.changedViews, name);
-                inheritedView && this._revertViewRemoval(inheritedView);
+                var inheritedModel = this._findOriginallyInheritedModelByName(this.changedModels, name);
+                inheritedModel && this.revertViewRemoval(inheritedModel);
             }
         },
 
@@ -64,22 +56,19 @@ define(function(require) {
             return this.collection.search(models)
                 .done(function(data) {
                     self._filterInheritedViews(data);
-                    self.collection.addItemsToCollection(self.inheritedAttributes);
+                    self.collection.addItemsToCollection(self.filteredInheriteds);
                 });
         },
 
         _removeInheritedView: function(model) {
-            var inheritedModels = this.collection.where({name: model.get("name"), inherited: true});
-
-            _.each(inheritedModels, function(inheritedModel) {
-                inheritedModel && !_.isEqual(model, inheritedModel) && this.removeView(null, inheritedModel);
-            }, this);
+            var inheritedModel = this._findInheriteds(model.get("name"));
+            inheritedModel && this.removeView(inheritedModel);
         },
 
         _addInheritedView: function(model) {
-            if (this.inheritedAttributes && this.inheritedAttributes.length) {
+            if (this.filteredInheriteds && this.filteredInheriteds.length) {
                 model.resetField("id");
-                this.collection.addItemsToCollection(this.inheritedAttributes);
+                this.collection.addItemsToCollection(this.filteredInheriteds);
             }
         }
     };

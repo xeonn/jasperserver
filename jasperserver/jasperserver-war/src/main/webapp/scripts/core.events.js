@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: core.events.js 8179 2015-01-27 12:34:21Z psavushchik $
+ * @version: $Id: core.events.js 9192 2015-08-12 19:52:08Z yplakosh $
  */
 
 /* global isSupportsTouch, layoutModule, primaryNavModule, matchAny, isIPad, matchMeOrUp, relatedTargetInElementSubtree,
@@ -86,7 +86,7 @@ document.observe('mouseover', function(evt){
     //for navigation buttons
     matched = matchMeOrUp(element, layoutModule.NAVIGATION_MUTTON_PATTERN);
     if (matched && !relatedTargetInElementSubtree(evt,matched)) {
-        primaryNavModule.showNavButtonMenu(evt, matched);
+        primaryNavModule.onMenuHeaderMouseOver(evt, matched);
         //TODO: clean up
         matched.tabIndex = -1;
         matched.focus();

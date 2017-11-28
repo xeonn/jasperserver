@@ -51,12 +51,14 @@ import com.jaspersoft.jasperserver.search.service.RepositorySearchResult;
 import com.jaspersoft.jasperserver.search.service.RepositorySearchService;
 import com.jaspersoft.jasperserver.search.service.impl.RepositorySearchAccumulator;
 import com.jaspersoft.jasperserver.search.service.impl.RepositorySearchCriteriaImpl;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -102,7 +104,7 @@ public class BatchRepositoryServiceImpl implements BatchRepositoryService {
                 .setExcludeRelativePaths(excludeFolders)
                 .setShowHidden(showHiddenItems)
                 .setAccessType(accessType)
-                .setResourceTypes(type)
+                .setResourceTypes(type ==null? Collections.EMPTY_LIST:type)
                 .setSearchMode(mode)
                 .setSortBy(sortBy)
                 .setSearchText(q)

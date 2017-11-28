@@ -21,16 +21,23 @@
 
 /**
  * @author: Olesya Bobruyko
- * @version: $Id: BaseRow.js 1076 2015-04-14 15:28:05Z obobruyk $
+ * @version: $Id: BaseRow.js 1495 2015-08-20 18:58:48Z yplakosh $
  */
 
 define(function(require) {
     var _ = require("underscore"),
         Marionette = require("backbone.marionette"),
-        epoxyViewMixin = require("common/view/mixin/epoxyViewMixin");
+        epoxyViewMixin = require("common/view/mixin/epoxyViewMixin"),
+        Tooltip = require("common/component/baseTable/behaviors/TooltipRowBehavior");
 
 
     var BaseRow = Marionette.ItemView.extend({
+
+        behaviors: {
+            Tooltip: {
+                behaviorClass: Tooltip
+            }
+        },
 
         /**
          * Initializes view and generates an abstract of Epoxy.View methods for mixin with BaseRow.

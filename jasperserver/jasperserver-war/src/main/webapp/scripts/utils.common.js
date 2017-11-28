@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: utils.common.js 8900 2015-05-06 20:57:14Z yplakosh $
+ * @version: $Id: utils.common.js 9218 2015-08-20 19:56:16Z yplakosh $
  */
 
 /**
@@ -3342,7 +3342,7 @@ var ValidationModule = {
                 showError && ValidationModule.showError(validationEntry.element, result.errorMessage);
                 isValid = false;
             } else if (!elemsWithErrors.include(validationEntry.element)) {
-                showError && ValidationModule.hideError(validationEntry.element);
+                showError && ValidationModule.hideError(validationEntry.element, true);
             }
         });
 
@@ -3419,10 +3419,23 @@ var ValidationModule = {
      * Hides error message for the specified form element.
      *
      * @param element the form element.
+     * @param cleanMessage a boolean to indicate what error message should be removed as well
      */
-    hideError: function(element) {
+    hideError: function(element, cleanMessage) {
         var msgContainer = element.validatorMessageContainer || element.parentNode;
+
+	    // removing error class name
         $(msgContainer).removeClassName(layoutModule.ERROR_CLASS);
+
+	    // in some cases it's better to remove error message to prevent some errors.
+	    if (cleanMessage) {
+		    // find element which has message
+		    var msg = $(msgContainer).select(layoutModule.MESSAGE_WARNING_PATTERN)[0]
+			    || $(msgContainer).select(layoutModule.MESSAGE_PATTERN)[0];
+		    if (msg) {
+			    msg.update("");
+		    }
+	    }
     },
 
     /**

@@ -107,7 +107,7 @@ import java.util.Properties;
 
 /**
  * @author sbirney
- * $Id: OlapConnectionServiceImpl.java 51947 2014-12-11 14:38:38Z ogavavka $
+ * $Id: OlapConnectionServiceImpl.java 56967 2015-08-20 23:20:53Z esytnik $
  */
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 public class OlapConnectionServiceImpl implements OlapConnectionService, ReportDataSourceServiceFactory {
@@ -269,7 +269,7 @@ public class OlapConnectionServiceImpl implements OlapConnectionService, ReportD
 
 	protected MetadataUserDetails getCurrentUserDetails() {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		if (auth != null) {
+		if (auth != null && auth.getPrincipal() instanceof MetadataUserDetails) {
 			return (MetadataUserDetails) auth.getPrincipal();
 		}
 		return null;

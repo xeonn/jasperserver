@@ -20,16 +20,21 @@
  */
 package com.jaspersoft.jasperserver.api.metadata.common.domain.client;
 
+import com.jaspersoft.jasperserver.api.metadata.common.domain.DataType;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.InputControl;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.InputControlsContainer;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.ListOfValues;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.Query;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceReference;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import com.jaspersoft.jasperserver.api.metadata.common.domain.*;
-
 
 /**
  * @author Ionut Nedelcu (ionutned@users.sourceforge.net)
- * @version $Id: InputControlImpl.java 51947 2014-12-11 14:38:38Z ogavavka $
+ * @version $Id: InputControlImpl.java 56967 2015-08-20 23:20:53Z esytnik $
  */
 public class InputControlImpl extends ResourceImpl implements InputControl, InputControlsContainer
 {
@@ -37,7 +42,7 @@ public class InputControlImpl extends ResourceImpl implements InputControl, Inpu
 	/**
 	 * 
 	 */
-	private byte type = TYPE_SINGLE_VALUE;
+	private byte inputControlType = TYPE_SINGLE_VALUE;
 	private boolean isMandatory = false;
 	private boolean isReadOnly = false;
 	private boolean isVisible= true;
@@ -56,7 +61,7 @@ public class InputControlImpl extends ResourceImpl implements InputControl, Inpu
         super(another);
 
         if (another != null) {
-            this.type = another.type;
+            this.inputControlType = another.inputControlType;
             this.isMandatory = another.isMandatory;
             this.isReadOnly = another.isReadOnly;
             this.isVisible = another.isVisible;
@@ -76,7 +81,7 @@ public class InputControlImpl extends ResourceImpl implements InputControl, Inpu
 	 */
 	public byte getInputControlType()
 	{
-		return type;
+		return inputControlType;
 	}
 
 	/**
@@ -84,7 +89,7 @@ public class InputControlImpl extends ResourceImpl implements InputControl, Inpu
 	 */
 	public void setInputControlType(byte type)
 	{
-		this.type = type;
+		this.inputControlType = type;
 	}
 
 	/**

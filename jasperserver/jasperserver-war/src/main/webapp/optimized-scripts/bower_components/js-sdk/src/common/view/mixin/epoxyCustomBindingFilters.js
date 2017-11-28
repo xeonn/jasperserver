@@ -1,1 +1,1 @@
-define(["require"],function(){return{}});
+define(["require"],function(e){return{}});

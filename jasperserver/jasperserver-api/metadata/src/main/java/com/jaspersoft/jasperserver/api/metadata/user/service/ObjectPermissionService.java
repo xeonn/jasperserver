@@ -32,7 +32,7 @@ import java.util.List;
  * {@link com.jaspersoft.jasperserver.api.metadata.user.domain.Role Role} permission.
  *
  * @author swood
- * @version $Id: ObjectPermissionService.java 51947 2014-12-11 14:38:38Z ogavavka $
+ * @version $Id: ObjectPermissionService.java 56839 2015-08-17 13:58:24Z esytnik $
  * @since 1.0.1
  */
 @JasperServerAPI
@@ -87,6 +87,17 @@ public interface ObjectPermissionService {
      */
 	public List getObjectPermissionsForObject(ExecutionContext context, Object targetObject);
 
+	
+	/**
+     * Returns a list of {@link ObjectPermission} objects for the specified repository object.
+     *
+     * @param context the execution context.
+     * @param targetObject the repository object.
+     * @return a list of ObjectPermission objects.
+     */
+	public List<ObjectPermission> getObjectPermissionsForSubtree(final String uri);
+
+	
     /**
      * Returns a list of effective {@link ObjectPermission} objects for the specified repository object.
      *

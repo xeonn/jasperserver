@@ -21,22 +21,43 @@
 
 
 /**
- * @version: $Id: commons.minimal.main.js 7808 2014-09-19 13:18:27Z sergey.prilukin $
+ * @version: $Id: commons.minimal.main.js 9192 2015-08-12 19:52:08Z yplakosh $
  */
+
+/* global __jrsConfigs__ */
 
 define(function(require){
 
     "use strict";
 
     require("commons.bare.main");
-    
+
     var domReady = require("!domReady");
     var heartbeat = require("components.heartbeat");
     var jrsConfigs = require("jrs.configs");
     var aboutDialog = require("components.about");
     var webHelp = require("components.webHelp");
     var $ = require("jquery");
+    var AttributesCollection = require("attributes/collection/AttributesCollection");
+    var AttributeModel = require("attributes/model/AttributeModel");
 
+    if (__jrsConfigs__.enableAccessibility=='true'){
+        // Standard Navigation system (stdnav)
+        // Provides focus management and keyboard event handling features.
+        var stdnav = require("stdnav");
+    
+        // Basic stdnav plugins from js-sdk
+        var stdnavPluginAnchor = require("stdnavPluginAnchor");
+        var stdnavPluginButton = require("stdnavPluginButton");
+        var stdnavPluginForms = require("stdnavPluginForms");
+        var stdnavPluginGrid = require("stdnavPluginGrid");
+        var stdnavPluginList = require("stdnavPluginList");
+        var stdnavPluginTable = require("stdnavPluginTable");
+    
+        // JasperServer-specific stdnav plugins from jrs-ui 
+        var stdnavPluginActionMenu = require("stdnavPluginActionMenu");
+        var stdnavPluginDynamicList = require("stdnavPluginDynamicList");
+    }
     domReady(function(){
         //Heartbeat
         heartbeat.initialize(jrsConfigs.heartbeatInitOptions);
@@ -52,6 +73,22 @@ define(function(require){
                 webHelp.displayWebHelp();
             });
         }
-    });
 
+        if (__jrsConfigs__.enableAccessibility=='true'){
+            // Basic stdnav plugins from js-sdk
+            stdnav.activate();
+            stdnavPluginAnchor.activate(stdnav);
+            stdnavPluginButton.activate(stdnav);
+            stdnavPluginForms.activate(stdnav);
+            stdnavPluginGrid.activate(stdnav);
+            stdnavPluginList.activate(stdnav);
+            stdnavPluginTable.activate(stdnav);
+    
+            // JasperServer-specific stdnav plugins from jrs-ui
+            stdnavPluginActionMenu.activate(stdnav);
+            stdnavPluginDynamicList.activate(stdnav);
+            stdnav.start();
+        }      
+    });
 });
+

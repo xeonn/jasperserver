@@ -9,6 +9,9 @@
     http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd
     http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.1.xsd">
 
+    <bean id="concreteAuditContext"
+          class="com.jaspersoft.jasperserver.api.logging.audit.context.impl.DummyAuditContext"/>
+
     <context:component-scan base-package="com.jaspersoft.jasperserver.war.cascade.handlers">
         <context:exclude-filter type="regex" expression=".*BaseInputControlHandler"/>
         <context:exclude-filter type="regex" expression=".*BooleanInputControlsHandler"/>

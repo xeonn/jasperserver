@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: controls.report.js 8900 2015-05-06 20:57:14Z yplakosh $
+ * @version: $Id: controls.report.js 9192 2015-08-12 19:52:08Z yplakosh $
  */
 
 /* global require, JRS, viewer, layoutModule, centerElement, ControlsBase, ControlDialog, matchAny, isProVersion, dialogs, OptionsDialog,
@@ -473,6 +473,7 @@ var Controls = (function (jQuery, _, Controls, Report) {
                 // they interfere with each other because AdHoc uses absolute positioning to get as much space as it needs,
                 // and this prevents controls from being visible.
                 // So, when controls are getting closed, we need to re-launch the "resize" event to let viewer.js to re-calculate the position of the window
+                // TODO: This should use eventAutomation.triggerNativeEvent when this is converted to use RequireJS
                 triggerNativeEvent("resize");
             } else {
                 $(ControlsBase.TOOLBAR_CONTROLS_BUTTON).removeClassName('up').addClassName('down');

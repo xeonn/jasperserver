@@ -5,7 +5,7 @@
     <parent>
         <artifactId>server</artifactId>
         <groupId>com.jaspersoft.jasperserver</groupId>
-        <version>6.1.0</version>
+        <version>6.1.1</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -69,6 +69,12 @@
             <groupId>com.sun.jersey</groupId>
             <artifactId>jersey-json</artifactId>
             <version>1.13-b01</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>stax</groupId>
+                    <artifactId>stax-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>javax.ws.rs</groupId>

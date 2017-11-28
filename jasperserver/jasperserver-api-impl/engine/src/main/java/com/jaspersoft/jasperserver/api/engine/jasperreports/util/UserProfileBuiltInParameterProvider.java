@@ -50,7 +50,7 @@ import java.util.TreeMap;
  * Parameters for reports and queries from the user profile are injected.
  *
  * @author Sherman Wood (sgwood@users.sourceforge.net)
- * @version $Id: UserProfileBuiltInParameterProvider.java 54590 2015-04-22 17:55:42Z vzavadsk $
+ * @version $Id: UserProfileBuiltInParameterProvider.java 56967 2015-08-20 23:20:53Z esytnik $
  */
 public class UserProfileBuiltInParameterProvider implements BuiltInParameterProvider, Serializable {
     /*
@@ -162,10 +162,15 @@ public class UserProfileBuiltInParameterProvider implements BuiltInParameterProv
                 MetadataUserDetails returnUserDetails;
 
                 try {
+                    MetadataUserDetails userDetails = getUserDetails();
+                    if (userDetails == null) {
+                        return null;
+                    }
+
                     // Write the object out to a byte array
                     ByteArrayOutputStream bos = new ByteArrayOutputStream();
                     ObjectOutputStream out = new ObjectOutputStream(bos);
-                    out.writeObject(getUserDetails());
+                    out.writeObject(userDetails);
                     out.flush();
                     out.close();
 

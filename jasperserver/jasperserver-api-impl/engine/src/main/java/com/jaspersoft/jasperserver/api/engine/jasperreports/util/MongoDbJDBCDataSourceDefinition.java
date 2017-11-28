@@ -29,6 +29,7 @@ public class MongoDbJDBCDataSourceDefinition extends JDBCQueryDataSourceDefiniti
         Set<String> additionalPropertySet = getAdditionalPropertySet();
         additionalPropertySet.remove("query");
         additionalPropertySet.add("portNumber");
+        additionalPropertySet.add("connectionOptions");
         additionalPropertySet.add(FILE_NAME_PROP);
 
         // define default values for the following properties

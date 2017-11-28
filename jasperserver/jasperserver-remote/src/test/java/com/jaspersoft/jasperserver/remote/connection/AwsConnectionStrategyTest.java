@@ -46,13 +46,14 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertSame;
 
 /**
  * <p></p>
  *
  * @author yaroslav.kovalchyk
- * @version $Id: AwsConnectionStrategyTest.java 50011 2014-10-09 16:57:26Z vzavadskii $
+ * @version $Id: AwsConnectionStrategyTest.java 56967 2015-08-20 23:20:53Z esytnik $
  */
 public class AwsConnectionStrategyTest {
     private static ClientAwsDataSource AWS_DATA_SOURCE_TEMPLATE = new ClientAwsDataSource()
@@ -110,8 +111,8 @@ public class AwsConnectionStrategyTest {
         doReturn(awsReportDataSource).when(repository).getResource(null, awsDataSource.getUri());
         final ClientAwsDataSource result = strategy.createConnection(awsDataSource, null);
         assertSame(result, awsDataSource);
-        assertEquals(result.getPassword(), awsReportDataSource.getPassword());
-        assertEquals(result.getSecretKey(), awsReportDataSource.getAWSSecretKey());
+        assertEquals(result.getPassword(), passwordSubstitution);
+        assertEquals(result.getSecretKey(), passwordSubstitution);
     }
 
     @Test
@@ -122,8 +123,8 @@ public class AwsConnectionStrategyTest {
         doReturn(awsReportDataSource).when(repository).getResource(null, awsDataSource.getUri());
         final ClientAwsDataSource result = strategy.createConnection(awsDataSource, null);
         assertSame(result, awsDataSource);
-        assertEquals(result.getPassword(), awsReportDataSource.getPassword());
-        assertEquals(result.getSecretKey(), awsReportDataSource.getAWSSecretKey());
+        assertNull(result.getPassword());
+        assertNull(result.getSecretKey());
     }
 
 

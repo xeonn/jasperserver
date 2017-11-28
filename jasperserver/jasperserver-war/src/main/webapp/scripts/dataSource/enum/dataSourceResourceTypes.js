@@ -26,5 +26,6 @@ define({
     VIRTUAL: "virtualDataSource",
     CUSTOM: "customDataSource",
     BEAN: "beanDataSource",
+    MONGODB: "MongoDbDataSource",
 	MONGODBJDBC: "mongoDbJDBCDataSource"
 });

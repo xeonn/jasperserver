@@ -9,7 +9,7 @@
 		<version column="version" name="version"/>
 		<property name="snapshotDate" column="snapshot_date" type="timestamp" />
 		<property name="contentsId" column="contents_id" type="long" not-null="true"/>
-		<map name="dataParameters" table="JIDataSnapshotParameter">
+		<map name="dataParameters" table="JIDataSnapshotParameter" fetch="subselect">
 			<key column="id" foreign-key="id_fk_idx"/>
 			<map-key column="parameter_name" type="string" length="100"/>
 			<element column="parameter_value" type="serializable" length="20971520"/>

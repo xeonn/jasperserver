@@ -105,7 +105,12 @@ public class TypedTreeDataProvider extends BaseTreeDataProvider {
         if (engineService == null) {
             return false;
         }
-        return engineService.isCustomDomainMetadataProvider(customReportDataSource);
+        try {
+            return engineService.isCustomDomainMetadataProvider(customReportDataSource);
+        } catch (Exception ex) {
+            log.error(ex);
+            return false;
+        }
     }
 
     private TreeNode filterTree(TreeNode tree) {

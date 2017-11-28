@@ -891,6 +891,14 @@
 
     create index JIUser_tenantId_index on JIUser (tenantId);
 
+    create index idxA1_resource_id_idx on JICustomDatasourceResource (resource_id);
+
+    create index idx16_mondrianSchema_idx on JIMondrianConnection (mondrianSchema);
+
+    create index idx17_reportDataSource_idx on JIMondrianConnection (reportDataSource);
+
+    create index idx23_olapClientConnection_idx on JIOlapUnit (olapClientConnection);
+
     create index JIReportUnit_mainReport_index on JIReportUnit (mainReport);
 
     create index JIReportUnit_query_index on JIReportUnit (query);
@@ -905,9 +913,11 @@
 
     create index idx33_resource_id_idx on JIReportUnitResource (resource_id);
 
-    create index idx23_olapClientConnection_idx on JIOlapUnit (olapClientConnection);
+    create index JIQuery_dataSource_index on JIQuery (dataSource);
 
-    create index idxA1_resource_id_idx on JICustomDatasourceResource (resource_id);
+    create index idx20_mondrianConnection_idx on JIMondrianXMLADefinition (mondrianConnection);
+
+    create index JIFileResource_reference_index on JIFileResource (reference);
 
     create index JIInputControl_data_type_index on JIInputControl (data_type);
 
@@ -916,13 +926,3 @@
     create index JIInputControl_list_query_idx on JIInputControl (list_query);
 
     create index idx15_input_ctrl_id_idx on JIInputControlQueryColumn (input_control_id);
-
-    create index idx16_mondrianSchema_idx on JIMondrianConnection (mondrianSchema);
-
-    create index idx17_reportDataSource_idx on JIMondrianConnection (reportDataSource);
-
-    create index JIQuery_dataSource_index on JIQuery (dataSource);
-
-    create index idx20_mondrianConnection_idx on JIMondrianXMLADefinition (mondrianConnection);
-
-    create index JIFileResource_reference_index on JIFileResource (reference);

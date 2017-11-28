@@ -22,16 +22,27 @@
 define(function(require) {
     "use strict";
 
-
 	var _ = require("underscore"),
 		CustomDataSourceView = require("dataSource/view/CustomDataSourceView"),
-		MongoDbDataSourceModel = require("dataSource/model/MongoDbDataSourceModel");
+		mongoDbSpecificTemplate = require("text!dataSource/template/mongoDbSpecificTemplate.htm");
 
 	return CustomDataSourceView.extend({
 		PAGE_TITLE_NEW_MESSAGE_CODE: "resource.datasource.mongo.page.title.new",
 		PAGE_TITLE_EDIT_MESSAGE_CODE: "resource.datasource.mongo.page.title.edit",
 
-		modelConstructor: MongoDbDataSourceModel
+		render: function() {
+			this.$el.empty();
+
+			this.renderMongoDbSpecificSection();
+			this.renderTestConnectionSection();
+
+			return this;
+		},
+
+		renderMongoDbSpecificSection: function() {
+			this.$el.append(_.template(mongoDbSpecificTemplate, this.templateData()));
+		}
+
 	});
 
 });

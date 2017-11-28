@@ -31,7 +31,7 @@ define(function(require) {
 		mongoJdbcFileSourceTypes = require("dataSource/enum/mongoJdbcFileSourceTypes"),
 		CustomDataSourceView = require("dataSource/view/CustomDataSourceView"),
 		MongoDbJdbcDataSourceModel = require("dataSource/model/MongoDbJdbcDataSourceModel"),
-		MongoDbSpecificTemplate = require("text!dataSource/template/mongoDbSpecificTemplate.htm"),
+		MongoDbJdbcSpecificTemplate = require("text!dataSource/template/mongoDbJdbcSpecificTemplate.htm"),
 		MongoDbJdbcFileLocationSectionTemplate = require("text!dataSource/template/mongoDbJdbcFileLocationSectionTemplate.htm"),
 
 		selectDialogTemplate = require("text!common/templates/components.pickers.htm");
@@ -47,6 +47,7 @@ define(function(require) {
 			var events = _.extend({}, CustomDataSourceView.prototype.events);
 
 			events["change [name=fileSourceType]"] = "changeFileSourceType";
+			events["change [name=autoSchemaDefinition]"] = "changeAutoSchemaDefinition";
 
 			return events;
 		},
@@ -58,8 +59,10 @@ define(function(require) {
 		},
 
 		changeFileSourceType: function() {
-			// since in the BaseDataSourceView there is a default listener, I'll trigger the rendering in the moment
-			// right after all event listeners will be run
+			_.defer(_.bind(function(){this.renderFileLocationSection();}, this));
+		},
+
+		changeAutoSchemaDefinition: function() {
 			_.defer(_.bind(function(){this.renderFileLocationSection();}, this));
 		},
 
@@ -68,7 +71,7 @@ define(function(require) {
 
 			this.renderMongoDbSpecificSection();
 			this.renderFileLocationSection();
-			
+
 			this.$el.find("[name=serverAddress]").focus();
 
 			return this;
@@ -115,23 +118,30 @@ define(function(require) {
 		},
 
 		renderMongoDbSpecificSection: function() {
-			this.$el.append(_.template(MongoDbSpecificTemplate, this.templateData()));
+			this.$el.append(_.template(MongoDbJdbcSpecificTemplate, this.templateData()));
 		},
 		
 		renderFileLocationSection: function() {
+
+			// we are going to re-render the file location section, and
+			// we need to remove everything which was there, and draw it again
 
 			this.renderOrAddAnyBlock(
 				this.$el.find("[name=fileLocationContainer]"),
 				_.template(MongoDbJdbcFileLocationSectionTemplate, this.templateData())
 			);
 
-			// remove the old browse button handler if exists
+			// browse button is a special component, and
+			// if we render this section second time and we have this
+			// component on the page we need to remove it
 			if (this.browseButton) {
 				this.browseButton.remove();
 				this.browseButton = false;
 			}
 
+			// and now, under certain condition, we may create this button again
 			if (this.model.get("fileSourceType") === "repository") {
+
 				this.browseButton = resourceLocator.initialize({
 					i18n: i18n,
 					template: selectDialogTemplate,
@@ -146,25 +156,7 @@ define(function(require) {
 					}, this)
 				});
 			}
-
-			this.adjustFileSystemConnectButton();
-		},
-
-		adjustFileSystemConnectButton: function() {
-			var flag = this.model.isValid("serverFileName");
-
-			this._adjustButton("serverFileSystemConnectToServer", flag);
-		},
-
-		_adjustButton: function(buttonSelector, enabledState) {
-			var button = this.$el.find("[name=" + buttonSelector + "]");
-			if (!!enabledState) {
-				button.removeAttr("disabled");
-			} else {
-				button.attr("disabled", "disabled");
-			}
 		}
-
 	});
 
 });

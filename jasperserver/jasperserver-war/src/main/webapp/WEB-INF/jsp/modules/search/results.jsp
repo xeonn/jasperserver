@@ -28,7 +28,7 @@
 
 <%@ page import="com.jaspersoft.jasperserver.search.model.SearchActionModelSupport" %>
 
-<%@ include file="../common/jsEdition.jsp" %>      
+<%@ include file="../common/jsEdition.jsp" %>
 
 <%-- Setting bodyID, page title, primary container title, nothing to display message. --%>
 <c:set var="bodyId" value="repoBrowse"/>
@@ -137,7 +137,7 @@
                     <ul id="filterPath" class=""></ul>
                 </div>
                 <ul class="list collapsible tabular resources fourColumn header" id="resultsListHeader">
-                    <li class="resources first leaf scheduled" id="resultsList_item1" tabindex="-1">
+                    <li class="resources first leaf scheduled" id="resultsListHeader_item1">
                         <div class="wrap draggable">
                             <div class="column one">
                                 <div class="scheduled icon button"></div>
@@ -158,9 +158,10 @@
                 </ul>
             </t:putAttribute>
             <t:putAttribute name="bodyID" value="resultsContainer"/>
+            <t:putAttribute name="bodyAttributes">tabindex="-1"</t:putAttribute>
 			<!-- Include swipeScroll here -->
             <t:putAttribute name="bodyContent">
-                <ol id="resultsList" class="" tabIndex="-1" data-tab-index="4" data-component-type="list"></ol>
+                <ol id="resultsList" class="" tabIndex="0" data-tab-index="4" data-component-type="list" js-navtype="dynamiclist"></ol>
                 <t:insertTemplate template="/WEB-INF/jsp/templates/nothingToDisplay.jsp">
                     <t:putAttribute name="bodyContent">
                         <p class="message">${nothingToDisplayMsg}</p>

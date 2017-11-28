@@ -33,6 +33,7 @@ import com.jaspersoft.jasperserver.war.action.EntitiesListManager;
 import com.jaspersoft.jasperserver.war.action.EntitiesListState;
 import com.jaspersoft.jasperserver.war.common.ConfigurationBean;
 import com.jaspersoft.jasperserver.war.common.JasperServerUtil;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.webflow.execution.Event;
@@ -433,7 +434,11 @@ public class ResourcePermissionsAction extends BaseSearchAction {
     private List<RoleWithPermission> getRoleWithPermissionList(RequestContext context, List<Role> roles,
             ResourcePermissionsState resourcePermissionsState) {
         List<RoleWithPermission> roleWithPermissionList = new ArrayList<RoleWithPermission>(roles.size());
+        Set<Role> processedRoles = new HashSet<Role>();
         for (Role role : roles) {
+        	if(processedRoles.contains(role)){
+        		continue;
+        	}
             RoleWithPermission roleWithPermission = new RoleWithPermission();
             roleWithPermission.setRole(role);
             roleWithPermission.setPermissionToDisplay(
@@ -441,6 +446,7 @@ public class ResourcePermissionsAction extends BaseSearchAction {
             disablePermissionIfRequired(roleWithPermission);
 
             roleWithPermissionList.add(roleWithPermission);
+        	processedRoles.add(role);
         }
 
         return roleWithPermissionList;

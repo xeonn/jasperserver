@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: repository.search.components.js 8900 2015-05-06 20:57:14Z yplakosh $
+ * @version: $Id: repository.search.components.js 9231 2015-08-24 22:16:45Z yplakosh $
  */
 
 /* global repositorySearch, SearchBox, toolbarButtonModule, toFunction, getAsFunction, localContext, isArray, JSCookie,
@@ -500,10 +500,17 @@ repositorySearch.resultsPanel =  {
                 }
             });
 
-            desc.update(xssUtil.escape(this.getValue().description));
-            new JSTooltip(desc, {
-                text: this.getValue().description
-            });
+            var descriptionValue = this.getValue().description;
+
+            desc.update(xssUtil.escape(descriptionValue));
+
+            if(!descriptionValue) {
+                desc.jsTooltip && desc.jsTooltip.disable();
+            } else {
+                new JSTooltip(desc, {
+                    text: descriptionValue
+                });
+            }
 
 
             var type = element.select(".resourceType")[0];

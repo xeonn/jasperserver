@@ -69,9 +69,7 @@ public class RunResourceActivity extends ReadResourceActivity {
         String resourceType = data.getResourceType();
         Integer permissionMask = data.getPermissionMask();
 
-        Boolean isAllowed = Permissions.ADMINISTRATION.equals(permissionMask)
-                    || Permissions.RUN.equals(permissionMask)
-                    || Permissions.READ.equals(permissionMask);
+        Boolean isAllowed = (permissionMask & (Permissions.ADMINISTRATION.mask() | Permissions.READ.mask())) > 0;
 
         if (canBeRunTypes.contains(resourceType) && isAllowed){
 

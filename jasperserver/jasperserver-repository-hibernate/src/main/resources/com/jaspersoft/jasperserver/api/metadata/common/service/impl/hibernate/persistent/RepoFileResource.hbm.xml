@@ -17,5 +17,4 @@
 	<create>create index JIFileResource_reference_index on JIFileResource (reference)</create>
 	<drop>DROP INDEX JIFileResource_reference_index ON JIFileResource</drop>
 </database-object>
-
 </hibernate-mapping>

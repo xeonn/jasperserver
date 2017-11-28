@@ -45,10 +45,10 @@
 
     <!-- input controls -->
     <bean id="multiSelectQuery_inputControl" class="com.jaspersoft.jasperserver.war.cascade.utils.InputControlMock">
-        <property name="type" ref="TYPE_MULTI_SELECT_QUERY"/>
+        <property name="inputControlType" ref="TYPE_MULTI_SELECT_QUERY"/>
     </bean>
     <bean id="singleSelectQuery_inputControl" class="com.jaspersoft.jasperserver.war.cascade.utils.InputControlMock">
-        <property name="type" ref="TYPE_SINGLE_SELECT_QUERY"/>
+        <property name="inputControlType" ref="TYPE_SINGLE_SELECT_QUERY"/>
     </bean>
 
     <bean id="query" class="com.jaspersoft.jasperserver.api.metadata.common.domain.client.QueryImpl"/>

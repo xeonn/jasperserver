@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: mng.common.js 8929 2015-05-22 14:15:10Z obobruyk $
+ * @version: $Id: mng.common.js 9225 2015-08-21 22:05:24Z mheck $
  */
 
 /* global repositorySearch, SearchBox, toolbarButtonModule, toFunction, getAsFunction, localContext, isArray, JSCookie,
@@ -458,6 +458,7 @@ orgModule.entityList = {
             listTemplateDomId: options.listTemplateId,
             itemTemplateDomId: options.itemTemplateId,
             multiSelect: true,
+            selectionDefaultsToCursor: true,
             comparator: function(item1, item2) {
                 var l1 = item1.getLabel();
                 var l2 = item2.getLabel();
@@ -652,7 +653,6 @@ orgModule.entityList = {
             });
         }
 
-        this.list.resetSelected();
         this.list.removeItems(matched);
     }
 };
@@ -808,7 +808,9 @@ orgModule.properties = {
             this.assignedViewList = new dynamicList.List(this._ASSIGNED_VIEW_LIST_ID, {
                 listTemplateDomId: options.viewAssignedListTemplateDomId,
                 itemTemplateDomId: options.viewAssignedItemTemplateDomId,
-                comparator: this.assignedComparator
+                comparator: this.assignedComparator,
+                allowSelections: false,
+                selectionDefaultsToCursor: false
             });
 
             var commonOptions = {
@@ -816,11 +818,21 @@ orgModule.properties = {
                 itemTemplateDomId: "list_responsive_collapsible_fields:fields",
                 comparator: this.assignedComparator,
                 dragPattern: this._DND_CLASS,
+                allowSelections: true,
+                selectionDefaultsToCursor: true,
                 multiSelect: true,
-                selectOnMousedown: true
+                selectOnMousedown: true,
+                setCursorOnMouseDown: true
             };
 
-            this.assignedList = new dynamicList.List(this._ASSIGNED_LIST_ID, commonOptions);
+            this.assignedList = new dynamicList.List(this._ASSIGNED_LIST_ID,
+                Object.extend({}, commonOptions,
+                    {
+                        allowSelections: false,
+                        selectionDefaultsToCursor: false
+                        //selectOnMouseDown: false,
+                        //setCursorOnMouseDown: false
+                    }));
             this.availableList = new dynamicList.List(this._AVAILABLE_LIST_ID, commonOptions);
 
 //            this.assignedList.DND_WRAPPER_TEMPLATE = "column_two";

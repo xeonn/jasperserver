@@ -22,7 +22,7 @@
 
 /**
  * @author: Angus Croll
- * @version: $Id: core.layout.js 8900 2015-05-06 20:57:14Z yplakosh $
+ * @version: $Id: core.layout.js 9192 2015-08-12 19:52:08Z yplakosh $
  */
 
 /* global $H, Truncator, isIE7, parseFunc, centerElement, iScroll, matchMeOrUp, Draggable, isIPad, doNothing, $$,
@@ -50,13 +50,17 @@ var layoutModule = {
     META_LINKS_PATTERN: '#metaLinks #main_logOut_link',
     BUTTON_SET_BUTTON: '.buttonSet > *',
     TABSET_TAB_PATTERN: '.tab',
+    // This class is given to both actual button elements, and instances of
+    // other element types that should be handled by the buttonManager.
     BUTTON_PATTERN: '.button',
     PRESSED_PATTERN: '.pressed',
     SELECTED_PATTERN: '.selected',
     LIST_ITEM_PATTERN: '.list.responsive > li',
     LIST_ITEM_WRAP_PATTERN: '.wrap',
     DISCLOSURE_BUTTON_PATTERN: ".disclosure",
+    // Entries in menu bars, popup menus, dropdown menus, and context menus.
     MENU_LIST_PATTERN: '#menu li',
+    // Visual separators in menus that aren't focusable or cursorable.
     SEPARATOR_PATTERN: '.separator',
     MESSAGE_PATTERN: '.message',
     MESSAGE_WARNING_PATTERN: '.message.warning',
@@ -77,6 +81,9 @@ var layoutModule = {
     PRESSED_CLASS : 'pressed',
     SELECTED_CLASS : 'selected',
     DISABLED_CLASS : 'disabled',
+    // The button manager adds this class when a mouseover event occurs, and
+    // removes it when a mouseout event occurs. Keyboard, touch, and automation
+    // navigation should manage it as well.
     HOVERED_CLASS : 'over',
     ERROR_CLASS : 'error',
     SUCCESS_CLASS : 'error',
@@ -85,10 +92,23 @@ var layoutModule = {
     LAST_CLASS : 'last',
     FIRST_CLASS : 'first',
     SCHEDULED_CLASS: 'scheduled',
+    // The main menu bar, and any other menu bars.  Not used for context menus.
+    MENU_ROOT_CLASS :'menuRoot',
+    // Multi-purpose:
+    //    For menus: a menu entry that has a drop-down or pop-out menu.
+    //               Not used for context menus.
     NODE_CLASS: 'node',
+    // Multi-purpose:
+    //    For menus: a menu entry that has no drop-down or pop-out menus.
+    //               Normally triggerable by clicking, touching, or pressing
+    //               ENTER.
     LEAF_CLASS: 'leaf',
     ICON_CLASS: 'icon',
+    // Node elements such as folders in tree views and list items with subitems
+    // should have this class when open.
     OPEN_CLASS: 'open',
+    // Node elements such as folders in tree views and list items with subitems
+    // should have this class when closed.
     CLOSED_CLASS: 'closed',
     LOADING_CLASS: 'loading',
     NOTHING_TO_DISPLAY_CLASS: 'nothingToDisplay',
@@ -114,9 +134,12 @@ var layoutModule = {
     READONLY_ATTR_NAME: "readonly",
 
     // Predefined DOM elements IDs.
+    // ----------------------------
     DIMMER_ID: "pageDimmer",
     PAGE_BODY_ID: "display",
+    // ID of the multipurpose dropdown/popup/context menu.
     MENU_ID: "menu",
+    // IDs of the actual main menu bar and its entries.
     MAIN_NAVIGATION_ID: "mainNavigation",
     MAIN_NAVIGATION_HOME_ITEM_ID: "main_home",
     MAIN_NAVIGATION_LIBRARY_ITEM_ID: "main_library",

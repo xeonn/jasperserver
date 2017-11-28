@@ -251,6 +251,10 @@ FLOATING DIALOGS
 	margin-bottom: 22px;
 }
 
+#helpLoggingIn .button.action:hover { /* this is temporary until we can dynamically add the .over class to this element */
+	background-color: #195b8a;
+}
+
 
 /* #heartbeatOptin */
 
@@ -1548,6 +1552,14 @@ PANES
 }
 
 /* JIVE */
+
+@media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) {
+    .jive_dialog > .msshadow {
+        display:none !important;
+    }
+}  /* IE10+ */
+
+
 
 .jive_chartTypeSelector .header > .title,
 .jive_dialog .dialogHeader .dialogTitle {

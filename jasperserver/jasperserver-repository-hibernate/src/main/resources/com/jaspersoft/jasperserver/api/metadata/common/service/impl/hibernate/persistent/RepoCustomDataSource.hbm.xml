@@ -8,12 +8,12 @@
 			table="JICustomDatasource">
 		<key column="id"/>
 		<property name="serviceClass" not-null="true" length="250" type="string"/>
-		<map name="propertyMap" table="JICustomDatasourceProperty">
+		<map name="propertyMap" table="JICustomDatasourceProperty" fetch="subselect">
 			<key column="ds_id"/>
 			<map-key column="name" type="string" length="200"/>
 			<element column="value" type="string" length="1000"/>
 		</map>
-		<map name="resources" table="JICustomDatasourceResource">
+		<map name="resources" table="JICustomDatasourceResource" fetch="subselect">
 			<key column="ds_id"/>
 			<map-key column="name" type="string" length="200"/>
 			<many-to-many column="resource_id" class="com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.persistent.RepoResource"/>

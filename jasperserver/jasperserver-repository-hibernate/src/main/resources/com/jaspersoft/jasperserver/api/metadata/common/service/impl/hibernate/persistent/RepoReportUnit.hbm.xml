@@ -9,12 +9,12 @@
 		<key column="id"/>
 		<many-to-one column="reportDataSource" name="dataSource" class="com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.persistent.RepoResource"/>
 		<many-to-one column="query" name="query"/>
-		<list table="JIReportUnitInputControl" name="inputControls">
+		<list table="JIReportUnitInputControl" name="inputControls" fetch="subselect">
 			<key column="report_unit_id"/>
 			<list-index column="control_index"/>
 			<many-to-many column="input_control_id" class="com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.persistent.RepoInputControl"/>
 		</list>
-		<list table="JIReportUnitResource" name="resources">
+		<list table="JIReportUnitResource" name="resources" fetch="subselect">
 			<key column="report_unit_id"/>
 			<list-index column="resource_index"/>
 			<many-to-many column="resource_id" class="com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.persistent.RepoFileResource"/>

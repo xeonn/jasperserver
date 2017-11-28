@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
+ * Copyright (C) 2005 - 2015 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: browserDetection.js 888 2015-02-25 12:09:07Z ktsaregradskyi $
+ * @version: $Id: browserDetection.js 1488 2015-08-12 18:20:41Z yplakosh $
  */
 
 define(function (require) {

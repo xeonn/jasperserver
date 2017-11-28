@@ -107,6 +107,7 @@ define(function (require) {
                     self.set(self.getCustomAttributeValuesFromConnectionUrl());
                     // use password substitution
                     self.set("password", jasperserverConfig["input.password.substitution"]);
+	                self.extendValidation();
                 }
 
                 var customAttributesChangeEventString = _.map(self.drivers.getAllPossibleCustomAttributes(),

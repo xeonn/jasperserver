@@ -104,6 +104,8 @@ public class ConfigurationBean
 
     private Boolean optimizeJavaScript;
 
+    private boolean enableAccessibility;
+
     
     private boolean defaultAddToDomainDependents;
     
@@ -446,6 +448,14 @@ public class ConfigurationBean
 
     public void setTempFolderUri(String tempFolderUri) {
         this.tempFolderUri = tempFolderUri;
+    }
+
+    public boolean getEnableAccessibility() {
+        return enableAccessibility;
+    }
+
+    public void setEnableAccessibility(boolean enableAccessibility) {
+        this.enableAccessibility = enableAccessibility;
     }
 
     public String getOrganizationsFolderUri() {

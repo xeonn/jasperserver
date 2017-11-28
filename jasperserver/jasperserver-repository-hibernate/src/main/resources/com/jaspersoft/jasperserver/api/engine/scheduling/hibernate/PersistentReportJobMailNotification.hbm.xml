@@ -11,7 +11,7 @@
         <property name="messageText" column="message" type="string" length="2000" not-null="false"/>
         <property name="resultSendType" column="send_type" type="byte" not-null="true"/>
         <property name="skipEmptyReports" column="skip_empty" type="boolean" not-null="true"/>
-        <list name="recipients" table="JIReportJobMailRecipient">
+        <list name="recipients" table="JIReportJobMailRecipient" fetch="subselect">
             <key column="destination_id"/>
             <list-index column="recipient_idx"/>
             <composite-element class="com.jaspersoft.jasperserver.api.engine.scheduling.hibernate.PersistentReportJobMailRecipient">

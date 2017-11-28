@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: core.events.bis.js 8790 2015-04-22 21:28:09Z obobruyk $
+ * @version: $Id: core.events.bis.js 9192 2015-08-12 19:52:08Z yplakosh $
  */
 
 /* global isSupportsTouch, matchMeOrUp, layoutModule, isIPad, isRightClick, isIE, hasDisabledAttributeSet,
@@ -159,6 +159,14 @@ document.observe('dom:loaded', function(event) {
 
     jQuery('body').on('mouseover mouseout',layoutModule.BUTTON_PATTERN,function(evt){
         if(!hasDisabledAttributeSet(this)) evt.type == 'mouseover' ? buttonManager.over(this) : buttonManager.out(this);
+    });
+
+    jQuery('body').on('focus',layoutModule.BUTTON_PATTERN,function(evt){
+        if(!hasDisabledAttributeSet(this)) buttonManager.over(this);
+    });
+
+    jQuery('body').on('blur',layoutModule.BUTTON_PATTERN+'.'+layoutModule.HOVERED_CLASS,function(evt){
+        if(!hasDisabledAttributeSet(this)) buttonManager.out(this);
     });
 
     jQuery('body').on('mousedown mouseup touchstart touchend',[layoutModule.BUTTON_PATTERN, layoutModule.MENU_LIST_PATTERN, layoutModule.DISCLOSURE_BUTTON_PATTERN, layoutModule.META_LINKS_PATTERN].join(','),function(evt){

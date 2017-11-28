@@ -40,7 +40,7 @@ import java.util.Map;
  * <p></p>
  *
  * @author yaroslav.kovalchyk
- * @version $Id: AwsConnectionStrategy.java 50011 2014-10-09 16:57:26Z vzavadskii $
+ * @version $Id: AwsConnectionStrategy.java 56967 2015-08-20 23:20:53Z esytnik $
  */
 @Service
 public class AwsConnectionStrategy implements ConnectionManagementStrategy<ClientAwsDataSource> {
@@ -74,11 +74,9 @@ public class AwsConnectionStrategy implements ConnectionManagementStrategy<Clien
                 existingDs = (AwsReportDataSource) repository.getResource(null, connectionDescription.getUri());
             }
             if ((password == null || password.equals(passwordSubstitution)) && existingDs != null) {
-                connectionDescription.setPassword(existingDs.getPassword());
                 awsReportDataSource.setPassword(existingDs.getPassword());
             }
             if ((secretKey == null || secretKey.equals(passwordSubstitution)) && existingDs != null) {
-                connectionDescription.setSecretKey(existingDs.getAWSSecretKey());
                 awsReportDataSource.setAWSSecretKey(existingDs.getAWSSecretKey());
             }
 

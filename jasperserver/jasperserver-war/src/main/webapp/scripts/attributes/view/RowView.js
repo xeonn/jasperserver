@@ -21,7 +21,7 @@
 
 /**
  * @author: Olesya Bobruyko
- * @version: $Id: RowView.js 8900 2015-05-06 20:57:14Z yplakosh $
+ * @version: $Id: RowView.js 9218 2015-08-20 19:56:16Z yplakosh $
  */
 
 define(function(require) {
@@ -60,23 +60,10 @@ define(function(require) {
             }
         },
 
-        events: {
-            "mouseover": "_onMouseOver",
-            "mouseout": "_onMouseOut"
-        },
-
         initialize: function(options) {
             this.type = options.type;
 
             BaseRow.prototype.initialize.apply(this, arguments);
-        },
-
-        _onMouseOver: function(e) {
-            this.trigger("mouseover", this.model, e);
-        },
-
-        _onMouseOut: function(e) {
-            this.trigger("mouseout", this.model, e);
         }
     });
 

@@ -326,10 +326,10 @@ Make sure you have compiled the jasperserver source code.
             edition="ce"
             example="js-ant import-upgrade-ce -DimportFile=my-upgrade.zip"/>
         <if>
-            <isset property="includeAccessEvents" />
+            <isset property="importArgs" />
             <then>
                 <run-import-export type="import" archive="${importFile}" edition="ce" checkDBMSConnection="true">
-                    <arg value="--include-access-events"/>
+                    <arg line="${importArgs}" />
                     <arg value="--update-core-users"/>
                 </run-import-export>
             </then>

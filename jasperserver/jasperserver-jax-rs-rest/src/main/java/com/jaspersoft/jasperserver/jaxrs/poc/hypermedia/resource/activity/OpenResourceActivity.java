@@ -64,7 +64,7 @@ public class OpenResourceActivity extends ReadResourceActivity {
         String resourceType = data.getResourceType();
         Integer permissionMask = data.getPermissionMask();
 
-        Boolean isAllowed = Permissions.ADMINISTRATION.equals(permissionMask) || Permissions.READ.equals(permissionMask);
+        Boolean isAllowed = (permissionMask & (Permissions.ADMINISTRATION.mask() | Permissions.READ.mask())) > 0;
 
         if (canBeOpen.contains(resourceType) && isAllowed){
 

@@ -12,12 +12,12 @@
 			<property name="URI" not-null="true" length="250" type="string" column="uri"/>
 		</natural-id>
 		<version column="version" unsaved-value="negative" name="version"/>
-		<set inverse="true" cascade="save-update,delete,delete-orphan" name="children">
+		<set inverse="true" cascade="all,delete-orphan" name="children">
 			<key column="parent_folder"/>
 			<one-to-many class="com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.persistent.RepoResource"/>
 		</set>
-		<set inverse="true" cascade="delete" name="subFolders">
-			<key column="parent_folder"/>
+		<set inverse="true" cascade="all,delete-orphan" name="subFolders" fetch="subselect">
+			<key column="parent_folder"/>  
 			<one-to-many class="com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.persistent.RepoFolder"/>
 		</set>
 		<property name="hidden" type="boolean" column="hidden"/>

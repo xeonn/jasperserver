@@ -22,7 +22,7 @@
 
 /**
  * @author: Dima Gorbenko
- * @version: $Id: DataSourceController.js 8900 2015-05-06 20:57:14Z yplakosh $
+ * @version: $Id: DataSourceController.js 9093 2015-07-27 10:20:35Z dgorbenk $
  */
 
 /* global dialogs, redirectToUrl */
@@ -204,8 +204,8 @@ define(function (require) {
 			if (!this.dataSourceType) {
 				this.dataSourceType = dataSourceResourceTypes.JDBC.toLowerCase();
 
-				// TODO: REMOVE ME IF YOU ARE ABOUT TO COMMIT TO TRUNK
-				//this.dataSourceType = "textDataSource";
+				// Use it for development reasons: you can pre-select any DS type
+				//this.dataSourceType = "MongoDbDataSource";
 			}
 
             this.dataSourceView = dataSourceViewFactory.getView(_.extend(this.options, {

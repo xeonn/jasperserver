@@ -51,7 +51,7 @@ import static org.mockito.Mockito.doThrow;
 
 /**
  * @author vsabadosh
- * @version $Id: AwsDataSourceServiceImplTest.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: AwsDataSourceServiceImplTest.java 56967 2015-08-20 23:20:53Z esytnik $
  */
 @RunWith(MockitoJUnitRunner.class)
 public class AwsDataSourceServiceImplTest {
@@ -221,13 +221,13 @@ public class AwsDataSourceServiceImplTest {
 
         AmazonServiceException amazonServiceException = new AmazonServiceException(exceptionMessage);
         doThrow(amazonServiceException).when(awsDataSourceService).getRdsInstances(any(AmazonRDSClient.class));
-        doReturn("[" + exceptionMessage + "]").when(messageSource).getMessage(Matchers.eq("[" + exceptionMessage + "]"),
+        doReturn("[" + amazonServiceException.getMessage() + "]").when(messageSource).getMessage(Matchers.eq("[" + amazonServiceException.getMessage() + "]"),
                 Matchers.any(String[].class), Matchers.any(Locale.class));
 
         List<AwsDBInstanceDTO> rdsInstances = awsDataSourceService.getAwsDBInstances(awsCredentials, AwsDataSourceServiceImpl.RDS, AWS_REGION);
 
         assertEquals(1, rdsInstances.size());
-        assertEquals("[" + exceptionMessage + "]", rdsInstances.get(0).getdBInstanceIdentifier());
+        assertEquals("[" + amazonServiceException.getMessage() + "]", rdsInstances.get(0).getdBInstanceIdentifier());
         assertEquals(AwsDataSourceServiceImpl.RDS, rdsInstances.get(0).getAmazonDbService());
     }
 

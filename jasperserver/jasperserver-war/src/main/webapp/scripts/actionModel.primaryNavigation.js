@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: actionModel.primaryNavigation.js 8900 2015-05-06 20:57:14Z yplakosh $
+ * @version: $Id: actionModel.primaryNavigation.js 9192 2015-08-12 19:52:08Z yplakosh $
  */
 
 /* global isNotNullORUndefined, actionModel, __jrsConfigs__, getAsFunction */
@@ -137,18 +137,12 @@ var primaryNavModule = {
         navigationMenuParent && navigationMenuParent.appendChild(mutton);
     },
 
-
-    /**
-     * Event for fired on mouse over. Used to show a menu.
-     * @param event
-     * @param object
-     */
+    /* Show the drop-down menu for a given top-level menu item on the menu bar. */
     showNavButtonMenu : function(event, object){
         var elementId = jQuery(object).attr("id");
         actionModel.showDropDownMenu(event, object, elementId + this.CONTEXT_POSTFIX, this.NAVIGATION_MENU_CLASS, this.ACTION_MODEL_TAG);
         $("menu").parentId = elementId;
     },
-
 
     /**
      * Used to determine if a element is part of the navigation button
@@ -158,7 +152,6 @@ var primaryNavModule = {
         return ($(object).hasClassName("mutton") || $(object).hasClassName("icon"));
 
     },
-
 
     /**
      * Object based method used to create a url based on the navigation path object
@@ -189,14 +182,27 @@ var primaryNavModule = {
             var executableFunction = getAsFunction(execFunction);
             var answer = executableFunction();
             if (typeof answer == 'function') {
-            	answer(function() {
-            		primaryNavModule.setNewLocation(option);
-            	});
-            	return;
+                answer(function() {
+                    primaryNavModule.setNewLocation(option);
+                });
+                return;
             } else if(!answer){
                 return;
             }
         }
         primaryNavModule.setNewLocation(option);
+    },
+
+    /* ==== EVENTS ==== */
+
+    /**
+     * Event for fired on mouse over. Used to show a menu.
+     * @param event
+     * @param object
+     */
+    onMenuHeaderMouseOver : function(event, object){
+        this.showNavButtonMenu(event, object);
     }
 };
+
+

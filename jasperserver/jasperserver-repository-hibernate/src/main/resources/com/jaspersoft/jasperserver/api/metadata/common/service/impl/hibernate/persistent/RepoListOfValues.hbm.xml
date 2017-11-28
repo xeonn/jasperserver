@@ -7,7 +7,7 @@
 			extends="com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.persistent.RepoResource"
 			table="JIListOfValues">
 		<key column="id"/>
-		<list table="JIListOfValuesItem" name="values">
+		<list table="JIListOfValuesItem" name="values" fetch="subselect">
 			<key column="id"/>
 			<list-index/>
 			<composite-element class="com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.persistent.RepoListOfValuesItem">

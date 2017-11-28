@@ -229,17 +229,7 @@ define(function(require) {
                 if (self.model.getFullDbTreePath()) {
                     self.awsDataSourceTree.openAndSelectNode(self.model.getFullDbTreePath(), function () {
                         isEdit = false;
-                        var selectedNode = self.awsDataSourceTree.getSelectedNode();
-                        if(selectedNode && selectedNode.param && selectedNode.param.extra){
-                            // add required fields to a model from selected node.
-                            // it's required for JDBC URL auto update
-                            self.model.set({
-                                connectionUrlTemplate: selectedNode.param.extra.jdbcTemplate,
-                                dbHost: selectedNode.param.extra.dnsAddress,
-                                dbPort : selectedNode.param.extra.dbPort
-                    });
-                }
-            });
+		            });
                 }
             });
         },

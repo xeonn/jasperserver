@@ -48,7 +48,7 @@ define(function(require) {
 
         events: {
 			"keyup input[type='text'], input[type='password'], textarea, select": "updateModelProperty",
-            "change input[type='text'], input[type='password'], input[type='checkbox'], textarea, select": "updateModelProperty",
+            "change input[type='text'], input[type='password'], input[type='radio'], input[type='checkbox'], textarea, select": "updateModelProperty",
             "click #testDataSource": "testConnection",
 			"click [name=testConnectionMessageDetails]" : "showTestConnectionMessageDetails"
         },
@@ -59,7 +59,7 @@ define(function(require) {
             this.timezones = options.timezones ? options.timezones : timezones;
 
             var modelAttrs = {};
-            if(options.dataSource){
+            if (options.dataSource) {
                 modelAttrs = _.extend(modelAttrs, options.dataSource);
             }
             this.model = new this.modelConstructor(modelAttrs, options);

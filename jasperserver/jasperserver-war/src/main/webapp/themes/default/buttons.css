@@ -602,6 +602,7 @@ button.capsule.mini .wrap {
 .button.capsule.text {
 	border-left: 1px solid #cecece;
 	border-right: 1px solid #fff;
+	font-family: Lucida Grande, Verdana, Arial, Helvetica, sans-serif;
 	margin: 0;
 	width: auto;
 	

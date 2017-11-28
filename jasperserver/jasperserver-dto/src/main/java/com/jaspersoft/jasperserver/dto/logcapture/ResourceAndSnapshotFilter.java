@@ -27,15 +27,15 @@ import javax.xml.bind.annotation.*;
 
 /**
  * @author Yakiv Tymoshenko
- * @version $Id: Id $
+ * @version $Id: ResourceAndSnapshotFilter.java 56967 2015-08-20 23:20:53Z esytnik $
  * @since 10.02.2015
  */
 @XmlRootElement
 @XmlType(propOrder = {"resourceUri", "includeDataSnapshots"})
 @XmlAccessorType(XmlAccessType.PROPERTY)
 public class ResourceAndSnapshotFilter {
-    public String resourceUri;
-    public Boolean includeDataSnapshots;
+    private String resourceUri;
+    private Boolean includeDataSnapshots;
 
     public ResourceAndSnapshotFilter() {
     }
@@ -45,7 +45,10 @@ public class ResourceAndSnapshotFilter {
         this.includeDataSnapshots = other.getIncludeDataSnapshots();
     }
 
-    public boolean isExportEnabled() {
+    /*
+        Don't name it "isExportEnabled" because it would look like a property in resulting JSON/XML.
+     */
+    public boolean exportEnabled() {
         return includeDataSnapshots != null
                 && (includeDataSnapshots && resourceUri != null && resourceUri.length() > 0);
     }

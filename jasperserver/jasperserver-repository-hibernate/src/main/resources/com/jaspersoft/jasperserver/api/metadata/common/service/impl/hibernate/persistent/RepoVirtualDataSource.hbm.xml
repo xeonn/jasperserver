@@ -7,7 +7,7 @@
 			extends="com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.persistent.RepoResource"
 			table="JIVirtualDatasource">
 		<key column="id"/>
-        <map name="dataSourceUriMap" table="JIVirtualDataSourceUriMap">
+        <map name="dataSourceUriMap" table="JIVirtualDataSourceUriMap" fetch="subselect">
             <key column="virtualDS_id"/>
             <map-key column="data_source_name" type="string" length="200"/>
             <many-to-many column="resource_id" class="com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.persistent.RepoResource"/>

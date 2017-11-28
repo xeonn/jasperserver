@@ -67,7 +67,7 @@
                     <button class="button minimize"></button>
                 </t:putAttribute>
             </t:putAttribute>
-		    <t:putAttribute name="containerTitle"><spring:message code="SEARCH_FILTERS"/></t:putAttribute>
+		    <t:putAttribute name="containerTitle"><spring:message code="menu.settings"/></t:putAttribute>
 		    <t:putAttribute name="bodyClass" value=""/>
 		    <t:putAttribute name="bodyContent">
 		    	<ul class="list responsive filters">

@@ -84,7 +84,7 @@
     </bean>
 
     <bean id="numberDataTypeMax300Min200" class="com.jaspersoft.jasperserver.api.metadata.common.domain.client.DataTypeImpl">
-        <property name="type" value="2"/>
+        <property name="dataTypeType" value="2"/>
         <property name="maxValue" value="300"/>
         <property name="minValue" value="200"/>
     </bean>

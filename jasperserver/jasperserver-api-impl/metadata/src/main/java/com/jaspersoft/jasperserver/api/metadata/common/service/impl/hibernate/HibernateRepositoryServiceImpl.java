@@ -56,6 +56,7 @@ import com.jaspersoft.jasperserver.api.search.*;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.LockMode;
 import org.hibernate.Query;
@@ -82,7 +83,7 @@ import java.util.*;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: HibernateRepositoryServiceImpl.java 55164 2015-05-06 20:54:37Z mchan $
+ * @version $Id: HibernateRepositoryServiceImpl.java 56839 2015-08-17 13:58:24Z esytnik $
  */
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 public class HibernateRepositoryServiceImpl extends HibernateDaoImpl implements HibernateRepositoryService, ReferenceResolver, RepoManager, ApplicationContextAware {
@@ -589,7 +590,7 @@ public class HibernateRepositoryServiceImpl extends HibernateDaoImpl implements 
 			
 			} catch (RuntimeException e){
 				log.error("******** Recovering from template.lock/saveOrUpdate ***** " + e.getMessage());
-				template.refresh(repo);
+				//template.refresh(repo);
 			}
 			template = null;
                     logAccessResource(repo, true);
@@ -842,6 +843,7 @@ public class HibernateRepositoryServiceImpl extends HibernateDaoImpl implements 
         if (!idList.isEmpty()) {
             DetachedCriteria criteria = searchCriteriaFactory != null ? searchCriteriaFactory.create(ExecutionContextImpl.getRuntimeExecutionContext(), null) : DetachedCriteria.forClass(RepoResource.class);
             criteria.add(Restrictions.in("id", idList));
+            criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
             resourceList = getHibernateTemplate().findByCriteria(criteria);
         }
 
@@ -854,10 +856,14 @@ public class HibernateRepositoryServiceImpl extends HibernateDaoImpl implements 
     private List orderByIdList(List<IdedRepoObject> resourceList, List<Long> idList) {
         List<IdedRepoObject> orderedList = new ArrayList<IdedRepoObject>();
 
+//        Set<Long> processed = new HashSet(idList.size());
         for (Long id : idList) {
-            for (IdedRepoObject repoResource : resourceList) {
-                if (repoResource.getId() == id) {
-                    orderedList.add(repoResource);
+        	for (IdedRepoObject repoResource : resourceList) {
+        		if (repoResource.getId() == id) {
+//            		if(!processed.contains(id)){
+            			orderedList.add(repoResource);
+//            			processed.add(id);
+//            		} 
                 }
             }
         }
@@ -988,6 +994,7 @@ public class HibernateRepositoryServiceImpl extends HibernateDaoImpl implements 
 		return loadRepoResourceList(context, filterCriteria, true);
 	}
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public List loadRepoResourceList(final ExecutionContext context, final FilterCriteria filterCriteria,
 			final boolean sort) {
 		DetachedCriteria criteria = translateFilterToCriteria(filterCriteria);
@@ -995,16 +1002,46 @@ public class HibernateRepositoryServiceImpl extends HibernateDaoImpl implements 
 		// If we don't have a mapping, ignore it
 		if (criteria == null) {
 			return new ArrayList();
-		} else {
-            criteria.getExecutableCriteria(getSession()).setCacheable(true);
-        }
+		} 
+
+		// improving database performance by querying first just a list of IDs and then loading
+		// each object individually. If we just load list of complete objects it
+		// takes a LONG time at least in the postgres.
+		
+		criteria.setProjection(Projections.distinct(Projections.id()));
+        criteria.getExecutableCriteria(getSession()).setCacheable(true);
 		
 		List repoResources = getHibernateTemplate().findByCriteria(criteria);
+		
+		// got list of ids, now lets load each object individually
+		// the code in between comments below is a modified/improved code
+		// of getResourcesByIdList which we couldn't use because
+		// it loads ony RepoResource objects and this method is used to 
+		// load any subclass of RepoResource.
+		/*******************************/
+		// determine exact subclass
+		Class<? extends RepoResourceBase> filterClass = filterCriteria == null ? null : filterCriteria.getFilterClass();
+		Class<? extends RepoResourceBase> persistentClass;
+		if (filterClass == null) {
+			persistentClass = RepoResource.class;
+		} else {			
+			persistentClass = getPersistentClassMappings().getImplementationClass(filterClass);
+		}
+
+		// load resources one by one.
+		List results = new ArrayList(repoResources.size());
+		for(Object id:repoResources){
+			Object ret = getHibernateTemplate().load(persistentClass, (Serializable) id);
+			results.add(ret);
+		}
+		/*******************************/
+
+		
 		if (sort) {
-			sortRepoResourcesByURI(context, repoResources);
+			sortRepoResourcesByURI(context, results);
 		}
 		
-		return repoResources;
+		return results;
 	}
 
 	protected DetachedCriteria translateFilterToCriteria(FilterCriteria filterCriteria) {
@@ -2430,7 +2467,7 @@ public class HibernateRepositoryServiceImpl extends HibernateDaoImpl implements 
         if(resource == null) {
             throw new JSException("jsexception.resource.does.not.exist");
         }
-
+        
         if(resource instanceof ReportDataSource) {
             //ReportDataSource can have dependent ReportUnit items
             final ReportDataSource dataSource = (ReportDataSource) resource;
@@ -2444,42 +2481,13 @@ public class HibernateRepositoryServiceImpl extends HibernateDaoImpl implements 
             if(max > 0) {
                 query.setMaxResults(max);
             }
+//            System.out.println(">>> GDR >>> : query " + query.getQueryString());
             List<Long> depRes = query.list();
+      
             List<ResourceLookup> depResLookup = getResourcesByIdList(depRes);
+//            System.out.println(">>> GDR >>> : result size: (" + depRes.size() + ":" + depResLookup.size());
+            
             return depResLookup;
-//TODO delete if code above proves to work fine
-//            SearchFilter filter = new SearchFilter() {
-//                public void applyRestrictions(String type, ExecutionContext context, SearchCriteria criteria) {
-//                    DetachedCriteria dsCriteria = criteria.createCriteria("dataSource", "ds");
-//                    dsCriteria.add(Restrictions.eq("ds.name", dataSource.getName()));
-//
-//                    DetachedCriteria dsParent = dsCriteria.createCriteria("parent", "dsParent");
-//                    dsParent.add(Restrictions.eq("dsParent.URI", dataSource.getParentFolder()));
-//
-//                    // will use it later on for sorting
-//                    DetachedCriteria folderCriteria = criteria.createCriteria("parent", "f");
-//                }
-//            };
-//
-//            SearchSorter sorter = new SearchSorter() {
-//                public void applyOrder(String type, ExecutionContext context, SearchCriteria criteria) {
-//                    criteria.addOrder(Order.asc("f.URI"));
-//                    criteria.addOrder(Order.asc("name"));
-//                    // by default we retrieving only id's and to be able sort  we had to add property to select clause
-//                    criteria.addProjection(Projections.property("f.URI"));
-//                    criteria.addProjection(Projections.property("name"));
-//                }
-//            };
-//            SearchCriteriaFactory criteriaFactory = searchCriteriaFactory.newFactory(ReportUnit.class.getName());
-//            List<ResourceLookup> resources = getResources(
-//                    context,
-//                    criteriaFactory,
-//                    Arrays.asList(filter),
-//                    sorter,
-//                    new BasicTransformerFactory(),
-//                    current, max);
-//
-//            return resources;
 
         //TODO: replace 'exist' with right solution, it's hardcoded fix for CE version
         } else if(resource instanceof ReportUnit && exist("com.jaspersoft.ji.adhoc.DashboardResource")) {

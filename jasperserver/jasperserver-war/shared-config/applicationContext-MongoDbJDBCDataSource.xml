@@ -9,7 +9,9 @@
 		<property name="name" value="mongoDbJDBCDataSource"/>
 		<property name="dataAdapterClassName" value="net.sf.jasperreports.data.jdbc.JdbcDataAdapterImpl"/>
         <property name="validator">
-            <bean class="com.jaspersoft.jasperserver.api.engine.jasperreports.util.MongoDbJDBCDataSourceValidator"/>
+            <bean class="com.jaspersoft.jasperserver.api.engine.jasperreports.util.MongoDbJDBCDataSourceValidator">
+                <property name="profileAttributesResolver" ref="profileAttributesResolver"/>
+            </bean>
         </property>
         <property name="customFactory" ref="mongoDbJDBCReportDataSourceServiceFactory"/>
 	</bean>

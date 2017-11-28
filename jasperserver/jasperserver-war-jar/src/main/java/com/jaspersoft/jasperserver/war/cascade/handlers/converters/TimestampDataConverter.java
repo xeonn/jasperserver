@@ -29,10 +29,11 @@ import javax.annotation.Resource;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 
 /**
  * @author Yaroslav.Kovalchyk
- * @version $Id: TimestampDataConverter.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: TimestampDataConverter.java 56967 2015-08-20 23:20:53Z esytnik $
  */
 @Service
 public class TimestampDataConverter implements DataConverter<Timestamp>, DateParser<Timestamp>{
@@ -41,7 +42,15 @@ public class TimestampDataConverter implements DataConverter<Timestamp>, DatePar
 
     @Override
     public Timestamp stringToValue(String rawData) throws ParseException {
-        return StringUtils.isNotEmpty(rawData) ? new Timestamp(getDateTimeFormatter().parse(rawData).getTime()) : null;
+        try{
+            return StringUtils.isNotEmpty(rawData) ? new Timestamp(getDateTimeFormatter().parse(rawData).getTime()) : null;
+        } catch (ParseException e){
+            try {
+               return Timestamp.valueOf(rawData);
+            } catch (IllegalArgumentException ex){
+                throw e;
+            }
+        }
     }
 
     @Override

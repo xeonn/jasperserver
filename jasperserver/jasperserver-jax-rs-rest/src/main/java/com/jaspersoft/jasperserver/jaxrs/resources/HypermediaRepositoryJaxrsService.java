@@ -83,6 +83,10 @@ public class HypermediaRepositoryJaxrsService {
         if (ResourceMediaType.FOLDER_JSON.equals(accept) || ResourceMediaType.FOLDER_XML.equals(accept)) {
             res = getResourceDetails("", accept, containerType, expanded);
         } else {
+
+            final String organizationFolderRegex = "^(?:" + configurationBean.getOrganizationsFolderUri() + "/([^/]+))*";
+            final List<String> excludeFoldersWithPublic = new ArrayList<String>(excludeFolders);
+            
             AccessType accessType = AccessType.ALL;
             if (accessTypeString != null && !"".equals(accessTypeString)) {
                 if (AccessType.MODIFIED.name().equalsIgnoreCase(accessTypeString)) {
@@ -101,20 +105,29 @@ public class HypermediaRepositoryJaxrsService {
                             sortBy, accessType, user,
                             forceFullPage);
 
-            List<HypermediaResourceLookup> hypermediaLookups = new ArrayList<HypermediaResourceLookup>(100);
+            List<HypermediaResourceLookup> hypermediaLookups = new ArrayList<HypermediaResourceLookup>(searchResult.getItems().size());
+            excludeFoldersWithPublic.add(configurationBean.getPublicFolderUri());
             for (ClientResourceLookup resourceLookup : searchResult.getItems()) {
 
                 HypermediaResourceLookup hypermediaResourceLookup = new HypermediaResourceLookup(resourceLookup);
 
                 if (containerType.contains(resourceLookup.getResourceType())) {
+                	
+                	boolean excludeWithPublic = false;
 
-                    String organizationFolderRegex = "^(?:" + configurationBean.getOrganizationsFolderUri() + "/([^/]+))*";
                     if (resourceLookup.getUri().matches(organizationFolderRegex)) {
-                        excludeFolders.add(configurationBean.getPublicFolderUri());
+                    	excludeWithPublic = true;
                     }
 
-                    int resourcesCount = batchRepositoryService.getResourcesCount(q, resourceLookup.getUri(), type,
-                            excludeFolders, true,showHiddenItems, accessType, null);
+                    int resourcesCount = batchRepositoryService.getResourcesCount(
+                    		q, resourceLookup.getUri(), 
+                    		type,
+                            excludeWithPublic? excludeFoldersWithPublic:excludeFolders, 
+                            true,
+                            showHiddenItems, 
+                            accessType, 
+                            null
+                    );
 
                     if (resourcesCount > 0) {
                         //add links

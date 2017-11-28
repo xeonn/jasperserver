@@ -22,7 +22,7 @@
 
 /**
  * @author: Yuriy Plakosh
- * @version: $Id: components.dialogs.js 8685 2015-04-10 14:06:42Z bkolesni $
+ * @version: $Id: components.dialogs.js 9192 2015-08-12 19:52:08Z yplakosh $
  */
 
 /**
@@ -149,7 +149,7 @@ dialogs.errorPopup = {
 
                 var st = document.getElementById('completeStackTrace');
                 if(st) {
-                	isIPad() && new TouchController(st,st.parentNode,{noInit3d:true});
+                    isIPad() && new TouchController(st,st.parentNode,{noInit3d:true});
                 }
             }
         }
@@ -201,94 +201,127 @@ dialogs.errorPopup = {
  * @param {Object} elem
  */
 dialogs.popup = {
-	show: function(elem, showDimmer, options) {
+    show: function(elem, showDimmer, options) {
+        require(['stdnav', 'jquery'], function(stdnav, jQuery){
+            options = options || {};
 
-        options = options || {};
+            elem = $(elem);
 
-        elem = $(elem);
-
-        if (!elem) {
-            return;
-        }
-        /*
-         * Hack for all 4 sides drop shadow. Applying drop shadow effect directly on dialog.overlay element causes
-         * cursor to be shifted out of inner input elements.
-         */
-        if(isIE7() || isIE8()) {
-            jo = jQuery(elem);
-            if(jo.children('div.msshadow').length == 0) {
-                jo.prepend('<div class="msshadow" style="position:absolute;top:-10px;right:10px;bottom:10px;left:-10px;border:0;background:#fff;">&nbsp;</div>');
+            if (!elem) {
+                return;
             }
-        }
+            /*
+             * Hack for all 4 sides drop shadow. Applying drop shadow effect directly on dialog.overlay element causes
+             * cursor to be shifted out of inner input elements.
+             */
+            if(isIE7() || isIE8()) {
+                jo = jQuery(elem);
+                if(jo.children('div.msshadow').length == 0) {
+                    jo.prepend('<div class="msshadow" style="position:absolute;top:-10px;right:10px;bottom:10px;left:-10px;border:0;background:#fff;">&nbsp;</div>');
+                }
+            }
 
-        //dimmer
-        if (showDimmer) {
-            pageDimmer.show();
-            elem.match(layoutModule.DIALOG_LOADING_PATTERN) && pageDimmer.setZindex(elem.getStyle('zIndex') - 1);
-        }
+            //dimmer
+            if (showDimmer) {
+                pageDimmer.show();
+                elem.match(layoutModule.DIALOG_LOADING_PATTERN) && pageDimmer.setZindex(elem.getStyle('zIndex') - 1);
+            }
 
-        //ensure body is parent
-        reParent(elem, document.body);
+            //ensure body is parent
+            reParent(elem, document.body);
 
-        elem.setOpacity(0);
+            elem.setOpacity(0);
 
-        elem.removeClassName(layoutModule.HIDDEN_CLASS);
+            elem.removeClassName(layoutModule.HIDDEN_CLASS);
 
-        isIE7() && !elem.match(".sizeable") && setWidthStyleByReflection(elem, '.content');
+            isIE7() && !elem.match(".sizeable") && setWidthStyleByReflection(elem, '.content');
 
-        layoutModule.createMover.call(layoutModule, elem);
-        layoutModule.createSizer.call(layoutModule, elem);
+            layoutModule.createMover.call(layoutModule, elem);
+            layoutModule.createSizer.call(layoutModule, elem);
 
-        if (options.cascade) {
-            //cascade
-            cascadeElement(elem, {position: options.position, number: options.number, horzOffset: 40, vertOffset: 40});
-        } else {
-            //center
-            centerElement(elem, {horz: true, vert: true});
-        }
-        //raise if necessary
-        dialogs.popup._setMaxZIndex(elem);
-
-        // Drag'&'Drop depends depends from zIndex on dialog
-        layoutModule.createMover.call(layoutModule, elem); // To move dialog on foreground we need initialize DnD after we have zIndex for dialog
-
-        isIPad() ? (elem.setOpacity(1.0) && elem.show()) : appear(elem, 0.4);
-
-        //focus
-        elem.tabIndex = -1;
-
-        //Set focus on dialog if options.focus is not present in options or it's set to true
-        if (!options || typeof options.focus === "undefined" || options.focus) {
-            if(isIE8()) {
-                setTimeout(function() {
-                    try {
-                        // you may wonder, but IE8 can say: Can't move focus to the control because it is invisible, not enabled, or of a type that does not accept the focus
-                        // so, let's cover this tricky case
-                        elem.focus()
-                    } catch(e){}
-                }, 450);
+            if (options.cascade) {
+                //cascade
+                cascadeElement(elem, {position: options.position, number: options.number, horzOffset: 40, vertOffset: 40});
             } else {
-                elem.focus();
+                //center
+                centerElement(elem, {horz: true, vert: true});
             }
-        }
+            // raise if necessary
+            dialogs.popup._setMaxZIndex(elem);
 
-        !showDimmer && elem.observe('click', dialogs.popup.zIndexHandler);
-	},
+            // Drag'&'Drop depends depends from zIndex on dialog
+            layoutModule.createMover.call(layoutModule, elem); // To move dialog on foreground we need initialize DnD after we have zIndex for dialog
 
-	hide: function(elem) {
-        if (!elem) {
-            return;
-        }
+            isIPad() ? (elem.setOpacity(1.0) && elem.show()) : appear(elem, 0.4);
 
-		elem = $(elem);
-        //hide dialog and dimmer
-        if (!elem.hasClassName(layoutModule.HIDDEN_CLASS)) {
-            elem.addClassName(layoutModule.HIDDEN_CLASS);
-            pageDimmer.hide();
-            elem.match(layoutModule.DIALOG_LOADING_PATTERN) && pageDimmer.setZindex(layoutModule.DIMMER_Z_INDEX);
-        }
-        elem.stopObserving('click', dialogs.popup.zIndexHandler);
-	},
+            // Keep track of the element that had focus prior to the dialog being
+            // shown, so that it can be restored.
+            jQuery(document.activeElement).addClass('preDialogFocus');
+
+            // Set focus on dialog if options.focus is not present in options or it's set to true.
+            // If there is a primary button, ensure it receives focus.  Otherwise, ensure the
+            // dialog itself receives focus.
+            var focusTarget=elem;
+            if (elem && jQuery('.primary', elem).length>0){
+                focusTarget=jQuery('.primary', elem)[0];
+            }
+            if (!options || typeof options.focus === "undefined" || options.focus) {
+                // In any case, ensure the dialog itself can be focused.  This helps
+                // screen readers to read the text in the dialog itself.
+                elem.tabIndex=0;
+                focusTarget.tabIndex=0;
+                if(isIE8()) {
+                    setTimeout(function() {
+                        try {
+                            // you may wonder, but IE8 can say: Can't move focus to the control because it is invisible, not enabled, or of a type that does not accept the focus
+                            // so, let's cover this tricky case
+                            focusTarget.focus()
+                        } catch(e){}
+                    }, 450);
+                } else {
+                    focusTarget.focus();
+                }
+            }
+
+            !showDimmer && elem.observe('click', dialogs.popup.zIndexHandler);
+
+            // Ensure the TAB key cannot move focus outside of the dialog.  While
+            // the "shader" dialog will intercept mouse clicks and touch events, it
+            // does not prevent keyboard events.
+            // NOTE: This must be done AFTER moving focus into the dialog.
+            stdnav.beginModalFocus(elem);
+        })
+    },
+
+    hide: function(elem) {
+        require(['stdnav', 'jquery'], function(stdnav, jQuery){
+            // Ensure the TAB key can move focus to all the places it was able to
+            // before the dialog was shown.
+            // NOTE: This must be done BEFORE moving focus out of the dialog.
+            stdnav.endModalFocus(elem);
+
+            // Restore keyboard focus to the element that had it prior to the
+            // dialog.
+            var jqPreDialogFocus=jQuery('.preDialogFocus');
+            if (jqPreDialogFocus.length>0){
+                jqPreDialogFocus[0].focus();
+                jqPreDialogFocus.removeClass('preDialogFocus');
+            }
+
+            if (!elem) {
+                return;
+            }
+
+            $elem = $(elem);
+            //hide dialog and dimmer
+            if (!$elem.hasClassName(layoutModule.HIDDEN_CLASS)) {
+                $elem.addClassName(layoutModule.HIDDEN_CLASS);
+                pageDimmer.hide();
+                $elem.match(layoutModule.DIALOG_LOADING_PATTERN) && pageDimmer.setZindex(layoutModule.DIMMER_Z_INDEX);
+            }
+            $elem.stopObserving('click', dialogs.popup.zIndexHandler);
+        });
+    },
 
     /**
      * Handler for dialog z-index change on click.

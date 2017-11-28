@@ -38,7 +38,7 @@ import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.Re
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: RepoFolder.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: RepoFolder.java 56839 2015-08-17 13:58:24Z esytnik $
  * 
  * @disabled_hibernate.class table="resource_folder"
  */
@@ -134,24 +134,9 @@ public class RepoFolder extends RepoResourceBase {
 	}
 
 	protected void filterChildren(Set newChildren) {
-		if (newChildren == null) {
-			children.clear();
-		}
-		else {
-			for (Iterator it = children.iterator(); it.hasNext();) {
-				RepoResource res = (RepoResource) it.next();
-				if (!newChildren.contains(res)) {
-					it.remove();
-				}
-			}
-			
-			//(re)adding the new children
-			for (Iterator it = newChildren.iterator(); it.hasNext();) {
-				RepoResource res = (RepoResource) it.next();
-				if (!children.contains(res)) {
-					children.add(res);
-				}
-			}
+		children.clear();
+		if(newChildren!=null){
+			children.addAll(newChildren);
 		}
 	}
 

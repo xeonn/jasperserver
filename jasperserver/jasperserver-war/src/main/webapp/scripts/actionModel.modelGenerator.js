@@ -22,7 +22,7 @@
 
 /**
  * @author Angus Croll, Papanii Okai
- * @version: $Id: actionModel.modelGenerator.js 8179 2015-01-27 12:34:21Z psavushchik $
+ * @version: $Id: actionModel.modelGenerator.js 9256 2015-08-27 20:35:41Z yplakosh $
  */
 
 /* global localContext, isProVersion, designerBase, isIE, isIE7, setWidthStyleByReflection, isNotNullORUndefined,
@@ -74,7 +74,15 @@ actionModel.LIST_ITEM_DOM_ID = "menuList_listItem";
 actionModel.DISPLAY_STYLE = "inline";
 
 //patterns
-actionModel.DROP_DOWN_MENU = ".dropDown";
+actionModel.DROP_DOWN_MENU_CLASS = "dropDown";
+actionModel.MOUSE_OUT_PATTERNS = [
+    "#"+layoutModule.MENU_ID,
+    "."+layoutModule.MENU_ROOT_CLASS,
+    ".toolbar .capsule",
+    ".header > .button.mutton",
+    "#"+layoutModule.MENU_ID+" *",
+    layoutModule.MENU_ROOT_CLASS+" *"
+];
 
 ////////////////////////////////////////////////////////////////////
 // Menu building
@@ -103,7 +111,7 @@ actionModel.showDynamicMenu = function(menuContext, event, className, coordinate
             return;
         }
     }
-    
+
     actionModel.resetMenu();
     actionModel.updateCSSClass(className);
     actionModel.initActionModelData(actionModelScriptTag);
@@ -113,18 +121,19 @@ actionModel.showDynamicMenu = function(menuContext, event, className, coordinate
     if(isIE()) {
         jQuery('#'+actionModel.menuDom.id).prepend('<div class="msshadow"></div>');
     }
-	actionModel.makeMenuVisible(actionModel.menuDom);
+    actionModel.makeMenuVisible(actionModel.menuDom);
     isIE7() && setWidthStyleByReflection(actionModel.menuDom, '.content');
     actionModel.adjustMenuPosition(actionModel.menuDom);
-    actionModel.focusMenu();
-    jQuery('body').on('mouseout', actionModel.closeHandler);
+    //actionModel.focusMenu();
+
+    jQuery(actionModel.MOUSE_OUT_PATTERNS.join(",")).on('mouseout', actionModel.closeHandler);
 };
 
 actionModel.closeHandler = function (event) {
     var target = jQuery(event.relatedTarget);
     if (((target.hasClass("mutton") || target.parents(".mutton").length) && event.relatedTarget) ||
-        (target.attr("id") === "menu" || target.parents("#menu").length)) {
-        event.stopPropagation();
+        (target.attr("id") === "menu" || target.parents("#menu").length)) {  //|| actionModel.lastInput=="key"
+        //event.stopPropagation();
     }
     else {
         jQuery('body').trigger('actionmodel-mouseout');
@@ -151,6 +160,8 @@ actionModel.resetMenu = function(){
     dom.writeAttribute("style", "");
     actionModel.menuDom = dom;
     actionModel.menuListDom = menuList;
+    // One of: ["none","keyboard","mouse","touch","automation"].
+    actionModel.lastInputSrc="none";
 };
 
 /**
@@ -177,13 +188,25 @@ actionModel.updateCSSClass = function(className){
  * @param event
  */
 actionModel.setMenuPosition = function(menuObj, event, coordinates){
-    var ev = event ? event : window.event;
-    var location = Event.pointer(ev);
+    var ev = event ? event : window.event,
+        location;
 
-    if (isSupportsTouch() && ev.changedTouches) {
+    if (ev){
+        if (isSupportsTouch() && ev.changedTouches) {
+            // Touch-initiated.
+            location = {
+                x: ev.changedTouches[0].pageX + 20,
+                y: ev.changedTouches[0].pageY
+            }
+        } else {
+            // Mouse-initiated.
+            location = Event.pointer(ev);
+        }
+    } else {
+        // Keyboard-initiated.
         location = {
-            x: ev.changedTouches[0].pageX + 20,
-            y: ev.changedTouches[0].pageY
+            x: 0,
+            y: 0
         }
     }
 
@@ -212,11 +235,10 @@ actionModel.setMenuPosition = function(menuObj, event, coordinates){
         'left': leftOffset + 'px',
         'top' : topOffset +'px'
     });
-
 };
 
 actionModel.adjustMenuPosition = function(menu, left, top, width, height){
-    if(!$(menu).hasClassName("dropDown") || $(menu).hasClassName("fitable")){
+    if(!$(menu).hasClassName(this.DROP_DOWN_MENU_CLASS) || $(menu).hasClassName("fitable")){
         fitObjectIntoScreen(menu, null, top, null, height);
     }
 };
@@ -233,7 +255,9 @@ actionModel.assembleMenuFromActionModel = function(menuContext, event, contentPa
     //In this place we can update action model for specified context on the fly.
     //This is necessary to have ability to construct fully dynamic menus which items can be calculated only
     //right before showing menu
-    updateContextActionModel && (contextActionModel = updateContextActionModel(menuContext, contextActionModel));
+    if (updateContextActionModel){
+        contextActionModel = updateContextActionModel(menuContext, contextActionModel);
+    }
     contextActionModel.each(function(thisAction){
         actionModel.appendToMenu(thisAction, event, contentParent)
     });
@@ -367,7 +391,7 @@ actionModel.addOption = function(thisAction, mouseUpFunction, contentParent){
     if (!actionModel.passesClientTest(thisAction)) {
         return; //does not satisfy client-side condition to appear in this menu
     }
-    
+
     var cssOverride = null;
     var newOptionRow = $(actionModel.LIST_ITEM_DOM_ID).cloneNode(true);
     thisAction.button = (thisAction.button && String(thisAction.button).toLowerCase()=="true") ? true : false;
@@ -466,30 +490,30 @@ actionModel.getSubMenuTop = function(selectorObj){
  * @param parent
  */
 actionModel.showChildSubmenu = function(parent){
-	var pid = parent.parentNode.parentNode.parentNode.id;
-	
-	/*
-	 * Hides submenus previously open
-	 */
+    var pid = parent.parentNode.parentNode.parentNode.id;
+
+    /*
+     * Hides submenus previously open
+     */
     var i;
     var j;
     var f = false;
     for(i=0;i<actionModel.openedSubMenus.length;i++){
-    	if(actionModel.openedSubMenus[i] == pid) {
-    		j = i;
-    		f = true;
-    		jQuery('#'+pid+'>div.content>ul').children('li.node').each(function(){
-    			actionModel.hideChildSubmenu(jQuery(this).get(0));
-    		})  		
-    	}
-    	if(f) {
-    		jQuery('#'+actionModel.openedSubMenus[i]+'>div.content>ul').children('li.node').each(function(){
-    			actionModel.hideChildSubmenu(jQuery(this).get(0));
-    		})    		
-    	}
+        if(actionModel.openedSubMenus[i] == pid) {
+            j = i;
+            f = true;
+            jQuery('#'+pid+'>div.content>ul').children('li.node').each(function(){
+                actionModel.hideChildSubmenu(jQuery(this).get(0));
+            })
+        }
+        if(f) {
+            jQuery('#'+actionModel.openedSubMenus[i]+'>div.content>ul').children('li.node').each(function(){
+                actionModel.hideChildSubmenu(jQuery(this).get(0));
+            })
+        }
     }
     actionModel.openedSubMenus.splice(j,actionModel.openedSubMenus.length-j);
-    
+
     var submenuTop = null;
     var submenuHeight = null;
     var submenuWidth = null;
@@ -697,18 +721,34 @@ actionModel.getFirstMenuButton = function() {
     return actionModel.menuDom.down(layoutModule.BUTTON_PATTERN, 0);
 };
 
+/* Move focus into the menu, starting with the top item in the list.  This
+ * function runs when a user presses the down arrow key from a top-level main
+ * menu entry.
+ */
 actionModel.focusMenu = function() {
-    var menuDom = actionModel.menuDom;
-    //will restore old focus when menu is closed
-    actionModel.lastFocused = document.activeElement;
-    !menuDom.hasClassName(layoutModule.HIDDEN_CLASS) && menuDom.focus();
+    var jQMenuDom=jQuery('#'+actionModel.menuDom.id);
 
-    if (!menuDom.match(actionModel.DROP_DOWN_MENU) && !isSupportsTouch()) {
-        var childItems = menuDom.select("li");
-        if (childItems[0]) {
-            var firstButton = childItems[0].down(layoutModule.BUTTON_PATTERN);
-            firstButton && buttonManager.over(firstButton);
-        }
+    // If the menu already has focus, do nothing.
+    if (!jQuery.contains(jQMenuDom, document.activeElement)){
+
+        //will restore old focus when menu is closed
+        actionModel.lastFocused = document.activeElement;
+        //!menuDom.hasClassName(layoutModule.HIDDEN_CLASS) && menuDom.focus();
+
+       //if (!jQMenuDom.hasClass(actionModel.DROP_DOWN_MENU_CLASS) && !is SupportsTouch()) {
+       /*
+       if (!jQMenuDom.hasClass(actionModel.DROP_DOWN_MENU_CLASS)) {
+            var jQChildItems = jQMenuDom.children("li");
+            if (jQChildItems[0]) {
+                var firstButton = jQChildItems[0].find(layoutModule.BUTTON_PATTERN);
+                firstButton && buttonManager.over(firstButton);
+            }
+       }
+       */
+       var jQChildItems=jQMenuDom.find(layoutModule.BUTTON_PATTERN);
+       if (jQChildItems.length>0){
+           $(jQChildItems[0]).focus();
+       }
     }
 };
 
@@ -747,7 +787,7 @@ actionModel.setMenuEventHandlers = function(menu){
             if (object.hasClassName("node")) {
                 if (isSupportsTouch()) {
                     Event.observe(object, 'touchstart', function(event) {
-                        if (!event.firstCall) {                       	
+                        if (!event.firstCall) {
                             actionModel.showChildSubmenu(object);
                         }
                         event.firstCall = true;
@@ -777,10 +817,13 @@ actionModel.initializeOneTimeMenuHandlers = function() {
     /**
      * generic mouseenter for menu - to initialize for mouse use
      */
+    // FIXME-- turn back on, disabled for debugging
+    /*
     $('menu').observe('mouseenter', function(event) {
         var selected = this.select("." + layoutModule.HOVERED_CLASS)[0];
         selected && buttonManager.out(selected);
-    }.bind($('menu')))		
+    }.bind($('menu')))
+    */
 };
 
 /**
@@ -798,7 +841,7 @@ actionModel.hideMenu = function(){
         };
         !isSupportsTouch() && setTimeout(setNextFocus, 0); //timeout so that any current key action misses this focus
         actionModel.makeMenuInVisible($("menu"));
-        jQuery('body').off('mouseout', actionModel.closeHandler);
+        jQuery(actionModel.MOUSE_OUT_PATTERNS.join(",")).off('mouseout', actionModel.closeHandler);
     }
 };
 
@@ -928,8 +971,3 @@ function getRandomId(){
     var rand =  Math.round(Math.random(10) * 50);
     return "_" + rand;
 }
-
-
-
-
-

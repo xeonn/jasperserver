@@ -20,14 +20,11 @@
  */
 package com.jaspersoft.jasperserver.api.metadata.user.service.impl;
 
-import com.jaspersoft.jasperserver.api.common.util.diagnostic.FilterBy;
 import com.jaspersoft.jasperserver.api.common.util.spring.StaticApplicationContext;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.impl.client.MetadataUserDetails;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.log4j.MDC;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -40,8 +37,6 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
 /**
@@ -63,7 +58,7 @@ import java.io.IOException;
 @Deprecated
 public class MetadataAuthenticationProcessingFilter implements Filter, InitializingBean {
 
-	private static Log log = LogFactory.getLog(MetadataAuthenticationProcessingFilter.class);
+	private static final Log log = LogFactory.getLog(MetadataAuthenticationProcessingFilter.class);
 
 	protected ExternalUserService externalUserService;
 
@@ -106,28 +101,6 @@ public class MetadataAuthenticationProcessingFilter implements Filter, Initializ
 		//##########################################################################################################
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-        if (auth != null) {
-            String userName;
-            Object principal = auth.getPrincipal();
-            if (principal != null && principal instanceof MetadataUserDetails) {
-                String tenantId = ((MetadataUserDetails) principal).getTenantId();
-                if (StringUtils.isNotBlank(tenantId) && !"null".equals(tenantId)) {
-                    userName = String.format("%s|%s", auth.getName(), tenantId);
-                } else {
-                    userName = auth.getName();
-                }
-
-            } else {
-                userName = auth.getName();
-            }
-            MDC.put(FilterBy.USER_ID.name(), userName);
-        }
-        if (request != null) {
-            HttpSession session = ((HttpServletRequest) request).getSession(false);
-            String sessionId = session != null ? session.getId() : "";
-            MDC.put(FilterBy.SESSION_ID.name(), sessionId);
-        }
 
         if (log.isDebugEnabled()) {
         	if (auth == null) {

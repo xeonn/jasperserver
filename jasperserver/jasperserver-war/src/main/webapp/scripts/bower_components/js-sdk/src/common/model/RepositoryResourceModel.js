@@ -21,7 +21,7 @@
 
 /**
  * @author: Kostiantyn Tsaregradskyi, Sergii Kylypko
- * @version: $Id: RepositoryResourceModel.js 1178 2015-05-06 20:40:12Z yplakosh $
+ * @version: $Id: RepositoryResourceModel.js 1495 2015-08-20 18:58:48Z yplakosh $
  */
 
 define(function(require) {
@@ -153,10 +153,10 @@ define(function(require) {
          */
         url: function() {
             if (this.isNew()){
-                return this.urlRoot() + this.get("parentFolderUri");
+                return this.urlRoot() + encodeURI(this.get("parentFolderUri"));
             }
 
-            return this.urlRoot() + this.id;
+            return this.urlRoot() + encodeURI(this.id);
         },
 
         /*

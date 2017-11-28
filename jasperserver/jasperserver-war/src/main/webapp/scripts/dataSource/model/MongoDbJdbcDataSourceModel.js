@@ -27,7 +27,6 @@ define(function (require) {
 	    mongoJdbcFileSourceTypes = require("dataSource/enum/mongoJdbcFileSourceTypes"),
         repositoryResourceTypes = require("common/enum/repositoryResourceTypes"),
         adminWorkflows = require("restResource!hypermedia/workflows?parentName=admin"),
-	    jrsConfigs = require("jrs.configs"),
         _ = require("underscore"),
         i18n = require("bundle!jasperserver_messages");
 
@@ -65,7 +64,7 @@ define(function (require) {
 	            repositoryFileName: [
 		            {
 			            fn: function(value, attr, computedState) {
-				            if (computedState.fileSourceType === "repository" && (_.isNull(value) || _.isUndefined(value) || (_.isString(value) && value === ''))) {
+				            if (!computedState.autoSchemaDefinition && computedState.fileSourceType === "repository" && (_.isNull(value) || _.isUndefined(value) || (_.isString(value) && value === ''))) {
 					            return i18n["fillParameters.error.mandatoryField"];
 				            }
 				            return null;
@@ -73,7 +72,7 @@ define(function (require) {
 		            },
 		            {
 			            fn: function(value, attr, computedState) {
-				            if (computedState.fileSourceType === "repository" && !(_.isString(value) && value !== ''
+				            if (!computedState.autoSchemaDefinition && computedState.fileSourceType === "repository" && !(_.isString(value) && value !== ''
 					            && value.indexOf("/") === 0)) {
 					            return i18n["resource.file.invalid.path"];
 				            }
@@ -84,7 +83,7 @@ define(function (require) {
 	            serverFileName: [
 		            {
 			            fn: function(value, attr, computedState) {
-				            if (computedState.fileSourceType === "serverFileSystem" && (_.isNull(value) || _.isUndefined(value) || (_.isString(value) && value === ''))) {
+				            if (!computedState.autoSchemaDefinition && computedState.fileSourceType === "serverFileSystem" && (_.isNull(value) || _.isUndefined(value) || (_.isString(value) && value === ''))) {
 					            return i18n["fillParameters.error.mandatoryField"];
 				            }
 				            return null;
@@ -121,6 +120,10 @@ define(function (require) {
 			    }
 
 			    delete model.fileName;
+
+			    model.autoSchemaDefinition = false;
+		    } else {
+			    model.autoSchemaDefinition = true;
 		    }
 
 		    return model;
@@ -143,9 +146,15 @@ define(function (require) {
 
 			    data.fileName = data.serverFileName;
 		    }
-
 		    delete data.repositoryFileName;
 		    delete data.serverFileName;
+
+		    if (data.autoSchemaDefinition) {
+			    // null or empty string in "fileName" is indication what schema must be auto-generated
+			    delete data.fileName;
+			    delete data.fileSourceType;
+		    }
+		    delete data.autoSchemaDefinition;
 
 		    data = CustomDataSourceModel.prototype.customFieldsToJSON.call(this, data, customFields);
 

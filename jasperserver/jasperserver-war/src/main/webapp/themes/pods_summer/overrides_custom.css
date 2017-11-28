@@ -15,8 +15,9 @@ Place styles for simple UI customization in this file
     height: 30px;
 }
 
-#metaLinks li {
-	margin-top: 9px;
+#metaLinks li.subfocus:not(select),
+#metaLinks li.over {
+  background-color: #89bd0d;
 }
 
 .palette08, 

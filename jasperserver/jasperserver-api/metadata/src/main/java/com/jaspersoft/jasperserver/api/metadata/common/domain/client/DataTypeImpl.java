@@ -38,7 +38,7 @@ public class DataTypeImpl extends ResourceImpl implements DataType
 	/**
 	 * 
 	 */
-	private byte type = TYPE_TEXT;
+	private byte dataTypeType = TYPE_TEXT;
 	private Integer maxLength = null;
 	private Integer decimals = null;
 	private String regularExpr = null;
@@ -53,7 +53,7 @@ public class DataTypeImpl extends ResourceImpl implements DataType
 	 */
 	public byte getDataTypeType()
 	{
-		return type;
+		return dataTypeType;
 	}
 
 	/**
@@ -61,7 +61,7 @@ public class DataTypeImpl extends ResourceImpl implements DataType
 	 */
 	public void setDataTypeType(byte type)
 	{
-		this.type = type;
+		this.dataTypeType = type;
 	}
 
 	/**

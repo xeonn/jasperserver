@@ -44,6 +44,7 @@ import com.jaspersoft.jasperserver.api.metadata.user.domain.impl.hibernate.RepoU
 import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributeService;
 import com.jaspersoft.jasperserver.api.metadata.user.service.TenantService;
 import com.jaspersoft.jasperserver.api.metadata.view.domain.FilterCriteria;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 import org.apache.commons.logging.Log;
@@ -60,6 +61,7 @@ import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.dao.DataAccessException;
 import org.springframework.orm.hibernate3.HibernateCallback;
+import org.springframework.orm.hibernate3.HibernateTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -84,7 +86,7 @@ import java.util.regex.Pattern;
 
 /**
  * @author swood
- * @version $Id: UserAuthorityServiceImpl.java 55164 2015-05-06 20:54:37Z mchan $
+ * @version $Id: UserAuthorityServiceImpl.java 56839 2015-08-17 13:58:24Z esytnik $
  */
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 public class UserAuthorityServiceImpl extends HibernateDaoImpl implements UserDetailsService, ExternalUserService,
@@ -102,6 +104,24 @@ public class UserAuthorityServiceImpl extends HibernateDaoImpl implements UserDe
     private boolean isUsernameCaseSensitive;
     private Pattern passwordPattern = Pattern.compile("^.*$");
 
+    /**
+     * Helper findByCriteria methods to cache all results
+     *
+     */
+    private List findByCriteria(DetachedCriteria criteria){
+    	HibernateTemplate template = getHibernateTemplate();
+    	//template.setCacheQueries(true);
+    	return template.findByCriteria(criteria);
+    }
+    
+    private List findByCriteria(DetachedCriteria criteria, int firstResult, int maxResults){
+    	HibernateTemplate template = getHibernateTemplate();
+    	//template.setCacheQueries(true);
+    	return template.findByCriteria(criteria, firstResult, maxResults);
+    }
+
+    
+    
     public void setDatabaseCharactersEscapeResolver(DatabaseCharactersEscapeResolver databaseCharactersEscapeResolver) {
         this.databaseCharactersEscapeResolver = databaseCharactersEscapeResolver;
     }
@@ -161,7 +181,7 @@ public class UserAuthorityServiceImpl extends HibernateDaoImpl implements UserDe
         }
 
         // Search with sensitivity according to the configuration.
-        List userList = getHibernateTemplate().findByCriteria(createUserSearchCriteria(username, tenant,
+        List userList = findByCriteria(createUserSearchCriteria(username, tenant,
                 isUsernameCaseSensitive));
 
         // Before 5.0.1 we had case sensitive usernames. But there was a bug 24226 opened with at least 4 customer
@@ -176,7 +196,7 @@ public class UserAuthorityServiceImpl extends HibernateDaoImpl implements UserDe
                     "\". Retrying with case sensitive search.");
 
             // Case sensitive search.
-            userList = getHibernateTemplate().findByCriteria(createUserSearchCriteria(username, tenant, true));
+            userList = findByCriteria(createUserSearchCriteria(username, tenant, true));
         }
 
         return extractUser(username, tenantId, userList);
@@ -354,7 +374,7 @@ public class UserAuthorityServiceImpl extends HibernateDaoImpl implements UserDe
     @Transactional(propagation = Propagation.REQUIRED)
     public List<User> getUsersByCriteria(ExecutionContext context, DetachedCriteria detachedCriteria) {
         // make User DTOs
-        List results = getHibernateTemplate().findByCriteria(detachedCriteria);
+        List results = findByCriteria(detachedCriteria);
         List userDTOs = null;
 
         if (results != null) {
@@ -607,7 +627,7 @@ public class UserAuthorityServiceImpl extends HibernateDaoImpl implements UserDe
                     set("tenant", tenant).
                     set("roleName", roleName));
         }
-        List roleList = getHibernateTemplate().findByCriteria(criteria);
+        List roleList = findByCriteria(criteria);
         RepoRole role = null;
         if (roleList.isEmpty()) {
             if (log.isDebugEnabled()) {
@@ -727,24 +747,20 @@ public class UserAuthorityServiceImpl extends HibernateDaoImpl implements UserDe
         auditContext.doInAuditContext(new String[] {"createRole", "updateRole"},
                 new AuditContext.AuditContextCallbackWithEvent() {
                     public void execute(AuditEvent auditEvent) {
-                        if (usersIdsAfterUpdate != null && !usersIdsAfterUpdate.isEmpty()) {
+                        if (usersIdsAfterUpdate != null) {
                             for (Iterator i = usersIdsAfterUpdate.iterator(); i.hasNext(); ) {
-                                Long id = (Long)i.next();
-                                if (usersIdsBeforeUpdate != null && usersIdsBeforeUpdate.contains(id)) {
-                                    usersIdsBeforeUpdate.remove(id);
+                                Object id = i.next();
+                                if (usersIdsBeforeUpdate!=null && usersIdsBeforeUpdate.remove(id)){
                                     i.remove();
+                                } else {
+                                	auditContext.addPropertyToAuditEvent("addedUserId", id, auditEvent);
                                 }
                             }
                         }
 
-                        if (usersIdsBeforeUpdate != null && !usersIdsBeforeUpdate.isEmpty()) {
+                        if (usersIdsBeforeUpdate != null) {
                             for (Object removedId: usersIdsBeforeUpdate) {
                                 auditContext.addPropertyToAuditEvent("removedUserId", removedId, auditEvent);
-                            }
-                        }
-                        if (usersIdsAfterUpdate != null && !usersIdsAfterUpdate.isEmpty()) {
-                            for (Object addedId: usersIdsAfterUpdate) {
-                                auditContext.addPropertyToAuditEvent("addedUserId", addedId, auditEvent);
                             }
                         }
                     }
@@ -1319,7 +1335,7 @@ public class UserAuthorityServiceImpl extends HibernateDaoImpl implements UserDe
     public List getTenantVisibleRoles(ExecutionContext context, Set tenantIds, String name, int firstResult, int maxResults) {
         DetachedCriteria criteria = createTenantVisibleRolesCriteria(tenantIds, name);
 
-        List results = getHibernateTemplate().findByCriteria(criteria, firstResult, maxResults);
+        List results = findByCriteria(criteria, firstResult, maxResults);
 
         List roleDTOs = convertRoleListToDtoList(results);
 
@@ -1332,7 +1348,7 @@ public class UserAuthorityServiceImpl extends HibernateDaoImpl implements UserDe
 
         criteria.setProjection(Projections.rowCount());
 
-        List results = getHibernateTemplate().findByCriteria(criteria);
+        List results = findByCriteria(criteria);
 
         Integer rowCount = new Integer(0) ;
         if (results != null && !results.isEmpty()) {
@@ -1526,7 +1542,7 @@ public class UserAuthorityServiceImpl extends HibernateDaoImpl implements UserDe
 
         DetachedCriteria criteria = createAvailableRolesCriteria(roleName, userRoles, userName);
 
-        List results = getHibernateTemplate().findByCriteria(criteria, firstResult, maxResults);
+        List results = findByCriteria(criteria, firstResult, maxResults);
 
         List roleDTOs = convertRoleListToDtoList(results);
 
@@ -1539,7 +1555,7 @@ public class UserAuthorityServiceImpl extends HibernateDaoImpl implements UserDe
         DetachedCriteria criteria = createAvailableRolesCriteria(roleName, userRoles, userName, false);
         criteria.setProjection(Projections.rowCount());
 
-        List results = getHibernateTemplate().findByCriteria(criteria);
+        List results = findByCriteria(criteria);
 
         Integer rowCount = new Integer(0) ;
         if (results != null && !results.isEmpty()) {
@@ -1590,7 +1606,7 @@ public class UserAuthorityServiceImpl extends HibernateDaoImpl implements UserDe
 
         criteria.setProjection(Projections.id());
 
-        return getHibernateTemplate().findByCriteria(criteria);
+        return findByCriteria(criteria);
     }
 
     private List<Role> convertRoleListToDtoList(List roleList) {
@@ -1613,7 +1629,7 @@ public class UserAuthorityServiceImpl extends HibernateDaoImpl implements UserDe
                                         int maxResults) {
         DetachedCriteria criteria = createAvailableRolesCriteria(context, userName, text, true);
 
-        List results = getHibernateTemplate().findByCriteria(criteria, firstResult, maxResults);
+        List results = findByCriteria(criteria, firstResult, maxResults);
 
         return convertRoleListToDtoList(results);
     }
@@ -1623,7 +1639,7 @@ public class UserAuthorityServiceImpl extends HibernateDaoImpl implements UserDe
         DetachedCriteria criteria = createAvailableRolesCriteria(context, userName, text, false);
         criteria.setProjection(Projections.rowCount());
 
-        List results = getHibernateTemplate().findByCriteria(criteria);
+        List results = findByCriteria(criteria);
 
         int rowCount = 0 ;
         if (results != null && !results.isEmpty()) {
@@ -1665,7 +1681,7 @@ public class UserAuthorityServiceImpl extends HibernateDaoImpl implements UserDe
         DetachedCriteria criteria = createAssignedRolesCriteria(null, user, null, true);
         criteria.setProjection(Projections.id());
 
-        return (List<Long>)getHibernateTemplate().findByCriteria(criteria);
+        return (List<Long>)findByCriteria(criteria);
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
@@ -1675,7 +1691,7 @@ public class UserAuthorityServiceImpl extends HibernateDaoImpl implements UserDe
 
         DetachedCriteria criteria = createAssignedRolesCriteria(context, user, text, true);
 
-        List results = getHibernateTemplate().findByCriteria(criteria, firstResult, maxResults);
+        List results = findByCriteria(criteria, firstResult, maxResults);
 
         return convertRoleListToDtoList(results);
     }
@@ -1687,7 +1703,7 @@ public class UserAuthorityServiceImpl extends HibernateDaoImpl implements UserDe
         DetachedCriteria criteria = createAssignedRolesCriteria(context, user, text, false);
         criteria.setProjection(Projections.rowCount());
 
-        List results = getHibernateTemplate().findByCriteria(criteria);
+        List results = findByCriteria(criteria);
 
         int rowCount = 0 ;
         if (results != null && !results.isEmpty()) {
@@ -1769,7 +1785,7 @@ public class UserAuthorityServiceImpl extends HibernateDaoImpl implements UserDe
 
         DetachedCriteria criteria = createUsersWithoutRoleCriteria(roleName, userName);
 
-        List userList = getHibernateTemplate().findByCriteria(criteria, firstResult, maxResults);
+        List userList = findByCriteria(criteria, firstResult, maxResults);
 
         return convertUserListToDtoList(userList);
     }
@@ -1780,7 +1796,7 @@ public class UserAuthorityServiceImpl extends HibernateDaoImpl implements UserDe
         DetachedCriteria criteria = createUsersWithoutRoleCriteria(roleName, userName, false);
         criteria.setProjection(Projections.rowCount());
 
-        List results = getHibernateTemplate().findByCriteria(criteria);
+        List results = findByCriteria(criteria);
 
         return getRowCountFromResult(results);
     }
@@ -1796,7 +1812,7 @@ public class UserAuthorityServiceImpl extends HibernateDaoImpl implements UserDe
         DetachedCriteria usersWithRoleCriteria = createUsersWithRoleCriteria(roleName, "");
         usersWithRoleCriteria.setProjection(Projections.id());
 
-        List usersWithRole = getHibernateTemplate().findByCriteria(usersWithRoleCriteria);
+        List usersWithRole = findByCriteria(usersWithRoleCriteria);
 
         String userNameField = "username";
 
@@ -1840,7 +1856,7 @@ public class UserAuthorityServiceImpl extends HibernateDaoImpl implements UserDe
                 DetachedCriteria.forClass(getPersistentTenantClass());
         idCriteria.add(Restrictions.in("tenantId", tenantIds));
         idCriteria.setProjection(Projections.id());
-        return getHibernateTemplate().findByCriteria(idCriteria);
+        return findByCriteria(idCriteria);
     }
 
     protected void addVisibleTenantCriteria(DetachedCriteria criteria, Set tenantIds) {
@@ -1863,14 +1879,14 @@ public class UserAuthorityServiceImpl extends HibernateDaoImpl implements UserDe
             }
         }
     }
-
+    
+    
     @Transactional(propagation = Propagation.REQUIRED)
     public List getUsersWithRole(ExecutionContext context, String roleName, String userName,
                                  int firstResult, int maxResults) {
 
         DetachedCriteria criteria = createUsersWithRoleCriteria(roleName, userName);
-
-        List userList = getHibernateTemplate().findByCriteria(criteria, firstResult, maxResults);
+        List userList = findByCriteria(criteria, firstResult, maxResults);
 
         return convertUserListToDtoList(userList);
     }
@@ -1880,8 +1896,7 @@ public class UserAuthorityServiceImpl extends HibernateDaoImpl implements UserDe
 
         DetachedCriteria criteria = createUsersWithRoleCriteria(roleName, userName, false);
         criteria.setProjection(Projections.rowCount());
-
-        List results = getHibernateTemplate().findByCriteria(criteria);
+        List results = findByCriteria(criteria);
 
         return getRowCountFromResult(results);
     }
@@ -1991,7 +2006,7 @@ public class UserAuthorityServiceImpl extends HibernateDaoImpl implements UserDe
             criteria.add(Restrictions.in("username", userNames));
         }
 
-        return getHibernateTemplate().findByCriteria(criteria);
+        return findByCriteria(criteria);
     }
 
     @Transactional(propagation = Propagation.REQUIRED)

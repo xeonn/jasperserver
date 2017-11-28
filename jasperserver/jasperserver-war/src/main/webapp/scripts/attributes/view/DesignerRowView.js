@@ -21,13 +21,14 @@
 
 /**
  * @author: Olesya Bobruyko
- * @version: $Id: DesignerRowView.js 8929 2015-05-22 14:15:10Z obobruyk $
+ * @version: $Id: DesignerRowView.js 9218 2015-08-20 19:56:16Z yplakosh $
  */
 
 define(function(require) {
     var _ = require("underscore"),
         $ = require("jquery"),
         RowView = require("attributes/view/RowView"),
+        DeleteConfirm = require("serverSettingsCommon/behaviors/DeleteConfirmBehavior"),
         confirmDialogTypesEnum = require("serverSettingsCommon/enum/confirmDialogTypesEnum"),
         permissionMasksEnum = require("attributes/enum/permissionMasksEnum"),
         rowTemplatesFactory = require("attributes/factory/rowTemplatesFactory");
@@ -47,7 +48,6 @@ define(function(require) {
         events: _.extend({}, RowView.prototype.events, {
             "click .edit": "toggleActive",
             "click .cancel": "cancel",
-            "click .delete": "_onDeleteClick",
             "click .ok": "runValidation",
             "click @ui.passwordInput": "toggleValue",
             "blur @ui.passwordInput": "toggleValue"
@@ -56,6 +56,12 @@ define(function(require) {
         modelEvents: {
             "change": "_onModelChange"
         },
+
+        behaviors: _.extend(RowView.prototype.behaviors, {
+            DeleteConfirm: {
+                behaviorClass: DeleteConfirm
+            }
+        }),
 
         computeds: _.extend(RowView.prototype.computeds, {
             readOnly: {
@@ -108,26 +114,11 @@ define(function(require) {
         },
 
         toggleMode: function() {
-            var self = this;
-
             var dfd = new $.Deferred();
 
             this.editMode = !this.editMode;
 
-            if (this.editMode) {
-                this.render().slideDown({
-                    done: function() {
-                        dfd.resolve();
-                    }
-                });
-            } else {
-                this.slideUp({
-                    done: function() {
-                        self.render().$el.css({"height": ROW_HEIGHT}).show();
-                        dfd.resolve();
-                    }
-                });
-            }
+            this.editMode ? this.slideDown(dfd) : this.slideUp(dfd);
 
             return dfd;
         },
@@ -147,14 +138,27 @@ define(function(require) {
             return new $.Deferred();
         },
 
-        slideDown: function(options) {
-            this.hide().slideDown(options);
+        slideDown: function(dfd) {
+            this.render().hide().slideDown({
+                done: function() {
+                    dfd.resolve();
+                }
+            });
 
             return this;
         },
 
-        slideUp: function(options, height) {
-            this.$el.animate({height: height || SLIDE_UP_ROW_HEIGHT}, options);
+        slideUp: function(dfd, height) {
+            height = height || SLIDE_UP_ROW_HEIGHT;
+
+            var self = this;
+
+            this.$el.animate({height: height}, {
+                done: function() {
+                    self.render().$el.css({height: ROW_HEIGHT}).show();
+                    dfd.resolve();
+                }
+            });
 
             return this;
         },
@@ -253,10 +257,6 @@ define(function(require) {
                     }
                 }
             }
-        },
-
-        _onDeleteClick: function(e) {
-            this.trigger("open:confirm", confirmDialogTypesEnum.DELETE_CONFIRM, this, this.model);
         },
 
         _onSaveSuccess: function() {

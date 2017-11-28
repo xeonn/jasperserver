@@ -99,6 +99,7 @@
                 <prop key="net.sf.ehcache.configurationResourceName">/ehcache_hibernate.xml</prop>
                 <prop key="hibernate.cache.use_minimal_puts">false</prop>
                 <prop key="hibernate.cache.use_query_cache">true</prop>
+                <prop key="hibernate.jdbc.batch_size">20</prop>
                 <prop key="hibernate.cache.use_second_level_cache">true</prop>
                 <prop key="hibernate.cache.use_structured_entries">true</prop>
             </props>
@@ -1061,6 +1062,7 @@
         <property name="sourceList">
             <list>
                 <value>${resource.root}/bundles/jasperserver_messages</value>
+                <value>${resource.root}/bundles/accessibility_messages</value>
                 <value>${resource.root}/bundles/jasperserver_config</value>
                 <value>${resource.root}/bundles/jpivot_messages</value>
                 <value>${resource.root}/bundles/calendar</value>
@@ -1411,6 +1413,7 @@
         <property name="defaultAddToDomainDependents" value="true"/>
         <property name="defaultDomainDependentsBlockAndUpdate" value="true"/>
 
+        <property name="enableAccessibility" value="true"/>
     </bean>
 
     <!-- report virtualizers -->

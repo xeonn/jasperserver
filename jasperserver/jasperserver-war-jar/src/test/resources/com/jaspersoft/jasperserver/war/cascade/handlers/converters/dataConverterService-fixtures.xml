@@ -195,11 +195,11 @@
     </bean>
 
     <bean id="multiSelectQueryControl" class="com.jaspersoft.jasperserver.war.cascade.utils.InputControlMock">
-        <property name="type" ref="TYPE_MULTI_SELECT_QUERY"/>
+        <property name="inputControlType" ref="TYPE_MULTI_SELECT_QUERY"/>
     </bean>
 
     <bean id="singleValueControl" class="com.jaspersoft.jasperserver.war.cascade.utils.InputControlMock">
-        <property name="type" ref="TYPE_SINGLE_VALUE"/>
+        <property name="inputControlType" ref="TYPE_SINGLE_VALUE"/>
     </bean>
 
     <bean id="orderDateMultiSelectControl" parent="multiSelectQueryControl">
@@ -250,21 +250,21 @@
         <constructor-arg ref="dateDataType"/>
     </bean>
     <bean id="dateDataType" class="com.jaspersoft.jasperserver.api.metadata.common.domain.client.DataTypeImpl">
-        <property name="type" value="3"/>
+        <property name="dataTypeType" value="3"/>
     </bean>
 
     <bean id="timestampDataTypeRef" class="com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceReference">
         <constructor-arg ref="timestampDataType"/>
     </bean>
     <bean id="timestampDataType" class="com.jaspersoft.jasperserver.api.metadata.common.domain.client.DataTypeImpl">
-        <property name="type" value="4"/>
+        <property name="dataTypeType" value="4"/>
     </bean>
 
     <bean id="timeDataTypeRef" class="com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceReference">
         <constructor-arg ref="timeDataType"/>
     </bean>
     <bean id="timeDataType" class="com.jaspersoft.jasperserver.api.metadata.common.domain.client.DataTypeImpl">
-        <property name="type" value="5"/>
+        <property name="dataTypeType" value="5"/>
     </bean>
 
 </beans>

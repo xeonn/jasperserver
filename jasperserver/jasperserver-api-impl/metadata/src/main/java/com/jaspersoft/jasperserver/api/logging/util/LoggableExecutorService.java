@@ -23,36 +23,30 @@ package com.jaspersoft.jasperserver.api.logging.util;
 import com.jaspersoft.jasperserver.api.logging.audit.context.RequestType;
 import com.jaspersoft.jasperserver.api.logging.audit.context.RequestTypeListener;
 import com.jaspersoft.jasperserver.api.logging.context.LoggingContextProvider;
+import com.jaspersoft.jasperserver.api.metadata.common.service.impl.ExecutorServiceWrapper;
 
 import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
  * A special {@link Executor} service that asynchronously execute the tasks in which logging events are setup.
  *
  * @author vsabadosh
- * @version $Id: LoggableExecutorService.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: LoggableExecutorService.java 56967 2015-08-20 23:20:53Z esytnik $
  */
-public class LoggableExecutorService implements Executor {
+public class LoggableExecutorService extends ExecutorServiceWrapper {
     private LoggingContextProvider loggingContextProvider;
     private RequestTypeListener requestTypeListener;
 
-    private ExecutorService asyncExecutor = Executors.newCachedThreadPool();
-
-    public void setLoggingContextProvider(LoggingContextProvider loggingContextProvider) {
-        this.loggingContextProvider = loggingContextProvider;
-    }
-
-    public void setRequestTypeListener(RequestTypeListener requestTypeListener) {
-        this.requestTypeListener = requestTypeListener;
+    public LoggableExecutorService() {
+        super(Executors.newCachedThreadPool());
     }
 
     @Override
     public void execute(final Runnable command) {
         //As requestType is thread local then we have to move it from main thread to the new thread.
         final RequestType requestType = requestTypeListener.getRequestType();
-        asyncExecutor.execute(new Runnable() {
+        getWrappedExecutorService().execute(new Runnable() {
             @Override
             public void run() {
                 requestTypeListener.setRequestType(requestType);
@@ -63,4 +57,11 @@ public class LoggableExecutorService implements Executor {
         });
     }
 
+    public void setLoggingContextProvider(LoggingContextProvider loggingContextProvider) {
+        this.loggingContextProvider = loggingContextProvider;
+    }
+
+    public void setRequestTypeListener(RequestTypeListener requestTypeListener) {
+        this.requestTypeListener = requestTypeListener;
+    }
 }

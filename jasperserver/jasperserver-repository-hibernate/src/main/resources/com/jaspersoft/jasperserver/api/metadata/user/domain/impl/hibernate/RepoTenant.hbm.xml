@@ -18,18 +18,18 @@
     <property name="tenantUri" not-null="true" length="250" type="string" column="tenantUri"/>
     <property name="tenantFolderUri" not-null="true" length="250" type="string" column="tenantFolderUri"/>
     <property name="theme" not-null="false" length="250" type="string" column="theme"/>
-    <set name="subTenants" inverse="true">
+    <set name="subTenants" inverse="true" fetch="subselect" lazy="true"> 
       <key column="parentId"/>
       <one-to-many
         class="com.jaspersoft.jasperserver.api.metadata.user.domain.impl.hibernate.RepoTenant"/>
     </set>
-    <set name="users" inverse="true" cascade="delete">
+    <set name="users" inverse="true" cascade="delete,delete-orphan" fetch="subselect" lazy="true"> 
       <key column="tenantId"/>
       <one-to-many
         class="com.jaspersoft.jasperserver.api.metadata.user.domain.impl.hibernate.RepoUser"/>
     </set>
-    <set name="roles" inverse="true">
-      <key column="tenantId"/>
+    <set name="roles" inverse="true" fetch="subselect">
+      <key column="tenantId"/> 
       <one-to-many
         class="com.jaspersoft.jasperserver.api.metadata.user.domain.impl.hibernate.RepoRole"/>
     </set>

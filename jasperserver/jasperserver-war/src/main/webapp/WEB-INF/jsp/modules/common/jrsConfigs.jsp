@@ -38,6 +38,7 @@
         contextPath: "${pageContext.request.contextPath}",
         publicFolderUri: "${not empty publicFolderUri ? publicFolderUri : commonProperties.publicFolderUri}",
         tempFolderUri: "${not empty tempFolderUri ? tempFolderUri : commonProperties.tempFolderUri}",
+        enableAccessibility: "${not empty enableAccessibility ? enableAccessibility : commonProperties.enableAccessibility}",
         organizationId: "${not empty organizationId ? organizationId : commonProperties.organizationId}",
         commonReportGeneratorsMetadata: ${not empty reportGenerators ? reportGenerators : '[]'},
         templatesFolderUri: '${not empty templatesFolderUri ? templatesFolderUri : templateProperties.templatesFolderUri}',

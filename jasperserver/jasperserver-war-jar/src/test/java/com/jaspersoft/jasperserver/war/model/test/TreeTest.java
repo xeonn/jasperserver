@@ -20,6 +20,15 @@
  */
 package com.jaspersoft.jasperserver.war.model.test;
 
+import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
+import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.HibernateRepositoryService;
+import com.jaspersoft.jasperserver.war.model.TreeHelper;
+import com.jaspersoft.jasperserver.war.model.TreeNode;
+import com.jaspersoft.jasperserver.war.model.impl.RepositoryTreeDataProviderImpl;
+import junit.framework.TestCase;
+import org.junit.Ignore;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -28,16 +37,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import junit.framework.TestCase;
-
-import org.springframework.context.support.ClassPathXmlApplicationContext;
-
-import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
-import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.HibernateRepositoryService;
-import com.jaspersoft.jasperserver.war.model.TreeHelper;
-import com.jaspersoft.jasperserver.war.model.TreeNode;
-import com.jaspersoft.jasperserver.war.model.impl.RepositoryTreeDataProviderImpl;
-
+@Ignore // This test is excluded in pom.xml, so ignoring it here.
 public class TreeTest extends TestCase {
     private Properties jdbcProps;
     private RepositoryService repo;

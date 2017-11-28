@@ -12,7 +12,7 @@
         class="com.jaspersoft.jasperserver.api.metadata.user.domain.impl.hibernate.RepoTenant"/>
     </natural-id>
     <property name="externallyDefined" type="boolean" column="externallyDefined"/>
-    <set table="JIUserRole" inverse="true" name="users">
+    <set table="JIUserRole" inverse="true" name="users" fetch="subselect"> 
       <key column="roleId" />
       <many-to-many column="userId" class="com.jaspersoft.jasperserver.api.metadata.user.domain.impl.hibernate.RepoUser" />
     </set>

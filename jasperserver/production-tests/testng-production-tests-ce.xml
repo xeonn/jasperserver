@@ -111,9 +111,9 @@
     </test>
 
     <!-- this class tests the profile attribute service -->
-    <test name="ProfileAttributeTestTestNG">
+    <test name="ProfileAttributeServiceTestTestNG">
         <classes>
-            <class name="com.jaspersoft.jasperserver.test.ProfileAttributeTestTestNG" />
+            <class name="com.jaspersoft.jasperserver.test.ProfileAttributeServiceTestTestNG" />
         </classes>
     </test>
 

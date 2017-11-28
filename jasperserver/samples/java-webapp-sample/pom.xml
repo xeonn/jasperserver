@@ -5,7 +5,7 @@
     <groupId>com.jaspersoft.jasperserver</groupId>
     <artifactId>jasperserver-ws-sample</artifactId>
     <packaging>pom</packaging>
-    <version>6.1.0</version>
+    <version>6.1.1</version>
     <name>Jasper Server WS Sample</name>
     <url>http://www.jaspersoft.com</url>
 
@@ -47,7 +47,7 @@
             <dependency>
                 <groupId>net.sf.jasperreports</groupId>
                 <artifactId>jasperreports</artifactId>
-                <version>6.1.0</version>
+                <version>6.1.1</version>
                 <exclusions>
                     <exclusion>
                         <groupId>xml-apis</groupId>

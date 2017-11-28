@@ -46,8 +46,10 @@ if [[ "$JS_UPGRADE_STRATEGY" == "standard" && $# -gt 5  || "$JS_UPGRADE_STRATEGY
 else
   JS_OPTION=$3
   IMPORT_FILE=$4
+  IS_INCLUDE_SERVER_SETTINGS=false
   if [[ "$JS_UPGRADE_STRATEGY" == "standard" ]]; then
     IS_INCLUDE_ACCESS_EVENTS=false
+    IS_INCLUDE_SERVER_SETTINGS=true
     if [[ "$3" == "include-access-events" ]]; then
       IS_INCLUDE_ACCESS_EVENTS=true
       JS_OPTION=$4
@@ -139,9 +141,16 @@ else
   JS_ANT_OPTIONS="$JS_ANT_OPTIONS -Dstrategy=$JS_UPGRADE_STRATEGY -DimportFile=$IMPORT_FILE"
 fi
 if [[ "$JS_UPGRADE_STRATEGY" == "standard" && "$IS_INCLUDE_ACCESS_EVENTS" == "true" ]]; then
-  JS_ANT_OPTIONS="$JS_ANT_OPTIONS -DincludeAccessEvents=include-access-events"
+  JS_IMPORT_ARGS="--include-access-events"
+fi
+if [ "$IS_INCLUDE_SERVER_SETTINGS" == "true" ]; then
+  JS_IMPORT_ARGS="--include-server-settings $JS_IMPORT_ARGS"
 fi
 #
 # Calling core setup script with determined parameters.
 #
-./bin/do-js-setup.sh upgrade $JS_EDITION $JS_OPTION $JS_ANT_TARGET $JS_ANT_OPTIONS
+if [ "$JS_IMPORT_ARGS" != "" ]; then
+  ./bin/do-js-setup.sh upgrade $JS_EDITION $JS_OPTION $JS_ANT_TARGET $JS_ANT_OPTIONS "-DimportArgs=\"$JS_IMPORT_ARGS\""
+else
+  ./bin/do-js-setup.sh upgrade $JS_EDITION $JS_OPTION $JS_ANT_TARGET $JS_ANT_OPTIONS
+fi

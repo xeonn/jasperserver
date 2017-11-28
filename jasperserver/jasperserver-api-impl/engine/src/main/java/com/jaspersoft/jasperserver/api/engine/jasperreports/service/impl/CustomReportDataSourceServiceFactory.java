@@ -92,6 +92,12 @@ public class CustomReportDataSourceServiceFactory implements ReportDataSourceSer
 		
 		// look up definition
 		CustomDataSourceDefinition dsDef = getDefinition(customDataSource);
+        if (dsDef == null) {
+            // TODO Auto-generated catch block
+            JSException ex = new JSException("jsexception.creating.custom.datasource [" + customDataSource.getDataSourceName() + "] Service Class [" + customDataSource.getServiceClass() + "]");
+            throw ex;
+        }
+
 		// does it have its own factory? if so, delegate to it
 		if (dsDef.getCustomFactory() != null) {
 			return dsDef.getCustomFactory().createService(customDataSource);

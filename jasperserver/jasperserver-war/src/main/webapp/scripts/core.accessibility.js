@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: core.accessibility.js 8179 2015-01-27 12:34:21Z psavushchik $
+ * @version: $Id: core.accessibility.js 9192 2015-08-12 19:52:08Z yplakosh $
  */
 
 /* global $$, dynamicTree, buttonManager, actionModel, layoutModule, isShiftHeld, dynamicList */
@@ -36,7 +36,7 @@ var accessibilityModule = {
     components: [],
     currentTabIndex: -1,
 
-    disabled: false,
+    disabled: true,
 
     initialize: function() {
         var elements = $$("*[" + this.ATTR_TAB_INDEX +"]");
@@ -44,6 +44,7 @@ var accessibilityModule = {
             var tabIndex = this.getTabIndex(element);
             tabIndex > 0 && (this.components[tabIndex] = element);
         }.bind(this));
+        this.enable();
     },
 
     enable: function() { this.disabled = false; },

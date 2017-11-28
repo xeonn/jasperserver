@@ -1,19 +1,7 @@
 
-    DROP INDEX JIQuery_dataSource_index ON JIQuery;
+    DROP INDEX idxA1_resource_id_idx on JICustomDatasourceResource;
 
-    DROP INDEX idx15_input_ctrl_id_idx ON JIInputControlQueryColumn;
-
-    DROP INDEX JIInputControl_list_query_idx ON JIInputControl;
-
-    DROP INDEX JIInputCtrl_list_of_values_idx ON JIInputControl;
-
-    DROP INDEX JIInputControl_data_type_index ON JIInputControl;
-
-    DROP INDEX JIFileResource_reference_index ON JIFileResource;
-
-    DROP INDEX idx17_reportDataSource_idx ON JIMondrianConnection;
-
-    DROP INDEX idx16_mondrianSchema_idx ON JIMondrianConnection;
+    DROP INDEX idx20_mondrianConnection_idx ON JIMondrianXMLADefinition;
 
     DROP INDEX idx23_olapClientConnection_idx ON JIOlapUnit;
 
@@ -31,9 +19,21 @@
 
     DROP INDEX JIReportUnit_mainReport_index ON JIReportUnit;
 
-    DROP INDEX idxA1_resource_id_idx on JICustomDatasourceResource;
+    DROP INDEX idx17_reportDataSource_idx ON JIMondrianConnection;
 
-    DROP INDEX idx20_mondrianConnection_idx ON JIMondrianXMLADefinition;
+    DROP INDEX idx16_mondrianSchema_idx ON JIMondrianConnection;
+
+    DROP INDEX JIQuery_dataSource_index ON JIQuery;
+
+    DROP INDEX idx15_input_ctrl_id_idx ON JIInputControlQueryColumn;
+
+    DROP INDEX JIInputControl_list_query_idx ON JIInputControl;
+
+    DROP INDEX JIInputCtrl_list_of_values_idx ON JIInputControl;
+
+    DROP INDEX JIInputControl_data_type_index ON JIInputControl;
+
+    DROP INDEX JIFileResource_reference_index ON JIFileResource;
 
     DROP INDEX JIUser_tenantId_index ON JIUser;
 

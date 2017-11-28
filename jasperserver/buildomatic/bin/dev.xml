@@ -862,7 +862,7 @@
             <!-- <arg value="-X"/> -->               <!-- MAVEN DEBUG LEVEL LOGGING -->
             <!-- <arg value="-e"/> -->               <!-- MAVEN FULL ERROR STACK TRACE -->
             <!-- <arg value="-o"/> -->               <!-- MAVEN OFFLINE MODE -->
-            <arg value="dependency:tree"/>  <!-- GENERATE DEPENDENCY TREE -->
+            <!-- <arg value="dependency:tree"/> -->  <!-- GENERATE DEPENDENCY TREE -->
         </runmaven>
         <if>
             <equals arg1="${dirName}" arg2="jasperserver-war"/>

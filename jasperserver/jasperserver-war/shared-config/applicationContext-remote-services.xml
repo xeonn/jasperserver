@@ -178,13 +178,11 @@
 
     <util:set id="customDataSourcesToHide">
         <value>xmlaQueryDataSource</value>
-        <value>sparkQueryDataSource</value>
         <value>remoteXmlDataSource</value>
         <value>mongoDBQueryDataSource</value>
         <value>jsonDataSource</value>
         <value>jdbcQueryDataSource</value>
         <value>cassandraQueryDataSource</value>
-        <value>myCustomDataSourceWithMetadata</value>
         <value>JsonSeriesDataSource</value>
     </util:set>
 

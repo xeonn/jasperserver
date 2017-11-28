@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: core.key.events.js 8179 2015-01-27 12:34:21Z psavushchik $
+ * @version: $Id: core.key.events.js 9192 2015-08-12 19:52:08Z yplakosh $
  */
 
 /* global Keys, isMetaHeld, isShiftHeld, actionModel, layoutModule, matchMeOrUp, primaryNavModule,
@@ -89,6 +89,22 @@ document.observe('keydown', function(event){
         focused.fire('key:down', {targetEvent: event, node: focused});
         return;
     }
+    if(event.keyCode == Event.KEY_PAGEUP) {
+        focused.fire('key:pageup', {targetEvent: event, node: focused});
+        return;
+    }
+    if(event.keyCode == Event.KEY_PAGEDOWN) {
+        focused.fire('key:pagedown', {targetEvent: event, node: focused});
+        return;
+    }
+    if(event.keyCode == Event.KEY_HOME) {
+        focused.fire('key:home', {targetEvent: event, node: focused});
+        return;
+    }
+    if(event.keyCode == Event.KEY_END) {
+        focused.fire('key:end', {targetEvent: event, node: focused});
+        return;
+    }
     //ctrl + y
     if(isMetaHeld(event) && ((event.keyCode == 89))) {
         focused.fire('key:redo', {targetEvent: event, node: focused});
@@ -105,7 +121,8 @@ document.observe('keydown', function(event){
         return;
     }
 
-    //escape
+    // NOTE: Reacting to the TAB key is not recommended for accessibility
+    // reasons.
     if(event.keyCode == Event.KEY_TAB) {
         focused.fire('key:tab', {targetEvent: event, node: focused});
         return;
@@ -155,7 +172,9 @@ document.observe('keydown', function(event){
 
 ////////////////////////////////////////////////
 // global custom event handlers
+// NOTE: See also Standard Navigation plugins ("stdnav/plugins")
 ////////////////////////////////////////////////
+
 
 document.observe('key:esc', function(event){
     if(actionModel.isMenuShowing()){
@@ -170,9 +189,12 @@ document.observe('key:enter', function(event){
     var menuElement = $(layoutModule.MENU_ID);
     if (layoutModule.isVisible(menuElement)) {
         Event.stop(event);
-        var selected = menuElement.select("." + layoutModule.HOVERED_CLASS)[0];
+        var selected = menuElement.select(":focus,." + layoutModule.HOVERED_CLASS)[0];
         if (selected) {
-            var thisItem = selected.up(layoutModule.MENU_LIST_PATTERN);
+            var thisItem = selected;
+            if (!selected.match(layoutModule.MENU_LIST_PATTERN)){
+                thisItem = selected.up(layoutModule.MENU_LIST_PATTERN);
+            }
             setTimeout(thisItem.onmouseup.curry(event.memo.targetEvent),0);
         }
     }
@@ -189,101 +211,3 @@ document.observe('key:enter', function(event){
     }
 });
 
-document.observe('key:down', function(event){
-    var elem = event.element(), matched;
-
-    //if menu showing select next
-    if (layoutModule.isVisible(layoutModule.MENU_ID)) {
-        Event.stop(event);
-        var selected = $(layoutModule.MENU_ID).select("." + layoutModule.HOVERED_CLASS)[0];
-        if (selected) {
-            var thisItem = selected.up(layoutModule.MENU_LIST_PATTERN);
-            //skip separators etc.
-            var next = getNextNonMatchingSibling(thisItem, layoutModule.SEPARATOR_PATTERN);
-            if (next) {
-                buttonManager.out(selected);
-                buttonManager.over(next.down(layoutModule.BUTTON_PATTERN));
-                next.focus();
-            }
-            return;
-        }
-    }
-
-    //navigation button focused? move to first menu item
-    if (matched = matchAny(event.element(), [layoutModule.NAVIGATION_MUTTON_PATTERN ], true)) {  // jshint ignore: line
-        //if mousedown on nav button navigate to top of menu (if any) 
-        //alert('dufus');
-        buttonManager.out(matched.down(layoutModule.BUTTON_PATTERN));
-        buttonManager.over(actionModel.getFirstMenuButton());
-        actionModel.focusMenu();
-    }
-});
-
-document.observe('key:up', function(event){
-    var elem = event.element(), matched;
-
-    //if menu showing select previous
-    if (layoutModule.isVisible(layoutModule.MENU_ID)) {
-        Event.stop(event);
-        var selected = $(layoutModule.MENU_ID).select("." + layoutModule.HOVERED_CLASS)[0];
-        if (selected) {
-            var thisItem = selected.up(layoutModule.MENU_LIST_PATTERN);
-            //skip separators etc.
-            var next = getPreviousNonMatchingSibling(thisItem, layoutModule.SEPARATOR_PATTERN) || actionModel.getMenuParent();
-            if (next) {
-                buttonManager.out(selected);
-                buttonManager.over(next.down(layoutModule.BUTTON_PATTERN));
-                next.focus();
-            }
-        }
-    }
-});	
-
-document.observe('key:left', function(event){
-    var elem = event.element(), matched;
-
-    var nav = $(layoutModule.MAIN_NAVIGATION_ID);
-    var selected = nav && nav.select("." + layoutModule.HOVERED_CLASS)[0]; // there is no main navigation in embedded mode
-    if (selected) {
-        Event.stop(event);
-        var thisItem = selected.up(layoutModule.NAVIGATION_PATTERN);
-        var next = getPreviousMatchingSibling(thisItem, layoutModule.NAVIGATION_PATTERN);
-        if (next) {
-            actionModel.hideMenu();
-
-            buttonManager.out(selected);
-            buttonManager.over(next.down(layoutModule.BUTTON_PATTERN));
-            next.focus();
-
-            matched = matchMeOrUp(next, layoutModule.NAVIGATION_MUTTON_PATTERN);
-            if (matched) {
-                primaryNavModule.showNavButtonMenu(event, matched);
-            }
-        }
-    }
-});
-
-document.observe('key:right', function(event){
-    var elem = event.element(), matched;
-
-    var nav = $(layoutModule.MAIN_NAVIGATION_ID);
-    var selected = nav && nav.select("." + layoutModule.HOVERED_CLASS)[0]; // there is no main navigation in embedded mode
-    if (selected) {
-        Event.stop(event);
-
-        var thisItem = selected.up(layoutModule.NAVIGATION_PATTERN);
-        var next = getNextMatchingSibling(thisItem, layoutModule.NAVIGATION_PATTERN);
-        if (next) {
-            actionModel.hideMenu();
-
-            buttonManager.out(selected);
-            buttonManager.over(next.down(layoutModule.BUTTON_PATTERN));
-            next.focus();
-
-            matched = matchMeOrUp(next, layoutModule.NAVIGATION_MUTTON_PATTERN);
-            if (matched) {
-                primaryNavModule.showNavButtonMenu(event, matched);
-            }
-        }
-    }
-});

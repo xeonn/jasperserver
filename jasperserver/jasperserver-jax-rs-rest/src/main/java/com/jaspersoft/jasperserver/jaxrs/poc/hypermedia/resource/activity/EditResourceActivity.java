@@ -80,7 +80,7 @@ public class EditResourceActivity extends ReadResourceActivity {
         String resourceType = data.getResourceType();
         Integer permissionMask = data.getPermissionMask();
 
-        Boolean isAllowed = Permissions.ADMINISTRATION.equals(permissionMask) || Permissions.WRITE.equals(permissionMask);
+        Boolean isAllowed = (permissionMask & (Permissions.ADMINISTRATION.mask() | Permissions.WRITE.mask())) > 0;
 
         if (canBeEditTypes.contains(resourceType) && isAllowed){
 

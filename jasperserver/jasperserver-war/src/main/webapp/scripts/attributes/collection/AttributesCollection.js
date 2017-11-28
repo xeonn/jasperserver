@@ -20,7 +20,7 @@
  */
 
 /**
- * @version: $Id: AttributesCollection.js 8924 2015-05-21 17:16:54Z obobruyk $
+ * @version: $Id: AttributesCollection.js 9218 2015-08-20 19:56:16Z yplakosh $
  */
 
 define(function(require) {
@@ -130,6 +130,16 @@ define(function(require) {
                 .done(_.bind(this._successSearchCallback, this, model, newModels));
         },
 
+        filterInheritedAttributes: function(data) {
+            var attributes = data && data.attribute;
+
+            return data
+                ? _.filter(attributes, function(attribute) {
+                      return attribute.inherited && !this.findWhere({name: attribute.name, inherited: true});
+                  }, this)
+                : null;
+        },
+
         search: function(models, newModels, recursive, omitId, groups) {
             recursive = recursive || "";
             groups = groups || "";
@@ -159,8 +169,17 @@ define(function(require) {
             !_.isArray(attributes) && (attributes = [attributes]);
 
             _.each(attributes, function(attribute) {
-                this.add(attribute);
+                this.addNew(attribute);
             }, this);
+        },
+
+        addNew: function(attribute) {
+            attribute = attribute || {};
+
+            var model = new this.model(attribute);
+            this.add(model);
+
+            return model;
         },
 
         _modelsToJSON: function(models, omitValue) {

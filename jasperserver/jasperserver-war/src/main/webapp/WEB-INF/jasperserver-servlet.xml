@@ -131,9 +131,10 @@
         <entry key="organizationId" value="#{${bean.securityContextProvider}.contextUser.tenantId}"/>
         <entry key="publicFolderUri" value="#{configurationBean.publicFolderUri}"/>
         <entry key="tempFolderUri" value="#{configurationBean.tempFolderUri}"/>
+        <entry key="enableAccessibility" value="#{configurationBean.enableAccessibility}"/>
     </util:map>
 
-    <util:map id="jsOptimizationProperties" scope="singleton">
+    <util:map id="jsOptimizationProperties" scope="prototype">
         <entry key="useOptimizedJavascript" value="#{javascriptOptimizationSettings.useOptimizedJavascript}"/>
         <entry key="optimizedJavascriptPath" value="#{javascriptOptimizationSettings.optimizedJavascriptPath}"/>
     </util:map>

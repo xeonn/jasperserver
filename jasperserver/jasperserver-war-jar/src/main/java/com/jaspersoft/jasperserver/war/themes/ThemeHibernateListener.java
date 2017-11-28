@@ -25,8 +25,6 @@ import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.Hi
 import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.persistent.RepoResource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.event.DeleteEvent;
-import org.hibernate.event.SaveOrUpdateEvent;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -95,8 +93,10 @@ public class ThemeHibernateListener implements HibernateSaveUpdateDeleteListener
             RepoResource res = (RepoResource) entity;
             String uri = res.getResourceURI();
             if (getThemeCache().isThemeResource(uri)) {
-                getLog().trace("onSaveOrUpdate: Resource :" + uri);
-                preProcessUpdate(res);
+            	if(log.isTraceEnabled()){
+            		log.trace("onSaveOrUpdate: Resource :" + uri);
+            	}
+            	preProcessUpdate(res);
                 getThemeCache().onThemeResourceChanged(uri);
             }
         }
@@ -108,8 +108,10 @@ public class ThemeHibernateListener implements HibernateSaveUpdateDeleteListener
             RepoResource res = (RepoResource) entity;
             String uri = res.getResourceURI();
             if (getThemeCache().isThemeResource(uri)) {
-                getLog().trace("onDelete: Resource :" + uri);
-                preProcessDelete(res);
+            	if(log.isTraceEnabled()){
+            		log.trace("onDelete: Resource :" + uri);
+            	}
+            	preProcessDelete(res);
                 getThemeCache().onThemeResourceChanged(uri);
             }
         }

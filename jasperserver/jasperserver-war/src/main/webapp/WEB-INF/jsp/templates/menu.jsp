@@ -22,32 +22,32 @@
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="t" %>
 
 <%--main menu--%>
-<div id='menu' class="menu vertical context hidden"></div>
+<div id='menu' class="menu vertical context hidden" aria-hidden="true" role="menu" js-navtype="actionmenu"></div>
 
 <div id="commonMenu" class="hidden">
     <div class="content">
-        <ul id="menuList_template">
+        <ul id="menuList_template" role="menubar" js-navtype="actionmenu">
         </ul>
     </div>
 </div>
 
-<ul class="hidden">
+<ul class="hidden" aria-hidden="true" role="menubar" js-navtype="actionmenu">
     <%--simply action list option--%>
-    <li id="menuList_simpleAction" class="leaf"><p class="wrap button"><span class="icon"></span><!--Item text goes here--></p></li>
+    <li id="menuList_simpleAction" class="leaf" role="menuitem" js-navtype="actionmenu"><p class="wrap button"><span class="icon"></span><!--Item text goes here--></p></li>
 
     <%--separator for menu--%>
-    <li id="menuList_separator" class="leaf separator"></li>
+    <li id="menuList_separator" class="leaf separator" role="separator" js-navtype="actionmenu"></li>
 
     <%--submenu list--%>
-    <li id="menuList_flyout" class="node"><p class="wrap button"><span class="icon"></span><!--Item text goes here--></p></li>
+    <li id="menuList_flyout" class="node" role="menu" js-navtype="actionmenu"><p class="wrap button"><span class="icon"></span><!--Item text goes here--></p></li>
 
     <%--extra pop up menu--%>
-    <li id="menuList_extraInput" class="leaf"><p class="wrap button"><span class="icon"></span><!--Item text goes here--></p></li>
+    <li id="menuList_extraInput" class="leaf" js-navtype="actionmenu"><p class="wrap button"><span class="icon"></span><!--Item text goes here--></p></li>
 
     <%--dropdown list element--%>
-    <li id="menuList_listItem" class="leaf"><p class="wrap toggle button"><span class="icon"></span><!--Item text goes here--></p></li>
+    <li id="menuList_listItem" class="leaf" role="menuitem" js-navtype="actionmenu"><p class="wrap toggle button"><span class="icon"></span><!--Item text goes here--></p></li>
 
     <%--main navigation mutton--%>
-    <%--<li id="navigation_mutton" class="leaf mutton up button"><i class="icon"></i></li>--%>
-    <li id="navigation_mutton" tabIndex="-1" class="node mutton"><p class="wrap button"><span class="icon"></span></p></li>
+    <%--<li id="navigation_mutton" class="leaf mutton up button" role="menuitem" js-navtype="actionmenu"><i class="icon"></i></li>--%>
+    <li id="navigation_mutton" tabIndex="-1" class="node mutton" role="menuitem" js-navtype="actionmenu"><p class="wrap button"><span class="icon"></span></p></li>
 </ul>

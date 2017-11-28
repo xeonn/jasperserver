@@ -24,6 +24,7 @@ package com.jaspersoft.jasperserver.util.test;
 import com.jaspersoft.jasperserver.api.JSException;
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
 import com.jaspersoft.jasperserver.api.common.domain.impl.ExecutionContextImpl;
+import com.jaspersoft.jasperserver.api.common.properties.PropertyChanger;
 import com.jaspersoft.jasperserver.api.engine.common.service.EngineService;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl.CustomReportDataSourceServiceFactory;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.util.TextDataSourceDefinition;
@@ -119,6 +120,7 @@ public class BaseServiceSetupTestNG extends AbstractTestNGSpringContextTests {
     protected static final Random random = new Random(System.currentTimeMillis());
     private List exportFolders = new ArrayList();
 
+    public static final String USER_SUPERUSER = "superuser";
     public static final String USER_JASPERADMIN = "jasperadmin";
     public static final String USER_CALIFORNIA_USER = "CaliforniaUser";
     public static final String USER_CALIFORNIA_USER_FULLNAME = "California User";
@@ -149,6 +151,8 @@ public class BaseServiceSetupTestNG extends AbstractTestNGSpringContextTests {
     private EngineService m_engineService;
     private TenantService m_tenantService;
     private ReportJobsScheduler reportScheduler;
+    private Map<String, String> changers;
+    private Map<String, PropertyChanger> changerObjects;
 
     private MessageSource messages;
 
@@ -565,11 +569,12 @@ public class BaseServiceSetupTestNG extends AbstractTestNGSpringContextTests {
         resource.setDescription(desc);
     }
 
-    protected ProfileAttribute createTestAttr(Object principal, String name, String value) {
+    protected ProfileAttribute createTestAttr(Object principal, String name, String value, String group) {
         ProfileAttribute attr = getProfileAttributeService().newProfileAttribute(null);
         attr.setPrincipal(principal);
         attr.setAttrName(name);
         attr.setAttrValue(value);
+        attr.setGroup(group);
         return attr;
     }
 
@@ -1052,5 +1057,23 @@ public class BaseServiceSetupTestNG extends AbstractTestNGSpringContextTests {
         formatter.format(text, info);
 
         return sb.toString();
+    }
+
+    @javax.annotation.Resource(name = "${bean.propertyChangers}")
+    public void setChangers(Map<String, String> changers) {
+        this.changers = changers;
+    }
+
+    public Map<String, PropertyChanger> getChangerObjects() {
+        // This code looks up spring context for changer beans based on this name
+        // We are wiring the service with changer names and not changer beans to eliminate circular references.
+        if (changerObjects == null) {
+            changerObjects = new HashMap<String, PropertyChanger>();
+            for (Map.Entry<String, String> e : changers.entrySet()) {
+                changerObjects.put(e.getKey(), (PropertyChanger) applicationContext.getBean(e.getValue()));
+            }
+        }
+
+        return changerObjects;
     }
 }

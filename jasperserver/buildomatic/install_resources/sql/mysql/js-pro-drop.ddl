@@ -9,6 +9,10 @@
 
     DROP INDEX idx5_adhocStateId_idx ON JIAdhocReportUnit;
 
+    DROP INDEX JIFileResource_reference_index ON JIFileResource;
+
+    DROP INDEX idx23_olapClientConnection_idx ON JIOlapUnit;
+
     DROP INDEX idx33_resource_id_idx ON JIReportUnitResource;
 
     DROP INDEX idx32_report_unit_id_idx ON JIReportUnitResource;
@@ -23,9 +27,11 @@
 
     DROP INDEX JIReportUnit_mainReport_index ON JIReportUnit;
 
-    DROP INDEX JIQuery_dataSource_index ON JIQuery;
+    DROP INDEX idx13_ref_id_idx ON JIDomainDatasourceDSRef;
 
-    DROP INDEX idxA1_resource_id_idx on JICustomDatasourceResource;
+    DROP INDEX idx12_bundle_id_idx ON JIDomainDatasourceBundle;
+
+    DROP INDEX JIQuery_dataSource_index ON JIQuery;
 
     DROP INDEX idx15_input_ctrl_id_idx ON JIInputControlQueryColumn;
 
@@ -35,13 +41,7 @@
 
     DROP INDEX JIInputControl_data_type_index ON JIInputControl;
 
-    DROP INDEX JIFileResource_reference_index ON JIFileResource;
-
-    DROP INDEX idx13_ref_id_idx ON JIDomainDatasourceDSRef;
-
-    DROP INDEX idx12_bundle_id_idx ON JIDomainDatasourceBundle;
-
-    DROP INDEX idx23_olapClientConnection_idx ON JIOlapUnit;
+    DROP INDEX idxA1_resource_id_idx on JICustomDatasourceResource;
 
     DROP INDEX idx20_mondrianConnection_idx ON JIMondrianXMLADefinition;
 

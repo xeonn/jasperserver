@@ -9,7 +9,7 @@
     <parent>
         <groupId>com.jaspersoft.jasperserver</groupId>
         <artifactId>server</artifactId>
-        <version>6.1.0</version>
+        <version>6.1.1</version>
     </parent>
     <profiles>
         <!-- enable handling between internal and external builds -->    
@@ -26,7 +26,7 @@
                 <dependency>
                     <groupId>com.jaspersoft</groupId>
                     <artifactId>jrs-ui</artifactId>
-                    <version>1.1.8</version>
+                    <version>1.2.5</version>
                     <type>zip</type>
                 </dependency>
             </dependencies>
@@ -107,7 +107,7 @@
         <dependency>
             <groupId>com.jaspersoft.jasperreports</groupId>
             <artifactId>jasperreports-customvisualization</artifactId>
-            <version>6.1.0</version>
+            <version>6.1.1</version>
             <exclusions>
                 <exclusion>
                     <groupId>net.sf.jasperreports</groupId>
@@ -279,12 +279,12 @@
         <dependency>
             <groupId>com.jaspersoft.jasperserver</groupId>
             <artifactId>jasperserver-hive-connector</artifactId>
-            <version>6.1.0</version>
+            <version>6.1.1</version>
         </dependency>
         <dependency>
             <groupId>com.jaspersoft.jasperserver</groupId>
             <artifactId>jasperserver-cassandra-connector</artifactId>
-            <version>6.1.0</version>
+            <version>6.1.1</version>
             <exclusions>
                 <exclusion>
                     <groupId>antlr</groupId>
@@ -540,12 +540,12 @@
         <dependency>
             <groupId>net.sf.jasperreports</groupId>
             <artifactId>jasperreports-chart-themes</artifactId>
-            <version>6.1.0</version>
+            <version>6.1.1</version>
         </dependency>
         <dependency>
             <groupId>net.sf.jasperreports</groupId>
             <artifactId>jasperreports-functions</artifactId>
-            <version>6.1.0</version>
+            <version>6.1.1</version>
         </dependency>
         <!-- bug 32641: fix for installation to JBoss 7. Because we have use deployment module to precisely    -->
         <!--            control batik jar dependencies used by jboss 7, we need to make sure the same jars are -->
@@ -686,7 +686,7 @@
         <dependency>
             <groupId>org.mozilla</groupId>
             <artifactId>rhino</artifactId>
-            <version>1.7R3</version>
+            <version>1.7.6</version>
             <scope>runtime</scope>
         </dependency>
         <!-- xbean dependency added in order to make jersey REST work for WAS 7. see bug #28550 -->
@@ -694,6 +694,12 @@
             <groupId>org.apache.xmlbeans</groupId>
             <artifactId>xmlbeans</artifactId>
             <version>2.6.0</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>stax</groupId>
+                    <artifactId>stax-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>xalan</groupId>
@@ -714,8 +720,7 @@
         <dependency>
             <groupId>com.jaspersoft.connectors.mongodb</groupId>
             <artifactId>js-mongodb-datasource</artifactId>
-            <version>2.0.2</version>
-            <exclusions>
+	    <exclusions>
                 <exclusion>
                     <groupId>commons-pool</groupId>                
                     <artifactId>commons-pool</artifactId>
@@ -730,7 +735,7 @@
         <dependency>
             <groupId>com.jaspersoft.jasperserver</groupId>
             <artifactId>jrs-mongodb-datasource</artifactId>
-            <version>6.1.0</version>
+            <version>6.1.1</version>
         </dependency>
 
         <!-- big data connector components END -->

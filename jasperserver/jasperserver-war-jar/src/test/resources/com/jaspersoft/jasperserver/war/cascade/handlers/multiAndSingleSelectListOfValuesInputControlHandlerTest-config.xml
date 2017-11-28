@@ -6,11 +6,11 @@
     <import resource="../applicationContext-cascade-test.xml"/>
     <bean id="multySelectListOfValuesInputControl"
           class="com.jaspersoft.jasperserver.war.cascade.utils.InputControlMock" scope="prototype">
-        <property name="type" ref="TYPE_MULTI_SELECT_QUERY"/>
+        <property name="inputControlType" ref="TYPE_MULTI_SELECT_QUERY"/>
     </bean>
 
     <bean id="singleSelectListOfValuesInputControl" class="com.jaspersoft.jasperserver.war.cascade.utils.InputControlMock" scope="prototype">
-        <property name="type" ref="TYPE_SINGLE_SELECT_LIST_OF_VALUES"/>
+        <property name="inputControlType" ref="TYPE_SINGLE_SELECT_LIST_OF_VALUES"/>
     </bean>
 
     <bean id="shipreg" parent="multySelectListOfValuesInputControl">
@@ -19,7 +19,7 @@
     </bean>
 
     <bean id="shipregSingleSelect" parent="shipreg">
-        <property name="type" ref="TYPE_SINGLE_SELECT_LIST_OF_VALUES"/>
+        <property name="inputControlType" ref="TYPE_SINGLE_SELECT_LIST_OF_VALUES"/>
     </bean>
 
     <bean id="stringCollection_controlInfo" class="com.jaspersoft.jasperserver.war.cascade.utils.ReportInputControlInformationMock">

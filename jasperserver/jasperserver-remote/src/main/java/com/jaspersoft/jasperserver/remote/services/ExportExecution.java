@@ -28,7 +28,10 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -84,6 +87,9 @@ public class ExportExecution {
         lock.lock();
         try {
             this.status = status;
+            if (status == ExecutionStatus.queued) {
+                notFetched = null;
+            }
             if (status != ExecutionStatus.queued && status != ExecutionStatus.execution) {
                 done = true;
                 condition.signalAll();
@@ -150,9 +156,8 @@ public class ExportExecution {
                 case ready:
                     break;
                 default: {
-                    // not ready and not failed. This situation happens if export execution is restarted after report execution complete.
-                    // let's call this method recursively to wait for next signal.
-                    result = getFinalOutputResource();
+                    descriptor = new ErrorDescriptor.Builder().setErrorCode("export.not.ready")
+                            .setMessage("Export not ready").getErrorDescriptor();
                 }
             }
             if (descriptor != null) throw new ExportExecutionRejectedException(descriptor);

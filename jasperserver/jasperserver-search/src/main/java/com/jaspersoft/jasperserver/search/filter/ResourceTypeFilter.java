@@ -30,10 +30,14 @@ import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.impl.RepoRe
 import com.jaspersoft.jasperserver.api.search.SearchCriteria;
 import com.jaspersoft.jasperserver.search.common.SearchAttributes;
 import com.jaspersoft.jasperserver.search.service.RepositorySearchCriteria;
+
 import org.hibernate.criterion.CriteriaSpecification;
 import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Property;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.criterion.Subqueries;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -46,7 +50,7 @@ import java.util.Map;
  * <p>Filters resources by resourceType field.</p>
  *
  * @author Yuriy Plakosh
- * @version $Id: ResourceTypeFilter.java 55352 2015-05-15 08:20:19Z ykovalch $
+ * @version $Id: ResourceTypeFilter.java 56967 2015-08-20 23:20:53Z esytnik $
  */
 public class ResourceTypeFilter extends BaseSearchFilter implements Serializable {
     private Map<String, List<String>> filterOptionToResourceTypes;
@@ -95,7 +99,7 @@ public class ResourceTypeFilter extends BaseSearchFilter implements Serializable
 
                     if(extractTopics){
 
-                        SearchCriteria notAdhocReportsCriteria = SearchCriteria.forClass(RepoReportUnit.class);
+                        DetachedCriteria notAdhocReportsCriteria = DetachedCriteria.forClass(RepoReportUnit.class,"U");
                         notAdhocReportsCriteria
                                 .createAlias("parent", "p")
                                 .createAlias("dataSource", "rds", CriteriaSpecification.LEFT_JOIN);
@@ -112,11 +116,11 @@ public class ResourceTypeFilter extends BaseSearchFilter implements Serializable
 
                         notAdhocReportsCriteria
                                 .add(topicsCriterion)
-                                .setProjection(Projections.property("id"));
+                                .add(Property.forName("U.id").eqProperty(criteria.getAlias()+".id"))
+                                .setProjection(Projections.property("U.id"));
 
-                        List<Long> topicIds = getHibernateTemplate().findByCriteria(notAdhocReportsCriteria);
                         Criterion isReportUnit = Restrictions.eq("resourceType", ReportUnit.class.getName());
-                        Criterion isTopic = Restrictions.and(isReportUnit, Restrictions.in("id", topicIds));
+                        Criterion isTopic = Restrictions.and(isReportUnit, Subqueries.exists(notAdhocReportsCriteria));
 
                         criterion = criterion == null ? isTopic : Restrictions.or(criterion, isTopic);
                     }

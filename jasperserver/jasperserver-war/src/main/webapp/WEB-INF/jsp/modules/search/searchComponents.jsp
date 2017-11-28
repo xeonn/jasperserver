@@ -52,12 +52,12 @@
 
 <div class="hidden">
     <t:insertTemplate template="/WEB-INF/jsp/templates/propertiesResource.jsp">
-        <t:putAttribute name="containerClass">centered_vert centered_horz</t:putAttribute>
+        <t:putAttribute name="containerClass">centered_vert centered_horz hidden</t:putAttribute>
     </t:insertTemplate>
 </div>
 <div class="hidden">
     <t:insertTemplate template="/WEB-INF/jsp/templates/permissions.jsp">
-        <t:putAttribute name="containerClass">centered_vert centered_horz</t:putAttribute>
+        <t:putAttribute name="containerClass">centered_vert centered_horz hidden</t:putAttribute>
         <t:putAttribute name="bodyContent">
             <ul id="permissionsList"></ul>
         </t:putAttribute>
