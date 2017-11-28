@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata modelVersion="1.1.0">
+  <groupId>org.jboss.integration-platform</groupId>
+  <artifactId>jboss-integration-platform-bom</artifactId>
+  <version>6.0.0-SNAPSHOT</version>
+  <versioning>
+    <snapshot>
+      <timestamp>20140529.032029</timestamp>
+      <buildNumber>82</buildNumber>
+    </snapshot>
+    <lastUpdated>20140529032029</lastUpdated>
+    <snapshotVersions>
+      <snapshotVersion>
+        <extension>pom</extension>
+        <value>6.0.0-20140529.032029-82</value>
+        <updated>20140529032029</updated>
+      </snapshotVersion>
+    </snapshotVersions>
+  </versioning>
+</metadata>
