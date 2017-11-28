@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -70,7 +70,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * @author Vladimir Tsukur
  * @author Anton Fomin
- * @version $Id: ViewReportActionTest.java 35226 2013-08-09 07:08:53Z inesterenko $
+ * @version $Id: ViewReportActionTest.java 51450 2014-11-14 16:15:34Z ykovalchyk $
  */
 public class ViewReportActionTest extends UnitilsJUnit4 {
 
@@ -166,7 +166,7 @@ public class ViewReportActionTest extends UnitilsJUnit4 {
 
                 return Arrays.asList(inputControlState, inputControlStateCountry);
             }
-        }).getValuesForInputControls(null, null, null);
+        }).getValuesForInputControls(null, null, null, false);
 
         viewReportAction.runReport(requestContext.getMock());
 

@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005 - 2009 Jaspersoft Corporation. All rights  reserved.
+* Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
 * http://www.jaspersoft.com.
 *
 * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -47,7 +47,7 @@ import static org.junit.Assert.assertNotNull;
 
 /**
  * @author Yaroslav.Kovalchyk
- * @version $Id: SingleSelectListInputControlHandlerTest.java 41549 2014-02-06 22:17:13Z udavidovich $
+ * @version $Id: SingleSelectListInputControlHandlerTest.java 47331 2014-07-18 09:13:06Z kklein $
  */
 public class SingleSelectListInputControlHandlerTest extends UnitilsJUnit4 {
     @TestedObject

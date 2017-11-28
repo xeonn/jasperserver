@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2014 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: controls.report.js 44999 2014-04-23 21:37:35Z dgorbenko $
+ * @version: $Id: controls.report.js 7762 2014-09-19 10:16:02Z sergey.prilukin $
  */
 
 var Controls = (function (jQuery, _, Controls, Report) {

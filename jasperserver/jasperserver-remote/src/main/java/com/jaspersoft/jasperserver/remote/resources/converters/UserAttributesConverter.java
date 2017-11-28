@@ -1,3 +1,23 @@
+/*
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
+ * http://www.jaspersoft.com.
+ *
+ * Unless you have purchased  a commercial license agreement from Jaspersoft,
+ * the following license terms  apply:
+ *
+ * This program is free software: you can redistribute it and/or  modify
+ * it under the terms of the GNU Affero General Public License  as
+ * published by the Free Software Foundation, either version 3 of  the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero  General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public  License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 package com.jaspersoft.jasperserver.remote.resources.converters;
 
 import com.jaspersoft.jasperserver.api.metadata.user.domain.ProfileAttribute;
@@ -19,7 +39,11 @@ public class UserAttributesConverter implements ToServerConverter<ClientUserAttr
     public ClientUserAttribute toClient(ProfileAttribute serverObject, ToClientConversionOptions options) {
         ClientUserAttribute client = new ClientUserAttribute();
         client.setName(serverObject.getAttrName());
-        client.setValue(serverObject.getAttrValue());
+        if (serverObject.isSecure()) {
+            client.setSecure(true);
+        } else {
+            client.setValue(serverObject.getAttrValue());
+        }
 
         return client;
     }
@@ -33,6 +57,7 @@ public class UserAttributesConverter implements ToServerConverter<ClientUserAttr
     public ProfileAttribute toServer(ClientUserAttribute clientObject, ProfileAttribute resultToUpdate, ToServerConversionOptions options) throws IllegalParameterValueException, MandatoryParameterNotFoundException {
         resultToUpdate.setAttrName(clientObject.getName());
         resultToUpdate.setAttrValue(clientObject.getValue());
+        resultToUpdate.setSecure(clientObject.isSecure() != null && clientObject.isSecure());
         return resultToUpdate;
     }
 

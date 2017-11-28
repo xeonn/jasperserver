@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -22,15 +22,20 @@ package com.jaspersoft.jasperserver.export.modules.repository.beans;
 
 import java.beans.XMLDecoder;
 import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 
+import com.jaspersoft.jasperserver.api.JSException;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 import com.jaspersoft.jasperserver.api.metadata.olap.domain.OlapUnit;
 import com.jaspersoft.jasperserver.export.modules.repository.ResourceExportHandler;
 import com.jaspersoft.jasperserver.export.modules.repository.ResourceImportHandler;
+import com.jaspersoft.jasperserver.api.metadata.olap.util.XMLDecoderHandler;
+
+import javax.xml.parsers.SAXParserFactory;
 
 /**
  * @author tkavanagh
- * @version $Id: OlapUnitBean.java 19925 2010-12-11 15:06:41Z tmatyashovsky $
+ * @version $Id: OlapUnitBean.java 51790 2014-12-03 17:29:31Z ztomchenco $
  */
 public class OlapUnitBean extends ResourceBean {
 	
@@ -61,9 +66,20 @@ public class OlapUnitBean extends ResourceBean {
 		} else {
 			byte[] viewOptionsData = importHandler.handleData(this, 
 					olapViewOptionsDataFile, DATA_PROVIDER_VIEW_OPTIONS);
-    	    XMLDecoder decoder = new XMLDecoder(new ByteArrayInputStream(viewOptionsData));
-    	    options = decoder.readObject();
-     	    decoder.close();
+            InputStream stream = new ByteArrayInputStream(viewOptionsData);
+            try {
+                XMLDecoder decoder = new XMLDecoder(stream);
+                options = decoder.readObject();
+                decoder.close();
+            } catch (Exception e){
+                XMLDecoderHandler hander = new XMLDecoderHandler();
+                try {
+                    SAXParserFactory.newInstance().newSAXParser().parse(stream, hander);
+                    options = hander.getResult();
+                } catch (Exception e1) {
+                    throw new JSException("Cannot parse file " + olapViewOptionsDataFile);
+                }
+            }
 		}
 		return options;
 	}

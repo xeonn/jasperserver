@@ -11,8 +11,8 @@
 		<property name="maxLength"/>
 		<property name="decimals"/>
 		<property name="regularExpr"/>
-		<property  name="minValue" type="serializable"/>
-		<property name="maxValue" column="max_value" type="serializable"/>
+		<property  name="minValue" type="serializable" length="1000"/>
+		<property name="maxValue" column="max_value" type="serializable" length="1000"/>
 		<property name="strictMin"/>
 		<property name="strictMax"/>
 	</joined-subclass>

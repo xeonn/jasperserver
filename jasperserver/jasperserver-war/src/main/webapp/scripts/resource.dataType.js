@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2014 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -21,13 +21,13 @@
 
 
 /**
- * @version: $Id: resource.dataType.js 43122 2014-03-18 12:44:22Z psavushchik $
+ * @version: $Id: resource.dataType.js 8068 2014-12-04 12:14:35Z ykovalchyk $
  */
 
 
 var resourceDataType = {
     PAGE_ID: "addResource_dataType",
-    DATA_TYPE_ID: "dataType.type",
+    DATA_TYPE_ID: "dataType.dataTypeType",
     LABEL_ID: "dataType.label",
     RESOURCE_ID_ID: "dataType.name",
     DESCRIPTION_ID: "dataType.description",

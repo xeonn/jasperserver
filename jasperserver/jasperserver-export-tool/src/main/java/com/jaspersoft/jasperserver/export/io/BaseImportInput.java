@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -24,12 +24,12 @@ package com.jaspersoft.jasperserver.export.io;
 import java.io.IOException;
 import java.io.InputStream;
 
-import com.jaspersoft.jasperserver.export.util.PathUtils;
+import com.jaspersoft.jasperserver.core.util.PathUtils;
 
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: BaseImportInput.java 19925 2010-12-11 15:06:41Z tmatyashovsky $
+ * @version $Id: BaseImportInput.java 51495 2014-11-17 15:55:08Z agodovanets $
  */
 public abstract class BaseImportInput implements ImportInput {
 

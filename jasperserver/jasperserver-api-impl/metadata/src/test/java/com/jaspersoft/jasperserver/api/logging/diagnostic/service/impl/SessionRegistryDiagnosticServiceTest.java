@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -26,8 +26,8 @@ import com.jaspersoft.jasperserver.api.logging.diagnostic.domain.DiagnosticAttri
 import com.jaspersoft.jasperserver.api.logging.diagnostic.helper.DiagnosticAttributeBuilder;
 import com.jaspersoft.jasperserver.api.logging.diagnostic.service.DiagnosticCallback;
 import org.junit.Before;
-import org.springframework.security.concurrent.SessionInformation;
-import org.springframework.security.concurrent.SessionRegistry;
+import org.springframework.security.core.session.SessionInformation;
+import org.springframework.security.core.session.SessionRegistry;
 import org.unitils.UnitilsJUnit4;
 import org.unitils.mock.Mock;
 

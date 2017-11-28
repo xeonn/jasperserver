@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -33,7 +33,7 @@ import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: MapResourceHandlerRegistry.java 22693 2012-03-21 12:54:07Z plysak $
+ * @version $Id: MapResourceHandlerRegistry.java 47331 2014-07-18 09:13:06Z kklein $
  */
 public class MapResourceHandlerRegistry implements ResourceHandlerRegistry, InitializingBean {
 

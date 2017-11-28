@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2013 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -20,10 +20,11 @@
  */
 package com.jaspersoft.jasperserver.api.security.externalAuth.preauth;
 
-import org.springframework.security.GrantedAuthority;
-import org.springframework.security.ui.preauth.PreAuthenticatedGrantedAuthoritiesAuthenticationDetails;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.web.authentication.preauth.PreAuthenticatedGrantedAuthoritiesAuthenticationDetails;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 
 /**
  * Class used by authenticationDetailsSource in BasePreAuthenticatedProcessingFilter bean.
@@ -35,6 +36,6 @@ import javax.servlet.http.HttpServletRequest;
 public class BasePreAuthenticatedGrantesAuthorityDetails extends PreAuthenticatedGrantedAuthoritiesAuthenticationDetails {
 	public BasePreAuthenticatedGrantesAuthorityDetails(HttpServletRequest request) {
 		super(request);
-		setGrantedAuthorities(new GrantedAuthority[0]);
+		setGrantedAuthorities(new ArrayList<GrantedAuthority>());
 	}
 }

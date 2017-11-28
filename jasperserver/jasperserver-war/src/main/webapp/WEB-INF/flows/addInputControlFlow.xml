@@ -37,12 +37,12 @@
     </action-state>
 
     <decision-state id="decideControlType">
-        <if test="flowScope.control.inputControl.type==1" then="saveInputControl"/>
-        <if test="flowScope.control.inputControl.type==2 || flowScope.control.inputControl.type==5"
+        <if test="flowScope.control.inputControl.inputControlType==1" then="saveInputControl"/>
+        <if test="flowScope.control.inputControl.inputControlType==2 || flowScope.control.inputControl.inputControlType==5"
             then="singleOrMultiValue"/>
-        <if test="flowScope.control.inputControl.type==3 || flowScope.control.inputControl.type==6 || flowScope.control.inputControl.type == 8 || flowScope.control.inputControl.type == 10"
+        <if test="flowScope.control.inputControl.inputControlType==3 || flowScope.control.inputControl.inputControlType==6 || flowScope.control.inputControl.inputControlType == 8 || flowScope.control.inputControl.inputControlType == 10"
             then="listOfValues"/>
-        <if test="flowScope.control.inputControl.type==4 || flowScope.control.inputControl.type==7 || flowScope.control.inputControl.type == 9 || flowScope.control.inputControl.type == 11"
+        <if test="flowScope.control.inputControl.inputControlType==4 || flowScope.control.inputControl.inputControlType==7 || flowScope.control.inputControl.inputControlType == 9 || flowScope.control.inputControl.inputControlType == 11"
             then="query" else="naming"/>
     </decision-state>
 

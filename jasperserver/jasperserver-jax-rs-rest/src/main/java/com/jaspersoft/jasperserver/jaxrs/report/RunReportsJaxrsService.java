@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005 - 2009 Jaspersoft Corporation. All rights  reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
 * http://www.jaspersoft.com.
 *
 * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -16,7 +16,7 @@
 * GNU Affero  General Public License for more details.
 *
 * You should have received a copy of the GNU Affero General Public  License
-* along with this program.&nbsp; If not, see <http://www.gnu.org/licenses/>.
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 package com.jaspersoft.jasperserver.jaxrs.report;
 
@@ -50,7 +50,7 @@ import java.util.Map;
 
 /**
  * @author Yaroslav.Kovalchyk
- * @version $Id: RunReportsJaxrsService.java 45722 2014-05-14 10:24:22Z sergey.prilukin $
+ * @version $Id: RunReportsJaxrsService.java 50801 2014-10-29 00:20:56Z inesterenko $
  */
 @Service
 @Path("/reports")
@@ -78,6 +78,7 @@ public class RunReportsJaxrsService extends RemoteServiceWrapper<RunReportServic
             @QueryParam("ignorePagination") final Boolean ignorePagination,
             @QueryParam("attachmentsPrefix") final String attachmentsPrefix,
             @QueryParam("allowInlineScripts") @DefaultValue("true") final Boolean allowInlineScripts,
+            @QueryParam("markupType") final String markupType,
             @Context final HttpServletRequest request,
             @QueryParam(Request.PARAM_NAME_FRESH_DATA) @DefaultValue("false") final Boolean freshData,
             /* rest_v2 service should be interactive by default, therefore default value for "interactive" is "true" */
@@ -104,6 +105,7 @@ public class RunReportsJaxrsService extends RemoteServiceWrapper<RunReportServic
                 }
                 final ExportExecutionOptions exportOptions = new ExportExecutionOptions().setOutputFormat(outputFormat)
                         .setPages(ReportOutputPages.valueOf(page != null ? page.toString() : pages))
+                        .setMarkupType(markupType)
                         .setBaseUrl(baseUrlFromQuery != null && !baseUrlFromQuery.isEmpty() ? baseUrlFromQuery : baseUrl)
                         .setAttachmentsPrefix(attachmentsPrefix).setAllowInlineScripts(allowInlineScripts);
                 ReportOutputResource reportOutputResource = remoteService.getReportOutputFromRawParameters(Folder.SEPARATOR + reportUnitURI, parameterMap, reportExecutionOptions, exportOptions);

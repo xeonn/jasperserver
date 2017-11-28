@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -36,21 +36,23 @@ import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceReference;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.JndiJdbcReportDataSource;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportUnit;
+import com.jaspersoft.jasperserver.api.metadata.security.JasperServerPermission;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.security.acl.basic.SimpleAclEntry;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.List;
 
-import static org.testng.AssertJUnit.*;
+import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.AssertJUnit.assertNotNull;
+import static org.testng.AssertJUnit.assertTrue;
 
 
 /**
  * @author Lucian Chirita
- * @version $Id: RepositoryMoveAndCopyTestsTestNG.java 30789 2013-04-04 12:17:29Z ykovalchyk $
+ * @version $Id: RepositoryMoveAndCopyTestsTestNG.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
 public class RepositoryMoveAndCopyTestsTestNG extends BaseRepositoryTestTestNG {
 
@@ -244,7 +246,7 @@ public class RepositoryMoveAndCopyTestsTestNG extends BaseRepositoryTestTestNG {
 				saveResource(ds);
 				
 				DataType dt = (DataType) newResource(DataType.class, "ds");
-				dt.setType(DataType.TYPE_TEXT);
+				dt.setDataTypeType(DataType.TYPE_TEXT);
 				saveResource(dt);
 				
 				Resource copy = getUnsecureRepositoryService().copyResource(getExecutionContext(), ds.getURIString(), dt.getURIString());
@@ -339,7 +341,7 @@ public class RepositoryMoveAndCopyTestsTestNG extends BaseRepositoryTestTestNG {
 						JndiJdbcReportDataSource.class, "ds");
 				ds.setJndiName("ds-jndi");
 				saveResource(ds);
-				setUserPermission(SimpleAclEntry.READ, ds.getURIString(), USER_JOE);
+				setUserPermission(JasperServerPermission.READ.getMask(), ds.getURIString(), USER_JOE);
 				
 				Folder folder = saveNewFolder("m");
 				
@@ -355,7 +357,7 @@ public class RepositoryMoveAndCopyTestsTestNG extends BaseRepositoryTestTestNG {
 				assertResourceInexistent(ds.getURIString());
 				JndiJdbcReportDataSource movedDS = (JndiJdbcReportDataSource) assertResourceExists(
 						JndiJdbcReportDataSource.class, folder, ds.getName());
-				assertUserPermission(SimpleAclEntry.READ, movedDS, USER_JOE);
+				assertUserPermission(JasperServerPermission.READ.getMask(), movedDS, USER_JOE);
 			}
 		});
 	}
@@ -376,10 +378,10 @@ public class RepositoryMoveAndCopyTestsTestNG extends BaseRepositoryTestTestNG {
 				report.addResource(newFileResource("img", FileResource.TYPE_IMAGE, "/images/jasperreports.png"));
 				
 				InputControl ic = (InputControl) newResource(InputControl.class, "ic");
-				ic.setType(InputControl.TYPE_SINGLE_VALUE);
+				ic.setInputControlType(InputControl.TYPE_SINGLE_VALUE);
 				ic.setMandatory(true);
 				DataType dt = (DataType) newResource(DataType.class, "dt");
-				dt.setType(DataType.TYPE_TEXT);
+				dt.setDataTypeType(DataType.TYPE_TEXT);
 				dt.setMaxLength(new Integer(20));
 				ic.setDataType(dt);
 				report.addInputControl(ic);
@@ -453,10 +455,10 @@ public class RepositoryMoveAndCopyTestsTestNG extends BaseRepositoryTestTestNG {
 				assertEquals(1, inputControls.size());
 				InputControl movedIC = (InputControl) assertLocalReference(
 						(ResourceReference) inputControls.get(0), InputControl.class);
-				assertEquals(InputControl.TYPE_SINGLE_VALUE, movedIC.getType());
+				assertEquals(InputControl.TYPE_SINGLE_VALUE, movedIC.getInputControlType());
 				assertTrue(movedIC.isMandatory());
 				DataType movedDT = (DataType) assertLocalReference(movedIC.getDataType(), DataType.class);
-				assertEquals(DataType.TYPE_TEXT, movedDT.getType());
+				assertEquals(DataType.TYPE_TEXT, movedDT.getDataTypeType());
 				assertEquals(new Integer(20), movedDT.getMaxLength());
 			}
 		});
@@ -585,13 +587,13 @@ public class RepositoryMoveAndCopyTestsTestNG extends BaseRepositoryTestTestNG {
 		executeInTempFolder(new Callback() {
 			public void execute() {
 				Folder folder = saveNewFolder("f");
-				setUserPermission(SimpleAclEntry.ADMINISTRATION, folder.getURIString(), USER_JOE);
+				setUserPermission(JasperServerPermission.ADMINISTRATION.getMask(), folder.getURIString(), USER_JOE);
 				
 				JndiJdbcReportDataSource ds = (JndiJdbcReportDataSource) newResource(
 						JndiJdbcReportDataSource.class, folder, "ds");
 				ds.setJndiName("ds-jndi");
 				saveResource(ds);
-				setUserPermission(SimpleAclEntry.READ_WRITE, ds.getURIString(), USER_JOE);
+				setUserPermission(JasperServerPermission.READ_WRITE.getMask(), ds.getURIString(), USER_JOE);
 				
 				String copyURI = makeUri("f2");
 				getUnsecureRepositoryService().copyFolder(getExecutionContext(), folder.getURIString(), copyURI);
@@ -608,10 +610,10 @@ public class RepositoryMoveAndCopyTestsTestNG extends BaseRepositoryTestTestNG {
 				getUnsecureRepositoryService().moveFolder(getExecutionContext(), folder.getURIString(), destFolder.getURIString());
 				assertFolderInexistent(folder.getURIString());
 				Folder movedFolder = assertFolderExists(destFolder, folder.getName());
-				assertUserPermission(SimpleAclEntry.ADMINISTRATION, movedFolder, USER_JOE);
+				assertUserPermission(JasperServerPermission.ADMINISTRATION.getMask(), movedFolder, USER_JOE);
 				JndiJdbcReportDataSource movedDs = (JndiJdbcReportDataSource) assertResourceExists(
 						JndiJdbcReportDataSource.class, movedFolder, ds.getName());
-				assertUserPermission(SimpleAclEntry.READ_WRITE, movedDs, USER_JOE);
+				assertUserPermission(JasperServerPermission.READ_WRITE.getMask(), movedDs, USER_JOE);
 			}
 		});
 	}

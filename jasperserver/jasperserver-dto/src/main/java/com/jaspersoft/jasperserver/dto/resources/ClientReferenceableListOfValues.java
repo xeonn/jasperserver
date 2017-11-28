@@ -1,6 +1,7 @@
 /*
- * Copyright (C) 2005 - 2012 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
+ *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
  * the following license terms  apply:
  *
@@ -23,7 +24,7 @@ package com.jaspersoft.jasperserver.dto.resources;
  * <p></p>
  *
  * @author Zakhar.Tomchenco
- * @version $Id: ClientReferenceableListOfValues.java 35226 2013-08-09 07:08:53Z inesterenko $
+ * @version $Id: ClientReferenceableListOfValues.java 47331 2014-07-18 09:13:06Z kklein $
  */
 public interface ClientReferenceableListOfValues extends ClientReferenceable {
 }

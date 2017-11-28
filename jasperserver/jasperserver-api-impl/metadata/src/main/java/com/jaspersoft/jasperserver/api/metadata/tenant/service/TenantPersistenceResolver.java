@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -23,9 +23,11 @@ package com.jaspersoft.jasperserver.api.metadata.tenant.service;
 
 import com.jaspersoft.jasperserver.api.metadata.user.domain.impl.hibernate.RepoTenant;
 
+import java.util.List;
+
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: TenantPersistenceResolver.java 19922 2010-12-11 14:59:51Z tmatyashovsky $
+ * @version $Id: TenantPersistenceResolver.java 50011 2014-10-09 16:57:26Z vzavadskii $
  */
 public interface TenantPersistenceResolver {
 	
@@ -33,4 +35,5 @@ public interface TenantPersistenceResolver {
 
     RepoTenant getPersistentTenantByAlias(String tenantAlias, boolean required);
 
+    List<RepoTenant> getPersistentTenants(List<String> tenantIds);
 }

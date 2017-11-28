@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -36,8 +36,8 @@ import com.jaspersoft.jasperserver.export.modules.ImporterModuleContext;
 import com.jaspersoft.jasperserver.export.modules.repository.ResourceImporter;
 import com.jaspersoft.jasperserver.export.modules.scheduling.beans.ReportJobBean;
 import com.jaspersoft.jasperserver.export.modules.scheduling.beans.ReportUnitJobsIndexBean;
-import com.jaspersoft.jasperserver.export.util.PathUtils;
-import com.jaspersoft.jasperserver.export.util.PathUtils.SplittedPath;
+import com.jaspersoft.jasperserver.core.util.PathUtils;
+import com.jaspersoft.jasperserver.core.util.PathUtils.SplittedPath;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dom4j.Element;
@@ -46,7 +46,7 @@ import java.util.*;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ReportJobsImporter.java 38348 2013-09-30 04:57:18Z carbiv $
+ * @version $Id: ReportJobsImporter.java 51495 2014-11-17 15:55:08Z agodovanets $
  */
 public class ReportJobsImporter extends BaseImporterModule {
 

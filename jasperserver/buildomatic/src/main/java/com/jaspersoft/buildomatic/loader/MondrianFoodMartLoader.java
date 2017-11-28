@@ -1,5 +1,5 @@
 /*
-// $Id: MondrianFoodMartLoader.java 37014 2013-09-09 20:38:27Z schubar $
+// $Id: MondrianFoodMartLoader.java 50269 2014-10-16 17:51:53Z tchow $
 // This software is subject to the terms of the Common Public License
 // Agreement, available at the following URL:
 // http://www.opensource.org/licenses/cpl.html.
@@ -17,7 +17,8 @@ import mondrian.olap.Util;
 import mondrian.rolap.RolapUtil;
 import mondrian.spi.Dialect;
 import mondrian.spi.DialectManager;
-
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.io.*;
 import java.math.BigDecimal;
 import java.sql.*;
@@ -85,7 +86,7 @@ import org.apache.log4j.*;
  *
  * @author jhyde
  * @since 23 December, 2004
- * @version $Id: MondrianFoodMartLoader.java 37014 2013-09-09 20:38:27Z schubar $
+ * @version $Id: MondrianFoodMartLoader.java 50269 2014-10-16 17:51:53Z tchow $
  */
 public class MondrianFoodMartLoader {
     // Constants
@@ -356,8 +357,7 @@ public class MondrianFoodMartLoader {
      * populating tables and creating indexes
      */
     private void load() throws Exception {
-        RolapUtil.loadDrivers(jdbcDrivers);
-
+        loadDriver(jdbcDrivers);
         if (userName == null) {
             connection = DriverManager.getConnection(jdbcURL);
         } else {
@@ -488,6 +488,24 @@ public class MondrianFoodMartLoader {
                 fileOutput.close();
                 fileOutput = null;
             }
+        }
+    }
+
+    private void loadDriver(String driverClassName) {
+        RolapUtil.loadDrivers(driverClassName);
+        Class<?> tibcoDriver = null;
+        Constructor<?> tdConstructor = null;
+        Driver driver = null;
+        if(driverClassName!=null){
+            try {
+                tibcoDriver = Class.forName(driverClassName);
+                tdConstructor = tibcoDriver.getDeclaredConstructor();
+                driver = (Driver) tdConstructor.newInstance((Object[])null);
+                DriverManager.registerDriver(driver);
+            } catch (Exception ex) {}
+            if(tibcoDriver==null)  LOGGER.info("Couldn't Class.forName for " + driverClassName);
+            else if(tdConstructor == null) LOGGER.info("Couldn't get constructor for " + driverClassName);
+            else if(driver==null) LOGGER.info("Couldn't instantiate " + driverClassName);
         }
     }
 

@@ -1,5 +1,5 @@
 <%--
-  ~ Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+  ~ Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
   ~ http://www.jaspersoft.com.
   ~
   ~ Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -47,7 +47,7 @@ Usage:
     <t:putAttribute name="containerElements"><div class="sizer diagonal"></div></t:putAttribute>
     <t:putAttribute name="headerClass" value="mover"/>
     <t:putAttribute name="bodyContent">
-            <label class="control input text" accesskey="o" for="generateResourceInputName" title="This will be the visible name for the resource and can be changed.">
+            <label class="control input text" accesskey="o" for="generateResourceInputName" title="<spring:message code='resource.visiblename.tooltip'/>">
                 <span class="wrap"><spring:message code="dialog.file.name"/> (<spring:message code='required.field'/>):</span>
                 <input class="" id="generateResourceInputName" type="text" maxlength="94" value=""/>
                 <span class="message warning">error message here</span>

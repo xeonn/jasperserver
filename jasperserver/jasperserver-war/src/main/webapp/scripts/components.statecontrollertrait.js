@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2014 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -22,7 +22,7 @@
 
 /*
  * @author inesterenko
- * @version: $Id: components.statecontrollertrait.js 45798 2014-05-16 15:39:01Z ztomchenco $
+ * @version: $Id: components.statecontrollertrait.js 7762 2014-09-19 10:16:02Z sergey.prilukin $
  */
 
 jaspersoft.components.StateControllerTrait = (function ($, _, Backbone, i18n, State) {

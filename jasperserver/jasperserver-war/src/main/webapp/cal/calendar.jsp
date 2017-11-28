@@ -1,5 +1,5 @@
 <%--
-  ~ Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+  ~ Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
   ~ http://www.jaspersoft.com.
   ~
   ~ Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -23,17 +23,17 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
-<link rel="stylesheet" href="${pageContext.request.contextPath}/scripts/lib/jquery/theme/redmond/jquery-ui-1.10.4-custom.css" type="text/css" media="screen">
+<link rel="stylesheet" href="${pageContext.request.contextPath}/scripts/bower_components/jquery-ui/themes/redmond/jquery-ui-1.10.4-custom.css" type="text/css" media="screen">
 
     <c:choose>
         <c:when test="${userLocale == null or empty userLocale}">
-            <script type='text/javascript' src="${pageContext.request.contextPath}/scripts/lib/jquery/ui/jquery.ui.datepicker-en.js"></script>
+            <script type='text/javascript' src="${pageContext.request.contextPath}/scripts/bower_components/jquery-ui/ui/jquery.ui.datepicker-en.js"></script>
         </c:when>
         <c:when test="${userLocale == 'zh-CN' || userLocale == 'zh-TW' || userLocale == 'pt-BR'|| userLocale == 'pt_BR' || userLocale == 'zh_CN' || userLocale == 'zh_TW'}">
-            <script type='text/javascript' src="${pageContext.request.contextPath}/scripts/lib/jquery/ui/jquery.ui.datepicker-${fn:replace(userLocale, "_", "-")}.js"></script>
+            <script type='text/javascript' src="${pageContext.request.contextPath}/scripts/bower_components/jquery-ui/ui/jquery.ui.datepicker-${fn:replace(userLocale, "_", "-")}.js"></script>
         </c:when>
         <c:otherwise>
-            <script type='text/javascript' src="${pageContext.request.contextPath}/scripts/lib/jquery/ui/jquery.ui.datepicker-${fn:substring(userLocale, 0,2)}.js"></script>
+            <script type='text/javascript' src="${pageContext.request.contextPath}/scripts/bower_components/jquery-ui/ui/jquery.ui.datepicker-${fn:substring(userLocale, 0,2)}.js"></script>
         </c:otherwise>
     </c:choose>
 
@@ -54,4 +54,4 @@
     JRS.i18n["bundledCalendarTimeFormat"] = '<spring:message code="calendar.time.format" javaScriptEscape="true"/>';
 </script>
 
-<script type="text/javascript" src="${pageContext.request.contextPath}/scripts/lib/jquery/ui/jquery.datepicker.extensions.js"> </script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/scripts/bower_components/jquery-ui/ui/jquery.datepicker.extensions.js"> </script>

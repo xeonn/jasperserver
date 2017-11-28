@@ -145,6 +145,14 @@
             </li>
 
 
+            <li class="leaf">
+                <div class="control checkBox">
+                     <label class="wrap" for="scheduler_box_14" title="<spring:message code="report.output.pptx.label.tooltip"/>"><spring:message code="report.output.pptx.label"/></label>
+                     <input id="scheduler_box_14" name="outputFormats" value="PPTX" type="checkbox">
+                </div>
+            </li>
+
+
             <c:if test="${enableDataSnapshot}">
                 <li class="leaf">
                     <div class="control checkBox">

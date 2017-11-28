@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -48,6 +48,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.io.Serializable;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -61,11 +62,11 @@ import java.util.concurrent.ConcurrentHashMap;
  * Report REST service
  * 
  * @author gtoffoli
- * @version $Id: RESTReport.java 35226 2013-08-09 07:08:53Z inesterenko $
+ * @version $Id: RESTReport.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
 @Component("restReportService")
 @Scope(value = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)
-public class RESTReport extends RESTAbstractService {
+public class RESTReport extends RESTAbstractService implements Serializable {
 
     private final static Log log = LogFactory.getLog(RESTReport.class);
     @Resource(name = "legacyRunReportService")

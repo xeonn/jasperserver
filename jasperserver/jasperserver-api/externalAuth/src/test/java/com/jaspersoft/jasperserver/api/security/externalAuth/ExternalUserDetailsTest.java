@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2013 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -20,15 +20,21 @@
  */
 package com.jaspersoft.jasperserver.api.security.externalAuth;
 
-import org.springframework.security.GrantedAuthority;
-import org.springframework.security.GrantedAuthorityImpl;
-import org.springframework.security.userdetails.UserTests;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertTrue;
 
 /**
  * User: dlitvak
  * Date: 3/22/13
  */
-public class ExternalUserDetailsTest extends UserTests {
+// TODO Spring Security Upgrade: fix dependency on org.springframework.security.core.userdetails.UserTests
+public class ExternalUserDetailsTest /*extends UserTests */{
 
 	public static final String TEST_USER_NAME = "testUser";
 	public static final String TEST_ROLE = "testRole";
@@ -38,20 +44,13 @@ public class ExternalUserDetailsTest extends UserTests {
 	public static final boolean USER_ACCOUNT_NON_LOCKED = true;
 	public static final String TEST_PASSWORD = "testPassword";
 
-	public void setAuthoritiesTest() {
-		ExternalUserDetails externalUserDetails= new ExternalUserDetails(TEST_USER_NAME);
-		assertNotNull("GrantedAuthorities array should not be null after ExternalUserDetails instantiation.", externalUserDetails.getAuthorities());
-		assertTrue("GrantedAuthorities array should be empty after ExternalUserDetails instantiation.", externalUserDetails.getAuthorities().length == 0);
-
-		externalUserDetails.setAuthorities(new GrantedAuthority[] {new GrantedAuthorityImpl(TEST_ROLE)});
-		assertNotNull("externalUserDetails GrantedAuthorities array should not be null", externalUserDetails.getAuthorities());
-		assertTrue("externalUserDetails GrantedAuthority array should condain only 1 role: " + TEST_ROLE, externalUserDetails.getAuthorities().length == 1 && TEST_ROLE.equalsIgnoreCase(externalUserDetails.getAuthorities()[0].getAuthority()));
-	}
 
 	public void construstorExternalUserDetailsTest() {
+        List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>(1);
+        authorities.add(new SimpleGrantedAuthority(TEST_ROLE));
 		ExternalUserDetails externalUserDetails= new ExternalUserDetails(TEST_USER_NAME, TEST_PASSWORD,
 				USER_ACCOUNT_ENABLED, USER_ACCOUNT_NOT_EXPIRED, USER_CREDS_NOT_EXPIRED, USER_ACCOUNT_NON_LOCKED,
-				new GrantedAuthority[] {new GrantedAuthorityImpl(TEST_ROLE)});
+                authorities);
 
 		assertTrue("Test user name did not match after externalUserDetails instantiation", TEST_USER_NAME.equals(externalUserDetails.getUsername()));
 		assertTrue("Test user password did not match after externalUserDetails instantiation", TEST_PASSWORD.equals(externalUserDetails.getPassword()));
@@ -62,7 +61,7 @@ public class ExternalUserDetailsTest extends UserTests {
 		assertNotNull("externalUserDetails has a null additionalDetailMap after instantiation", externalUserDetails.getAdditionalDetailsMap());
 
 		assertNotNull("externalUserDetails GrantedAuthorities array should not be null after externalUserDetails instantiation", externalUserDetails.getAuthorities());
-		assertTrue("externalUserDetails GrantedAuthority array should condain only 1 role  after externalUserDetails instantiation: " + TEST_ROLE, externalUserDetails.getAuthorities().length == 1 && TEST_ROLE.equalsIgnoreCase(externalUserDetails.getAuthorities()[0].getAuthority()));
+		assertTrue("externalUserDetails GrantedAuthority array should condain only 1 role  after externalUserDetails instantiation: " + TEST_ROLE, externalUserDetails.getAuthorities().size() == 1 && TEST_ROLE.equalsIgnoreCase(externalUserDetails.getAuthorities().iterator().next().getAuthority()));
 
 	}
 }

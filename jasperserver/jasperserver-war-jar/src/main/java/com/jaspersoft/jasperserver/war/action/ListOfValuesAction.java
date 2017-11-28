@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -22,6 +22,7 @@ package com.jaspersoft.jasperserver.war.action;
 
 import java.util.Arrays;
 
+import com.jaspersoft.jasperserver.api.common.crypto.PasswordCipherer;
 import com.jaspersoft.jasperserver.war.common.ConfigurationBean;
 import org.springframework.validation.DataBinder;
 import org.springframework.web.multipart.support.ByteArrayMultipartFileEditor;
@@ -47,7 +48,7 @@ import com.jaspersoft.jasperserver.war.validation.ListOfValuesValidator;
 
 /**
  * @author Ionut Nedelcu (ionutned@users.sourceforge.net)
- * @version $Id: ListOfValuesAction.java 41549 2014-02-06 22:17:13Z udavidovich $
+ * @version $Id: ListOfValuesAction.java 51858 2014-12-06 20:46:19Z vsabadosh $
  */
 public class ListOfValuesAction extends FormAction {
     private static final String ATTRIBUTE_RESOURCE_ID_NOT_SUPPORTED_SYMBOLS = "resourceIdNotSupportedSymbols";
@@ -56,12 +57,12 @@ public class ListOfValuesAction extends FormAction {
 	private static final String LISTOFVALUES_ATTR = "listOfValues";
 	private static final String PARENT_FOLDER_ATTR = "parentFolder";
 	private static final String IS_EDIT = "isEdit";//FIXME use wrapper to disable name in UI
+    private static final String SECURE_VALUE_SUBSTITUTION =  "*******";
 
 	private RepositoryService repository;
     private ConfigurationBean configuration;
 
-
-	public RepositoryService getRepository() {
+    public RepositoryService getRepository() {
 		return repository;
 	}
 
@@ -76,7 +77,6 @@ public class ListOfValuesAction extends FormAction {
     protected void initBinder(RequestContext context, DataBinder binder) {
 		binder.registerCustomEditor(byte[].class, new ByteArrayMultipartFileEditor());
 	}
-
 
 	/**
 	 *
@@ -95,7 +95,7 @@ public class ListOfValuesAction extends FormAction {
 	public Event lovList(RequestContext context)
 	{
 		ResourceLookup[] resources = repository.findResource(
-				JasperServerUtil.getExecutionContext(context), 
+				JasperServerUtil.getExecutionContext(context),
 				FilterCriteria.createFilter(ListOfValues.class));
 
 		context.getRequestScope().put("resources", Arrays.asList(resources));
@@ -131,10 +131,10 @@ public class ListOfValuesAction extends FormAction {
 		if (isEdit == null) {
 			isEdit = (String)context.getRequestParameters().get(IS_EDIT);
 			context.getFlowScope().put(IS_EDIT, isEdit);
-		}		
+		}
 		if (isEdit != null)
 		{
-			String currentDataType = (String) context.getFlowScope().get(LISTOFVALUES_ATTR);	
+			String currentDataType = (String) context.getFlowScope().get(LISTOFVALUES_ATTR);
 			if (currentDataType == null) {
 				currentDataType = (String)context.getRequestParameters().get("resource");
 				context.getFlowScope().put(LISTOFVALUES_ATTR, currentDataType);
@@ -144,8 +144,9 @@ public class ListOfValuesAction extends FormAction {
 			if(listOfValues == null){
 				context.getFlowScope().remove("prevForm");
 				throw new JSException("jsexception.could.not.find.resource.with.uri", new Object[] {currentDataType});
-			}		
-			listOfValuesDTO = new ListOfValuesDTO(listOfValues);
+			}
+
+            listOfValuesDTO = new ListOfValuesDTO(hideEncryptedValues(listOfValues));
 			listOfValuesDTO.setMode(BaseDTO.MODE_STAND_ALONE_EDIT);
 		}
 		else
@@ -166,6 +167,16 @@ public class ListOfValuesAction extends FormAction {
 		return listOfValuesDTO;
 	}
 
+    ListOfValues hideEncryptedValues(ListOfValues listOfValues) {
+        if (listOfValues.getValues() != null) {
+            for (ListOfValuesItem listOfValuesItem : listOfValues.getValues()) {
+				if (PasswordCipherer.getInstance().isEncrypted(listOfValuesItem.getValue().toString())) {
+                    listOfValuesItem.setValue(SECURE_VALUE_SUBSTITUTION);
+                }
+            }
+        }
+        return listOfValues;
+    }
 
 	/**
 	 *

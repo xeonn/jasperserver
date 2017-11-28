@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005 - 2013 Jaspersoft Corporation. All rights  reserved.
+* Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
 * http://www.jaspersoft.com.
 *
 * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -20,34 +20,48 @@
 */
 package com.jaspersoft.jasperserver.remote.connection;
 
+import com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl.BeanReportDataSourceServiceFactory;
+import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.BeanReportDataSource;
+import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.client.BeanReportDataSourceImpl;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.service.ReportDataSourceService;
-import com.jaspersoft.jasperserver.dto.connection.BeanConnection;
-import com.jaspersoft.jasperserver.remote.exception.MandatoryParameterNotFoundException;
+import com.jaspersoft.jasperserver.dto.resources.ClientBeanDataSource;
+import com.jaspersoft.jasperserver.remote.resources.converters.BeanDataSourceResourceConverter;
+import com.jaspersoft.jasperserver.remote.resources.converters.ToServerConversionOptions;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.context.ApplicationContext;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import static org.mockito.Mockito.mock;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertSame;
+import static org.mockito.Mockito.doThrow;
+import static org.testng.Assert.assertEquals;
 
 /**
  * <p></p>
  *
  * @author yaroslav.kovalchyk
- * @version $Id: BeanConnectionStrategyTest.java 41578 2014-02-07 14:59:02Z ykovalchyk $
+ * @version $Id: BeanConnectionStrategyTest.java 50011 2014-10-09 16:57:26Z vzavadskii $
  */
 public class BeanConnectionStrategyTest {
+    private static ClientBeanDataSource INITIAL_CONNECTION_DESCRIPTION = new ClientBeanDataSource().
+            setBeanName("test bean").setBeanMethod("test bean method");
+
     @InjectMocks
     private final BeanConnectionStrategy strategy = new BeanConnectionStrategy();
+
     @Mock
-    private ApplicationContext ctx;
+    private BeanReportDataSourceServiceFactory beanDataSourceFactory;
+    @Mock
+    private BeanDataSourceResourceConverter beanDataSourceResourceConverter;
+    @Mock
+    private ReportDataSourceService reportDataSourceService;
+    private BeanReportDataSource serverBeanReportDataSource;
+    private ClientBeanDataSource testConnectionDescription;
 
     @BeforeClass
     public void init(){
@@ -56,95 +70,26 @@ public class BeanConnectionStrategyTest {
 
     @BeforeMethod
     public void resetMocks(){
-        reset(ctx);
+        reset(beanDataSourceFactory, beanDataSourceResourceConverter, reportDataSourceService);
+        testConnectionDescription = new ClientBeanDataSource(INITIAL_CONNECTION_DESCRIPTION);
+        serverBeanReportDataSource = new BeanReportDataSourceImpl();
 
-    }
-
-    @Test(expectedExceptions = ConnectionFailedException.class)
-    public void createConnection_wrongBeanName_null(){
-        strategy.createConnection(new BeanConnection().setBeanName("test"), null);
-    }
-
-    @Test(expectedExceptions = ConnectionFailedException.class)
-    public void createConnection_wrongBeanName_NoSuchBeanDefinitionException(){
-        final String beanName = "test";
-        when(ctx.getBean(beanName)).thenThrow(NoSuchBeanDefinitionException.class);
-        strategy.createConnection(new BeanConnection().setBeanName(beanName), null);
+        when(beanDataSourceResourceConverter.toServer(same(INITIAL_CONNECTION_DESCRIPTION),
+                any(ToServerConversionOptions.class))).thenReturn(serverBeanReportDataSource);
+        when(beanDataSourceFactory.createService(serverBeanReportDataSource)).thenReturn(reportDataSourceService);
     }
 
     @Test
-    public void createConnection_noBeanMethod_instanceofReportDataSourceService_success(){
-        final String beanName = "test";
-        when(ctx.getBean(beanName)).thenReturn(mock(ReportDataSourceService.class));
-        final BeanConnection connectionDescription = new BeanConnection().setBeanName(beanName);
-        final BeanConnection connection = strategy.createConnection(connectionDescription, null);
-        assertSame(connection, connectionDescription);
+    public void createConnection_factoryCreatesReportDataSourceService_success(){
+        ClientBeanDataSource result = strategy.createConnection(INITIAL_CONNECTION_DESCRIPTION, null);
+        assertEquals(result.getBeanName(), testConnectionDescription.getBeanName());
+        assertEquals(result.getBeanMethod(), testConnectionDescription.getBeanMethod());
     }
 
-    @Test(expectedExceptions = MandatoryParameterNotFoundException.class)
-    public void createConnection_noBeanMethod_notInstanceofReportDataSourceService_exception(){
-        final String beanName = "test";
-        when(ctx.getBean(beanName)).thenReturn(new Object());
-        final BeanConnection connectionDescription = new BeanConnection().setBeanName(beanName);
-        strategy.createConnection(connectionDescription, null);
-    }
 
     @Test(expectedExceptions = ConnectionFailedException.class)
-    public void createConnection_wrongBeanMethod_exception(){
-        final String beanName = "test";
-        when(ctx.getBean(beanName)).thenReturn(new Object());
-        final BeanConnection connectionDescription = new BeanConnection().setBeanName(beanName).setBeanMethod("notExistentMethodName");
-        strategy.createConnection(connectionDescription, null);
+    public void createConnection_factoryNotCreatesReportDataSourceService_null(){
+        doThrow(new RuntimeException()).when(beanDataSourceFactory).createService(serverBeanReportDataSource);
+        strategy.createConnection(INITIAL_CONNECTION_DESCRIPTION, null);
     }
-
-    @Test(expectedExceptions = ConnectionFailedException.class)
-    public void createConnection_privateMethod_exception(){
-        final String beanName = "test";
-        when(ctx.getBean(beanName)).thenReturn(new Object() {
-            private Object testMethod() {
-                return new Object();
-            }
-        });
-        final BeanConnection connectionDescription = new BeanConnection().setBeanName(beanName).setBeanMethod("testMethod");
-        strategy.createConnection(connectionDescription, null);
-    }
-
-    @Test(expectedExceptions = ConnectionFailedException.class)
-    public void createConnection_methodReturnsNull_exception(){
-        final String beanName = "test";
-        when(ctx.getBean(beanName)).thenReturn(new Object(){
-            public Object testMethod(){
-                return null;
-            }
-        });
-        final BeanConnection connectionDescription = new BeanConnection().setBeanName(beanName).setBeanMethod("testMethod");
-        strategy.createConnection(connectionDescription, null);
-    }
-
-    @Test(expectedExceptions = ConnectionFailedException.class)
-    public void createConnection_methodThrowsException(){
-        final String beanName = "test";
-        when(ctx.getBean(beanName)).thenReturn(new Object(){
-            public Object testMethod(){
-                throw new RuntimeException();
-            }
-        });
-        final BeanConnection connectionDescription = new BeanConnection().setBeanName(beanName).setBeanMethod("testMethod");
-        strategy.createConnection(connectionDescription, null);
-    }
-
-    @Test
-    public void createConnection_methodReturnsObject_success(){
-        final String beanName = "test";
-        when(ctx.getBean(beanName)).thenReturn(new Object(){
-            public Object testMethod(){
-                return new Object();
-            }
-        });
-        final BeanConnection connectionDescription = new BeanConnection().setBeanName(beanName).setBeanMethod("testMethod");
-        final BeanConnection connection = strategy.createConnection(connectionDescription, null);
-        assertSame(connection, connectionDescription);
-    }
-
-
 }

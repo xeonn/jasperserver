@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -32,7 +32,7 @@ import java.util.Map;
  * Mondrian Olap4j Member helper service. Provides some extra service methods which is not included in olap4j API yet.
  *
  * @author Vasily Spachynsky, vsabadosh
- * @version $Id: MondrianOlap4jMemberHelper.java 43798 2014-03-31 18:22:38Z vsabadosh $
+ * @version $Id: MondrianOlap4jMemberHelper.java 47331 2014-07-18 09:13:06Z kklein $
  */
 public class MondrianOlap4jMemberHelper {
 

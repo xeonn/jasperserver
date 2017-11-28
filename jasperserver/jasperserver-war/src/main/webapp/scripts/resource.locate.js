@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2014 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: resource.locate.js 43122 2014-03-18 12:44:22Z psavushchik $
+ * @version: $Id: resource.locate.js 7882 2014-10-06 11:29:52Z sergey.prilukin $
  */
 
 var resourceLocator = {
@@ -57,15 +57,21 @@ var resourceLocator = {
      *
      */
     initialize: function(options) {
-        this.resourceUri = $(options.resourceInput);
-        this.browseButton = $(options.browseButton);
-        this.filePath = $(options.fileUploadInput);
-        this.fakeFilePath = $(options.fakeFileUploadInput);
-        this.fakeFileInput = $(options.fakeFileUploadInputText);
-        this.newResourceLink = $(options.newResourceLink);
+		var get = function(element) {
+			return _.isObject(element) ? element : $(element);
+		};
+
+        this.resourceUri = get(options.resourceInput);
+        this.browseButton = get(options.browseButton);
+        this.filePath = get(options.fileUploadInput);
+        this.fakeFilePath = get(options.fakeFileUploadInput);
+        this.fakeFileInput = get(options.fakeFileUploadInputText);
+        this.newResourceLink = get(options.newResourceLink);
 
         try {
             this._initFileSelector(options);
+        } catch(e) {
+            /* bypass logging to console */
         } finally {
             this._initEvents(options);
         }
@@ -135,19 +141,18 @@ var resourceLocator = {
     },
 
     _initFileSelector : function(options) {
-        new picker.FileSelector({
-            id: options.id,
-            treeId: options.treeId,
-            providerId: options.providerId,
-            uriTextboxId: this.resourceUri,
-            browseButtonId: this.browseButton,
-            title: options.dialogTitle,
-            selectLeavesOnly: options.selectLeavesOnly,
-			onChange: options.onChange || false
-        });
+        this.fileSelector = new picker.FileSelector(_.extend({}, options, {
+			uriTextboxId: this.resourceUri,
+			browseButtonId: this.browseButton,
+			title: options.dialogTitle
+		}));
     },
 
-    ///////////////////////////
+	remove : function(options) {
+		this.fileSelector.remove();
+	},
+
+	///////////////////////////
     // Utility methods.
     ///////////////////////////
     _switchElementClasses : function(element, classes) {

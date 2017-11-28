@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -33,7 +33,7 @@ import java.util.Map;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ScheduleReportParametersAction.java 25010 2012-09-26 16:56:35Z sergey.prilukin $
+ * @version $Id: ScheduleReportParametersAction.java 47331 2014-07-18 09:13:06Z kklein $
  */
 public class ScheduleReportParametersAction extends ReportParametersAction {
 

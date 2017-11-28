@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.TimeZone;
 import javax.sql.DataSource;
 
+import com.jaspersoft.jasperserver.api.common.util.TibcoDriverManager;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.util.PooledObjectCache;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.util.PooledObjectEntry;
 import org.apache.commons.logging.Log;
@@ -38,11 +39,11 @@ import com.jaspersoft.jasperserver.api.metadata.jasperreports.service.ReportData
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: JdbcReportDataSourceServiceFactory.java 25420 2012-10-20 16:36:09Z sergey.prilukin $
+ * @version $Id: JdbcReportDataSourceServiceFactory.java 50011 2014-10-09 16:57:26Z vzavadskii $
  */
 public class JdbcReportDataSourceServiceFactory implements ReportDataSourceServiceFactory {
 
-	private static final Log log = LogFactory.getLog(JdbcReportDataSourceServiceFactory.class);
+    private static final Log log = LogFactory.getLog(JdbcReportDataSourceServiceFactory.class);
 
 	protected static class PooledDataSourcesCache {
 
@@ -123,8 +124,8 @@ public class JdbcReportDataSourceServiceFactory implements ReportDataSourceServi
 		if (!(reportDataSource instanceof JdbcReportDataSource)) {
 			throw new JSException("jsexception.invalid.jdbc.datasource", new Object[] {reportDataSource.getClass()});
 		}
-		JdbcReportDataSource jdbcDataSource = (JdbcReportDataSource) reportDataSource;
-	
+        JdbcReportDataSource jdbcDataSource = (JdbcReportDataSource) reportDataSource;
+
 		DataSource dataSource = getPoolDataSource(jdbcDataSource.getDriverClass(), jdbcDataSource.getConnectionUrl(), jdbcDataSource.getUsername(), jdbcDataSource.getPassword());
 
 		return new JdbcDataSourceService(dataSource, getTimeZoneByDataSourceTimeZone(jdbcDataSource.getTimezone()));

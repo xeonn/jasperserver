@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -32,7 +32,7 @@ import java.util.Map;
 
 /**
  * @author vsabadosh
- * @version $Id: DiagnosticCustomDataSource.java 30771 2013-04-04 08:50:38Z vsabadosh $
+ * @version $Id: DiagnosticCustomDataSource.java 47331 2014-07-18 09:13:06Z kklein $
  */
 public class DiagnosticCustomDataSource implements JRDataSource {
 

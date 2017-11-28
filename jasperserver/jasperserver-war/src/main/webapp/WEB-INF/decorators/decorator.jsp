@@ -1,5 +1,5 @@
 <%--
-  ~ Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+  ~ Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
   ~ http://www.jaspersoft.com.
   ~
   ~ Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -37,7 +37,7 @@
 
 <html>
     <head>
-        <title>Jaspersoft: <decorator:title /></title>
+        <title>TIBCO Jaspersoft: <decorator:title /></title>
         <meta http-equiv="Content-Type" content="text/html; charset=${requestScope['com.jaspersoft.ji.characterEncoding']}">
 
         <!--

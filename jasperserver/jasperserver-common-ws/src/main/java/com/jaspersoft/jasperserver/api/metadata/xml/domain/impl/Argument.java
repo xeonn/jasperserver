@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -50,6 +50,7 @@ public class Argument {
     public static final String RUN_OUTPUT_FORMAT_XLSX = "XLSX";
     public static final String RUN_OUTPUT_FORMAT_XLSX_NOPAG = "XLSX_NOPAG";
     public static final String RUN_OUTPUT_FORMAT_RTF = "ODT";
+    public static final String RUN_OUTPUT_FORMAT_PPTX = "PPTX";
 
     
     public static final String RUN_OUTPUT_IMAGES_URI = "IMAGES_URI";

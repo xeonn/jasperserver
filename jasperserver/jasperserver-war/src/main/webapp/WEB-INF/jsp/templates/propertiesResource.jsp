@@ -1,5 +1,5 @@
 <%--
-  ~ Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+  ~ Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
   ~ http://www.jaspersoft.com.
   ~
   ~ Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -43,7 +43,7 @@ Usage:
     <t:putAttribute name="bodyContent">
         <fieldset>
             <legend class="offLeft"><span><spring:message code="DIALOG_PROPERTIES_RESOURCE_COLUMN_PRIMARY_LEGEND"/></span></legend>
-            <label class="control input text" accesskey="o" for="displayName" title="This will be the visible name for the resource and can be changed.">
+            <label class="control input text" accesskey="o" for="displayName" title="<spring:message code='resource.visiblename.tooltip'/>">
                 <span class="wrap"><spring:message code="DIALOG_PROPERTIES_RESOURCE_DISPLAY_NAME"/>:</span>
                 <input id="displayName" name="displayName" type="text" value="Accounts Report"/>
                 <span class="message warning">error message here</span>

@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005 - 2009 Jaspersoft Corporation. All rights  reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
 * http://www.jaspersoft.com.
 *
 * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -16,7 +16,7 @@
 * GNU Affero  General Public License for more details.
 *
 * You should have received a copy of the GNU Affero General Public  License
-* along with this program.&nbsp; If not, see <http://www.gnu.org/licenses/>.
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 package com.jaspersoft.jasperserver.dto.resources;
 
@@ -26,7 +26,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: ClientFile.java 44312 2014-04-09 14:30:12Z vsabadosh $
+ * @version $Id: ClientFile.java 51276 2014-11-09 17:44:57Z ktsaregradskyi $
  */
 @XmlRootElement(name = ResourceMediaType.FILE_CLIENT_TYPE)
 public class ClientFile extends ClientResource<ClientFile> implements ClientReferenceableFile {
@@ -105,6 +105,7 @@ public class ClientFile extends ClientResource<ClientFile> implements ClientRefe
         docx("application/vnd.openxmlformats-officedocument.wordprocessingml.document"),
         ods("application/vnd.oasis.opendocument.spreadsheet"),
         xlsx("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
+        pptx("application/vnd.openxmlformats-officedocument.presentationml.presentation"),
         img("image/*"),
         font("font/*"),
         jrxml("application/jrxml"),
@@ -112,9 +113,11 @@ public class ClientFile extends ClientResource<ClientFile> implements ClientRefe
         prop("application/properties"),
         jrtx("application/jrtx"),
         xml("application/xml"),
+        json("application/json"),
         css("text/css"),
         accessGrantSchema("application/accessGrantSchema"),
         olapMondrianSchema("application/olapMondrianSchema"),
+        dashboardComponent("application/dashboardComponentsSchema+json"),
         unspecified("application/octet-stream");
 
         FileType(String mime){

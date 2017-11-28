@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005 - 2013 Jaspersoft Corporation. All rights  reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
 * http://www.jaspersoft.com.
 *
 * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -16,7 +16,7 @@
 * GNU Affero  General Public License for more details.
 *
 * You should have received a copy of the GNU Affero General Public  License
-* along with this program.&nbsp; If not, see <http://www.gnu.org/licenses/>.
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 package com.jaspersoft.jasperserver.jaxrs.jdbcdrivers;
 
@@ -33,8 +33,8 @@ import com.jaspersoft.jasperserver.remote.exception.RemoteException;
 import com.sun.jersey.multipart.FormDataBodyPart;
 import com.sun.jersey.multipart.FormDataMultiPart;
 import com.sun.jersey.multipart.FormDataParam;
-import org.springframework.security.Authentication;
-import org.springframework.security.context.SecurityContextHolder;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -55,7 +55,7 @@ import java.util.Set;
  * <p></p>
  *
  * @author yaroslav.kovalchyk
- * @version $Id: JdbcDriversJaxrsService.java 42613 2014-03-05 10:55:45Z ykovalchyk $
+ * @version $Id: JdbcDriversJaxrsService.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
 @Service
 @Path("/jdbcDrivers")

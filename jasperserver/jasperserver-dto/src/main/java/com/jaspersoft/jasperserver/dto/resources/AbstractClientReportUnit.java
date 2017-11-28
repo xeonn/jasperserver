@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005 - 2013 Jaspersoft Corporation. All rights  reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
 * http://www.jaspersoft.com.
 *
 * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -16,7 +16,7 @@
 * GNU Affero  General Public License for more details.
 *
 * You should have received a copy of the GNU Affero General Public  License
-* along with this program.&nbsp; If not, see <http://www.gnu.org/licenses/>.
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 package com.jaspersoft.jasperserver.dto.resources;
 
@@ -33,13 +33,13 @@ import java.util.Map;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: AbstractClientReportUnit.java 44312 2014-04-09 14:30:12Z vsabadosh $
+ * @version $Id: AbstractClientReportUnit.java 51276 2014-11-09 17:44:57Z ktsaregradskyi $
  */
 // builder methods (all setters) should return concrete ClientReportUnit type.
 // Definition of these concrete types (subclasses) assures, that cast is safe
 @SuppressWarnings("unchecked")
 public abstract class AbstractClientReportUnit<BuilderType extends AbstractClientReportUnit<BuilderType>>
-        extends AbstractClientDataSourceHolder<BuilderType>  {
+        extends AbstractClientDataSourceHolder<BuilderType> implements ClientReferenceableReportUnit {
 
     private ClientReferenceableQuery query;
     private ClientReferenceableFile jrxml;

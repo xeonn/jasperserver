@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -20,25 +20,18 @@
  */
 package com.jaspersoft.jasperserver.test;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.*;
-
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.FileResource;
-import com.jaspersoft.jasperserver.api.metadata.security.JasperServerAclEntry;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.Folder;
+import com.jaspersoft.jasperserver.api.metadata.security.JasperServerPermission;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.ObjectPermission;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.Role;
-import com.jaspersoft.jasperserver.api.metadata.user.domain.client.TenantImpl;
+import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
 import com.jaspersoft.jasperserver.api.metadata.user.service.ObjectPermissionService;
-import com.jaspersoft.jasperserver.api.metadata.user.service.TenantService;
 import com.jaspersoft.jasperserver.util.test.BaseServiceSetupTestNG;
 import com.jaspersoft.jasperserver.war.common.JasperServerUtil;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.quartz.impl.calendar.HolidayCalendar;
@@ -47,21 +40,20 @@ import org.springframework.orm.hibernate3.SessionFactoryUtils;
 import org.springframework.orm.hibernate3.SessionHolder;
 import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
-
-import com.jaspersoft.jasperserver.api.metadata.common.domain.Folder;
-import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.persistent.RepoFolder;
-import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
-
-import org.springframework.security.acl.basic.SimpleAclEntry;
-import org.springframework.security.Authentication;
-
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.springframework.test.context.ContextConfiguration;
-import javax.annotation.Resource;
-
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+
+import javax.annotation.Resource;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.TimeZone;
 
 /**
  * @author srosen
@@ -153,8 +145,8 @@ public class CoreDataCreateTestNG extends BaseServiceSetupTestNG {
 
         // add folder perm: root folder, ROLE_ADMINISTRATOR (administrator)
         // add folder perm: root folder, ROLE_USER (read_only)
-        createObjectPermission("/", roleAdministrator, SimpleAclEntry.ADMINISTRATION);
-        createObjectPermission("/", roleUser, SimpleAclEntry.READ);    // root folder read only for ROLE_USER
+        createObjectPermission("/", roleAdministrator, JasperServerPermission.ADMINISTRATION.getMask());
+        createObjectPermission("/", roleUser, JasperServerPermission.READ.getMask());    // root folder read only for ROLE_USER
 
         // create user anonymousUser
         // create and add role ROLE_ANONYMOUS to anonymousUser
@@ -179,7 +171,7 @@ public class CoreDataCreateTestNG extends BaseServiceSetupTestNG {
         String filePath = null;
         getOrCreateFolder("/", "themes", "Themes");
         Role userRole = getRole(BaseServiceSetupTestNG.ROLE_USER);
-        createObjectPermission("/themes", userRole, JasperServerAclEntry.EXECUTE);
+        createObjectPermission("/themes", userRole, JasperServerPermission.EXECUTE.getMask());
 
         Set<String> themes = new HashSet<String>();
 
@@ -207,7 +199,7 @@ public class CoreDataCreateTestNG extends BaseServiceSetupTestNG {
         // apply permissions now that new folder and the themes are in the repository
         // /themes/default folder needs be R/O for EVERYONE, no exclusions
         Role adminRole = getRole(ROLE_ADMINISTRATOR);
-        ObjectPermission objPerm = createObjectPermission("/themes/default", adminRole, SimpleAclEntry.READ);
+        ObjectPermission objPerm = createObjectPermission("/themes/default", adminRole, JasperServerPermission.READ.getMask());
         ExecutionContext executionContext = JasperServerUtil.getExecutionContext();
         executionContext.getAttributes().add(ObjectPermissionService.PRIVILEGED_OPERATION);
         getObjectPermissionService().putObjectPermission(executionContext, objPerm);

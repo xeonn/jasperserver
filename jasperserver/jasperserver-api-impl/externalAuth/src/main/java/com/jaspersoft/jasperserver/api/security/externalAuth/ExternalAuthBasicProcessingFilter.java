@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2013 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -21,9 +21,9 @@
 package com.jaspersoft.jasperserver.api.security.externalAuth;
 
 import com.jaspersoft.jasperserver.api.security.internalAuth.InternalAuthenticationToken;
-import org.springframework.security.Authentication;
-import org.springframework.security.context.SecurityContextHolder;
-import org.springframework.security.ui.basicauth.BasicProcessingFilter;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.util.Assert;
 
 import javax.servlet.http.HttpServletRequest;
@@ -34,11 +34,11 @@ import java.io.IOException;
  * User: dlitvak
  * Date: 4/24/13
  */
-public class ExternalAuthBasicProcessingFilter extends BasicProcessingFilter {
+public class ExternalAuthBasicProcessingFilter extends BasicAuthenticationFilter {
 	private ExternalDataSynchronizer externalDataSynchronizer;
 
 	@Override
-	public void afterPropertiesSet() throws Exception {
+	public void afterPropertiesSet() {
 		super.afterPropertiesSet();
 
 		Assert.notNull(externalDataSynchronizer, "externalDataSynchronizer cannot be null");

@@ -3,9 +3,9 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:util="http://www.springframework.org/schema/util"
-       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:p="http://www.springframework.org/schema/p" xmlns:security="http://www.springframework.org/schema/security"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
-       	http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.1.xsd">
+       	http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.1.xsd http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd">
 
 	<bean id="managementServiceConfiguration"
 			class="com.jaspersoft.jasperserver.ws.axis2.DefaultManagementServiceConfiguration">
@@ -97,26 +97,23 @@
 
 	<bean id="wsMessageCodesResolver" class="org.springframework.validation.DefaultMessageCodesResolver"/>
 
-    <bean id="userAndRoleManagementServiceMethodSecurity" class="com.jaspersoft.jasperserver.api.common.util.spring.SimplePropertyFactoryBean">
-        <property name="objectType" value="org.springframework.security.intercept.method.MethodDefinitionSource"/>
-        <property name="value">
-            <value>
-                com.jaspersoft.jasperserver.ws.axis2.authority.UserAndRoleManagementService.findUsers=ROLE_ADMINISTRATOR
-                com.jaspersoft.jasperserver.ws.axis2.authority.UserAndRoleManagementService.putUser=ROLE_ADMINISTRATOR
-                com.jaspersoft.jasperserver.ws.axis2.authority.UserAndRoleManagementService.deleteUser=ROLE_ADMINISTRATOR
-                com.jaspersoft.jasperserver.ws.axis2.authority.UserAndRoleManagementService.findRoles=ROLE_ADMINISTRATOR
-                com.jaspersoft.jasperserver.ws.axis2.authority.UserAndRoleManagementService.putRole=ROLE_ADMINISTRATOR
-                com.jaspersoft.jasperserver.ws.axis2.authority.UserAndRoleManagementService.deleteRole=ROLE_ADMINISTRATOR
-            </value>
-        </property>
-    </bean>
 
     <bean id="userAndRoleManagementServiceSecurity"
-        class="org.springframework.security.intercept.method.aopalliance.MethodSecurityInterceptor">
+        class="org.springframework.security.access.intercept.aopalliance.MethodSecurityInterceptor">
         <property name="authenticationManager"><ref bean="authenticationManager"/></property>
         <property name="accessDecisionManager"><ref bean="aclAccessDecisionManager"/></property>
         <property name="afterInvocationManager"><ref bean="afterInvocationManager"/></property>
-        <property name="objectDefinitionSource"><ref local="userAndRoleManagementServiceMethodSecurity"/></property>
+        <property name="securityMetadataSource">
+            <security:method-security-metadata-source>
+                <security:protect method="com.jaspersoft.jasperserver.ws.axis2.authority.UserAndRoleManagementService.findUsers" access="ROLE_ADMINISTRATOR"/>
+                <security:protect method="com.jaspersoft.jasperserver.ws.axis2.authority.UserAndRoleManagementService.putUser" access="ROLE_ADMINISTRATOR"/>
+                <security:protect method="com.jaspersoft.jasperserver.ws.axis2.authority.UserAndRoleManagementService.deleteUser" access="ROLE_ADMINISTRATOR"/>
+                <security:protect method="com.jaspersoft.jasperserver.ws.axis2.authority.UserAndRoleManagementService.findRoles" access="ROLE_ADMINISTRATOR"/>
+                <security:protect method="com.jaspersoft.jasperserver.ws.axis2.authority.UserAndRoleManagementService.putRole" access="ROLE_ADMINISTRATOR"/>
+                <security:protect method="com.jaspersoft.jasperserver.ws.axis2.authority.UserAndRoleManagementService.deleteRole" access="ROLE_ADMINISTRATOR"/>
+            </security:method-security-metadata-source>
+
+        </property>
     </bean>
 
     <bean id="userAndRoleManagementServiceTarget" class="com.jaspersoft.jasperserver.ws.axis2.authority.UserAndRoleManagementServiceImpl">
@@ -181,7 +178,11 @@
 	<bean id="txtExporter" class="com.jaspersoft.jasperserver.ws.axis2.TextWSExporter" scope="prototype"/>
 	<bean id="docxExporter" class="com.jaspersoft.jasperserver.ws.axis2.DocxWSExporter" scope="prototype"/>
 	<bean id="odsExporter" class="com.jaspersoft.jasperserver.ws.axis2.OdsWSExporter" scope="prototype"/>
-	<bean id="xlsxExporter" class="com.jaspersoft.jasperserver.ws.axis2.XlsxWSExporter" scope="prototype"/-->
+	<bean id="xlsxExporter" class="com.jaspersoft.jasperserver.ws.axis2.XlsxWSExporter" scope="prototype"/>
+	<bean id="pptxExporter" class="com.jaspersoft.jasperserver.ws.axis2.PptxWSExporter" scope="prototype">
+		<property name="exportParams" ref="pptxExportParameters"/>
+		<property name="jasperReportsContext" ref="${bean.jasperReportsContext}"/>
+	</bean-->
 
     <util:map id="exportersMap">
         <entry key="pdf" value-ref="pdfExporter"/>
@@ -194,7 +195,8 @@
 		<entry key="txt" value-ref="txtExporter"/>        
         <entry key="docx" value-ref="docxExporter"/>
         <entry key="ods" value-ref="odsExporter"/>
-        <entry key="xlsx" value-ref="xlsxExporter"/-->
+        <entry key="xlsx" value-ref="xlsxExporter"/>
+        <entry key="pptx" value-ref="pptxExporter"/-->
     </util:map> 
 
     <util:map id="exportParametersMap">

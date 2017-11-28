@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -22,14 +22,14 @@ package com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.impl.datas
 
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 import com.jaspersoft.jasperserver.api.metadata.common.service.ResourceFactory;
-import com.jaspersoft.jasperserver.api.metadata.common.service.impl.PasswordCipherer;
+import com.jaspersoft.jasperserver.api.common.crypto.PasswordCipherer;
 import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.ReferenceResolver;
 import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.persistent.RepoDataSource;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.JdbcReportDataSource;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: RepoJdbcDataSource.java 19922 2010-12-11 14:59:51Z tmatyashovsky $
+ * @version $Id: RepoJdbcDataSource.java 51858 2014-12-06 20:46:19Z vsabadosh $
  * 
  * @hibernate.joined-subclass table="JdbcDatasource"
  * @hibernate.joined-subclass-key column="id"
@@ -57,7 +57,7 @@ public class RepoJdbcDataSource extends RepoDataSource implements RepoReportData
 	}
 
 	/**
-	 * @hibernate.property column="password" type="string" length="100"
+	 * @hibernate.property column="password" type="string" length="250"
 	 */
 	public String getPassword() {
 		return password;

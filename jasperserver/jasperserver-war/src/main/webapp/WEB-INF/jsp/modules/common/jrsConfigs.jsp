@@ -1,5 +1,5 @@
 <%--
-  ~ Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+  ~ Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
   ~ http://www.jaspersoft.com.
   ~
   ~ Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -37,6 +37,7 @@
         isIPad: "<c:out value="${isIPad}"/>",
         contextPath: "<c:out value="${pageContext.request.contextPath}"/>",
         publicFolderUri: "<c:out value="${not empty publicFolderUri ? publicFolderUri : commonProperties.publicFolderUri}"/>",
+        tempFolderUri: "<c:out value="${not empty tempFolderUri ? tempFolderUri : commonProperties.tempFolderUri}"/>",
         organizationId: "<c:out value="${not empty organizationId ? organizationId : commonProperties.organizationId}"/>",
         commonReportGeneratorsMetadata: ${not empty reportGenerators ? reportGenerators : '[]'},
         templatesFolderUri: '<c:out value="${not empty templatesFolderUri ? templatesFolderUri : templateProperties.templatesFolderUri}"/>',
@@ -75,6 +76,9 @@
         defaultSearchText: "<spring:message code='SEARCH_BOX_DEFAULT_TEXT'/>",
         serverIsNotResponding: "<spring:message code='confirm.slow.server'/>"
     };
+
+    // dirty hack to get path to current theme
+    __jrsConfigs__.currentThemePath = "<spring:theme code='theme.css'/>".split("/").slice(0, -1).join("/");
 
     __jrsConfigs__.isProVersion = "${isProVersion}" === "true" ? true : false;
 
@@ -137,5 +141,10 @@
     </authz:authorize>
 
     __jrsConfigs__.flowExecutionKey = "${flowExecutionKey}";
+
+    if (window.localStorage && window.localStorage.previousPageHash){
+        window.location.hash = window.localStorage.previousPageHash;
+        delete window.localStorage.previousPageHash;
+    }
 
 </script>

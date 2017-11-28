@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -31,7 +31,7 @@ import com.jaspersoft.jasperserver.export.modules.repository.beans.ResourceRefer
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ResourceExportHandler.java 22839 2012-03-28 09:01:12Z lchirita $
+ * @version $Id: ResourceExportHandler.java 51369 2014-11-12 13:59:41Z sergey.prilukin $
  */
 public interface ResourceExportHandler {
 
@@ -51,4 +51,5 @@ public interface ResourceExportHandler {
 	
 	ExecutionContext getExecutionContext();
 	
+	void markExported(String uri);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -37,7 +37,7 @@ import com.jaspersoft.jasperserver.export.util.CommandOut;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: BaseImporterModule.java 25456 2012-10-23 23:54:34Z inesterenko $
+ * @version $Id: BaseImporterModule.java 47331 2014-07-18 09:13:06Z kklein $
  */
 public abstract class BaseImporterModule implements ImporterModule {
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2013 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -36,6 +36,7 @@ import com.jaspersoft.jasperserver.api.logging.access.domain.AccessEvent;
 import com.jaspersoft.jasperserver.api.logging.audit.context.AuditContext;
 import com.jaspersoft.jasperserver.api.logging.audit.domain.AuditEvent;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.*;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.impl.IdedObject;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.impl.IdedRepoObject;
 import com.jaspersoft.jasperserver.api.metadata.common.service.JSResourceNotFoundException;
 import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryEventListener;
@@ -50,13 +51,18 @@ import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.ut
 import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.util.UpdateDatesIndicator;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportDataSource;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportUnit;
+import com.jaspersoft.jasperserver.api.metadata.user.domain.ObjectPermission;
+import com.jaspersoft.jasperserver.api.metadata.user.domain.impl.ObjectPermissionRecipientIdentity;
 import com.jaspersoft.jasperserver.api.metadata.view.domain.FilterCriteria;
 import com.jaspersoft.jasperserver.api.metadata.view.domain.FilterElement;
 import com.jaspersoft.jasperserver.api.search.*;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.Hibernate;
 import org.hibernate.HibernateException;
 import org.hibernate.LockMode;
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.*;
@@ -80,7 +86,7 @@ import java.util.*;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: HibernateRepositoryServiceImpl.java 45784 2014-05-16 08:35:57Z lchirita $
+ * @version $Id: HibernateRepositoryServiceImpl.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 public class HibernateRepositoryServiceImpl extends HibernateDaoImpl implements HibernateRepositoryService, ReferenceResolver, RepoManager, ApplicationContextAware {
@@ -792,6 +798,7 @@ public class HibernateRepositoryServiceImpl extends HibernateDaoImpl implements 
 	}
 
     @Transactional(propagation = Propagation.REQUIRED)
+    @Override
     public List<Long> getResourcesIds(ExecutionContext context, String text, Class type, Class aClass,
                                                   List<SearchFilter> filters, Map<String, SearchFilter> typeSpecificFilters,
                                                   SearchSorter sorter, TransformerFactory transformerFactory,
@@ -1344,7 +1351,7 @@ public class HibernateRepositoryServiceImpl extends HibernateDaoImpl implements 
         });
     }
 
-    protected List loadAllSubfolders(ExecutionContext context, String parentURI) {
+	protected List loadAllSubfolders(ExecutionContext context, String parentURI) {
 		DetachedCriteria criteria = DetachedCriteria.forClass(RepoFolder.class);
 		criteria.add(Restrictions.eq("hidden", Boolean.FALSE));
 		
@@ -1485,6 +1492,7 @@ public class HibernateRepositoryServiceImpl extends HibernateDaoImpl implements 
 	}
 
 	protected void deleteFolder(String uri) {
+        // TODO: Spring Security - possiblly fix for bug #29251 should be located here (implement it)
         auditFolderActivity("deleteFolder", uri);
 		RepoFolder folder = getFolder(uri, true);
 		if (folder.isRoot()) {
@@ -1933,7 +1941,8 @@ public class HibernateRepositoryServiceImpl extends HibernateDaoImpl implements 
 	protected abstract class BaseResourceCopier implements ReferenceResolver {
 		
 		protected final LinkedHashMap copiedResources = new LinkedHashMap();
-		private final Set copyingResourceStack = new HashSet();
+        private final Map<String, RepoResource> copyingResources = new LinkedHashMap<String, RepoResource>();
+        private final Set copyingResourceStack = new HashSet();
 
 		protected abstract boolean isCopiedResource(String uri);
 
@@ -1969,7 +1978,10 @@ public class HibernateRepositoryServiceImpl extends HibernateDaoImpl implements 
 				resourceCopied(resource.getResourceURI(), copy);
 				
 				Class persistentClass = resourcePersistentClass(copy.getClass());
-				RepoResource resourceCopy = createPersistentResource(persistentClass);
+
+                RepoResource resourceCopy = createPersistentResource(persistentClass);
+                copyingResources.put(copyURI, resourceCopy);
+
 				RepoFolder copyParent = getCopyParent(resource);
 				resourceCopy.setParent(copyParent);
 				resourceCopy.copyFromClient(copy, this);
@@ -1981,13 +1993,17 @@ public class HibernateRepositoryServiceImpl extends HibernateDaoImpl implements 
 				return resourceCopy;
 			} finally {
 				copyingResourceStack.remove(copyURI);
+                copyingResources.remove(copyURI);
 			}
 		}
 
 		protected RepoResource getCopiedResourceReference(String uri, Class persistentClass) {
 			String copyURI = getCopyURI(uri);
 			RepoResource resourceCopy = (RepoResource) copiedResources.get(copyURI);
-			if (resourceCopy == null) {
+            if (resourceCopy == null) {
+                resourceCopy = copyingResources.get(copyURI);
+            }
+            if (resourceCopy == null) {
 				RepoResource resource = loadResourceToCopy(uri, persistentClass);
 				resourceCopy = copyResource(resource, copyURI);
 			}
@@ -2294,6 +2310,50 @@ public class HibernateRepositoryServiceImpl extends HibernateDaoImpl implements 
 		return null;
 	}
 
+    /**
+     * use an HQL query to get some resources
+     * @param context
+     * @param hqlQueryString
+     * @return
+     */
+    @Override
+	@Transactional(propagation = Propagation.REQUIRED)
+	public List<? extends Object> getResources(ExecutionContext context, boolean asLookups, final String hqlQueryString) {
+		List<Object> objList = getHibernateTemplate().executeFind(new HibernateCallback() {
+            public Object doInHibernate(Session session) throws HibernateException {
+                Query query = session.createQuery(hqlQueryString);
+                // params TBD
+	            return query.list();
+	        }
+	    });
+		List resultList = new ArrayList(objList.size());
+		
+		for (Object obj : objList) {
+			Object resultObj = obj;
+			if (obj instanceof RepoResource) {
+	            RepoResource repoResource = (RepoResource) obj;
+				// to lookup or full resource?
+				if (asLookups) {
+		            ResourceLookup resourceLookup = repoResource.toClientLookup();
+		
+	                List attrList = resourceLookup.getAttributes();
+	                if (attrList == null) {
+	                    attrList = new ArrayList();
+	                    resourceLookup.setAttributes(attrList);
+	                }
+	                attrList.add(new IdAttribute(repoResource.getId()));
+	                resultObj = resourceLookup;
+				} else {
+					// convert to client resource
+					resultObj = repoResource.toClient(resourceFactory);
+				}
+			}
+			resultList.add(resultObj);
+		}
+		return resultList;
+	}
+
+    
     @Transactional(propagation = Propagation.REQUIRED)
 	public List<ResourceLookup> getResources(ExecutionContext context, SearchCriteriaFactory searchCriteriaFactory,
             List<SearchFilter> filters, SearchSorter sorter, TransformerFactory transformerFactory, int current,
@@ -2379,7 +2439,9 @@ public class HibernateRepositoryServiceImpl extends HibernateDaoImpl implements 
             Session session = getHibernateTemplate().getSessionFactory().getCurrentSession();
             //TODO GetDependentResourcesIds query can be updated to handle ReportUnit objects too
             org.hibernate.Query query = session.getNamedQuery("GetDependentResourcesIds");
-            query.setEntity("dependency", repoDS).setFirstResult(current);
+            query.setEntity("dependency", repoDS)
+                    .setString("dependencySubFolderURI", getChildrenFolderName(resource.getURIString()))
+                    .setFirstResult(current);
             if(max > 0) {
                 query.setMaxResults(max);
             }
@@ -2498,9 +2560,8 @@ public class HibernateRepositoryServiceImpl extends HibernateDaoImpl implements 
         return result;
     }
 
-    // used to have REQUIRES_NEW but that resulted in a deadlock on DB when called from 
-    // EngineServiceImpl.autoUpdateJRXMLResource()/HibernateRepositoryCache.saveData()
-    @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+    // running this in its own transaction so that it doesn't affect anything external
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = false)
 	public void replaceFileResourceData(final String uri, DataContainer data) {
 		final long resourceId = findResourceId(uri, FileResource.class);
 		

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -21,9 +21,7 @@
 package com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl;
 
 import javax.sql.DataSource;
-
 import org.apache.commons.dbcp.ConnectionFactory;
-import org.apache.commons.dbcp.DriverManagerConnectionFactory;
 import org.apache.commons.dbcp.PoolableConnectionFactory;
 import org.apache.commons.dbcp.PoolingDataSource;
 import org.apache.commons.logging.Log;
@@ -35,7 +33,7 @@ import com.jaspersoft.jasperserver.api.JSExceptionWrapper;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: DbcpDataSource.java 19922 2010-12-11 14:59:51Z tmatyashovsky $
+ * @version $Id: DbcpDataSource.java 49286 2014-09-23 13:32:25Z ykovalchyk $
  */
 public class DbcpDataSource implements PooledDataSource {
 	
@@ -66,7 +64,7 @@ public class DbcpDataSource implements PooledDataSource {
 
 	protected void createPoolableConnectionFactory(String url, String username, String password,
 			boolean defaultReadOnly, boolean defaultAutoCommit) {
-		ConnectionFactory connectionFactory = new DriverManagerConnectionFactory(url, username, password);
+		ConnectionFactory connectionFactory = new JdbcDriverManagerConnectionFactory(url, username, password);
 		new PoolableConnectionFactory(connectionFactory, connectionPool, null, null, 
 				defaultReadOnly, defaultAutoCommit);
 	}

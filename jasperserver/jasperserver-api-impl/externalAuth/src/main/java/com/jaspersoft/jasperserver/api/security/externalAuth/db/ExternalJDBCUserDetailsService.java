@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2012 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -15,8 +15,8 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Affero  General Public License for more details.
  *
- *  You should have received a copy of the GNU Affero General Public  License
- *  along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public  License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 package com.jaspersoft.jasperserver.api.security.externalAuth.db;
@@ -29,8 +29,8 @@ import org.springframework.context.ApplicationContextException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.object.MappingSqlQuery;
-import org.springframework.security.GrantedAuthority;
-import org.springframework.security.userdetails.jdbc.JdbcDaoImpl;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.jdbc.JdbcDaoImpl;
 import org.springframework.util.StringUtils;
 
 import javax.sql.DataSource;

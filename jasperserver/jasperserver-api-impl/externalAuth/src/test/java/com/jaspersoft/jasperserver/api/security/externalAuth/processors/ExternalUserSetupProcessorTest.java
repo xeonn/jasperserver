@@ -1,9 +1,7 @@
 package com.jaspersoft.jasperserver.api.security.externalAuth.processors;
 
-import com.jaspersoft.jasperserver.api.common.service.impl.ImplementationClassObjectFactoryImpl;
 import com.jaspersoft.jasperserver.api.common.service.impl.ObjectFactoryImpl;
 import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
-import com.jaspersoft.jasperserver.api.metadata.common.service.ResourceFactory;
 import com.jaspersoft.jasperserver.api.metadata.common.service.impl.ResourceFactoryImpl;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.Role;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
@@ -18,13 +16,15 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.junit.Test;
-import org.springframework.security.GrantedAuthority;
-import org.springframework.security.GrantedAuthorityImpl;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.unitils.UnitilsJUnit4;
 import org.unitils.mock.Mock;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -45,15 +45,16 @@ public class ExternalUserSetupProcessorTest  extends UnitilsJUnit4 {
 
     @Test
     public void testAlignInternalUser() throws Exception {
+		final String organization_1 = "organization_1";
 
 //        Scenario 1 - user has no internal roles and there are no roles in the organizationRoleMap
-        Set<Role> remoteExternalUserRoles = new HashSet<Role>();
+		Set<Role> remoteExternalUserRoles = new HashSet<Role>();
 
-        // roles from LDAP
-        Role externalRole = new RoleImpl();
-        externalRole.setRoleName("ROLE_EXTERNAL");
-        externalRole.setExternallyDefined(true);
-        externalRole.setTenantId("organization_1");
+		// roles from LDAP
+		Role externalRole = new RoleImpl();
+		externalRole.setRoleName("ROLE_EXTERNAL");
+		externalRole.setExternallyDefined(true);
+		externalRole.setTenantId(organization_1);
         remoteExternalUserRoles.add(externalRole);
 
         // user
@@ -66,37 +67,27 @@ public class ExternalUserSetupProcessorTest  extends UnitilsJUnit4 {
 
         // test
         userProcessor.alignInternalAndExternalUser(remoteExternalUserRoles, user);
-        Assert.assertTrue("user should have one externally defined user",
+        Assert.assertTrue("user should have one externally defined role",
                                 user.getRoles().size()==1 &&((Role)user.getRoles().toArray()[0]).isExternallyDefined());
 
 
-        // Scenario 2 - user has no internal roles and there are roles that needs to be mapped
-        // populating OrganizationRoleMap
-        Map<String, String> organizationRoleMap = new HashMap<String, String>();
-        organizationRoleMap.put("ROLE_EXTERNAL", "ROLE_ADMINISTRATOR");
-        userProcessor.setOrganizationRoleMap(organizationRoleMap);
-
-        // test
-        userProcessor.alignInternalAndExternalUser(remoteExternalUserRoles, user);
-        Assert.assertTrue("user should have one internal role - ROLE_ADMINISTRATOR defined in root",
-                                        user.getRoles().size()==1 &&
-                                        !((Role)user.getRoles().toArray()[0]).isExternallyDefined() &&
-                                        ((Role)user.getRoles().toArray()[0]).getTenantId()==null &&
-                                        ((Role)user.getRoles().toArray()[0]).getRoleName().equals("ROLE_ADMINISTRATOR"));
-
-
-//        Scenario 3 - user has internal roles which is the value of one of the rootRoleMap
-        // creating user and role and the organizationRootMap
+        //        Scenario 2 - user has internal roles which is the value of one of the rootRoleMap
+        // The internal role should be removed from the user
+        
         user = new UserImpl();
         Role adminRole = new RoleImpl();
         adminRole.setRoleName("ROLE_ADMINISTRATOR");
         user.addRole(adminRole);
 
+		// populating OrganizationRoleMap
+		Map<String, String> organizationRoleMap = new HashMap<String, String>();
+		organizationRoleMap.put("ROLE_EXTERNAL", "ROLE_ADMINISTRATOR");
         organizationRoleMap.put("ROLE_SCENARIO_3", "ROLE_ADMINISTRATOR");
+		userProcessor.setOrganizationRoleMap(organizationRoleMap);
 
         // test
         userProcessor.alignInternalAndExternalUser(new HashSet<Role>(), user);
-        Assert.assertTrue("user should have one externally defined user", user.getRoles() != null && user.getRoles().size() == 0);
+        Assert.assertTrue("user should have the internally defined role removed.", user.getRoles() != null && user.getRoles().size() == 0);
     }
 
 	@Test
@@ -132,7 +123,7 @@ public class ExternalUserSetupProcessorTest  extends UnitilsJUnit4 {
 					"ROLE_ADMINISTRATOR".equals(roleMap.get("ROLE_EXTERNAL")));
 
 			//Case 1: ROLE$EXT is mapped to internal ROLE_ADMINISTRATOR
-			GrantedAuthority[] authorities = new GrantedAuthority[] {new GrantedAuthorityImpl("ROLE$EXT")};
+			List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>() {{add(new SimpleGrantedAuthority("ROLE$EXT"));}};
 			Set<Role> roleSet = userProcessor.convertGrantedAuthoritiesToRoles(authorities, "tenant");
 			Assert.assertTrue("Case 1: roleSet must have 1 elem.", roleSet != null && roleSet.size() == 1);
 			Role role = roleSet.iterator().next();
@@ -142,7 +133,7 @@ public class ExternalUserSetupProcessorTest  extends UnitilsJUnit4 {
 
 			//Case 2: ROLE$EXTERNAL-NOT MAPPED+ is converted to external ROLE_EXTERNAL_NOT_MAPPED.
 			// Illegal (not matching permittedExternalRoleNameRegex) char sequences are substituted by _
-			authorities = new GrantedAuthority[] {new GrantedAuthorityImpl("ROLE$EXTERNAL-NOT MAPPED+")};
+			authorities = new ArrayList<GrantedAuthority>() {{add(new SimpleGrantedAuthority("ROLE$EXTERNAL-NOT MAPPED+"));}};
 			roleSet = userProcessor.convertGrantedAuthoritiesToRoles(authorities, "tenant");
 			Assert.assertTrue("Case 2: roleSet must have 1 elem.", roleSet != null && roleSet.size() == 1);
 			role = roleSet.iterator().next();
@@ -152,7 +143,7 @@ public class ExternalUserSetupProcessorTest  extends UnitilsJUnit4 {
 
 
 			//Case 3: ROLE_EXTERNAL is mapped to internal ROLE_ADMINISTRATOR
-			authorities = new GrantedAuthority[] {new GrantedAuthorityImpl("ROLE_EXTERNAL")};
+			authorities = new ArrayList<GrantedAuthority>() {{add(new SimpleGrantedAuthority("ROLE_EXTERNAL"));}};
 			roleSet = userProcessor.convertGrantedAuthoritiesToRoles(authorities, "tenant");
 			Assert.assertTrue("Case 3: roleSet must have 1 elem.", roleSet != null && roleSet.size() == 1);
 			role = roleSet.iterator().next();

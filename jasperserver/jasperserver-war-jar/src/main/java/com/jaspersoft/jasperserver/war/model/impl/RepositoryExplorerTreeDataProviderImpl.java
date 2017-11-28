@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -26,7 +26,6 @@ import com.jaspersoft.jasperserver.api.metadata.common.domain.Folder;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
 import com.jaspersoft.jasperserver.api.metadata.common.service.impl.RepositorySecurityChecker;
-import com.jaspersoft.jasperserver.api.metadata.user.service.ObjectPermissionService;
 import com.jaspersoft.jasperserver.api.metadata.view.domain.FilterCriteria;
 import com.jaspersoft.jasperserver.war.common.ConfigurationBean;
 import com.jaspersoft.jasperserver.war.model.JSONObject;
@@ -51,7 +50,6 @@ public class RepositoryExplorerTreeDataProviderImpl implements TreeDataProvider 
 	
     private RepositoryService repositoryService;
     private RepositorySecurityChecker repositoryServiceSecurityChecker;
-    private ObjectPermissionService objectPermissionService;
     private ThemeService themeService;
     private TreeDataFilter filter;
     
@@ -136,7 +134,7 @@ public class RepositoryExplorerTreeDataProviderImpl implements TreeDataProvider 
         Properties extraProperty = new Properties();
         extraProperty.isWritable = repositoryServiceSecurityChecker.isEditable(resource);
         extraProperty.isRemovable = repositoryServiceSecurityChecker.isRemovable(resource);
-        extraProperty.isAdministrable = objectPermissionService.isObjectAdministrable(null, resource);
+        extraProperty.isAdministrable = repositoryServiceSecurityChecker.isAdministrable(resource);
 
         if (isFolder) {
             extraProperty.desc = resource.getDescription();
@@ -231,14 +229,6 @@ public class RepositoryExplorerTreeDataProviderImpl implements TreeDataProvider 
 			RepositorySecurityChecker repositoryServiceSecurityChecker) {
 		this.repositoryServiceSecurityChecker = repositoryServiceSecurityChecker;
 	}
-
-    public ObjectPermissionService getObjectPermissionService() {
-        return objectPermissionService;
-    }
-
-    public void setObjectPermissionService(ObjectPermissionService objectPermissionService) {
-        this.objectPermissionService = objectPermissionService;
-    }
 
     public ThemeService getThemeService() {
         return themeService;

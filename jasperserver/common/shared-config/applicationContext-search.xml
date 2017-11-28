@@ -134,6 +134,7 @@
         <ref bean="${bean.search.sorterFilter}"/>
         <ref bean="${bean.search.folderFilter}"/>
         <ref bean="${bean.search.textFilter}"/>
+        <ref bean="${bean.excludeFolderFilter}"/>
         <ref bean="hiddenFilter"/>
     </util:list>
 
@@ -508,6 +509,10 @@
     <bean id="hiddenFilter" class="com.jaspersoft.jasperserver.search.filter.HiddenFilter" parent="baseSearchFilter">
     </bean>
 
+    <bean id="ceExcludeFolderFilter" class="com.jaspersoft.jasperserver.search.filter.ExcludeFolderFilter">
+        <property name="sessionFactory" ref="sessionFactory"/>
+    </bean>
+
     <bean id="textFilter" class="com.jaspersoft.jasperserver.search.filter.TextFilter" parent="baseSearchFilter">
         <property name="databaseCharactersEscapeResolver" ref="databaseCharactersEscapeResolver"/>   
     </bean>
@@ -551,7 +556,6 @@
     <bean id="resourceService" class="com.jaspersoft.jasperserver.search.service.impl.ResourceServiceImpl">
         <property name="repositoryService" ref="${bean.repositoryService}"/>
         <property name="securityChecker" ref="${bean.repositoryServiceSecurityChecker}"/>
-        <property name="permissionService" ref="objectPermissionService"/>
         <property name="schedulingChecker" ref="${bean.search.schedulingChecker}"/>
         <property name="childrenLoaders" ref="${bean.search.childrenLoaders}"/>
         <property name="searchCriteriaFactory" ref="searchCriteriaFactory"/>
@@ -562,7 +566,7 @@
         <property name="resourceTypeResolver">
             <bean class="com.jaspersoft.jasperserver.search.service.impl.CustomReportDataSourceTypeResolver" >
                 <property name="repositoryService" ref="${bean.repositoryService}"/>
-            </bean>
+    </bean>
         </property>
     </bean>
 
@@ -572,4 +576,6 @@
     <bean id="folderService" class="com.jaspersoft.jasperserver.search.service.impl.FolderServiceImpl">
         <property name="repositoryService" ref="${bean.repositoryService}"/>
     </bean>
+
+    <alias name="${bean.tenantService}" alias="concreteTenantService"/>
 </beans>

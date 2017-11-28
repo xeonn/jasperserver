@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2013 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -42,7 +42,7 @@ import com.jaspersoft.jasperserver.search.service.RepositorySearchResult;
 import com.sun.jersey.core.spi.factory.ResponseBuilderImpl;
 import com.sun.jersey.multipart.FormDataMultiPart;
 import com.sun.jersey.multipart.FormDataParam;
-import org.springframework.security.context.SecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -58,10 +58,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import javax.ws.rs.core.*;
 import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.Providers;
 import java.io.IOException;
@@ -75,7 +72,7 @@ import java.util.regex.Pattern;
  * <p></p>
  *
  * @author Zakhar.Tomchenco
- * @version $Id: RepositoryJaxrsService.java 45878 2014-05-21 00:15:48Z schubar $
+ * @version $Id: RepositoryJaxrsService.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
 @Service
 @Path("/resources")
@@ -101,6 +98,7 @@ public class RepositoryJaxrsService {
             @QueryParam(RestConstants.QUERY_PARAM_SEARCH_QUERY) String q,
             @QueryParam("folderUri") String folderUri,
             @QueryParam("type") List<String> type,
+            @QueryParam("excludeFolder") List<String> excludeFolders,
             @QueryParam("accessType") String accessTypeString,
             @QueryParam(RestConstants.QUERY_PARAM_OFFSET) Integer start,
             @QueryParam(RestConstants.QUERY_PARAM_LIMIT) Integer limit,
@@ -110,7 +108,7 @@ public class RepositoryJaxrsService {
             @QueryParam(RestConstants.QUERY_PARAM_SORT_BY) String sortBy,
             @QueryParam(RestConstants.QUERY_PARAM_EXPANDED) Boolean expanded,
             @QueryParam("forceFullPage") @DefaultValue("false") Boolean forceFullPage,
-            @HeaderParam(HttpHeaders.ACCEPT)String accept) throws RemoteException {
+            @HeaderParam(HttpHeaders.ACCEPT)String accept) throws RemoteException, IOException {
 
         Response res;
         if (ResourceMediaType.FOLDER_JSON.equals(accept) || ResourceMediaType.FOLDER_XML.equals(accept)) {
@@ -128,7 +126,7 @@ public class RepositoryJaxrsService {
 
             User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             RepositorySearchResult<ClientResourceLookup> result =
-                    batchRepositoryService.getResources(q, folderUri, type,
+                    batchRepositoryService.getResources(q, folderUri, type, excludeFolders,
                             start, limit,
                             recursive, showHiddenItems,
                             sortBy, accessType, user,
@@ -151,7 +149,7 @@ public class RepositoryJaxrsService {
                 if (isForceTotalCount || iStart == 0 || forceFullPage) {
                     totalCount = forceFullPage
                             ? (((realResultSize < iLimit) && !isForceTotalCount) ? realResultSize : result.getTotalCount())
-                            : batchRepositoryService.getResourcesCount(q, folderUri, type, recursive, showHiddenItems, accessType, user);
+                            : batchRepositoryService.getResourcesCount(q, folderUri, type, excludeFolders, recursive, showHiddenItems, accessType, user);
                 }
 
                 if (iStart == 0 || isForceTotalCount || iLimit == 0 || forceFullPage) {
@@ -163,6 +161,7 @@ public class RepositoryJaxrsService {
                 }
             } else {
                 response.status(Response.Status.NO_CONTENT);
+                response.header(RestConstants.HEADER_TOTAL_COUNT, 0);
             }
 
             res = response.build();
@@ -205,6 +204,7 @@ public class RepositoryJaxrsService {
             @HeaderParam("Content-Description")String description,
             @HeaderParam(HttpHeaders.CONTENT_TYPE)MediaType mediaType,
             @HeaderParam(HttpHeaders.ACCEPT)String accept,
+            @QueryParam(RestConstants.QUERY_PARAM_EXPANDED)@DefaultValue("false")Boolean expanded,
             @QueryParam(RestConstants.QUERY_PARAM_CREATE_FOLDERS)@DefaultValue("true")Boolean createFolders,
             @QueryParam("overwrite")@DefaultValue("false")Boolean overwrite) throws RemoteException, IOException {
         String uri = Folder.SEPARATOR + _uri.replaceAll("/$", "");
@@ -220,7 +220,13 @@ public class RepositoryJaxrsService {
         if(response == null){
             final ClientResource createdResource = resourceDetailsJaxrsService
                     .createResource(resourceLookup, uri, createFolders);
-            response = Response.status(Response.Status.CREATED).entity(createdResource).build();
+
+            if (expanded != null && expanded){
+                response = Response.fromResponse(resourceDetailsJaxrsService.getResourceDetails(createdResource.getUri(), mediaType.toString(), true))
+                        .status(Response.Status.CREATED).build();
+            } else {
+                response = Response.status(Response.Status.CREATED).entity(createdResource).build();
+            }
         }
         return response;
     }
@@ -233,9 +239,10 @@ public class RepositoryJaxrsService {
             @HeaderParam("Content-Description")String description,
             @HeaderParam(HttpHeaders.CONTENT_TYPE)MediaType rawMimeType,
             @HeaderParam(HttpHeaders.ACCEPT)String accept,
+            @QueryParam(RestConstants.QUERY_PARAM_EXPANDED)@DefaultValue("false")Boolean expanded,
             @QueryParam(RestConstants.QUERY_PARAM_CREATE_FOLDERS)@DefaultValue("true")Boolean createFolders,
             @QueryParam("overwrite")@DefaultValue("false")Boolean overwrite) throws RemoteException, IOException{
-        return defaultPostHandler(stream, "", sourceUri,disposition, description, rawMimeType, accept, createFolders, overwrite);
+        return defaultPostHandler(stream, "", sourceUri,disposition, description, rawMimeType, accept, expanded, createFolders, overwrite);
     }
 
     /**
@@ -310,9 +317,10 @@ public class RepositoryJaxrsService {
             @HeaderParam("Content-Description")String description,
             @HeaderParam(HttpHeaders.CONTENT_TYPE)MediaType mediaType,
             @HeaderParam(HttpHeaders.ACCEPT)String accept,
+            @QueryParam(RestConstants.QUERY_PARAM_EXPANDED)@DefaultValue("false")Boolean expanded,
             @QueryParam(RestConstants.QUERY_PARAM_CREATE_FOLDERS)@DefaultValue("true")Boolean createFolders,
             @QueryParam("overwrite")@DefaultValue("false")Boolean overwrite) throws RemoteException, IOException {
-        return defaultPutHandler(stream, "", sourceUri, disposition, description, mediaType, accept, createFolders, overwrite);
+        return defaultPutHandler(stream, "", sourceUri, disposition, description, mediaType, accept, expanded, createFolders, overwrite);
     }
 
     @PUT
@@ -325,6 +333,7 @@ public class RepositoryJaxrsService {
             @HeaderParam("Content-Description")String description,
             @HeaderParam(HttpHeaders.CONTENT_TYPE)MediaType mediaType,
             @HeaderParam(HttpHeaders.ACCEPT)String accept,
+            @QueryParam(RestConstants.QUERY_PARAM_EXPANDED)@DefaultValue("false")Boolean expanded,
             @QueryParam(RestConstants.QUERY_PARAM_CREATE_FOLDERS)@DefaultValue("true")Boolean createFolders,
             @QueryParam("overwrite")@DefaultValue("false")Boolean overwrite) throws RemoteException, IOException {
         String uri = Folder.SEPARATOR + _uri.replaceAll("/$", "");
@@ -347,10 +356,17 @@ public class RepositoryJaxrsService {
             int createdVersion = com.jaspersoft.jasperserver.api.metadata.common.domain.Resource.VERSION_NEW +1;
             // if current version is '0' (new version for the resource to be created is '-1') and previous version isn't '0',
             // then send 201 (Created), otherwise - 200 (OK)
-            response = updatedResource.getVersion() == createdVersion
+            Response.Status status = updatedResource.getVersion() == createdVersion
                     && (resourceLookup.getVersion() == null || resourceLookup.getVersion().intValue() != createdVersion)
-                    ? Response.status(Response.Status.CREATED).entity(updatedResource).build()
-                    : Response.ok(updatedResource).build();
+                    ? Response.Status.CREATED : Response.Status.OK;
+
+            if (expanded != null && expanded){
+                response = Response.fromResponse(resourceDetailsJaxrsService.getResourceDetails(updatedResource.getUri(), mediaType.toString(), true))
+                        .status(status).build();
+            } else {
+                response = Response.status(status).entity(updatedResource).build();
+            }
+
         }
         return response;
     }

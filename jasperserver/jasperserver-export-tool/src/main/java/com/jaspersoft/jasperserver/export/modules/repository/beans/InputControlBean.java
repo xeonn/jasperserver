@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -24,11 +24,10 @@ import com.jaspersoft.jasperserver.api.metadata.common.domain.InputControl;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 import com.jaspersoft.jasperserver.export.modules.repository.ResourceExportHandler;
 import com.jaspersoft.jasperserver.export.modules.repository.ResourceImportHandler;
-import com.jaspersoft.jasperserver.export.modules.repository.beans.ResourceReferenceBean;
 
 /**
  * @author tkavanagh
- * @version $Id: InputControlBean.java 19925 2010-12-11 15:06:41Z tmatyashovsky $
+ * @version $Id: InputControlBean.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
 
 public class InputControlBean extends ResourceBean {
@@ -46,7 +45,7 @@ public class InputControlBean extends ResourceBean {
 	
 	protected void additionalCopyFrom(Resource res, ResourceExportHandler export) {
 		InputControl ic = (InputControl) res;
-		setType(ic.getType());
+		setType(ic.getInputControlType());
 		setMandatory(ic.isMandatory());
 		setReadOnly(ic.isReadOnly());
 		setVisible(ic.isVisible());
@@ -60,7 +59,7 @@ public class InputControlBean extends ResourceBean {
 
 	protected void additionalCopyTo(Resource res, ResourceImportHandler importHandler) {
 		InputControl ic = (InputControl) res;
-		ic.setType(getType());
+		ic.setInputControlType(getType());
 		ic.setMandatory(isMandatory());
 		ic.setReadOnly(isReadOnly());
 		ic.setVisible(isVisible());

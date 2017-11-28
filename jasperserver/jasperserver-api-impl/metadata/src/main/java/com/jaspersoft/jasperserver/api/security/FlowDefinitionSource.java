@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -21,41 +21,54 @@
 
 package com.jaspersoft.jasperserver.api.security;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Collection;
-
-import org.springframework.security.ConfigAttributeDefinition;
-import org.springframework.security.intercept.ObjectDefinitionSource;
 import org.aopalliance.intercept.MethodInvocation;
+import org.springframework.security.access.ConfigAttribute;
+import org.springframework.security.access.SecurityMetadataSource;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: FlowDefinitionSource.java 21035 2011-09-20 00:14:12Z afomin $
+ * @version $Id: FlowDefinitionSource.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
-public class FlowDefinitionSource implements ObjectDefinitionSource {
+public class FlowDefinitionSource implements SecurityMetadataSource {
 
 	protected static final String DEFAULT_FLOW = "*";
 	
-	private Map flowAttributes;
+	private Map<Object, Collection<ConfigAttribute>> flowAttributes;
 	
 	public FlowDefinitionSource() {
 		flowAttributes = new HashMap();
 	}
 	
-	public void addFlow(String flowId, ConfigAttributeDefinition attributes) {
+	public void addFlow(String flowId, Collection<ConfigAttribute> attributes) {
 		flowAttributes.put(flowId, attributes);
 	}
 	
-	public ConfigAttributeDefinition getAttributes(Object object) throws IllegalArgumentException {
-		ConfigAttributeDefinition attributes = (ConfigAttributeDefinition) flowAttributes.get(object);
+	public Collection<ConfigAttribute> getAttributes(Object object) throws IllegalArgumentException {
+        Collection<ConfigAttribute> attributes =  flowAttributes.get(object);
 		if (attributes == null) {
-			attributes = (ConfigAttributeDefinition) flowAttributes.get(DEFAULT_FLOW);
+			attributes = flowAttributes.get(DEFAULT_FLOW);
 		}
 		return attributes;
 	}
 
-	public Collection getConfigAttributeDefinitions() {
+    @Override
+    public Collection<ConfigAttribute> getAllConfigAttributes() {
+        Set<ConfigAttribute> allAttributes = new HashSet<ConfigAttribute>();
+
+        for (Map.Entry<Object, Collection<ConfigAttribute>> entry : flowAttributes.entrySet()) {
+            allAttributes.addAll(entry.getValue());
+        }
+
+        return allAttributes;
+    }
+
+    public Collection getConfigAttributeDefinitions() {
 		return flowAttributes.values();
 	}
 

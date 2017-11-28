@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -31,7 +31,7 @@ import java.util.Map;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: DataSnapshotMetadataBean.java 23810 2012-05-18 05:19:56Z ykovalchyk $
+ * @version $Id: DataSnapshotMetadataBean.java 47331 2014-07-18 09:13:06Z kklein $
  */
 public class DataSnapshotMetadataBean {
 

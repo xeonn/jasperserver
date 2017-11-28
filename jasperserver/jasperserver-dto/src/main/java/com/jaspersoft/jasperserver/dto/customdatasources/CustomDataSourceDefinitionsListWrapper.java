@@ -1,6 +1,7 @@
 /*
- * Copyright (C) 2005 - 2012 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
+ *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
  * the following license terms  apply:
  *
@@ -29,7 +30,7 @@ import java.util.List;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: CustomDataSourceDefinitionsListWrapper.java 39398 2013-11-13 08:51:19Z ykovalchyk $
+ * @version $Id: CustomDataSourceDefinitionsListWrapper.java 47331 2014-07-18 09:13:06Z kklein $
  */
 @XmlRootElement(name = "definitions")
 public class CustomDataSourceDefinitionsListWrapper {

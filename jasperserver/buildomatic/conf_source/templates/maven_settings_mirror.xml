@@ -1,6 +1,6 @@
 <settings>
 	<offline>${maven.offline}</offline>
-  <localRepository>${maven-localrepo-path}</localRepository>
+    <localRepository>${maven-localrepo-path}</localRepository>
 	<profiles>
 		<profile>
 			<id>JasperServerProfile</id>
@@ -18,19 +18,24 @@
 				<platform-path>${currentConf}</platform-path>
 				<test.hibernate.cfg>${currentConf}/hibernate.cfg.xml</test.hibernate.cfg>
 				<test.hibernate.jdbc.properties>${currentConf}/js.jdbc.properties</test.hibernate.jdbc.properties>
+				<master.properties>${masterPropsSource}</master.properties>
+		        <!-- workaround src w/o tibco drivers -->
+                <tibco.driver.available>${tibco.driver.available}</tibco.driver.available>
+                <SKIP_TEST_ARG>${SKIP_TEST_ARG}</SKIP_TEST_ARG>
+                <disable.fafj>${disable.fafj}</disable.fafj>
 			</properties>
 		</profile>
 		<profile>
-      <repositories>
-        <repository>
-          <id>jaspersoft-central</id>
-          <name>repo</name>
-          <url>${mvn-mirror}</url>
-          <snapshots>
-            <updatePolicy>always</updatePolicy>
-          </snapshots>
-        </repository>
-      </repositories>
+            <repositories>
+                <repository>
+                    <id>jaspersoft-central</id>
+                    <name>repo</name>
+                    <url>${mvn-mirror}</url>
+                    <snapshots>
+                        <updatePolicy>always</updatePolicy>
+                    </snapshots>
+                </repository>
+            </repositories>
 			<pluginRepositories>
 				<pluginRepository>
 					<id>jaspersoft-central</id>

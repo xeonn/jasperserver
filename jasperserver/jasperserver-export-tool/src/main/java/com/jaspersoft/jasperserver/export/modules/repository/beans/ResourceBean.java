@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -22,13 +22,13 @@ package com.jaspersoft.jasperserver.export.modules.repository.beans;
 
 /**
  * @author tkavanagh
- * @version $Id: ResourceBean.java 37014 2013-09-09 20:38:27Z schubar $
+ * @version $Id: ResourceBean.java 51858 2014-12-06 20:46:19Z vsabadosh $
  */
 
 import com.jaspersoft.jasperserver.api.common.util.spring.StaticApplicationContext;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceReference;
-import com.jaspersoft.jasperserver.api.metadata.common.service.impl.Cipherer;
+import com.jaspersoft.jasperserver.api.common.crypto.Cipherer;
 import com.jaspersoft.jasperserver.export.modules.repository.ResourceExportHandler;
 import com.jaspersoft.jasperserver.export.modules.repository.ResourceImportHandler;
 import org.apache.log4j.LogManager;
@@ -98,7 +98,7 @@ import java.util.List;
  *
  */
 
-public abstract class ResourceBean {
+public abstract class ResourceBean{
 	protected final Logger log = LogManager.getLogger(getClass());
 
 	//TODO use constants from EncryptionEngine instead
@@ -124,6 +124,18 @@ public abstract class ResourceBean {
 		 *  Export specific data
 		 */
 	private boolean exportedWithPermissions;
+
+	public static String decryptSecureAttribute(String encPass) {
+		return importExportCipher.decode(encPass.replaceFirst(ENCRYPTION_PREFIX, "").replaceAll(ENCRYPTION_SUFFIX + "$", ""));
+	}
+
+	public static String encryptSecureAttribute(String rawPass) {
+		return ENCRYPTION_PREFIX + importExportCipher.encode(rawPass) + ENCRYPTION_SUFFIX;
+	}
+
+	public static boolean isEncrypted(String secureValue) {
+		return secureValue != null && secureValue.startsWith(ENCRYPTION_PREFIX) && secureValue.endsWith(ENCRYPTION_SUFFIX);
+	}
 
 	/**
 	 * This method is called by exportHandler (com.jaspersoft.jasperserver.export.modules.repository.ResourceExporter#handleResource)

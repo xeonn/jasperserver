@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -20,41 +20,40 @@
  */
 package com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.persistent;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
-
-import sun.misc.BASE64Decoder;
-import sun.misc.BASE64Encoder;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jaspersoft.jasperserver.api.JSException;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Query;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.QueryParameterDescriptor;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceReference;
 import com.jaspersoft.jasperserver.api.metadata.common.service.ResourceFactory;
 import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.ReferenceResolver;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.impl.datasource.RepoReportDataSource;
+import sun.misc.BASE64Decoder;
+import sun.misc.BASE64Encoder;
+
+import java.io.*;
+import java.util.List;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 
 /**
  * @author Teodor Danciu (teodord@users.sourceforge.net)
- * @version $Id: RepoQuery.java 19922 2010-12-11 14:59:51Z tmatyashovsky $
+ * @version $Id: RepoQuery.java 50801 2014-10-29 00:20:56Z inesterenko $
  * 
  * @hibernate.joined-subclass table="JSQuery"
  * @hibernate.joined-subclass-key column="id"
  */
-public class RepoQuery extends RepoResource
-{
+public class RepoQuery extends RepoResource {
+    private static final ObjectMapper mapper = new ObjectMapper();
+
 	// defined in RepoQuery.hbm.xml
 	private static final int MAX_QUERY_TEXT = 3600;
 	private RepoResource dataSource = null;
 	private String language;
 	private String sql;
+    private String parameters;
 
 
 	/**
@@ -109,7 +108,16 @@ public class RepoQuery extends RepoResource
     		queryText = new BASE64Encoder().encode(compressed);
 		}
 		setSql(queryText);
-	}
+
+        try {
+            if (query.getParameters() != null){
+                setParameters(mapper.writeValueAsString(new ParametersContainer(query.getParameters())));
+            }
+        } catch (IOException e) {
+            throw new JSException(e.getMessage());
+        }
+
+    }
 
 	protected void copyTo(Resource clientRes, ResourceFactory resourceFactory) {
 		super.copyTo(clientRes, resourceFactory);
@@ -128,7 +136,15 @@ public class RepoQuery extends RepoResource
     	} catch (Exception e) {
     	}
 		query.setSql(queryText);
-	}
+
+        if (parameters != null) {
+            try {
+                query.setParameters(mapper.readValue(parameters, ParametersContainer.class).getParams());
+            } catch (IOException e) {
+                throw new JSException(e.getMessage());
+            }
+        }
+    }
 
 
 	public static String uncompress(byte[] compressed) throws IOException {
@@ -174,4 +190,31 @@ public class RepoQuery extends RepoResource
 	public void setLanguage(String language) {
 		this.language = language;
 	}
+
+    public String getParameters() {
+        return parameters;
+    }
+
+    public void setParameters(String parameters) {
+        this.parameters = parameters;
+    }
+
+    private static class ParametersContainer{
+        private List<QueryParameterDescriptor> params;
+
+        ParametersContainer() { }
+
+        ParametersContainer(List<QueryParameterDescriptor> params){
+            this.params = params;
+        }
+
+        public List<QueryParameterDescriptor> getParams() {
+            return params;
+        }
+
+        public void setParams(List<QueryParameterDescriptor> params) {
+            this.params = params;
+        }
+    }
+
 }

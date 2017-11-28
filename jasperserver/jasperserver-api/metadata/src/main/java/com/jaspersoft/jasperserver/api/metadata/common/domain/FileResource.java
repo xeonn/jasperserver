@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2013 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -31,7 +31,7 @@ import java.io.InputStream;
  * It extends {@link com.jaspersoft.jasperserver.api.metadata.common.domain.Resource}
  * 
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: FileResource.java 32262 2013-05-31 16:05:18Z inesterenko $
+ * @version $Id: FileResource.java 51276 2014-11-09 17:44:57Z ktsaregradskyi $
  */
 @JasperServerAPI
 public interface FileResource extends Resource
@@ -43,8 +43,10 @@ public interface FileResource extends Resource
 	String TYPE_RESOURCE_BUNDLE = "prop";
 	String TYPE_STYLE_TEMPLATE = "jrtx";
 	String TYPE_XML = "xml";
+	String TYPE_JSON = "json";
     String TYPE_CSS = "css";
     String TYPE_ACCESS_GRANT_SCHEMA = "accessGrantSchema";
+    String TYPE_DASHBOARD_COMPONENTS_SCHEMA = "dashboardComponent";
 
     /**
      * Returns <code>true</code> if the resource has some file.

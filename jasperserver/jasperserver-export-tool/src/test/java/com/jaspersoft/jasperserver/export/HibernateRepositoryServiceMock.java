@@ -311,4 +311,11 @@ public class HibernateRepositoryServiceMock implements HibernateRepositoryServic
     @Override
     public void saveOrUpdateAll(ExecutionContext context, List<RepoResource> resources, List<RepoFolder> folders) {
     }
+
+	@Override
+	public List<? extends Object> getResources(ExecutionContext context,
+			boolean asLookups, String hqlQueryString) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

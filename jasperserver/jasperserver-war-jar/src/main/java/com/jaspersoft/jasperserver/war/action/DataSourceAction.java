@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -31,6 +31,7 @@ import com.jaspersoft.jasperserver.api.engine.common.service.EngineService;
 import com.jaspersoft.jasperserver.api.common.service.JdbcDriverService;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl.AwsDataSourceService;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl.CustomReportDataSourceServiceFactory;
+import com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl.TibcoDriverManagerImpl;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.util.*;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceLookup;
@@ -62,7 +63,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.security.context.SecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.Errors;
 import org.springframework.validation.FieldError;
 import org.springframework.web.multipart.MultipartFile;
@@ -598,7 +599,7 @@ public class DataSourceAction extends FormAction implements ApplicationContextAw
 		try {
 			Context ctx = new InitialContext();
 			DataSource dataSource = (DataSource) ctx.lookup("java:comp/env/" + ds.getJndiName());
-			conn = dataSource.getConnection();
+            conn = TibcoDriverManagerImpl.getInstance().unlockConnection(dataSource);
             if (conn != null) {
                 connectionStatusMessageKey = RESOURCE_DATA_SOURCE_CONNECTION_STATE_PASSED;
             }

@@ -51,5 +51,4 @@ public class UserAttributesConverterTest {
         assertEquals(converted.getAttrName(), client.getName());
         assertEquals(converted.getAttrValue(), client.getValue());
     }
-
 }

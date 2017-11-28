@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2014 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: repository.search.actions.js 44825 2014-04-19 03:33:49Z schubar $
+ * @version: $Id: repository.search.actions.js 7978 2014-10-29 17:49:25Z bob $
  */
 
 /**
@@ -862,9 +862,11 @@ repositorySearch.RedirectAction.addMethod('invokeAction', function() {
 
     } else if(this.type === repositorySearch.RedirectType.WINDOW_REDIRECT) {
 
-        var w = window.open();
+        var w = window.open(),
+            params = this._serializeParams(this.paramsMap);
+
         w.opener = null;
-        w.document.location = this.url + '?' + this._serializeParams(this.paramsMap);
+        w.document.location = this.url + (params ? '?' + params : "");
     }
 });
 
@@ -928,6 +930,15 @@ repositorySearch.runActionFactory = {
             paramsMap: {
                 dashboardResource: inNewTab ? encodeURIComponent(resource.URIString) : resource.URIString
             }
+        });
+    },
+
+    "DashboardModelResource": function(resource, inNewTab) {
+        var type = inNewTab ?
+                   repositorySearch.RedirectType.WINDOW_REDIRECT : repositorySearch.RedirectType.LOCATION_REDIRECT;
+
+        return new repositorySearch.RedirectAction(type, {
+            url: "dashboard/viewer.html#" + encodeURIComponent(resource.URIString)
         });
     },
 
@@ -1016,8 +1027,19 @@ repositorySearch.editActionFactory = {
     },
 
     "DataDefinerUnit": function(resource, actionType) {
-        return repositorySearch.editActionFactory["ReportUnit"](resource, actionType);
-    },
+    // Going into the report unit edit flow is useless for domain topic.
+    // Edit will go to the data chooser flow, and "Open in designer", which used to go to data chooser,
+    // is disabled.
+    // see JRS-3395
+    //        return repositorySearch.editActionFactory["ReportUnit"](resource, actionType);
+         return new repositorySearch.RedirectAction(actionType, {
+             flowId: 'queryBuilderFlow',
+             paramsMap: {
+                 uri: resource.URIString,
+                 ParentFolderUri: resource.parentFolder
+             }
+         });
+     },
 
     "OlapUnit": function(resource, actionType) {
         return new repositorySearch.RedirectAction(actionType, {
@@ -1233,6 +1255,15 @@ repositorySearch.openActionFactory = {
                 resource: resource.URIString,
                 ParentFolderUri: resource.parentFolder
             }
+        });
+    },
+
+    "DashboardModelResource": function(resource, inNewTab) {
+        var type = inNewTab ?
+            repositorySearch.RedirectType.WINDOW_REDIRECT : repositorySearch.RedirectType.LOCATION_REDIRECT;
+
+        return new repositorySearch.RedirectAction(type, {
+            url: "dashboard/designer.html#"+ encodeURIComponent(resource.URIString)
         });
     },
 

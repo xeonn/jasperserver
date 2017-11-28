@@ -1,6 +1,6 @@
 #!/bin/sh
 
-ANT_OPTS="-Xms128m -Xmx512m -XX:MaxPermSize=512m"
+ANT_OPTS="-Xms128m -Xmx512m -XX:MaxPermSize=512m -Djava.net.preferIPv4Stack=true"
 
 #
 # setup to use bundled of ant

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2014 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: actionModel.primaryNavigation.js 43122 2014-03-18 12:44:22Z psavushchik $
+ * @version: $Id: actionModel.primaryNavigation.js 8012 2014-11-09 16:08:03Z ktsaregradskyi $
  */
 
 var primaryNavModule = {
@@ -58,7 +58,8 @@ var primaryNavModule = {
         designerCache : {url : "flow.html", params : "_flowId=designerCacheFlow"},
         awsSettings : {url : "flow.html", params : "_flowId=awsSettingsFlow"},
         designer : {url : "flow.html", params : "_flowId=adhocFlow"},
-        dashboard : {url : "flow.html", params : "_flowId=dashboardDesignerFlow&createNew=true"},
+        dashboard : {url : "dashboard/designer.html"},
+        legacyDashboard : {url : "flow.html", params : "_flowId=dashboardDesignerFlow&createNew=true"},
         domain : {url : "flow.html", params : "_flowId=createSLDatasourceFlow&ParentFolderUri="},
         dataSource : {url : "flow.html", params : "_flowId=addDataSourceFlow&ParentFolderUri=" + encodeURIComponent("/datasources")},
         logSettings : {url : "log_settings.html"},

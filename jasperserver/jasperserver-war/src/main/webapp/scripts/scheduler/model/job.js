@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2014 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: job.js 45662 2014-05-12 23:48:46Z schubar $
+ * @version: $Id: job.js 7787 2014-09-19 13:11:00Z sergey.prilukin $
  */
 
 define('scheduler/model/job', function (require) {
@@ -33,8 +33,8 @@ define('scheduler/model/job', function (require) {
 
     var $ = require('jquery'),
         Backbone = require('backbone'),
-        timepicker = require('jquery.timepicker'),
-        datepicker = require('jquery.datepicker.extensions'),
+        timepicker = require('common/jquery/extension/timepickerExt'),
+        datepicker = require('common/jquery/extension/datepickerExt'),
         config = require('jrs.configs'),
         moment = require("moment");
 

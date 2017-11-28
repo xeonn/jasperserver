@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -30,7 +30,7 @@ import java.util.Locale;
 
 /**
  * @author inesterenko
- * @version $Id: LocalizedErrorDescriptorBuilder.java 30161 2013-03-22 19:20:15Z inesterenko $
+ * @version $Id: LocalizedErrorDescriptorBuilder.java 47331 2014-07-18 09:13:06Z kklein $
  */
 
 public class LocalizedErrorDescriptorBuilder extends ErrorDescriptor.Builder{

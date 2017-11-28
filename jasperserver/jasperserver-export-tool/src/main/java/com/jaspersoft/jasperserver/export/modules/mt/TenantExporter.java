@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -23,6 +23,7 @@ package com.jaspersoft.jasperserver.export.modules.mt;
 import java.util.LinkedList;
 import java.util.Queue;
 
+import com.jaspersoft.jasperserver.export.modules.mt.beans.TenantBean;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dom4j.Element;
@@ -116,9 +117,13 @@ public class TenantExporter extends BaseExporterModule
 	{
 		commandOut.info("Exporting tenant " + tenant.getId() 
 				+ " (" + tenant.getTenantUri() + ")");
-		
+
+        tenant = getTenantService().getTenant(executionContext, tenant.getId());
+        TenantBean tenantBean = new TenantBean();
+        tenantBean.copyFrom(tenant);
+
 		// serialize the tenant to XML
-		serialize(tenant, 
+		serialize(tenantBean,
 				moduleConfiguration.getTenantsDirectory(),
 				getTenantFileName(tenant), 
 				moduleConfiguration.getTenantSerializer());

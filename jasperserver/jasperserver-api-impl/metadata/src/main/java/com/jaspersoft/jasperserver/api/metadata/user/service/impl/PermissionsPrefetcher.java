@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -19,6 +19,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+
 package com.jaspersoft.jasperserver.api.metadata.user.service.impl;
 
 
@@ -28,24 +29,24 @@ import java.util.List;
 import java.util.Set;
 
 import com.jaspersoft.jasperserver.api.metadata.common.domain.impl.IdedObject;
+import com.jaspersoft.jasperserver.api.metadata.security.JasperServerAclImpl;
+import com.jaspersoft.jasperserver.api.metadata.security.JasperServerPermission;
+import com.jaspersoft.jasperserver.api.security.EhCacheBasedJasperServerAclCache;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.log4j.Logger;
 import org.hibernate.HibernateException;
-import org.hibernate.Query;
 import org.hibernate.Session;
 import org.springframework.orm.hibernate3.HibernateCallback;
-import org.springframework.security.acl.basic.BasicAclEntry;
-import org.springframework.security.acl.basic.BasicAclEntryCache;
-import org.springframework.security.acl.basic.SimpleAclEntry;
 
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Folder;
-import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
 import com.jaspersoft.jasperserver.api.metadata.common.service.ResourceFactory;
 import com.jaspersoft.jasperserver.api.metadata.common.service.impl.HibernateDaoImpl;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.ObjectPermission;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.impl.hibernate.RepoObjectPermission;
-import com.jaspersoft.jasperserver.api.metadata.user.service.impl.ObjectPermissionServiceImpl.URIObjectIdentity;
+import org.springframework.security.acls.domain.AccessControlEntryImpl;
+import org.springframework.security.acls.model.AccessControlEntry;
+import org.springframework.security.acls.model.Acl;
 
 /**
  * this interceptor is put in the chain for the repo service
@@ -59,12 +60,13 @@ import com.jaspersoft.jasperserver.api.metadata.user.service.impl.ObjectPermissi
  * @author bob
  *
  */
+
 public class PermissionsPrefetcher extends HibernateDaoImpl implements MethodInterceptor {
 	private static Logger log = Logger.getLogger(PermissionsPrefetcher.class);
 	
 	private int minimumPrefetch = 10; 
-    private RepositoryService repositoryService;
-    private ObjectPermissionServiceImpl objectPermissionService;
+    private EhCacheBasedJasperServerAclCache aclCache;
+    private JasperServerSidRetrievalStrategyImpl sidRetrievalStrategy;
 	private ResourceFactory objectMappingFactory;
 	private ResourceFactory persistentClassFactory;
 
@@ -85,12 +87,12 @@ public class PermissionsPrefetcher extends HibernateDaoImpl implements MethodInt
 		if (folderURI.equals("/")) {
 			return;
 		}
-		BasicAclEntryCache cache = objectPermissionService.getBasicAclEntryCache();
+        Acl parentAcl = aclCache.getFromCache(new InternalURIDefinition(folderURI));
 		Set<String> missingEntries = new HashSet<String>();
 		for (Object subFolderObj : subFolderList) {
 			Folder subFolder = (Folder) subFolderObj;
 			String uri = subFolder.getURI();
-			if (cache.getEntriesFromCache(new URIObjectIdentity(uri)) == null) {
+			if (aclCache.getFromCache(new InternalURIDefinition(uri)) == null) {
 				missingEntries.add(uri);
 			}
 		}
@@ -98,13 +100,6 @@ public class PermissionsPrefetcher extends HibernateDaoImpl implements MethodInt
 		if (missingEntries.size() < minimumPrefetch) {
 			return;
 		}
-		// do query on all users to push into the cache
-		List<?> userList = getHibernateTemplate().executeFind(new HibernateCallback() {
-            public Object doInHibernate(Session session) throws HibernateException {
-                Query query = session.createQuery("from RepoUser u left join fetch u.roles");
-                return query.list();
-            }
-        });
 		final String objPermissionClassName = getPersistentClassFactory().getImplementationClassName(ObjectPermission.class);
 		final String queryString = "from " + objPermissionClassName + 
 			" where URI like 'repo:" + folderURI + "%'" + 
@@ -121,7 +116,8 @@ public class PermissionsPrefetcher extends HibernateDaoImpl implements MethodInt
             }
         });
 		String currentURI = null;
-		List<BasicAclEntry> permsForURI = new ArrayList<BasicAclEntry>();
+		List<AccessControlEntry> permsForURI = new ArrayList<AccessControlEntry>();
+        Acl tempAcl=new JasperServerAclImpl(new InternalURIDefinition(""),null);
 		for (Object permObj : permList) {
 			RepoObjectPermission perm = (RepoObjectPermission) permObj;
 			// only handle perms that match one of the returned folders
@@ -132,11 +128,9 @@ public class PermissionsPrefetcher extends HibernateDaoImpl implements MethodInt
 			// we are sorting by uri; if we've hit a new uri, then we need to 
 			// put the previously gathered up perms for the last uri into the cache
 			if (! perm.getURI().equals(currentURI)) {
-				if (permsForURI.size() > 0) {
-					BasicAclEntry[] aclArray = permsForURI.toArray(new BasicAclEntry[permsForURI.size()]);
-					cache.putEntriesInCache(aclArray);
-					permsForURI.clear();
-				}
+                Acl acl = new JasperServerAclImpl(new InternalURIDefinition(currentURI),permsForURI,parentAcl);
+                aclCache.putInCache(acl);
+                permsForURI.clear();
 				// remove old version from missingEntries
 				missingEntries.remove(currentURI);
 				// set currentURI to new value
@@ -144,37 +138,20 @@ public class PermissionsPrefetcher extends HibernateDaoImpl implements MethodInt
 			}
 			// create aclEntry from the repo perm object, and save it in list
 			ObjectPermission clientPermission = (ObjectPermission) perm.toClient(objectMappingFactory);
-			BasicAclEntry aclEntry = objectPermissionService.createBasicAclEntry(currentURI, clientPermission);
+			AccessControlEntry aclEntry = new AccessControlEntryImpl(null,tempAcl,sidRetrievalStrategy.getSid(clientPermission.getPermissionRecipient()), new JasperServerPermission(clientPermission.getPermissionMask()),true,false,false);
 			permsForURI.add(aclEntry);
 		}
 		// put any perms that haven't been put yet 
 		if (permsForURI.size() > 0) {
-			BasicAclEntry[] aclArray = permsForURI.toArray(new BasicAclEntry[permsForURI.size()]);
-			cache.putEntriesInCache(aclArray);
+            Acl acl = new JasperServerAclImpl(new InternalURIDefinition(currentURI),permsForURI,parentAcl);
+            aclCache.putInCache(acl);
 			missingEntries.remove(currentURI);
 		}
 		// put in empty perms entry for folders in returned list that don't have any perms records
 		for (String uriWithNoPerms : missingEntries) {
-			BasicAclEntry[] emptyAclEntries = {
-            		objectPermissionService.createBasicAclEntry(uriWithNoPerms, null)};
-            cache.putEntriesInCache(emptyAclEntries);
+            Acl acl = new JasperServerAclImpl(new InternalURIDefinition(uriWithNoPerms),new ArrayList<AccessControlEntry>(),parentAcl);
+            aclCache.putInCache(acl);
 		}
-	}
-
-	public RepositoryService getRepositoryService() {
-		return repositoryService;
-	}
-
-	public void setRepositoryService(RepositoryService repositoryService) {
-		this.repositoryService = repositoryService;
-	}
-
-	public void setObjectPermissionService(ObjectPermissionServiceImpl objectPermissionService) {
-		this.objectPermissionService = objectPermissionService;
-	}
-
-	public ObjectPermissionServiceImpl getObjectPermissionService() {
-		return objectPermissionService;
 	}
 
 	public void setMinimumPrefetch(int minimumPrefetch) {
@@ -201,4 +178,11 @@ public class PermissionsPrefetcher extends HibernateDaoImpl implements MethodInt
 		return persistentClassFactory;
 	}
 
+    public void setAclCache(EhCacheBasedJasperServerAclCache aclCache) {
+        this.aclCache = aclCache;
+    }
+
+    public void setSidRetrievalStrategy(JasperServerSidRetrievalStrategyImpl sidRetrievalStrategy) {
+        this.sidRetrievalStrategy = sidRetrievalStrategy;
+    }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -30,7 +30,7 @@ import java.util.Map;
  * Parameters for reports and queries that are available automatically when run.
  *
  * @author Sherman Wood (sgwood@users.sourceforge.net)
- * @version $Id: BuiltInParameterProvider.java 19921 2010-12-11 14:52:49Z tmatyashovsky $
+ * @version $Id: BuiltInParameterProvider.java 47331 2014-07-18 09:13:06Z kklein $
  */
 @JasperServerAPI
 public interface BuiltInParameterProvider {

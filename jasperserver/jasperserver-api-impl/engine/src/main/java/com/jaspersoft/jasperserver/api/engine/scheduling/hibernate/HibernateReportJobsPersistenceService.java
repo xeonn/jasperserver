@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -69,7 +69,7 @@ import java.util.List;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: HibernateReportJobsPersistenceService.java 44312 2014-04-09 14:30:12Z vsabadosh $
+ * @version $Id: HibernateReportJobsPersistenceService.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 public class HibernateReportJobsPersistenceService extends HibernateDaoImpl
@@ -464,6 +464,16 @@ public class HibernateReportJobsPersistenceService extends HibernateDaoImpl
             }
         });
 	}
+
+    @Override
+    public String getSourceUriByJobId(final long jobId) {
+        return (String) executeCallback(new DaoCallback() {
+            public Object execute() {
+                PersistentReportJob persistentJob = findJob(jobId, true);
+                return persistentJob.getSource().getReportUnitURI();
+            }
+        });
+    }
 
     @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
 	public long[] deleteReportUnitJobs(final String reportUnitURI) {

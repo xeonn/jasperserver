@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2013 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -21,9 +21,13 @@
 package com.jaspersoft.jasperserver.api.common.util;
 
 import com.jaspersoft.jasperserver.api.common.properties.PropertyChanger;
+import com.jaspersoft.jasperserver.api.common.properties.PropertyChangerAdapter;
 import com.jaspersoft.jasperserver.api.common.service.JdbcDriverService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Implementation of {@link PropertyChanger} for JdbcDriverService
@@ -31,7 +35,7 @@ import org.apache.commons.logging.LogFactory;
  * @author Sergey Prilukin (sprilukin@jaspersoft.com)
  * @version $Id$
  */
-public class JdbcDriverServicePropertyChanger implements PropertyChanger {
+public class JdbcDriverServicePropertyChanger extends PropertyChangerAdapter {
 
     final public static String PROPERTY_PREFIX = "jdbc:";
 
@@ -59,6 +63,15 @@ public class JdbcDriverServicePropertyChanger implements PropertyChanger {
         checkKey(key);
 
         return jdbcDriverService.getDriverMappings().get(getDriverClassName(key));
+    }
+
+    @Override
+    public Map<String, String> getProperties() {
+        Map<String, String> map = new HashMap<String, String>();
+        for (String key : jdbcDriverService.getDriverMappings().keySet()) {
+            map.put(PROPERTY_PREFIX + key, jdbcDriverService.getDriverMappings().get(key));
+        }
+        return map;
     }
 
     @Override

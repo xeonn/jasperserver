@@ -7,6 +7,10 @@
         drop 
         foreign key FK47FB3CD7F254B53E;
 
+    alter table JIAwsDatasource 
+        drop 
+        foreign key FK6085542387E4472B;
+
     alter table JIBeanDatasource 
         drop 
         foreign key FK674BF34A8BF376D;
@@ -70,10 +74,6 @@
     alter table JIJdbcDatasource 
         drop 
         foreign key FKC8BDFCBFA8BF376D;
-
-    alter table JIAwsDatasource
-        drop
-        foreign key FK6085542387E4472B;
 
     alter table JIListOfValues 
         drop 
@@ -171,6 +171,14 @@
         drop 
         foreign key FKB9337C5CD2B2EB53;
 
+    alter table JIReportThumbnail 
+        drop 
+        foreign key FKFDB3DED932282198;
+
+    alter table JIReportThumbnail 
+        drop 
+        foreign key FKFDB3DED9F254B53E;
+
     alter table JIReportUnit 
         drop 
         foreign key FK98818B77A8BF376D;
@@ -257,6 +265,8 @@
 
     drop table if exists JIAccessEvent;
 
+    drop table if exists JIAwsDatasource;
+
     drop table if exists JIBeanDatasource;
 
     drop table if exists JIContentResource;
@@ -284,8 +294,6 @@
     drop table if exists JIJNDIJdbcDatasource;
 
     drop table if exists JIJdbcDatasource;
-
-    drop table if exists JIAwsDatasource;
 
     drop table if exists JIListOfValues;
 
@@ -328,6 +336,8 @@
     drop table if exists JIReportJobSimpleTrigger;
 
     drop table if exists JIReportJobTrigger;
+
+    drop table if exists JIReportThumbnail;
 
     drop table if exists JIReportUnit;
 

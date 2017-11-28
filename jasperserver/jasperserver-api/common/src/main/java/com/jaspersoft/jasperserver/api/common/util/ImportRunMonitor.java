@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2012 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -25,7 +25,7 @@ package com.jaspersoft.jasperserver.api.common.util;
  * <p>Monitors import process.</p>
  *
  * @author Yuriy Plakosh
- * @version $Id: ImportRunMonitor.java 24003 2012-06-02 00:59:58Z yuriy.plakosh $
+ * @version $Id: ImportRunMonitor.java 47331 2014-07-18 09:13:06Z kklein $
  * @since 4.7.0
  */
 public class ImportRunMonitor {

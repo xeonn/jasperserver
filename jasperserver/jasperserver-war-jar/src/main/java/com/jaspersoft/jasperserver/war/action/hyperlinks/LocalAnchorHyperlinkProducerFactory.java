@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -39,7 +39,7 @@ import net.sf.jasperreports.web.servlets.JasperPrintAccessor;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: LocalAnchorHyperlinkProducerFactory.java 45722 2014-05-14 10:24:22Z sergey.prilukin $
+ * @version $Id: LocalAnchorHyperlinkProducerFactory.java 49286 2014-09-23 13:32:25Z ykovalchyk $
  */
 public class LocalAnchorHyperlinkProducerFactory implements HyperlinkProducerFlowFactory, Serializable {
 
@@ -75,8 +75,8 @@ public class LocalAnchorHyperlinkProducerFactory implements HyperlinkProducerFlo
 			this.jasperPrintAccessor = (result == null ? null : result.getJasperPrintAccessor());
 			if (jasperPrintAccessor == null) {
 				throw new JSException("jsexception.jasperprint.not.found", new Object[]{jasperPrintName});
-            }
-        }
+			}
+		}
 
 		public String getHyperlink(JRPrintHyperlink hyperlink) {
 			String ref = null;

@@ -152,6 +152,10 @@ a#about:active,
 	color:#3f5d3b;
 }
 
+.workflow-buttonContainer .button {
+	color:#467a02;
+}
+
 #copyright {
     color: #559502;
 }

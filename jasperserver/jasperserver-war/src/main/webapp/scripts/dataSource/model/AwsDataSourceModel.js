@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2014 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -25,13 +25,14 @@ define(function (require) {
     var JdbcDataSourceModel = require("dataSource/model/JdbcDataSourceModel"),
         BaseDataSourceModel = require("dataSource/model/BaseDataSourceModel"),
         JdbcDriverCollection = require("dataSource/collection/JdbcDriverCollection"),
-		connectionTypes = require("dataSource/enum/connectionTypes"),
+        dataSourcePatterns = require("settings!dataSourcePatterns"),
+        connectionTypes = require("dataSource/enum/connectionTypes"),
         repositoryResourceTypes = require("common/enum/repositoryResourceTypes"),
         _ = require("underscore"),
         $ = require("jquery"),
         i18n = require("bundle!jasperserver_messages"),
         awsSettings = require("settings!awsSettings"),
-		jasperserverConfig = require("bundle!jasperserver_config"),
+        jasperserverConfig = require("bundle!jasperserver_config"),
         settingsUtility = require("dataSource/util/settingsUtility");
 
     var AwsDataSourceModel = JdbcDataSourceModel.extend({
@@ -50,7 +51,7 @@ define(function (require) {
                 roleArn: "",
                 region: "",
                 credentialsType: "",
-				connectionType: connectionTypes.AWS
+                connectionType: connectionTypes.AWS
             });
 
             return defaults;
@@ -60,21 +61,31 @@ define(function (require) {
             var validation = {};
 
             _.extend(validation, JdbcDataSourceModel.prototype.validation, {
+                username: [
+                    {
+                        required: true,
+                        msg: i18n["ReportDataSourceValidator.error.not.empty.reportDataSource.username"]
+                    }
+                ],
                 driverClass: [
                     {
                         required: true,
                         msg: i18n["ReportDataSourceValidator.error.not.empty.reportDataSource.driverClass"]
                     },
                     {
-                        doesNotContainCharacters: "\\s",
+                        xRegExpPattern: XRegExp(dataSourcePatterns.forbidWhitespacesPattern),
                         msg: i18n["ReportDataSourceValidator.error.invalid.chars.reportDataSource.driverClass"]
                     },
                     {
                         fn: function(value, attr, computedState) {
-                            var driver = this.drivers.getDriverByClass(value);
+                            var contains = new RegExp(dataSourcePatterns.attributePlaceholderPattern).test(value);
 
-                            if (!driver || !driver.get("available")) {
-                                return i18n['ReportDataSourceValidator.error.not.empty.reportDataSource.driverNotInstalled'];
+                            if (!contains) {
+                                var driver = this.drivers.getDriverByClass(value);
+
+                                if (!driver || !driver.get("available")) {
+                                    return i18n['ReportDataSourceValidator.error.not.empty.reportDataSource.driverNotInstalled'];
+                                }
                             }
                         }
                     }
@@ -120,10 +131,10 @@ define(function (require) {
             });
             if (this.isNew()) {
                 this.set("region", _.first(deepDefaults.awsSettings.awsRegions));
-			} else {
-				// use password substitution
-				this.set("password", jasperserverConfig["input.password.substitution"]);
-				this.set("secretKey", jasperserverConfig["input.password.substitution"]);
+            } else {
+                // use password substitution
+                this.set("password", jasperserverConfig["input.password.substitution"]);
+                this.set("secretKey", jasperserverConfig["input.password.substitution"]);
             }
             this.set("credentialsType", !deepDefaults.awsSettings.isEc2Instance || deepDefaults.awsSettings.suppressEc2CredentialsWarnings || this.get("accessKey") !== ""
                 ? AwsDataSourceModel.credentialsType.AWS
@@ -145,8 +156,13 @@ define(function (require) {
                 return;
             }
 
+            var valuesMap = this.pick(["dbName", "dbPort", "dbHost", "sName"]);
+            if(!valuesMap.sName){
+                // some JDBC URL templates use sName instead of dbName.
+                valuesMap.sName = valuesMap.dbName;
+            }
             var connectionUrl = this.replaceConnectionUrlTemplatePlaceholdersWithValues(
-                this.get("connectionUrlTemplate"), this.pick(["dbName", "dbPort", "dbHost", "sName"]));
+                this.get("connectionUrlTemplate"), valuesMap);
 
             this.set("connectionUrl", connectionUrl);
         },
@@ -163,15 +179,15 @@ define(function (require) {
             }
         },
 
-		toJSON: function() {
-			var data = JdbcDataSourceModel.prototype.toJSON.apply(this, arguments);
+        toJSON: function() {
+            var data = JdbcDataSourceModel.prototype.toJSON.apply(this, arguments);
 
-			if (this.options.isEditMode && data.secretKey === jasperserverConfig["input.password.substitution"]) {
-				data.secretKey = null;
-			}
+            if (this.options.isEditMode && data.secretKey === jasperserverConfig["input.password.substitution"]) {
+                data.secretKey = null;
+            }
 
-			return data;
-		},
+            return data;
+        },
 
         getFullDbTreePath: function() {
             return this.get("dbInstanceIdentifier") && this.get("dbService")

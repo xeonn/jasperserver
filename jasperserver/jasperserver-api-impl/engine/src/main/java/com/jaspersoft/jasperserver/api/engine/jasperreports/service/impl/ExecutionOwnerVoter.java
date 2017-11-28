@@ -1,35 +1,35 @@
 /*
-* Copyright (C) 2005 - 2009 Jaspersoft Corporation. All rights  reserved.
-* http://www.jaspersoft.com.
-*
-* Unless you have purchased  a commercial license agreement from Jaspersoft,
-* the following license terms  apply:
-*
-* This program is free software: you can redistribute it and/or  modify
-* it under the terms of the GNU Affero General Public License  as
-* published by the Free Software Foundation, either version 3 of  the
-* License, or (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-* GNU Affero  General Public License for more details.
-*
-* You should have received a copy of the GNU Affero General Public  License
-* along with this program.&nbsp; If not, see <http://www.gnu.org/licenses/>.
-*/
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
+ * http://www.jaspersoft.com.
+ *
+ * Unless you have purchased  a commercial license agreement from Jaspersoft,
+ * the following license terms  apply:
+ *
+ * This program is free software: you can redistribute it and/or  modify
+ * it under the terms of the GNU Affero General Public License  as
+ * published by the Free Software Foundation, either version 3 of  the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero  General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public  License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 package com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl;
 
 import com.jaspersoft.jasperserver.api.engine.common.service.SecurityContextProvider;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
 import org.aopalliance.intercept.MethodInvocation;
-import org.springframework.security.Authentication;
-import org.springframework.security.ConfigAttribute;
-import org.springframework.security.ConfigAttributeDefinition;
-import org.springframework.security.vote.AccessDecisionVoter;
+import org.springframework.security.access.AccessDecisionVoter;
+import org.springframework.security.access.ConfigAttribute;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -39,7 +39,7 @@ import java.util.Map;
  * @version $Id: ExecutionOwnerVoter.java 27042 2012-12-19 10:18:08Z ykovalchyk $
  */
 @Component
-public class ExecutionOwnerVoter implements AccessDecisionVoter {
+public class ExecutionOwnerVoter implements AccessDecisionVoter<MethodInvocation> {
     public static final String ATTRIBUTE_EXECUTION_OWNER = "EXECUTION_OWNER";
 
     @Resource
@@ -58,15 +58,17 @@ public class ExecutionOwnerVoter implements AccessDecisionVoter {
     }
 
     @Override
-    public int vote(Authentication authentication, Object object, ConfigAttributeDefinition config) {
+    public int vote(Authentication authentication, MethodInvocation invocation, Collection<ConfigAttribute> attributes) {
         int result = ACCESS_ABSTAIN;
-        if (ATTRIBUTE_EXECUTION_OWNER.equals(((ConfigAttribute) config.getConfigAttributes().iterator().next()).getAttribute())) {
-            MethodInvocation invocation = (MethodInvocation) object;
+        if (ATTRIBUTE_EXECUTION_OWNER.equals(attributes.iterator().next().getAttribute())) {
             final String executionId = (String) invocation.getArguments()[0];
             EngineServiceImpl.ReportExecutionStatus status = engineExecutions.get(executionId);
             if (status != null) {
                 User currentUser = securityContextProvider.getContextUser();
                 result = status.getOwner().equals(currentUser) ? ACCESS_GRANTED : ACCESS_DENIED;
+            } else {
+                // no status. Execution is done. Nothing to cancel - nothing to secure.
+                result = ACCESS_GRANTED;
             }
         }
         return result;

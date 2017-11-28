@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2012 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -32,7 +32,7 @@ import com.jaspersoft.jasperserver.api.JasperServerAPI;
  * Model is used in search/ update only.
  *
  * @author Ivan Chan (ichan@jaspersoft.com)
- * @version $Id: ReportJobRepositoryDestinationModel.java 25010 2012-09-26 16:56:35Z sergey.prilukin $
+ * @version $Id: ReportJobRepositoryDestinationModel.java 47331 2014-07-18 09:13:06Z kklein $
  * @since 4.7
  */
 @JasperServerAPI

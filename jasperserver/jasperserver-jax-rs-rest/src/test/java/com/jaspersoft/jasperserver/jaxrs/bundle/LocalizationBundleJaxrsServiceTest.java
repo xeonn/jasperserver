@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005 - 2013 Jaspersoft Corporation. All rights  reserved.
+* Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
 * http://www.jaspersoft.com.
 *
 * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -50,7 +50,7 @@ import static org.testng.Assert.assertTrue;
  * <p></p>
  *
  * @author yaroslav.kovalchyk
- * @version $Id: LocalizationBundleJaxrsServiceTest.java 40333 2013-12-27 12:56:42Z ykovalchyk $
+ * @version $Id: LocalizationBundleJaxrsServiceTest.java 47331 2014-07-18 09:13:06Z kklein $
  */
 public class LocalizationBundleJaxrsServiceTest {
     private static final String BUNDLE1_NAME = "bundle1";

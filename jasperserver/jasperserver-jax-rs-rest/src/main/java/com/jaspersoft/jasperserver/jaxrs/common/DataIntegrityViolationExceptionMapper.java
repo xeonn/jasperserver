@@ -1,6 +1,7 @@
 /*
- * Copyright (C) 2005 - 2012 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
+ *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
  * the following license terms  apply:
  *
@@ -47,16 +48,13 @@ public class DataIntegrityViolationExceptionMapper implements ExceptionMapper<Da
     @Override
     public Response toResponse(DataIntegrityViolationException exception) {
         Response.ResponseBuilder response;
-        if (exception.getCause() instanceof JDBCException) {
-            JDBCException cause = (JDBCException) exception.getCause();
-            Iterator<Throwable> it = cause.getSQLException().iterator();
-            Throwable throwable = null;
-            while (it.hasNext() && (throwable = it.next()) instanceof SQLException);
+        Throwable cause = exception.getCause();
 
-            response = Response.status(cause instanceof ConstraintViolationException ? Response.Status.FORBIDDEN : Response.Status.BAD_REQUEST)
+        if (cause instanceof JDBCException || cause instanceof SQLException) {
+            response = Response.status(isConstraintViolation(cause) ? Response.Status.FORBIDDEN : Response.Status.BAD_REQUEST)
                     .entity(new ErrorDescriptor.Builder()
-                            .setErrorCode(cause instanceof ConstraintViolationException ? ResourceInUseException.ERROR_CODE : IllegalParameterValueException.ERROR_CODE)
-                            .setMessage(cause.getLocalizedMessage() + ": " + throwable.getLocalizedMessage())
+                            .setErrorCode(isConstraintViolation(cause) ? ResourceInUseException.ERROR_CODE : IllegalParameterValueException.ERROR_CODE)
+                            .setMessage(cause.getLocalizedMessage() + ": " + getLocalizedMessage(cause))
                             .getErrorDescriptor());
         } else {
             response = Response.status(Response.Status.BAD_REQUEST)
@@ -68,4 +66,18 @@ public class DataIntegrityViolationExceptionMapper implements ExceptionMapper<Da
 
         return response.build();
     }
+
+    private String getLocalizedMessage(Throwable cause) {
+        Iterator<Throwable> it = (cause instanceof JDBCException)
+                ? ((JDBCException) cause).getSQLException().iterator()
+                : ((SQLException) cause).iterator();
+        Throwable throwable = null;
+        while (it.hasNext() && (throwable = it.next()) instanceof SQLException);
+        return throwable != null ? throwable.getLocalizedMessage() : cause.getLocalizedMessage();
+    }
+
+    private boolean isConstraintViolation(Throwable cause) {
+        return (cause instanceof ConstraintViolationException) ||
+                (cause.getMessage().contains("integrity")) && (cause.getMessage().contains("violate"));
+    }	
 }

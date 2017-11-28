@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -21,22 +21,19 @@
 
 package com.jaspersoft.jasperserver.export.modules.scheduling;
 
-import com.jaspersoft.jasperserver.export.io.ObjectSerializer;
 import com.jaspersoft.jasperserver.export.modules.BaseImporterModule;
 import com.jaspersoft.jasperserver.export.modules.ImporterModuleContext;
 import com.jaspersoft.jasperserver.export.modules.repository.ResourceImporter;
 import com.jaspersoft.jasperserver.export.modules.scheduling.beans.HolidayCalendarBean;
-import com.jaspersoft.jasperserver.export.util.PathUtils;
+import com.jaspersoft.jasperserver.core.util.PathUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dom4j.Element;
 import org.quartz.Calendar;
 import org.quartz.impl.calendar.HolidayCalendar;
 
-import java.util.Map;
 import java.util.List;
 import java.util.Iterator;
-import java.util.HashMap;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)

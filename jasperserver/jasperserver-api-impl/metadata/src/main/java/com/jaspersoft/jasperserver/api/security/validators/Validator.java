@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -69,7 +69,7 @@ import static com.jaspersoft.jasperserver.api.security.validators.Validator.Prop
  *
  * @author Normando Macaraeg
  * @author Anton Fomin
- * @version $Id: Validator.java 37824 2013-09-20 06:42:34Z dlitvak $
+ * @version $Id: Validator.java 47331 2014-07-18 09:13:06Z kklein $
  */
 public class Validator {
     private static final Logger log = Logger.getLogger(Validator.class);

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -291,6 +291,7 @@ public class UserManagerAction extends BaseManagerAction {
         return success();
     }
 
+
     public Event deleteAll(RequestContext context) {
         String responseModel;
         try {
@@ -301,7 +302,14 @@ public class UserManagerAction extends BaseManagerAction {
 
         try {
             List<String> userNames = getEntities(context);
-            if (userNames.size() > 0) {
+
+            //Bug 37601
+            if (userNames.size() == 1) {
+                createAuditEvent("deleteUser");
+                managerService.deleteAll(null, userNames);
+                closeAuditEvent("deleteUser");
+            }
+            else if (userNames.size() > 0) {
                 createAuditEvent("deleteAllUsers");
                 managerService.deleteAll(null, userNames);
                 closeAuditEvent("deleteAllUsers");

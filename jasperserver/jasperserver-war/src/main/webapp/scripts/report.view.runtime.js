@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2014 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -21,11 +21,10 @@
 
 
 /**
- * @version: $Id: report.view.runtime.js 43122 2014-03-18 12:44:22Z psavushchik $
+ * @version: $Id: report.view.runtime.js 8036 2014-11-20 06:08:27Z nmarcu $
  */
 
 Report.toolbarActionMap = {
-    'asyncCancel' : "Report.cancelReportAsyncExecution",
     'back' : "Report.goBack",
     'ICDialog' : "Controls.show",
     'export': "doNothing",
@@ -53,6 +52,12 @@ jQuery.extend(Report, {
                 } else {
                     this.refreshReport({freshData: true}, null, '');
                 }
+            }.bindAsEventListener(this));
+        }
+
+        if ($(Report.ASYNC_CANCEL_BUTTON)) {
+            $(Report.ASYNC_CANCEL_BUTTON).observe('mouseup', function() {
+                this.cancelReportAsyncExecution(true);
             }.bindAsEventListener(this));
         }
 
@@ -126,6 +131,10 @@ jQuery.extend(Report, {
                 })
             }
             r.show();
+
+            // bloody hack to remember initial size of report frame
+            window.reportFrameHeight = window.reportFrameHeight || fr.parent().height();
+            window.reportFrameWidth = window.reportFrameWidth || fr.parent().width();
         } else {
             var ic = $(ControlsBase.INPUT_CONTROLS_FORM);
             if(isSupportsTouch()){
@@ -269,17 +278,20 @@ jQuery.extend(Report, {
     refreshAsyncCancel: function(canceled) {
         var meta = viewer.reportInstance.status;
 
-        if ($('asyncCancel')) {
+        if ($(Report.ASYNC_CANCEL_BUTTON)) {
             if(canceled) {
                 $('asyncIndicator').addClassName(layoutModule.HIDDEN_CLASS);
-                buttonManager.disable('asyncCancel');
+                buttonManager.disable(Report.ASYNC_CANCEL_BUTTON);
+                $(Report.DATA_REFRESH_BUTTON).removeClassName(layoutModule.HIDDEN_CLASS);
             } else {
                 if(meta.jasperPrintName && meta.reportStatus == 'running' && meta.totalPages == null) {
-                    buttonManager.enable('asyncCancel');
+                    buttonManager.enable(Report.ASYNC_CANCEL_BUTTON);
                     $('asyncIndicator').removeClassName(layoutModule.HIDDEN_CLASS);
+                    $(Report.DATA_REFRESH_BUTTON).addClassName(layoutModule.HIDDEN_CLASS);
                 } else {
                     $('asyncIndicator').addClassName(layoutModule.HIDDEN_CLASS);
-                    buttonManager.disable('asyncCancel');
+                    buttonManager.disable(Report.ASYNC_CANCEL_BUTTON);
+                    $(Report.DATA_REFRESH_BUTTON).removeClassName(layoutModule.HIDDEN_CLASS);
                 }
             }
         }
@@ -347,14 +359,14 @@ jQuery.extend(Report, {
     undoAll: function() {
         viewer.reportInstance.undoAll();
     },
-    cancelReportAsyncExecution: function() {
+    cancelReportAsyncExecution: function(bAsync) {
         if (!viewer.reportInstance.status.jasperPrintName) {
             return;
         }
 
-        buttonManager.disable($('asyncCancel'));
+        buttonManager.disable($(Report.ASYNC_CANCEL_BUTTON));
 
-        viewer.reportInstance.cancelExecution().then(function(jsonResponse, textStatus, jqXHR) {
+        viewer.reportInstance.cancelExecution(bAsync).then(function(jsonResponse, textStatus, jqXHR) {
             var status = jsonResponse.result.status;
             /*
              If report execution finished do nothing.
@@ -379,11 +391,14 @@ jQuery.extend(Report, {
             } else {
                 if (jsonResponse.result.lastPageIndex) {
                     Report.lastPageIndex = jsonResponse.result.lastPageIndex;
+                    viewer.reportInstance.status.totalPages = Report.lastPageIndex + 1;
                 }
 
                 if (jsonResponse.result.snapshotSaveStatus) {
                     Report.snapshotSaveStatus = jsonResponse.result.snapshotSaveStatus;
                 }
+
+                viewer.reportInstance.status.reportStatus = status;
 
                 Report.refreshPagination(true);
                 Report.refreshExporters();

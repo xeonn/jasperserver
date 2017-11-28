@@ -1,5 +1,5 @@
 <%--
-  ~ Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+  ~ Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
   ~ http://www.jaspersoft.com.
   ~
   ~ Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -126,8 +126,8 @@ linkurls = [
 "${pageContext.request.contextPath}/themes/dev/pageSpecific/serverError.css",
 "${pageContext.request.contextPath}/themes/dev/pageSpecific/systemError.css",
 "${pageContext.request.contextPath}/themes/default/samples.css",
-"${pageContext.request.contextPath}/scripts/lib/jquery/theme/jquery.ui.theme.css",
-"${pageContext.request.contextPath}/scripts/lib/jquery/theme/redmond/jquery-ui-1.10.4-custom.css",
+"${pageContext.request.contextPath}/scripts/bower_components/jquery-ui/themes/jquery.ui.theme.css",
+"${pageContext.request.contextPath}/scripts/bower_components/jquery-ui/themes/redmond/jquery-ui-1.10.4-custom.css",
 "${pageContext.request.contextPath}/themes/dev/containers/bg.css",
 "${pageContext.request.contextPath}/themes/dev/lists/bg.css",
 "${pageContext.request.contextPath}/themes/dev/buttons/bg.css",
@@ -234,8 +234,10 @@ Page Specific
 <link rel="stylesheet" href="${pageContext.request.contextPath}/themes/dev/pageSpecific/serverError.css" type="text/css" media="screen,print"/>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/themes/dev/pageSpecific/systemError.css" type="text/css" media="screen,print"/>
 
-<link rel="stylesheet" href="${pageContext.request.contextPath}/scripts/lib/jquery/theme/jquery.ui.theme.css" type="text/css" media="screen,print"/>
-<link rel="stylesheet" href="${pageContext.request.contextPath}/scripts/lib/jquery/theme/redmond/jquery-ui-1.10.4-custom.css" type="text/css" media="screen">
+<%--TODO: move to commmon themes approach--%>
+<link rel="stylesheet" href="${pageContext.request.contextPath}/scripts/bower_components/jquery-ui/themes/jquery.ui.theme.css" type="text/css" media="screen,print"/>
+<link rel="stylesheet" href="${pageContext.request.contextPath}/scripts/bower_components/jquery-ui/themes/redmond/jquery-ui-1.10.4-custom.css" type="text/css" media="screen">
+
 <link rel="stylesheet" href="${pageContext.request.contextPath}/themes/dev/containers/bg.css" type="text/css" media="screen,print"/>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/themes/dev/lists/bg.css" type="text/css" media="screen,print"/>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/themes/dev/buttons/bg.css" type="text/css" media="screen,print"/>

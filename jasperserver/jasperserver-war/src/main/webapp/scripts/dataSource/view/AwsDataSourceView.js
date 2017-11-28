@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2014 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -135,9 +135,7 @@ define(function(require) {
         render: function() {
             this.$el.empty();
 
-            this.renderNameAndDescriptionSection();
             this.renderTimezoneSection();
-            this.renderSaveLocationSection();
             this.renderAwsSpecificSection();
 			this.renderTestConnectionSection();
 
@@ -231,7 +229,17 @@ define(function(require) {
                 if (self.model.getFullDbTreePath()) {
                     self.awsDataSourceTree.openAndSelectNode(self.model.getFullDbTreePath(), function () {
                         isEdit = false;
+                        var selectedNode = self.awsDataSourceTree.getSelectedNode();
+                        if(selectedNode && selectedNode.param && selectedNode.param.extra){
+                            // add required fields to a model from selected node.
+                            // it's required for JDBC URL auto update
+                            self.model.set({
+                                connectionUrlTemplate: selectedNode.param.extra.jdbcTemplate,
+                                dbHost: selectedNode.param.extra.dnsAddress,
+                                dbPort : selectedNode.param.extra.dbPort
                     });
+                }
+            });
                 }
             });
         },

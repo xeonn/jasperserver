@@ -1,5 +1,5 @@
 package com.jaspersoft.jasperserver.remote.services.impl.async;/*
-* Copyright (C) 2005 - 2012 Jaspersoft Corporation. All rights reserved.
+* Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
 * http://www.jaspersoft.com.
 * Licensed under commercial Jaspersoft Subscription License Agreement.
 */

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -94,7 +94,7 @@ public class UserImpl implements User, InternalURI, Serializable {
 
 	/**
 	 * (non-Javadoc)
-	 * @see org.springframework.security.userdetails.UserDetails#getPassword()
+	 * @see org.springframework.security.core.userdetails.UserDetails#getPassword()
 	 */
     @XmlTransient
 	public String getPassword() {
@@ -189,7 +189,7 @@ public class UserImpl implements User, InternalURI, Serializable {
 
 	/** 
      *  (non-Javadoc)
-	 * @see org.springframework.security.userdetails.UserDetails#isEnabled()
+	 * @see org.springframework.security.core.userdetails.UserDetails#isEnabled()
 	 */
     @XmlTransient
 	public boolean isEnabled() {
@@ -220,6 +220,17 @@ public class UserImpl implements User, InternalURI, Serializable {
             .append(this.getUsername(), castOther.getUsername())
             .append(this.getTenantId(), castOther.getTenantId())
             .isEquals();
+    }
+
+    @Override
+    public Serializable getIdentifier() {
+        // TODO Security Upgrade: userId
+        return getURI();
+    }
+
+    @Override
+    public String getType() {
+        return User.class.getName();
     }
 
     public int hashCode() {

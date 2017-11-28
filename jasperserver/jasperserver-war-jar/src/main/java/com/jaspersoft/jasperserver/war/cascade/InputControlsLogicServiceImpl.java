@@ -1,3 +1,23 @@
+/*
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
+ * http://www.jaspersoft.com.
+ *
+ * Unless you have purchased  a commercial license agreement from Jaspersoft,
+ * the following license terms  apply:
+ *
+ * This program is free software: you can redistribute it and/or  modify
+ * it under the terms of the GNU Affero General Public License  as
+ * published by the Free Software Foundation, either version 3 of  the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero  General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public  License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 package com.jaspersoft.jasperserver.war.cascade;
 
 import com.jaspersoft.jasperserver.api.common.domain.ValidationErrors;
@@ -5,9 +25,9 @@ import com.jaspersoft.jasperserver.api.common.domain.impl.ValidationErrorsImpl;
 import com.jaspersoft.jasperserver.api.engine.common.service.SecurityContextProvider;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.InputControlsContainer;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceReference;
-import com.jaspersoft.jasperserver.war.cascade.cache.ControlLogicCacheManager;
 import com.jaspersoft.jasperserver.dto.reports.inputcontrols.InputControlState;
 import com.jaspersoft.jasperserver.dto.reports.inputcontrols.ReportInputControl;
+import com.jaspersoft.jasperserver.war.cascade.cache.ControlLogicCacheManager;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -106,7 +126,7 @@ public class InputControlsLogicServiceImpl implements InputControlsLogicService 
     public List<ReportInputControl> getInputControlsWithValues(String reportUnitUri, Set<String> inputControlIds, Map<String, String[]> rawParameters) throws CascadeResourceNotFoundException {
         List<ReportInputControl> result = getInputControlsStructure(reportUnitUri, inputControlIds);
         if (result != null && !result.isEmpty()) {
-            final List<InputControlState> states = getValuesForInputControls(reportUnitUri, inputControlIds, rawParameters);
+            final List<InputControlState> states = getValuesForInputControls(reportUnitUri, inputControlIds, rawParameters, false);
             if (states != null && !states.isEmpty()) {
                 Map<String, InputControlState> statesMap = new HashMap<String, InputControlState>();
                 for (InputControlState currentState : states)
@@ -158,8 +178,11 @@ public class InputControlsLogicServiceImpl implements InputControlsLogicService 
         return reordered;
     }
 
-    public List<InputControlState> getValuesForInputControls(String containerUri, final Set<String> inputControlIds, final Map<String, String[]> parameters) throws CascadeResourceNotFoundException {
+    public List<InputControlState> getValuesForInputControls(String containerUri, final Set<String> inputControlIds, final Map<String, String[]> parameters, boolean freshData) throws CascadeResourceNotFoundException {
         List<InputControlState> states;
+        if(freshData){
+            controlLogicCacheManager.clearCache();
+        }
         defaultEvaluationEventsHandler.beforeEvaluation(containerUri, parameters, securityContextProvider.getContextUser());
         try {
             states = callControlLogic(containerUri, new ControLogicCaller<List<InputControlState>>() {

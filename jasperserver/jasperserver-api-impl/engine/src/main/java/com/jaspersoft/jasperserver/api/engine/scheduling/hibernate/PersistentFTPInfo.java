@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -22,7 +22,7 @@ package com.jaspersoft.jasperserver.api.engine.scheduling.hibernate;
 
 import com.jaspersoft.jasperserver.api.engine.scheduling.domain.FTPInfo;
 import com.jaspersoft.jasperserver.api.engine.scheduling.domain.reportjobmodel.FTPInfoModel;
-import com.jaspersoft.jasperserver.api.metadata.common.service.impl.PasswordCipherer;
+import com.jaspersoft.jasperserver.api.common.crypto.PasswordCipherer;
 import com.jaspersoft.jasperserver.api.metadata.common.util.NullValue;
 
 import java.util.Map;
@@ -30,7 +30,7 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 /**
  * @author Ivan Chan (lucianc@users.sourceforge.net)
- * @version $Id: PersistentFTPInfo.java 37014 2013-09-09 20:38:27Z schubar $
+ * @version $Id: PersistentFTPInfo.java 51858 2014-12-06 20:46:19Z vsabadosh $
  */
 public class PersistentFTPInfo {
 	private static final Logger logger = LogManager.getLogger(PersistentFTPInfo.class);

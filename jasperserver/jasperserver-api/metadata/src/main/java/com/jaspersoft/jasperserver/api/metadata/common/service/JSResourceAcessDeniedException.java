@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2012 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -29,7 +29,7 @@ import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceReference;
  * repository at a specified path fails to locate the resource.
  * 
  * @author Ivan Chan (ichan@jaspersoft.com)
- * @version $Id: JSResourceAcessDeniedException.java 25072 2012-10-03 01:29:37Z ichan $
+ * @version $Id: JSResourceAcessDeniedException.java 47331 2014-07-18 09:13:06Z kklein $
  * @since 1.0
  */
 @JasperServerAPI

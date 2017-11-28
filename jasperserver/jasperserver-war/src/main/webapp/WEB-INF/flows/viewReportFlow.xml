@@ -145,9 +145,10 @@
        <transition on="refreshReport" to="runReport">
        		<evaluate expression="viewReportActionBean.initFlowScope"/>
        		<evaluate expression="viewReportActionBean.initInputControls"/>       		
+       		<evaluate expression="viewReportActionBean.resetSearchCache"/>
        </transition>
        
-       <!--<transition on-exception="org.springframework.security.AccessDeniedException" to="accessDeniedPage"/>-->
+       <!--<transition on-exception="org.springframework.security.access.AccessDeniedException" to="accessDeniedPage"/>-->
        <transition on-exception="net.sf.jasperreports.web.JRInteractiveRuntimeException" to="jasperInteractiveErrorPage"/>
         <transition on-exception="java.lang.Throwable" to="errorPage"/>
     </global-transitions>

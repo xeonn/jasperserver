@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2013 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -32,11 +32,12 @@ import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.VirtualReportDataSource;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.client.JdbcReportDataSourceImpl;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.client.VirtualReportDataSourceImpl;
+import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributesResolver;
 import com.jaspersoft.jasperserver.api.search.SearchCriteriaFactory;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.security.AccessDeniedException;
+import org.springframework.security.access.AccessDeniedException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -60,12 +61,14 @@ import static org.mockito.Mockito.*;
 public class VirtualDataSourceResourceValidatorTest {
     @InjectMocks
     private final VirtualDataSourceResourceValidator validator = new VirtualDataSourceResourceValidator();
-    @Mock RepositoryService service;
+    @Mock
+    private RepositoryService service;
+    @Mock
+    private ProfileAttributesResolver profileAttributesResolver;
     @Mock
     private SearchCriteriaFactory searchCriteriaFactory;
 
     private VirtualReportDataSource dataSource;
-    private Map<String, ResourceReference> dataSourceUris;
     private List<ResourceLookup> dependent = new LinkedList<ResourceLookup>();
 
     @BeforeClass
@@ -76,6 +79,8 @@ public class VirtualDataSourceResourceValidatorTest {
     @BeforeMethod
     public void setUp() throws Exception {
         reset(service);
+        reset(profileAttributesResolver);
+
         dataSource = new VirtualReportDataSourceImpl();
         dataSource.setLabel("tets");
         dataSource.setURIString("/a/uri");
@@ -97,7 +102,9 @@ public class VirtualDataSourceResourceValidatorTest {
 
         when(service.getResource(any(ExecutionContext.class), eq("/a"))).thenReturn(new JdbcReportDataSourceImpl());
         when(service.getResource(any(ExecutionContext.class), eq("/b"))).thenReturn(new JdbcReportDataSourceImpl());
+        when(service.getResource(any(ExecutionContext.class), eq("/d"))).thenReturn(new JdbcReportDataSourceImpl());
         when(service.getResource(any(ExecutionContext.class), eq("/z"))).thenReturn(new JdbcReportDataSourceImpl());
+        when(profileAttributesResolver.containsAttribute(anyString())).thenReturn(false);
     }
 
     @Test
@@ -123,6 +130,15 @@ public class VirtualDataSourceResourceValidatorTest {
     @Test(expectedExceptions = {JSValidationException.class})
     public void testValidate_special() throws Exception {
         dataSource.getDataSourceUriMap().put("&", new ResourceReference("/a"));
+
+        validator.validate(dataSource);
+    }
+
+    @Test
+    public void testValidate_specialInAttribute() {
+        String attributePlaceholder = "{attribute('&#!', '&,.:')}";
+        when(profileAttributesResolver.containsAttribute(attributePlaceholder)).thenReturn(true);
+        dataSource.getDataSourceUriMap().put(attributePlaceholder, new ResourceReference("/d"));
 
         validator.validate(dataSource);
     }
@@ -306,6 +322,4 @@ public class VirtualDataSourceResourceValidatorTest {
 
         validator.validate(dataSource);
     }
-
-
 }

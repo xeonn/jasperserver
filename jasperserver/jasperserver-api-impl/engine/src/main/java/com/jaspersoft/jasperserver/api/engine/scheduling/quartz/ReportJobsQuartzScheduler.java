@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -68,7 +68,7 @@ import com.jaspersoft.jasperserver.api.logging.diagnostic.service.DiagnosticCall
  * Implementation of {@link ReportJobsScheduler).
  *
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ReportJobsQuartzScheduler.java 44312 2014-04-09 14:30:12Z vsabadosh $
+ * @version $Id: ReportJobsQuartzScheduler.java 49286 2014-09-23 13:32:25Z ykovalchyk $
  */
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 public class ReportJobsQuartzScheduler implements ReportJobsScheduler, InitializingBean, Diagnostic {
@@ -110,7 +110,7 @@ public class ReportJobsQuartzScheduler implements ReportJobsScheduler, Initializ
     private String singleSimpleJobMisfirePolicy;
     private String calendarJobMisfirePolicy;
 
-    public ReportJobsQuartzScheduler() {
+	public ReportJobsQuartzScheduler() {
 
 
 		listeners = new HashSet();
@@ -172,7 +172,7 @@ public class ReportJobsQuartzScheduler implements ReportJobsScheduler, Initializ
 
 
 
-    public void afterPropertiesSet() {
+	public void afterPropertiesSet() {
 		try {
             getScheduler().getListenerManager().addTriggerListener(triggerListener, (List<Matcher<TriggerKey>>) null);
             getScheduler().getListenerManager().addSchedulerListener(schedulerListener);
@@ -334,28 +334,28 @@ public class ReportJobsQuartzScheduler implements ReportJobsScheduler, Initializ
 
         if(policy.equals(MISFIRE_INSTRUCTION_FIRE_NOW))
         {
-            trigger = newTrigger().withIdentity(triggerName, GROUP).
-                    startAt(startDate).
-                    modifiedByCalendar(calendarName).
-                    withSchedule(simpleSchedule().
+		  trigger = newTrigger().withIdentity(triggerName, GROUP).
+                  startAt(startDate).
+                  modifiedByCalendar(calendarName).
+                  withSchedule(simpleSchedule().
                             withIntervalInMilliseconds(interval).
                             withRepeatCount(repeatCount).
                             withMisfireHandlingInstructionFireNow()).
-                    build();
+                  build();
 
 
         }
         else if(policy.equals(MISFIRE_INSTRUCTION_IGNORE_MISFIRE_POLICY))
         {
-            trigger = newTrigger().withIdentity(triggerName, GROUP).
-                    startAt(startDate).
-                    modifiedByCalendar(calendarName).
-                    withSchedule(simpleSchedule().
-                            withIntervalInMilliseconds(interval).
-                            withRepeatCount(repeatCount).
+          trigger = newTrigger().withIdentity(triggerName, GROUP).
+                  startAt(startDate).
+                  modifiedByCalendar(calendarName).
+                  withSchedule(simpleSchedule().
+                          withIntervalInMilliseconds(interval).
+                          withRepeatCount(repeatCount).
                             withMisfireHandlingInstructionIgnoreMisfires()).
-                    build();
-        }
+                  build();
+		}
         else if(policy.equals(MISFIRE_INSTRUCTION_RESCHEDULE_NEXT_WITH_EXISTING_COUNT))
         {
             trigger = newTrigger().withIdentity(triggerName, GROUP).
@@ -433,10 +433,10 @@ public class ReportJobsQuartzScheduler implements ReportJobsScheduler, Initializ
             {
 
                 trigger = newTrigger().withIdentity(triggerName, GROUP).
-                        startAt(startDate).
-                        endAt(endDate).
-                        modifiedByCalendar(calendarName).
-                        withSchedule(cronSchedule(cronExpression).
+                  startAt(startDate).
+                  endAt(endDate).
+                  modifiedByCalendar(calendarName).
+                  withSchedule(cronSchedule(cronExpression).
                                 inTimeZone(getTriggerTimeZone(jobTrigger)).
                                 withMisfireHandlingInstructionIgnoreMisfires()).
                         build();
@@ -472,12 +472,12 @@ public class ReportJobsQuartzScheduler implements ReportJobsScheduler, Initializ
                         endAt(endDate).
                         modifiedByCalendar(calendarName).
                         withSchedule(cronSchedule(cronExpression).
-                                inTimeZone(getTriggerTimeZone(jobTrigger))).
-                        build();
+                          inTimeZone(getTriggerTimeZone(jobTrigger))).
+                  build();
 
             }
 
-            return trigger;
+			return trigger;
 		} catch (Exception e) {
 			log.error("Error creating Quartz Cron trigger", e);
 			throw new JSExceptionWrapper(e);

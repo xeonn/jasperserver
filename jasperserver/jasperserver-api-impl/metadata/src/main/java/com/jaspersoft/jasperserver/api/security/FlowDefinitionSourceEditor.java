@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -21,19 +21,20 @@
 
 package com.jaspersoft.jasperserver.api.security;
 
+import org.springframework.beans.propertyeditors.PropertiesEditor;
+import org.springframework.security.access.ConfigAttribute;
+import org.springframework.security.access.ConfigAttributeEditor;
+
 import java.beans.PropertyEditorSupport;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Map.Entry;
-
-import org.springframework.security.ConfigAttributeDefinition;
-import org.springframework.security.ConfigAttributeEditor;
-import org.springframework.beans.propertyeditors.PropertiesEditor;
+import java.util.Properties;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: FlowDefinitionSourceEditor.java 21035 2011-09-20 00:14:12Z afomin $
+ * @version $Id: FlowDefinitionSourceEditor.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
 public class FlowDefinitionSourceEditor extends PropertyEditorSupport {
 
@@ -52,7 +53,7 @@ public class FlowDefinitionSourceEditor extends PropertyEditorSupport {
                 String value = (String) entry.getValue();
 
                 configAttribEd.setAsText(value);
-                ConfigAttributeDefinition attr = (ConfigAttributeDefinition) configAttribEd.getValue();
+                Collection<ConfigAttribute> attr = (Collection<ConfigAttribute>) configAttribEd.getValue();
 
                 source.addFlow(name, attr);
             }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -21,22 +21,28 @@
 
 package com.jaspersoft.jasperserver.api.metadata.security;
 
-import org.springframework.security.Authentication;
-import org.springframework.security.ConfigAttribute;
-import org.springframework.security.ConfigAttributeDefinition;
-import org.springframework.security.acl.AclManager;
-import org.springframework.security.vote.AccessDecisionVoter;
 import org.aopalliance.intercept.MethodInvocation;
+import org.springframework.security.access.AccessDecisionVoter;
+import org.springframework.security.access.ConfigAttribute;
+import org.springframework.security.acls.model.AclService;
+import org.springframework.security.acls.model.ObjectIdentityRetrievalStrategy;
+import org.springframework.security.acls.model.SidRetrievalStrategy;
+import org.springframework.security.core.Authentication;
+
+import java.util.Collection;
 
 /**
  * @author Lucian Chirita
  *
  */
-public class MultiAclEntryVoter implements AccessDecisionVoter {
+public class MultiAclEntryVoter implements AccessDecisionVoter<Object> {
 
 	private ConfigAttribute configAttribute;
-	private AclManager aclManager;
+	private AclService aclService;
+    private SidRetrievalStrategy sidRetrievalStrategy;
+    private ObjectIdentityRetrievalStrategy objectIdentityRetrievalStrategy;
 	private MethodArgumentAclVoter[] argumentVoters;
+    private Boolean overrideVoterProperties=true;
 	
 	public boolean supports(ConfigAttribute attribute) {
 		return configAttribute.equals(attribute);
@@ -47,14 +53,17 @@ public class MultiAclEntryVoter implements AccessDecisionVoter {
 	}
 
 	public int vote(Authentication authentication, Object object,
-			ConfigAttributeDefinition config) {
+            Collection<ConfigAttribute> attributes) {
 		int access;
-		if (config.contains(configAttribute)) {
+		if (attributes.contains(configAttribute)) {
 			MethodInvocation call = (MethodInvocation) object;
 			access = ACCESS_GRANTED;
 			for (int i = 0; i < argumentVoters.length; i++) {
 				MethodArgumentAclVoter voter = argumentVoters[i];
-				if (!voter.allow(call, authentication, aclManager)) {
+                if (overrideVoterProperties) {
+                    setPropertiesForVoter(voter);
+                }
+				if (!voter.allow(call, authentication)) {
 					access = ACCESS_DENIED;
 					break;
 				}
@@ -64,6 +73,12 @@ public class MultiAclEntryVoter implements AccessDecisionVoter {
 		}
 		return access;
 	}
+
+    private void setPropertiesForVoter(MethodArgumentAclVoter voter) {
+        voter.setAclService(aclService);
+        voter.setSidRetrievalStrategy(sidRetrievalStrategy);
+        voter.setObjectIdentityRetrievalStrategy(objectIdentityRetrievalStrategy);
+    }
 
 	public ConfigAttribute getConfigAttribute() {
 		return configAttribute;
@@ -87,18 +102,19 @@ public class MultiAclEntryVoter implements AccessDecisionVoter {
 		this.argumentVoters = argumentVoters;
 	}
 
-	/**
-	 * @return Returns the aclManager.
-	 */
-	public AclManager getAclManager() {
-		return aclManager;
+	public void setAclService(AclService aclService) {
+		this.aclService = aclService;
 	}
 
-	/**
-	 * @param aclManager The aclManager to set.
-	 */
-	public void setAclManager(AclManager aclManager) {
-		this.aclManager = aclManager;
-	}
+    public void setSidRetrievalStrategy(SidRetrievalStrategy sidRetrievalStrategy) {
+        this.sidRetrievalStrategy = sidRetrievalStrategy;
+    }
 
+    public void setObjectIdentityRetrievalStrategy(ObjectIdentityRetrievalStrategy objectIdentityRetrievalStrategy) {
+        this.objectIdentityRetrievalStrategy = objectIdentityRetrievalStrategy;
+    }
+
+    public void setOverrideVoterProperties(Boolean overrideVoterProperties) {
+        this.overrideVoterProperties = overrideVoterProperties;
+    }
 }

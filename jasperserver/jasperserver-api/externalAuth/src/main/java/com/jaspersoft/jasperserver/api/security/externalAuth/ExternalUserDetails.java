@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2012 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -15,16 +15,17 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Affero  General Public License for more details.
  *
- *  You should have received a copy of the GNU Affero General Public  License
- *  along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public  License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 package com.jaspersoft.jasperserver.api.security.externalAuth;
 
 import com.jaspersoft.jasperserver.api.JasperServerAPI;
-import org.springframework.security.GrantedAuthority;
-import org.springframework.security.userdetails.User;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.User;
 
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -44,24 +45,29 @@ public class ExternalUserDetails extends User {
 	private Map<String,Object> additionalDetailsMap = new HashMap<String, Object>();
 
 	public ExternalUserDetails(String username, String password, boolean enabled, boolean accountNonExpired,
-							   boolean credentialsNonExpired, boolean accountNonLocked, GrantedAuthority[] authorities)
+							   boolean credentialsNonExpired, boolean accountNonLocked, Collection<? extends GrantedAuthority> authorities)
 			throws IllegalArgumentException {
 		super(username, password, enabled, accountNonExpired, credentialsNonExpired, accountNonLocked, authorities);
 	}
 
-	public ExternalUserDetails(String username, String password, GrantedAuthority[] authorities)
+    @Override
+    public Collection<GrantedAuthority> getAuthorities() {
+        return super.getAuthorities();
+    }
+
+    public ExternalUserDetails(String username, String password, Collection<? extends GrantedAuthority> authorities)
 			throws IllegalArgumentException {
 		super(username, password, true, true, true, true, authorities);
 	}
 
-	public ExternalUserDetails(String username, GrantedAuthority[] authorities)
+	public ExternalUserDetails(String username, Collection<? extends GrantedAuthority> authorities)
 			throws IllegalArgumentException {
 		super(username, EMPTY_PASSWORD, true, true, true, true, authorities);
 	}
 
 	public ExternalUserDetails(String username)
 			throws IllegalArgumentException {
-		super(username, EMPTY_PASSWORD, true, true, true, true, new GrantedAuthority[0]);
+		super(username, EMPTY_PASSWORD, true, true, true, true, new ArrayList<GrantedAuthority>());
 	}
 
 	public Map<String, Object> getAdditionalDetailsMap() {
@@ -70,10 +76,5 @@ public class ExternalUserDetails extends User {
 
 	public void setAdditionalDetailsMap(Map<String, Object> additionalDetailMap) {
 		this.additionalDetailsMap = additionalDetailMap;
-	}
-
-	@Override
-	public void setAuthorities(GrantedAuthority[] grantedAuthorities) {
-		super.setAuthorities(grantedAuthorities);
 	}
 }

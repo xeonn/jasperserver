@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -29,7 +29,7 @@ import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportUnit;
  * for different editions.
  *
  * @author Sergey Prilukin
- * @version $Id: OlapReportCheckUtil.java 21499 2011-11-09 01:58:16Z ichan $
+ * @version $Id: OlapReportCheckUtil.java 47331 2014-07-18 09:13:06Z kklein $
  */
 public interface OlapReportCheckUtil {
     public boolean isOlapReportFrom421OrBelow(String uri);

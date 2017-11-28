@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -21,22 +21,13 @@
 package com.jaspersoft.jasperserver.test;
 
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
 
-import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceReference;
-import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.VirtualReportDataSource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.DataType;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.FileResource;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Folder;
@@ -48,20 +39,8 @@ import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.client.DataTypeImpl;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.client.FolderImpl;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.client.ListOfValuesItemImpl;
-import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.JdbcReportDataSource;
-import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.JndiJdbcReportDataSource;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportUnit;
-import com.jaspersoft.jasperserver.api.metadata.olap.domain.MondrianConnection;
-import com.jaspersoft.jasperserver.api.metadata.olap.domain.MondrianXMLADefinition;
-import com.jaspersoft.jasperserver.api.metadata.olap.domain.OlapUnit;
-import com.jaspersoft.jasperserver.api.metadata.olap.domain.XMLAConnection;
-import com.jaspersoft.jasperserver.api.metadata.olap.service.impl.OlapConnectionServiceImpl;
-import com.jaspersoft.jasperserver.api.metadata.security.JasperServerAclEntry;
-import com.jaspersoft.jasperserver.api.metadata.user.domain.Role;
-import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
-import com.jaspersoft.jasperserver.api.metadata.xml.domain.impl.ResourceDescriptor;
 import com.jaspersoft.jasperserver.util.test.BaseServiceSetupTestNG;
-import com.jaspersoft.jasperserver.war.common.JasperServerUtil;
 
 /**
  * @author tkavanagh
@@ -221,7 +200,7 @@ public class CreateExtraTestResourcesTestNG extends BaseServiceSetupTestNG {
 
         InputControl textInputCtrl = (InputControl) getUnsecureRepositoryService().newResource(null, InputControl.class);
         setCommon(textInputCtrl, "TextInputControl");
-        textInputCtrl.setType(InputControl.TYPE_SINGLE_VALUE);
+        textInputCtrl.setInputControlType(InputControl.TYPE_SINGLE_VALUE);
         textInputCtrl.setMandatory(false);
         textInputCtrl.setReadOnly(false);
         textInputCtrl.setVisible(true);
@@ -233,13 +212,13 @@ public class CreateExtraTestResourcesTestNG extends BaseServiceSetupTestNG {
         DataType dataType = new DataTypeImpl();
         dataType.setName("test");
         dataType.setLabel("test");
-        dataType.setType(DataType.TYPE_NUMBER);
+        dataType.setDataTypeType(DataType.TYPE_NUMBER);
         textInputCtrl.setDataType(dataType);
         unit.addInputControl(textInputCtrl);
 
         InputControl checkboxInputControl = (InputControl) getUnsecureRepositoryService().newResource(null, InputControl.class);
         setCommon(checkboxInputControl, "CheckboxInputControl");
-        checkboxInputControl.setType(InputControl.TYPE_BOOLEAN);
+        checkboxInputControl.setInputControlType(InputControl.TYPE_BOOLEAN);
         checkboxInputControl.setMandatory(true);
         checkboxInputControl.setReadOnly(false);
         checkboxInputControl.setVisible(true);
@@ -249,7 +228,7 @@ public class CreateExtraTestResourcesTestNG extends BaseServiceSetupTestNG {
 
         InputControl listInputControl = (InputControl) getUnsecureRepositoryService().newResource(null, InputControl.class);
         setCommon(listInputControl, "ListInputControl");
-        listInputControl.setType(InputControl.TYPE_SINGLE_SELECT_LIST_OF_VALUES);
+        listInputControl.setInputControlType(InputControl.TYPE_SINGLE_SELECT_LIST_OF_VALUES);
         listInputControl.setMandatory(true);
         listInputControl.setReadOnly(false);
         listInputControl.setVisible(true);
@@ -277,7 +256,7 @@ public class CreateExtraTestResourcesTestNG extends BaseServiceSetupTestNG {
         dataType = new DataTypeImpl();
         dataType.setName("test");
         dataType.setLabel("test");
-        dataType.setType(DataType.TYPE_TEXT);
+        dataType.setDataTypeType(DataType.TYPE_TEXT);
         listInputControl.setDataType(dataType);
 
         unit.addInputControl(listInputControl);
@@ -286,7 +265,7 @@ public class CreateExtraTestResourcesTestNG extends BaseServiceSetupTestNG {
 
         InputControl dateInputCtrl = (InputControl) getUnsecureRepositoryService().newResource(null, InputControl.class);
         setCommon(dateInputCtrl, "DateInput");
-        dateInputCtrl.setType(InputControl.TYPE_SINGLE_VALUE);
+        dateInputCtrl.setInputControlType(InputControl.TYPE_SINGLE_VALUE);
         dateInputCtrl.setMandatory(false);
         dateInputCtrl.setReadOnly(false);
         dateInputCtrl.setVisible(true);
@@ -296,7 +275,7 @@ public class CreateExtraTestResourcesTestNG extends BaseServiceSetupTestNG {
 
         InputControl queryInputCtrl = (InputControl) getUnsecureRepositoryService().newResource(null, InputControl.class);
         setCommon(queryInputCtrl, "QueryInput");
-        queryInputCtrl.setType(InputControl.TYPE_SINGLE_SELECT_QUERY);
+        queryInputCtrl.setInputControlType(InputControl.TYPE_SINGLE_SELECT_QUERY);
         queryInputCtrl.setMandatory(false);
         queryInputCtrl.setReadOnly(false);
         queryInputCtrl.setVisible(true);
@@ -345,7 +324,7 @@ public class CreateExtraTestResourcesTestNG extends BaseServiceSetupTestNG {
         empQuery.setLanguage("sql");
         empQuery.setSql("SELECT id, user_name FROM users WHERE employee_status = 'Active'");
 
-        empIC.setType(InputControl.TYPE_SINGLE_SELECT_QUERY);
+        empIC.setInputControlType(InputControl.TYPE_SINGLE_SELECT_QUERY);
         empIC.setQuery(empQuery);
         empIC.setQueryValueColumn("id");
         empIC.addQueryVisibleColumn("user_name");
@@ -403,7 +382,7 @@ public class CreateExtraTestResourcesTestNG extends BaseServiceSetupTestNG {
         countryIC.setLabel("Country");
         countryIC.setDescription("Country");
         countryIC.setMandatory(true);
-        countryIC.setType(InputControl.TYPE_SINGLE_SELECT_QUERY);
+        countryIC.setInputControlType(InputControl.TYPE_SINGLE_SELECT_QUERY);
 
         Query countryQ = (Query) getUnsecureRepositoryService().newResource(null, Query.class);
         countryQ.setName("CountryQuery");
@@ -424,11 +403,11 @@ public class CreateExtraTestResourcesTestNG extends BaseServiceSetupTestNG {
         requestDateIC.setLabel("RequestDate");
         requestDateIC.setDescription("RequestDate");
         requestDateIC.setMandatory(false);
-        requestDateIC.setType(InputControl.TYPE_SINGLE_VALUE);
+        requestDateIC.setInputControlType(InputControl.TYPE_SINGLE_VALUE);
 
         DataType dateDT = (DataType) getUnsecureRepositoryService().newResource(null, DataType.class);
         setCommon(dateDT, "Date");
-        dateDT.setType(DataType.TYPE_DATE);
+        dateDT.setDataTypeType(DataType.TYPE_DATE);
         requestDateIC.setDataType(dateDT);
 
         unit.addInputControl(requestDateIC);
@@ -439,11 +418,11 @@ public class CreateExtraTestResourcesTestNG extends BaseServiceSetupTestNG {
         orderIdIC.setLabel("OrderId");
         orderIdIC.setDescription("OrderId");
         orderIdIC.setMandatory(false);
-        orderIdIC.setType(InputControl.TYPE_SINGLE_VALUE);
+        orderIdIC.setInputControlType(InputControl.TYPE_SINGLE_VALUE);
 
         DataType numberDT = (DataType) getUnsecureRepositoryService().newResource(null, DataType.class);
         setCommon(numberDT, "Number");
-        numberDT.setType(DataType.TYPE_NUMBER);
+        numberDT.setDataTypeType(DataType.TYPE_NUMBER);
         orderIdIC.setDataType(numberDT);
 
         unit.addInputControl(orderIdIC);
@@ -626,7 +605,7 @@ public class CreateExtraTestResourcesTestNG extends BaseServiceSetupTestNG {
         countryIC.setLabel("Country multi select");
         countryIC.setDescription("Country multi select");
         countryIC.setMandatory(true);
-        countryIC.setType(InputControl.TYPE_MULTI_SELECT_QUERY);
+        countryIC.setInputControlType(InputControl.TYPE_MULTI_SELECT_QUERY);
 
         countryQ = (Query) getUnsecureRepositoryService().newResource(null, Query.class);
         countryQ.setName("country_query");
@@ -647,7 +626,7 @@ public class CreateExtraTestResourcesTestNG extends BaseServiceSetupTestNG {
         stateIC.setLabel("Cascading state multi select control");
         stateIC.setDescription("Cascading state multi select control");
         stateIC.setMandatory(true);
-        stateIC.setType(InputControl.TYPE_MULTI_SELECT_QUERY);
+        stateIC.setInputControlType(InputControl.TYPE_MULTI_SELECT_QUERY);
 
         stateQ = (Query) getUnsecureRepositoryService().newResource(null, Query.class);
         stateQ.setName("Cascading_state_query");
@@ -669,7 +648,7 @@ public class CreateExtraTestResourcesTestNG extends BaseServiceSetupTestNG {
         nameIC.setLabel("Cascading name single select");
         nameIC.setDescription("Cascading name single select");
         nameIC.setMandatory(true);
-        nameIC.setType(InputControl.TYPE_SINGLE_SELECT_QUERY);
+        nameIC.setInputControlType(InputControl.TYPE_SINGLE_SELECT_QUERY);
 
         nameQ = (Query) getUnsecureRepositoryService().newResource(null, Query.class);
         nameQ.setName("country_state_to_name");
@@ -724,7 +703,7 @@ public class CreateExtraTestResourcesTestNG extends BaseServiceSetupTestNG {
         rolesIC.setLabel("Roles of LoggedIn User");
         rolesIC.setDescription("Roles of LoggedIn User");
         rolesIC.setMandatory(true);
-        rolesIC.setType(InputControl.TYPE_MULTI_SELECT_QUERY);
+        rolesIC.setInputControlType(InputControl.TYPE_MULTI_SELECT_QUERY);
 
         rolesQ = (Query) getUnsecureRepositoryService().newResource(null, Query.class);
         rolesQ.setName("RolesOfUserQuery");
@@ -766,7 +745,7 @@ public class CreateExtraTestResourcesTestNG extends BaseServiceSetupTestNG {
         // Gender.
         InputControl listInputControl = (InputControl) getUnsecureRepositoryService().newResource(null, InputControl.class);
         setCommon(listInputControl, "Gender");
-        listInputControl.setType(InputControl.TYPE_MULTI_SELECT_LIST_OF_VALUES);
+        listInputControl.setInputControlType(InputControl.TYPE_MULTI_SELECT_LIST_OF_VALUES);
         listInputControl.setMandatory(true);
         listInputControl.setReadOnly(false);
         listInputControl.setVisible(true);
@@ -790,7 +769,7 @@ public class CreateExtraTestResourcesTestNG extends BaseServiceSetupTestNG {
         DataType dataType = new DataTypeImpl();
         dataType.setName("gender_type");
         dataType.setLabel("gender_type");
-        dataType.setType(DataType.TYPE_TEXT);
+        dataType.setDataTypeType(DataType.TYPE_TEXT);
         listInputControl.setDataType(dataType);
 
         unit.addInputControl(listInputControl);
@@ -798,7 +777,7 @@ public class CreateExtraTestResourcesTestNG extends BaseServiceSetupTestNG {
         // Marital status.
         listInputControl = (InputControl) getUnsecureRepositoryService().newResource(null, InputControl.class);
         setCommon(listInputControl, "Marital Status");
-        listInputControl.setType(InputControl.TYPE_MULTI_SELECT_LIST_OF_VALUES_CHECKBOX);
+        listInputControl.setInputControlType(InputControl.TYPE_MULTI_SELECT_LIST_OF_VALUES_CHECKBOX);
         listInputControl.setMandatory(true);
         listInputControl.setReadOnly(false);
         listInputControl.setVisible(true);
@@ -822,7 +801,7 @@ public class CreateExtraTestResourcesTestNG extends BaseServiceSetupTestNG {
         dataType = new DataTypeImpl();
         dataType.setName("maritalStatus_type");
         dataType.setLabel("maritalStatus_type");
-        dataType.setType(DataType.TYPE_TEXT);
+        dataType.setDataTypeType(DataType.TYPE_TEXT);
         listInputControl.setDataType(dataType);
 
         unit.addInputControl(listInputControl);
@@ -830,7 +809,7 @@ public class CreateExtraTestResourcesTestNG extends BaseServiceSetupTestNG {
         // Department.
         listInputControl = (InputControl) getUnsecureRepositoryService().newResource(null, InputControl.class);
         setCommon(listInputControl, "Department");
-        listInputControl.setType(InputControl.TYPE_SINGLE_SELECT_LIST_OF_VALUES);
+        listInputControl.setInputControlType(InputControl.TYPE_SINGLE_SELECT_LIST_OF_VALUES);
         listInputControl.setMandatory(true);
         listInputControl.setReadOnly(false);
         listInputControl.setVisible(true);
@@ -894,7 +873,7 @@ public class CreateExtraTestResourcesTestNG extends BaseServiceSetupTestNG {
         dataType = new DataTypeImpl();
         dataType.setName("department_type");
         dataType.setLabel("department_type");
-        dataType.setType(DataType.TYPE_NUMBER);
+        dataType.setDataTypeType(DataType.TYPE_NUMBER);
         listInputControl.setDataType(dataType);
 
         unit.addInputControl(listInputControl);
@@ -928,7 +907,7 @@ public class CreateExtraTestResourcesTestNG extends BaseServiceSetupTestNG {
 
         DataType dateDataType = new DataTypeImpl();
         setCommon(dateDataType, "date");
-        dateDataType.setType(DataType.TYPE_DATE);
+        dateDataType.setDataTypeType(DataType.TYPE_DATE);
         dateDataType.setParentFolder(folder);
         getUnsecureRepositoryService().saveResource(null, dateDataType);
     }

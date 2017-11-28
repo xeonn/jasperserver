@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2012 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -15,8 +15,8 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Affero  General Public License for more details.
  *
- *  You should have received a copy of the GNU Affero General Public  License
- *  along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public  License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 package com.jaspersoft.jasperserver.api.security.externalAuth.sso;
@@ -26,10 +26,10 @@ import com.jaspersoft.jasperserver.api.security.externalAuth.ExternalUserDetails
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.security.Authentication;
-import org.springframework.security.AuthenticationException;
-import org.springframework.security.GrantedAuthority;
-import org.springframework.security.providers.AuthenticationProvider;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.util.Assert;
 
 import java.util.List;
@@ -60,7 +60,6 @@ public class SsoAuthenticationProvider implements AuthenticationProvider, Initia
 		ExternalUserDetails userDetails = ticketValidator.validate(ssoToken);
 
 		List<GrantedAuthority> authorities = externalUserDetailsService.loadAuthoritiesByUsername(userDetails.getUsername());
-		userDetails.setAuthorities(authorities.toArray(new GrantedAuthority[authorities.size()]));
 		return createSuccessAuthentication(authentication, userDetails, authorities);
 	}
 
@@ -74,7 +73,7 @@ public class SsoAuthenticationProvider implements AuthenticationProvider, Initia
 	 * @return the successful authentication token
 	 */
 	protected Authentication createSuccessAuthentication(Authentication authentication, ExternalUserDetails userDetails, List<GrantedAuthority> authorities) {
-		SsoAuthenticationToken ssoAuthenticationToken = new SsoAuthenticationToken(null, userDetails, null, authorities.toArray(new GrantedAuthority[authorities.size()]));
+		SsoAuthenticationToken ssoAuthenticationToken = new SsoAuthenticationToken(null, userDetails, null, authorities);
 		ssoAuthenticationToken.setDetails(authentication.getDetails());
 
 		return ssoAuthenticationToken;

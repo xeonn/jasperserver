@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -27,7 +27,7 @@ import org.apache.commons.logging.LogFactory;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: RepositoryUtil.java 45608 2014-05-12 09:49:27Z lchirita $
+ * @version $Id: RepositoryUtil.java 47331 2014-07-18 09:13:06Z kklein $
  */
 public class RepositoryUtil
 {

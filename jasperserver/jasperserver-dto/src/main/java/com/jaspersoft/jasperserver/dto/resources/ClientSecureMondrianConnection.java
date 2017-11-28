@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2013 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -33,7 +33,7 @@ import java.util.List;
  * <p></p>
  *
  * @author Zakhar.Tomchenco
- * @version $Id: ClientSecureMondrianConnection.java 44312 2014-04-09 14:30:12Z vsabadosh $
+ * @version $Id: ClientSecureMondrianConnection.java 47331 2014-07-18 09:13:06Z kklein $
  */
 @XmlRootElement(name = ResourceMediaType.SECURE_MONDRIAN_CONNECTION_CLIENT_TYPE)
 public class ClientSecureMondrianConnection extends AbstractClientMondrianConnection<ClientSecureMondrianConnection> {

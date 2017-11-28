@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -42,6 +42,7 @@ import com.jaspersoft.jasperserver.api.engine.common.service.ReportInputControlV
 import com.jaspersoft.jasperserver.api.engine.common.service.ReportInputControlsInformation;
 import com.jaspersoft.jasperserver.api.engine.common.service.SchedulerReportExecutionStatusSearchCriteria;
 import com.jaspersoft.jasperserver.api.engine.common.service.SecurityContextProvider;
+import com.jaspersoft.jasperserver.api.engine.jasperreports.common.JSReportExecutionRequestCancelledException;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.common.ReportExecuter;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.domain.impl.CompositeReportExecutionListener;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.domain.impl.ReportExecutionListener;
@@ -52,6 +53,8 @@ import com.jaspersoft.jasperserver.api.engine.jasperreports.domain.impl.ReportUn
 import com.jaspersoft.jasperserver.api.engine.jasperreports.domain.impl.TrialReportUnitRequest;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.service.DataCacheProvider;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.service.InputControlsInfoExtractor;
+import com.jaspersoft.jasperserver.api.engine.jasperreports.util.CustomDataSourceDefinition;
+import com.jaspersoft.jasperserver.api.engine.jasperreports.util.DataAdapterDefinition;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.util.DataSourceServiceFactory;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.util.DefaultProtectionDomainProvider;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.util.InputControlLabelResolver;
@@ -76,29 +79,22 @@ import com.jaspersoft.jasperserver.api.logging.diagnostic.domain.DiagnosticAttri
 import com.jaspersoft.jasperserver.api.logging.diagnostic.helper.DiagnosticAttributeBuilder;
 import com.jaspersoft.jasperserver.api.logging.diagnostic.service.Diagnostic;
 import com.jaspersoft.jasperserver.api.logging.diagnostic.service.DiagnosticCallback;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.FileResource;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.FileResourceData;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.InputControl;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.InputControlsContainer;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.ListOfValues;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.MemoryDataContainer;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.Query;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceContainer;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceLookup;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceReference;
-import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryCache;
-import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryCacheableItem;
-import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
-import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryUnsecure;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.*;
+import com.jaspersoft.jasperserver.api.metadata.common.service.*;
+import com.jaspersoft.jasperserver.api.metadata.common.service.impl.AsyncThumbnailCreator;
 import com.jaspersoft.jasperserver.api.metadata.data.cache.DataCacheSnapshot;
 import com.jaspersoft.jasperserver.api.metadata.data.cache.DataSnapshotPersistentMetadata;
+import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.CustomDomainMetaData;
+import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.CustomDomainMetaDataProvider;
+import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.CustomReportDataSource;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.DataView;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportDataSource;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportUnit;
+import com.jaspersoft.jasperserver.api.metadata.jasperreports.service.CustomReportDataSourceService;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.service.ReportDataSourceService;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.service.ReportDataSourceServiceFactory;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
+import com.jaspersoft.jasperserver.api.metadata.user.service.TenantService;
 import com.jaspersoft.jasperserver.api.metadata.view.domain.FilterCriteria;
 
 import net.sf.ehcache.pool.SizeOfEngine;
@@ -108,6 +104,7 @@ import net.sf.jasperreports.engine.DefaultJasperReportsContext;
 import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRExporterParameter;
+import net.sf.jasperreports.engine.JRField;
 import net.sf.jasperreports.engine.JRParameter;
 import net.sf.jasperreports.engine.JRPropertiesUtil;
 import net.sf.jasperreports.engine.JRQuery;
@@ -150,15 +147,7 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InvalidClassException;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -186,7 +175,7 @@ import java.util.jar.JarFile;
 /**
  *
  * @author Teodor Danciu (teodord@users.sourceforge.net)
- * @version $Id: EngineServiceImpl.java 45502 2014-05-08 14:06:14Z lchirita $
+ * @version $Id: EngineServiceImpl.java 51369 2014-11-12 13:59:41Z sergey.prilukin $
  */
 public class EngineServiceImpl implements EngineService, ReportExecuter,
 		CompiledReportProvider, InternalReportCompiler, InitializingBean, Diagnostic
@@ -238,6 +227,9 @@ public class EngineServiceImpl implements EngineService, ReportExecuter,
 	private List<ReportDataParameterContributor> dataParameterContributors;
 	
 	private JasperReportsContext jasperReportsContext;
+
+    private AsyncThumbnailCreator asyncThumbnailCreator;
+    private boolean reportThumbnailServiceEnabled;
 
     private AtomicLong startSyncReportExecutionCount=new AtomicLong();
     private AtomicLong startAsyncReportExecutionCount=new AtomicLong();
@@ -619,6 +611,10 @@ public class EngineServiceImpl implements EngineService, ReportExecuter,
 		if (log.isDebugEnabled()) {
 			log.debug("Returning fill result " + reportAccessor);
 		}
+
+        if (reportThumbnailServiceEnabled && (reportAccessor.getJasperPrint().getPages().size() > 0)) {
+            asyncThumbnailCreator.createAndStoreThumbnail(reportAccessor, jasperReportsContext, securityContextProvider.getContextUser(), reportUnit);
+        }
 
 		Map params = request.getReportParameters();
 		JRVirtualizer virtualizer = params == null ? null : ((JRVirtualizer) params.get(JRParameter.REPORT_VIRTUALIZER));
@@ -1251,7 +1247,7 @@ public class EngineServiceImpl implements EngineService, ReportExecuter,
 		}
 
 		public void reportCancelled() {
-			throw new JSException("Report has been cancelled");
+			throw new JSReportExecutionRequestCancelledException("Report has been cancelled");
 		}
 
 		public void reportFillError(Throwable t) {
@@ -1278,7 +1274,7 @@ public class EngineServiceImpl implements EngineService, ReportExecuter,
 	protected void checkRequestCanceled() {
 		ReportExecutionStatus status = currentExecutionStatus();
 		if (status != null && status.isCancelRequested()) {
-			throw new JSException("Report execution request canceled");
+			throw new JSReportExecutionRequestCancelledException();
 		}
 	}
 
@@ -2500,7 +2496,8 @@ public class EngineServiceImpl implements EngineService, ReportExecuter,
         ResourceBundle reportBundle = loadResourceBundle(report);
 
         // evaluate the default values from Jasper Report
-        Map jrDefaultValues = JRParameterDefaultValuesEvaluator.evaluateParameterDefaultValues(report, initialParameters);
+        Map jrDefaultValues = JRParameterDefaultValuesEvaluator.evaluateParameterDefaultValues(getEffectiveJasperReportsContext(), 
+        		report, initialParameters);
         
         // build the JasperReportInputControlInformation object for given input controls
         for (ResourceReference inputControlRef : inputControls) {
@@ -2815,6 +2812,46 @@ public class EngineServiceImpl implements EngineService, ReportExecuter,
 		this.dataParameterContributors = dataParameterContributors;
 	}
 
+    /*
+     *  This function is used for retrieving the metadata layer of the data connector in form of TableSourceMetadata
+     *  TableSourceMetadata contains information JRFields, query, query language and field name mapping (actual JRField name, name used in domain)
+     *  Currently, this function only supports data adapter CustomReportDataSource object such as CSV, XLS and XLSX data adapter CustomReportDataSource object.
+     */
+    public CustomDomainMetaData getMetaDataFromConnector(CustomReportDataSource customReportDataSource) throws Exception {
+        RepositoryContextHandle repositoryContextHandle = null;
+        try {
+            // only supports data adapter CustomReportDataSource object
+            CustomReportDataSourceServiceFactory factory = (CustomReportDataSourceServiceFactory) getDataSourceServiceFactories().getBean(customReportDataSource.getClass());
+
+            CustomDomainMetaDataProvider customDomainMetaDataProvider = null;
+            CustomDataSourceDefinition dataSourceDefinition = factory.getDefinition(customReportDataSource);
+            if (dataSourceDefinition instanceof  CustomDomainMetaDataProvider) {
+                customDomainMetaDataProvider = (CustomDomainMetaDataProvider)dataSourceDefinition;
+            } else {
+                ReportDataSourceService customReportDataSourceService = factory.createService(customReportDataSource);
+                if (customReportDataSourceService instanceof CustomDomainMetaDataProvider) {
+                    customDomainMetaDataProvider = (CustomDomainMetaDataProvider)customReportDataSourceService;
+                }
+
+            }
+            if (customDomainMetaDataProvider != null) {
+                // setup thread repository context for looking up data source file from repo
+                if (dataSourceDefinition instanceof DataAdapterDefinition) {
+                    ((DataAdapterDefinition) dataSourceDefinition).setupThreadRepositoryContext(this, customReportDataSource);
+                }
+                // discover metadata from connector
+                CustomDomainMetaData tableSourceMetadata = customDomainMetaDataProvider.getCustomDomainMetaData(customReportDataSource);
+                if (log.isDebugEnabled()) {
+                    for (JRField field : tableSourceMetadata.getJRFieldList()) {
+                        log.debug("METADATA from CONNECTOR:  FIELD = " + field.getName() + "  TYPE = " + field.getValueClassName());
+                    }
+                }
+                return tableSourceMetadata;
+            } else return null;
+        } finally {
+            resetThreadRepositoryContext(repositoryContextHandle);
+        }
+    }
 	public boolean isRecordSizeof() {
 		return recordSizeof;
 	}
@@ -2831,4 +2868,37 @@ public class EngineServiceImpl implements EngineService, ReportExecuter,
         this.jrxmlFixerList = jrxmlFixerList;
     }
 
+    // return JRDataSource from data connector.  User can iterate the data from JRDataSource and JRField list (get it from TableSourceMetaData) for previewing
+    public JRDataSource getJRDataSource(CustomReportDataSource customReportDataSource) throws Exception  {
+        RepositoryContextHandle repositoryContextHandle = null;
+        try {
+            // only supports data adapter CustomReportDataSource object
+            if ((customReportDataSource).getServiceClass().equals(DataAdapterDefinition.DATA_ADAPTER_SERVICE_CLASS)) {
+                CustomReportDataSourceServiceFactory factory = (CustomReportDataSourceServiceFactory) getDataSourceServiceFactories().getBean(customReportDataSource.getClass());
+                DataAdapterDefinition dataSourceDefinition = (DataAdapterDefinition) factory.getDefinition( customReportDataSource);
+                // setup thread repository context for looking up data source file from repo
+                dataSourceDefinition.setupThreadRepositoryContext(this, customReportDataSource);
+                // discover metadata from connector
+                return dataSourceDefinition.getJRDataSource(customReportDataSource);
+            } else return null;
+        } finally {
+            resetThreadRepositoryContext(repositoryContextHandle);
+        }
+    }
+    
+    public boolean isReportThumbnailServiceEnabled() {
+        return reportThumbnailServiceEnabled;
+    }
+
+    public void setReportThumbnailServiceEnabled(boolean reportThumbnailServiceEnabled) {
+        this.reportThumbnailServiceEnabled = reportThumbnailServiceEnabled;
+    }
+
+    public AsyncThumbnailCreator getAsyncThumbnailCreator() {
+        return asyncThumbnailCreator;
+    }
+
+    public void setAsyncThumbnailCreator(AsyncThumbnailCreator asyncThumbnailCreator) {
+        this.asyncThumbnailCreator = asyncThumbnailCreator;
+    }
 }

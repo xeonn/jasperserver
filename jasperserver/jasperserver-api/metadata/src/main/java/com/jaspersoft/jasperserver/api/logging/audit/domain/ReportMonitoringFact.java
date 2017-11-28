@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2012 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -26,7 +26,7 @@ import java.util.Date;
 
 /**
  * @author Richard Klein
- * @version $Id: ReportMonitoringFact.java 25494 2012-10-27 00:53:07Z udavidovich $
+ * @version $Id: ReportMonitoringFact.java 47331 2014-07-18 09:13:06Z kklein $
  */
 public interface ReportMonitoringFact extends LoggableEvent {
 

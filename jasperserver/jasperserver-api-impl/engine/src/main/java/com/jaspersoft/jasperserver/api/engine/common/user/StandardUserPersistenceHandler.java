@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -31,7 +31,7 @@ import com.jaspersoft.jasperserver.api.metadata.user.service.impl.UserAuthorityP
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: StandardUserPersistenceHandler.java 45722 2014-05-14 10:24:22Z sergey.prilukin $
+ * @version $Id: StandardUserPersistenceHandler.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
 public class StandardUserPersistenceHandler implements UserPersistenceHandler {
 	

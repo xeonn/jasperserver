@@ -1,5 +1,5 @@
 <%--
-  ~ Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+  ~ Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
   ~ http://www.jaspersoft.com.
   ~
   ~ Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -289,6 +289,12 @@
                             %>
                             <jsp:include page="templateCheckbox.jsp" flush="true" />
 
+                            <%
+                                request.setAttribute("oName", MondrianProperties.instance().ReadAggregates.getPath());
+                                request.setAttribute("oLabelCode", "JAM_072_READ_AGGREGATE_TABLES");
+                                request.setAttribute("oValue", MondrianProperties.instance().ReadAggregates.get());
+                            %>
+                            <jsp:include page="templateCheckbox.jsp" flush="true" />
 
                             <%
                               request.setAttribute("oName", MondrianProperties.instance().ChooseAggregateByVolume.getPath());

@@ -1,10 +1,5 @@
-package com.jaspersoft.jasperserver.api.engine.scheduling.quartz;
-
-import org.springframework.core.NestedRuntimeException;
-import org.springframework.util.MethodInvoker;
-
 /*
- * Copyright (C) 2005 - 2012 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -23,7 +18,10 @@ import org.springframework.util.MethodInvoker;
  * You should have received a copy of the GNU Affero General Public  License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+package com.jaspersoft.jasperserver.api.engine.scheduling.quartz;
 
+import org.springframework.core.NestedRuntimeException;
+import org.springframework.util.MethodInvoker;
 
 public class JSJobMethodInvocationFailedException  extends NestedRuntimeException
 {

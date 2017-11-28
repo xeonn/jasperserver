@@ -18,7 +18,7 @@
     </bean>
 
     <bean id="expectedResultTypedValue" class="java.util.ArrayList">
-        <constructor-arg index="0">
+        <constructor-arg index="0" type="java.util.Collection">
             <list value-type="java.lang.Integer">
                 <null/>
                 <value>123</value>

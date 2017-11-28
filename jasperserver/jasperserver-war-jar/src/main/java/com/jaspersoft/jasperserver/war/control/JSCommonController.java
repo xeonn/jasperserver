@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -33,8 +33,8 @@ import com.jaspersoft.jasperserver.war.common.LocalesList;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.security.Authentication;
-import org.springframework.security.context.SecurityContextHolder;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMethodException;
 
@@ -48,7 +48,7 @@ import java.util.Locale;
 
 /**
  * @author aztec
- * @version $Id: JSCommonController.java 35053 2013-08-06 08:54:48Z vsabadosh $
+ * @version $Id: JSCommonController.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
 public class JSCommonController extends JRBaseMultiActionController {
 	public static final String JSP_REQUEST_HANDLING_PREFIX = "jsp:";

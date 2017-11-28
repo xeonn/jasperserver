@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -23,7 +23,7 @@ package com.jaspersoft.jasperserver.remote;
 
 /**
  * @author Yuriy Plakosh
- * @version $Id: ResourceResolverAdapter.java 20578 2011-06-30 22:53:17Z carbiv $
+ * @version $Id: ResourceResolverAdapter.java 47331 2014-07-18 09:13:06Z kklein $
  * @since 3.7.0.1
  */
 public interface ResourceResolverAdapter {

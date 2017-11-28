@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -22,7 +22,6 @@ package com.jaspersoft.jasperserver.api.metadata.user.service.impl;
 
 import com.jaspersoft.jasperserver.api.JSException;
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
-import com.jaspersoft.jasperserver.api.common.util.ImportRunMonitor;
 import com.jaspersoft.jasperserver.api.logging.audit.context.AuditContext;
 import com.jaspersoft.jasperserver.api.logging.audit.domain.AuditEvent;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Folder;
@@ -36,6 +35,7 @@ import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.Hi
 import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.PersistentObjectResolver;
 import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.ReferenceResolver;
 import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.persistent.RepoResource;
+import com.jaspersoft.jasperserver.api.metadata.security.JasperServerPermission;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.ObjectPermission;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.Role;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
@@ -44,6 +44,8 @@ import com.jaspersoft.jasperserver.api.metadata.user.domain.impl.ObjectPermissio
 import com.jaspersoft.jasperserver.api.metadata.user.domain.impl.hibernate.RepoObjectPermission;
 import com.jaspersoft.jasperserver.api.metadata.user.service.ObjectPermissionService;
 import com.jaspersoft.jasperserver.api.metadata.user.service.UserAuthorityService;
+import com.jaspersoft.jasperserver.api.security.JasperServerAclHelper;
+import com.jaspersoft.jasperserver.api.security.NonMutableAclCache;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
@@ -58,30 +60,15 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.orm.hibernate3.HibernateCallback;
-import org.springframework.security.AccessDeniedException;
-import org.springframework.security.Authentication;
-import org.springframework.security.GrantedAuthority;
-import org.springframework.security.acl.AclEntry;
-import org.springframework.security.acl.AclProvider;
-import org.springframework.security.acl.basic.AclObjectIdentity;
-import org.springframework.security.acl.basic.BasicAclDao;
-import org.springframework.security.acl.basic.BasicAclEntry;
-import org.springframework.security.acl.basic.BasicAclEntryCache;
-import org.springframework.security.acl.basic.EffectiveAclsResolver;
-import org.springframework.security.acl.basic.GrantedAuthorityEffectiveAclsResolver;
-import org.springframework.security.acl.basic.SimpleAclEntry;
-import org.springframework.security.acl.basic.cache.NullAclEntryCache;
-import org.springframework.security.context.SecurityContextHolder;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.acls.domain.GrantedAuthoritySid;
+import org.springframework.security.acls.domain.PrincipalSid;
+import org.springframework.security.acls.model.*;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.io.Serializable;
+import java.util.*;
 
 /**
  *
@@ -89,7 +76,7 @@ import java.util.Set;
  *
  */
 public class ObjectPermissionServiceImpl extends HibernateDaoImpl implements
-				BasicAclDao, AclProvider, AclService, ObjectPermissionService, ObjectPermissionServiceInternal,
+				ObjectPermissionService, ObjectPermissionServiceInternal,
 				ApplicationContextAware, PersistentObjectResolver, InitializingBean {
 
 	//
@@ -111,9 +98,9 @@ public class ObjectPermissionServiceImpl extends HibernateDaoImpl implements
 
 	private ResourceFactory objectFactory;
 	private ResourceFactory persistentClassFactory;
+    private NonMutableAclCache nonMutableAclCache;
+    private AclService aclService;
 
-    private BasicAclEntryCache basicAclEntryCache = new NullAclEntryCache();
-    private EffectiveAclsResolver effectiveAclsResolver = new GrantedAuthorityEffectiveAclsResolver();
 
     private ApplicationContext appContext;
     private AuditContext auditContext;
@@ -162,28 +149,6 @@ public class ObjectPermissionServiceImpl extends HibernateDaoImpl implements
 		this.persistentClassFactory = persistentClassFactory;
 	}
 
-    public void setBasicAclEntryCache(BasicAclEntryCache basicAclEntryCache) {
-        this.basicAclEntryCache = basicAclEntryCache;
-    }
-
-    public BasicAclEntryCache getBasicAclEntryCache() {
-        return basicAclEntryCache;
-    }
-
-    /**
-	 * @return Returns the effectiveAclsResolver.
-	 */
-	public EffectiveAclsResolver getEffectiveAclsResolver() {
-		return effectiveAclsResolver;
-	}
-
-	/**
-	 * @param effectiveAclsResolver The effectiveAclsResolver to set.
-	 */
-	public void setEffectiveAclsResolver(EffectiveAclsResolver effectiveAclsResolver) {
-		this.effectiveAclsResolver = effectiveAclsResolver;
-	}
-
 	/* (non-Javadoc)
 	 * @see org.springframework.context.ApplicationContextAware#setApplicationContext(org.springframework.context.ApplicationContext)
 	 */
@@ -194,332 +159,6 @@ public class ObjectPermissionServiceImpl extends HibernateDaoImpl implements
 
     public void setAuditContext(AuditContext auditContext) {
         this.auditContext = auditContext;
-    }
-
-    /**
-     * Returns the ACLs associated with the requested
-     * <code>AclObjectIdentity</code>.
-     *
-     * <P>
-     * The {@link BasicAclEntry}s returned by this method will have
-     * <code>String</code>-based recipients. This will not be a problem if you
-     * are using the <code>GrantedAuthorityEffectiveAclsResolver</code>, which
-     * is the default configured against <code>BasicAclProvider</code>.
-     * </p>
-     *
-     * @param aclObjectIdentity for which ACL information is required (cannot
-     *        be <code>null</code>)
-     *
-     * @return the ACLs that apply (without any <code>null</code>s inside the
-     *         array), or <code>null</code> if not found or if an incompatible
-     *         <code>AclObjectIdentity</code> was requested
-     */
-    public BasicAclEntry[] getAcls(String uri) {
-
-       BasicAclEntry[] entries = checkImport(uri);
-       if (entries != null) return entries;
-
-        Resource res = ((RepositoryUnsecure)getRepositoryService()).getResourceLookupUnsecure(null, uri);
-	if (res == null) {
-		res = ((RepositoryUnsecure)getRepositoryService()).getFolderUnsecure(null, uri);
-	}
-	if (res != null)
-	{
-		return getAcls((InternalURI) res);
-	}
-
-	return null;
-    }
-   /**
-     * Returns the ACLs associated with the requested
-     * <code>AclObjectIdentity</code>.
-     *
-     * <P>
-     * The {@link BasicAclEntry}s returned by this method will have
-     * <code>String</code>-based recipients. This will not be a problem if you
-     * are using the <code>GrantedAuthorityEffectiveAclsResolver</code>, which
-     * is the default configured against <code>BasicAclProvider</code>.
-     * </p>
-     *
-     * @param aclObjectIdentity for which ACL information is required (cannot
-     *        be <code>null</code>)
-     *
-     * @return the ACLs that apply (without any <code>null</code>s inside the
-     *         array), or <code>null</code> if not found or if an incompatible
-     *         <code>AclObjectIdentity</code> was requested
-     */
-    public BasicAclEntry[] getAcls(InternalURI targetURI) {
-
-
-        //Object obj = org.springframework.security.context.SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        //String username = "unknow";
-        //if (obj instanceof org.springframework.security.userdetails.UserDetails) {
-        //  username = ((org.springframework.security.userdetails.UserDetails)obj).getUsername();
-        //} else {
-        //  username = obj.toString();
-        //}
-        //logger.error("Requesting access to: " + targetURI.getURI() + " | " + targetURI.getPath() + " User: " + username);
-
-        if (targetURI == null) {
-        	logger.error("getAcls(InternalURI targetURI): returning. null targetURI");
-        	return null;
-        }
-
-        BasicAclEntry[] entries = checkImport(targetURI.getURI());
-        if (entries != null) return entries;
-
-
-        Map map = new HashMap();
-
-
-
-	BasicAclEntry[] instanceAclEntries = null;
-
-        // Look in cache by targetURI.getURI for BasicAclEntry[]
-        if (targetURI instanceof Resource &&
-            ((Resource)targetURI).isNew())
-        {
-          // Look if it is really is new resouce...
-          Resource res = ((RepositoryUnsecure)getRepositoryService()).getResourceLookupUnsecure(null, "repo:" + targetURI.getPath());
-          if (res == null) {
-            res = ((RepositoryUnsecure)getRepositoryService()).getFolderUnsecure(null, "repo:" + targetURI.getPath());
-          }
-
-          if (res == null)
-          {
-            // Look directly to the parent...
-                instanceAclEntries = lookup( getParentURI( "repo:" + targetURI.getPath()), null);
-          }
-        }
-        else
-        {
-        	instanceAclEntries = lookup("repo:" + targetURI.getPath(), targetURI);
-	    }
-
-
-        // Exit if there is no ACL information or parent for this instance
-        if (instanceAclEntries == null) {
-            return null;
-        }
-
-        // Add the leaf objects to the Map, keyed on recipient
-        for (int i = 0; i < instanceAclEntries.length; i++) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Explicit add: "
-                        + instanceAclEntries[i].toString());
-            }
-
-            map.put(instanceAclEntries[i].getRecipient(), instanceAclEntries[i]);
-        }
-
-        String parent = getParentURI("repo:" + targetURI.getPath());
-
-        while (parent != null) {
-            BasicAclEntry[] parentAclEntries = lookup(parent, null);
-
-            if (logger.isDebugEnabled()) {
-                logger.debug("Parent lookup: " + parent);
-            }
-
-            // Exit loop if parent couldn't be found (unexpected condition)
-            if (parentAclEntries == null) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Parent could not be found in ACL repository");
-                }
-
-                break;
-            }
-
-            // Now add each _NEW_ recipient to the list
-            for (int i = 0; i < parentAclEntries.length; i++) {
-                if (!map.containsKey(parentAclEntries[i].getRecipient())) {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Added parent to map: "
-                                + parentAclEntries[i].toString()
-                                + " for recipient: "
-                                + parentAclEntries[i].getRecipient());
-                    }
-
-                    map.put(parentAclEntries[i].getRecipient(),
-                            parentAclEntries[i]);
-                } else {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Did NOT add parent to map: "
-                                + parentAclEntries[i].toString()
-                                + " for recipient: "
-                                + parentAclEntries[i].getRecipient());
-                    }
-                }
-            }
-
-            // Prepare for next iteration of while loop
-            parent = getParentURI(parent);
-        }
-
-        Collection collection = map.values();
-
-        return (BasicAclEntry[]) collection.toArray(new BasicAclEntry[]{});
-    }
-
-    public BasicAclEntry[] getAcls(AclObjectIdentity aclObjectIdentity) {
-        if (aclObjectIdentity == null || !(aclObjectIdentity instanceof InternalURI)) {
-        	logger.debug("getAcls(AclObjectIdentity aclObjectIdentity): returning. invalid object for getAcls: " + aclObjectIdentity);
-        	return null;
-        }
-
-        InternalURI targetURI = (InternalURI) aclObjectIdentity;
-
-		return getAcls(targetURI);
-    }
-
-    public BasicAclEntry[] getAcls(AclObjectIdentity aclObjectIdentity, Object recipient) {
-        if (aclObjectIdentity == null || !(aclObjectIdentity instanceof InternalURI)) {
-        	logger.debug("getAcls(AclObjectIdentity aclObjectIdentity, Object recipient): returning. invalid object for getAcls: " + aclObjectIdentity);
-        	return null;
-        }
-
-        InternalURI targetURI = (InternalURI) aclObjectIdentity;
-		return getAclsForRecipient(RESOURCE_URI_PREFIX + targetURI.getPath(), recipient);
-    }
-
-    private BasicAclEntry[] checkImport(String uri) {
-        BasicAclEntry[] res = null;
-        if (ImportRunMonitor.isImportRun()){
-            //Add special permission for current user
-            //to allow updating special resources like themes etc
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            for (GrantedAuthority authority : authentication.getAuthorities()){
-                if (authority.getAuthority().equals(ObjectPermissionService.PRIVILEGED_OPERATION)){
-                    ObjectPermission permission = new ObjectPermissionImpl();
-                    permission.setPermissionMask(SimpleAclEntry.ADMINISTRATION);
-                    permission.setPermissionRecipient(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
-                    res = new BasicAclEntry[]{createBasicAclEntry(uri, permission)};
-                }
-            }
-        }
-        return res;
-    }
-
-    private BasicAclEntry[] getAclsForRecipient(String targetURI, Object recipient) {
-        Map map = new HashMap();
-
-    	while (targetURI != null) {
-    		BasicAclEntry[] entries = lookup(targetURI, null);
-    		if (entries != null) {
-
-    	        // Add the leaf objects to the Map, keyed on recipient
-    	        for (int i = 0; i < entries.length; i++) {
-
-    	        	// Include if we are not filtering by recipients or we have matched the given
-    	        	// recipient, and we have not seen this recipient before
-
-                    if ((recipient == null || recipient.equals(entries[i].getRecipient()))
-                    		&& !map.containsKey(entries[i].getRecipient())) {
-                        if (logger.isDebugEnabled()) {
-                            logger.debug("Added: "
-                                    + entries[i].toString());
-                        }
-
-                        map.put(entries[i].getRecipient(),
-                        		entries[i]);
-                    } else {
-                        if (logger.isDebugEnabled()) {
-                            logger.debug("Did NOT add: "
-                                    + entries[i].toString());
-                        }
-                    }
-    	        }
-    		}
-    		targetURI = getParentURI(targetURI);
-    	}
-
-        Collection collection = map.values();
-    	return (BasicAclEntry[]) collection.toArray(new BasicAclEntry[]{});
-    	//return new ArrayList(map.values());
-    }
-
-    /**
-     * Create AclEntrys from targetURI and list of ObjectPermissions
-     *
-     *
-     * @param targetURI
-     * @param permissions
-     * @return
-     */
-    private BasicAclEntry[] getAclsFromObjectPermissions(String targetURI, List permissions) {
-
-        if (permissions == null || permissions.size() == 0) {
-        	log.debug("No explicit permissions found");
-            // return merely an inheritance marker (as we know about the object but it has no related ACLs)
-            return new BasicAclEntry[] {createBasicAclEntry(targetURI, null)};
-        } else {
-        	if (log.isDebugEnabled()) {
-        		log.debug("Found " + permissions.size() + " explicit permissions");
-        	}
-            // return the individual ACL instances
-        	ObjectPermission[] aclHolders = (ObjectPermission[]) permissions.toArray(new ObjectPermission[] {});
-            List toReturnAcls = new ArrayList(aclHolders.length);
-
-            for (int i = 0; i < aclHolders.length; i++) {
-            	if (log.isDebugEnabled()) {
-            		log.debug(aclHolders[i]);
-            	}
-                toReturnAcls.add(createBasicAclEntry(targetURI, aclHolders[i]));
-            }
-
-            return (BasicAclEntry[]) toReturnAcls.toArray(new BasicAclEntry[] {});
-        }
-    }
-    /**
-     * Constructs an individual <code>BasicAclEntry</code> from the passed
-     * <code>ObjectPermission</code> and <code>InternalURI</code>.
-     *
-     * <P>
-     * Guarantees to never return <code>null</code> (exceptions are thrown in
-     * the event of any issues).
-     * </p>
-     *
-     * @param propertiesInformation mandatory information about which instance
-     *        to create, the object identity, and the parent object identity
-     *        (<code>null</code> or empty <code>String</code>s prohibited for
-     *        <code>aclClass</code> and <code>aclObjectIdentity</code>
-     * @param aclInformation optional information about the individual ACL
-     *        record (if <code>null</code> only an "inheritence marker"
-     *        instance is returned; if not <code>null</code>, it is prohibited
-     *        to present <code>null</code> or an empty <code>String</code> for
-     *        <code>recipient</code>)
-     *
-     * @return a fully populated instance suitable for use by external objects
-     *
-     * @throws IllegalArgumentException if the indicated ACL class could not be
-     *         created
-     */
-    BasicAclEntry createBasicAclEntry(
-    		String targetURI, ObjectPermission aclInformation) {
-        BasicAclEntry entry;
-
-        try {
-            entry = (BasicAclEntry) SimpleAclEntry.class.newInstance();
-        } catch (InstantiationException ie) {
-            throw new IllegalArgumentException(ie.getMessage());
-        } catch (IllegalAccessException iae) {
-            throw new IllegalArgumentException(iae.getMessage());
-        }
-
-        entry.setAclObjectIdentity(new URIObjectIdentity(targetURI));
-        entry.setAclObjectParentIdentity(new URIObjectIdentity(getParentURI(targetURI)));
-
-        if (aclInformation == null) {
-            // this is an inheritance marker instance only
-            entry.setMask(0);
-            entry.setRecipient(RECIPIENT_USED_FOR_INHERITANCE_MARKER);
-        } else {
-            // this is an individual ACL entry
-            entry.setMask(aclInformation.getPermissionMask());
-            entry.setRecipient(aclInformation.getPermissionRecipient());
-        }
-
-        return entry;
     }
 
     /**
@@ -564,128 +203,6 @@ public class ObjectPermissionServiceImpl extends HibernateDaoImpl implements
     	}
     }
 
-	/**
-	 * Find ObjectPermissions for the object
-	 *
-	 *  (non-Javadoc)
-	 * @see org.springframework.security.acl.AclManager#getAcls(java.lang.Object)
-	 */
-	public AclEntry[] getAcls(Object obj) {
-
-		List resultList = new ArrayList();
-
-		if (obj instanceof InternalURI) {
-			return getAcls((InternalURI) obj);
-		}
-		else if (obj instanceof String) {
-			String path = (String) obj;
-			if (path.startsWith(RESOURCE_URI_PREFIX)) {
-				path = path.substring(RESOURCE_URI_PREFIX_LENGTH);
-			}
-			return getAcls(new InternalURIDefinition(path));
-		}
-
-		return (BasicAclEntry[]) resultList.toArray(new BasicAclEntry[] {});
-	}
-
-	/**
-	 * Find ObjectPermissions for the object and Authentication (user)
-	 *
-	 *  (non-Javadoc)
-	 * @see org.springframework.security.acl.AclManager#getAcls(java.lang.Object, org.springframework.security.Authentication)
-	 */
-	public AclEntry[] getAcls(Object obj, Authentication auth) {
-
-		if (auth == null || auth.getPrincipal() == null ||
-		! (obj instanceof InternalURI || obj instanceof String)) {
-			return new BasicAclEntry[] {};
-		}
-        AclEntry[] allAcls = (AclEntry[]) this.getAcls(obj);
-
-        return this.effectiveAclsResolver.resolveEffectiveAcls(allAcls,
-            auth);
-	}
-
-    private BasicAclEntry[] lookup(String targetURI, InternalURI targetObject) {
-    	URIObjectIdentity objIdent = new URIObjectIdentity(targetURI);
-
-
-        BasicAclEntry[] result = basicAclEntryCache.getEntriesFromCache(objIdent);
-
-        if (result != null && result.length > 0) {
-        	if (log.isDebugEnabled()) {
-        		log.debug("Found " + targetURI + " in cache");
-        	}
-            if (result[0].getRecipient() == null || result[0].getRecipient().equals(RECIPIENT_FOR_CACHE_EMPTY)) {
-                return null;
-            } else {
-                return result;
-            }
-        }
-
-        if (log.isDebugEnabled()) {
-    		log.debug("Did not find " + targetURI + " in cache");
-    	}
-
-        Resource res = null;
-        if (targetObject instanceof Resource) {
-        	res = (Resource) targetObject;
-
-        	if (log.isDebugEnabled()) {
-        		log.debug("Looking up permissions for resource object " + res.getURIString());
-        	}
-        } else {
-        	res = ((RepositoryUnsecure)getRepositoryService()).getResourceLookupUnsecure(null, targetURI);
-        	if (res == null) {
-        		res = ((RepositoryUnsecure)getRepositoryService()).getFolderUnsecure(null, targetURI);
-        		if (log.isDebugEnabled()) {
-        			log.debug("Did not find " + targetURI + " as resource");
-        			log.debug("Did " + ((res == null) ? "not" : "") + " find " + targetURI + " as folder");
-        		}
-        	} else {
-        		if (log.isDebugEnabled()) {
-        			log.debug("Found " + targetURI + " as resource");
-        		}
-        	}
-        }
-
-		if (res != null) {
-			List permissions = getObjectPermissionsForObject(null, res);
-
-			result = getAclsFromObjectPermissions(targetURI, permissions);
-		} else {
-			if (log.isDebugEnabled()) {
-				log.debug("Resource not found for permissions lookup: " + targetURI +
-						". Using parent permissions");
-			}
-
-			// is it a new resource? Return the parent permissions....
-			return lookup( getParentURI(targetURI), null);
-		}
-
-        if (result == null) {
-
-            if (log.isDebugEnabled()) {
-        		log.debug("Default entries for " + targetURI + " cached");
-        	}
-
-            SimpleAclEntry[] emptyAclEntries = {new SimpleAclEntry(RECIPIENT_FOR_CACHE_EMPTY,
-            		new URIObjectIdentity(targetURI), null, 0)};
-            basicAclEntryCache.putEntriesInCache(emptyAclEntries);
-
-            return null;
-        }
-
-        if (log.isDebugEnabled()) {
-    		log.debug(result.length + " entries for " + targetURI + " cached");
-    	}
-
-        basicAclEntryCache.putEntriesInCache(result);
-
-        return result;
-    }
-
-
     public void deleteObjectPermissionForObject(ExecutionContext context, Object targetObject) {
 		if (targetObject == null || !(targetObject instanceof InternalURI)) {
 			return;
@@ -701,7 +218,7 @@ public class ObjectPermissionServiceImpl extends HibernateDaoImpl implements
     	}
 
 		List permissions = getRepoObjectPermissions(context, repositoryURI(path), null);
-        deleteObjectPermissions(permissions, false);
+        deleteObjectPermissions(context, permissions, false);
     }
 
 	public void deleteObjectPermissionsForRecipient(ExecutionContext context, Object recipient) {
@@ -710,7 +227,7 @@ public class ObjectPermissionServiceImpl extends HibernateDaoImpl implements
     	}
 
 		List permissions = getRepoObjectPermissions(context, null, recipient);
-		deleteObjectPermissions(permissions);
+		deleteObjectPermissions(context, permissions);
 	}
 
 	public void deleteObjectPermissionsForRecipient(ExecutionContext context, ObjectPermissionRecipientIdentity recipientIdentity) {
@@ -719,28 +236,28 @@ public class ObjectPermissionServiceImpl extends HibernateDaoImpl implements
     	}
 
 		List permissions = getRepoObjectPermissions(recipientIdentity);
-		deleteObjectPermissions(permissions);
+		deleteObjectPermissions(context, permissions);
 	}
 
-    protected void deleteObjectPermissions(List permissions) {
-        deleteObjectPermissions(permissions, true);
+    protected void deleteObjectPermissions(ExecutionContext context, List permissions) {
+        deleteObjectPermissions(context, permissions, true);
     }
-    protected void deleteObjectPermissions(List permissions, boolean checkAdministerAccess) {
+    protected void deleteObjectPermissions(ExecutionContext context, List permissions, boolean checkAdministerAccess) {
         if (permissions != null && !permissions.isEmpty()) {
             for (Iterator it = permissions.iterator(); it.hasNext();) {
                 RepoObjectPermission permission = (RepoObjectPermission) it.next();
-                deleteObjectPermission(permission, checkAdministerAccess);
+                deleteObjectPermission(context, permission, checkAdministerAccess);
             }
         }
     }
 
-	/**
+    /**
 	 * A key for the cache
 	 *
 	 * @author swood
 	 *
 	 */
-    public static class URIObjectIdentity implements AclObjectIdentity {
+    public static class URIObjectIdentity implements ObjectIdentity {
     	String uri;
     	public URIObjectIdentity(String uri) {
     		String fullUri = uri;
@@ -769,6 +286,16 @@ public class ObjectPermissionServiceImpl extends HibernateDaoImpl implements
                 .isEquals();
         }
 
+        @Override
+        public Serializable getIdentifier() {
+            return getURI();
+        }
+
+        @Override
+        public String getType() {
+            return Resource.class.getName();
+        }
+
         public int hashCode() {
             return new HashCodeBuilder()
                 .append(getURI())
@@ -779,8 +306,6 @@ public class ObjectPermissionServiceImpl extends HibernateDaoImpl implements
 	/**
 	 * We can authorize InternalURI
 	 *
-	 *  (non-Javadoc)
-	 * @see org.springframework.security.acl.AclProvider#supports(java.lang.Object)
 	 */
 	public boolean supports(Object obj) {
 		return obj instanceof InternalURI || obj instanceof String;
@@ -835,8 +360,7 @@ public class ObjectPermissionServiceImpl extends HibernateDaoImpl implements
             throw new IllegalArgumentException("Permission can't be null");
         }
         // checking administrative access
-        boolean privileged = (context != null && context.getAttributes() != null && context.getAttributes().contains(PRIVILEGED_OPERATION)) ? true : false;
-        if (!privileged && !isObjectAdministrable(context, objPermission.getURI())) {
+        if (!isPrivilegedOperation(context) && !isObjectAdministrable(context, objPermission.getURI())) {
             throw new AccessDeniedException("Access is denied");
         }
         final Object permissionRecipient = objPermission.getPermissionRecipient();
@@ -893,20 +417,24 @@ public class ObjectPermissionServiceImpl extends HibernateDaoImpl implements
 		}
 		// and delete
         addParamsToSetPermissionAuditEvent(context, objPermission, existingPerm.getPermissionMask());
-		deleteObjectPermission(existingPerm);
+		deleteObjectPermission(context, existingPerm);
 	}
 
-    protected void deleteObjectPermission(RepoObjectPermission permission) {
-        deleteObjectPermission(permission, true);
+    protected void deleteObjectPermission(ExecutionContext context, RepoObjectPermission permission) {
+        deleteObjectPermission(context, permission, true);
     }
-	protected void deleteObjectPermission(RepoObjectPermission permission, boolean checkAdministerAccess) {
+	protected void deleteObjectPermission(ExecutionContext context, RepoObjectPermission permission, boolean checkAdministerAccess) {
         // checking administrable access
-        if (checkAdministerAccess && !isObjectAdministrable(null, permission.getURI())) {
+        if (!isPrivilegedOperation(context) && checkAdministerAccess && !isObjectAdministrable(null, permission.getURI())) {
             throw new AccessDeniedException("Access is denied");
         }
 		getHibernateTemplate().delete(permission);
 		clearAclEntriesCache(permission.getURI());
 	}
+
+    protected boolean isPrivilegedOperation(ExecutionContext context){
+        return context != null && context.getAttributes() != null && context.getAttributes().contains(PRIVILEGED_OPERATION);
+    }
 
 	public ObjectPermission getObjectPermission(ExecutionContext context, ObjectPermission objPermission) {
 		// Given the object and the recipient, find the permission
@@ -1034,24 +562,34 @@ public class ObjectPermissionServiceImpl extends HibernateDaoImpl implements
 
     @Override
     public List<ObjectPermission> getEffectivePermissionsForObject(ExecutionContext context, Object targetObject) {
-        List<ObjectPermission> result;
-        BasicAclEntry[] acls = (BasicAclEntry[])getAcls(targetObject);
-        if (acls != null) {
-            result = new ArrayList<ObjectPermission>(acls.length);
-
-            for (BasicAclEntry entry : acls) {
-                if (!(entry.getRecipient() instanceof String)) {
-                    ObjectPermission permission = new ObjectPermissionImpl();
-                    permission.setPermissionRecipient(entry.getRecipient());
-                    permission.setPermissionMask(entry.getMask());
-                    permission.setURI(((ObjectPermissionServiceImpl.URIObjectIdentity) entry.getAclObjectIdentity()).getURI());
-                    result.add(permission);
-                }
-            }
-        } else {
-            result = Collections.EMPTY_LIST;
+        if (!(targetObject instanceof ObjectIdentity)) {
+            return Collections.EMPTY_LIST;
         }
+        List<ObjectPermission> result;
+        result = new ArrayList<ObjectPermission>();
+        Acl effectiveAcl = aclService.readAclById((ObjectIdentity) targetObject);
+        Set<Sid> sids = JasperServerAclHelper.locateSids(effectiveAcl, true);
+        AccessControlEntry ace;
+        for (Sid sid : sids) {
+            ace = JasperServerAclHelper.locateAceForSid(effectiveAcl, sid);
+            if (ace != null) {
+
+                ObjectPermission op = new ObjectPermissionImpl();
+                op.setPermissionMask(ace.getPermission().getMask());
+                op.setURI(extractUriFromAcl(ace.getAcl()));
+                op.setPermissionRecipient(ace.getSid());
+                result.add(op);
+            }
+        }
+
+        // objectPermissionService.getEffectivePermissionsForObject(makeExecutionContext(), resource);
         return result;
+    }
+    protected String extractUriFromAcl(Acl entry) {
+        final ObjectIdentity objectIdentity = entry.getObjectIdentity();
+        return objectIdentity instanceof ObjectPermissionServiceImpl.URIObjectIdentity
+                ? ((ObjectPermissionServiceImpl.URIObjectIdentity) objectIdentity).getURI()
+                : objectIdentity.getIdentifier().toString();
     }
 
     /* (non-Javadoc)
@@ -1083,12 +621,51 @@ public class ObjectPermissionServiceImpl extends HibernateDaoImpl implements
         if ((targetObject == null) || (auth == null)) {
             return true;
         }
-        BasicAclEntry[] allAcls = (BasicAclEntry[]) effectiveAclsResolver.resolveEffectiveAcls(getAcls(targetObject), auth);
-        if (allAcls != null) {
-            for (int i = 0; i < allAcls.length; i++) {
-                BasicAclEntry aclEntry = allAcls[i];
-                if (aclEntry.getMask() == SimpleAclEntry.ADMINISTRATION) {
-                    return true;
+        JasperServerSidRetrievalStrategyImpl localStrategy =  new JasperServerSidRetrievalStrategyImpl();
+        List<Sid> sids = localStrategy.getSids(auth);
+        List objectPermissions = new ArrayList();
+        InternalURI targetURI=null;
+        if (targetObject instanceof String) {
+            String path = (String) targetObject;
+            // clear out repo: part if it`s exist;
+            path = path.startsWith(RESOURCE_URI_PREFIX) ? path.substring(RESOURCE_URI_PREFIX_LENGTH).trim() : path;
+            targetURI = new InternalURIDefinition(path);
+        } else if (targetObject instanceof InternalURI) {
+            targetURI =(InternalURI) targetObject;
+        }
+
+        if (targetURI!=null) {
+            // Look if it is really a resouce...
+            Resource res = ((RepositoryUnsecure)getRepositoryService()).getResourceLookupUnsecure(null, "repo:" + targetURI.getPath());
+            if (res == null) {
+                res = ((RepositoryUnsecure)getRepositoryService()).getFolderUnsecure(null, "repo:" + targetURI.getPath());
+            }
+            if (res == null)
+            {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Did not find resource, switching to parent");
+                }
+                // Look directly to the parent...
+                targetURI = new InternalURIDefinition(getParentURI(targetURI.getPath()));
+            }
+
+            while (targetURI.getPath()!=null) {
+                objectPermissions.addAll(getObjectPermissionsForObject(context,targetURI));
+                targetURI = new InternalURIDefinition(targetURI.getParentPath());
+            }
+        } else {
+            objectPermissions = getObjectPermissionsForObject(context,targetObject);
+        }
+        for(Object obj:objectPermissions) {
+            if (obj instanceof ObjectPermission) {
+                Sid permissionSid = localStrategy.getSid(((ObjectPermission) obj).getPermissionRecipient());
+                if (sids.contains(permissionSid)) {
+                    if (JasperServerPermission.ADMINISTRATION.getMask()==((ObjectPermission) obj).getPermissionMask()) {
+                        return true;
+                    } else {
+                        // Remove current SID from future checks - because we already found that this Sid don`t have Admin access
+                        sids.remove(permissionSid);
+                    }
                 }
             }
         }
@@ -1156,11 +733,13 @@ public class ObjectPermissionServiceImpl extends HibernateDaoImpl implements
 	}
 
 	protected void clearAclEntriesCache(String uri) {
-		URIObjectIdentity objId = new URIObjectIdentity(uri);
+		InternalURIDefinition objId = new InternalURIDefinition(uri);
 		if (log.isDebugEnabled()) {
 			log.debug("Removing " + objId + " from permissions");
 		}
-		basicAclEntryCache.removeEntriesFromCache(objId);
+		if (nonMutableAclCache!=null) {
+			nonMutableAclCache.evictFromCache(objId);
+		}
 	}
 
 	public void updateObjectPermissionRepositoryPath(String oldPath, String newPath) {
@@ -1192,11 +771,11 @@ public class ObjectPermissionServiceImpl extends HibernateDaoImpl implements
 						+ targetObject);
 			}
 
-			return SimpleAclEntry.NOTHING;
+			return 0;
 		}
 
 		InternalURI resource = (InternalURI) targetObject;
-		int permissionMask = SimpleAclEntry.NOTHING;
+		int permissionMask = 0;
 
 		String folderURI = getParentURI(resource.getPath());
 		while (folderURI != null) {
@@ -1226,4 +805,11 @@ public class ObjectPermissionServiceImpl extends HibernateDaoImpl implements
 		return permissionMask;
 	}
 
+    public void setNonMutableAclCache(NonMutableAclCache nonMutableAclCache) {
+        this.nonMutableAclCache = nonMutableAclCache;
+    }
+
+    public void setAclService(AclService aclService) {
+        this.aclService = aclService;
+    }
 }

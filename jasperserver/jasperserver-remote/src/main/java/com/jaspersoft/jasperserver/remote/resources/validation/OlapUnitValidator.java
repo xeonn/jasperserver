@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2013 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -41,7 +41,7 @@ import static com.jaspersoft.jasperserver.remote.resources.validation.Validation
  * <p></p>
  *
  * @author Zakhar.Tomchenco
- * @version $Id: OlapUnitValidator.java 34091 2013-07-18 13:07:33Z ztomchenco $
+ * @version $Id: OlapUnitValidator.java 47331 2014-07-18 09:13:06Z kklein $
  */
 @Component
 public class OlapUnitValidator extends GenericResourceValidator<OlapUnit> {

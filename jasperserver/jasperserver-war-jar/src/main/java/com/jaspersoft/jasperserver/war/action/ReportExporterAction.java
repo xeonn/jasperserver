@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -43,7 +43,7 @@ import com.jaspersoft.jasperserver.war.common.ConfigurationBean;
 
 /**
  * @author sanda zaharia (szaharia@users.sourceforge.net)
- * @version $Id: ReportExporterAction.java 44903 2014-04-22 12:24:57Z tdanciu $
+ * @version $Id: ReportExporterAction.java 49286 2014-09-23 13:32:25Z ykovalchyk $
  */
 public class ReportExporterAction extends FormAction {
 	
@@ -97,15 +97,15 @@ public class ReportExporterAction extends FormAction {
 			Boolean isPaginated = exporterConfiguration.getCurrentExporter().isPaginationPreferred(jasperReport); 
 			if (isPaginated != null && !isPaginated) 
 			{
-				//setting the ignore pagination flag on the request so that 
-				//the following report fill will be unpaginated.
-				//note that this assumes the report fill will occur in the same request, 
-				//which will not be the case when we'll have export options dialogs.
-				if (log.isDebugEnabled()) {
-					log.debug("requested unpaginated report");
-				}
-				context.getRequestScope().put(getViewReportAction().getAttributeIgnorePagination(), true);
+			//setting the ignore pagination flag on the request so that 
+			//the following report fill will be unpaginated.
+			//note that this assumes the report fill will occur in the same request, 
+			//which will not be the case when we'll have export options dialogs.
+			if (log.isDebugEnabled()) {
+				log.debug("requested unpaginated report");
 			}
+			context.getRequestScope().put(getViewReportAction().getAttributeIgnorePagination(), true);
+		}
 		}
 
 		return success();

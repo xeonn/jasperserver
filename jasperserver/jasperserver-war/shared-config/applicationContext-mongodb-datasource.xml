@@ -18,8 +18,8 @@
             <list>
                 <map>
                     <entry key="name" value="mongoURI" />
-                    <entry key="default"
-                        value="mongodb://hostname:27017/database" />
+                    <entry key="default" value="mongodb://hostname:27017/database" />
+                    <entry key="mandatory" value="true" />
                 </map>
                 <map>
                     <entry key="name" value="username" />

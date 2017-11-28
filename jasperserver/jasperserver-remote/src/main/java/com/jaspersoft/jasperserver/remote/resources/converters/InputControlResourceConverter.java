@@ -1,6 +1,7 @@
 /*
- * Copyright (C) 2005 - 2012 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
+ *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
  * the following license terms  apply:
  *
@@ -37,7 +38,7 @@ import java.util.Arrays;
  * <p></p>
  *
  * @author Zakhar.Tomchenco
- * @version $Id: InputControlResourceConverter.java 35226 2013-08-09 07:08:53Z inesterenko $
+ * @version $Id: InputControlResourceConverter.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
 @Service
 public class InputControlResourceConverter extends ResourceConverterImpl<InputControl, ClientInputControl> {
@@ -57,7 +58,7 @@ public class InputControlResourceConverter extends ResourceConverterImpl<InputCo
         resultToUpdate.setMandatory(clientObject.isMandatory());
         resultToUpdate.setReadOnly(clientObject.isReadOnly());
         resultToUpdate.setVisible(clientObject.isVisible());
-        resultToUpdate.setType(clientObject.getType());
+        resultToUpdate.setInputControlType(clientObject.getType());
         resultToUpdate.setQueryValueColumn(clientObject.getValueColumn());
 
         for( String column : resultToUpdate.getQueryVisibleColumns()){
@@ -86,7 +87,7 @@ public class InputControlResourceConverter extends ResourceConverterImpl<InputCo
         client.setMandatory(serverObject.isMandatory());
         client.setReadOnly(serverObject.isReadOnly());
         client.setVisible(serverObject.isVisible());
-        client.setType(serverObject.getType());
+        client.setType(serverObject.getInputControlType());
         client.setValueColumn(serverObject.getQueryValueColumn());
         if (serverObject.getQueryVisibleColumns().length > 0){
             client.setVisibleColumns(new ArrayList<String>(Arrays.asList(serverObject.getQueryVisibleColumns())));

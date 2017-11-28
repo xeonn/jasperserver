@@ -6,7 +6,7 @@
     <jdbc-connection-pool 
         name="jasperserver_pool" 
         datasource-classname="${jdbcDataSourceClass}"
-        res-type="javax.sql.ConnectionPoolDataSource">
+        res-type="javax.sql.ConnectionPoolDataSource" is-connection-validation-required="true">
         <property name="serverName" value="${dbHost}"/>
         <property name="user" value="${js.dbUsername}"/>
         <property name="password" value="${escapeXML:js.dbPassword}"/>
@@ -20,7 +20,9 @@
         <property name="fullyMaterializeInputStreams" value="${db2.fullyMaterializeInputStreams}"/>
         <property name="progressiveStreaming" value="${db2.progressiveStreaming}"/>
         <property name="progresssiveLocators" value="${db2.progresssiveLocators}"/>
-		 <property name="JDBC30DataSource" value="true"/>
+		<property name="JDBC30DataSource" value="true"/>
+        <property name="LobStreamingProtocol" value="${db2.LobStreamingProtocol}"/>
+        <property name="SendStreamAsBlob" value="${db2.SendStreamAsBlob}"/>
     </jdbc-connection-pool>
 
     <jdbc-resource enabled="true" jndi-name="${js.jndi}" object-type="user" pool-name="jasperserver_pool"/>
@@ -29,7 +31,7 @@
     <jdbc-connection-pool 
         name="sugarcrm_pool" 
         datasource-classname="${jdbcDataSourceClass}"
-        res-type="javax.sql.ConnectionPoolDataSource">
+        res-type="javax.sql.ConnectionPoolDataSource" is-connection-validation-required="true">
         <property name="serverName" value="${dbHost}"/>
         <property name="user" value="${sugarcrm.dbUsername}"/>
         <property name="password" value="${escapeXML:sugarcrm.dbPassword}"/>
@@ -40,6 +42,7 @@
         <property name="portNumber" value="${dbPort}"/>
         <property name="currentSchema" value="${sugarcrm.dbName}"/>
 		 <property name="JDBC30DataSource" value="true"/>
+        <property name="AlernateId" value="${sugarcrm.dbName}"/>
     </jdbc-connection-pool>
 
     <jdbc-resource enabled="true" jndi-name="${sugarcrm.jndi}" object-type="user" pool-name="sugarcrm_pool"/>
@@ -48,7 +51,7 @@
     <jdbc-connection-pool 
         name="foodmart_pool" 
         datasource-classname="${jdbcDataSourceClass}"
-        res-type="javax.sql.ConnectionPoolDataSource">
+        res-type="javax.sql.ConnectionPoolDataSource" is-connection-validation-required="true">
         <property name="serverName" value="${dbHost}"/>
         <property name="user" value="${foodmart.dbUsername}"/>
         <property name="password" value="${escapeXML:foodmart.dbPassword}"/>
@@ -59,6 +62,7 @@
         <property name="portNumber" value="${dbPort}"/>
         <property name="currentSchema" value="${foodmart.dbName}"/>
 		<property name="JDBC30DataSource" value="true"/>
+        <property name="AlernateId" value="${foodmart.dbName}"/>
     </jdbc-connection-pool>
 
     <jdbc-resource enabled="true" jndi-name="${foodmart.jndi}" object-type="user" pool-name="foodmart_pool"/>

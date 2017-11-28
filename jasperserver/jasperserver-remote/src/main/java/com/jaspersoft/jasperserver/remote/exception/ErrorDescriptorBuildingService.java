@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005 - 2013 Jaspersoft Corporation. All rights  reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
 * http://www.jaspersoft.com.
 *
 * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -16,7 +16,7 @@
 * GNU Affero  General Public License for more details.
 *
 * You should have received a copy of the GNU Affero General Public  License
-* along with this program.&nbsp; If not, see <http://www.gnu.org/licenses/>.
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 package com.jaspersoft.jasperserver.remote.exception;
 
@@ -30,13 +30,13 @@ import javax.annotation.Resource;
  * <p></p>
  *
  * @author yaroslav.kovalchyk
- * @version $Id: ErrorDescriptorBuildingService.java 45722 2014-05-14 10:24:22Z sergey.prilukin $
+ * @version $Id: ErrorDescriptorBuildingService.java 50801 2014-10-29 00:20:56Z inesterenko $
  */
 @Service
 public class ErrorDescriptorBuildingService {
     @Resource
     private GenericTypeProcessorRegistry genericTypeProcessorRegistry;
-    public ErrorDescriptor buildErrorDescriptor(Exception e){
+    public ErrorDescriptor buildErrorDescriptor(Throwable e){
         final ErrorDescriptorBuilder errorDescriptorBuilder = genericTypeProcessorRegistry
                 .getTypeProcessor(e.getClass(), ErrorDescriptorBuilder.class, false);
         return errorDescriptorBuilder != null ? errorDescriptorBuilder.build(e) : new ErrorDescriptor(e);

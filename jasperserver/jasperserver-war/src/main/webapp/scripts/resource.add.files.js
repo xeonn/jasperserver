@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2014 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: resource.add.files.js 43122 2014-03-18 12:44:22Z psavushchik $
+ * @version: $Id: resource.add.files.js 7872 2014-10-04 09:08:52Z inesterenko $
  */
 
 var addFileResource = {
@@ -45,7 +45,7 @@ var addFileResource = {
         "prop": ["properties"],
         "jrtx": ["jrtx"],
         "xml": ["xml", "agxml"],
-        "contentResource": ["docx", "doc", "ppt", "pptx", "xls", "xlsx", "ods", "odt", "odp", "pdf", "rtf", "html"]
+        "contentResource": ["docx", "doc", "ppt", "pptx", "xls", "xlsx", "ods", "odt", "odp", "pdf", "rtf", "html", "txt", "csv"]
     },
 
     _canGenerateId: true,

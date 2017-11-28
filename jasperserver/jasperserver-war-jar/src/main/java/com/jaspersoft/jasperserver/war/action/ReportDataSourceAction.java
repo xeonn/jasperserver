@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -36,6 +36,7 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
 
+import com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl.TibcoDriverManagerImpl;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.VirtualReportDataSource;
 import com.jaspersoft.jasperserver.war.model.TreeDataProvider;
 import org.apache.commons.logging.Log;
@@ -448,8 +449,7 @@ public class ReportDataSourceAction extends FormAction implements ApplicationCon
         log.debug("com.jaspersoft.jasperserver.war.action.ReportDataSourceAction.testJndiDataSource  look up success: DataSource at JNDI location: 'java:comp/env/" + ds.getJndiName()+"' \n" +
        " About to do:  DataSource.getConnection \n");
       }
-			conn = dataSource.getConnection();
-
+			conn = TibcoDriverManagerImpl.getInstance().unlockConnection(dataSource);
       if (log.isDebugEnabled()) {
         log.debug("com.jaspersoft.jasperserver.war.action.ReportDataSourceAction.testJndiDataSource  DataSource.getConnection success. \n");
       }

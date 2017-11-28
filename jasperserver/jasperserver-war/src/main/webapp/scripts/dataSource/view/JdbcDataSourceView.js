@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2014 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -184,10 +184,8 @@ define(function(require) {
         render: function() {
             this.$el.empty();
 
-            this.renderNameAndDescriptionSection();
             this.renderJdbcSpecificSection();
             this.renderTimezoneSection();
-            this.renderSaveLocationSection();
 			this.renderTestConnectionSection();
 
             return this;

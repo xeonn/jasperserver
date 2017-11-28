@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -36,7 +36,7 @@ import org.quartz.DateBuilder;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.security.context.SecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -44,7 +44,7 @@ import java.util.regex.Pattern;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: DefaultReportJobValidator.java 30814 2013-04-04 21:14:31Z schubar $
+ * @version $Id: DefaultReportJobValidator.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
 public class DefaultReportJobValidator implements ReportJobValidator, ApplicationContextAware {
 

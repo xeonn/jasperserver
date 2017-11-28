@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -25,7 +25,7 @@ import java.io.Serializable;
 /**
  * InputControlOption
  * @author jwhang
- * @version $Id: EventOption.java 22756 2012-03-23 10:39:15Z sergey.prilukin $
+ * @version $Id: EventOption.java 47331 2014-07-18 09:13:06Z kklein $
  * Simple class to hold option attribute information.
  */
 

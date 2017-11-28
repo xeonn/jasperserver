@@ -1,3 +1,23 @@
+/*
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
+ * http://www.jaspersoft.com.
+ *
+ * Unless you have purchased  a commercial license agreement from Jaspersoft,
+ * the following license terms  apply:
+ *
+ * This program is free software: you can redistribute it and/or  modify
+ * it under the terms of the GNU Affero General Public License  as
+ * published by the Free Software Foundation, either version 3 of  the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero  General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public  License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 package com.jaspersoft.jasperserver.remote.services.impl;
 
 import com.jaspersoft.jasperserver.api.JSException;
@@ -20,7 +40,9 @@ import com.jaspersoft.jasperserver.remote.exception.ResourceNotFoundException;
 import com.jaspersoft.jasperserver.remote.exception.WeakPasswordException;
 import com.jaspersoft.jasperserver.remote.services.UserAndRoleService;
 import com.jaspersoft.jasperserver.war.common.ConfigurationBean;
-import com.jaspersoft.jasperserver.war.common.JasperServerUtil;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.stereotype.Component;
 
@@ -36,7 +58,8 @@ import java.util.Set;
  */
 @Component("userAndRoleService")
 public class UserAndRoleServiceImpl implements UserAndRoleService {
-
+	protected static final Log log = LogFactory.getLog(UserAndRoleServiceImpl.class);
+	
     @javax.annotation.Resource(name = "concreteSecurityContextProvider")
     private SecurityContextProvider securityContextProvider;
 
@@ -531,11 +554,41 @@ public class UserAndRoleServiceImpl implements UserAndRoleService {
         if (tenantId.equals(currentTenantId)){
             return true;
         } else {
-            Set tenants = getTenantsCriteriaSet(currentTenantId, true);
-            return tenants.contains(tenantId);
+        	// New check bottom up
+        	Tenant tenant= null;
+        	// using try-catch to fix bug 39855:
+        	// we need to catch all exceptions that might happen there.
+        	// if we do not catch and defuse it here we fall through the entire call
+        	// and it messed the flow
+        	try{
+        		tenant = tenantService.getTenant(null, tenantId);
+	        	if(tenant!=null){
+	        		// traverse up to the root until we find match for current tenant id,
+	        		// in which case we return true
+	        		// or until we reach to the top and still can't find the match
+	        		// in which case we return false
+	        		for(String parentId = tenant.getParentId(); parentId!=null;){
+	        			Tenant parent = tenantService.getTenant(null, parentId);
+	        			if(parent!=null){
+	        				if(parentId.equals(currentTenantId)){
+	        					return true;
+	        				} else {
+	        					parentId = parent.getParentId();
+	        				}
+	        			} else {
+	        				return false;
+	        			}
+	        		}
+		        }
+	        	return false;
+        	} catch(Exception e){ // such as MTResourceNotVisibleException
+        		if(log.isDebugEnabled()){
+        			log.debug("tenantService.getTenant(null,"+tenantId+") exception: " + e);
+        		}
+        		return false;
+        	}
         }
     }
-
     public void setDefaultRoles(List<Role> defaultRoles) {
         this.defaultRoles = defaultRoles;
     }

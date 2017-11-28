@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005 - 2009 Jaspersoft Corporation. All rights  reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
 * http://www.jaspersoft.com.
 *
 * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -16,7 +16,7 @@
 * GNU Affero  General Public License for more details.
 *
 * You should have received a copy of the GNU Affero General Public  License
-* along with this program.&nbsp; If not, see <http://www.gnu.org/licenses/>.
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 package com.jaspersoft.jasperserver.jaxrs.report;
 
@@ -37,7 +37,7 @@ import javax.ws.rs.core.Response;
 
 /**
  * @author Yaroslav.Kovalchyk
- * @version $Id: ReportsServiceCallTemplate.java 45722 2014-05-14 10:24:22Z sergey.prilukin $
+ * @version $Id: ReportsServiceCallTemplate.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
 public class ReportsServiceCallTemplate<T> implements RemoteServiceCallTemplate<T> {
     private static final Log log = LogFactory.getLog(ReportsServiceCallTemplate.class);
@@ -57,7 +57,7 @@ public class ReportsServiceCallTemplate<T> implements RemoteServiceCallTemplate<
                             .setErrorCode(ResourceNotFoundException.ERROR_CODE_RESOURCE_NOT_FOUND)
                             .setParameters(e.getArgs()).getErrorDescriptor())
                     .build();
-        }catch (org.springframework.security.AccessDeniedException e){
+        }catch (org.springframework.security.access.AccessDeniedException e){
             response = Response.status(Response.Status.FORBIDDEN).entity(new AccessDeniedException(e.getMessage()).getErrorDescriptor()).build();
         }catch (com.jaspersoft.jasperserver.remote.exception.AccessDeniedException e){
             response = Response.status(Response.Status.FORBIDDEN).entity(e.getErrorDescriptor()).build();

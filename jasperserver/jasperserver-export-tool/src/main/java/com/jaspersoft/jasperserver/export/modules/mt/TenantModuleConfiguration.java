@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -20,6 +20,8 @@
  */
 package com.jaspersoft.jasperserver.export.modules.mt;
 
+import com.jaspersoft.jasperserver.api.metadata.common.service.ResourceFactory;
+import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributeService;
 import com.jaspersoft.jasperserver.api.metadata.user.service.TenantService;
 import com.jaspersoft.jasperserver.export.io.ObjectSerializer;
 
@@ -37,8 +39,10 @@ public class TenantModuleConfiguration
 	private DefaultTenantExportConfiguration tenantExportConfiguration;
 	private TenantService tenantService;
 	private ObjectSerializer tenantSerializer;
+    private ProfileAttributeService attributeService;
+    private ResourceFactory objectMappingFactory;
 
-	public ObjectSerializer getTenantSerializer()
+    public ObjectSerializer getTenantSerializer()
 	{
 		return tenantSerializer;
 	}
@@ -96,4 +100,19 @@ public class TenantModuleConfiguration
 		this.tenantsArgument = tenantsArgument;
 	}
 
+    public ProfileAttributeService getAttributeService() {
+        return attributeService;
+    }
+
+    public void setAttributeService(ProfileAttributeService attributeService) {
+        this.attributeService = attributeService;
+    }
+
+    public ResourceFactory getObjectMappingFactory() {
+        return objectMappingFactory;
+    }
+
+    public void setObjectMappingFactory(ResourceFactory objectMappingFactory) {
+        this.objectMappingFactory = objectMappingFactory;
+    }
 }

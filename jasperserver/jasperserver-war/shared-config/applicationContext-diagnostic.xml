@@ -381,6 +381,7 @@
     <bean id="logSettingsDiagnosticService" class="com.jaspersoft.jasperserver.api.logging.diagnostic.service.impl.LogSettingsDiagnosticService">
         <property name="propertiesManagementService" ref="propertiesManagementService"/>
         <property name="messageSource" ref="messageSource"/>
+        <property name="log4jSettingsService" ref="log4jSettingsService"/>
     </bean>
 
     <bean id="sessionRegistryWrapper" class="com.jaspersoft.jasperserver.api.logging.diagnostic.service.impl.SessionRegistryDiagnosticService">

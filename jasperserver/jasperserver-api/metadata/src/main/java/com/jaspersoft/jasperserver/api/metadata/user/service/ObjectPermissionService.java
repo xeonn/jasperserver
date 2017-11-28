@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -32,7 +32,7 @@ import java.util.List;
  * {@link com.jaspersoft.jasperserver.api.metadata.user.domain.Role Role} permission.
  *
  * @author swood
- * @version $Id: ObjectPermissionService.java 35226 2013-08-09 07:08:53Z inesterenko $
+ * @version $Id: ObjectPermissionService.java 51947 2014-12-11 14:38:38Z ogavavka $
  * @since 1.0.1
  */
 @JasperServerAPI
@@ -41,6 +41,7 @@ public interface ObjectPermissionService {
     /**
      * To be used as an attribute of execution context and mark the current operation as privileged
      */
+    // TODO Spring Security Upgrade: rethink if we rely need PRIVILEGED_OPERATION if ACL is complete
     public static final String PRIVILEGED_OPERATION = "PRIVILEGED_OPERATION";
 
     /**

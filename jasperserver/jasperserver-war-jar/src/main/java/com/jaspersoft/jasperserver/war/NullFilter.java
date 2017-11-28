@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2013 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -20,13 +20,12 @@
  */
 package com.jaspersoft.jasperserver.war;
 
-import org.springframework.security.ui.FilterChainOrder;
-import org.springframework.security.ui.SpringSecurityFilter;
+import org.springframework.web.filter.GenericFilterBean;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import java.io.IOException;
 
 /**
@@ -37,15 +36,10 @@ import java.io.IOException;
  * User: dlitvak
  * Date: 10/1/13
  */
-public class NullFilter extends SpringSecurityFilter {
-	@Override
-	protected void doFilterHttp(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-			throws IOException, ServletException {
-		filterChain.doFilter(request, response);
-	}
+public class NullFilter extends GenericFilterBean {
 
-	@Override
-	public int getOrder() {
-		return FilterChainOrder.PRE_AUTH_FILTER;
-	}
+    @Override
+    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
+        filterChain.doFilter(servletRequest, servletResponse);
+    }
 }

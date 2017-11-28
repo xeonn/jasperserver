@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -37,7 +37,7 @@ import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportUnit;
 
 /**
  * @author Teodor Danciu (teodord@users.sourceforge.net)
- * @version $Id: ReportUnitImpl.java 38151 2013-09-26 09:30:32Z vsabadosh $
+ * @version $Id: ReportUnitImpl.java 50958 2014-10-31 23:23:16Z bob $
  */
 public class ReportUnitImpl extends ResourceImpl implements ReportUnit , Serializable
 {
@@ -150,20 +150,6 @@ public class ReportUnitImpl extends ResourceImpl implements ReportUnit , Seriali
 	public List getResources()
 	{
 		return resources;
-	}
-
-	public FileResource getResource(String name) {
-		FileResource resource = null;
-		if (resources != null && !resources.isEmpty()) {
-			for (Iterator iter = resources.iterator(); iter.hasNext();) {
-				FileResource res = (FileResource) iter.next();
-				if (res.getName().equals(name)) {
-					resource = res;
-					break;
-				}
-			}
-		}
-		return resource;
 	}
 
 	public void setResources(List resources)

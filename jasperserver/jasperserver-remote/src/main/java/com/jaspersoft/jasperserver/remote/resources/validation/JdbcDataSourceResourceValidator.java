@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2013 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -24,6 +24,7 @@ package com.jaspersoft.jasperserver.remote.resources.validation;
 import com.jaspersoft.jasperserver.api.common.domain.ValidationErrors;
 import com.jaspersoft.jasperserver.api.common.service.JdbcDriverService;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.JdbcReportDataSource;
+import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributesResolver;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -42,27 +43,29 @@ import static com.jaspersoft.jasperserver.remote.resources.validation.Validation
 public class JdbcDataSourceResourceValidator extends GenericResourceValidator<JdbcReportDataSource> {
     @Resource
     private JdbcDriverService jdbcDriverService;
+    @Resource
+    private ProfileAttributesResolver profileAttributesResolver;
 
     @Override
     protected void internalValidate(JdbcReportDataSource resource, ValidationErrors errors) {
-        if (empty(resource.getDriverClass())){
+        if (empty(resource.getDriverClass())) {
             addMandatoryParameterNotFoundError(errors, "DriverClass");
         } else {
-            if (!jdbcDriverService.isRegistered(resource.getDriverClass())){
+            String driverClass = resource.getDriverClass();
+            if (!profileAttributesResolver.containsAttribute(driverClass) &&
+                    !jdbcDriverService.isRegistered(driverClass)) {
                 addIllegalParameterValueError(errors, "DriverClass", resource.getDriverClass(), "Specified driver class is not registered");
             }
         }
-        if (empty(resource.getUsername())){
-            addMandatoryParameterNotFoundError(errors, "Username");
-        }
-        if (empty(resource.getConnectionUrl())){
+        if (empty(resource.getConnectionUrl())) {
             addMandatoryParameterNotFoundError(errors, "ConnectionUrl");
         } else {
-            if (!resource.getConnectionUrl().trim().startsWith("jdbc:")){
+            String url = resource.getConnectionUrl();
+            if (!profileAttributesResolver.containsAttribute(url) && !url.trim().startsWith("jdbc:")) {
                 addIllegalParameterValueError(errors, "ConnectionUrl", resource.getConnectionUrl(), "The JDBC URI must start with 'jdbc:'");
             }
         }
-        if (!empty(resource.getTimezone()) && !resource.getTimezone().matches("^[a-zA-Z/_]+$")){
+        if (!empty(resource.getTimezone()) && !resource.getTimezone().matches("^[a-zA-Z/_]+$")) {
             addIllegalParameterValueError(errors, "Timezone", resource.getTimezone(), "The timezone value contains not permitted characters");
         }
     }

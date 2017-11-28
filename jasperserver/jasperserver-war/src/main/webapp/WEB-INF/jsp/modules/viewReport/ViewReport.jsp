@@ -1,5 +1,5 @@
 <%--
-     ~ Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+     ~ Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
      ~ http://www.jaspersoft.com.
      ~
      ~ Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -44,6 +44,62 @@
     <t:putAttribute name="headerContent">
     	<style>
     		.novis {visibility:hidden}
+
+            div#reportPartsController {
+                position: absolute;
+                right: 22px;
+                top: 3px;
+            }
+
+            div#reportPartsContainer {
+                color: #0872A4;
+                float: left;
+            }
+
+            div#reportPartsContainer div.reportPart {
+                cursor:pointer;
+                background-color: #efefef;
+                border-bottom:transparent;
+                border-color:#c5c5c5;
+                border-style: solid;
+                border-width:1px;
+                display: inline-block;
+                height:19px;
+                margin: 0 2px;
+                min-width:100px;
+                position:relative;
+                top:1px;
+                white-space:nowrap;
+                zoom:1;
+            }
+
+            div#reportPartsContainer div.reportPart.active {
+                border:1px solid #c5c5c5;
+                border-top:1px solid #c5c5c5;
+                border-bottom:transparent;
+                height:22px;
+                top:1px;
+            }
+
+            div#reportPartsContainer span {
+                display: block;
+                height: 100%;
+                line-height: 19px;
+                min-width: 100px;
+                padding: 0 8px;
+                text-align: center;
+                width: auto;
+            }
+
+            div#reportPartsContainer div.reportPart.active span {
+                background:#fff;
+                border-bottom:1px solid #ffffff;
+                font-weight: bold;
+            }
+
+            div#reportPartsNavigation {
+                float: left;
+            }
     	</style>
         <jsp:include page="../inputControls/InputControlConstants.jsp" />
         <%@ include file="ViewReportState.jsp" %>
@@ -58,10 +114,27 @@
 
             <!-- ========== TOOLBAR =========== -->
             <t:putAttribute name="headerContent">
+
                 <div id="dataTimestampMessage"></div>
+                <ul id="asyncIndicator" class="list buttonSet hidden">
+                    <li class="leaf"><button id="asyncCancel" class="button capsule text up" disabled="disabled"><span class="wrap"><spring:message code="button.cancel.loading"/><span class="icon"></span></span></button></li>
+                </ul>
                 <ul class="list buttonSet">
                     <li class="leaf"><button id="dataRefreshButton" type="submit" title="<spring:message code="jasper.report.view.button.data.refresh" javaScriptEscape="true"/>" class="button capsule up"><span class="wrap"><span class="icon"></span></span></button></li>
                 </ul>
+
+                <div id="reportPartsController" style="display: none">
+                    <div id="reportPartsContainer">
+                    </div>
+                    <div id="reportPartsNavigation" class="control search">
+                        <button id="part_prev" title="<spring:message code="REPORT_VIEWER_PAGINATION_CONTROLS_PREVIOUS"/>" class="button action square move searchPrevious up" disabled="disabled">
+                            <span class="wrap"><span class="icon"></span></span>
+                        </button>
+                        <button id="part_next" title="<spring:message code="REPORT_VIEWER_PAGINATION_CONTROLS_NEXT"/>" class="button action square move searchNext up" disabled="disabled">
+                            <span class="wrap"><span class="icon"></span></span>
+                        </button>
+                    </div>
+                </div>
                 
                 <div id="viewerToolbar" class="toolbar">
 
@@ -77,10 +150,6 @@
                         <button id="page_next" type="submit" title="<spring:message code="REPORT_VIEWER_PAGINATION_CONTROLS_NEXT" javaScriptEscape="true"/>" class="button action square move right up" disabled="disabled"><span class="wrap"><span class="icon"></span></span></button>
                         <button id="page_last" type="submit" title="<spring:message code="REPORT_VIEWER_PAGINATION_CONTROLS_LAST" javaScriptEscape="true"/>" class="button action square move toRight up" disabled="disabled"><span class="wrap"><span class="icon"></span></span></button>
                     </div>
-                        
-                    <ul id="asyncIndicator" class="list buttonSet hidden">
-                        <li class="leaf"><button id="asyncCancel" class="button capsule text up" disabled="disabled"><span class="wrap"><spring:message code="button.cancel.loading"/><span class="icon"></span></span></button></li>
-                    </ul>
 
                     <%--
                         LAYOUT_POPUP_SCREEN = 1;
@@ -187,10 +256,10 @@
                             {"key": "1", "value": "100%"}, {"key": "1.25", "value": "125%"}, {"key": "2", "value": "200%"}, {"key": "4", "value": "400%"},
                             {"key": "8", "value": "800%"}, {"key": "16", "value": "1600%"}, {"key": "24", "value": "2400%"}, {"key": "32", "value": "3200%"},
                             {"key": "64", "value": "6400%"},
-                            {"key": "fit_actual", "value": "<spring:message code="button.zoomOptions.option.actualSize" javaScriptEscape="true"/>"},
-                            {"key": "fit_width", "value": "<spring:message code="button.zoomOptions.option.fitWidth" javaScriptEscape="true"/>"},
-                            {"key": "fit_height", "value": "<spring:message code="button.zoomOptions.option.fitHeight" javaScriptEscape="true"/>"},
-                            {"key": "fit_page", "value": "<spring:message code="button.zoomOptions.option.fitPage" javaScriptEscape="true"/>"}
+                            {"key": "fit_actual", "value": "<spring:message code="button.zoomOptions.option.actualSize" htmlEscape="true"/>"},
+                            {"key": "fit_width", "value": "<spring:message code="button.zoomOptions.option.fitWidth" htmlEscape="true"/>"},
+                            {"key": "fit_height", "value": "<spring:message code="button.zoomOptions.option.fitHeight" htmlEscape="true"/>"},
+                            {"key": "fit_page", "value": "<spring:message code="button.zoomOptions.option.fitPage" htmlEscape="true"/>"}
                         ]
                     </script>
                 </div>

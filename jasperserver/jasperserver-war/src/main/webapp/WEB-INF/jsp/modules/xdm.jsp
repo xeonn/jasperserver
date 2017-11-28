@@ -2,7 +2,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
 <!--
-* Copyright (C) 2005 - 2014 Jaspersoft Corporation. All rights reserved.
+* Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
 * http://www.jaspersoft.com.
 *
 * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -27,11 +27,15 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <%@ include file="common/jsEdition.jsp" %>
+
+    <c:set var="xdmRemotePageModulePath" value="${isProVersion ? 'bower_components/jrs-ui/src/' : ''}" />
+
     <c:if test="${optimizeJavascript == true}">
-        <script type="text/javascript" src="${scriptsUri}/xdm.remote.js"></script>
+        <script type="text/javascript" src="${scriptsUri}/${xdmRemotePageModulePath}xdm.remote.page.js"></script>
     </c:if>
     <c:if test="${optimizeJavascript == false}">
-        <script type="text/javascript" src="${scriptsUri}/lib/require-2.1.10.js"></script>
+        <script type="text/javascript" src="${scriptsUri}/bower_components/requirejs/require.js"></script>
         <script type="text/javascript" src="${scriptsUri}/require.config.js"></script>
     </c:if>
 
@@ -44,17 +48,20 @@
             });
 
             <c:if test="${param['logLevel'] != null}">
-                require.config({
-                    config: {
-                        logger: {level: "${param['logLevel']}"}
-                    }
-                });
+            require.config({
+                config: {
+                    logger: {level: "${param['logLevel']}"}
+                }
+            });
             </c:if>
         </script>
     </c:if>
 
     <script type="text/javascript">
-        require(["xdm.remote"], function(remote) {
+        require.config({
+            baseUrl: "${scriptsUri}"
+        });
+        require(["xdm.remote.page"], function(remote) {
             window.remote = remote;
         });
     </script>

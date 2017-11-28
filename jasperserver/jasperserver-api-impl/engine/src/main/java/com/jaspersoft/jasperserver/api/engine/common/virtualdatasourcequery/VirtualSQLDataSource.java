@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2012 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -42,7 +42,7 @@ import java.util.logging.Logger;
 
 /**
  * @author Ivan Chan (ichan@jaspersoft.com)
- * @version $Id: VirtualSQLDataSource.java 28947 2013-02-26 15:02:08Z vsabadosh $
+ * @version $Id: VirtualSQLDataSource.java 47331 2014-07-18 09:13:06Z kklein $
  */
 public class VirtualSQLDataSource implements javax.sql.DataSource {
 

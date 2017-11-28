@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -25,6 +25,8 @@ import com.jaspersoft.jasperserver.api.metadata.common.domain.Folder;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.InternalURI;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 
+import java.io.Serializable;
+
 /**
  * @author swood
  *
@@ -35,17 +37,21 @@ public class InternalURIDefinition implements InternalURI {
 	private String folderUri;
 	
 	public InternalURIDefinition(String uri) {
-		this.uri = uri;
+        this.uri = uri;
 		
 		if (uri == null || uri.length() == 0) {
 			this.folderUri = null;
 		} else {
-			int lastSeparator = uri.lastIndexOf(Folder.SEPARATOR);
-			
+            if (uri.startsWith(getProtocol().concat(":"))) {
+                this.uri=uri.substring(getProtocol().length()+1);
+            }
+
+            int lastSeparator = this.uri.lastIndexOf(Folder.SEPARATOR);
+
 			if (lastSeparator <= 0) {
 				this.folderUri = null;
 			} else {
-				this.folderUri = uri.substring(0, lastSeparator);
+				this.folderUri = this.uri.substring(0, lastSeparator);
 			}
 		}
 	}
@@ -54,6 +60,9 @@ public class InternalURIDefinition implements InternalURI {
 	 * @see com.jaspersoft.jasperserver.api.metadata.common.domain.InternalURI#getParentPath()
 	 */
 	public String getParentPath() {
+        if (getParentFolder()==null && uri.lastIndexOf(Folder.SEPARATOR)==0 && uri.length()>1) {
+            return Folder.SEPARATOR;
+        }
 		return getParentFolder() == null ? null : getParentFolder();
 	}
 
@@ -61,7 +70,7 @@ public class InternalURIDefinition implements InternalURI {
 	 * @see com.jaspersoft.jasperserver.api.metadata.common.domain.InternalURI#getParentURI()
 	 */
 	public String getParentURI() {
-		return getParentFolder() == null ? null : getProtocol() + ":" + getParentFolder();
+		return getParentPath() == null ? null : getProtocol() + ":" + getParentPath();
 	}
 
 	public String getParentFolder() {
@@ -89,4 +98,18 @@ public class InternalURIDefinition implements InternalURI {
 		return getProtocol() + ":" + getPath();
 	}
 
+    @Override
+    public Serializable getIdentifier() {
+        return getURI();
+    }
+
+    @Override
+    public String getType() {
+        return Folder.class.getName();
+    }
+
+    @Override
+    public String toString() {
+        return getURI();
+    }
 }

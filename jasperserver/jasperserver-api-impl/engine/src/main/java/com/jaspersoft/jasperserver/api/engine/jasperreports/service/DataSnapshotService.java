@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -32,7 +32,7 @@ import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportUnit;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: DataSnapshotService.java 23956 2012-05-30 12:23:37Z lchirita $
+ * @version $Id: DataSnapshotService.java 47331 2014-07-18 09:13:06Z kklein $
  */
 public interface DataSnapshotService {
 

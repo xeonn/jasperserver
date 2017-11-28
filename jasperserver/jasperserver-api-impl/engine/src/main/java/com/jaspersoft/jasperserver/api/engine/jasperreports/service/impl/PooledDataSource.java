@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -24,7 +24,7 @@ import javax.sql.DataSource;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: PooledDataSource.java 19922 2010-12-11 14:59:51Z tmatyashovsky $
+ * @version $Id: PooledDataSource.java 47331 2014-07-18 09:13:06Z kklein $
  */
 public interface PooledDataSource {
 

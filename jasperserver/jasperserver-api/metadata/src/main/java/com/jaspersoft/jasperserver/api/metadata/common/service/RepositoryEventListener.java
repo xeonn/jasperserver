@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -27,7 +27,7 @@ import com.jaspersoft.jasperserver.api.JasperServerAPI;
  * Listener that contains methods called to notify of resource repository events.
  * 
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: RepositoryEventListener.java 19921 2010-12-11 14:52:49Z tmatyashovsky $
+ * @version $Id: RepositoryEventListener.java 47331 2014-07-18 09:13:06Z kklein $
  * @since 1.0
  * @see RepositoryEventListenerRegistry
  */

@@ -8,32 +8,6 @@
         primary key (id)
     ) ENGINE=InnoDB;
 
-    create table JIAdhocChartMeasure (
-        id bigint not null,
-        name varchar(255) not null,
-        label varchar(255),
-        width integer,
-        jiFunction varchar(255),
-        type varchar(255),
-        mask varchar(255),
-        functionMask varchar(255),
-        idx integer not null,
-        primary key (id, idx)
-    ) ENGINE=InnoDB;
-
-    create table JIAdhocColumn (
-        id bigint not null,
-        name varchar(255) not null,
-        label varchar(255),
-        width integer,
-        jiFunction varchar(255),
-        type varchar(255),
-        mask varchar(255),
-        functionMask varchar(255),
-        idx integer not null,
-        primary key (id, idx)
-    ) ENGINE=InnoDB;
-
     create table JIAdhocDataView (
         id bigint not null,
         adhocStateId bigint,
@@ -42,6 +16,13 @@
         controlslayout tinyint,
         controlrenderer varchar(100),
         primary key (id)
+    ) ENGINE=InnoDB;
+
+    create table JIAdhocDataViewBasedReports (
+        adhoc_data_view_id bigint not null,
+        report_id bigint not null,
+        report_index integer not null,
+        primary key (adhoc_data_view_id, report_index)
     ) ENGINE=InnoDB;
 
     create table JIAdhocDataViewInputControl (
@@ -58,16 +39,6 @@
         primary key (adhoc_data_view_id, resource_index)
     ) ENGINE=InnoDB;
 
-    create table JIAdhocGroup (
-        id bigint not null,
-        name varchar(255) not null,
-        label varchar(255),
-        type varchar(255),
-        mask varchar(255),
-        idx integer not null,
-        primary key (id, idx)
-    ) ENGINE=InnoDB;
-
     create table JIAdhocReportUnit (
         id bigint not null,
         adhocStateId bigint,
@@ -81,12 +52,6 @@
         title varchar(255),
         pageOrientation varchar(255),
         paperSize varchar(255),
-        maxRows integer,
-        summaryLabel varchar(255),
-        group_name varchar(255),
-        group_label varchar(255),
-        group_type varchar(255),
-        group_mask varchar(255),
         primary key (id)
     ) ENGINE=InnoDB;
 
@@ -95,51 +60,6 @@
         value varchar(1000),
         name varchar(100) not null,
         primary key (state_id, name)
-    ) ENGINE=InnoDB;
-
-    create table JIAdhocTableSortField (
-        id bigint not null,
-        fieldName varchar(255) not null,
-        ascending bit,
-        idx integer not null,
-        primary key (id, idx)
-    ) ENGINE=InnoDB;
-
-    create table JIAdhocXTabColumnGroup (
-        id bigint not null,
-        name varchar(255) not null,
-        label varchar(255),
-        type varchar(255),
-        categorizer varchar(1000),
-        fieldName varchar(255),
-        fieldType varchar(255),
-        idx integer not null,
-        primary key (id, idx)
-    ) ENGINE=InnoDB;
-
-    create table JIAdhocXTabMeasure (
-        id bigint not null,
-        name varchar(255) not null,
-        label varchar(255),
-        width integer,
-        jiFunction varchar(255),
-        type varchar(255),
-        mask varchar(255),
-        functionMask varchar(255),
-        idx integer not null,
-        primary key (id, idx)
-    ) ENGINE=InnoDB;
-
-    create table JIAdhocXTabRowGroup (
-        id bigint not null,
-        name varchar(255) not null,
-        label varchar(255),
-        type varchar(255),
-        categorizer varchar(1000),
-        fieldName varchar(255),
-        fieldType varchar(255),
-        idx integer not null,
-        primary key (id, idx)
     ) ENGINE=InnoDB;
 
     create table JIAuditEvent (
@@ -234,9 +154,24 @@
         frameName varchar(255) not null,
         frameClassName varchar(255) not null,
         propertyName varchar(255) not null,
-        propertyValue varchar(1000),
+        propertyValue mediumtext,
         idx integer not null,
         primary key (id, idx)
+    ) ENGINE=InnoDB;
+
+    create table JIDashboardModel (
+        id bigint not null,
+        foundationsString text,
+        resourcesString text,
+        defaultFoundation integer,
+        primary key (id)
+    ) ENGINE=InnoDB;
+
+    create table JIDashboardModelResource (
+        dashboard_id bigint not null,
+        resource_id bigint not null,
+        resource_index integer not null,
+        primary key (dashboard_id, resource_index)
     ) ENGINE=InnoDB;
 
     create table JIDashboardResource (
@@ -278,8 +213,8 @@
         maxLength integer,
         decimals integer,
         regularExpr varchar(255),
-        minValue tinyblob,
-        max_value tinyblob,
+        minValue blob,
+        max_value blob,
         strictMin bit,
         strictMax bit,
         primary key (id)
@@ -353,7 +288,7 @@
     create table JIJdbcDatasource (
         id bigint not null,
         driver varchar(100) not null,
-        password varchar(100),
+        password varchar(250),
         connectionUrl varchar(500),
         username varchar(100),
         timezone varchar(100),
@@ -541,7 +476,7 @@
         using_def_rpt_opt_folder_uri bit not null,
         output_local_folder varchar(250),
         user_name varchar(50),
-        password varchar(50),
+        password varchar(250),
         server_name varchar(150),
         folder_path varchar(250),
         primary key (id)
@@ -596,9 +531,18 @@
 
     create table JIReportOptionsInput (
         options_id bigint not null,
-        input_value blob,
+        input_value longblob,
         input_name varchar(100) not null,
         primary key (options_id, input_name)
+    ) ENGINE=InnoDB;
+
+    create table JIReportThumbnail (
+        id bigint not null auto_increment,
+        user_id bigint not null,
+        resource_id bigint not null,
+        thumbnail longblob not null,
+        primary key (id),
+        unique (user_id, resource_id)
     ) ENGINE=InnoDB;
 
     create table JIReportUnit (
@@ -700,7 +644,7 @@
         tenantId bigint not null,
         fullname varchar(100) not null,
         emailAddress varchar(100),
-        password varchar(100),
+        password varchar(250),
         externallyDefined bit,
         enabled bit,
         previousPasswordChangeTime datetime,
@@ -731,7 +675,7 @@
         id bigint not null,
         catalog varchar(100) not null,
         username varchar(100) not null,
-        password varchar(100) not null,
+        password varchar(250) not null,
         datasource varchar(100) not null,
         uri varchar(100) not null,
         primary key (id)
@@ -778,18 +722,6 @@
         references JIResource (id) 
         on delete cascade;
 
-    alter table JIAdhocChartMeasure 
-        add index FK89D1A3FAB0A3C8CB (id), 
-        add constraint FK89D1A3FAB0A3C8CB 
-        foreign key (id) 
-        references JIAdhocState (id);
-
-    alter table JIAdhocColumn 
-        add index FK9265D330EC885ADB (id), 
-        add constraint FK9265D330EC885ADB 
-        foreign key (id) 
-        references JIAdhocState (id);
-
     alter table JIAdhocDataView 
         add index FK200A2AC9A8BF376D (id), 
         add constraint FK200A2AC9A8BF376D 
@@ -807,6 +739,18 @@
         add constraint FK200A2AC931211827 
         foreign key (adhocStateId) 
         references JIAdhocState (id);
+
+    alter table JIAdhocDataViewBasedReports 
+        add index FKFFD9AFF5B22FF3B2 (adhoc_data_view_id), 
+        add constraint FKFFD9AFF5B22FF3B2 
+        foreign key (adhoc_data_view_id) 
+        references JIAdhocDataView (id);
+
+    alter table JIAdhocDataViewBasedReports 
+        add index FKFFD9AFF5830BA6DB (report_id), 
+        add constraint FKFFD9AFF5830BA6DB 
+        foreign key (report_id) 
+        references JIReportUnit (id);
 
     alter table JIAdhocDataViewInputControl 
         add index FKA248C79CB22FF3B2 (adhoc_data_view_id), 
@@ -832,12 +776,6 @@
         foreign key (resource_id) 
         references JIFileResource (id);
 
-    alter table JIAdhocGroup 
-        add index FK704D9365EC885ADB (id), 
-        add constraint FK704D9365EC885ADB 
-        foreign key (id) 
-        references JIAdhocState (id);
-
     alter table JIAdhocReportUnit 
         add index FK68AE6BB2981B13F0 (id), 
         add constraint FK68AE6BB2981B13F0 
@@ -854,30 +792,6 @@
         add index FK2C7E3C6C298B519D (state_id), 
         add constraint FK2C7E3C6C298B519D 
         foreign key (state_id) 
-        references JIAdhocState (id);
-
-    alter table JIAdhocTableSortField 
-        add index FK1AF05FA8EC885ADB (id), 
-        add constraint FK1AF05FA8EC885ADB 
-        foreign key (id) 
-        references JIAdhocState (id);
-
-    alter table JIAdhocXTabColumnGroup 
-        add index FK336E71F262231DA (id), 
-        add constraint FK336E71F262231DA 
-        foreign key (id) 
-        references JIAdhocState (id);
-
-    alter table JIAdhocXTabMeasure 
-        add index FK3CF53B0762231DA (id), 
-        add constraint FK3CF53B0762231DA 
-        foreign key (id) 
-        references JIAdhocState (id);
-
-    alter table JIAdhocXTabRowGroup 
-        add index FK9D33843C62231DA (id), 
-        add constraint FK9D33843C62231DA 
-        foreign key (id) 
         references JIAdhocState (id);
 
     create index res_type_index on JIAuditEvent (resource_type);
@@ -953,6 +867,24 @@
         add constraint FK679EF04DFA08F0B4 
         foreign key (id) 
         references JIAdhocState (id);
+
+    alter table JIDashboardModel 
+        add index FK8BB7D814A8BF376D (id), 
+        add constraint FK8BB7D814A8BF376D 
+        foreign key (id) 
+        references JIResource (id);
+
+    alter table JIDashboardModelResource 
+        add index FK273EAC4230711005 (dashboard_id), 
+        add constraint FK273EAC4230711005 
+        foreign key (dashboard_id) 
+        references JIDashboardModel (id);
+
+    alter table JIDashboardModelResource 
+        add index FK273EAC42F254B53E (resource_id), 
+        add constraint FK273EAC42F254B53E 
+        foreign key (resource_id) 
+        references JIResource (id);
 
     alter table JIDashboardResource 
         add index FK37B53B43326276AC (dashboard_id), 
@@ -1291,6 +1223,20 @@
         add constraint options_fk 
         foreign key (options_id) 
         references JIReportOptions (id);
+
+    alter table JIReportThumbnail 
+        add index FKFDB3DED932282198 (user_id), 
+        add constraint FKFDB3DED932282198 
+        foreign key (user_id) 
+        references JIUser (id) 
+        on delete cascade;
+
+    alter table JIReportThumbnail 
+        add index FKFDB3DED9F254B53E (resource_id), 
+        add constraint FKFDB3DED9F254B53E 
+        foreign key (resource_id) 
+        references JIResource (id) 
+        on delete cascade;
 
     alter table JIReportUnit 
         add index FK98818B77A8BF376D (id), 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -26,7 +26,6 @@ import java.util.Map;
 import java.util.TimeZone;
 
 import javax.sql.DataSource;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -35,7 +34,7 @@ import com.jaspersoft.jasperserver.api.engine.jasperreports.util.JRTimezoneJdbcQ
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: JdbcDataSourceService.java 20205 2011-02-25 20:30:39Z tchow $
+ * @version $Id: JdbcDataSourceService.java 50011 2014-10-09 16:57:26Z vzavadskii $
  */
 public class JdbcDataSourceService extends BaseJdbcDataSource {
 
@@ -50,9 +49,10 @@ public class JdbcDataSourceService extends BaseJdbcDataSource {
 		this.timezone = timezone;
 	}
 
+
 	protected Connection createConnection() {
 		try {
-			Connection c = dataSource.getConnection();
+			Connection c = TibcoDriverManagerImpl.getInstance().unlockConnection(dataSource);
       if (log.isDebugEnabled()) {
         log.debug("CreateConnection successful at com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl.JdbcDataSourceService.createConnection");
       }
@@ -76,5 +76,21 @@ public class JdbcDataSourceService extends BaseJdbcDataSource {
 	public DataSource getDataSource() {
 		return dataSource;
 	}
+
+    @Override
+    public boolean testConnection() throws SQLException {
+        Connection conn = null;
+        try {
+            conn = dataSource.getConnection();
+            return conn != null;
+        } finally {
+            if (conn != null)
+                try {
+                    conn.close();
+                } catch (SQLException e) {
+                    log.error("Couldn't disconnect JDBC connection", e);
+                }
+        }
+    }
 
 }

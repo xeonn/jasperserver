@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2014 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -21,16 +21,19 @@
 
 
 /**
- * @version: $Id: parameters.js 43122 2014-03-18 12:44:22Z psavushchik $
+ * @version: $Id: parameters.js 7832 2014-09-19 13:36:11Z sergey.prilukin $
  */
 
-define('scheduler/view/editor/parameters', function(require){
+define(function(require){
+
+    "use strict";
 
     require('controls.options');
     require('controls.controller');
 
     // dependencies
     var $ = require('jquery'),
+        _ = require('underscore'),
         config = require('jrs.configs'),
         Backbone = require('backbone'),
         parameters = require('text!scheduler/template/parameters.htm');

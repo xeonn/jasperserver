@@ -10,13 +10,13 @@
     <parent>
         <groupId>com.jaspersoft.jasperserver</groupId>
         <artifactId>jasperserver-api</artifactId>
-        <version>5.6.0</version>
+        <version>6.0.1</version>
     </parent>
   <dependencies>
       <dependency>
           <groupId>org.jboss.teiid</groupId>
           <artifactId>teiid-engine</artifactId>
-          <version>8.7.0.Beta1</version>
+          <version>8.8.1</version>
           <exclusions>
            <exclusion>
              <groupId>org.jboss.as</groupId>
@@ -31,7 +31,7 @@
       <dependency>
           <groupId>org.jboss.teiid</groupId>
           <artifactId>teiid-runtime</artifactId>
-          <version>8.7.0.Beta1</version>
+          <version>8.8.1</version>
           <exclusions>
               <exclusion>
                   <groupId>org.rhq.helpers</groupId>
@@ -53,9 +53,55 @@
                   <groupId>io.netty</groupId>
                   <artifactId>netty</artifactId>
               </exclusion>
+              <exclusion>
+                  <groupId>org.infinispan</groupId>
+                  <artifactId>infinispan-core</artifactId>
+              </exclusion>
           </exclusions>
       </dependency>
-    <dependency>
+        <dependency>
+            <groupId>org.jboss.teiid</groupId>
+            <artifactId>teiid-admin</artifactId>
+            <version>8.8.1</version>
+        </dependency>
+      <dependency>
+          <groupId>org.jboss.teiid</groupId>
+          <artifactId>teiid-api</artifactId>
+          <version>8.8.1</version>
+      </dependency>
+      <dependency>
+          <groupId>org.jboss.teiid</groupId>
+          <artifactId>teiid-common-core</artifactId>
+          <version>8.8.1</version>
+      </dependency>
+      <dependency>
+          <groupId>org.infinispan</groupId>
+          <artifactId>infinispan-core</artifactId>
+          <version>5.1.2.FINAL</version>
+          <exclusions>
+              <exclusion>
+                  <groupId>org.jboss.spec.javax.transaction</groupId>
+                  <artifactId>jboss-transaction-api_1.1_spec</artifactId>
+              </exclusion>
+              <exclusion>
+                  <groupId>org.codehaus.woodstox</groupId>
+                  <artifactId>woodstox-core-asl</artifactId>
+              </exclusion>
+              <exclusion>
+                  <groupId>org.codehaus.woodstox</groupId>
+                  <artifactId>stax2-api</artifactId>
+              </exclusion>
+              <exclusion>
+                  <groupId>org.rhq.helpers</groupId>
+                  <artifactId>rhq-pluginAnnotations</artifactId>
+              </exclusion>
+              <exclusion>
+                  <groupId>org.jboss.logging</groupId>
+                  <artifactId>jboss-logging</artifactId>
+              </exclusion>
+          </exclusions>
+      </dependency>
+      <dependency>
       <groupId>javax.resource</groupId>
       <artifactId>connector-api</artifactId>
       <version>1.5</version>
@@ -74,7 +120,7 @@
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-context</artifactId>
-      <version>3.1.4.RELEASE</version>
+      <version>${spring.security.version}</version>
     </dependency>
   </dependencies>
 </project>

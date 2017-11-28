@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -21,47 +21,13 @@
 
 package com.jaspersoft.jasperserver.util.test;
 
-import static org.testng.AssertJUnit.assertFalse;
-import static org.testng.AssertJUnit.assertTrue;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Formatter;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Random;
-import java.util.Set;
-
-import net.sf.jasperreports.engine.JRParameter;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.MessageSource;
-import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.security.Authentication;
-import org.springframework.security.context.SecurityContextHolder;
-import org.springframework.security.providers.TestingAuthenticationToken;
-import org.springframework.security.userdetails.UserDetails;
-import org.springframework.security.userdetails.UserDetailsService;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-
+import com.jaspersoft.jasperserver.api.JSException;
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
 import com.jaspersoft.jasperserver.api.common.domain.impl.ExecutionContextImpl;
 import com.jaspersoft.jasperserver.api.engine.common.service.EngineService;
-import com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl.JdbcReportDataSourceServiceFactory;
-import com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl.JndiJdbcReportDataSourceServiceFactory;
+import com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl.CustomReportDataSourceServiceFactory;
+import com.jaspersoft.jasperserver.api.engine.jasperreports.util.TextDataSourceDefinition;
+import com.jaspersoft.jasperserver.api.engine.jasperreports.util.TextDataSourceValidator;
 import com.jaspersoft.jasperserver.api.engine.scheduling.service.ReportJobsScheduler;
 import com.jaspersoft.jasperserver.api.engine.scheduling.service.ReportSchedulingService;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.FileResource;
@@ -70,26 +36,21 @@ import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceReference;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.client.FolderImpl;
 import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
-import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.JdbcReportDataSource;
-import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.JndiJdbcReportDataSource;
-import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportDataSource;
-import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.VirtualReportDataSource;
+import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.*;
+import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.client.CustomReportDataSourceImpl;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.client.JdbcReportDataSourceImpl;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.client.JndiJdbcReportDataSourceImpl;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.client.VirtualReportDataSourceImpl;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.service.ReportDataSourceService;
+import com.jaspersoft.jasperserver.api.metadata.jasperreports.service.ReportDataSourceServiceFactory;
 import com.jaspersoft.jasperserver.api.metadata.olap.service.OlapConnectionService;
-import com.jaspersoft.jasperserver.api.metadata.user.domain.ObjectPermission;
-import com.jaspersoft.jasperserver.api.metadata.user.domain.ProfileAttribute;
-import com.jaspersoft.jasperserver.api.metadata.user.domain.Role;
-import com.jaspersoft.jasperserver.api.metadata.user.domain.Tenant;
-import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
+import com.jaspersoft.jasperserver.api.metadata.user.domain.*;
+import com.jaspersoft.jasperserver.api.metadata.user.domain.client.ObjectPermissionImpl;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.client.TenantImpl;
 import com.jaspersoft.jasperserver.api.metadata.user.service.ObjectPermissionService;
 import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributeService;
 import com.jaspersoft.jasperserver.api.metadata.user.service.TenantService;
 import com.jaspersoft.jasperserver.api.metadata.user.service.UserAuthorityService;
-import com.jaspersoft.jasperserver.api.metadata.user.service.impl.ObjectPermissionServiceImpl;
 import com.jaspersoft.jasperserver.common.test.MockServletContextLoader;
 import com.jaspersoft.jasperserver.crypto.EncryptionEngine;
 import com.jaspersoft.jasperserver.crypto.KeystoreManager;
@@ -97,13 +58,38 @@ import com.jaspersoft.jasperserver.export.CommandBean;
 import com.jaspersoft.jasperserver.export.Parameters;
 import com.jaspersoft.jasperserver.export.ParametersImpl;
 import com.jaspersoft.jasperserver.remote.services.PermissionsService;
+import com.jaspersoft.jasperserver.war.common.JasperServerUtil;
+import net.sf.jasperreports.engine.JRParameter;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.security.authentication.TestingAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.SQLException;
+import java.util.*;
+
+import static org.testng.AssertJUnit.assertFalse;
+import static org.testng.AssertJUnit.assertTrue;
 
 /**
  * @author srosen
- *
- * The base class to support all integration tests based on the TestNG framework.
+ *         <p/>
+ *         The base class to support all integration tests based on the TestNG framework.
  */
-@ContextConfiguration(loader = MockServletContextLoader.class,locations={"classpath:applicationContext*.xml", "classpath:prod-tests-applicationContext-testProviders.xml"})
+@ContextConfiguration(loader = MockServletContextLoader.class, locations = {"classpath:applicationContext*.xml", "classpath:prod-tests-applicationContext-testProviders.xml"})
 public class BaseServiceSetupTestNG extends AbstractTestNGSpringContextTests {
 
     // MOD: the variable below are from the removed BaseExportTestCase class
@@ -145,21 +131,22 @@ public class BaseServiceSetupTestNG extends AbstractTestNGSpringContextTests {
     protected static final String ROLE_PORTLET = "ROLE_PORTLET";
     protected static final String HOLIDAY_CALENDAR_NAME = "New Years Days";
 
-	protected ExecutionContext m_exContext = new ExecutionContextImpl();
+    protected ExecutionContext m_exContext = new ExecutionContextImpl();
 
     private Properties m_jdbcProps;
-    private JdbcReportDataSourceServiceFactory m_jdbcDataSourceServiceFactory;
-    private JndiJdbcReportDataSourceServiceFactory m_jndiJdbcDataSourceServiceFactory;
+    private ReportDataSourceServiceFactory m_jdbcDataSourceServiceFactory;
+    private ReportDataSourceServiceFactory m_jndiJdbcDataSourceServiceFactory;
+    private CustomReportDataSourceServiceFactory m_customReportDataSourceServiceFactory;
     private RepositoryService m_repositoryService;
     private RepositoryService m_unsecureRepositoryService;
     private UserAuthorityService m_userAuthorityService;
     private ProfileAttributeService m_profileAttributeService;
-	private ObjectPermissionService m_objectPermissionService;
-	private PermissionsService m_permissionsService;
-	private ReportSchedulingService m_reportSchedulingService;
-	private OlapConnectionService m_olapConnectionService;
+    private ObjectPermissionService m_objectPermissionService;
+    private PermissionsService m_permissionsService;
+    private ReportSchedulingService m_reportSchedulingService;
+    private OlapConnectionService m_olapConnectionService;
     private EngineService m_engineService;
-	private TenantService m_tenantService;
+    private TenantService m_tenantService;
     private ReportJobsScheduler reportScheduler;
 
     private MessageSource messages;
@@ -218,25 +205,26 @@ public class BaseServiceSetupTestNG extends AbstractTestNGSpringContextTests {
 
     /**
      * MOD: Adding methods and variable from BaseExportTestCase
-     *      The BaseExportTestCase class can then be removed
+     * The BaseExportTestCase class can then be removed
      */
     protected Object getBean(String beanName) {
-		return applicationContext.getBean(beanName);
-	}
+        return applicationContext.getBean(beanName);
+    }
 
     protected void performExport(Parameters params) {
-		CommandBean exporter = (CommandBean) getBean(EXPORT_COMMAND_BEAN_NAME);
-		exporter.process(params);
-	}
+        CommandBean exporter = (CommandBean) getBean(EXPORT_COMMAND_BEAN_NAME);
+        exporter.process(params);
+    }
 
-	protected void performImport(Parameters params) {
-		CommandBean importer = (CommandBean) getBean(IMPORT_COMMAND_BEAN_NAME);
-		importer.process(params);
-	}
+    protected void performImport(Parameters params) {
+        params.addParameterValue(ObjectPermissionService.PRIVILEGED_OPERATION, ObjectPermissionService.PRIVILEGED_OPERATION);
+        CommandBean importer = (CommandBean) getBean(IMPORT_COMMAND_BEAN_NAME);
+        importer.process(params);
+    }
 
-	protected Parameters createParameters() {
-		return new ParametersImpl();
-	}
+    protected Parameters createParameters() {
+        return new ParametersImpl();
+    }
 
     public String getNameFromURI(String uri) {
         String[] pathParts = uri.split("/");
@@ -256,7 +244,7 @@ public class BaseServiceSetupTestNG extends AbstractTestNGSpringContextTests {
         StringBuffer sb = new StringBuffer();
         char[] cbuf = new char[1024];
         int k = 0;
-        while ( (k = br.read(cbuf)) !=  -1 ) {
+        while ((k = br.read(cbuf)) != -1) {
             sb.append(cbuf, 0, k);
         }
         br.close();
@@ -285,59 +273,59 @@ public class BaseServiceSetupTestNG extends AbstractTestNGSpringContextTests {
     //      need to use this method
     protected Folder ensureParentFolderExists(String uri) {
 
-    	String[] pathParts;
+        String[] pathParts;
         StringBuffer folderPath = getParentURI(uri);
 
-    	Folder got = getRepositoryService().getFolder(m_exContext, folderPath.toString());
+        Folder got = getRepositoryService().getFolder(m_exContext, folderPath.toString());
 
-    	if (got != null) {
-    		m_logger.debug("Folder: " + folderPath.toString() + " exists");
-    		return got;
-    	}
+        if (got != null) {
+            m_logger.debug("Folder: " + folderPath.toString() + " exists");
+            return got;
+        }
 
-    	m_logger.debug("Creating Folder: " + folderPath.toString());
+        m_logger.debug("Creating Folder: " + folderPath.toString());
 
-    	pathParts = folderPath.toString().split("/");
+        pathParts = folderPath.toString().split("/");
 
-    	folderPath = new StringBuffer();
-    	Folder parentFolder = null;
+        folderPath = new StringBuffer();
+        Folder parentFolder = null;
 
-    	for (int i = 0; i < pathParts.length; i++) {
-    		if (pathParts[i].length() == 0) {
-    			continue;
-    		}
+        for (int i = 0; i < pathParts.length; i++) {
+            if (pathParts[i].length() == 0) {
+                continue;
+            }
 
-    		folderPath.append("/").append(pathParts[i]);
+            folderPath.append("/").append(pathParts[i]);
 
-    		got = getRepositoryService().getFolder(m_exContext, folderPath.toString());
+            got = getRepositoryService().getFolder(m_exContext, folderPath.toString());
 
-        	if (got == null) {
+            if (got == null) {
                 got = new FolderImpl();
                 got.setName(pathParts[i]);
                 got.setLabel(pathParts[i]);
                 got.setDescription(pathParts[i] + " description");
                 got.setParentFolder(parentFolder);
                 getRepositoryService().saveFolder(null, got);
-        	}
+            }
 
-        	parentFolder = got;
-    	}
+            parentFolder = got;
+        }
 
-    	return got;
+        return got;
     }
 
     public StringBuffer getParentURI(String uri) {
         String[] pathParts = uri.split("/");
 
-    	StringBuffer folderPath = new StringBuffer();
+        StringBuffer folderPath = new StringBuffer();
 
-    	for (int i = 0; i < pathParts.length - 1; i++) {
-    		if (pathParts[i].length() == 0) {
-    			continue;
-    		}
-    		folderPath.append("/").append(pathParts[i]);
-    		//log.debug("" + i + ": " + folderPath.toString());
-    	}
+        for (int i = 0; i < pathParts.length - 1; i++) {
+            if (pathParts[i].length() == 0) {
+                continue;
+            }
+            folderPath.append("/").append(pathParts[i]);
+            //log.debug("" + i + ": " + folderPath.toString());
+        }
         return folderPath;
     }
 
@@ -347,20 +335,20 @@ public class BaseServiceSetupTestNG extends AbstractTestNGSpringContextTests {
 
     @javax.annotation.Resource(name = "jdbcProps")
     public void setJdbcProps(Properties jdbcProps) {
-		m_logger.info("setJdbcProps() called");
-    	this.m_jdbcProps = jdbcProps;
+        m_logger.info("setJdbcProps() called");
+        this.m_jdbcProps = jdbcProps;
     }
 
     /**
      * Returns database product name to decide which schema should be used
      * (database specific schemas with upper case for Oracle and special date functions for SQLServer)
      * Suppose to use it instead of
-     *      test.databaseFlavor=oracle
-     *      test.foodmart.upperCaseNames=true
-     * @param dsUri
-     *      datasource uri
+     * test.databaseFlavor=oracle
+     * test.foodmart.upperCaseNames=true
+     *
+     * @param dsUri datasource uri
      * @return String
-     *      database vendor name, has to be one of listed in applicationContext-semanticLayer.xml beanId = sqlGeneratorFactory
+     * database vendor name, has to be one of listed in applicationContext-semanticLayer.xml beanId = sqlGeneratorFactory
      */
     public String getDatabaseProductName(String dsUri) {
         ReportDataSource ds = (ReportDataSource) getRepositoryService().getResource(m_exContext, dsUri);
@@ -387,92 +375,138 @@ public class BaseServiceSetupTestNG extends AbstractTestNGSpringContextTests {
     //      This is support for consolidating Export operations
     public String getDatabaseProductNameFromProp() {
 
-    	if (getJdbcProps().getProperty("test.databaseFlavor") != null &&
-		   (getJdbcProps().getProperty("test.databaseFlavor").startsWith("postgresql") ||
-				getJdbcProps().getProperty("test.databaseFlavor").startsWith("oracle") ||
-				getJdbcProps().getProperty("test.databaseFlavor").startsWith("sqlserver") ||
-				getJdbcProps().getProperty("test.databaseFlavor").startsWith("mysql") ||
-				getJdbcProps().getProperty("test.databaseFlavor").startsWith("db2"))) {
+        if (getJdbcProps().getProperty("test.databaseFlavor") != null &&
+                (getJdbcProps().getProperty("test.databaseFlavor").startsWith("postgresql") ||
+                        getJdbcProps().getProperty("test.databaseFlavor").startsWith("oracle") ||
+                        getJdbcProps().getProperty("test.databaseFlavor").startsWith("sqlserver") ||
+                        getJdbcProps().getProperty("test.databaseFlavor").startsWith("mysql") ||
+                        getJdbcProps().getProperty("test.databaseFlavor").startsWith("db2"))) {
 
-    		m_logger.info("Info: Database Flavor is: " + getJdbcProps().getProperty("test.databaseFlavor"));
-    		return getJdbcProps().getProperty("test.databaseFlavor");
-    	} else {
-    		m_logger.warn("WARNING: Unknown database type (flavor): " + getJdbcProps().getProperty("test.databaseFlavor"));
-    		m_logger.warn("WARNING: setting databaseFlavor to: mysql");
-    		m_logger.warn("WARNING: output js-catalog file will be named -mysql");
-    		return "mysql";
-    	}
-	}
+            m_logger.info("Info: Database Flavor is: " + getJdbcProps().getProperty("test.databaseFlavor"));
+            return getJdbcProps().getProperty("test.databaseFlavor");
+        } else {
+            m_logger.warn("WARNING: Unknown database type (flavor): " + getJdbcProps().getProperty("test.databaseFlavor"));
+            m_logger.warn("WARNING: setting databaseFlavor to: mysql");
+            m_logger.warn("WARNING: output js-catalog file will be named -mysql");
+            return "mysql";
+        }
+    }
 
     /**
      * Checks if foodmart.upperCaseNames property is set
+     *
      * @return boolean
-     * @throws Exception 
+     * @throws Exception
      */
     public boolean useUpperCaseNames() throws Exception {
         return Boolean.parseBoolean(getJdbcProps().getProperty("foodmart.upperCaseNames"));
     }
-    
 
-    public JdbcReportDataSourceServiceFactory getJdbcDataSourceServiceFactory() {
+
+    public ReportDataSourceServiceFactory getJdbcDataSourceServiceFactory() {
         return m_jdbcDataSourceServiceFactory;
     }
 
     @javax.annotation.Resource(name = "jdbcDataSourceServiceFactory")
-    public void setJdbcDataSourceServiceFactory(JdbcReportDataSourceServiceFactory jdbcDataSourceServiceFactory) {
-		m_logger.info("setJdbcDataSourceServiceFactory() called");
+    public void setJdbcDataSourceServiceFactory(ReportDataSourceServiceFactory jdbcDataSourceServiceFactory) {
+        m_logger.info("setJdbcDataSourceServiceFactory() called");
         this.m_jdbcDataSourceServiceFactory = jdbcDataSourceServiceFactory;
     }
 
-    public JndiJdbcReportDataSourceServiceFactory getJndiJdbcDataSourceServiceFactory() {
+    public ReportDataSourceServiceFactory getJndiJdbcDataSourceServiceFactory() {
         return m_jndiJdbcDataSourceServiceFactory;
     }
 
     @javax.annotation.Resource(name = "jndiJdbcDataSourceServiceFactory")
-    public void setJndiJdbcDataSourceServiceFactory(JndiJdbcReportDataSourceServiceFactory jndiJdbcDataSourceServiceFactory) {
-		m_logger.info("setJndiJdbcDataSourceServiceFactory() called");
+    public void setJndiJdbcDataSourceServiceFactory(ReportDataSourceServiceFactory jndiJdbcDataSourceServiceFactory) {
+        m_logger.info("setJndiJdbcDataSourceServiceFactory() called");
         this.m_jndiJdbcDataSourceServiceFactory = jndiJdbcDataSourceServiceFactory;
     }
 
-	protected JdbcReportDataSource createJdbcReportDataSourceFromProperties(String prefix) throws Exception {
-			    JdbcReportDataSourceImpl ds = new JdbcReportDataSourceImpl();
-			    ds.setDriverClass(getJdbcProps().getProperty(prefix + ".jdbc.driverClassName"));
-			    ds.setConnectionUrl(getJdbcProps().getProperty(prefix + ".jdbc.url"));
-			    ds.setUsername(getJdbcProps().getProperty(prefix + ".jdbc.username"));
+    public CustomReportDataSourceServiceFactory getCustomReportDataSourceServiceFactory() {
+        return m_customReportDataSourceServiceFactory;
+    }
 
-				String passwd = getJdbcProps().getProperty(prefix + ".jdbc.password");
-				if (EncryptionEngine.isEncrypted(passwd)) {
-					KeystoreManager ksManager = KeystoreManager.getInstance();
-					passwd = EncryptionEngine.decrypt(ksManager.getBuildKey(), passwd);
-				}
-				ds.setPassword(passwd);
+    @javax.annotation.Resource(name = "customDataSourceServiceFactory")
+    public void setCustomReportDataSourceServiceFactory(CustomReportDataSourceServiceFactory customReportDataSourceServiceFactory) {
+        this.m_customReportDataSourceServiceFactory = customReportDataSourceServiceFactory;
+    }
 
-			    if (ds.getDriverClass() == null || ds.getConnectionUrl() == null || ds.getUsername() == null || ds.getPassword() == null) {
-			    	throw new IllegalArgumentException("some jdbc props missing for prefix " + prefix);
-			    }
-			    return ds;
-			}
+    protected JdbcReportDataSource createJdbcReportDataSourceFromProperties(String prefix) throws Exception {
+        JdbcReportDataSourceImpl ds = new JdbcReportDataSourceImpl();
+        ds.setDriverClass(getJdbcProps().getProperty(prefix + ".jdbc.driverClassName"));
+        ds.setConnectionUrl(getJdbcProps().getProperty(prefix + ".jdbc.url"));
+        ds.setUsername(getJdbcProps().getProperty(prefix + ".jdbc.username"));
+        ds.setName(prefix + "dsName");
+
+        String passwd = getJdbcProps().getProperty(prefix + ".jdbc.password");
+        if (EncryptionEngine.isEncrypted(passwd)) {
+            KeystoreManager ksManager = KeystoreManager.getInstance();
+            passwd = EncryptionEngine.decrypt(ksManager.getBuildKey(), passwd);
+        }
+        ds.setPassword(passwd);
+
+        if (ds.getDriverClass() == null || ds.getConnectionUrl() == null || ds.getUsername() == null || ds.getPassword() == null) {
+            throw new IllegalArgumentException("some jdbc props missing for prefix " + prefix);
+        }
+        return ds;
+    }
 
     protected JdbcReportDataSource createAndSaveJdbcDSFromProps(String dsURI, String prefix) throws Exception {
         return createAndSaveJdbcDSFromProps(dsURI, prefix, prefix);
     }
 
-	protected JdbcReportDataSource createAndSaveJdbcDSFromProps(String dsURI, String prefix, String name) throws Exception {
-		JdbcReportDataSource ds = (JdbcReportDataSource) getRepositoryService().getResource(m_exContext, dsURI);
-	
-	    // Create it if is not there
-	    if (ds == null) {
- 	    	ds = createJdbcReportDataSourceFromProperties(prefix);
-	        ds.setName(name);
-	        ds.setParentFolder(ensureParentFolderExists(dsURI));
-		    ds.setLabel(name);
-		    getRepositoryService().saveResource(m_exContext, ds);
-	    }
-	    return ds;
-	}
+    protected JdbcReportDataSource createAndSaveJdbcDSFromProps(String dsURI, String prefix, String name) throws Exception {
+        JdbcReportDataSource ds = (JdbcReportDataSource) getRepositoryService().getResource(m_exContext, dsURI);
+
+        // Create it if is not there
+        if (ds == null) {
+            ds = createJdbcReportDataSourceFromProperties(prefix);
+            ds.setName(name);
+            ds.setParentFolder(ensureParentFolderExists(dsURI));
+            ds.setLabel(name);
+            getRepositoryService().saveResource(m_exContext, ds);
+        }
+        return ds;
+    }
+
+    protected CustomReportDataSource createTextReportDataSourceFromProperties(String textFile) throws Exception {
+        CustomReportDataSourceImpl cds = new CustomReportDataSourceImpl();
+        TextDataSourceDefinition textDataSourceDefinition = (TextDataSourceDefinition) m_customReportDataSourceServiceFactory.getDefinitionByServiceClass("net.sf.jasperreports.data.csv.CsvDataAdapterImpl");
+        if (textDataSourceDefinition == null) {
+            textDataSourceDefinition = new TextDataSourceDefinition();
+            textDataSourceDefinition.setDataAdapterClassName("net.sf.jasperreports.data.csv.CsvDataAdapterImpl");
+            textDataSourceDefinition.setValidator(new TextDataSourceValidator());
+            HashMap<String, String> queryExecuterMap = new HashMap<String, String>();
+            queryExecuterMap.put("csv", "net.sf.jasperreports.engine.query.JRCsvQueryExecuterFactory");
+            textDataSourceDefinition.setQueryExecuterMap(queryExecuterMap);
+            m_customReportDataSourceServiceFactory.addDefinition(textDataSourceDefinition);
+        }
+        textDataSourceDefinition.setDefaultValues(cds);
+        cds.setServiceClass(textDataSourceDefinition.getServiceClassName());
+        cds.getPropertyMap().put("fileName", textFile);
+        cds.getPropertyMap().put("useFirstRowAsHeader", "true");
+
+        return cds;
+    }
+
+    protected CustomReportDataSource createTextReportDataSourceFromProperties(String dsURI, String prefix, String name, String textFile) throws Exception {
+        CustomReportDataSource ds = (CustomReportDataSourceImpl) getRepositoryService().getResource(m_exContext, dsURI);
+
+        // Create it if is not there
+        if (ds == null) {
+            ds = createTextReportDataSourceFromProperties(textFile);
+            ds.setName(name);
+            ds.setParentFolder(ensureParentFolderExists(dsURI));
+            ds.setLabel(name);
+            getRepositoryService().saveResource(m_exContext, ds);
+        }
+        return ds;
+    }
 
     /**
      * Get a ReportDataSource. Fire an assert if the requested datasource is not found.
+     *
      * @param dsURI
      * @return
      */
@@ -484,6 +518,7 @@ public class BaseServiceSetupTestNG extends AbstractTestNGSpringContextTests {
 
     /**
      * Get a JndiJdbcReportDataSource. Fire an assert if the requested datasource is not found.
+     *
      * @param dsURI
      * @return
      */
@@ -494,61 +529,61 @@ public class BaseServiceSetupTestNG extends AbstractTestNGSpringContextTests {
 
 
     protected JndiJdbcReportDataSource createAndSaveJndiDSFromProps(String dsURI, String prefix, String jndiName) throws Exception {
-		JndiJdbcReportDataSource ds = (JndiJdbcReportDataSource) getRepositoryService().getResource(m_exContext, dsURI);
-	    // Create it if is not there
-	    if (ds == null) {
-	        ds = new JndiJdbcReportDataSourceImpl();
+        JndiJdbcReportDataSource ds = (JndiJdbcReportDataSource) getRepositoryService().getResource(m_exContext, dsURI);
+        // Create it if is not there
+        if (ds == null) {
+            ds = new JndiJdbcReportDataSourceImpl();
             ds.setJndiName(jndiName);
-	        ds.setName(prefix);
-	        ds.setParentFolder(ensureParentFolderExists(dsURI));
-		    ds.setLabel(prefix);
-		    getRepositoryService().saveResource(m_exContext, ds);
-	    }
-	    return ds;
-	}
+            ds.setName(prefix);
+            ds.setParentFolder(ensureParentFolderExists(dsURI));
+            ds.setLabel(prefix);
+            getRepositoryService().saveResource(m_exContext, ds);
+        }
+        return ds;
+    }
 
     protected VirtualReportDataSource createAndSaveVirtualDSFromProps(String dsURI, String name, Map<String, ResourceReference> uriMap, Set<String> selectedSchemas) throws Exception {
-		VirtualReportDataSource ds = (VirtualReportDataSource) getRepositoryService().getResource(m_exContext, dsURI);
-	    // Create it if is not there
-	    if (ds == null) {
-	        ds = new VirtualReportDataSourceImpl();
+        VirtualReportDataSource ds = (VirtualReportDataSource) getRepositoryService().getResource(m_exContext, dsURI);
+        // Create it if is not there
+        if (ds == null) {
+            ds = new VirtualReportDataSourceImpl();
             ds.setDataSourceUriMap(uriMap);
             if (selectedSchemas != null) ds.setSchemas(selectedSchemas);
-	        ds.setName(name);
-	        ds.setParentFolder(ensureParentFolderExists(dsURI));
-		    ds.setLabel(name);
-		    getRepositoryService().saveResource(m_exContext, ds);
-	    }
-	    return ds;
-	}
+            ds.setName(name);
+            ds.setParentFolder(ensureParentFolderExists(dsURI));
+            ds.setLabel(name);
+            getRepositoryService().saveResource(m_exContext, ds);
+        }
+        return ds;
+    }
 
-	protected void updateResource(Resource resource, String label, String desc) throws Exception {
-		resource.setLabel(label);
-		resource.setDescription(desc);
-	}
-	
-	protected ProfileAttribute createTestAttr(Object principal, String name, String value) {
-	    ProfileAttribute attr = getProfileAttributeService().newProfileAttribute( null );
-	    attr.setPrincipal( principal );
-	    attr.setAttrName( name );
-	    attr.setAttrValue( value );
-	    return attr;
-	}
+    protected void updateResource(Resource resource, String label, String desc) throws Exception {
+        resource.setLabel(label);
+        resource.setDescription(desc);
+    }
 
-	protected Authentication setAuthenticatedUser(String username) {
-		m_logger.info("setAuthenticatedUser() called");
-	    UserDetails userDetails =
-	        ((UserDetailsService)getUserAuthorityService()).loadUserByUsername(username);
-	    Authentication aUser =
-	        new TestingAuthenticationToken(userDetails,
-	                       userDetails.getPassword(),
-	                       userDetails.getAuthorities());
-	    aUser.setAuthenticated(true);
-	    SecurityContextHolder.getContext().setAuthentication(aUser);
-	
-	    m_logger.debug("Principal: " + aUser.getPrincipal());
-	    return aUser;
-	}
+    protected ProfileAttribute createTestAttr(Object principal, String name, String value) {
+        ProfileAttribute attr = getProfileAttributeService().newProfileAttribute(null);
+        attr.setPrincipal(principal);
+        attr.setAttrName(name);
+        attr.setAttrValue(value);
+        return attr;
+    }
+
+    protected Authentication setAuthenticatedUser(String username) {
+        m_logger.info("setAuthenticatedUser() called");
+        UserDetails userDetails =
+                ((UserDetailsService) getUserAuthorityService()).loadUserByUsername(username);
+        Authentication aUser =
+                new TestingAuthenticationToken(userDetails,
+                        userDetails.getPassword(),
+                        (List) userDetails.getAuthorities());
+        aUser.setAuthenticated(true);
+        SecurityContextHolder.getContext().setAuthentication(aUser);
+
+        m_logger.debug("Principal: " + aUser.getPrincipal());
+        return aUser;
+    }
 
     /*
     * create a role
@@ -558,65 +593,71 @@ public class BaseServiceSetupTestNG extends AbstractTestNGSpringContextTests {
     *      - tenantId can be set to an existing tenant such as organization_1
     */
     public Role createRole(String roleName) {
-		Role role = getUserAuthorityService().getRole(null, roleName);
+        Role role = getUserAuthorityService().getRole(null, roleName);
 
         // check for role being null (ie shouldn't already exist)
         assertTrue("Error: trying to create a role that already exists, roleName="
-                   + roleName, (role == null));
+                + roleName, (role == null));
 
-		role = getUserAuthorityService().newRole(null);
-		role.setRoleName(roleName);
-		role.setExternallyDefined(false);
-		getUserAuthorityService().putRole(null, role);
+        role = getUserAuthorityService().newRole(null);
+        role.setRoleName(roleName);
+        role.setExternallyDefined(false);
+        getUserAuthorityService().putRole(getExecutionContext(), role);
 
-		return role;
-	}
+        return role;
+    }
 
     /*
     * add a role to an existing user
      */
     public Role addRole(User user, String roleName) {
-		Role role = getUserAuthorityService().getRole(null, roleName);
-		getUserAuthorityService().addRole(null, user, role);
-		return role;
-	}
+        Role role = getUserAuthorityService().getRole(null, roleName);
+        getUserAuthorityService().addRole(getExecutionContext(), user, role);
+        return role;
+    }
 
     /*
     * remove a role from an existing user
      */
     public void removeRole(User user, String roleName) {
-		Role role = getUserAuthorityService().getRole(null, roleName);
-		if (role != null) {
-			getUserAuthorityService().removeRole(null, user, role);
-		} else {
+        Role role = getUserAuthorityService().getRole(null, roleName);
+        if (role != null) {
+            getUserAuthorityService().removeRole(getExecutionContext(), user, role);
+        } else {
             m_logger.warn("removeRole : Could not find role " + roleName + " for user " + user);
         }
-		return;
-	}
+        return;
+    }
 
     /*
     * delete a role
      */
     public void deleteRole(String roleName) {
-		Role role = getUserAuthorityService().getRole(null, roleName);
-		if (role != null) {
-			getUserAuthorityService().   deleteRole(null, roleName);
-		} else {
+        Role role = getUserAuthorityService().getRole(null, roleName);
+        if (role != null) {
+            getUserAuthorityService().deleteRole(getExecutionContext(), roleName);
+        } else {
             m_logger.warn("deleteRole : Could not find role " + roleName + " to delete");
         }
-		return;
-	}
+        return;
+    }
 
-	public Role getRole(String roleName) {
-	    Role r = getUserAuthorityService().getRole(null, roleName);
-	    if (r == null) {
-	        r = getUserAuthorityService().newRole(null);
-	        r.setRoleName(roleName);
-	        r.setExternallyDefined(false);
-	        getUserAuthorityService().putRole(null, r);
-	    }
-	    return r;
-	}
+    public Role getRole(String roleName) {
+        Role r = getUserAuthorityService().getRole(null, roleName);
+        if (r == null) {
+            r = getUserAuthorityService().newRole(null);
+            r.setRoleName(roleName);
+            r.setExternallyDefined(false);
+            getUserAuthorityService().putRole(getExecutionContext(), r);
+        }
+        return r;
+    }
+
+    protected ExecutionContext getExecutionContext() {
+        ExecutionContext executionContext = JasperServerUtil.getExecutionContext();
+        executionContext.getAttributes().add(ObjectPermissionService.PRIVILEGED_OPERATION);
+        return executionContext;
+    }
 
     public User getUser(String username) {
         User workingUser = getUserAuthorityService().getUser(null, username);
@@ -624,7 +665,7 @@ public class BaseServiceSetupTestNG extends AbstractTestNGSpringContextTests {
     }
 
     public void deleteUser(String username) {
-        getUserAuthorityService().deleteUser(null, username);
+        getUserAuthorityService().deleteUser(getExecutionContext(), username);
         return;
     }
 
@@ -637,7 +678,7 @@ public class BaseServiceSetupTestNG extends AbstractTestNGSpringContextTests {
 
         // check for user being null (ie shouldn't already exist)
         assertTrue("Error: trying to create a user that already exists, username="
-                   + userName, (workingUser == null));
+                + userName, (workingUser == null));
 
         workingUser = getUserAuthorityService().newUser(null);
         workingUser.setUsername(userName);
@@ -649,7 +690,7 @@ public class BaseServiceSetupTestNG extends AbstractTestNGSpringContextTests {
         workingUser.setFullName(fullName);
         workingUser.setEnabled(true);
         workingUser.setPreviousPasswordChangeTime(new Date());
-        getUserAuthorityService().putUser(null, workingUser);
+        getUserAuthorityService().putUser(getExecutionContext(), workingUser);
         return workingUser;
     }
 
@@ -690,6 +731,9 @@ public class BaseServiceSetupTestNG extends AbstractTestNGSpringContextTests {
     }
 
     public Folder getOrCreateFolder(String baseFolderURI, String name, String label) {
+        if (baseFolderURI.equals("/")) {
+            baseFolderURI = "";
+        }
         Folder folder = getRepositoryService().getFolder(null, baseFolderURI + "/" + name);
         if (folder == null) {
             folder = new FolderImpl();
@@ -709,13 +753,15 @@ public class BaseServiceSetupTestNG extends AbstractTestNGSpringContextTests {
     }
 
     // MOD: this getFolder() method is first step to replace getOrCreateFolder() methods
+
     /**
      * Get a folder. Assert Fail if folder does not exist
+     *
      * @param folderURI
      * @return
      */
     public Folder getFolder(String folderURI) {
-       Folder folder = getRepositoryService().getFolder(null, folderURI);
+        Folder folder = getRepositoryService().getFolder(null, folderURI);
 
         // fail if folder does not exist
         assertFalse("Error trying to get a folder, probably does not exist, folderURI="
@@ -726,11 +772,22 @@ public class BaseServiceSetupTestNG extends AbstractTestNGSpringContextTests {
 
 
     public void deleteFolderIfExists(String folderURI) {
-        if (getRepositoryService().getFolder(null, folderURI) != null) getRepositoryService().deleteFolder(null, folderURI);
+        if (getRepositoryService().getFolder(null, folderURI) != null)
+            getRepositoryService().deleteFolder(null, folderURI);
     }
 
     public void deleteFolder(String folderURI) {
         getRepositoryService().deleteFolder(null, folderURI);
+
+        // currently if folder get deleted with URI - permissions will not be deleted bug #29251
+
+        ObjectPermission objectPermission = new ObjectPermissionImpl();
+        objectPermission.setURI(folderURI);
+        try {
+            getObjectPermissionService().deleteObjectPermission(null, objectPermission);
+        } catch (JSException e) {
+            // Stub
+        }
     }
 
     /*
@@ -738,65 +795,65 @@ public class BaseServiceSetupTestNG extends AbstractTestNGSpringContextTests {
      * This was formerly only in CoreDataCreateTestNG but we should be able to have stdalone tests
      */
     protected Folder createRootFolderIfMissing() {
-    	String rootFolderName = Folder.SEPARATOR;
+        String rootFolderName = Folder.SEPARATOR;
         Folder root = getUnsecureRepositoryService().getFolder(null, rootFolderName);
         if (root == null) {
             root = new FolderImpl();
-    		root.setCreationDate(new Date());
-    		root.setUpdateDate(new Date());
-    		root.setName(Folder.SEPARATOR);
-    		root.setLabel("root");
-    		root.setDescription("Root of the folder hierarchy");
-    		root.setParentFolder((Folder) null);
-    		getUnsecureRepositoryService().saveFolder(null, root);
+            root.setCreationDate(new Date());
+            root.setUpdateDate(new Date());
+            root.setName(Folder.SEPARATOR);
+            root.setLabel("root");
+            root.setDescription("Root of the folder hierarchy");
+            root.setParentFolder((Folder) null);
+            getUnsecureRepositoryService().saveFolder(null, root);
         }
         return root;
     }
 
-	private FileResource saveOrUpdateFile(String uri, String name, String label,
-			String description, String content, String fileType) {
-			
-			    FileResource schemaRes = (FileResource) getRepositoryService().getResource(m_exContext, uri);
-			
-			    // Create it if is not there
-			    if (schemaRes == null) {
-			
-			    	m_logger.debug("File: " + uri + " being created");
-			
-			        schemaRes = prepareFile(name, label, description, content, fileType);
-			        schemaRes.setParentFolder(ensureParentFolderExists(uri));
-			
-			        getRepositoryService().saveResource(m_exContext, schemaRes);
-			    }
-			
-			    return schemaRes;
-			}
+    private FileResource saveOrUpdateFile(String uri, String name, String label,
+                                          String description, String content, String fileType) {
 
-	protected FileResource loadAndSaveFileResource(String resourcePath, String uri, String fileType) throws Exception {
-	    String resultString = loadFile(resourcePath);
-	
-	    String name = getNameFromURI(uri);
-	    return saveOrUpdateFile(uri, name, name, name, resultString, fileType);
-	}
-	
+        FileResource schemaRes = (FileResource) getRepositoryService().getResource(m_exContext, uri);
+
+        // Create it if is not there
+        if (schemaRes == null) {
+
+            m_logger.debug("File: " + uri + " being created");
+
+            schemaRes = prepareFile(name, label, description, content, fileType);
+            schemaRes.setParentFolder(ensureParentFolderExists(uri));
+
+            getRepositoryService().saveResource(m_exContext, schemaRes);
+        }
+
+        return schemaRes;
+    }
+
+    protected FileResource loadAndSaveFileResource(String resourcePath, String uri, String fileType) throws Exception {
+        String resultString = loadFile(resourcePath);
+
+        String name = getNameFromURI(uri);
+        return saveOrUpdateFile(uri, name, name, name, resultString, fileType);
+    }
+
 
     /*
      * create a tenant for the root--used for standalone tests that can be run from a bare repo
      */
     protected void createTenantForRootIfMissing() {
-    	Tenant rootTenant = getTenantService().getTenant(null, TenantService.ORGANIZATIONS);
-    	if (rootTenant == null) {
-	        // create root tenant
-	        // setting empty strings in NOT NULL fields (fix for Oracle)
-	        createTenant("", TenantService.ORGANIZATIONS, "root", TenantService.ORGANIZATIONS, " ", "/", "/", "default");
-    	}
+        Tenant rootTenant = getTenantService().getTenant(null, TenantService.ORGANIZATIONS);
+        if (rootTenant == null) {
+            // create root tenant
+            // setting empty strings in NOT NULL fields (fix for Oracle)
+            createTenant("", TenantService.ORGANIZATIONS, "root", TenantService.ORGANIZATIONS, " ", "/", "/", "default");
+        }
     }
 
     /*
      * create a tenant
      */
     protected void createTenant(String parentTenantId, String tenantId, String tenantName,
-            String tenantDesc, String tenantNote, String relativeUri, String uri, String theme) {
+                                String tenantDesc, String tenantNote, String relativeUri, String uri, String theme) {
 
         TenantImpl aTenant = new TenantImpl();
 
@@ -824,73 +881,73 @@ public class BaseServiceSetupTestNG extends AbstractTestNGSpringContextTests {
 
     @javax.annotation.Resource(name = "repositoryService")
     public void setRepositoryService(RepositoryService repository) {
-		m_logger.info("setRepositoryService() called");
-    	m_repositoryService = repository;
+        m_logger.info("setRepositoryService() called");
+        m_repositoryService = repository;
     }
 
     @javax.annotation.Resource(name = "unsecureRepositoryService")
-	public void setUnsecureRepositoryService(RepositoryService unsecureRepositoryService) {
-		m_logger.info("setUnsecureRepositoryService() called");
-		this.m_unsecureRepositoryService = unsecureRepositoryService;
-	}
+    public void setUnsecureRepositoryService(RepositoryService unsecureRepositoryService) {
+        m_logger.info("setUnsecureRepositoryService() called");
+        this.m_unsecureRepositoryService = unsecureRepositoryService;
+    }
 
-	public RepositoryService getUnsecureRepositoryService() {
-		return m_unsecureRepositoryService;
-	}
+    public RepositoryService getUnsecureRepositoryService() {
+        return m_unsecureRepositoryService;
+    }
 
     @javax.annotation.Resource(name = "userAuthorityService")
-	public void setUserAuthorityService(UserAuthorityService userAuthorityService) {
-		m_logger.info("setUserAuthorityService() called");
-		this.m_userAuthorityService = userAuthorityService;
-	}
+    public void setUserAuthorityService(UserAuthorityService userAuthorityService) {
+        m_logger.info("setUserAuthorityService() called");
+        this.m_userAuthorityService = userAuthorityService;
+    }
 
-	public UserAuthorityService getUserAuthorityService() {
-		return m_userAuthorityService;
-	}
+    public UserAuthorityService getUserAuthorityService() {
+        return m_userAuthorityService;
+    }
 
     @javax.annotation.Resource(name = "objectPermissionServiceUnsecure")
-	public void setObjectPermissionService(ObjectPermissionService objectPermissionService) {
+    public void setObjectPermissionService(ObjectPermissionService objectPermissionService) {
         m_logger.info("setObjectPermissionService() called");
-		this.m_objectPermissionService = objectPermissionService;
-	}
+        this.m_objectPermissionService = objectPermissionService;
+    }
 
-	public ObjectPermissionService getObjectPermissionService() {
-		return m_objectPermissionService;
-	}
+    public ObjectPermissionService getObjectPermissionService() {
+        return m_objectPermissionService;
+    }
 
     @javax.annotation.Resource(name = "permissionsService")
-	public void setPermissionsService(PermissionsService permissionsService) {
+    public void setPermissionsService(PermissionsService permissionsService) {
         m_logger.info("setPermissionsService() called");
-		this.m_permissionsService = permissionsService;
-	}
+        this.m_permissionsService = permissionsService;
+    }
 
-	public PermissionsService getPermissionsService() {
-		return m_permissionsService;
-	}
+    public PermissionsService getPermissionsService() {
+        return m_permissionsService;
+    }
 
-	@javax.annotation.Resource(name = "reportSchedulingService")
-	public void setReportSchedulingService(ReportSchedulingService reportSchedulingService) {
-		m_logger.info("setReportSchedulingService() called");
-		this.m_reportSchedulingService = reportSchedulingService;
-	}
+    @javax.annotation.Resource(name = "reportSchedulingService")
+    public void setReportSchedulingService(ReportSchedulingService reportSchedulingService) {
+        m_logger.info("setReportSchedulingService() called");
+        this.m_reportSchedulingService = reportSchedulingService;
+    }
 
     public ProfileAttributeService getProfileAttributeService() {
-		return m_profileAttributeService;
-	}
+        return m_profileAttributeService;
+    }
 
-	public ReportSchedulingService getReportSchedulingService() {
-		return m_reportSchedulingService;
-	}
+    public ReportSchedulingService getReportSchedulingService() {
+        return m_reportSchedulingService;
+    }
 
     @javax.annotation.Resource(name = "olapConnectionService")
-	public void setOlapConnectionService(OlapConnectionService olapConnectionService) {
+    public void setOlapConnectionService(OlapConnectionService olapConnectionService) {
         m_logger.info("setOlapConnectionService() called");
-		this.m_olapConnectionService = olapConnectionService;
-	}
+        this.m_olapConnectionService = olapConnectionService;
+    }
 
-	public OlapConnectionService getOlapConnectionService() {
-		return m_olapConnectionService;
-	}
+    public OlapConnectionService getOlapConnectionService() {
+        return m_olapConnectionService;
+    }
 
     protected void logPermission(ObjectPermission perm) {
         if (perm == null) return;
@@ -906,17 +963,15 @@ public class BaseServiceSetupTestNG extends AbstractTestNGSpringContextTests {
         m_logger.info("Creating permission : " + perm.getURI() + " will have mask " + perm.getPermissionMask() + " for " + name);
     }
 
-	protected ObjectPermission createObjectPermission(String targetPath, Object recipient, int permissionMask) {
-			    ObjectPermission permission = getObjectPermissionService().newObjectPermission(null);
-			    permission.setURI("repo:" + targetPath);
-			    permission.setPermissionRecipient(recipient);
-			    permission.setPermissionMask(permissionMask);
-			    ExecutionContext ectx = new ExecutionContextImpl();
-			    ectx.getAttributes().add(ObjectPermissionServiceImpl.PRIVILEGED_OPERATION);
-                logPermission(permission);
-			    getObjectPermissionService().putObjectPermission(ectx, permission);
-			    return permission;
-	}
+    protected ObjectPermission createObjectPermission(String targetPath, Object recipient, int permissionMask) {
+        ObjectPermission permission = getObjectPermissionService().newObjectPermission(null);
+        permission.setURI("repo:" + targetPath);
+        permission.setPermissionRecipient(recipient);
+        permission.setPermissionMask(permissionMask);
+        logPermission(permission);
+        getObjectPermissionService().putObjectPermission(getExecutionContext(), permission);
+        return permission;
+    }
 
     protected void deleteObjectPermission(String targetPath, Object recipient) {
 
@@ -928,7 +983,7 @@ public class BaseServiceSetupTestNG extends AbstractTestNGSpringContextTests {
         ObjectPermission op2 = getObjectPermissionService().getObjectPermission(null, op);
         if (op2 != null) {
             m_logger.info("deleteObjectPermission: got " + op2 + ". about to delete: " + targetPath + ", recipient: " + recipient);
-            getObjectPermissionService().deleteObjectPermission(null, op);
+            getObjectPermissionService().deleteObjectPermission(getExecutionContext(), op);
             m_logger.info("deleted permission for uri: " + targetPath + ", recipient: " + recipient);
         } else {
             m_logger.warn("Can't delete permission for uri: " + targetPath + ", recipient: " + recipient + " because it does not exist");
@@ -937,31 +992,31 @@ public class BaseServiceSetupTestNG extends AbstractTestNGSpringContextTests {
     }
 
     @javax.annotation.Resource(name = "tenantService")
-	public void setTenantService(TenantService tenantService) {
+    public void setTenantService(TenantService tenantService) {
         m_logger.info("setTenantService() called");
-		this.m_tenantService = tenantService;
-	}
+        this.m_tenantService = tenantService;
+    }
 
-	public TenantService getTenantService() {
-		return m_tenantService;
-	}
+    public TenantService getTenantService() {
+        return m_tenantService;
+    }
 
     @javax.annotation.Resource(name = "profileAttributeService")
-	public void setProfileAttributeService(
-			ProfileAttributeService profileAttributeService) {
+    public void setProfileAttributeService(
+            ProfileAttributeService profileAttributeService) {
         m_logger.info("setProfileAttributeService() called");
-		this.m_profileAttributeService = profileAttributeService;
-	}
+        this.m_profileAttributeService = profileAttributeService;
+    }
 
     @javax.annotation.Resource(name = "engineService")
-	public void setEngineService(EngineService engineService) {
+    public void setEngineService(EngineService engineService) {
         m_logger.info("setEngineService() called");
-		this.m_engineService = engineService;
-	}
+        this.m_engineService = engineService;
+    }
 
-	public EngineService getEngineService() {
-		return m_engineService;
-	}
+    public EngineService getEngineService() {
+        return m_engineService;
+    }
 
     public ReportJobsScheduler getReportScheduler() {
         return reportScheduler;
@@ -981,7 +1036,7 @@ public class BaseServiceSetupTestNG extends AbstractTestNGSpringContextTests {
         this.messages = messages;
     }
 
-    public String msg(String text, Object ... info) {
+    public String msg(String text, Object... info) {
         StringBuilder sb = new StringBuilder();
 
         Formatter formatter = new Formatter(sb, LocaleContextHolder.getLocale());

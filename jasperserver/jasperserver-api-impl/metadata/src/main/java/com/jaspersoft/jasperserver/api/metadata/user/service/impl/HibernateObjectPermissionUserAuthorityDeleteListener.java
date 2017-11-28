@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -21,6 +21,9 @@
 
 package com.jaspersoft.jasperserver.api.metadata.user.service.impl;
 
+import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
+import com.jaspersoft.jasperserver.api.common.domain.impl.ExecutionContextImpl;
+import com.jaspersoft.jasperserver.api.metadata.user.service.ObjectPermissionService;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
@@ -32,7 +35,7 @@ import com.jaspersoft.jasperserver.api.metadata.user.domain.impl.hibernate.RepoU
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: HibernateObjectPermissionUserAuthorityDeleteListener.java 19922 2010-12-11 14:59:51Z tmatyashovsky $
+ * @version $Id: HibernateObjectPermissionUserAuthorityDeleteListener.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
 public class HibernateObjectPermissionUserAuthorityDeleteListener implements
 		HibernateDeleteListener, ApplicationContextAware {
@@ -46,7 +49,7 @@ public class HibernateObjectPermissionUserAuthorityDeleteListener implements
 	}
 
 	protected ObjectPermissionServiceInternal getObjectPermissionService() {
-		return (ObjectPermissionServiceInternal) context.getBean(
+		return context.getBean(
 				getObjectPermissionsServiceBeanName(),
 				ObjectPermissionServiceInternal.class);
 	}
@@ -61,7 +64,9 @@ public class HibernateObjectPermissionUserAuthorityDeleteListener implements
 	
 	protected void deleteObjectPermissions(IdedObject recipient) {
 		ObjectPermissionRecipientIdentity recipientIdentity = new ObjectPermissionRecipientIdentity(recipient);
-		getObjectPermissionService().deleteObjectPermissionsForRecipient(null, recipientIdentity);
+        ExecutionContext executionContext = new ExecutionContextImpl();
+        executionContext.getAttributes().add(ObjectPermissionService.PRIVILEGED_OPERATION);
+		getObjectPermissionService().deleteObjectPermissionsForRecipient(executionContext, recipientIdentity);
 	}
 
 	public String getObjectPermissionsServiceBeanName() {

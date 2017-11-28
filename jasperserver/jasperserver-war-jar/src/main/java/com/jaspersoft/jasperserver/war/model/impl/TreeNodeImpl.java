@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -29,7 +29,6 @@ import org.apache.fop.fo.FObj;
 import com.jaspersoft.jasperserver.war.model.JSONObject;
 import com.jaspersoft.jasperserver.war.model.TreeDataProvider;
 import com.jaspersoft.jasperserver.war.model.TreeNode;
-import com.lowagie.text.pdf.ExtraEncoding;
 import org.apache.log4j.Logger;
 
 /**

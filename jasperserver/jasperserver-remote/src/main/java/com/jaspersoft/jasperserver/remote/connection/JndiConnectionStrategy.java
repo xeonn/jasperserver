@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005 - 2013 Jaspersoft Corporation. All rights  reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
 * http://www.jaspersoft.com.
 *
 * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -16,20 +16,21 @@
 * GNU Affero  General Public License for more details.
 *
 * You should have received a copy of the GNU Affero General Public  License
-* along with this program.&nbsp; If not, see <http://www.gnu.org/licenses/>.
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 package com.jaspersoft.jasperserver.remote.connection;
 
-import com.jaspersoft.jasperserver.dto.connection.JndiConnection;
+import com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl.BaseJdbcDataSource;
+import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.JndiJdbcReportDataSource;
+import com.jaspersoft.jasperserver.api.metadata.jasperreports.service.ReportDataSourceServiceFactory;
+import com.jaspersoft.jasperserver.dto.resources.ClientJndiJdbcDataSource;
 import com.jaspersoft.jasperserver.remote.exception.IllegalParameterValueException;
+import com.jaspersoft.jasperserver.remote.resources.converters.JndiJdbcDataSourceResourceConverter;
+import com.jaspersoft.jasperserver.remote.resources.converters.ToServerConversionOptions;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Service;
-
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.sql.DataSource;
-import java.sql.Connection;
+import javax.annotation.Resource;
 import java.sql.SQLException;
 import java.util.Map;
 
@@ -37,33 +38,30 @@ import java.util.Map;
  * <p></p>
  *
  * @author yaroslav.kovalchyk
- * @version $Id: JndiConnectionStrategy.java 44312 2014-04-09 14:30:12Z vsabadosh $
+ * @version $Id: JndiConnectionStrategy.java 50011 2014-10-09 16:57:26Z vzavadskii $
  */
 @Service
-public class JndiConnectionStrategy implements ConnectionManagementStrategy<JndiConnection> {
+public class JndiConnectionStrategy implements ConnectionManagementStrategy<ClientJndiJdbcDataSource> {
     protected final Log log = LogFactory.getLog(getClass());
+    @Resource(name = "jndiJdbcDataSourceServiceFactory")
+    private ReportDataSourceServiceFactory dataSourceFactory;
+    @Resource
+    private JndiJdbcDataSourceResourceConverter dataSourceResourceConverter;
 
     @Override
-    public JndiConnection createConnection(JndiConnection connectionDescription, Map<String, Object> data) throws IllegalParameterValueException {
-        Connection conn = null;
+    public ClientJndiJdbcDataSource createConnection(ClientJndiJdbcDataSource connectionDescription, Map<String, Object> data) throws IllegalParameterValueException {
         boolean passed = false;
-        Exception exception = null;
+        Throwable exception = null;
+        JndiJdbcReportDataSource jndiJdbcReportDataSource = dataSourceResourceConverter.
+                toServer(connectionDescription, ToServerConversionOptions.getDefault().setSuppressValidation(true));
+
         try {
-            Context ctx = new InitialContext();
-            DataSource dataSource = (DataSource) ctx.lookup("java:comp/env/" + connectionDescription.getJndiName());
-            conn = dataSource.getConnection();
-            if (conn != null) {
-                passed = true;
-            }
-        } catch(Exception e) {
+            passed = ((BaseJdbcDataSource)dataSourceFactory.createService(jndiJdbcReportDataSource)).testConnection();
+        } catch (SQLException vex) {
+            if (vex.getMessage().indexOf("[JI_CONNECTION_VALID]") >= 0) passed = true;
+            exception = vex;
+        } catch(Throwable e) {
             exception = e;
-        } finally {
-            if(conn != null)
-                try {
-                    conn.close();
-                } catch (SQLException e) {
-                    log.error("Couldn't disconnect JNDI connection", e);
-                }
         }
         if(!passed){
             throw new ConnectionFailedException(connectionDescription.getJndiName(), "jndiName", "Invalid JNDI name: "
@@ -73,18 +71,19 @@ public class JndiConnectionStrategy implements ConnectionManagementStrategy<Jndi
     }
 
     @Override
-    public void deleteConnection(JndiConnection connectionDescription, Map<String, Object> data) {
+    public void deleteConnection(ClientJndiJdbcDataSource connectionDescription, Map<String, Object> data) {
     }
 
     @Override
-    public JndiConnection modifyConnection(JndiConnection newConnectionDescription, JndiConnection oldConnectionDescription, Map<String, Object> data) throws IllegalParameterValueException {
+    public ClientJndiJdbcDataSource modifyConnection(ClientJndiJdbcDataSource newConnectionDescription, ClientJndiJdbcDataSource oldConnectionDescription, Map<String, Object> data) throws IllegalParameterValueException {
         // here is nothing to update, just check if it can be connected.
         return createConnection(newConnectionDescription, data);
     }
 
     @Override
-    public JndiConnection secureGetConnection(JndiConnection connectionDescription, Map<String, Object> data) {
+    public ClientJndiJdbcDataSource secureGetConnection(ClientJndiJdbcDataSource connectionDescription, Map<String, Object> data) {
         // no hidden attributes
         return connectionDescription;
     }
+
 }

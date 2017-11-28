@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2012 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -40,12 +40,15 @@ import java.util.Properties;
 
 /**
  * @author Ivan Chan (ichan@jaspersoft.com)
- * @version $Id: CassandraTeiidConnectorImpl.java 45722 2014-05-14 10:24:22Z sergey.prilukin $
+ * @version $Id: CassandraTeiidConnectorImpl.java 48307 2014-08-15 21:38:37Z ichan $
  */
 public class CassandraTeiidConnectorImpl implements TeiidDataSource {
 
     String address;
     String keyspace;
+    String username;
+    String password;
+    int port;
     String dataSourceName;
     TranslatorConfig translatorConfig;
     private Map<String, String> importPropertyMap;
@@ -65,6 +68,30 @@ public class CassandraTeiidConnectorImpl implements TeiidDataSource {
 
     public void setKeyspace(String keyspace) {
         this.keyspace = keyspace;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    public void setPort(int port) {
+        this.port = port;
     }
 
     public TranslatorConfig getTranslatorConfig() {
@@ -93,7 +120,7 @@ public class CassandraTeiidConnectorImpl implements TeiidDataSource {
     * returns connector name which use for reference in teiid connector manager repository (sub data source id)
     */
     public String getConnectorName() {
-        return (address + keyspace).hashCode() + "";
+        return (address + keyspace + username + port).hashCode() + "";
     }
 
     /*
@@ -113,6 +140,9 @@ public class CassandraTeiidConnectorImpl implements TeiidDataSource {
         CassandraManagedConnectionFactory cassandraManagedConnectionFactory = new CassandraManagedConnectionFactory();
         cassandraManagedConnectionFactory.setAddress(address);
         cassandraManagedConnectionFactory.setKeyspace(keyspace);
+        cassandraManagedConnectionFactory.setUsername(username);
+        cassandraManagedConnectionFactory.setPassword(password);
+        cassandraManagedConnectionFactory.setPort(port);
         translatorConfig.setupTranslator();
         return cassandraManagedConnectionFactory.createConnectionFactory();
     }
@@ -121,6 +151,9 @@ public class CassandraTeiidConnectorImpl implements TeiidDataSource {
         CassandraManagedConnectionFactory cassandraManagedConnectionFactory = new CassandraManagedConnectionFactory();
         cassandraManagedConnectionFactory.setAddress((String)map.get("hostname"));
         cassandraManagedConnectionFactory.setKeyspace((String)map.get("keyspace"));
+        cassandraManagedConnectionFactory.setUsername((String) map.get("username"));
+        cassandraManagedConnectionFactory.setPassword((String) map.get("password"));
+        cassandraManagedConnectionFactory.setPort(new Integer((String)map.get("port")).intValue());
         return cassandraManagedConnectionFactory.createConnectionFactory();
     }
 

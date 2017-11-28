@@ -45,7 +45,12 @@ fieldset .sectionHeader {
 	padding-left: 10px;
 	position:relative;
 }
-
+.groupName {
+    color: #666;
+    margin-bottom: 7px;
+    margin-left: -6px;
+    font-weight: bold;
+}
 .group legend {
 	margin-bottom:6px;
 	margin-left: -10px;
@@ -197,6 +202,28 @@ fieldset .sectionHeader {
 /* END two line controls */
 
 
+/* START multiple inputs on one row, new for data sources in Emerald 3 */
+.inlineControls {
+    margin-left: 4px;
+}
+.inlineControls .group {
+    margin: 10px 10px 0;
+}
+
+.group.inputRow {
+	display:block;
+	overflow:hidden;
+	padding-left:0;
+}
+
+.group.inputRow > .group {
+	float:left;
+}		
+
+.group.inputRow .control {
+	margin-bottom:0px;
+}
+/* END multiple inputs on one row controls */
 
 .input,
 .select,
@@ -265,6 +292,14 @@ select,
 	height:auto;
 	padding:8px;
 	margin-top:4px;
+}
+
+.sourceDialogNew .itemDescription {
+    background-color:#EEEEEE;
+    border:1px solid #E0E0E0;
+    height: 50px;
+    padding:8px;
+    margin: 6px 0 0;
 }
 
 select,
@@ -390,10 +425,13 @@ input + label {
 	width: 97%;
 }
 
-
 .control.checkBox,
 .control.radio {
 	white-space: normal;
+}
+
+.control.checkBox.toggle {
+	margin-bottom:16px;
 }
 
 .checkBox .wrap,
@@ -478,6 +516,10 @@ and (max-device-width : 1024px) {
 	margin-top:12px;
 }
 
+.section .subgroup {
+	margin-left:20px;
+}
+
 .section.noTitle > .group {
 	margin-left:0;
 	margin-top:18px;
@@ -502,6 +544,10 @@ and (max-device-width : 1024px) {
 .section > .group.noIndent {
 	margin-left:0;
 	padding-left:0;
+}
+
+.section.last {
+	margin-bottom:24px;
 }
 
 .section .list.inputSet .inputSet {
@@ -1267,6 +1313,7 @@ http://www.dynarch.com/projects/calendar/old/
 .control.searchLockup>.wrap>input[type=text] {
 	background:none;
 	border:none;
+    margin-right: 46px;
 }
 
 #globalSearch.control.searchLockup>.wrap>input[type=text] {
@@ -1566,7 +1613,7 @@ http://www.dynarch.com/projects/calendar/old/
     top: 32px;
 }
 
-/* sprite positions .tabSet.horizontal.buttons. .selected */
+/* .tabSet.horizontal.buttons. .selected */
 
 .tabSet.horizontal.buttons>.tab.selected>.button,
 .tabSet.horizontal.buttons>.tab.selected>.button.over,
@@ -1579,7 +1626,14 @@ http://www.dynarch.com/projects/calendar/old/
 	cursor:default;
 }
 
-/* sprite positions .tabSet.horizontal.buttons .over */
+/* Reverse Style Tabs, active tabs are white */
+.tabSet.reverse.horizontal.buttons>.tab.selected>.button,
+.tabSet.reverse.horizontal.buttons>.tab.selected>.button.over,
+.tabSet.reverse.horizontal.buttons>.tab.selected>.button.pressed {
+    background-color: #FFFFFF;
+}
+
+/* .tabSet.horizontal.buttons .over */
 
 .tabSet.horizontal.buttons .button.over {
 	/* gradient end values are #fba82a and #fb7c24 */
@@ -1590,7 +1644,7 @@ http://www.dynarch.com/projects/calendar/old/
 	background: url("images/tabs_horizontal_sprite.png") repeat-x scroll 0 0 #fb7c24;
 }
 
-/* sprite positions .tabSet.horizontal.buttons .pressed */
+/* .tabSet.horizontal.buttons .pressed */
 
 .tabSet.horizontal.buttons .button.pressed {
 	/* gradient end values are #fb7c24 and #f6a429 */
@@ -1644,14 +1698,6 @@ http://www.dynarch.com/projects/calendar/old/
 	font-weight:bolder;
 	color:#666666;
 }
-
-	/* sprite positions .selected */
-.tabSet.horizontal.buttons>.formulaBuilderTab.tab.selected>.button,
-.tabSet.horizontal.buttons>.formulaBuilderTab.tab.selected>.button.over,
-.tabSet.horizontal.buttons>.formulaBuilderTab.tab.selected>.button.pressed {
-	background-color: #FFFFFF;
-}
-
 
 #chartContainer {
     position:absolute;
@@ -1957,4 +2003,11 @@ input.hasCalendar2[readonly] {
     border-color: #848484 #C1C1C1 #E1E1E1;
     border-style: solid;
     border-width: 1px;
+}
+
+.sourceDialogNew.overlay .control.searchLockup>.wrap>input[type=text]{
+    width: 100%;
+    margin-right: 0;
+    box-sizing: border-box;
+    padding-right: 23px;
 }

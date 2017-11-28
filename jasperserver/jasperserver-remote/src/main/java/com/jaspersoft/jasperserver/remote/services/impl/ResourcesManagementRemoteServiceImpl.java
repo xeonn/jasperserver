@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -41,7 +41,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.security.AccessDeniedException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletResponse;
@@ -51,7 +51,7 @@ import java.util.regex.Pattern;
 
 /**
  * @author Yaroslav.Kovalchyk
- * @version $Id: ResourcesManagementRemoteServiceImpl.java 23955 2012-05-30 09:08:15Z ykovalchyk $
+ * @version $Id: ResourcesManagementRemoteServiceImpl.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
 @Component("resourcesManagementRemoteService")
 public class ResourcesManagementRemoteServiceImpl implements ResourcesManagementRemoteService {

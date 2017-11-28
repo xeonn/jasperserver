@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -27,7 +27,7 @@ import com.jaspersoft.jasperserver.api.JSShowOnlyErrorMessage;
  * {@link JSShowOnlyErrorMessage}
  *
  * @author Sergey Prilukin
- * @version $Id: UIExceptionRouter.java 24178 2012-06-18 14:45:54Z sergey.prilukin $
+ * @version $Id: UIExceptionRouter.java 47331 2014-07-18 09:13:06Z kklein $
  */
 public interface UIExceptionRouter {
     public JSShowOnlyErrorMessage getUIException(Exception cause);

@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005 - 2009 Jaspersoft Corporation. All rights  reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
 * http://www.jaspersoft.com.
 *
 * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -16,7 +16,7 @@
 * GNU Affero  General Public License for more details.
 *
 * You should have received a copy of the GNU Affero General Public  License
-* along with this program.&nbsp; If not, see <http://www.gnu.org/licenses/>.
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 package com.jaspersoft.jasperserver.api.common.domain.jaxb;
 
@@ -31,7 +31,7 @@ import java.util.List;
  * Enumeration should implement NamedPropertyHolder interface.
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: AbstractEnumXmlAdapter.java 30161 2013-03-22 19:20:15Z inesterenko $
+ * @version $Id: AbstractEnumXmlAdapter.java 49286 2014-09-23 13:32:25Z ykovalchyk $
  */
 public abstract class AbstractEnumXmlAdapter<PropertyType> extends XmlAdapter<String, PropertyType>{
      @Override

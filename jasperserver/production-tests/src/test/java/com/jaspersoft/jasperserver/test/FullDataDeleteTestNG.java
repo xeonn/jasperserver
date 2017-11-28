@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -58,6 +58,8 @@ public class FullDataDeleteTestNG extends BaseServiceSetupTestNG {
 	public void deleteFullDataResources() throws Exception {
         m_logger.info("deleteFullDataResources() called");
 
+        // delete a interactive folder and its resources
+        deleteInteractiveReportResources();
         deleteOlapConnectionResources();
         deleteUserAuthorityServiceTestResources();
         deleteContentRepositoryTestResources();
@@ -283,9 +285,6 @@ public class FullDataDeleteTestNG extends BaseServiceSetupTestNG {
         // delete a sample image and images folder
         deleteImagesFolderAndSampleImage();
 
-        // delete a interactive folder and its resources
-        deleteInteractiveFolderAndReportResources();
-
         // delete the reports folder
         m_logger.info("deleteHibernateRepositoryReportResources() => deleting /reports");
         getUnsecureRepositoryService().deleteFolder(null, "/reports");
@@ -325,7 +324,7 @@ public class FullDataDeleteTestNG extends BaseServiceSetupTestNG {
         getUnsecureRepositoryService().deleteFolder(null, "/images");
     }
 
-    private void deleteInteractiveFolderAndReportResources() {
+    private void deleteInteractiveReportResources() {
         deleteCustomersReport();
         deleteCustomersData();
         deleteCustomersDataAdapter();

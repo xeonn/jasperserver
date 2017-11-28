@@ -1,5 +1,5 @@
 <%--
-  ~ Copyright (C) 2005 - 2014 Jaspersoft Corporation. All rights reserved.
+  ~ Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
   ~ http://www.jaspersoft.com.
   ~
   ~ Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -23,7 +23,7 @@
 
 <jsp:include page="setScriptOptimizationProps.jsp"/>
 
-<script type="text/javascript" src="${scriptsUri}/lib/require-2.1.10.js"></script>
+<script type="text/javascript" src="${scriptsUri}/bower_components/requirejs/require.js"></script>
 <script type="text/javascript" src="${scriptsUri}/require.config.js"></script>
 <script type="text/javascript">
     require.config({
@@ -32,17 +32,18 @@
 </script>
 
 <%-- Preload  jQuery since some plugins assume it's global --%>
-<script type="text/javascript" src="${scriptsUri}/lib/jquery-1.11.0.js"></script>
+<script type="text/javascript" src="${scriptsUri}/bower_components/jquery/dist/jquery.js"></script>
 
 <c:if test="${optimizeJavascript == true}">
     <%--
         Prototypejs is excluded from uglifing since it has troubles with uglifying.
         So in case if js optimization is enabled - load it as usual javascript file from not optimized sources.
     --%>
-    <script type="text/javascript" src="${notOptimizedScriptsUri}/lib/prototype-1.7.1-patched.js"></script>
+    <script type="text/javascript" src="${notOptimizedScriptsUri}/bower_components/prototype/dist/prototype.js"></script>
 
     <%-- Hack to skip loading of prototype from optimized folder since it's already loaded--%>
     <script type="text/javascript">
         define("prototype", $);
     </script>
 </c:if>
+

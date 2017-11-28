@@ -20,60 +20,48 @@
 */
 package com.jaspersoft.jasperserver.remote.connection;
 
-import com.jaspersoft.jasperserver.api.JSException;
-import com.jaspersoft.jasperserver.api.common.service.JdbcDriverService;
-import com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl.AwsDataSourceService;
-import com.jaspersoft.jasperserver.api.engine.jasperreports.util.AwsDataSourceRecovery;
+import com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl.BaseJdbcDataSource;
 import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.AwsReportDataSource;
+import com.jaspersoft.jasperserver.api.metadata.jasperreports.service.ReportDataSourceServiceFactory;
 import com.jaspersoft.jasperserver.dto.resources.ClientAwsDataSource;
 import com.jaspersoft.jasperserver.remote.exception.IllegalParameterValueException;
 import com.jaspersoft.jasperserver.remote.resources.converters.AwsDataSourceResourceConverter;
 import com.jaspersoft.jasperserver.remote.resources.converters.ToServerConversionOptions;
-import org.apache.commons.lang.exception.ExceptionUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.stereotype.Service;
 
+import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.net.ConnectException;
-import java.net.SocketTimeoutException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+
 import java.util.Map;
 
 /**
  * <p></p>
  *
  * @author yaroslav.kovalchyk
- * @version $Id: AwsConnectionStrategy.java 42684 2014-03-06 14:26:22Z ykovalchyk $
+ * @version $Id: AwsConnectionStrategy.java 50011 2014-10-09 16:57:26Z vzavadskii $
  */
 @Service
 public class AwsConnectionStrategy implements ConnectionManagementStrategy<ClientAwsDataSource> {
-    private final static Log log = LogFactory.getLog(AwsConnectionStrategy.class);
-    @Resource
-    private JdbcDriverService jdbcDriverService;
     @Resource
     private MessageSource messageSource;
     @Resource(name = "concreteRepository")
     private RepositoryService repository;
     @Resource
-    private AwsDataSourceRecovery awsDataSourceRecovery;
-    @Resource
     private AwsDataSourceResourceConverter awsDataSourceResourceConverter;
+    @Resource(name = "awsDataSourceServiceFactory")
+    private ReportDataSourceServiceFactory awsDataSourceFactory;
 
     @Override
     public ClientAwsDataSource createConnection(ClientAwsDataSource connectionDescription, Map<String, Object> data) throws IllegalParameterValueException {
-        Connection conn = null;
         boolean passed = false;
         Exception exception = null;
+
+        AwsReportDataSource awsReportDataSource = awsDataSourceResourceConverter.toServer(connectionDescription,
+                ToServerConversionOptions.getDefault().setSuppressValidation(true));
+
         try {
-            jdbcDriverService.register(connectionDescription.getDriverClass());
             String passwordSubstitution = messageSource.getMessage("input.password.substitution", null,
                     LocaleContextHolder.getLocale());
 
@@ -87,53 +75,21 @@ public class AwsConnectionStrategy implements ConnectionManagementStrategy<Clien
             }
             if ((password == null || password.equals(passwordSubstitution)) && existingDs != null) {
                 connectionDescription.setPassword(existingDs.getPassword());
+                awsReportDataSource.setPassword(existingDs.getPassword());
             }
             if ((secretKey == null || secretKey.equals(passwordSubstitution)) && existingDs != null) {
                 connectionDescription.setSecretKey(existingDs.getAWSSecretKey());
+                awsReportDataSource.setAWSSecretKey(existingDs.getAWSSecretKey());
             }
-            awsDataSourceRecovery.createAwsDSSecurityGroup(awsDataSourceResourceConverter
-                    .toServer(connectionDescription, ToServerConversionOptions.getDefault()));
-            conn = establishConnection(connectionDescription.getConnectionUrl(),
-                    connectionDescription.getUsername(), connectionDescription.getPassword());
-            if (conn != null) {
-                passed = true;
-            }
+
+            passed = ((BaseJdbcDataSource)awsDataSourceFactory.createService(awsReportDataSource)).testConnection();
         } catch (Exception e) {
             exception = e;
-        } finally {
-            if (conn != null) {
-                try {
-                    conn.close();
-                } catch (SQLException e) {
-                    log.error("Couldn't disconnect AWS connection", e);
-                }
-            }
         }
         if (!passed) {
-            if (exception != null) {
-                Throwable throwable = ExceptionUtils.getRootCause(exception);
-                if (throwable instanceof ConnectException || throwable instanceof SocketTimeoutException ||
-                        (exception instanceof SQLException && ((SQLException) exception).getSQLState().
-                                startsWith(AwsDataSourceService.SQL_STATE_CLASS))) {
-                    final StringWriter result = new StringWriter();
-                    final PrintWriter traceWriter = new PrintWriter(result);
-                    exception.printStackTrace(traceWriter);
-                    final String traceString = result.toString();
-                    throw new IllegalParameterValueException(
-                            "Invalid AWS connection information",
-                            "awsDataSource",
-                            connectionDescription.toString(),
-                            messageSource.getMessage("aws.exception.datasource.recovery.timeout", null, LocaleContextHolder.getLocale()),
-                            traceString);
-                }
-            }
             throw new ConnectionFailedException(connectionDescription, exception);
         }
         return connectionDescription;
-    }
-
-    protected Connection establishConnection(String url, String username, String password) throws SQLException {
-        return DriverManager.getConnection(url, username, password);
     }
 
     @Override

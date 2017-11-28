@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2012 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -23,30 +23,59 @@ package com.jaspersoft.jasperserver.api.engine.jasperreports.util;
 
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.services.ec2.AmazonEC2Client;
-import com.amazonaws.services.ec2.model.*;
+import com.amazonaws.services.ec2.model.AuthorizeSecurityGroupIngressRequest;
+import com.amazonaws.services.ec2.model.CreateSecurityGroupRequest;
+import com.amazonaws.services.ec2.model.DescribeSecurityGroupsResult;
+import com.amazonaws.services.ec2.model.IpPermission;
+import com.amazonaws.services.ec2.model.RevokeSecurityGroupIngressRequest;
+import com.amazonaws.services.ec2.model.SecurityGroup;
 import com.amazonaws.services.rds.AmazonRDSClient;
-import com.amazonaws.services.rds.model.*;
+import com.amazonaws.services.rds.model.AuthorizeDBSecurityGroupIngressRequest;
+import com.amazonaws.services.rds.model.CreateDBSecurityGroupRequest;
+import com.amazonaws.services.rds.model.DBInstance;
+import com.amazonaws.services.rds.model.DBSecurityGroup;
+import com.amazonaws.services.rds.model.DBSecurityGroupMembership;
+import com.amazonaws.services.rds.model.DBSecurityGroupNotFoundException;
+import com.amazonaws.services.rds.model.DBSubnetGroup;
+import com.amazonaws.services.rds.model.DescribeDBInstancesRequest;
+import com.amazonaws.services.rds.model.DescribeDBInstancesResult;
+import com.amazonaws.services.rds.model.DescribeDBSecurityGroupsRequest;
+import com.amazonaws.services.rds.model.DescribeDBSecurityGroupsResult;
 import com.amazonaws.services.rds.model.IPRange;
-//import com.amazonaws.services.redshift.AmazonRedshiftClient;
-//import com.amazonaws.services.redshift.model.*;
+import com.amazonaws.services.rds.model.ModifyDBInstanceRequest;
+import com.amazonaws.services.rds.model.RevokeDBSecurityGroupIngressRequest;
 import com.amazonaws.services.rds.model.VpcSecurityGroupMembership;
 import com.amazonaws.services.redshift.AmazonRedshiftClient;
-import com.amazonaws.services.redshift.model.*;
+import com.amazonaws.services.redshift.model.AuthorizeClusterSecurityGroupIngressRequest;
+import com.amazonaws.services.redshift.model.Cluster;
+import com.amazonaws.services.redshift.model.ClusterSecurityGroup;
+import com.amazonaws.services.redshift.model.ClusterSecurityGroupMembership;
+import com.amazonaws.services.redshift.model.ClusterSecurityGroupNotFoundException;
+import com.amazonaws.services.redshift.model.CreateClusterSecurityGroupRequest;
+import com.amazonaws.services.redshift.model.DescribeClusterSecurityGroupsRequest;
+import com.amazonaws.services.redshift.model.DescribeClusterSecurityGroupsResult;
+import com.amazonaws.services.redshift.model.DescribeClustersRequest;
+import com.amazonaws.services.redshift.model.DescribeClustersResult;
+import com.amazonaws.services.redshift.model.ModifyClusterRequest;
+import com.amazonaws.services.redshift.model.RevokeClusterSecurityGroupIngressRequest;
 import com.jaspersoft.jasperserver.api.JSAwsDataSourceRecoveryException;
 import com.jaspersoft.jasperserver.api.JSException;
-import com.jaspersoft.jasperserver.api.JSShowOnlyErrorMessage;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.AwsReportDataSource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
-import static org.apache.commons.lang.StringUtils.isNotEmpty;
 
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static org.apache.commons.lang.StringUtils.isEmpty;
+import static org.apache.commons.lang.StringUtils.isNotEmpty;
+
+//import com.amazonaws.services.redshift.AmazonRedshiftClient;
+//import com.amazonaws.services.redshift.model.*;
 
 /**
  * @author vsabadosh
@@ -54,6 +83,7 @@ import static org.apache.commons.lang.StringUtils.isEmpty;
 public class AwsDataSourceRecovery {
 
     public static final String RDS = "rds";
+    public static final String EC2 = "ec2";
     public static final String Redshift = "redshift";
 
     private List<String> awsRegions;
@@ -61,6 +91,7 @@ public class AwsDataSourceRecovery {
     private AwsProperties awsProperties;
 
     private AwsEc2MetadataClient awsEc2MetadataClient;
+    private AwsCredentialUtil awsCredentialUtil;
 
     public static String DB_VPC_ID = "DB_VPC_ID";
     public static String DB_REGION = "DB_REGION";
@@ -92,7 +123,8 @@ public class AwsDataSourceRecovery {
                 }
             } catch (Exception ex) {
                 String errorMessage = messageSource.getMessage("aws.exception.datasource.recovery.base",
-                        new String[]{awsReportDataSource.getURIString()}, LocaleContextHolder.getLocale()) + "\n" + ex.getMessage();
+                        new String[]{awsReportDataSource.getName() != null ? awsReportDataSource.getURIString() : ""},
+                        LocaleContextHolder.getLocale()) + "\n" + ex.getMessage();
                 logger.error(errorMessage);
                 throw new JSAwsDataSourceRecoveryException(errorMessage);
             }
@@ -100,7 +132,7 @@ public class AwsDataSourceRecovery {
     }
 
     private void createRDSSecurityGroup(AwsReportDataSource awsReportDataSource) throws Exception {
-        AWSCredentials awsCredentials = AwsCredentialUtil.getAWSCredentials(awsReportDataSource.getAWSAccessKey(),
+        AWSCredentials awsCredentials = awsCredentialUtil.getAWSCredentials(awsReportDataSource.getAWSAccessKey(),
                 awsReportDataSource.getAWSSecretKey(), awsReportDataSource.getRoleARN());
 
         AmazonRDSClient rdsClient = new AmazonRDSClient(awsCredentials);
@@ -224,7 +256,7 @@ public class AwsDataSourceRecovery {
 
     private void createRedshiftSecurityGroup(AwsReportDataSource awsReportDataSource) throws Exception {
 
-        AWSCredentials awsCredentials = AwsCredentialUtil.getAWSCredentials(awsReportDataSource.getAWSAccessKey(),
+        AWSCredentials awsCredentials = awsCredentialUtil.getAWSCredentials(awsReportDataSource.getAWSAccessKey(),
                 awsReportDataSource.getAWSSecretKey(), awsReportDataSource.getRoleARN());
 
         AmazonRedshiftClient redshiftClient = new AmazonRedshiftClient(awsCredentials);
@@ -386,10 +418,14 @@ public class AwsDataSourceRecovery {
     }
     
     private String recoverVpcSecurityGroup(AwsReportDataSource awsReportDataSource, String vpcId, String ingressPublicIp) {
-        AWSCredentials awsCredentials = AwsCredentialUtil.getAWSCredentials(awsReportDataSource.getAWSAccessKey(),
+        AWSCredentials awsCredentials = awsCredentialUtil.getAWSCredentials(awsReportDataSource.getAWSAccessKey(),
                 awsReportDataSource.getAWSSecretKey(), awsReportDataSource.getRoleARN());
         //Security
         AmazonEC2Client amazonEc2Client = new AmazonEC2Client(awsCredentials);
+        String endpoint = awsReportDataSource.getAWSRegion();
+        if (endpoint != null) {
+            amazonEc2Client.setEndpoint(EC2 + "." + endpoint);
+        }
 
         SecurityGroup vpcSecurityGroup = null;
         try {
@@ -488,4 +524,7 @@ public class AwsDataSourceRecovery {
         this.awsProperties = awsProperties;
     }
 
+    public void setAwsCredentialUtil(AwsCredentialUtil awsCredentialUtil) {
+        this.awsCredentialUtil = awsCredentialUtil;
+    }
 }

@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005 - 2009 Jaspersoft Corporation. All rights  reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
 * http://www.jaspersoft.com.
 *
 * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -16,7 +16,7 @@
 * GNU Affero  General Public License for more details.
 *
 * You should have received a copy of the GNU Affero General Public  License
-* along with this program.&nbsp; If not, see <http://www.gnu.org/licenses/>.
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 package com.jaspersoft.jasperserver.dto.resources;
 
@@ -27,7 +27,7 @@ import java.util.List;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: ResourceMediaType.java 45722 2014-05-14 10:24:22Z sergey.prilukin $
+ * @version $Id: ResourceMediaType.java 51276 2014-11-09 17:44:57Z ktsaregradskyi $
  */
 public interface ResourceMediaType {
     public static final String RESOURCE_MEDIA_TYPE_PREFIX = "application/repository.";
@@ -125,6 +125,10 @@ public interface ResourceMediaType {
     public static final String DASHBOARD_CLIENT_TYPE = "dashboard";
     public static final String DASHBOARD_JSON = RESOURCE_MEDIA_TYPE_PREFIX + DASHBOARD_CLIENT_TYPE + RESOURCE_JSON_TYPE;
     public static final String DASHBOARD_XML = RESOURCE_MEDIA_TYPE_PREFIX + DASHBOARD_CLIENT_TYPE + RESOURCE_XML_TYPE;
+
+    public static final String LEGACY_DASHBOARD_CLIENT_TYPE = "legacyDashboard";
+    public static final String LEGACY_DASHBOARD_JSON = RESOURCE_MEDIA_TYPE_PREFIX + LEGACY_DASHBOARD_CLIENT_TYPE + RESOURCE_JSON_TYPE;
+    public static final String LEGACY_DASHBOARD_XML = RESOURCE_MEDIA_TYPE_PREFIX + LEGACY_DASHBOARD_CLIENT_TYPE + RESOURCE_XML_TYPE;
     // reportOptions
     public static final String REPORT_OPTIONS_CLIENT_TYPE = "reportOptions";
     public static final String REPORT_OPTIONS_JSON = RESOURCE_MEDIA_TYPE_PREFIX + REPORT_OPTIONS_CLIENT_TYPE + RESOURCE_JSON_TYPE;

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2012 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -24,6 +24,7 @@ package com.jaspersoft.jasperserver.export;
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.ProfileAttribute;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.client.ProfileAttributeImpl;
+import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributeCategory;
 import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributeService;
 import com.jaspersoft.jasperserver.api.metadata.user.service.UserAuthorityService;
 
@@ -38,15 +39,27 @@ public class ProfileAttributeServiceMock implements ProfileAttributeService {
     private UserAuthorityService userAuthorityService;
     private ProfileAttribute attribute;
 
+    @Override
     public ProfileAttribute getProfileAttribute(ExecutionContext executionContext, ProfileAttribute profileAttribute) {
         return attribute;
     }
 
+    @Override
     public List getProfileAttributesForPrincipal(ExecutionContext executionContext, Object o) {
         return null;  
     }
 
-	/**
+    @Override
+    public List<ProfileAttribute> getCurrentUserProfileAttributes(ProfileAttributeCategory category) {
+        return null;
+    }
+
+    @Override
+    public List getProfileAttributesForPrincipal(ExecutionContext context, Object principal, boolean effectiveAttributes) {
+        return null;
+    }
+
+    /**
 	 * Find all matching attributes for the principal extracted from
 	 * SecurityContextHolder.getContext().getAuthentication()
 	 * token.

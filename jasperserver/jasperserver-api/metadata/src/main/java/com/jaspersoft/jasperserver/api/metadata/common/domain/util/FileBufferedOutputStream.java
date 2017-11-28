@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2013 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -52,7 +52,7 @@ import org.apache.commons.logging.LogFactory;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: FileBufferedOutputStream.java 32262 2013-05-31 16:05:18Z inesterenko $
+ * @version $Id: FileBufferedOutputStream.java 47331 2014-07-18 09:13:06Z kklein $
  */
 public class FileBufferedOutputStream extends OutputStream 
 {

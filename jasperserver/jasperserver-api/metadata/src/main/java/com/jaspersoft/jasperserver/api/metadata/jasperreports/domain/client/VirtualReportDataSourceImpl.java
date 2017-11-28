@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2012 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -29,7 +29,7 @@ import java.util.Set;
 
 /**
  * @author Ivan Chna (ichan@jaspersoft.com)
- * @version $Id: VirtualReportDataSourceImpl.java 25072 2012-10-03 01:29:37Z ichan $
+ * @version $Id: VirtualReportDataSourceImpl.java 47331 2014-07-18 09:13:06Z kklein $
  */
 public class VirtualReportDataSourceImpl extends ReportDataSourceImpl implements VirtualReportDataSource {
 

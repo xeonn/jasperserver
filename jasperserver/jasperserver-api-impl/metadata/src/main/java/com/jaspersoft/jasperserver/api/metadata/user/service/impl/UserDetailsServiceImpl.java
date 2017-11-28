@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -24,17 +24,19 @@ import com.jaspersoft.jasperserver.api.metadata.user.domain.impl.client.TenantAw
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.dao.DataAccessException;
-import org.springframework.security.userdetails.UserDetails;
-import org.springframework.security.userdetails.UserDetailsService;
-import org.springframework.security.userdetails.UsernameNotFoundException;
-import org.springframework.security.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.core.GrantedAuthority;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
 /**
  * @author bklawans from code written by swood
- * @version $Id: UserDetailsServiceImpl.java 19922 2010-12-11 14:59:51Z tmatyashovsky $
+ * @version $Id: UserDetailsServiceImpl.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
 public class UserDetailsServiceImpl implements UserDetailsService {
 
@@ -82,8 +84,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     }
     
     private UserDetails detailsFromList(List roles, String username) {
-		
-		GrantedAuthority[] authorities = roles == null ? new GrantedAuthority[0] : new GrantedAuthority[roles.size()];
+
+        Collection<GrantedAuthority> authorities = roles == null ? new ArrayList<GrantedAuthority>(0) : new ArrayList<GrantedAuthority>(roles.size());
 		
 		if (roles == null) {
 			return new UserDetailsImpl(authorities, username);
@@ -92,7 +94,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 		Iterator it = roles.iterator();
 		int i = 0;
 		while (it.hasNext()) {
-			authorities[i++] = new TenantAwareGrantedAuthority((String) it.next());
+			authorities.add(new TenantAwareGrantedAuthority((String) it.next()));
 		}
 		
 		return new UserDetailsImpl(authorities, username);
@@ -100,15 +102,15 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     }
     
     public static class UserDetailsImpl implements UserDetails {
-        private GrantedAuthority[] authorities;
+        private Collection<? extends GrantedAuthority> authorities;
         private String username;
         
-        public UserDetailsImpl(GrantedAuthority[] authorities, String username) {
+        public UserDetailsImpl(Collection<? extends GrantedAuthority> authorities, String username) {
             this.authorities = authorities;
             this.username = username;
         }
         
-        public GrantedAuthority[] getAuthorities() {
+        public Collection<? extends GrantedAuthority> getAuthorities() {
             return authorities;
         }
         

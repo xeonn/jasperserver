@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -46,6 +46,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
+import java.io.Serializable;
 import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Map;
@@ -56,11 +57,11 @@ import java.util.Set;
  * It provides support for the HTTP verbs GET, POST, PUT and DELETE.
  *
  * @author gtoffoli
- * @version $Id: RESTResource.java 28947 2013-02-26 15:02:08Z vsabadosh $
+ * @version $Id: RESTResource.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
 @Component("restResourceService")
 @Scope(value = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)
-public class RESTResource extends RESTAbstractService {
+public class RESTResource extends RESTAbstractService implements Serializable {
 
     private final static Log log = LogFactory.getLog(RESTResource.class);
     @Resource

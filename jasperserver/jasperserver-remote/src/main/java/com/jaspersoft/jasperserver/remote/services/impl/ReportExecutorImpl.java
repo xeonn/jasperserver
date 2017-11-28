@@ -1,23 +1,23 @@
 /*
-* Copyright (C) 2005 - 2009 Jaspersoft Corporation. All rights  reserved.
-* http://www.jaspersoft.com.
-*
-* Unless you have purchased  a commercial license agreement from Jaspersoft,
-* the following license terms  apply:
-*
-* This program is free software: you can redistribute it and/or  modify
-* it under the terms of the GNU Affero General Public License  as
-* published by the Free Software Foundation, either version 3 of  the
-* License, or (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-* GNU Affero  General Public License for more details.
-*
-* You should have received a copy of the GNU Affero General Public  License
-* along with this program.&nbsp; If not, see <http://www.gnu.org/licenses/>.
-*/
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
+ * http://www.jaspersoft.com.
+ *
+ * Unless you have purchased  a commercial license agreement from Jaspersoft,
+ * the following license terms  apply:
+ *
+ * This program is free software: you can redistribute it and/or  modify
+ * it under the terms of the GNU Affero General Public License  as
+ * published by the Free Software Foundation, either version 3 of  the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero  General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public  License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 package com.jaspersoft.jasperserver.remote.services.impl;
 
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
@@ -61,7 +61,6 @@ import org.springframework.stereotype.Service;
 import java.io.OutputStream;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -124,7 +123,8 @@ public class ReportExecutorImpl implements ReportExecutor {
             parameters.put(JRParameter.IS_IGNORE_PAGINATION, ignorePagination);
         }
         // run the report
-        ReportUnitResult reportUnitResult = strategy.runReport(report, parameters, engine, reportExecutionOptions);
+        ReportUnitResult reportUnitResult = strategy.runReport(report, parameters, engine,
+                getJasperReportsContext(reportExecutionOptions.isInteractive()), reportExecutionOptions);
 
         if (reportUnitResult == null) {
             throw new RemoteException(new ErrorDescriptor.Builder()
@@ -149,7 +149,7 @@ public class ReportExecutorImpl implements ReportExecutor {
         ExecutionContextImpl ctx = new ExecutionContextImpl();
         ctx.setLocale(LocaleContextHolder.getLocale());
         ctx.setTimeZone(TimeZoneContextHolder.getTimeZone());
-        return ctx;
+        return ExecutionContextImpl.getRuntimeExecutionContext(ctx);
     }
 
     /**
@@ -215,12 +215,11 @@ public class ReportExecutorImpl implements ReportExecutor {
         // report type should correspond to concrete type of strategy. getStrategyForReport() assure that.
         // So, unchecked cast is safe
         @SuppressWarnings("unchecked")
-        public ReportUnitResult runReport(Resource reportResource, Map<String, Object> parameters, EngineService engine,
+        public ReportUnitResult runReport(Resource reportResource, Map<String, Object> parameters, EngineService engine, JasperReportsContext context,
                 ReportExecutionOptions options) {
             ReportType report = (ReportType) reportResource;
             Map<String, Object> convertedParameters = parameters != null ? RepositoryHelper.convertParameterValues(getConcreteReportURI(report), parameters, engine) : new HashMap<String, Object>();
-            ReportUnitRequest request = getReportUnitRequest(report, convertedParameters, options);
-            request.setAsynchronous(options.isAsync());
+            ReportUnitRequest request = getReportUnitRequest(report, convertedParameters, context, options);
             ExecutionContext executionContext = createExecutionContext();
             ReportUnitResult result = (ReportUnitResult) engine.execute(executionContext, request);
             persistDataSnapshot(executionContext, options, reportResource, request.getReportContext());
@@ -278,7 +277,7 @@ public class ReportExecutorImpl implements ReportExecutor {
             }
         }
 
-        protected ReportUnitRequest getReportUnitRequest(ReportType reportResource, Map<String, Object> parameters,
+        protected ReportUnitRequest getReportUnitRequest(ReportType reportResource, Map<String, Object> parameters, JasperReportsContext context,
                 ReportExecutionOptions options) {
             final ReportExecutionOptions executionOptions = options != null ? options : new ReportExecutionOptions();
             Map<String, Object> requestParams = new HashMap<String, Object>();
@@ -292,7 +291,7 @@ public class ReportExecutorImpl implements ReportExecutor {
                 executionOptions.setReportContext(reportContext);
             }
             if(executionOptions.getJasperReportsContext() == null){
-                executionOptions.setJasperReportsContext(getJasperReportsContext(options.isInteractive()));
+                executionOptions.setJasperReportsContext(context);
             }
             requestParams.put(JRParameter.REPORT_CONTEXT, executionOptions.getReportContext());
 
@@ -349,7 +348,7 @@ public class ReportExecutorImpl implements ReportExecutor {
     }
 
     protected interface RunReportStrategy {
-        ReportUnitResult runReport(Resource reportResource, Map<String, Object> parameters, EngineService engine,
+        ReportUnitResult runReport(Resource reportResource, Map<String, Object> parameters, EngineService engine, JasperReportsContext context,
                 ReportExecutionOptions options);
 
         ReportUnit getReportUnit(Resource reportResource);

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -26,10 +26,11 @@ import java.util.*;
 
 import com.jaspersoft.jasperserver.api.engine.common.service.ReportInputControlInformation;
 import com.jaspersoft.jasperserver.api.engine.common.service.ReportInputControlsInformation;
+import com.jaspersoft.jasperserver.api.engine.common.service.impl.QueryParameterInformation;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ReportInputControlsInformationImpl.java 23025 2012-04-06 10:22:59Z andy21ca $
+ * @version $Id: ReportInputControlsInformationImpl.java 50801 2014-10-29 00:20:56Z inesterenko $
  */
 public class ReportInputControlsInformationImpl implements
 		ReportInputControlsInformation, Serializable {

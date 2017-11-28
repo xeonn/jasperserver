@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2014 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -30,7 +30,7 @@ define(function (require) {
         featureDetection = require("common/util/featureDetection"),
         subDataSourceItemTemplate = require("text!dataSource/template/subDataSourceItemTemplate.htm");
 
-    require("dataSource/validation/backboneValidationExtension");
+   var Validation = require("backbone.validation");
 
     return Backbone.View.extend({
         events: {
@@ -48,7 +48,7 @@ define(function (require) {
                 tooltipText: this.model.get("uri")
             });
 
-            Backbone.Validation.bind(this, {
+            Validation.bind(this, {
                 valid: this.fieldIsValid,
                 invalid: this.fieldIsInvalid,
                 forceUpdate: true

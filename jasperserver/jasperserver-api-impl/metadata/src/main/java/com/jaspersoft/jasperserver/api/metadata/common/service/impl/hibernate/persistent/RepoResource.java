@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -39,7 +39,7 @@ import java.util.Set;
 
 /**
  * @author Teodor Danciu (teodord@users.sourceforge.net)
- * @version $Id: RepoResource.java 23813 2012-05-18 10:18:41Z ykovalchyk $
+ * @version $Id: RepoResource.java 50693 2014-10-26 23:00:43Z yuriy.plakosh $
  * 
  * @disabled_hibernate.class table="Resource" abstract="true"
  */
@@ -55,6 +55,7 @@ public abstract class RepoResource extends RepoResourceBase
 	private RepoFolder childrenFolder;
 
 	private Set newChildren;
+
 	
 	protected RepoResource() {
 	}

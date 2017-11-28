@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2014 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: utils.common.js 45453 2014-05-07 12:41:31Z agodovanets $
+ * @version: $Id: utils.common.js 7871 2014-10-03 15:07:22Z sergey.prilukin $
  */
 
 /**
@@ -3528,7 +3528,9 @@ var JSCookie = function(name, value, days) {
 };
 
 JSCookie.addVar('daysToExpiration', 30);
-JSCookie.addVar('cookieTemplate', new Template('#{name}=#{value}; expires={expires}; path=/;'));
+JSCookie.addVar('getCookieTemplate', function() {
+    return _.template('{{= name}}={{= value}}; expires={{= expires}}; path=/;')
+});
 
 JSCookie.addMethod('_getCookies', function() {
     var cookies = {};
@@ -3551,7 +3553,7 @@ JSCookie.addMethod('get', function() {
 });
 
 JSCookie.addMethod('_setCookie', function(name, value, days) {
-    document.cookie = this.cookieTemplate.evaluate({
+    document.cookie = this.getCookieTemplate()({
         name: name,
         value: encodeURI(new String(value)),
         expires: this._getExpiresDate(days).toGMTString()

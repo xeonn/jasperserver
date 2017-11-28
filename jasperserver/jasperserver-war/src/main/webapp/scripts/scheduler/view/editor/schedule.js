@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2014 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: schedule.js 43122 2014-03-18 12:44:22Z psavushchik $
+ * @version: $Id: schedule.js 7787 2014-09-19 13:11:00Z sergey.prilukin $
  */
 
 define('scheduler/view/editor/schedule', function(require){
@@ -29,8 +29,8 @@ define('scheduler/view/editor/schedule', function(require){
 	var Backbone = require('backbone'),
 		$ = require('jquery'),
 		config = require('jrs.configs'),
-		timepicker = require('jquery.timepicker'),
-		datepicker = require('jquery.datepicker.extensions'),
+		timepicker = require("common/jquery/extension/timepickerExt"),
+		datepicker = require('common/jquery/extension/datepickerExt'),
 		holydayCalView = require('scheduler/view/editor/holidayCal'),
 		holidayCalsCollection = require('scheduler/collection/holidayCals');
 

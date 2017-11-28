@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -36,7 +36,6 @@ import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService
 import com.jaspersoft.jasperserver.api.metadata.common.util.LockHandle;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.poi.util.IOUtils;
 
 import java.io.*;
 import java.util.*;
@@ -45,7 +44,7 @@ import java.util.zip.ZipOutputStream;
 
 /**
  * @author Ivan Chan (ichan@jaspersoft.com)
- * @version $Id: ReportExecutionJobFileSavingImpl.java 38725 2013-10-10 03:40:46Z carbiv $
+ * @version $Id: ReportExecutionJobFileSavingImpl.java 51369 2014-11-12 13:59:41Z sergey.prilukin $
  */
 public class ReportExecutionJobFileSavingImpl implements ReportExecutionJobFileSaving {
 
@@ -273,9 +272,22 @@ public class ReportExecutionJobFileSavingImpl implements ReportExecutionJobFileS
 			}
 			attachmentName = output.getFilename() + ".zip";
 		}
-        Map result = new HashMap<String, InputStream>();
-        result.put(attachmentName, IOUtils.toByteArray(attachmentData.getInputStream()));
-        return result;
+
+		//read the data from attachment and put them into a result map
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		InputStream inputStream = attachmentData.getInputStream();
+		byte[] attachmentBuffer = new byte[4096];
+		int read = 0;
+		while (read != -1) {
+			read = inputStream.read(attachmentBuffer);
+			if (read > 0) {
+				baos.write(attachmentBuffer, 0, read);
+			}
+		}
+
+		Map result = new HashMap<String, InputStream>();
+		result.put(attachmentName, baos.toByteArray());
+		return result;
     }
 
 //    in case the admin decided to block jobs from writing to the file system

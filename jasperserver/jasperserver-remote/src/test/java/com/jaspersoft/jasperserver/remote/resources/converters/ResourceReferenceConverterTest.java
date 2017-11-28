@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005 - 2009 Jaspersoft Corporation. All rights  reserved.
+* Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
 * http://www.jaspersoft.com.
 *
 * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -38,6 +38,7 @@ import com.jaspersoft.jasperserver.dto.resources.ClientReferenceable;
 import com.jaspersoft.jasperserver.dto.resources.ClientReferenceableDataType;
 import com.jaspersoft.jasperserver.dto.resources.ClientUriHolder;
 import com.jaspersoft.jasperserver.remote.exception.IllegalParameterValueException;
+import com.jaspersoft.jasperserver.remote.services.PermissionsService;
 import com.jaspersoft.jasperserver.war.common.ConfigurationBean;
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals;
 import org.mockito.invocation.InvocationOnMock;
@@ -53,12 +54,13 @@ import static org.testng.Assert.*;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: ResourceReferenceConverterTest.java 35226 2013-08-09 07:08:53Z inesterenko $
+ * @version $Id: ResourceReferenceConverterTest.java 51276 2014-11-09 17:44:57Z ktsaregradskyi $
  */
 public class ResourceReferenceConverterTest {
     private ResourceReferenceConverter converter;
     private ResourceConverterProvider resourceConverterProvider;
     private RepositoryService repositoryService;
+    private PermissionsService permissionsService;
     private ConfigurationBean configurationBean = new ConfigurationBean();
     private ToServerConversionOptions options = ToServerConversionOptions.getDefault();
 
@@ -67,7 +69,7 @@ public class ResourceReferenceConverterTest {
         configurationBean.setResourceIdNotSupportedSymbols("@#$%");
         resourceConverterProvider = mock(ResourceConverterProvider.class);
         repositoryService = mock(RepositoryService.class);
-        converter = new ResourceReferenceConverter(resourceConverterProvider, repositoryService, configurationBean);
+        converter = new ResourceReferenceConverter(resourceConverterProvider, repositoryService, permissionsService, configurationBean);
     }
 
     @Test

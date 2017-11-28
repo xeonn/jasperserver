@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2014 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: core.key.events.js 43122 2014-03-18 12:44:22Z psavushchik $
+ * @version: $Id: core.key.events.js 7828 2014-09-19 13:34:25Z sergey.prilukin $
  */
 
 /* 
@@ -238,7 +238,8 @@ document.observe('key:up', function(event){
 document.observe('key:left', function(event){
     var elem = event.element(), matched;
 
-    var selected = $(layoutModule.MAIN_NAVIGATION_ID).select("." + layoutModule.HOVERED_CLASS)[0];
+    var nav = $(layoutModule.MAIN_NAVIGATION_ID);
+    var selected = nav && nav.select("." + layoutModule.HOVERED_CLASS)[0]; // there is no main navigation in embedded mode
     if (selected) {
         Event.stop(event);
         var thisItem = selected.up(layoutModule.NAVIGATION_PATTERN);
@@ -261,7 +262,8 @@ document.observe('key:left', function(event){
 document.observe('key:right', function(event){
     var elem = event.element(), matched;
 
-    var selected = $(layoutModule.MAIN_NAVIGATION_ID).select("." + layoutModule.HOVERED_CLASS)[0];
+    var nav = $(layoutModule.MAIN_NAVIGATION_ID);
+    var selected = nav && nav.select("." + layoutModule.HOVERED_CLASS)[0]; // there is no main navigation in embedded mode
     if (selected) {
         Event.stop(event);
 

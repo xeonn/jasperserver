@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -22,17 +22,16 @@
 package com.jaspersoft.jasperserver.war.model.impl;
 
 
-import java.util.Iterator;
-import java.util.List;
-
+import com.jaspersoft.jasperserver.api.metadata.user.service.UserAuthorityService;
 import com.jaspersoft.jasperserver.war.model.TreeDataFilter;
 import com.jaspersoft.jasperserver.war.model.TreeNode;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 
-import org.springframework.security.Authentication;
-import com.jaspersoft.jasperserver.api.metadata.user.service.UserAuthorityService;
-import org.springframework.security.GrantedAuthority;
-import org.springframework.security.context.SecurityContextHolder;
-import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * @author achan
@@ -59,7 +58,7 @@ public class RepositoryExplorerTreeDataFilterImpl implements TreeDataFilter {
                 String uri = (String) iter.next();
                 if ((nodeUri.equalsIgnoreCase(uri)) || (nodeUri.indexOf(uri + "/") == 0)) {
                     Authentication existingAuth = SecurityContextHolder.getContext().getAuthentication();
-                    GrantedAuthority[] grantedAuthorities = existingAuth.getAuthorities();
+                    final Collection<? extends GrantedAuthority> grantedAuthorities = existingAuth.getAuthorities();
                     if (grantedAuthorities != null) {
                         for (GrantedAuthority grantedAuthority : grantedAuthorities) {
                             if (roleToShowTempFolder.equals(grantedAuthority.getAuthority())) {

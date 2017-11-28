@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -20,8 +20,8 @@
  */
 package com.jaspersoft.jasperserver.export.modules.auth.beans;
 
+import com.jaspersoft.jasperserver.api.common.crypto.Cipherer;
 import com.jaspersoft.jasperserver.api.common.util.spring.StaticApplicationContext;
-import com.jaspersoft.jasperserver.api.metadata.common.service.impl.Cipherer;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.ProfileAttribute;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.Role;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
@@ -41,7 +41,7 @@ import static com.jaspersoft.jasperserver.export.modules.repository.beans.Resour
 
 /**
  * @author tkavanagh
- * @version $Id: UserBean.java 37014 2013-09-09 20:38:27Z schubar $
+ * @version $Id: UserBean.java 51858 2014-12-06 20:46:19Z vsabadosh $
  */
 public class UserBean {
 

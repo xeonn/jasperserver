@@ -6,10 +6,7 @@
 
 	<!-- Backing action for edit data type flow -->
 	<bean id="editDataTypeAction" class="com.jaspersoft.jasperserver.war.action.EditDataTypeAction">
-		<property name="repository">
-			<ref bean="${bean.repositoryService}"/>
-		</property>
-		<property name="calendarFormatProvider" ref="messagesCalendarFormatProvider"/>
+		<property name="repository" ref="${bean.repositoryService}"/>
 		<property name="validator" ref="dataTypeValidator"/>
         <property name="messages" ref="messageSource"/>
         <property name="configuration" ref="configurationBean"/>

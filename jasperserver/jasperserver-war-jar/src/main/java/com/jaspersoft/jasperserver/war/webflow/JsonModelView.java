@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -34,7 +34,7 @@ import org.springframework.web.servlet.View;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: JsonModelView.java 44473 2014-04-14 12:16:30Z tdanciu $
+ * @version $Id: JsonModelView.java 47331 2014-07-18 09:13:06Z kklein $
  */
 public class JsonModelView implements View {
 

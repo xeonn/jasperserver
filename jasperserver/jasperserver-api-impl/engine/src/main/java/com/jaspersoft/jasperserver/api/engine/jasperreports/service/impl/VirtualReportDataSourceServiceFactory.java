@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2012 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -28,6 +28,7 @@ import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.AwsReportDa
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.VirtualReportDataSource;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportDataSource;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.service.ReportDataSourceService;
+import com.jaspersoft.jasperserver.api.metadata.jasperreports.service.ReportDataSourceServiceFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -36,13 +37,13 @@ import java.util.TimeZone;
 
 /**
  * @author Ivan Chan (ichan@jaspersoft.com)
- * @version $Id: VirtualReportDataSourceServiceFactory.java 44499 2014-04-14 23:42:20Z schubar $
+ * @version $Id: VirtualReportDataSourceServiceFactory.java 50011 2014-10-09 16:57:26Z vzavadskii $
  */
 public class VirtualReportDataSourceServiceFactory extends JdbcReportDataSourceServiceFactory {
 
 	private static final Log log = LogFactory.getLog(VirtualReportDataSourceServiceFactory.class);
     VirtualDataSourceHandler virtualDataSourceHandler;
-    AwsReportDataSourceServiceFactory awsDataSourceServiceFactory;
+    ReportDataSourceServiceFactory awsDataSourceServiceFactory;
 	public VirtualReportDataSourceServiceFactory() {
 	}
 
@@ -50,7 +51,7 @@ public class VirtualReportDataSourceServiceFactory extends JdbcReportDataSourceS
         return virtualDataSourceHandler;
     }
 
-    public void setAwsDataSourceServiceFactory(AwsReportDataSourceServiceFactory awsDataSourceServiceFactory) {
+    public void setAwsDataSourceServiceFactory(ReportDataSourceServiceFactory awsDataSourceServiceFactory) {
         this.awsDataSourceServiceFactory = awsDataSourceServiceFactory;
     }
 

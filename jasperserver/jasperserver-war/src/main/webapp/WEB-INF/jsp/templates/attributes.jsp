@@ -53,3 +53,19 @@
             </div>
         </div>
 </script>
+
+<script id="attributesSecureItem" type="template/mustache">
+        <div class="wrap">
+            <div class="column attrName textArea">
+                <textarea rows="1" readonly>{{name}}</textarea>
+                <span class="message warning"></span>
+            </div>
+            <div class="column attrValue input">
+                <input type="password" readonly value="{{value}}"/>
+                <span class="message warning"></span>
+            </div>
+            <div class="column attrAction">
+                <a class="launcher"><spring:message code="resource.lov.remove"/></a>
+            </div>
+        </div>
+</script>

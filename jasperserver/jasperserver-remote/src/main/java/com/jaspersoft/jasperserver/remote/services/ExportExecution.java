@@ -1,23 +1,23 @@
 /*
-* Copyright (C) 2005 - 2009 Jaspersoft Corporation. All rights  reserved.
-* http://www.jaspersoft.com.
-*
-* Unless you have purchased  a commercial license agreement from Jaspersoft,
-* the following license terms  apply:
-*
-* This program is free software: you can redistribute it and/or  modify
-* it under the terms of the GNU Affero General Public License  as
-* published by the Free Software Foundation, either version 3 of  the
-* License, or (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-* GNU Affero  General Public License for more details.
-*
-* You should have received a copy of the GNU Affero General Public  License
-* along with this program.&nbsp; If not, see <http://www.gnu.org/licenses/>.
-*/
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
+ * http://www.jaspersoft.com.
+ *
+ * Unless you have purchased  a commercial license agreement from Jaspersoft,
+ * the following license terms  apply:
+ *
+ * This program is free software: you can redistribute it and/or  modify
+ * it under the terms of the GNU Affero General Public License  as
+ * published by the Free Software Foundation, either version 3 of  the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero  General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public  License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 package com.jaspersoft.jasperserver.remote.services;
 
 import com.jaspersoft.jasperserver.remote.exception.ExportExecutionRejectedException;
@@ -28,10 +28,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -54,6 +51,7 @@ public class ExportExecution {
     private Lock lock;
     private Condition condition;
     private volatile Boolean done = false;
+    private volatile ReportOutputResource notFetched;
 
     public ExportExecution() {
         lock = new ReentrantLock();
@@ -118,8 +116,9 @@ public class ExportExecution {
     @XmlTransient
     public ReportOutputResource getFinalOutputResource() throws RemoteException {
         lock.lock();
+        ReportOutputResource result;
         try {
-            while (!done) {
+            while (!done && notFetched == null) {
                 try {
                     condition.await();
                 } catch (InterruptedException e) {
@@ -129,6 +128,7 @@ public class ExportExecution {
             final ExecutionStatus currentStatus = status;
             if (currentStatus == null) throw new IllegalStateException("Status shouldn't be null");
             ErrorDescriptor descriptor = null;
+            result = outputResource;
             switch (currentStatus) {
                 case failed: {
                     descriptor = errorDescriptor != null ? errorDescriptor :
@@ -137,8 +137,14 @@ public class ExportExecution {
                 }
                 break;
                 case cancelled: {
-                    descriptor = new ErrorDescriptor.Builder().setErrorCode("export.cancelled")
-                            .setMessage("Export cancelled").getErrorDescriptor();
+                    if (notFetched != null){
+                        // execution reset already, so return saved result
+                        result = notFetched;
+                        notFetched = null;
+                    } else {
+                        descriptor = new ErrorDescriptor.Builder().setErrorCode("export.cancelled")
+                                .setMessage("Export cancelled").getErrorDescriptor();
+                    }
                 }
                 break;
                 case ready:
@@ -152,7 +158,7 @@ public class ExportExecution {
         } finally {
             lock.unlock();
         }
-        return outputResource;
+        return result;
     }
 
     public void setOutputResource(ReportOutputResource outputResource) {
@@ -175,6 +181,8 @@ public class ExportExecution {
     }
 
     public void reset(){
+        // if reset happen before actual fetch, save the result
+        notFetched = status == ExecutionStatus.ready ? outputResource : null;
         status = ExecutionStatus.cancelled;
         errorDescriptor = null;
         outputResource = null;

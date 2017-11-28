@@ -1,5 +1,5 @@
 <%--
-  ~ Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+  ~ Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
   ~ http://www.jaspersoft.com.
   ~
   ~ Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -26,15 +26,15 @@
 
 --%><c:choose><%--
 	--%><c:when test="${control.inputControl.mandatory
-			and (control.inputControl.type == 2
-				or control.inputControl.type == 3
-				or control.inputControl.type == 4
-				or control.inputControl.type == 6
-				or control.inputControl.type == 7
-				or control.inputControl.type == 8
-				or control.inputControl.type == 9
-				or control.inputControl.type == 10
-				or control.inputControl.type == 11
+			and (control.inputControl.inputControlType == 2
+				or control.inputControl.inputControlType == 3
+				or control.inputControl.inputControlType == 4
+				or control.inputControl.inputControlType == 6
+				or control.inputControl.inputControlType == 7
+				or control.inputControl.inputControlType == 8
+				or control.inputControl.inputControlType == 9
+				or control.inputControl.inputControlType == 10
+				or control.inputControl.inputControlType == 11
 				)}"><%--
         --%><spring:message code="jsp.defaultParametersForm.star.input.label" argumentSeparator="\\\\" arguments="${controlLabel}"/><%--
     --%></c:when><%--

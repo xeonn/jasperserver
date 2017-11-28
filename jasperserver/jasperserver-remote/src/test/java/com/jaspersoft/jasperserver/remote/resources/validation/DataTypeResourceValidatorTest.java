@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2013 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -24,6 +24,11 @@ package com.jaspersoft.jasperserver.remote.resources.validation;
 import com.jaspersoft.jasperserver.api.JSValidationException;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.DataType;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.client.DataTypeImpl;
+import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributesResolver;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -34,11 +39,20 @@ import org.testng.annotations.Test;
  * @version $Id$
  */
 public class DataTypeResourceValidatorTest {
+    @InjectMocks
     private final DataTypeResourceValidator validator = new DataTypeResourceValidator();
+    @Mock
+    private ProfileAttributesResolver profileAttributesResolver;
+
     private DataType type;
 
+    @BeforeClass
+    public void init() {
+        MockitoAnnotations.initMocks(this);
+    }
+
     @BeforeMethod
-    public void setUp(){
+    public void setUp() {
         type = new DataTypeImpl();
         type.setLabel("label");
     }
@@ -58,7 +72,7 @@ public class DataTypeResourceValidatorTest {
 
     @Test(expectedExceptions = {JSValidationException.class})
     public void testValidate_type_notSpecified() throws Exception {
-        type.setType((byte) 0);
+        type.setDataTypeType((byte) 0);
 
         validator.validate(type);
     }
@@ -90,7 +104,4 @@ public class DataTypeResourceValidatorTest {
 
         validator.validate(type);
     }
-
-
-
 }

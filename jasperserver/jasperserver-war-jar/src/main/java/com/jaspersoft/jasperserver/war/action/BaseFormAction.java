@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -21,6 +21,7 @@
 
 package com.jaspersoft.jasperserver.war.action;
 
+import com.jaspersoft.jasperserver.api.SessionAttribMissingException;
 import com.jaspersoft.jasperserver.api.logging.audit.context.AuditContext;
 import com.jaspersoft.jasperserver.api.logging.audit.domain.AuditEvent;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.Role;
@@ -32,12 +33,13 @@ import com.jaspersoft.jasperserver.war.helper.JSONHelper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.context.MessageSource;
-import org.springframework.security.Authentication;
-import org.springframework.security.context.SecurityContextHolder;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.webflow.action.FormAction;
 import org.springframework.webflow.core.collection.ParameterMap;
 import org.springframework.webflow.execution.RequestContext;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 /**
@@ -77,11 +79,22 @@ public class BaseFormAction extends FormAction {
     }
 
     protected void putState(RequestContext context, Object state) {
-        context.getExternalContext().getSessionMap().put(ATTRIBUTE_STATE, state);
+        ((HttpServletRequest)context.getExternalContext().getNativeRequest()).getSession().setAttribute(ATTRIBUTE_STATE, state);
     }
 
-    protected Object getState(RequestContext context) {
-        return context.getExternalContext().getSessionMap().get(ATTRIBUTE_STATE);
+    protected Object getState(RequestContext context) throws SessionAttribMissingException {
+        //return context.getExternalContext().getSessionMap().get(ATTRIBUTE_STATE);
+
+        //Bug 38187
+        try
+        {
+            return ((HttpServletRequest)context.getExternalContext().getNativeRequest()).getSession().getAttribute(ATTRIBUTE_STATE);
+        }
+        catch (SessionAttribMissingException e)
+        {
+            throw e;
+        }
+
     }
 
     protected String getParameter(RequestContext context, String name) {

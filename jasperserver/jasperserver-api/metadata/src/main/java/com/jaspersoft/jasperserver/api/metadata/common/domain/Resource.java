@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -31,7 +31,7 @@ import com.jaspersoft.jasperserver.api.common.domain.AttributedObject;
  * The base interface for any JasperServer resource. It has many implementations.
  *
  * @author Teodor Danciu (teodord@users.sourceforge.net)
- * @version $Id: Resource.java 19921 2010-12-11 14:52:49Z tmatyashovsky $
+ * @version $Id: Resource.java 47331 2014-07-18 09:13:06Z kklein $
  */
 @JasperServerAPI
 public interface Resource extends AttributedObject, InternalURI, Serializable

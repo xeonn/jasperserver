@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -20,17 +20,18 @@
  */
 package com.jaspersoft.jasperserver.api.metadata.common.domain.client;
 
-import java.io.Serializable;
-import java.util.*;
-
 import com.jaspersoft.jasperserver.api.JSException;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Folder;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceLookup;
 
+import java.io.Serializable;
+import java.util.Date;
+import java.util.List;
+
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ResourceLookupImpl.java 38151 2013-09-26 09:30:32Z vsabadosh $
+ * @version $Id: ResourceLookupImpl.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
 public class ResourceLookupImpl implements ResourceLookup,Serializable {
 	
@@ -233,6 +234,16 @@ public class ResourceLookupImpl implements ResourceLookup,Serializable {
         ResourceLookup resourceLookup = (ResourceLookup) o;
         return (uri != null && uri.equals(resourceLookup.getURIString()) && resourceType != null &&
                 resourceType.equals(resourceLookup.getResourceType()));
+    }
+
+    @Override
+    public Serializable getIdentifier() {
+        return getURIString();
+    }
+
+    @Override
+    public String getType() {
+        return getResourceType();
     }
 
     @Override

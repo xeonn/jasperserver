@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -48,7 +48,7 @@ import com.jaspersoft.jasperserver.api.JSExceptionWrapper;
  */
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: StreamUtil.java 19924 2010-12-11 15:03:35Z tmatyashovsky $
+ * @version $Id: StreamUtil.java 47331 2014-07-18 09:13:06Z kklein $
  */
 public class StreamUtil {
 	private static final Log log = LogFactory.getLog(StreamUtil.class);

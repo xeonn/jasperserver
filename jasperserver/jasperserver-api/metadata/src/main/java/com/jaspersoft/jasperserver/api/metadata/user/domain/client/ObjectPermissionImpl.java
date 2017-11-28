@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -87,6 +87,7 @@ public class ObjectPermissionImpl implements ObjectPermission {
 		return new ToStringBuilder(this)
 			.append("URI", getURI())
 			.append("permissionRecipient", getPermissionRecipient())
+            .append("permissionMask",getPermissionMask())
 			.toString();
 	}
 

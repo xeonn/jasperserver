@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2014 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: dynamicTree.tree.js 44748 2014-04-18 10:42:28Z agodovanets $
+ * @version: $Id: dynamicTree.tree.js 8025 2014-11-12 13:10:12Z ktsaregradskyi $
  */
 
 /**
@@ -161,7 +161,12 @@ var dynamicTree = {
 
         tree[name] = value;
 
-        localStorage.setItem('dynamicTree', JSON.stringify(tree));
+        try {
+            localStorage.setItem('dynamicTree', JSON.stringify(tree));
+        } catch(e) {
+            // TODO: use our logger
+            window.console && console.log(e);
+        }
     },
 
     _templateHash: {}

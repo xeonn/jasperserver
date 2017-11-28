@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -21,6 +21,7 @@
 package com.jaspersoft.jasperserver.api.metadata.user.domain;
 
 import com.jaspersoft.jasperserver.api.JasperServerAPI;
+import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributeCategory;
 
 /**
  * ProfileAttribute interface manages attaching of extra information to users and roles. For example, you may assign
@@ -28,7 +29,7 @@ import com.jaspersoft.jasperserver.api.JasperServerAPI;
  * views.
  *
  * @author sbirney
- * @version $Id: ProfileAttribute.java 21806 2011-12-27 09:24:01Z ykovalchyk $
+ * @version $Id: ProfileAttribute.java 50011 2014-10-09 16:57:26Z vzavadskii $
  * @see com.jaspersoft.jasperserver.api.metadata.user.domain.client.ProfileAttributeImpl
  * @since 2.0.0
  */
@@ -76,4 +77,31 @@ public interface ProfileAttribute {
      * @param o the principal object
      */
     public void setPrincipal(Object o);
+
+    /**
+     * Shows whether attribute is secure.
+     *
+     * @return <code>true</code> if the attribute is secure, <code>false</code> otherwise.
+     */
+    public boolean isSecure();
+
+    /**
+     *  Sets the value of secure field of the attribute. If the value is set to <code>true</code>, then attribute
+     * is secure. If it is set to <code>false</code>, then attribute is not secure.
+     */
+    public void setSecure(boolean secure);
+
+    /**
+     * Returns the category of the attribute.
+     *
+     * @return the category of the attribute.
+     */
+    public ProfileAttributeCategory getCategory();
+
+    /**
+     * Sets category for the attribute.
+     *
+     * @param category the category of the attribute.
+     */
+    public void setCategory(ProfileAttributeCategory category);
 }

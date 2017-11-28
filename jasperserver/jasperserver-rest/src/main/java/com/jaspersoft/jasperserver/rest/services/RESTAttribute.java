@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -21,9 +21,11 @@
 package com.jaspersoft.jasperserver.rest.services;
 
 import com.jaspersoft.jasperserver.api.metadata.user.domain.ProfileAttribute;
+import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.client.ProfileAttributeImpl;
+import com.jaspersoft.jasperserver.api.metadata.user.domain.client.UserImpl;
 import com.jaspersoft.jasperserver.remote.ServiceException;
-import com.jaspersoft.jasperserver.remote.services.AttributesRemoteService;
+import com.jaspersoft.jasperserver.remote.services.GenericAttributesService;
 import com.jaspersoft.jasperserver.rest.RESTAbstractService;
 import com.jaspersoft.jasperserver.rest.utils.JAXBList;
 import org.apache.commons.logging.Log;
@@ -41,25 +43,26 @@ import java.util.List;
 
 /**
  * @author carbiv
- * @version $Id: RESTAttribute.java 22699 2012-03-21 15:26:53Z ogavavka $
+ * @version $Id: RESTAttribute.java 50011 2014-10-09 16:57:26Z vzavadskii $
  */
 @Component("restProfileAttributeService")
 public class RESTAttribute extends RESTAbstractService
 {
     private final static Log log = LogFactory.getLog(RESTAttribute.class);
-    @Resource
-    private AttributesRemoteService attributesRemoteService;
+
+    @Resource(name = "userAttributesService")
+    private GenericAttributesService<User> attributesRemoteService;
+
     @SuppressWarnings("unused")//used by Spring
-    public void setAttributesRemoteService(AttributesRemoteService attributesRemoteServiceImpl) {
+    public void setAttributesRemoteService(GenericAttributesService<User> attributesRemoteServiceImpl) {
         this.attributesRemoteService = attributesRemoteServiceImpl;
     }
 
-
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServiceException {
+        User user = generateUserByName(restUtils.extractResourceName(req.getPathInfo()));
         restUtils.setStatusAndBody(HttpServletResponse.SC_OK, resp,
-                generateProfileAttributeReport(attributesRemoteService
-                        .getAttributesOfUser(restUtils.extractResourceName(req.getPathInfo()))));
+                generateProfileAttributeReport(attributesRemoteService.getAttributes(user)));
     }
 
     private String generateProfileAttributeReport(List<ProfileAttribute> atts)
@@ -90,9 +93,8 @@ public class RESTAttribute extends RESTAbstractService
              String userName = restUtils.getFullUserName(restUtils.extractResourceName(req.getPathInfo()));
             @SuppressWarnings("unchecked")
             JAXBList<ProfileAttribute> atts = (JAXBList<ProfileAttribute>) restUtils.unmarshal(req.getInputStream(), JAXBList.class, ProfileAttributeImpl.class);
-
             for (int i=0 ; i<atts.size() ; i++){
-                    attributesRemoteService.putAttribute(userName, atts.get(i));
+                    attributesRemoteService.putAttribute(generateUserByName(userName), atts.get(i));
             }
 
             restUtils.setStatusAndBody(HttpServletResponse.SC_CREATED, resp, "");
@@ -102,6 +104,12 @@ public class RESTAttribute extends RESTAbstractService
              throw new ServiceException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
          }
      }
+
+    private User generateUserByName(String userName) {
+        User user = new UserImpl();
+        user.setUsername(userName);
+        return user;
+    }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServiceException {

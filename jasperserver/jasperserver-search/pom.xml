@@ -9,7 +9,7 @@
     <parent>
       <groupId>com.jaspersoft.jasperserver</groupId>
       <artifactId>server</artifactId>
-      <version>5.6.0</version>
+      <version>6.0.1</version>
     </parent>
     <dependencies>
         <dependency>
@@ -64,6 +64,34 @@
                 <exclusion>
                     <groupId>org.springframework</groupId>
                     <artifactId>spring-expression</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.springframework.webflow</groupId>
+                    <artifactId>spring-binding</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.springframework.webflow</groupId>
+                    <artifactId>spring-js</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.springframework</groupId>
+                    <artifactId>spring-orm</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.springframework</groupId>
+                    <artifactId>spring-webmvc-portlet</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.springframework</groupId>
+                    <artifactId>spring-tx</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.springframework.security</groupId>
+                    <artifactId>spring-security-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.springframework</groupId>
+                    <artifactId>spring-test</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>

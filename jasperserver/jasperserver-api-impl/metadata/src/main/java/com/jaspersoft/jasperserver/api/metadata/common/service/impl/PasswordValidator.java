@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -21,10 +21,11 @@
 
 package com.jaspersoft.jasperserver.api.metadata.common.service.impl;
 
+import com.jaspersoft.jasperserver.api.common.crypto.Cipherer;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.springframework.dao.DataAccessException;
-import org.springframework.security.providers.encoding.PasswordEncoder;
+import org.springframework.security.authentication.encoding.PasswordEncoder;
 
 
 /**
@@ -95,7 +96,7 @@ public class PasswordValidator implements PasswordEncoder {
     
     /********** implemented PasswordEncoder METHODS ****************/
 	/* (non-Javadoc)
-	 * @see org.springframework.security.providers.encoding.PasswordEncoder#encodePassword(java.lang.String, java.lang.Object)
+	 * @see org.springframework.security.authentication.encoding.PasswordEncoder#encodePassword(java.lang.String, java.lang.Object)
 	 * NOTE: salt will be ignored since we will use the "secretket" defined in Spring configuration
 	 */
 	public String encodePassword(String rawPass, Object salt) throws DataAccessException {
@@ -103,7 +104,7 @@ public class PasswordValidator implements PasswordEncoder {
 	}
 
 	/* (non-Javadoc)
-	 * @see org.springframework.security.providers.encoding.PasswordEncoder#isPasswordValid(java.lang.String, java.lang.String, java.lang.Object)
+	 * @see org.springframework.security.authentication.encoding.PasswordEncoder#isPasswordValid(java.lang.String, java.lang.String, java.lang.Object)
 	 * NOTE: salt will be ignored since we will use the "secretket" defined in Spring configuration
 	 */
 	public boolean isPasswordValid(String encPass, String rawPass, Object salt) throws DataAccessException {

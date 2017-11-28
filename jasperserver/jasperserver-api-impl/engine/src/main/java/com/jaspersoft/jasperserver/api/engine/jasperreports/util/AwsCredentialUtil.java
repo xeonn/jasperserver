@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2012 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -40,7 +40,9 @@ import static org.apache.commons.lang.StringUtils.isNotEmpty;
 public class AwsCredentialUtil {
     private static final Log logger = LogFactory.getLog(AwsCredentialUtil.class);
 
-    public static AWSCredentials getAWSCredentials(String awsAccessKey, String awsSecretKey, String roleARN) {
+    private MessageSource messageSource;
+
+    public AWSCredentials getAWSCredentials(String awsAccessKey, String awsSecretKey, String roleARN) {
         AWSCredentials awsCredentials;
         if (isNotEmpty(awsAccessKey) && isNotEmpty(awsSecretKey)) {
             awsCredentials = new BasicAWSCredentials(awsAccessKey.trim(), awsSecretKey.trim());
@@ -77,15 +79,16 @@ public class AwsCredentialUtil {
             try {
                 awsCredentials = instanceCredentialsProvider.getCredentials();
             } catch (Exception ex) {
-                ApplicationContext ctx = StaticApplicationContext.getApplicationContext();
-                MessageSource message = ctx.getBean("messageSource", MessageSource.class);
-
                 logger.error("Exception loading default JRS instance credentials", ex);
-                throw new JSShowOnlyErrorMessage(message.getMessage("aws.exception.datasource.load.default.credentials",
+                throw new JSShowOnlyErrorMessage(messageSource.getMessage("aws.exception.datasource.load.default.credentials",
                         null, LocaleContextHolder.getLocale()));
             }
         }
+
         return awsCredentials;
     }
 
+    public void setMessageSource(MessageSource messageSource) {
+        this.messageSource = messageSource;
+    }
 }

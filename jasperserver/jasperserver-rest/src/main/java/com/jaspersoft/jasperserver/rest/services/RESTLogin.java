@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -38,7 +38,7 @@ import javax.servlet.http.HttpServletResponse;
  * The dirty job of loggin a user and sending out an error is done by the RESTLoginAuthenticationFilter.
  * This service does not return anything.
  * @author gtoffoli
- * @version $Id: RESTLogin.java 21826 2012-01-04 09:43:55Z ykovalchyk $
+ * @version $Id: RESTLogin.java 47331 2014-07-18 09:13:06Z kklein $
  */
 @Component("restLoginService")
 public class RESTLogin implements RESTService {

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -37,9 +37,12 @@ import com.jaspersoft.jasperserver.api.metadata.user.domain.Role;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.Tenant;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.impl.hibernate.RepoTenant;
+import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributeService;
 import com.jaspersoft.jasperserver.api.metadata.user.service.TenantService;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.CacheMode;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.MatchMode;
@@ -72,6 +75,7 @@ public class TenantServiceImpl extends HibernateDaoImpl
 	private ResourceFactory persistentClassFactory;
 	private String userOrgIdDelimiter;
     private DatabaseCharactersEscapeResolver databaseCharactersEscapeResolver;
+    private ProfileAttributeService profileAttributeService;
     private boolean isTenantCaseSensitive;
 
     public void setDatabaseCharactersEscapeResolver(DatabaseCharactersEscapeResolver databaseCharactersEscapeResolver) {
@@ -100,6 +104,10 @@ public class TenantServiceImpl extends HibernateDaoImpl
 
     public void setTenantCaseSensitive(boolean tenantCaseSensitive) {
         isTenantCaseSensitive = tenantCaseSensitive;
+    }
+
+    public void setProfileAttributeService(ProfileAttributeService profileAttributeService) {
+        this.profileAttributeService = profileAttributeService;
     }
 
     protected RepoTenant getRepoTenant(String tenantId, boolean required) {
@@ -171,6 +179,18 @@ public class TenantServiceImpl extends HibernateDaoImpl
         return tenant;
     }
 
+    protected List<RepoTenant> getRepoTenantListByIds(List<String> tenantIds) {
+        DetachedCriteria criteria = DetachedCriteria.forClass(persistentTenantClass());
+        criteria.add(Restrictions.in("tenantId", tenantIds));
+        criteria.getExecutableCriteria(getSession()).setCacheable(true);
+        @SuppressWarnings("unchecked")
+        List<RepoTenant> tenantList = getHibernateTemplate().findByCriteria(criteria);
+        if (tenantList.isEmpty()) {
+            log.debug("Tenants not found with ids \"" + tenantIds + "\"");
+        }
+        return tenantList;
+    }
+
 	protected Class persistentTenantClass() {
 		return getPersistentClassFactory().getImplementationClass(Tenant.class);
 	}
@@ -239,8 +259,13 @@ public class TenantServiceImpl extends HibernateDaoImpl
 		RepoTenant rTenant = getRepoTenant(tenantId, false);
 		if (rTenant == null) {
 			return null;
-		}
-        return toClientTenant(rTenant);
+		} else {
+            Tenant tenant = toClientTenant(rTenant);
+            if (rTenant.getTenantId() != null && !(rTenant.getTenantId().equals(ORGANIZATIONS))) {
+                tenant.setAttributes(profileAttributeService.getProfileAttributesForPrincipal(null, tenant));
+            }
+            return tenant;
+        }
 	}
 
     @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
@@ -410,6 +435,15 @@ public class TenantServiceImpl extends HibernateDaoImpl
         }
 
         return getRepoTenantByAlias(tenantAlias, required);
+    }
+
+    @Override
+    public List<RepoTenant> getPersistentTenants(List<String> tenantIds) {
+        if (tenantIds == null || tenantIds.size() == 0) {
+            return null;
+        }
+
+        return getRepoTenantListByIds(tenantIds);
     }
 
     public String getUniqueTenantId(String proposedTenantId) {
@@ -664,7 +698,7 @@ public class TenantServiceImpl extends HibernateDaoImpl
 
         if (parent != null) {
             DetachedCriteria criteria = createSubTenantsCriteria(parent, text, depth);
-            criteria.getExecutableCriteria(getSession()).setCacheable(true);
+            criteria.getExecutableCriteria(getSession()).setCacheable(true); // .setCacheMode(CacheMode.REFRESH);
             subTenantList.addAll(getHibernateTemplate().findByCriteria(criteria));
         }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -27,32 +27,28 @@ import com.jaspersoft.jasperserver.api.metadata.user.domain.ProfileAttribute;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.Role;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.impl.client.MetadataUserDetails;
-import org.springframework.security.Authentication;
-import org.springframework.security.context.SecurityContextHolder;
+import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributeCategory;
+import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributeService;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Parameters for reports and queries from the user profile are injected.
  *
  * @author Sherman Wood (sgwood@users.sourceforge.net)
- * @version $Id: UserProfileBuiltInParameterProvider.java 41549 2014-02-06 22:17:13Z udavidovich $
+ * @version $Id: UserProfileBuiltInParameterProvider.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
 public class UserProfileBuiltInParameterProvider implements BuiltInParameterProvider, Serializable {
-
-    public static final String LOGGED_IN_USER_PARAMETER_PREFIX = "LoggedInUser";
-
     /*
      * Automatically added by JasperServer when running a report
      *
      * $P{LoggedInUser}
      * $P{LoggedInUsername}
      *
-     * This will be available if explictly included in the query or report
+     * This will be available if explicitly included in the query or report
      *
      * $P{LoggedInUserFullName}
      * $P{LoggedInUserEmailAddress}
@@ -63,15 +59,241 @@ public class UserProfileBuiltInParameterProvider implements BuiltInParameterProv
      * $P{LoggedInUserAttributes} -> return Map of attributes
      * $P{LoggedInUserAttributeNames} -> return collection of attribute names
      * $P{LoggedInUserAttributeValues} -> return collection of attribute values
-     * $P{LoggedInUserAttribute_att1} -> return attribute value for matched attribute name
+     * $P{LoggedInUserAttribute_attr1} -> return attribute value for matched attribute name
+     *
+     * For this parameters attribute is retrieved from the User's parent Tenant.
+     *
+     * $P{LoggedInTenantAttribute_attr1}
+     *
+     * Attribute is retrieved from the Server level (GlobalPropertiesList file).
+     *
+     * $P{ServerAttribute_attr1}
+     *
+     * Parameters contain hierarchically resolved attribute: from User, Tenant or Server levels.
+     *
+     * $P{Attribute_attr1}
      */
 
-    public static final String LOGGED_IN_USER_NAME_PARAMETER = LOGGED_IN_USER_PARAMETER_PREFIX + "name";
-
-    public static final String[] LOGGED_IN_USER_STANDARD_PARAMETERS = {
-        LOGGED_IN_USER_PARAMETER_PREFIX,
-        LOGGED_IN_USER_NAME_PARAMETER
+    public static final String[] STANDARD_PARAMETERS = {
+            Parameter.LOGGED_IN_USER.getName(),
+            Parameter.LOGGED_IN_USER_NAME.getName()
     };
+
+    public static final String ATTRIBUTE_DELIMITER = "_";
+
+    /**
+     * Represents all available parameters that can be used in reports and queries
+     */
+    public static enum Parameter {
+        // User parameters
+        LOGGED_IN_USER("LoggedInUser"),
+        LOGGED_IN_USER_NAME("LoggedInUsername"),
+        LOGGED_IN_USER_FULL_NAME("LoggedInUserFullname"),
+        LOGGED_IN_USER_EMAIL_ADDRESS("LoggedInUserEmailAddress"),
+        LOGGED_IN_USER_ENABLED("LoggedInUserEnabled"),
+        LOGGED_IN_USER_EXTERNALLY_DEFINED("LoggedInUserExternallyDefined"),
+        LOGGED_IN_USER_TENANT_ID("LoggedInUserTenantId"),
+        LOGGED_IN_USER_ROLES("LoggedInUserRoles"),
+        LOGGED_IN_USER_ATTRIBUTES("LoggedInUserAttributes"),
+        LOGGED_IN_USER_ATTRIBUTE_NAMES("LoggedInUserAttributeNames"),
+        LOGGED_IN_USER_ATTRIBUTE_VALUES("LoggedInUserAttributeValues"),
+        LOGGED_IN_USER_ATTRIBUTE("LoggedInUserAttribute_"),
+
+        // Tenant parameters
+        LOGGED_IN_TENANT_ATTRIBUTE("LoggedInTenantAttribute_"),
+
+        // Server parameters
+        SERVER_ATTRIBUTE("ServerAttribute_"),
+
+        // General hierarchical parameters
+        ATTRIBUTE("Attribute_");
+
+        private String name;
+
+        Parameter(String name) {
+            this.name = name;
+        }
+
+        public String getName() {
+            return name;
+        }
+    }
+
+    public static interface ParameterCallback {
+        public Object[] getParameter(String name);
+    }
+
+    // List of all available categories that can be use
+    private List<ProfileAttributeCategory> profileAttributeCategories;
+    private ProfileAttributeService profileAttributeService;
+    private Map<String, ParameterCallback> availableParameters = new HashMap<String, ParameterCallback>();
+
+    public void setProfileAttributeService(ProfileAttributeService profileAttributeService) {
+        this.profileAttributeService = profileAttributeService;
+    }
+
+    public void setProfileAttributeCategories(List<ProfileAttributeCategory> profileAttributeCategories) {
+        this.profileAttributeCategories = profileAttributeCategories;
+    }
+
+    public void init() {
+        // User callbacks
+        availableParameters.put(Parameter.LOGGED_IN_USER.getName(), new ParameterCallback() {
+            @Override
+            public Object[] getParameter(String name) {
+                MetadataUserDetails returnUserDetails;
+
+                try {
+                    // Write the object out to a byte array
+                    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                    ObjectOutputStream out = new ObjectOutputStream(bos);
+                    out.writeObject(getUserDetails());
+                    out.flush();
+                    out.close();
+
+                    // Make an input stream from the byte array and read
+                    // a copy of the object back in.
+                    ObjectInputStream in = new ObjectInputStream(
+                            new ByteArrayInputStream(bos.toByteArray()));
+                    returnUserDetails = (MetadataUserDetails) in.readObject();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return null;
+                } catch (ClassNotFoundException exception) {
+                    exception.printStackTrace();
+                    return null;
+                }
+
+                returnUserDetails.setPassword(null);
+                return makeParameter(name, User.class, returnUserDetails);
+            }
+        });
+        availableParameters.put(Parameter.LOGGED_IN_USER_NAME.getName(), new ParameterCallback() {
+            @Override
+            public Object[] getParameter(String name) {
+                User user = getUserDetails();
+                String username = (user != null) ? user.getUsername() : "";
+                return makeParameter(name, String.class, username);
+            }
+        });
+        availableParameters.put(Parameter.LOGGED_IN_USER_FULL_NAME.getName(), new ParameterCallback() {
+            @Override
+            public Object[] getParameter(String name) {
+                User user = getUserDetails();
+                String fullName = (user != null) ? user.getFullName() : "";
+                return makeParameter(name, String.class, fullName);
+            }
+        });
+        availableParameters.put(Parameter.LOGGED_IN_USER_EMAIL_ADDRESS.getName(), new ParameterCallback() {
+            @Override
+            public Object[] getParameter(String name) {
+                User user = getUserDetails();
+                String emailAddress = (user != null) ? user.getEmailAddress() : "";
+                return makeParameter(name, String.class, emailAddress);
+            }
+        });
+        availableParameters.put(Parameter.LOGGED_IN_USER_ENABLED.getName(), new ParameterCallback() {
+            @Override
+            public Object[] getParameter(String name) {
+                User user = getUserDetails();
+                Boolean enabled = (user != null) && user.isEnabled();
+                return makeParameter(name, Boolean.class, enabled);
+            }
+        });
+        availableParameters.put(Parameter.LOGGED_IN_USER_EXTERNALLY_DEFINED.getName(), new ParameterCallback() {
+            @Override
+            public Object[] getParameter(String name) {
+                User user = getUserDetails();
+                Boolean externallyDefined = (user != null) && user.isExternallyDefined();
+                return makeParameter(name, Boolean.class, externallyDefined);
+            }
+        });
+        availableParameters.put(Parameter.LOGGED_IN_USER_TENANT_ID.getName(), new ParameterCallback() {
+            @Override
+            public Object[] getParameter(String name) {
+                User user = getUserDetails();
+                String tenantId = (user != null) ? user.getTenantId() : "";
+                return makeParameter(name, String.class, tenantId);
+            }
+        });
+        availableParameters.put(Parameter.LOGGED_IN_USER_ROLES.getName(), new ParameterCallback() {
+            @Override
+            public Object[] getParameter(String name) {
+                User user = getUserDetails();
+                Set roles = (user != null) ? user.getRoles() : new HashSet();
+                Collection<String> roleNames = new ArrayList<String>(roles.size());
+                for (Object role : roles) {
+                    roleNames.add(((Role) role).getRoleName());
+                }
+                return makeParameter(name, Collection.class, roleNames);
+            }
+        });
+        availableParameters.put(Parameter.LOGGED_IN_USER_ATTRIBUTES.getName(), new ParameterCallback() {
+            @Override
+            public Object[] getParameter(String name) {
+                Collection<ProfileAttribute> profileAttributes = getProfileAttributes(ProfileAttributeCategory.USER);
+                return makeParameter(name, Collection.class, profileAttributes);
+            }
+        });
+        availableParameters.put(Parameter.LOGGED_IN_USER_ATTRIBUTE_NAMES.getName(), new ParameterCallback() {
+            @Override
+            public Object[] getParameter(String name) {
+                Collection<ProfileAttribute> attributes = getProfileAttributes(ProfileAttributeCategory.USER);
+                Collection<String> keys = getAttributeNames(attributes);
+                return makeParameter(name, Collection.class, keys);
+            }
+        });
+        availableParameters.put(Parameter.LOGGED_IN_USER_ATTRIBUTE_VALUES.getName(), new ParameterCallback() {
+            @Override
+            public Object[] getParameter(String name) {
+                Collection<ProfileAttribute> attributes = getProfileAttributes(ProfileAttributeCategory.USER);
+                Collection<String> values = getAttributeValues(attributes);
+                return makeParameter(name, Collection.class, values);
+            }
+        });
+        availableParameters.put(Parameter.LOGGED_IN_USER_ATTRIBUTE.getName(), new ParameterCallback() {
+            @Override
+            public Object[] getParameter(String name) {
+                Collection<ProfileAttribute> attributes = getProfileAttributes(ProfileAttributeCategory.USER);
+                String attrValue = getAttributeValue(attributes, name);
+                return (attrValue != null) ? makeParameter(name, String.class, attrValue) : null;
+            }
+        });
+
+        // Tenant callbacks
+        availableParameters.put(Parameter.LOGGED_IN_TENANT_ATTRIBUTE.getName(), new ParameterCallback() {
+            @Override
+            public Object[] getParameter(String name) {
+                Collection<ProfileAttribute> attributes = getProfileAttributes(ProfileAttributeCategory.TENANT);
+                String attrValue = getAttributeValue(attributes, name);
+                return (attrValue != null) ? makeParameter(name, String.class, attrValue) : null;
+            }
+        });
+
+        // Server callbacks
+        availableParameters.put(Parameter.SERVER_ATTRIBUTE.getName(), new ParameterCallback() {
+            @Override
+            public Object[] getParameter(String name) {
+                Collection<ProfileAttribute> attributes = getProfileAttributes(ProfileAttributeCategory.SERVER);
+                String attrValue = getAttributeValue(attributes, name);
+                return (attrValue != null) ? makeParameter(name, String.class, attrValue) : null;
+            }
+        });
+
+        // Callbacks for the hierarchically resolved attributes
+        availableParameters.put(Parameter.ATTRIBUTE.getName(), new ParameterCallback() {
+            @Override
+            public Object[] getParameter(String name) {
+                Collection<ProfileAttribute> attributes = getProfileAttributes(ProfileAttributeCategory.HIERARCHICAL);
+                String attrValue = getAttributeValue(attributes, name);
+                return (attrValue != null) ? makeParameter(name, String.class, attrValue) : null;
+            }
+        });
+    }
+
+    public UserProfileBuiltInParameterProvider() {
+        init();
+    }
 
     /**
      * Each element is a JRParameter, value
@@ -82,10 +304,9 @@ public class UserProfileBuiltInParameterProvider implements BuiltInParameterProv
      * @return List<Object[]> [JRParameter, value]
      */
     public List<Object[]> getParameters(ExecutionContext context, List jrParameters, Map parameters) {
-
         List<Object[]> userProfileParameters = new ArrayList<Object[]>();
 
-        for (String parameterName : LOGGED_IN_USER_STANDARD_PARAMETERS) {
+        for (String parameterName : STANDARD_PARAMETERS) {
             Object[] result = getParameter(context, jrParameters, parameters, parameterName);
             if (result != null) {
                 userProfileParameters.add(result);
@@ -96,106 +317,71 @@ public class UserProfileBuiltInParameterProvider implements BuiltInParameterProv
     }
 
     public Object[] getParameter(ExecutionContext context, List jrParameters, Map parameters, String name) {
+        // Contains only parameter name, without attribute name (e.g. for parameter "LoggedInUserAttribute_attr1"
+        // parameterName will be "LoggedInUserAttribute_")
+        String parameterName;
 
-        if (name == null || !name.toLowerCase().startsWith(LOGGED_IN_USER_PARAMETER_PREFIX.toLowerCase())) {
-            return null;
+        int indexOfDelimiter = name.indexOf(ATTRIBUTE_DELIMITER);
+        if (indexOfDelimiter != -1) {
+            // Remove attribute name but include delimiter
+            parameterName = name.substring(0, indexOfDelimiter + 1);
+        } else {
+            parameterName = name;
         }
 
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || !(auth.getPrincipal() instanceof MetadataUserDetails)) {
-            return null;
-        }
-        MetadataUserDetails userDetails = (MetadataUserDetails) auth.getPrincipal();
-
-        // return a copy, so we are not handing out passwords
-        if (name.equalsIgnoreCase(LOGGED_IN_USER_PARAMETER_PREFIX)) {
-            MetadataUserDetails returnUserDetails = null;
-            try {
-                // Write the object out to a byte array
-                ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                ObjectOutputStream out = new ObjectOutputStream(bos);
-                out.writeObject(userDetails);
-                out.flush();
-                out.close();
-
-                // Make an input stream from the byte array and read
-                // a copy of the object back in.
-                ObjectInputStream in = new ObjectInputStream(
-                    new ByteArrayInputStream(bos.toByteArray()));
-                returnUserDetails = (MetadataUserDetails) in.readObject();
-            } catch(IOException e) {
-                e.printStackTrace();
-                return null;
-            } catch(ClassNotFoundException cnfe) {
-                cnfe.printStackTrace();
-                return null;
-            }
-            returnUserDetails.setPassword(null);
-            return new Object[] {JRQueryExecuterAdapter.makeParameter(name, User.class), returnUserDetails};
+        Object[] result = null;
+        ParameterCallback callback = availableParameters.get(parameterName);
+        if (callback != null) {
+            result = callback.getParameter(name);
         }
 
-        String variableName = name.substring(LOGGED_IN_USER_PARAMETER_PREFIX.length());
-
-        if (variableName.equalsIgnoreCase("name")) {
-            return new Object[] {JRQueryExecuterAdapter.makeParameter(name, String.class),
-                userDetails.getUsername() != null ? userDetails.getUsername() : ""};
-        } else if (variableName.equalsIgnoreCase("Fullname")) {
-            return new Object[] {JRQueryExecuterAdapter.makeParameter(name, String.class),
-                userDetails.getFullName() != null ? userDetails.getFullName() : ""};
-        } else if (variableName.equalsIgnoreCase("EmailAddress")) {
-            return new Object[] {JRQueryExecuterAdapter.makeParameter(name, String.class),
-                userDetails.getEmailAddress() != null ? userDetails.getEmailAddress() : ""};
-        } else if (variableName.equalsIgnoreCase("Enabled")) {
-            return new Object[] {JRQueryExecuterAdapter.makeParameter(name, Boolean.class), Boolean.valueOf(userDetails.isEnabled())};
-        } else if (variableName.equalsIgnoreCase("ExternallyDefined")) {
-            return new Object[] {JRQueryExecuterAdapter.makeParameter(name, Boolean.class), Boolean.valueOf(userDetails.isExternallyDefined())};
-        } else if (variableName.equalsIgnoreCase("TenantId")) {
-            return new Object[] {JRQueryExecuterAdapter.makeParameter(name, String.class),
-                userDetails.getTenantId() != null ? userDetails.getTenantId() : ""};
-        } else if (variableName.startsWith("Roles")) {
-            Collection<String> roleNames = new ArrayList<String>(userDetails.getRoles().size());
-            for (Object o : userDetails.getRoles()) {
-                Role r = (Role) o;
-                roleNames.add(r.getRoleName());
-            }
-            return new Object[] {JRQueryExecuterAdapter.makeParameter(name, Collection.class), roleNames};
-        } else if (variableName.equalsIgnoreCase("Attributes")) {
-            return new Object[] {JRQueryExecuterAdapter.makeParameter(name, Collection.class), userDetails.getAttributes()};
-        } else if (variableName.equalsIgnoreCase("AttributeNames")) {
-            Collection<String> keys;
-            if (userDetails!=null && userDetails.getAttributes()!=null){
-                keys= new ArrayList<String>(userDetails.getAttributes().size());
-                for (Object o : userDetails.getAttributes()) {
-                    ProfileAttribute att = (ProfileAttribute) o;
-                    keys.add(att.getAttrName());
-                }
-            }
-            else {
-                // we can get to here in cases like external authentication or where we have created the user without attributes
-                keys = new ArrayList<String>(0);
-            }
-            return new Object[] {JRQueryExecuterAdapter.makeParameter(name, Collection.class), keys};
-        } else if (variableName.equalsIgnoreCase("AttributeValues")) {
-            Collection<String> values = new ArrayList<String>(userDetails.getAttributes().size());
-            for (Object o : userDetails.getAttributes()) {
-                ProfileAttribute att = (ProfileAttribute) o;
-                values.add(att.getAttrValue());
-            }
-            return new Object[] {JRQueryExecuterAdapter.makeParameter(name, Collection.class), values};
-        } else if (variableName.startsWith("Attribute_")) {
-            String attrName = variableName.substring("Attribute_".length());
-            for (Object o : userDetails.getAttributes()) {
-                ProfileAttribute att = (ProfileAttribute) o;
-
-                if (att.getAttrName().equalsIgnoreCase(attrName)) {
-                    return new Object[] {JRQueryExecuterAdapter.makeParameter(name, String.class), att.getAttrValue()};
-                }
-            }
-        }
-        return null;
+        return result;
     }
 
-    public String getLoggedInUserParameterPrefix() {
-        return LOGGED_IN_USER_PARAMETER_PREFIX;
+    protected MetadataUserDetails getUserDetails() {
+        return (MetadataUserDetails) ProfileAttributeCategory.USER.getPrincipal(null);
+    }
+
+    protected Object[] makeParameter(String name, Class<?> type, Object value) {
+        return new Object[]{JRQueryExecuterAdapter.makeParameter(name, type), value};
+    }
+
+    protected Collection<ProfileAttribute> getProfileAttributes(ProfileAttributeCategory category) {
+        // Check if we can use this category, or retrieving attributes hierarchically
+        if (category == ProfileAttributeCategory.HIERARCHICAL || profileAttributeCategories.contains(category)) {
+            return profileAttributeService.getCurrentUserProfileAttributes(category);
+        }
+
+        return new ArrayList<ProfileAttribute>();
+    }
+
+    protected Collection<String> getAttributeNames(Collection<ProfileAttribute> attributes) {
+        Collection<String> keys = new ArrayList<String>(attributes.size());
+        for (ProfileAttribute attribute : attributes) {
+            keys.add(attribute.getAttrName());
+        }
+
+        return keys;
+    }
+
+    protected Collection<String> getAttributeValues(Collection<ProfileAttribute> attributes) {
+        Collection<String> values = new ArrayList<String>(attributes.size());
+        for (ProfileAttribute attribute : attributes) {
+            values.add(attribute.getAttrValue());
+        }
+
+        return values;
+    }
+
+    protected String getAttributeValue(Collection<ProfileAttribute> attributes, String name) {
+        String attrName = name.split(ATTRIBUTE_DELIMITER, 2)[1];
+
+        for (ProfileAttribute attribute : attributes) {
+            if (attribute.getAttrName().equalsIgnoreCase(attrName)) {
+                return attribute.getAttrValue();
+            }
+        }
+
+        return null;
     }
 }

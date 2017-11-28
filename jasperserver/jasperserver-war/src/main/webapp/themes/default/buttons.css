@@ -108,6 +108,68 @@
 	margin-top:2px;
 }
 
+/* action square small, new buttons introduced October 2014 */
+/* occurs in redesigned Select Data dialog box (formerly Data Chooser) */
+.action.square.small {
+	width:auto;
+	min-height:24px;
+	padding:0;
+	margin:0;
+}
+
+.action.square.small > .wrap {
+    height: 24px;
+    width: 24px;
+}
+
+.action.square.small.tree > .wrap,
+.action.square.small.list > .wrap {
+	width:30px;
+}
+
+.action.square.small > .wrap > .icon {
+    background-image: url("images/select_data_icons_sprite.png");
+    background-repeat: no-repeat;
+    display: block;
+    height: 24px;
+    width: 30px;
+}
+
+/* button background color, states */
+.action.small.down {
+    background-position: 0 -150px;
+}
+
+.action.small.down.over {
+    background-position: 0 -200px;
+}
+
+.action.small.down.pressed {
+    background-position: 0 -250px;
+}
+
+/* button icon positions, states */
+.action.small.tree.up .icon,
+.action.small.tree.up.over .icon {
+    background-position: 7px 4px;
+}
+
+.action.small.list.up .icon,
+.action.small.list.up.over .icon {
+    background-position: 4px -25px;
+}
+
+
+.action.small.tree.down .icon,
+.action.small.tree.down.over .icon {
+    background-position: -33px 4px;
+}
+
+.action.small.list.down .icon,
+.action.small.list.down.over .icon {
+    background-position: -36px -25px;
+}		
+
 /* action simple, new icon-only buttons introduced July 2013 */
 /* occurs in schedule jobs list page */
 .action.simple {
@@ -128,6 +190,11 @@
 .action.simple.button.delete {
 	background-position:4px -33px;
 	height:100%;
+}
+
+.action.simple.button.add {
+    background-position:4px -74px;
+    height:100%;
 }
 
 /* CHROME ONLY */
@@ -968,6 +1035,10 @@ button.capsule.mini .wrap {
 	/* gradient end values are #faac1f to #f9771d with a top inner shadow */
 	background-position: 0 -100px;
 	background-color: #fa961f;
+}
+
+.action.checking {
+	cursor:default;
 }
 
 .button.options {

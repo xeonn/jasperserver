@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -20,6 +20,7 @@
  */
 package com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
 
@@ -29,6 +30,7 @@ import javax.naming.NamingException;
 import javax.naming.NoInitialContextException;
 import javax.sql.DataSource;
 
+import com.jaspersoft.jasperserver.api.common.util.TibcoDriverManager;
 import com.jaspersoft.jasperserver.api.metadata.common.util.JndiFallbackResolver;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -46,10 +48,10 @@ import com.jaspersoft.jasperserver.api.metadata.jasperreports.service.ReportData
 public class JndiJdbcReportDataSourceServiceFactory extends JdbcReportDataSourceServiceFactory {
 
 	private static final Log log = LogFactory.getLog(JndiJdbcReportDataSourceServiceFactory.class);
-	
 	private Context ctx = null;
 	private boolean disableJndi;
 	private JndiFallbackResolver jndiFallbackResolver;
+    private static Map<String, String> jndiAppServerConnectionFunctionMap;
 
 	public JndiJdbcReportDataSourceServiceFactory() {
 		try {
@@ -138,4 +140,13 @@ public class JndiJdbcReportDataSourceServiceFactory extends JdbcReportDataSource
     public void setJndiFallbackResolver(JndiFallbackResolver jndiFallbackResolver) {
         this.jndiFallbackResolver = jndiFallbackResolver;
     }
+
+    public static Map<String, String> getJndiAppServerConnectionFunctionMap() {
+        return jndiAppServerConnectionFunctionMap;
+}
+
+    public static void setJndiAppServerConnectionFunctionMap(Map<String, String> jndiAppServerConnectionFunctionMap) {
+        JndiJdbcReportDataSourceServiceFactory.jndiAppServerConnectionFunctionMap = jndiAppServerConnectionFunctionMap;
+    }
+
 }

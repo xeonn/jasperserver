@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005 - 2009 Jaspersoft Corporation. All rights  reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
 * http://www.jaspersoft.com.
 *
 * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -16,7 +16,7 @@
 * GNU Affero  General Public License for more details.
 *
 * You should have received a copy of the GNU Affero General Public  License
-* along with this program.&nbsp; If not, see <http://www.gnu.org/licenses/>.
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 package com.jaspersoft.jasperserver.remote.resources.converters;
 
@@ -29,7 +29,7 @@ import org.springframework.stereotype.Service;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: AwsDataSourceResourceConverter.java 35226 2013-08-09 07:08:53Z inesterenko $
+ * @version $Id: AwsDataSourceResourceConverter.java 51542 2014-11-19 19:16:56Z vsabadosh $
  */
 @Service
 public class AwsDataSourceResourceConverter extends GenericJdbcDataSourceResourceConverter<AwsReportDataSource, ClientAwsDataSource> {
@@ -39,7 +39,7 @@ public class AwsDataSourceResourceConverter extends GenericJdbcDataSourceResourc
         awsReportDataSource.setRoleARN(clientObject.getRoleArn());
         awsReportDataSource.setAWSAccessKey(clientObject.getAccessKey());
         awsReportDataSource.setAWSRegion(clientObject.getRegion());
-        if (clientObject.getSecretKey() != null) {
+        if (clientObject.getSecretKey() != null || clientObject.getAccessKey() == null) {
             awsReportDataSource.setAWSSecretKey(clientObject.getSecretKey());
         }
         awsReportDataSource.setDbInstanceIdentifier(clientObject.getDbInstanceIdentifier());

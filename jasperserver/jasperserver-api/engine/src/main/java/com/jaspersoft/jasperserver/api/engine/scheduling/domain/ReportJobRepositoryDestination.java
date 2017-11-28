@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -30,7 +30,7 @@ import java.io.Serializable;
  * for report job output files.
  * 
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ReportJobRepositoryDestination.java 38683 2013-10-09 02:39:26Z carbiv $
+ * @version $Id: ReportJobRepositoryDestination.java 47331 2014-07-18 09:13:06Z kklein $
  * @since 1.0
  * @see ReportJob#getContentRepositoryDestination()
  */

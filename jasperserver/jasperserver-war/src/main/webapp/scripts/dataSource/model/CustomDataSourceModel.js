@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2014 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -19,6 +19,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * @author yaroslav.kovalchyk
+ * @version $Id: CustomDataSourceModel.js 49286 2014-09-23 13:32:25Z ykovalchyk $
+ */
 define(function(require) {
     "use strict";
 
@@ -54,13 +58,10 @@ define(function(require) {
 			this.testable = false;
 			this.queryTypes = null;
             this.initialization = $.Deferred();
+
             this.getCustomFieldsDefinition();
-            if(!this.isNew()){
-                // editing mode
-                this.set(this.parseProperties(this.get("properties")), options);
-                this.set("password", jasperserverConfig["input.password.substitution"]);
-            }
-			return result;
+
+            return result;
 		},
 
         getCustomFieldsDefinition: function() {
@@ -74,6 +75,7 @@ define(function(require) {
                 headers: headers,
                 url: jrsConfigs.contextPath + "/rest_v2/customDataSources/" + this.get("dataSourceName")
             }).done(function(response) {
+
                 if (response && response.propertyDefinitions && _.isArray(response.propertyDefinitions)) {
 
                     self.testable = !!response.testable;
@@ -91,8 +93,13 @@ define(function(require) {
 
                         self.customFields.push(definition);
                         self.defaults[definition.name] = definition.defaultValue;
+
                         if (!self.options.isEditMode) {
                             self.set(definition.name, definition.defaultValue);
+                        }
+
+                        if (definition.name === "password" && self.options.isEditMode && !self.isNew()) {
+                            self.set("password", jasperserverConfig["input.password.substitution"]);
                         }
 
                         // now, extend the validation object with required fields
@@ -105,29 +112,37 @@ define(function(require) {
                         }
                     });
                 }
+
+                if (!self.options.isEditMode) {
+                    self.set(self.parse(self.attributes), {silent: true});
+                }
+
                 self.initialization.resolve();
             }).fail(function(xhr) {
-                    var response = false, msg = "Failed to load custom data source definition. ";
-                    try {
-                        response = JSON.parse(xhr.responseText);
-                    } catch (e) {
+                var response = false, msg = "Failed to load custom data source definition. ";
+                try {
+                    response = JSON.parse(xhr.responseText);
+                } catch (e) {
+                }
+                if (response) {
+                    if (response[0] && response[0].errorCode) {
+                        msg += "<br/>The reason is: " + response[0].errorCode;
+                    } else if (response.message) {
+                        msg += "<br/>The reason is: " + response.message;
                     }
-                    if (response) {
-                        if (response[0] && response[0].errorCode) {
-                            msg += "<br/>The reason is: " + response[0].errorCode;
-                        } else if (response.message) {
-                            msg += "<br/>The reason is: " + response.message;
-                        }
-                        msg += "<br/><br/>The full response from the server is: " + xhr.responseText;
-                    }
-                    dialogs.errorPopup.show(msg);
-                });
+                    msg += "<br/><br/>The full response from the server is: " + xhr.responseText;
+                }
+                dialogs.errorPopup.show(msg);
+            });
         },
 
         parse: function(response) {
+
             var result = BaseDataSourceModel.prototype.parse.apply(this, arguments);
 
 			result = _.extend(result, this.parseProperties(response.properties));
+
+            delete response.properties;
 
             return result;
         },
@@ -146,20 +161,23 @@ define(function(require) {
 
         toJSON: function() {
             var result = BaseDataSourceModel.prototype.toJSON.apply(this, arguments);
+            return this.customFieldsToJSON(result, this.customFields);
+        },
 
-            if (!_.isEmpty(this.customFields)) {
-                result.properties = [];
+        customFieldsToJSON: function(data, customFields){
+            if (!_.isEmpty(customFields)) {
+                data.properties = [];
 
-                _.each(this.customFields, function(field){
-                    var value = result[field.name];
+                _.each(customFields, function(field){
+                    var value = data[field.name];
                     var isPassword = "password" === field.name;
                     if(!isPassword || (isPassword && value !== jasperserverConfig["input.password.substitution"])){
-                        result.properties.push({key: field.name, value: value});
+                        data.properties.push({key: field.name, value: value});
+                        delete data[field.name];
                     }
                 });
             }
-
-            return result;
+            return data;
         }
     });
 });

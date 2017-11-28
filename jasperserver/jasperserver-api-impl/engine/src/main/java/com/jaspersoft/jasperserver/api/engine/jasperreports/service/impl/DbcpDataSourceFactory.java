@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -29,7 +29,7 @@ import com.jaspersoft.jasperserver.api.JSExceptionWrapper;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: DbcpDataSourceFactory.java 30890 2013-04-06 15:26:45Z afomin $
+ * @version $Id: DbcpDataSourceFactory.java 48307 2014-08-15 21:38:37Z ichan $
  */
 public class DbcpDataSourceFactory implements PooledJdbcDataSourceFactory {
 	private static final Log log = LogFactory.getLog(DbcpDataSourceFactory.class);
@@ -48,7 +48,6 @@ public class DbcpDataSourceFactory implements PooledJdbcDataSourceFactory {
 			String url, String username, String password,
 			boolean defaultReadOnly, boolean defaultAutoCommit) {
 		registerDriver(driverClass);
-
 		return new DbcpDataSource(objectPoolFactory, url, username, password, 
 				defaultReadOnly, defaultAutoCommit);
 	}

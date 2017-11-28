@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -22,11 +22,9 @@ package com.jaspersoft.jasperserver.war.action;
 
 import com.jaspersoft.jasperserver.dto.reports.inputcontrols.InputControlOption;
 import com.jaspersoft.jasperserver.dto.reports.inputcontrols.InputControlState;
+import com.jaspersoft.jasperserver.dto.reports.inputcontrols.ReportInputControl;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ReportParametersUtils {
 
@@ -37,6 +35,17 @@ public class ReportParametersUtils {
                 valueMap.put(state.getId(), getValueFromInputControlState(state));
         }
 
+        return valueMap;
+    }
+
+    public static Map<String, String[]> getValueMapFromInputControls(List<ReportInputControl> inputControls) {
+        LinkedHashMap<String, String[]> valueMap = new LinkedHashMap<String, String[]>(inputControls.size());
+        for (ReportInputControl ic : inputControls) {
+            InputControlState state = ic.getState();
+            if (state != null) {
+                valueMap.put(state.getId(), getValueFromInputControlState(state));
+            }
+        }
         return valueMap;
     }
 

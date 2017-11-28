@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -30,13 +30,18 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.security.Authentication;
-import org.springframework.security.GrantedAuthority;
-import org.springframework.security.ui.WebAuthenticationDetails;
-import org.springframework.security.providers.UsernamePasswordAuthenticationToken;
-import org.springframework.security.context.SecurityContextHolder;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.WebAuthenticationDetails;
 
-import javax.servlet.*;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -226,13 +231,13 @@ public class JIPortletAuthenticationProcessingFilter  implements Filter, Initial
 	}
 	
 	protected Authentication createAuthenticationObject(String userName, String password, List roleList, ServletRequest request) {
-        GrantedAuthority roleListArray[] = new GrantedAuthority[roleList.size()];
+        List<GrantedAuthority> rolesAuthrity = new ArrayList<GrantedAuthority>(roleList.size());
         for (int i=0; i<roleList.size(); i++) {
-        	roleListArray[i] = new TenantAwareGrantedAuthority((String)roleList.get(i));
+            rolesAuthrity.add(new TenantAwareGrantedAuthority((String)roleList.get(i)));
         }      
         User user = getUser(userName);
         MetadataUserDetails md = new MetadataUserDetails(user);
-        UsernamePasswordAuthenticationToken authRequest = new UsernamePasswordAuthenticationToken(md, password, roleListArray);
+        UsernamePasswordAuthenticationToken authRequest = new UsernamePasswordAuthenticationToken(md, password, rolesAuthrity);
         authRequest.setDetails(new WebAuthenticationDetails((HttpServletRequest)request));
 
         return authRequest;        

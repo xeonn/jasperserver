@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -21,23 +21,21 @@
 
 package com.jaspersoft.jasperserver.api.metadata.security;
 
-import java.util.Collection;
-import java.util.Iterator;
-
-import org.springframework.security.Authentication;
-import org.springframework.security.acl.AclManager;
-import org.springframework.security.acl.basic.BasicAclEntry;
 import org.apache.commons.collections.iterators.ArrayIterator;
 import org.apache.commons.collections.iterators.SingletonIterator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.security.core.Authentication;
+
+import java.util.Collection;
+import java.util.Iterator;
 
 /**
- * A {@link BasicAclEntry} ACLs based method argument voter that works with
+ * A {@link org.springframework.security.acls.model.Acl} ACLs based method argument voter that works with
  * collections and arrays of objects. 
  * 
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: BasicMethodCollectionArgumentVoter.java 19922 2010-12-11 14:59:51Z tmatyashovsky $
+ * @version $Id: BasicMethodCollectionArgumentVoter.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
 public class BasicMethodCollectionArgumentVoter extends
 		BasicMethodArgumentVoter {
@@ -45,12 +43,11 @@ public class BasicMethodCollectionArgumentVoter extends
 	private static final Log log = LogFactory.getLog(BasicMethodCollectionArgumentVoter.class);
 	
 	@Override
-	protected boolean accessPermitted(Authentication authentication,
-			AclManager aclManager, Object secureObject) {
+	protected boolean accessPermitted(Authentication authentication, Object secureObject) {
 		boolean permitted = true;
 		for (Iterator it = getObjectsIterator(secureObject); it.hasNext();) {
 			Object object = (Object) it.next();
-			if (!super.accessPermitted(authentication, aclManager, object)) {
+			if (!super.accessPermitted(authentication, object)) {
 				permitted = false;
 				break;
 			}

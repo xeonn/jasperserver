@@ -1,6 +1,7 @@
 /*
- * Copyright (C) 2005 - 2012 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
+ *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
  * the following license terms  apply:
  *
@@ -26,7 +27,7 @@ import com.jaspersoft.jasperserver.war.common.JasperServerHttpConstants;
  * <p></p>
  *
  * @author Zakhar.Tomchenco
- * @version $Id: RestConstants.java 45307 2014-05-01 02:13:44Z schubar $
+ * @version $Id: RestConstants.java 47331 2014-07-18 09:13:06Z kklein $
  */
 public interface RestConstants {
     String HEADER_START_INDEX = "Start-Index";

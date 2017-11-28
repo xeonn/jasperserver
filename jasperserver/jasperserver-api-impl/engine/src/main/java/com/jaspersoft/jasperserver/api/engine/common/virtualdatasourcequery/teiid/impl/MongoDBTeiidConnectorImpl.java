@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2012 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -43,7 +43,7 @@ import org.teiid.translator.TranslatorException;
 
 /**
  * @author Ivan Chan (ichan@jaspersoft.com)
- * @version $Id: MongoDBTeiidConnectorImpl.java 45722 2014-05-14 10:24:22Z sergey.prilukin $
+ * @version $Id: MongoDBTeiidConnectorImpl.java 47331 2014-07-18 09:13:06Z kklein $
  */
 public class MongoDBTeiidConnectorImpl implements TeiidDataSource {
 

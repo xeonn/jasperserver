@@ -3,10 +3,12 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:context="http://www.springframework.org/schema/context"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:security="http://www.springframework.org/schema/security"
        xmlns:util="http://www.springframework.org/schema/util" xmlns:aop="http://www.springframework.org/schema/aop"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
                 http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.1.xsd
-                http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd">
+                http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd
+                http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.2.xsd">
     <!-- REST v.2-->
     <context:component-scan base-package="com.jaspersoft.jasperserver.jaxrs, com.jaspersoft.jasperserver.rest">
         <context:exclude-filter type="regex" expression=".*UserWorkflowStorage"/>
@@ -24,7 +26,7 @@
     </bean>
 
     <bean id="filterOutNotPermittedWorkflows"
-          class="org.springframework.security.intercept.method.aopalliance.MethodSecurityInterceptor">
+          class="org.springframework.security.access.intercept.aopalliance.MethodSecurityInterceptor">
         <property name="authenticationManager">
             <ref bean="authenticationManager"/>
         </property>
@@ -35,16 +37,15 @@
             <bean class="com.jaspersoft.jasperserver.jaxrs.poc.hypermedia.workflow.service.EmptyAccessDecisionManager"/>
         </property>
 
-        <property name="objectDefinitionSource">
-            <value>
-                com.jaspersoft.jasperserver.jaxrs.poc.hypermedia.workflow.data.UserWorkflowStorage.findByName=ADMINISTRATION_ALLOWED,CONFIGURATION_ALLOWED
-                com.jaspersoft.jasperserver.jaxrs.poc.hypermedia.workflow.data.UserWorkflowStorage.findAll=ADMINISTRATION_ALLOWED,CONFIGURATION_ALLOWED
-                com.jaspersoft.jasperserver.jaxrs.poc.hypermedia.workflow.data.UserWorkflowStorage.findAllByParentName=ADMINISTRATION_ALLOWED,CONFIGURATION_ALLOWED
-            </value>
+        <property name="securityMetadataSource">
+            <security:method-security-metadata-source>
+                <security:protect method="com.jaspersoft.jasperserver.jaxrs.poc.hypermedia.workflow.data.UserWorkflowStorage.findByName" access="ADMINISTRATION_ALLOWED,CONFIGURATION_ALLOWED"/>
+                <security:protect method="com.jaspersoft.jasperserver.jaxrs.poc.hypermedia.workflow.data.UserWorkflowStorage.findAllByParentName" access="ADMINISTRATION_ALLOWED,CONFIGURATION_ALLOWED"/>
+            </security:method-security-metadata-source>
         </property>
     </bean>
 
-    <bean id="workflowsAfterInvocationManager" class="org.springframework.security.afterinvocation.AfterInvocationProviderManager">
+    <bean id="workflowsAfterInvocationManager" class="org.springframework.security.access.intercept.AfterInvocationProviderManager">
         <property name="providers">
             <list>
                 <bean class="com.jaspersoft.jasperserver.jaxrs.poc.hypermedia.workflow.service.WorkflowsSecurityFilter">
@@ -76,17 +77,15 @@
     </bean>
     <bean id="usersJaxrsService"  class="com.jaspersoft.jasperserver.jaxrs.authority.UsersJaxrsService">
         <property name="service" ref="${bean.userAndRoleService}" />
-        <property name="attributesService" ref="${bean.userAttributesService}"/>
+    </bean>
 
-        <property name="maxLengthAttrName">
-            <value type="int">255</value>
-        </property>
-        <property name="maxLengthAttrValue">
-            <value type="int">255</value>
-        </property>
+    <bean id="attributesConfig" class="com.jaspersoft.jasperserver.jaxrs.common.AttributesConfig">
+        <property name="maxLengthAttrName" value="255"/>
+        <property name="maxLengthAttrValue" value="255"/>
     </bean>
 
     <alias name="${bean.permissionsRecipientIdentityResolver}" alias="concretePermissionsRecipientIdentityResolver"/>
+    <alias name="${bean.userAttributesService}" alias="concreteUserAttributesService"/>
 
     <util:map id="protocolMapping">
         <entry key="user">
@@ -114,9 +113,13 @@
         <entry key="prop" value="text/plain"/>
         <entry key="jrtx" value="application/xml"/>
         <entry key="xml" value="application/xml"/>
+        <entry key="json" value="application/json"/>
         <entry key="css" value="text/css"/>
         <entry key="accessGrantSchema" value="application/xml"/>
         <entry key="olapMondrianSchema" value="application/xml"/>
+        <entry key="pptx" value="application/vnd.openxmlformats-officedocument.presentationml.presentation"/>
+        <entry key="json" value="application/json"/>
+        <entry key="dashboardComponent" value="application/dashboardComponentsSchema+json"/>
     </util:map>
 
     <util:list id="queryLanguagesCe">
@@ -139,6 +142,11 @@
         <property name="defaultEncoding" value="UTF-8"/>
         <property name="basenamePrefix" value="WEB-INF/bundles/"/>
     </bean>
+
+    <alias name="${bean.copyMoveStrategies}" alias="copyMoveStrategies"/>
+
+    <util:map id="copyMoveStrategiesCe">
+    </util:map>
 
     <!-- REST v.1-->
     <alias name="${bean.restUtils}" alias="concreteRestUtils"/>
@@ -181,7 +189,7 @@
     <bean id="modifyProtectedCe" class="java.util.HashSet">
         <!-- this set contains URI or regular expressions of delete protected resources.
         Currently there are technical JRS specific folders -->
-        <constructor-arg index="0">
+        <constructor-arg index="0" type="java.util.Collection">
             <set>
                 <value>/</value>
                 <value>/temp</value>
@@ -195,7 +203,7 @@
     <bean id="foldersOnlyCe" class="java.util.HashSet">
         <!-- this set contains URI or regular expressions of delete protected resources.
         Currently there are technical JRS specific folders -->
-        <constructor-arg index="0">
+        <constructor-arg index="0" type="java.util.Collection">
             <set>
                 <value>/</value>
             </set>
@@ -291,11 +299,7 @@
 
     <!--Search Hypermedia Activity configuration-->
 
-    <bean id="ceExcludeFolderFilter" class="com.jaspersoft.jasperserver.jaxrs.poc.hypermedia.root.ExcludeFolderFilter">
-        <property name="sessionFactory" ref="sessionFactory"/>
-    </bean>
-
-    <util:list id="hypermediaSearchCustomFilters">
+    <util:list id="hypermediaSearchCustomFilters" scope="prototype">
        <ref bean="${bean.excludeFolderFilter}"/>
     </util:list>
 

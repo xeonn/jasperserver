@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -24,7 +24,7 @@ import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ResourceCopiedEvent.java 23577 2012-05-03 17:23:08Z lchirita $
+ * @version $Id: ResourceCopiedEvent.java 47331 2014-07-18 09:13:06Z kklein $
  */
 public class ResourceCopiedEvent {
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -20,6 +20,7 @@
  */
 package com.jaspersoft.jasperserver.war.tags;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -34,6 +35,7 @@ import com.jaspersoft.jasperserver.api.SessionAttribMissingException;
 
 import net.sf.jasperreports.engine.JRExporter;
 import net.sf.jasperreports.engine.JRExporterParameter;
+import net.sf.jasperreports.engine.JRPropertiesUtil;
 import net.sf.jasperreports.engine.JasperReportsContext;
 import net.sf.jasperreports.engine.ReportContext;
 import net.sf.jasperreports.engine.export.AbstractHtmlExporter;
@@ -41,6 +43,7 @@ import net.sf.jasperreports.engine.export.JRHtmlExporterParameter;
 import net.sf.jasperreports.engine.export.JRHyperlinkProducerFactory;
 import net.sf.jasperreports.engine.export.JsonExporter;
 import net.sf.jasperreports.engine.export.type.ZoomTypeEnum;
+import net.sf.jasperreports.web.actions.SaveZoomCommand;
 import net.sf.jasperreports.web.servlets.JasperPrintAccessor;
 import net.sf.jasperreports.web.servlets.ReportExecutionStatus;
 import net.sf.jasperreports.web.servlets.ReportPageStatus;
@@ -72,7 +75,7 @@ import com.jaspersoft.jasperserver.war.util.SessionObjectSerieAccessor;
  * renderJsp parameter allows override of default output format for HTML controls
  * 
  * @author Ionut Nedelcu (ionutned@users.sourceforge.net)
- * @version $Id: JasperViewerTag.java 44473 2014-04-14 12:16:30Z tdanciu $
+ * @version $Id: JasperViewerTag.java 51250 2014-11-07 19:36:11Z tdanciu $
  */
 public class JasperViewerTag extends RequestContextAwareTag
 {
@@ -103,7 +106,7 @@ public class JasperViewerTag extends RequestContextAwareTag
 	private String pageIndexAttribute = DEFAULT_PAGE_INDEX_ATTRIBUTE;
 	private String linkProducerFactoryAttribute = DEFAULT_LINK_PRODUCER_FACTORY_ATTRIBUTE;
 	private Map reportContextMap;
-	
+
 
 	protected int doStartTagInternal() {
 		return SKIP_BODY;
@@ -244,11 +247,21 @@ public class JasperViewerTag extends RequestContextAwareTag
                     result.put("pageTimestamp", String.valueOf(pageStatus.getTimestamp()));
                 }
 
-				String defaultZoomProperty = printAccessor.getJasperPrint().getProperty("net.sf.jasperreports.viewer.zoom"); // FIXME: use constant
+				String defaultZoomProperty = printAccessor.getJasperPrint().getProperty(SaveZoomCommand.PROPERTY_VIEWER_ZOOM);
 				if (defaultZoomProperty != null) {
 					ZoomTypeEnum zoomType = ZoomTypeEnum.getByName(defaultZoomProperty);
 					result.put("defaultZoom", zoomType != null ? zoomType.getHtmlValue() : defaultZoomProperty);
 				}
+
+				// report parts/tabs
+				JRPropertiesUtil propertiesUtil = JRPropertiesUtil.getInstance(jasperReportsContext);
+				Integer maxTabCount = propertiesUtil.getIntegerProperty(printAccessor.getJasperPrint(), "com.jaspersoft.jasperserver.viewer.report.tabs.max.count", 4);
+				Integer maxLabelLength = propertiesUtil.getIntegerProperty(printAccessor.getJasperPrint(), "com.jaspersoft.jasperserver.viewer.report.tabs.labels.max.length", 16);
+
+				Map<String, Integer> tabProps = new HashMap<String, Integer>();
+				tabProps.put("maxCount", maxTabCount);
+				tabProps.put("maxLabelLength", maxLabelLength);
+				result.put("tabs", tabProps);
 
 				response.setHeader("jasperreports-report-status", JacksonUtil.getInstance(jasperReportsContext).getJsonString(result));
 			}

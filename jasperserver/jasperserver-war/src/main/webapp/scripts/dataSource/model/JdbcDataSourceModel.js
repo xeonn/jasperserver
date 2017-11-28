@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2014 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -25,7 +25,8 @@ define(function (require) {
     var BaseDataSourceModel = require("dataSource/model/BaseDataSourceModel"),
         JdbcDriverModel = require("dataSource/model/JdbcDriverModel"),
         JdbcDriverCollection = require("dataSource/collection/JdbcDriverCollection"),
-		connectionTypes = require("dataSource/enum/connectionTypes"),
+        dataSourcePatterns = require("settings!dataSourcePatterns"),
+        connectionTypes = require("dataSource/enum/connectionTypes"),
         _ = require("underscore"),
         $ = require("jquery"),
         XRegExp = require("xregexp"),
@@ -37,19 +38,13 @@ define(function (require) {
         var validation = {};
 
         _.extend(validation, BaseDataSourceModel.prototype.validation, {
-            username: [
-                {
-                    required: true,
-                    msg: i18n["ReportDataSourceValidator.error.not.empty.reportDataSource.username"]
-                }
-            ],
             connectionUrl: [
                 {
                     required: true,
                     msg: i18n["ReportDataSourceValidator.error.not.empty.reportDataSource.connectionUrl"]
                 },
                 {
-                    doesNotContainCharacters: "\\s",
+                    xRegExpPattern: XRegExp(dataSourcePatterns.forbidWhitespacesPattern),
                     msg: i18n["ReportDataSourceValidator.error.invalid.chars.reportDataSource.connectionUrl"]
                 }
             ]
@@ -69,13 +64,13 @@ define(function (require) {
 
             _.extend(defaults, BaseDataSourceModel.prototype.defaults, {
                 driverClass: "", // this is the value of the selected driver class. Keep in mind, what "other" driver has (and should have) empty driver class name (i.e. "")
-				selectedDriverClass: "", // this is the pointer to the "selected" element in the <select> html tag on the page
+                selectedDriverClass: "", // this is the pointer to the "selected" element in the <select> html tag on the page
                 username: "",
                 password: "",
                 timezone: "",
                 connectionUrl: "",
                 isOtherDriver: false,
-				connectionType: connectionTypes.JDBC
+                connectionType: connectionTypes.JDBC
             });
 
             return defaults;
@@ -92,14 +87,6 @@ define(function (require) {
             var self = this;
             this.drivers.fetch({reset: true}).done(function(){
                 // set default driver for new model
-                if (self.isNew()) {
-                    self.setCustomAttributesDefaultValues(self.drivers.getDefaultDriver());
-                } else {
-                    self.set("selectedDriverClass", self.get("driverClass"));
-                    self.set(self.getCustomAttributeValuesFromConnectionUrl());
-                    // use password substitution
-                    self.set("password", jasperserverConfig["input.password.substitution"]);
-                }
 
                 if (self.drivers.driverUploadEnabled && self.otherDriverIsPresent) {
                     self.drivers.add({
@@ -111,6 +98,15 @@ define(function (require) {
                         jdbcUrl: "",
                         uploaded: false
                     });
+                }
+
+                if (self.isNew()) {
+                    self.setCustomAttributesDefaultValues(self.drivers.getDefaultDriver());
+                } else {
+                    self.set("selectedDriverClass", self.get("driverClass"));
+                    self.set(self.getCustomAttributeValuesFromConnectionUrl());
+                    // use password substitution
+                    self.set("password", jasperserverConfig["input.password.substitution"]);
                 }
 
                 var customAttributesChangeEventString = _.map(self.drivers.getAllPossibleCustomAttributes(),
@@ -126,7 +122,7 @@ define(function (require) {
             return this.drivers.getDriverByClass(this.get("selectedDriverClass"));
         },
 
-		changeSelectedDriver: function() {
+        changeSelectedDriver: function() {
             var driver = this.drivers.getDriverByClass(this.get("selectedDriverClass"));
 
             if (driver) {
@@ -188,14 +184,14 @@ define(function (require) {
             if (!driver.isOtherDriver()) {
                 _.extend(defaultValues, driver.get("defaultValues"));
                 defaultValues["selectedDriverClass"] = driver.get("jdbcDriverClass");
-				defaultValues["driverClass"] = driver.get("jdbcDriverClass");
+                defaultValues["driverClass"] = driver.get("jdbcDriverClass");
                 defaultValues["isOtherDriver"] = false;
                 defaultValues["connectionUrl"] = this.replaceConnectionUrlTemplatePlaceholdersWithValues(
                     driver.get("jdbcUrl"), driver.get("defaultValues")
-				);
+                );
             } else {
-				defaultValues["selectedDriverClass"] = driver.get("jdbcDriverClass");
-				defaultValues["driverClass"] = "";
+                defaultValues["selectedDriverClass"] = driver.get("jdbcDriverClass");
+                defaultValues["driverClass"] = "";
                 defaultValues["isOtherDriver"] = true;
             }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2013 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -25,6 +25,11 @@ import com.jaspersoft.jasperserver.api.JSValidationException;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.client.FileResourceImpl;
 import com.jaspersoft.jasperserver.api.metadata.olap.domain.MondrianConnection;
 import com.jaspersoft.jasperserver.api.metadata.olap.domain.client.MondrianConnectionImpl;
+import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributesResolver;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -34,12 +39,20 @@ import static org.testng.Assert.fail;
  * <p></p>
  *
  * @author Zakhar.Tomchenco
- * @version $Id: MondrianConnectionResourceValidatorTest.java 34356 2013-07-24 14:23:29Z ykovalchyk $
+ * @version $Id: MondrianConnectionResourceValidatorTest.java 51369 2014-11-12 13:59:41Z sergey.prilukin $
  */
 public class MondrianConnectionResourceValidatorTest {
-
+    @InjectMocks
     private final MondrianConnectionResourceValidator validator = new MondrianConnectionResourceValidator();
+    @Mock
+    private ProfileAttributesResolver profileAttributesResolver;
+
     private MondrianConnection connection;
+
+    @BeforeClass
+    public void init() {
+        MockitoAnnotations.initMocks(this);
+    }
 
     @BeforeMethod
     public void setUp() {

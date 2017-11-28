@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2013 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -28,10 +28,10 @@ import java.util.Map;
  * <p></p>
  *
  * @author Zakhar.Tomchenco
- * @version $Id: ToServerConversionOptions.java 35226 2013-08-09 07:08:53Z inesterenko $
+ * @version $Id: ToServerConversionOptions.java 49286 2014-09-23 13:32:25Z ykovalchyk $
  */
 public class ToServerConversionOptions {
-    private boolean allowReferencesOnly, resetVersion;
+    private boolean allowReferencesOnly, resetVersion, suppressValidation;
     private String ownersUri;
     private Map<String, InputStream> attachments;
 
@@ -75,15 +75,26 @@ public class ToServerConversionOptions {
         return this;
     }
 
+    public boolean isSuppressValidation() {
+        return suppressValidation;
+    }
+
+    public ToServerConversionOptions setSuppressValidation(boolean suppressValidation) {
+        this.suppressValidation = suppressValidation;
+        return this;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof ToServerConversionOptions)) return false;
 
         ToServerConversionOptions that = (ToServerConversionOptions) o;
 
         if (allowReferencesOnly != that.allowReferencesOnly) return false;
         if (resetVersion != that.resetVersion) return false;
+        if (suppressValidation != that.suppressValidation) return false;
+        if (attachments != null ? !attachments.equals(that.attachments) : that.attachments != null) return false;
         if (ownersUri != null ? !ownersUri.equals(that.ownersUri) : that.ownersUri != null) return false;
 
         return true;
@@ -93,7 +104,9 @@ public class ToServerConversionOptions {
     public int hashCode() {
         int result = (allowReferencesOnly ? 1 : 0);
         result = 31 * result + (resetVersion ? 1 : 0);
+        result = 31 * result + (suppressValidation ? 1 : 0);
         result = 31 * result + (ownersUri != null ? ownersUri.hashCode() : 0);
+        result = 31 * result + (attachments != null ? attachments.hashCode() : 0);
         return result;
     }
 
@@ -102,7 +115,9 @@ public class ToServerConversionOptions {
         return "ToServerConversionOptions{" +
                 "allowReferencesOnly=" + allowReferencesOnly +
                 ", resetVersion=" + resetVersion +
+                ", suppressValidation=" + suppressValidation +
                 ", ownersUri='" + ownersUri + '\'' +
+                ", attachments=" + attachments +
                 '}';
     }
 }

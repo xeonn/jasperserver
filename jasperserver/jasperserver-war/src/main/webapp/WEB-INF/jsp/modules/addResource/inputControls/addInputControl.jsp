@@ -1,5 +1,5 @@
 <%--
-  ~ Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+  ~ Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
   ~ http://www.jaspersoft.com.
   ~
   ~ Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -89,7 +89,7 @@
                             <t:putAttribute name="containerTitle"><spring:message code="addResources.addInputControle.conteinerTitle" javaScriptEscape="true"/></t:putAttribute>
                             <t:putAttribute name="headerContent">
 
-                                <spring:bind path="control.inputControl.type">
+                                <spring:bind path="control.inputControl.inputControlType">
                                     <label class="control select inline<c:if test="${status.error}"> error</c:if>" for="dataTypeKind" title="Data Type Kind">
                                         <span class="wrap offLeft"><spring:message code="addResources.addInputControle.inputControleType" javaScriptEscape="true"/></span>
                                         <select id="dataTypeKind" name="${status.expression}">

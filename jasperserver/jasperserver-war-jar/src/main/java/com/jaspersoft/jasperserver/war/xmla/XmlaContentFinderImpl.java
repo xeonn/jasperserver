@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -51,7 +51,7 @@ import java.util.*;
  * load content of the repository.
  *
  * @author vsabadosh
- * @version $Id: XmlaContentFinderImpl.java 42231 2014-02-24 16:57:50Z vsabadosh $
+ * @version $Id: XmlaContentFinderImpl.java 47331 2014-07-18 09:13:06Z kklein $
  */
 public class XmlaContentFinderImpl implements XmlaContentFinder {
     protected static final Log log = LogFactory.getLog(XmlaContentFinderImpl.class);

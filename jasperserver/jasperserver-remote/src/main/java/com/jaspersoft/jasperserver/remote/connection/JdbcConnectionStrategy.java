@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005 - 2013 Jaspersoft Corporation. All rights  reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
 * http://www.jaspersoft.com.
 *
 * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -16,84 +16,68 @@
 * GNU Affero  General Public License for more details.
 *
 * You should have received a copy of the GNU Affero General Public  License
-* along with this program.&nbsp; If not, see <http://www.gnu.org/licenses/>.
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 package com.jaspersoft.jasperserver.remote.connection;
 
-import com.jaspersoft.jasperserver.api.common.service.JdbcDriverService;
+import com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl.BaseJdbcDataSource;
 import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.JdbcReportDataSource;
+import com.jaspersoft.jasperserver.api.metadata.jasperreports.service.ReportDataSourceServiceFactory;
 import com.jaspersoft.jasperserver.dto.resources.ClientJdbcDataSource;
 import com.jaspersoft.jasperserver.remote.exception.IllegalParameterValueException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.jaspersoft.jasperserver.remote.resources.converters.JdbcDataSourceResourceConverter;
+import com.jaspersoft.jasperserver.remote.resources.converters.ToServerConversionOptions;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
-
 import javax.annotation.Resource;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+
 import java.util.Map;
 
 /**
  * <p></p>
  *
  * @author yaroslav.kovalchyk
- * @version $Id: JdbcConnectionStrategy.java 42684 2014-03-06 14:26:22Z ykovalchyk $
+ * @version $Id: JdbcConnectionStrategy.java 50011 2014-10-09 16:57:26Z vzavadskii $
  */
 @Service
 public class JdbcConnectionStrategy implements ConnectionManagementStrategy<ClientJdbcDataSource> {
-    private final static Log log = LogFactory.getLog(JdbcConnectionStrategy.class);
-    @Resource
-    private JdbcDriverService jdbcDriverService;
     @Resource
     private MessageSource messageSource;
     @Resource(name = "concreteRepository")
     private RepositoryService repository;
+    @Resource(name = "jdbcDataSourceServiceFactory")
+    private ReportDataSourceServiceFactory jdbcDataSourceFactory;
+    @Resource
+    private JdbcDataSourceResourceConverter jdbcDataSourceResourceConverter;
 
     @Override
     public ClientJdbcDataSource createConnection(ClientJdbcDataSource connectionDescription, Map<String, Object> data) throws IllegalParameterValueException {
-        Connection conn = null;
         Exception exception = null;
         boolean passed = false;
-        try {
-            jdbcDriverService.register(connectionDescription.getDriverClass());
 
-            // On edit datasource we set the passwordSubstitution to the passwords form fields
-            // If we get the substitution from UI then use the password from original data source (if it exists)
-            String password = connectionDescription.getPassword();
-            final String passwordSubstitution = messageSource.getMessage("input.password.substitution", null, LocaleContextHolder.getLocale());
-            if ((password == null || password.equals(passwordSubstitution)) && connectionDescription.getUri() != null) {
-                JdbcReportDataSource existingDs = (JdbcReportDataSource) repository.getResource(null, connectionDescription.getUri());
-                if (existingDs != null) {
-                    password = existingDs.getPassword();
-                }
+        JdbcReportDataSource jdbcReportDataSource = jdbcDataSourceResourceConverter.toServer(connectionDescription,
+                ToServerConversionOptions.getDefault().setSuppressValidation(true));
+
+        String password = connectionDescription.getPassword();
+        final String passwordSubstitution = messageSource.getMessage("input.password.substitution", null, LocaleContextHolder.getLocale());
+        if ((password == null || password.equals(passwordSubstitution)) && connectionDescription.getUri() != null) {
+            JdbcReportDataSource existingDs = (JdbcReportDataSource) repository.getResource(null, connectionDescription.getUri());
+            if (existingDs != null) {
+                jdbcReportDataSource.setPassword(existingDs.getPassword());
             }
+        }
 
-            conn = establishConnection(connectionDescription.getConnectionUrl(), connectionDescription.getUsername(), password);
-            passed = conn != null;
+        try {
+            passed = ((BaseJdbcDataSource)jdbcDataSourceFactory.createService(jdbcReportDataSource)).testConnection();
         } catch (Exception e) {
             exception = e;
-        } finally {
-            if (conn != null)
-                try {
-                    conn.close();
-                } catch (SQLException e) {
-                    log.error("Couldn't disconnect JDBC connection", e);
-                }
         }
         if (!passed) {
             throw new ConnectionFailedException(connectionDescription, exception);
         }
         return connectionDescription;
-    }
-
-    protected Connection establishConnection(String url, String username, String password) throws SQLException {
-        return DriverManager.getConnection(url, username, password);
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2014 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: administer.options.js 45873 2014-05-20 22:59:36Z ogavavka $
+ * @version: $Id: administer.options.js 8025 2014-11-12 13:10:12Z ktsaregradskyi $
  */
 
 var Options = {
@@ -125,8 +125,8 @@ var Options = {
     },
 
     flushCache: function() {
-        var url = 'flush.html';
-        Administer._sendRequest(url, null, Options._flushCallback);
+        var url = 'flow.html?_flowExecutionKey=' + Administer.flowExecutionKey + '&_eventId=flushCache';
+        Administer._sendRequest(url,null,Options._flushCallback);
     },
 
 

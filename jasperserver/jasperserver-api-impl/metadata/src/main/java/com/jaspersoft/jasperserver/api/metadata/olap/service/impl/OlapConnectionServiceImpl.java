@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -52,6 +52,7 @@ import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.impl.client.MetadataUserDetails;
 import com.jaspersoft.jasperserver.api.metadata.user.service.TenantService;
 import com.jaspersoft.jasperserver.api.metadata.user.service.UserAuthorityService;
+import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributesResolver;
 import com.tonbeller.jpivot.core.Model;
 import com.tonbeller.jpivot.core.ModelFactory;
 import com.tonbeller.jpivot.mondrian.MondrianModel;
@@ -79,8 +80,8 @@ import org.olap4j.metadata.Catalog;
 import org.olap4j.metadata.NamedList;
 import org.olap4j.metadata.Schema;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.security.Authentication;
-import org.springframework.security.context.SecurityContextHolder;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -106,18 +107,18 @@ import java.util.Properties;
 
 /**
  * @author sbirney
- * $Id: OlapConnectionServiceImpl.java 44312 2014-04-09 14:30:12Z vsabadosh $
+ * $Id: OlapConnectionServiceImpl.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 public class OlapConnectionServiceImpl implements OlapConnectionService, ReportDataSourceServiceFactory {
 
-    /**
-     * property keys used for olap4j connection
-     */
-    public static final String OLAP4J_DRIVER = "olap4jDriver";
-    public static final String OLAP4J_URL_PREFIX = "urlPrefix";
-    public static final String XMLA_USER = "user";
-    public static final String XMLA_PASSWORD = "password";
+	/**
+	 * property keys used for olap4j connection
+	 */
+	public static final String OLAP4J_DRIVER = "olap4jDriver";
+	public static final String OLAP4J_URL_PREFIX = "urlPrefix";
+	public static final String XMLA_USER = "user";
+	public static final String XMLA_PASSWORD = "password";
 
     private static final String OLAP_CONNECTION_JNDI_DATA_SOURCE = "DataSource";
     private static final String OLAP_CONNECTION_JDBC = "Jdbc";
@@ -132,52 +133,53 @@ public class OlapConnectionServiceImpl implements OlapConnectionService, ReportD
     private TenantService tenantService;
     private JndiFallbackResolver jndiFallbackResolver;
     private JdbcDriverService jdbcDriverService;
+    private ProfileAttributesResolver profileAttributesResolver;
 
     private CatalogLocator repositoryCatalogLocator = new RepositoryCatalogLocator();
 
-    protected String OLAP4J_CACHE = null;
+	protected String OLAP4J_CACHE = null;
     protected String OLAP4J_CACHE_NAME = null;
     protected String OLAP4J_CACHE_MODE = null;
     protected String OLAP4J_CACHE_TIMEOUT = null;
     protected String OLAP4J_CACHE_SIZE = null;
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.jaspersoft.jasperserver.api.metadata.olap.service.OlapConnectionService.createOlapModel()
-     *
-     * @return a newly constructed and configured OlapModel initialize is not
-     * yet called.
-     */
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.jaspersoft.jasperserver.api.metadata.olap.service.OlapConnectionService.createOlapModel()
+	 *
+	 * @return a newly constructed and configured OlapModel initialize is not
+	 * yet called.
+	 */
     @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-    public OlapModel createOlapModel(ExecutionContext context, OlapUnit olapUnit) {
-        OlapClientConnection clientConn = (OlapClientConnection) dereference(
-                context, olapUnit.getOlapClientConnection());
-        if (clientConn instanceof XMLAConnection) {
-            return createXmlaModel(context, olapUnit);
-        }
-        String mdx = olapUnit.getMdxQuery();
-        MondrianConnection conn = (MondrianConnection) clientConn;
+	public OlapModel createOlapModel(ExecutionContext context, OlapUnit olapUnit) {
+		OlapClientConnection clientConn = (OlapClientConnection) dereference(
+				context, olapUnit.getOlapClientConnection());
+		if (clientConn instanceof XMLAConnection) {
+			return createXmlaModel(context, olapUnit);
+		}
+		String mdx = olapUnit.getMdxQuery();
+		MondrianConnection conn = (MondrianConnection) clientConn;
 		/*
 		 * FIXME Need to be able to configure the extensions
 		 *
 		 * URL url; if (config == null) url = getDefaultConfig(); else url =
 		 * pageContext.getServletContext().getResource(config);
 		 */
-        MondrianModel model = null;
-        try {
-            model = (MondrianModel) ModelFactory
-                    .instance(getDefaultMondrianConfig());
-        } catch (Exception e) {
-            throw new JSException(e);
-        }
+		MondrianModel model = null;
+		try {
+			model = (MondrianModel) ModelFactory
+					.instance(getDefaultMondrianConfig());
+		} catch (Exception e) {
+			throw new JSException(e);
+		}
 
-        model.setMdxQuery(mdx);
-        model.setConnectProperties(getMondrianConnectProperties(context, conn));
-        model.setDynLocale(String.valueOf(LocaleContextHolder.getLocale()));
+		model.setMdxQuery(mdx);
+		model.setConnectProperties(getMondrianConnectProperties(context, conn));
+		model.setDynLocale(String.valueOf(LocaleContextHolder.getLocale()));
 
-        // Set the catalog locator
-        model.setCatalogLocator(repositoryCatalogLocator);
+                // Set the catalog locator
+                model.setCatalogLocator(repositoryCatalogLocator);
 
 		/*
 		 * FIXME use of other values?
@@ -188,99 +190,99 @@ public class OlapConnectionServiceImpl implements OlapConnectionService, ReportD
 		 * mm.setConnectionPooling(false);
 		 * mm.setExternalDataSource(cfg.getExternalDataSource());
 		 */
-        return model;
-    }
+		return model;
+	}
 
-    protected URL getDefaultMondrianConfig() {
-        return MondrianOlapModelTag.class
-                .getResource("/com/tonbeller/jpivot/mondrian/config.xml");
-    }
+	protected URL getDefaultMondrianConfig() {
+		return MondrianOlapModelTag.class
+				.getResource("/com/tonbeller/jpivot/mondrian/config.xml");
+	}
 
-    protected URL getDefaultXMLAConfig() {
-        return XMLA_OlapModelTag.class.getResource("config.xml");
-    }
+	protected URL getDefaultXMLAConfig() {
+		return XMLA_OlapModelTag.class.getResource("config.xml");
+	}
 
     @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-    public OlapModel createXmlaModel(ExecutionContext context, OlapUnit xmlaUnit) {
-        String mdx = xmlaUnit.getMdxQuery();
-        XMLAConnection xmlaConn = (XMLAConnection) dereference(context,
-                xmlaUnit.getOlapClientConnection());
+	public OlapModel createXmlaModel(ExecutionContext context, OlapUnit xmlaUnit) {
+		String mdx = xmlaUnit.getMdxQuery();
+		XMLAConnection xmlaConn = (XMLAConnection) dereference(context,
+				xmlaUnit.getOlapClientConnection());
 
-        URL url;
+		URL url;
 		/*
 		 * if (config == null) url = getClass().getResource("config.xml"); else
 		 * url = pageContext.getServletContext().getResource(config);
 		 */
-        url = getDefaultXMLAConfig();
+		url = getDefaultXMLAConfig();
 
-        // let Digester create a model from config input
-        // the config input stream MUST refer to the XMLA_Model class
-        // <model class="com.tonbeller.bii.xmla.XMLA_Model"> is required
-        Model model;
-        try {
-            model = ModelFactory.instance(url);
-        } catch (Exception e) {
-            throw new JSException(e);
-        }
+		// let Digester create a model from config input
+		// the config input stream MUST refer to the XMLA_Model class
+		// <model class="com.tonbeller.bii.xmla.XMLA_Model"> is required
+		Model model;
+		try {
+			model = ModelFactory.instance(url);
+		} catch (Exception e) {
+			throw new JSException(e);
+		}
 
-        if (!(model instanceof XMLA_Model))
-            throw new JSException(
-                    "jsexception.invalid.class.attribute.for.model.tag",
-                    new Object[] { getDefaultXMLAConfig() });
+		if (!(model instanceof XMLA_Model))
+			throw new JSException(
+					"jsexception.invalid.class.attribute.for.model.tag",
+					new Object[] { getDefaultXMLAConfig() });
 
-        XMLA_Model xmlaModel = (XMLA_Model) model;
+		XMLA_Model xmlaModel = (XMLA_Model) model;
 
-        xmlaModel.setCatalog(xmlaConn.getCatalog());
+		xmlaModel.setCatalog(xmlaConn.getCatalog());
 
-        // if the xmlaConnection metadata object does not specify
-        // username or password, then use the login-in user's credentials
-        if (lacksAuthentication(xmlaConn)) {
-            User user = getCurrentUserDetails();
-            String fullyQualifiedName = user.getUsername();
-            if (user.getTenantId() != null) {
-                fullyQualifiedName += tenantService.getUserOrgIdDelimiter() + user.getTenantId();
-            }
-            xmlaModel.setUser(fullyQualifiedName);
-            xmlaModel.setPassword(user.getPassword());
-        } else {
-            xmlaModel.setUser(xmlaConn.getUsername());
-            xmlaModel.setPassword(xmlaConn.getPassword());
-        }
+		// if the xmlaConnection metadata object does not specify
+		// username or password, then use the login-in user's credentials
+		if (lacksAuthentication(xmlaConn)) {
+			User user = getCurrentUserDetails();
+			String fullyQualifiedName = user.getUsername();
+			if (user.getTenantId() != null) {
+				fullyQualifiedName += tenantService.getUserOrgIdDelimiter() + user.getTenantId();
+			}
+			xmlaModel.setUser(fullyQualifiedName);
+			xmlaModel.setPassword(user.getPassword());
+		} else {
+			xmlaModel.setUser(xmlaConn.getUsername());
+			xmlaModel.setPassword(xmlaConn.getPassword());
+		}
 
-        xmlaModel.setDataSource(xmlaConn.getDataSource());
+		xmlaModel.setDataSource(xmlaConn.getDataSource());
 
-        xmlaModel.setMdxQuery(mdx);
-        xmlaModel.setID(xmlaConn.getCatalog() + "-" + xmlaUnit.hashCode()); // ???
-        xmlaModel.setUri(xmlaConn.getURI());
+		xmlaModel.setMdxQuery(mdx);
+		xmlaModel.setID(xmlaConn.getCatalog() + "-" + xmlaUnit.hashCode()); // ???
+		xmlaModel.setUri(xmlaConn.getURI());
 
-        log.debug("XMLA USERNAME = " + xmlaModel.getUser());
-        log.debug("XMLA PASSWORD = " + xmlaModel.getPassword());
+		log.debug("XMLA USERNAME = " + xmlaModel.getUser());
+		log.debug("XMLA PASSWORD = " + xmlaModel.getPassword());
 
-        return xmlaModel;
-    }
+		return xmlaModel;
+	}
 
-    protected boolean lacksAuthentication(XMLAConnection xmlaConn) {
-        return xmlaConn.getUsername() == null || xmlaConn.getPassword() == null
-                || xmlaConn.getUsername().equals("")
-                || xmlaConn.getPassword().equals("");
-    }
+	protected boolean lacksAuthentication(XMLAConnection xmlaConn) {
+		return xmlaConn.getUsername() == null || xmlaConn.getPassword() == null
+				|| xmlaConn.getUsername().equals("")
+				|| xmlaConn.getPassword().equals("");
+	}
 
-    protected MetadataUserDetails getCurrentUserDetails() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth != null) {
-            return (MetadataUserDetails) auth.getPrincipal();
-        }
-        return null;
-    }
+	protected MetadataUserDetails getCurrentUserDetails() {
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		if (auth != null) {
+			return (MetadataUserDetails) auth.getPrincipal();
+		}
+		return null;
+	}
 
-    /*
-     * Because of the way the repository works, this version of validate
-     * only works if the OlapUnit has already been saved.
-     */
+	/*
+	 * Because of the way the repository works, this version of validate
+	 * only works if the OlapUnit has already been saved.
+	 */
     @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-    public ValidationResult validate(ExecutionContext context, OlapUnit unit) {
-        return validate(context, unit, null, null, null);
-    }
+	public ValidationResult validate(ExecutionContext context, OlapUnit unit) {
+		return validate(context, unit, null, null, null);
+	}
 
 	/*
 	 * if your OlapUnit has not yet been saved as a repository resource,
@@ -289,85 +291,85 @@ public class OlapConnectionServiceImpl implements OlapConnectionService, ReportD
 	 */
 
     @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-    public ValidationResult validate(ExecutionContext context, OlapUnit unit,
-                                     FileResource schema, OlapClientConnection conn,
-                                     ReportDataSource dataSource) {
-        ValidationResultImpl result = new ValidationResultImpl();
-        validateMDX(context, result, unit, schema, conn, dataSource);
-        // TODO: validate the datasource as well
-        return result;
-    }
+	public ValidationResult validate(ExecutionContext context, OlapUnit unit,
+			FileResource schema, OlapClientConnection conn,
+			ReportDataSource dataSource) {
+		ValidationResultImpl result = new ValidationResultImpl();
+		validateMDX(context, result, unit, schema, conn, dataSource);
+		// TODO: validate the datasource as well
+		return result;
+	}
 
-    /*
-     * Because of the way the repository works, this version of validateMDX
-     * only works if the OlapUnit has already been saved.
-     */
-    protected void validateMDX(ExecutionContext context,
-                               ValidationResultImpl result, OlapUnit unit) {
-        validateMDX(context, result, unit, null, null, null);
-    }
+	/*
+	 * Because of the way the repository works, this version of validateMDX
+	 * only works if the OlapUnit has already been saved.
+	 */
+	protected void validateMDX(ExecutionContext context,
+			ValidationResultImpl result, OlapUnit unit) {
+		validateMDX(context, result, unit, null, null, null);
+	}
 
-    protected void validateMDX(ExecutionContext context,
-                               ValidationResultImpl result, OlapUnit unit, FileResource schema,
-                               OlapClientConnection conn, ReportDataSource dataSource) {
-        MondrianConnection resource = null;
-        if (conn instanceof MondrianConnection)
-            resource = (MondrianConnection) conn;
+	protected void validateMDX(ExecutionContext context,
+			ValidationResultImpl result, OlapUnit unit, FileResource schema,
+			OlapClientConnection conn, ReportDataSource dataSource) {
+		MondrianConnection resource = null;
+		if (conn instanceof MondrianConnection)
+			resource = (MondrianConnection) conn;
+
+		if (resource == null)
+			resource = getConnectionResource(context, unit);
 
         if (resource == null)
-            resource = getConnectionResource(context, unit);
-
-        if (resource == null)
-            return;
+			return;
 
         try {
             mondrian.olap.Connection monConnection = getTestMondrianConnection(context, resource, dataSource, schema);
-            monConnection.parseQuery(unit.getMdxQuery());
-        } catch (Exception e) {
-            ValidationDetailImpl detail = new ValidationDetailImpl();
-            detail.setValidationClass(OlapUnit.class);
-            detail.setName(unit.getName());
-            detail.setLabel(unit.getLabel());
-            detail.setResult(ValidationResult.STATE_ERROR);
-            detail.setException(e);
-            detail.setMessage(e.getMessage());
-            result.addValidationDetail(detail);
-            log.warn("Validation Failed for Olap Unit: " + unit.getName(), e);
-        }
+			monConnection.parseQuery(unit.getMdxQuery());
+		} catch (Exception e) {
+			ValidationDetailImpl detail = new ValidationDetailImpl();
+			detail.setValidationClass(OlapUnit.class);
+			detail.setName(unit.getName());
+			detail.setLabel(unit.getLabel());
+			detail.setResult(ValidationResult.STATE_ERROR);
+			detail.setException(e);
+			detail.setMessage(e.getMessage());
+			result.addValidationDetail(detail);
+			log.warn("Validation Failed for Olap Unit: " + unit.getName(), e);
+		}
 
-    }
-    /*
-     * mondrianConnection
-     */
+	}
+	/*
+	 * mondrianConnection
+	 */
     @Transactional(propagation = Propagation.REQUIRED)
-    public MondrianConnection getConnectionResource(ExecutionContext context, OlapUnit unit) {
-        Resource clientConn = dereference(context, unit.getOlapClientConnection());
-        if (clientConn instanceof MondrianConnection) {
-            return (MondrianConnection) clientConn;
-        }
-        if (clientConn instanceof XMLAConnection) {
-            // TODO: have to find the matching MondrianXMLADefinition
-        }
-        return null;
-    }
+	public MondrianConnection getConnectionResource(ExecutionContext context, OlapUnit unit) {
+		Resource clientConn = dereference(context, unit.getOlapClientConnection());
+		if (clientConn instanceof MondrianConnection) {
+			return (MondrianConnection) clientConn;
+		}
+		if (clientConn instanceof XMLAConnection) {
+			// TODO: have to find the matching MondrianXMLADefinition
+		}
+		return null;
+	}
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public mondrian.olap.Connection getMondrianConnection(ExecutionContext context, String connResourceName) {
-        MondrianConnection conn = (MondrianConnection) getRepository().getResource(context, connResourceName);
+	public mondrian.olap.Connection getMondrianConnection(ExecutionContext context, String connResourceName) {
+		MondrianConnection conn = (MondrianConnection) getRepository().getResource(context, connResourceName);
 
-        if (conn == null) {
-            log.error("missing MondrianConnection resource: "
-                    + connResourceName);
-            throw new JSException(
-                    "jsexception.mondrian.no.connection.for.resource",
-                    new Object[] { connResourceName });
-        }
-        return getMondrianConnection(context, conn);
-    }
+		if (conn == null) {
+			log.error("missing MondrianConnection resource: "
+					+ connResourceName);
+			throw new JSException(
+					"jsexception.mondrian.no.connection.for.resource",
+					new Object[] { connResourceName });
+		}
+		return getMondrianConnection(context, conn);
+	}
 
-    private mondrian.olap.Connection getMondrianConnection(ExecutionContext context, MondrianConnection conn) {
-        return getMondrianConnection(context, conn, null);
-    }
+	private mondrian.olap.Connection getMondrianConnection(ExecutionContext context, MondrianConnection conn) {
+		return getMondrianConnection(context, conn, null);
+	}
 
     protected mondrian.olap.Connection getMondrianConnection(ExecutionContext context, MondrianConnection conn, ReportDataSource dataSource) {
         Util.PropertyList connectProps = getMondrianConnectProperties(context, conn, dataSource);
@@ -413,28 +415,32 @@ public class OlapConnectionServiceImpl implements OlapConnectionService, ReportD
     }
 
     @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-    public void initializeAndShow(OlapModelProxy omp, String viewUri,
-                                  OlapModel model, OlapUnit unit) throws Exception {
-        omp.initializeAndShow(viewUri, model);
-    }
+	public void initializeAndShow(OlapModelProxy omp, String viewUri,
+			OlapModel model, OlapUnit unit) throws Exception {
+		omp.initializeAndShow(viewUri, model);
+	}
 
     @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-    public OlapModel initializeOlapModel(ExecutionContext executionContext,
-                                         OlapUnit olapUnit, HttpSession sess) {
+	public OlapModel initializeOlapModel(ExecutionContext executionContext,
+			OlapUnit olapUnit, HttpSession sess) {
 
-        RequestContext context = RequestContext.instance();
+		RequestContext context = RequestContext.instance();
 
-        OlapModel model = createOlapModel(executionContext, olapUnit);
+		OlapModel model = createOlapModel(executionContext, olapUnit);
 
-        if (model == null) {
-            throw new JSException("jsexception.no.olap.model.created.for",
-                    new Object[] { olapUnit.getURIString() });
+		if (model == null) {
+			throw new JSException("jsexception.no.olap.model.created.for",
+					new Object[] { olapUnit.getURIString() });
+		}
+
+		model = (OlapModel) model.getTopDecorator();
+		model.setLocale(context.getLocale());
+        //Set right locale
+        if (sess.getServletContext() != null) {
+            sess.getServletContext().setAttribute("locale", LocaleContextHolder.getLocale());
         }
-
-        model = (OlapModel) model.getTopDecorator();
-        model.setLocale(context.getLocale());
         model.setServletContext(sess.getServletContext());
-        model.setID(olapUnit.getURIString());
+		model.setID(olapUnit.getURIString());
 
 		/*
 		 ClickableExtension ext = (ClickableExtension) model.getExtension(ClickableExtension.ID);
@@ -444,68 +450,68 @@ public class OlapConnectionServiceImpl implements OlapConnectionService, ReportD
 		 }
 		 ext.setClickables(clickables);
 		 */
-        // stackMode
-        OlapModelProxy omp = OlapModelProxy.instance(olapUnit.getURIString(),
-                sess, false);
+		// stackMode
+		OlapModelProxy omp = OlapModelProxy.instance(olapUnit.getURIString(),
+				sess, false);
 		/*	    if (queryName != null)
 		 omp.initializeAndShow(queryName, model);
 		 else
 		 */
-        try {
-            initializeAndShow(omp, olapUnit.getURIString(), model, olapUnit);
-        } catch (Exception e) {
-            throw new JSException(e);
-        }
+		try {
+			initializeAndShow(omp, olapUnit.getURIString(), model, olapUnit);
+		} catch (Exception e) {
+			throw new JSException(e);
+		}
 
-        return omp;
-    }
+		return omp;
+	}
 
-    // this could be a general repository method too...
+	// this could be a general repository method too...
     @Transactional(propagation = Propagation.REQUIRED)
-    public String getFileResourceData(ExecutionContext context,
-                                      FileResource file) {
-        RepositoryService rep = getRepository();
-        StringBuffer fileString = new StringBuffer();
-        InputStream data;
-        if (file.hasData()) {
-            data = file.getDataStream();
-        } else {
-            log.debug("FILE URI STRING = " + file.getURIString());
-            FileResourceData resourceData = rep.getResourceData(context, file
-                    .getURIString());
-            data = resourceData.getDataStream();
-        }
-        log.debug("FILE = " + file);
+	public String getFileResourceData(ExecutionContext context,
+			FileResource file) {
+		RepositoryService rep = getRepository();
+		StringBuffer fileString = new StringBuffer();
+		InputStream data;
+		if (file.hasData()) {
+			data = file.getDataStream();
+		} else {
+			log.debug("FILE URI STRING = " + file.getURIString());
+			FileResourceData resourceData = rep.getResourceData(context, file
+					.getURIString());
+			data = resourceData.getDataStream();
+		}
+		log.debug("FILE = " + file);
 
-        // use character encoding
-        String encoding = getEncodingProvider().getCharacterEncoding();
-        String line;
-        try {
-            BufferedReader in = new BufferedReader(new InputStreamReader(data,
-                    encoding));
-            while ((line = in.readLine()) != null) {
-                fileString.append(line);
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        return fileString.toString();
-    }
+		// use character encoding
+		String encoding = getEncodingProvider().getCharacterEncoding();
+		String line;
+		try {
+			BufferedReader in = new BufferedReader(new InputStreamReader(data,
+					encoding));
+			while ((line = in.readLine()) != null) {
+				fileString.append(line);
+			}
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		return fileString.toString();
+	}
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public Util.PropertyList getOlapConnectProperties(ExecutionContext context, OlapClientConnection conn) {
-        if (conn instanceof MondrianConnection) {
-            log.debug("go fetch Mondrian Connection Properties");
-            return getMondrianConnectProperties(context, (MondrianConnection) conn, null);
+	public Util.PropertyList getOlapConnectProperties(ExecutionContext context, OlapClientConnection conn) {
+		if (conn instanceof MondrianConnection) {
+      log.debug("go fetch Mondrian Connection Properties");
+			return getMondrianConnectProperties(context, (MondrianConnection) conn, null);
 
-        } else if (conn instanceof XMLAConnection) {
-            log.debug("go fetch XMLConnection Properties");
-            return getXMLAConnectProperties(context, (XMLAConnection) conn);
+		} else if (conn instanceof XMLAConnection) {
+      log.debug("go fetch XMLConnection Properties");
+			return getXMLAConnectProperties(context, (XMLAConnection) conn);
 
-        } else {
-            throw new IllegalArgumentException("unknown repo connection type " + conn.getClass().getName());
-        }
-    }
+		} else {
+			throw new IllegalArgumentException("unknown repo connection type " + conn.getClass().getName());
+		}
+	}
 
     /**
      * from an xml/a connection, get a prop list suitable for olap4j
@@ -513,6 +519,9 @@ public class OlapConnectionServiceImpl implements OlapConnectionService, ReportD
      * @param conn
      */
     private Util.PropertyList getXMLAConnectProperties(ExecutionContext context, XMLAConnection conn) {
+        //Resolve Profile Attribute for XML/A Connection
+        conn = profileAttributesResolver.merge(conn);
+
         Util.PropertyList connectProps = new Util.PropertyList();
         connectProps.put(XmlaOlap4jDriver.Property.SERVER.toString(), conn.getURI());
         connectProps.put(XmlaOlap4jDriver.Property.CATALOG.toString(), conn.getCatalog());
@@ -546,54 +555,57 @@ public class OlapConnectionServiceImpl implements OlapConnectionService, ReportD
         connectProps.put(OLAP4J_DRIVER, "org.olap4j.driver.xmla.XmlaOlap4jDriver");
         connectProps.put(OLAP4J_URL_PREFIX, "jdbc:xmla:");
         return connectProps;
-    }
+	}
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public Util.PropertyList getMondrianConnectProperties(
-            ExecutionContext context, MondrianConnection conn) {
-        return getMondrianConnectProperties(context, conn, null);
-    }
+	public Util.PropertyList getMondrianConnectProperties(
+			ExecutionContext context, MondrianConnection conn) {
+		return getMondrianConnectProperties(context, conn, null);
+	}
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public Util.PropertyList getMondrianConnectProperties(
-            ExecutionContext context, MondrianConnection conn,
-            ReportDataSource dataSource) {
+	public Util.PropertyList getMondrianConnectProperties(
+			ExecutionContext context, MondrianConnection conn,
+			ReportDataSource dataSource) {
 
-        // assemble a mondrian connection PropertyList
-        if (dataSource == null) {
-            dataSource = (ReportDataSource) dereference(context, conn.getDataSource());
+            // assemble a mondrian connection PropertyList
             if (dataSource == null) {
-                throw new JSException("null data source on dereference of mondrian connection " + conn.getURIString() + " for " +
-                        (conn.getDataSource().isLocal() ? "local: " + conn.getDataSource().getLocalResource().getURIString()
-                                : conn.getDataSource().getReferenceURI()));
+                dataSource = (ReportDataSource) dereference(context, conn.getDataSource());
+                if (dataSource == null) {
+                    throw new JSException("null data source on dereference of mondrian connection " + conn.getURIString() + " for " +
+                            (conn.getDataSource().isLocal() ? "local: " + conn.getDataSource().getLocalResource().getURIString()
+                                                            : conn.getDataSource().getReferenceURI()));
+                }
             }
-        }
 
-        Util.PropertyList connectProps = new Util.PropertyList();
+            Util.PropertyList connectProps = new Util.PropertyList();
 
-        connectProps.put(RolapConnectionProperties.Provider.toString(), "mondrian");
-        connectProps.put(OLAP4J_DRIVER, "mondrian.olap4j.MondrianOlap4jDriver");
-        connectProps.put(OLAP4J_URL_PREFIX, "jdbc:mondrian:");
+            connectProps.put(RolapConnectionProperties.Provider.toString(), "mondrian");
+            connectProps.put(OLAP4J_DRIVER, "mondrian.olap4j.MondrianOlap4jDriver");
+            connectProps.put(OLAP4J_URL_PREFIX, "jdbc:mondrian:");
         connectProps.put(RolapConnectionProperties.Locale.toString(), LocaleContextHolder.getLocale().toString());
 
             /*
              * The URI here has to be an "internal" representation (in multi-tenancy terms)
              * so that the Mondrian schema cache has the right key to flush.
              */
-        String transformedUri =
-                repositoryCatalogLocator.locate(transformUri(conn.getSchema().getReferenceURI()));
+            String transformedUri =
+                    repositoryCatalogLocator.locate(transformUri(conn.getSchema().getReferenceURI()));
 
-        transformedUri =
-                connectProps.put(RolapConnectionProperties.Catalog.toString(), transformedUri);
+            transformedUri =
+                    connectProps.put(RolapConnectionProperties.Catalog.toString(), transformedUri);
 
-        // writing a DynamicSchemaProcessor looks like the way to update schema
-        // on the fly
-        //  connectProps.put(RolapConnectionProperties.DynamicSchemaProcessor
-        //		.toString(), "NONE");
+            // writing a DynamicSchemaProcessor looks like the way to update schema
+            // on the fly
+            //  connectProps.put(RolapConnectionProperties.DynamicSchemaProcessor
+            //		.toString(), "NONE");
 
-        // To cope with changes in the underlying schema
-        connectProps.put(RolapConnectionProperties.UseContentChecksum.toString(),
-                useContentChecksum);
+            // To cope with changes in the underlying schema
+            connectProps.put(RolapConnectionProperties.UseContentChecksum.toString(),
+                    useContentChecksum);
+
+        //Resolve data source attributes
+        dataSource = profileAttributesResolver.merge(dataSource);
 
         if (dataSource instanceof JdbcReportDataSource) {
             JdbcReportDataSource jdbcDataSource = (JdbcReportDataSource) dataSource;
@@ -603,157 +615,157 @@ public class OlapConnectionServiceImpl implements OlapConnectionService, ReportD
             connectProps.put(RolapConnectionProperties.JdbcDrivers.toString(),
                     driverClassName);
 
-            try {
-                // load the driver- may not have been done, mondrian expects it
-                log.info("Loading jdbc driver: " + driverClassName);
-                jdbcDriverService.register(driverClassName);
-            } catch (ClassNotFoundException cnfe) {
-                log.error("CANNOT LOAD DRIVER: " + driverClassName);
-                throw new JSException(cnfe);
-            } catch (Exception e) {
-                throw new JSException(e);
-            }
-
-            if (jdbcDataSource.getUsername() != null && jdbcDataSource.getUsername().trim().length() > 0) {
-                connectProps.put(RolapConnectionProperties.JdbcUser.toString(),
-                        jdbcDataSource.getUsername());
-            }
-
-            if (jdbcDataSource.getPassword() != null && jdbcDataSource.getPassword().trim().length() > 0) {
-                connectProps.put(RolapConnectionProperties.JdbcPassword.toString(), jdbcDataSource.getPassword());
-            }
-
-        } else {
-            // We have a JNDI data source
-            JndiJdbcReportDataSource jndiDataSource = (JndiJdbcReportDataSource) dataSource;
-
-            String jndiURI = "";
-
-            if (jndiDataSource.getJndiName() != null && !jndiDataSource.getJndiName().startsWith("java:")) {
                 try {
-                    Context ctx = new InitialContext();
-                    ctx.lookup("java:comp/env/" + jndiDataSource.getJndiName());
-                    jndiURI = "java:comp/env/";
-                }  catch (NamingException e) {
-                    //Added as short time solution due of http://bugzilla.jaspersoft.com/show_bug.cgi?id=26570.
-                    //The main problem - this code executes in separate tread (non http).
-                    //Jboss 7 support team recommend that you use the non-component environment namespace for such situations.
+                    // load the driver- may not have been done, mondrian expects it
+                    log.info("Loading jdbc driver: " + driverClassName);
+                    jdbcDriverService.register(driverClassName);
+                } catch (ClassNotFoundException cnfe) {
+                    log.error("CANNOT LOAD DRIVER: " + driverClassName);
+                    throw new JSException(cnfe);
+                } catch (Exception e) {
+                    throw new JSException(e);
+                }
+
+                if (jdbcDataSource.getUsername() != null && jdbcDataSource.getUsername().trim().length() > 0) {
+                    connectProps.put(RolapConnectionProperties.JdbcUser.toString(),
+                            jdbcDataSource.getUsername());
+                }
+
+                if (jdbcDataSource.getPassword() != null && jdbcDataSource.getPassword().trim().length() > 0) {
+                    connectProps.put(RolapConnectionProperties.JdbcPassword.toString(), jdbcDataSource.getPassword());
+                }
+
+            } else {
+                // We have a JNDI data source
+                JndiJdbcReportDataSource jndiDataSource = (JndiJdbcReportDataSource) dataSource;
+
+                String jndiURI = "";
+
+                if (jndiDataSource.getJndiName() != null && !jndiDataSource.getJndiName().startsWith("java:")) {
                     try {
                         Context ctx = new InitialContext();
-                        ctx.lookup(jndiDataSource.getJndiName());
-                        jndiURI = "";
+                        ctx.lookup("java:comp/env/" + jndiDataSource.getJndiName());
+                        jndiURI = "java:comp/env/";
+                    }  catch (NamingException e) {
+                        //Added as short time solution due of http://bugzilla.jaspersoft.com/show_bug.cgi?id=26570.
+                        //The main problem - this code executes in separate tread (non http).
+                        //Jboss 7 support team recommend that you use the non-component environment namespace for such situations.
+                        try {
+                            Context ctx = new InitialContext();
+                            ctx.lookup(jndiDataSource.getJndiName());
+                            jndiURI = "";
 
-                    } catch (NamingException ex) {
+                        } catch (NamingException ex) {
 
+                        }
                     }
                 }
-            }
-            jndiURI = jndiURI + jndiDataSource.getJndiName();
+                jndiURI = jndiURI + jndiDataSource.getJndiName();
 
-            connectProps.put(RolapConnectionProperties.DataSource.toString(),
-                    jndiURI);
-        }
+                connectProps.put(RolapConnectionProperties.DataSource.toString(),
+                        jndiURI);
+            }
 
         if (log.isDebugEnabled()) {
             log.debug("connection properties prepared: " + connectProps);
         }
 
-        // TODO get from web context and metadata
-        // + "RoleXX='California manager';";
-        return connectProps;
-    }
+            // TODO get from web context and metadata
+            // + "RoleXX='California manager';";
+            return connectProps;
+	}
 
-    /**
-     * No transformation of URIs in Community Edition
-     * @param uri
-     * @return
-     */
-    protected String transformUri(String uri) {
-        return uri;
-    }
+        /**
+         * No transformation of URIs in Community Edition
+         * @param uri
+         * @return
+         */
+        protected String transformUri(String uri) {
+            return uri;
+        }
 
-    /* should something like this be part of the repository api? */
+	/* should something like this be part of the repository api? */
     @Transactional(propagation = Propagation.REQUIRED)
-    public Resource dereference(ExecutionContext context, ResourceReference ref) {
-        if (ref.isLocal())
-            return ref.getLocalResource();
-        // resources used by olap objects can be accessible with execute-only perms
-        context = ExecutionContextImpl.getRuntimeExecutionContext(context);
-        return getRepository().getResource(context, ref.getReferenceURI());
-    }
+	public Resource dereference(ExecutionContext context, ResourceReference ref) {
+		if (ref.isLocal())
+			return ref.getLocalResource();
+		// resources used by olap objects can be accessible with execute-only perms
+		context = ExecutionContextImpl.getRuntimeExecutionContext(context);
+		return getRepository().getResource(context, ref.getReferenceURI());
+	}
 
-    /**
-     * saveResource creates path of folders as necessary and put the resource in
-     * the bottommost folder does not update if the target already exists. maybe
-     * this can be added to the RepositoryService API?
-     */
+	/**
+	 * saveResource creates path of folders as necessary and put the resource in
+	 * the bottommost folder does not update if the target already exists. maybe
+	 * this can be added to the RepositoryService API?
+	 */
     @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-    public void saveResource(ExecutionContext context, String path,
-                             Resource resource) {
-        RepositoryService rep = getRepository();
+	public void saveResource(ExecutionContext context, String path,
+			Resource resource) {
+		RepositoryService rep = getRepository();
 
-        // check if the target already exists
-        String targetUri = path
-                + (path.endsWith(Folder.SEPARATOR) ? "" : Folder.SEPARATOR)
-                + resource.getName();
-        if (rep.resourceExists(context, targetUri)) {
-            return;
-        }
+		// check if the target already exists
+		String targetUri = path
+				+ (path.endsWith(Folder.SEPARATOR) ? "" : Folder.SEPARATOR)
+				+ resource.getName();
+		if (rep.resourceExists(context, targetUri)) {
+			return;
+		}
 
-        Folder folder = mkdirs(context, path);
-        resource.setParentFolder(folder);
-        rep.saveResource(context, resource);
-    }
+		Folder folder = mkdirs(context, path);
+		resource.setParentFolder(folder);
+		rep.saveResource(context, resource);
+	}
 
 
     @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-    public Folder mkdirs(ExecutionContext context, String path) {
-        RepositoryService rep = getRepository();
+	public Folder mkdirs(ExecutionContext context, String path) {
+		RepositoryService rep = getRepository();
 
-        // travel down the elements of the path
-        String[] splitPath = path.split(Folder.SEPARATOR);
-        String folderName = "/"; // start with root
-        Folder parentFolder = null; // root's parent is null
-        Folder folder = rep.getFolder(context, folderName);
-        for (int i = 0; i < splitPath.length; i++) {
-            log.debug("Current path element is " + splitPath[i]);
-            if ("".equals(splitPath[i])) {
-                continue; // ignore extra slashes
-            }
-            log.debug("Folder name '" + folderName + "' yields folder '" + folder + "'");
-            if (! folderName.equals("/")) {
-                folderName += "/";
-            }
-            folderName += splitPath[i];
-            parentFolder = folder; // remember parent
-            folder = rep.getFolder(context, folderName);
-            if (folder == null) {
-                folder = new FolderImpl();
-                folder.setName(splitPath[i]);
-                folder.setLabel(splitPath[i]);
-                folder.setDescription(splitPath[i] + " folder");
-                folder.setParentFolder(parentFolder);
-                rep.saveFolder(context, folder);
-            }
-        }
-        log.debug("Folder name '" + folderName + "' yields folder '" + folder
-                + "'");
-        return folder;
-    }
+		// travel down the elements of the path
+		String[] splitPath = path.split(Folder.SEPARATOR);
+		String folderName = "/"; // start with root
+		Folder parentFolder = null; // root's parent is null
+		Folder folder = rep.getFolder(context, folderName);
+		for (int i = 0; i < splitPath.length; i++) {
+			log.debug("Current path element is " + splitPath[i]);
+			if ("".equals(splitPath[i])) {
+				continue; // ignore extra slashes
+			}
+			log.debug("Folder name '" + folderName + "' yields folder '" + folder + "'");
+			if (! folderName.equals("/")) {
+				folderName += "/";
+			}
+			folderName += splitPath[i];
+			parentFolder = folder; // remember parent
+			folder = rep.getFolder(context, folderName);
+			if (folder == null) {
+				folder = new FolderImpl();
+				folder.setName(splitPath[i]);
+				folder.setLabel(splitPath[i]);
+				folder.setDescription(splitPath[i] + " folder");
+				folder.setParentFolder(parentFolder);
+				rep.saveFolder(context, folder);
+			}
+		}
+		log.debug("Folder name '" + folderName + "' yields folder '" + folder
+				+ "'");
+		return folder;
+	}
 
-    // PROPERTIES
+	// PROPERTIES
 
-    private RepositoryService mRepository;
+	private RepositoryService mRepository;
 
     private String useContentChecksum;
 
-    public RepositoryService getRepository() {
-        return mRepository;
-    }
+	public RepositoryService getRepository() {
+		return mRepository;
+	}
 
-    public void setRepository(RepositoryService repository) {
-        mRepository = repository;
-    }
+	public void setRepository(RepositoryService repository) {
+		mRepository = repository;
+	}
 
     public String getUseContentChecksum() {
         return useContentChecksum;
@@ -765,49 +777,49 @@ public class OlapConnectionServiceImpl implements OlapConnectionService, ReportD
 
     private StaticCharacterEncodingProvider encodingProvider;
 
-    /**
-     * returns character encoding provided by jaspersoft
-     * @return
-     */
-    public StaticCharacterEncodingProvider getEncodingProvider() {
-        return encodingProvider;
-    }
+	/**
+	 * returns character encoding provided by jaspersoft
+	 * @return
+	 */
+	public StaticCharacterEncodingProvider getEncodingProvider() {
+		return encodingProvider;
+	}
 
-    /**
-     * sets character encoding provided by jaspersoft
-     * @param encodingProviderIn
-     */
-    public void setEncodingProvider(
-            StaticCharacterEncodingProvider encodingProviderIn) {
-        encodingProvider = encodingProviderIn;
-    }
+	/**
+	 * sets character encoding provided by jaspersoft
+	 * @param encodingProviderIn
+	 */
+	public void setEncodingProvider(
+			StaticCharacterEncodingProvider encodingProviderIn) {
+		encodingProvider = encodingProviderIn;
+	}
 
     @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-    public ReportDataSourceService createService(ReportDataSource dataSource) {
-        ReportDataSourceService dsService;
-        if (dataSource instanceof MondrianConnection) {
-            MondrianConnection mondrianConnection = (MondrianConnection) dataSource;
-            Connection connection = getMondrianConnection(null,
-                    mondrianConnection);
-            dsService = new MondrianConnectionDataSourceService(connection);
-        } else if (dataSource instanceof XMLAConnection) {
-            XMLAConnection xmlaConnection = (XMLAConnection) dataSource;
-            String tenantSeparator = (tenantService != null) ? tenantService.getUserOrgIdDelimiter() : null;
-            if (lacksAuthentication(xmlaConnection)) {
-                User user = getCurrentUserDetails();
-                dsService = new XmlaConnectionDataSourceService(xmlaConnection, tenantSeparator, user);
-            } else {
-                dsService = new XmlaConnectionDataSourceService(xmlaConnection, tenantSeparator);
-            }
-        } else {
-            throw new JSException("jsexception.invalid.olap.datasource",
-                    new Object[] { dataSource.getClass() });
-        }
-        return dsService;
-    }
+	public ReportDataSourceService createService(ReportDataSource dataSource) {
+		ReportDataSourceService dsService;
+		if (dataSource instanceof MondrianConnection) {
+			MondrianConnection mondrianConnection = (MondrianConnection) dataSource;
+			Connection connection = getMondrianConnection(null,
+					mondrianConnection);
+			dsService = new MondrianConnectionDataSourceService(connection);
+		} else if (dataSource instanceof XMLAConnection) {
+			XMLAConnection xmlaConnection = (XMLAConnection) dataSource;
+			String tenantSeparator = (tenantService != null) ? tenantService.getUserOrgIdDelimiter() : null;
+			if (lacksAuthentication(xmlaConnection)) {
+				User user = getCurrentUserDetails();
+				dsService = new XmlaConnectionDataSourceService(xmlaConnection, tenantSeparator, user);
+			} else {
+				dsService = new XmlaConnectionDataSourceService(xmlaConnection, tenantSeparator);
+			}
+		} else {
+			throw new JSException("jsexception.invalid.olap.datasource",
+					new Object[] { dataSource.getClass() });
+		}
+		return dsService;
+	}
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public OlapConnection getOlapConnection(ExecutionContext context, String resourceName)	{
+	public OlapConnection getOlapConnection(ExecutionContext context, String resourceName)	{
         OlapClientConnection conn = (OlapClientConnection) getRepository().getResource(context, resourceName);
         return getOlapConnection(context, conn);
     }
@@ -830,11 +842,11 @@ public class OlapConnectionServiceImpl implements OlapConnectionService, ReportD
 
         //OLAP4J cache configuration
         if (getOLAP4J_CACHE()!=null && getOLAP4J_CACHE().length()>0) {
-            props.put("Cache",getOLAP4J_CACHE());
-            props.put("Cache.Name", getOLAP4J_CACHE_NAME());
-            props.put("Cache.Mode",getOLAP4J_CACHE_MODE());
-            props.put("Cache.Timeout",getOLAP4J_CACHE_TIMEOUT());
-            props.put("Cache.Size",getOLAP4J_CACHE_SIZE());
+	        props.put("Cache",getOLAP4J_CACHE());
+	        props.put("Cache.Name", getOLAP4J_CACHE_NAME());
+	        props.put("Cache.Mode",getOLAP4J_CACHE_MODE());
+	        props.put("Cache.Timeout",getOLAP4J_CACHE_TIMEOUT());
+	        props.put("Cache.Size",getOLAP4J_CACHE_SIZE());
         }
 
         if (log.isDebugEnabled()) {
@@ -892,136 +904,136 @@ public class OlapConnectionServiceImpl implements OlapConnectionService, ReportD
         return (OlapConnection) rConnection;
     }
 
-    public XMLATestResult testConnection(ExecutionContext context, XMLAConnection xmlaConnection) {
-        try {
-            OlapConnectionService service = this;
-            OlapConnection connection = service.getOlapConnection(context, xmlaConnection);
-            ResultSet rs;
-            try {
-                rs = connection.getMetaData().getDatabases();
-            } catch (Exception e) {
-                Throwable ee = e;
-                while (ee.getCause()!=null && ee.getCause()!=ee)
-                    ee = ee.getCause();
-                String message = ee.getClass().getName()+": "+ee.getMessage();
-                if (ee.getClass().equals(ConnectException.class)||
-                        ee.getClass().equals(SocketException.class)||
-                        ee.getClass().equals(FileNotFoundException.class)||
-                        ee.getClass().equals(UnknownHostException.class)) {
-                    return new XMLATestResult(XMLATestCode.URI_CONNECTION_FAILED, message, e);
-                } else if (ee.getClass().equals(StringIndexOutOfBoundsException.class)) {
-                    return new XMLATestResult(XMLATestCode.BAD_URI, message, e);
-                } else if (ee.getClass().equals(IOException.class)) {
-                    if (ee.getMessage().contains("401")) {
-                        return new XMLATestResult(XMLATestCode.BAD_CREDENTIALS, message, e);
-                    } else {
-                        return new XMLATestResult(XMLATestCode.BAD_URI, message, e);
-                    }
-                } else {
-                    return new XMLATestResult(XMLATestCode.OTHER, message, e);
-                }
-            }
-            try {
-                Schema schema = connection.getOlapSchema();
-            } catch (Exception e) {
-                if (e.getMessage().contains("No datasource could be found")) {
-                    LinkedList<String> options = new LinkedList<String>();
-                    try {
-                        while (rs.next()) {
-                            options.add(rs.getString(1));
-                        }
-                    } catch (Exception ee) {
-                        //do nothing
-                    }
-                    return new XMLATestResult(XMLATestCode.BAD_DATASOURCE, e.getMessage(), options.toArray(new String[0]), e);
-                } else if (e.getMessage().contains("There is no catalog named")) {
-                    LinkedList<String> options = new LinkedList<String>();
-                    for (Catalog cat : connection.getOlapCatalogs()) {
-                        options.add(cat.getName());
-                    }
-                    return new XMLATestResult(XMLATestCode.BAD_CATALOG, e.getMessage(), options.toArray(new String[0]), e);
-                } else {
-                    return new XMLATestResult(XMLATestCode.OTHER, e.getMessage(), e);
-                }
-            }
-            return new XMLATestResult(XMLATestCode.OK);
-        } catch (Exception e) {
-            XMLATestResult result = new XMLATestResult(XMLATestCode.OTHER, e.getMessage(), e);
+	public XMLATestResult testConnection(ExecutionContext context, XMLAConnection xmlaConnection) {
+		try {
+			OlapConnectionService service = this;
+			OlapConnection connection = service.getOlapConnection(context, xmlaConnection);
+			ResultSet rs;
+			try {
+				rs = connection.getMetaData().getDatabases();
+			} catch (Exception e) {
+				Throwable ee = e;
+				while (ee.getCause()!=null && ee.getCause()!=ee)
+					ee = ee.getCause();
+				String message = ee.getClass().getName()+": "+ee.getMessage();
+				if (ee.getClass().equals(ConnectException.class)||
+						ee.getClass().equals(SocketException.class)||
+						ee.getClass().equals(FileNotFoundException.class)||
+						ee.getClass().equals(UnknownHostException.class)) {
+					return new XMLATestResult(XMLATestCode.URI_CONNECTION_FAILED, message, e);
+				} else if (ee.getClass().equals(StringIndexOutOfBoundsException.class)) {
+					return new XMLATestResult(XMLATestCode.BAD_URI, message, e);
+				} else if (ee.getClass().equals(IOException.class)) {
+					if (ee.getMessage().contains("401")) {
+						return new XMLATestResult(XMLATestCode.BAD_CREDENTIALS, message, e);
+					} else {
+						return new XMLATestResult(XMLATestCode.BAD_URI, message, e);
+					}
+				} else {
+					return new XMLATestResult(XMLATestCode.OTHER, message, e);
+				}
+			}
+			try {
+				Schema schema = connection.getOlapSchema();
+			} catch (Exception e) {
+				if (e.getMessage().contains("No datasource could be found")) {
+					LinkedList<String> options = new LinkedList<String>();
+					try {
+						while (rs.next()) {
+							options.add(rs.getString(1));
+			            }
+					} catch (Exception ee) {
+						//do nothing
+					}
+					return new XMLATestResult(XMLATestCode.BAD_DATASOURCE, e.getMessage(), options.toArray(new String[0]), e);
+				} else if (e.getMessage().contains("There is no catalog named")) {
+					LinkedList<String> options = new LinkedList<String>();
+					for (Catalog cat : connection.getOlapCatalogs()) {
+						options.add(cat.getName());
+					}
+					return new XMLATestResult(XMLATestCode.BAD_CATALOG, e.getMessage(), options.toArray(new String[0]), e);
+				} else {
+					return new XMLATestResult(XMLATestCode.OTHER, e.getMessage(), e);
+				}
+			}
+			return new XMLATestResult(XMLATestCode.OK);
+		} catch (Exception e) {
+			XMLATestResult result = new XMLATestResult(XMLATestCode.OTHER, e.getMessage(), e);
             return result;
-        }
+		}
+	}
+
+  //
+  // Entry point for unit tests
+  //
+  public mondrian.olap.Connection getOlap4jMondrianConnection(ExecutionContext context, String resourceName)
+  {
+    OlapConnection oConn = getOlapConnection(context, resourceName);
+    if (oConn != null)  {
+      return getOlap4jMondrianConnectionFromOlapConnection(oConn);
     }
+    return null;    //  we should have Exceptioned out before reaching here
+  }
 
-    //
-    // Entry point for unit tests
-    //
-    public mondrian.olap.Connection getOlap4jMondrianConnection(ExecutionContext context, String resourceName)
-    {
-        OlapConnection oConn = getOlapConnection(context, resourceName);
-        if (oConn != null)  {
-            return getOlap4jMondrianConnectionFromOlapConnection(oConn);
-        }
-        return null;    //  we should have Exceptioned out before reaching here
+
+  protected mondrian.olap.Connection getOlap4jMondrianConnectionFromOlapConnection(OlapConnection oConn)
+  {
+    try {
+          return (mondrian.olap.Connection)((java.sql.Wrapper)oConn).unwrap(mondrian.olap.Connection.class);
+    } catch (Exception e) {
+      throw new JSException("could not obtain mondrian.olap.Connection from '"+oConn+"' "+e.getMessage());
     }
+  }
 
 
-    protected mondrian.olap.Connection getOlap4jMondrianConnectionFromOlapConnection(OlapConnection oConn)
-    {
-        try {
-            return (mondrian.olap.Connection)((java.sql.Wrapper)oConn).unwrap(mondrian.olap.Connection.class);
-        } catch (Exception e) {
-            throw new JSException("could not obtain mondrian.olap.Connection from '"+oConn+"' "+e.getMessage());
-        }
+	public UserAuthorityService getUserService() {
+		return userService;
+	}
+
+	public void setUserService(UserAuthorityService userService) {
+		this.userService = userService;
+	}
+
+	public TenantService getTenantService() {
+		return tenantService;
+	}
+
+	public void setTenantService(TenantService tenantService) {
+		this.tenantService = tenantService;
+	}
+
+  /**
+   * Searches all members of a Class until a member of the given type
+   * is found.
+   *
+   *  Returns a reference to that Field or NULL if none found
+   *
+   *  WARNING:  this method will return the FIRST found member of the specified
+   *            type.  Be sure that this is what you want.
+   *            IF there are multiple members of type 'A', you will get the first one.
+   *
+   *
+   * @param cl
+   * @param typeName
+   * @return
+   */
+  public static Field getFieldByTypeName(Class cl,
+                                         String typeName) {
+    // Check we have valid arguments
+    assert (cl != null);
+    assert (typeName != null);
+
+    final Field fields[] =
+        cl.getDeclaredFields();
+    for (int i = 0; i < fields.length; ++i) {
+      if (typeName.equals(fields[i].getType().getName())) {
+
+        fields[i].setAccessible(true);
+        return fields[i];
+      }
     }
-
-
-    public UserAuthorityService getUserService() {
-        return userService;
-    }
-
-    public void setUserService(UserAuthorityService userService) {
-        this.userService = userService;
-    }
-
-    public TenantService getTenantService() {
-        return tenantService;
-    }
-
-    public void setTenantService(TenantService tenantService) {
-        this.tenantService = tenantService;
-    }
-
-    /**
-     * Searches all members of a Class until a member of the given type
-     * is found.
-     *
-     *  Returns a reference to that Field or NULL if none found
-     *
-     *  WARNING:  this method will return the FIRST found member of the specified
-     *            type.  Be sure that this is what you want.
-     *            IF there are multiple members of type 'A', you will get the first one.
-     *
-     *
-     * @param cl
-     * @param typeName
-     * @return
-     */
-    public static Field getFieldByTypeName(Class cl,
-                                           String typeName) {
-        // Check we have valid arguments
-        assert (cl != null);
-        assert (typeName != null);
-
-        final Field fields[] =
-                cl.getDeclaredFields();
-        for (int i = 0; i < fields.length; ++i) {
-            if (typeName.equals(fields[i].getType().getName())) {
-
-                fields[i].setAccessible(true);
-                return fields[i];
-            }
-        }
-        return null;
-    }
+    return null;
+  }
 
     public void setJndiFallbackResolver(JndiFallbackResolver jndiFallbackResolver) {
         this.jndiFallbackResolver = jndiFallbackResolver;
@@ -1029,44 +1041,44 @@ public class OlapConnectionServiceImpl implements OlapConnectionService, ReportD
 
 
     public String getOLAP4J_CACHE() {
-        return OLAP4J_CACHE;
-    }
+		return OLAP4J_CACHE;
+	}
 
-    public void setOLAP4J_CACHE(String oLAP4J_CACHE) {
-        OLAP4J_CACHE = oLAP4J_CACHE;
-    }
+	public void setOLAP4J_CACHE(String oLAP4J_CACHE) {
+		OLAP4J_CACHE = oLAP4J_CACHE;
+	}
 
-    public String getOLAP4J_CACHE_NAME() {
-        return OLAP4J_CACHE_NAME;
-    }
+	public String getOLAP4J_CACHE_NAME() {
+		return OLAP4J_CACHE_NAME;
+	}
 
-    public void setOLAP4J_CACHE_NAME(String oLAP4J_CACHE_NAME) {
-        OLAP4J_CACHE_NAME = oLAP4J_CACHE_NAME;
-    }
+	public void setOLAP4J_CACHE_NAME(String oLAP4J_CACHE_NAME) {
+		OLAP4J_CACHE_NAME = oLAP4J_CACHE_NAME;
+	}
 
-    public String getOLAP4J_CACHE_MODE() {
-        return OLAP4J_CACHE_MODE;
-    }
+	public String getOLAP4J_CACHE_MODE() {
+		return OLAP4J_CACHE_MODE;
+	}
 
-    public void setOLAP4J_CACHE_MODE(String oLAP4J_CACHE_MODE) {
-        OLAP4J_CACHE_MODE = oLAP4J_CACHE_MODE;
-    }
+	public void setOLAP4J_CACHE_MODE(String oLAP4J_CACHE_MODE) {
+		OLAP4J_CACHE_MODE = oLAP4J_CACHE_MODE;
+	}
 
-    public String getOLAP4J_CACHE_TIMEOUT() {
-        return OLAP4J_CACHE_TIMEOUT;
-    }
+	public String getOLAP4J_CACHE_TIMEOUT() {
+		return OLAP4J_CACHE_TIMEOUT;
+	}
 
-    public void setOLAP4J_CACHE_TIMEOUT(String oLAP4J_CACHE_TIMEOUT) {
-        OLAP4J_CACHE_TIMEOUT = oLAP4J_CACHE_TIMEOUT;
-    }
+	public void setOLAP4J_CACHE_TIMEOUT(String oLAP4J_CACHE_TIMEOUT) {
+		OLAP4J_CACHE_TIMEOUT = oLAP4J_CACHE_TIMEOUT;
+	}
 
-    public String getOLAP4J_CACHE_SIZE() {
-        return OLAP4J_CACHE_SIZE;
-    }
+	public String getOLAP4J_CACHE_SIZE() {
+		return OLAP4J_CACHE_SIZE;
+	}
 
-    public void setOLAP4J_CACHE_SIZE(String oLAP4J_CACHE_SIZE) {
-        OLAP4J_CACHE_SIZE = oLAP4J_CACHE_SIZE;
-    }
+	public void setOLAP4J_CACHE_SIZE(String oLAP4J_CACHE_SIZE) {
+		OLAP4J_CACHE_SIZE = oLAP4J_CACHE_SIZE;
+	}
 
     public JdbcDriverService getJdbcDriverService() {
         return jdbcDriverService;
@@ -1074,5 +1086,9 @@ public class OlapConnectionServiceImpl implements OlapConnectionService, ReportD
 
     public void setJdbcDriverService(JdbcDriverService jdbcDriverService) {
         this.jdbcDriverService = jdbcDriverService;
+    }
+
+    public void setProfileAttributesResolver(ProfileAttributesResolver profileAttributesResolver) {
+        this.profileAttributesResolver = profileAttributesResolver;
     }
 }

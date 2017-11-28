@@ -6,7 +6,7 @@
         select
             rr.id from RepoResource rr
         where
-            rr in (select ru from RepoReportUnit ru where ru.dataSource=:dependency)
+        rr in (select ru from RepoReportUnit ru where ru.dataSource=:dependency and ru.parent.URI!=:dependencySubFolderURI)
         order by
             rr.parent.URI ASC, rr.name ASC
     </query>

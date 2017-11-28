@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -20,19 +20,6 @@
  */
 package com.jaspersoft.jasperserver.api.metadata.olap.service.impl;
 
-import java.util.Iterator;
-import java.util.List;
-
-import mondrian.olap.CacheControl;
-import mondrian.rolap.agg.AggregationManager;
-import mondrian.spi.CatalogLocator;
-import net.sf.ehcache.Cache;
-import net.sf.ehcache.Element;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.cache.ehcache.EhCacheFactoryBean;
-
 import com.jaspersoft.jasperserver.api.JSException;
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
 import com.jaspersoft.jasperserver.api.common.domain.impl.ExecutionContextImpl;
@@ -49,10 +36,20 @@ import com.jaspersoft.jasperserver.api.metadata.olap.service.MondrianConnectionS
 import com.jaspersoft.jasperserver.api.metadata.olap.service.OlapConnectionService;
 import com.jaspersoft.jasperserver.api.metadata.olap.service.OlapManagementService;
 import com.jaspersoft.jasperserver.api.metadata.view.domain.FilterCriteria;
+import mondrian.olap.CacheControl;
+import mondrian.rolap.agg.AggregationManager;
+import mondrian.spi.CatalogLocator;
+import net.sf.ehcache.Cache;
+import net.sf.ehcache.Element;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.cache.ehcache.EhCacheFactoryBean;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import java.util.Iterator;
+import java.util.List;
 
 
 /**
@@ -71,6 +68,11 @@ public class OlapManagementServiceImpl implements  OlapManagementService {
 
     private Cache mondrianConnectionCache;
     private Cache sharedMondrianConnectionCache;
+    private Cache olapFiltersCache;
+
+    public void setOlapFiltersCache(Cache olapFiltersCache) {
+        this.olapFiltersCache = olapFiltersCache;
+    }
 
     private CatalogLocator repositoryCatalogLocator = new RepositoryCatalogLocator();
     private ExecutionContext runtimeContext = ExecutionContextImpl.getRuntimeExecutionContext();
@@ -86,6 +88,7 @@ public class OlapManagementServiceImpl implements  OlapManagementService {
     public void flushOlapCache() {
         //TODO: Mondrian upgrade QA have to test occurate mondrian schema cache
         AggregationManager.instance().getCacheControl(null, null).flushSchemaCache();
+        olapFiltersCache.removeAll();
         log.debug("All schemas flushed");
     }
 

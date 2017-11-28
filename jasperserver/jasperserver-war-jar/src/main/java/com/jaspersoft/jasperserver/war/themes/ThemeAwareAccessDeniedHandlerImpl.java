@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -21,15 +21,15 @@
 
 package com.jaspersoft.jasperserver.war.themes;
 
-import org.springframework.security.AccessDeniedException;
-import org.springframework.security.ui.AccessDeniedHandlerImpl;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.web.access.AccessDeniedHandlerImpl;
 import org.springframework.ui.context.ThemeSource;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.ThemeResolver;
 
 import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
@@ -46,7 +46,7 @@ public class ThemeAwareAccessDeniedHandlerImpl extends AccessDeniedHandlerImpl {
     private ThemeSource themeSource;
 
     @Override
-    public void handle(ServletRequest request, ServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
+    public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
         request.setAttribute(DispatcherServlet.THEME_RESOLVER_ATTRIBUTE, themeResolver);
         request.setAttribute(DispatcherServlet.THEME_SOURCE_ATTRIBUTE, themeSource);
         super.handle(request, response, accessDeniedException);

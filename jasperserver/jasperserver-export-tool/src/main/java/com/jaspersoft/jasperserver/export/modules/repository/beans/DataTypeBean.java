@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -34,7 +34,7 @@ import java.util.Date;
 
 /**
  * @author tkavanagh
- * @version $Id: DataTypeBean.java 39101 2013-10-22 20:53:50Z ztomchenco $
+ * @version $Id: DataTypeBean.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
 
 public class DataTypeBean extends ResourceBean {
@@ -50,7 +50,7 @@ public class DataTypeBean extends ResourceBean {
 	
 	protected void additionalCopyFrom(Resource res, ResourceExportHandler referenceHandler) {
 		DataType dt = (DataType) res;
-		setType(dt.getType());
+		setType(dt.getDataTypeType());
 		setMaxLength(dt.getMaxLength());
 		setDecimals(dt.getDecimals());
 		setRegularExpr(dt.getRegularExpr());
@@ -62,7 +62,7 @@ public class DataTypeBean extends ResourceBean {
 
 	protected void additionalCopyTo(Resource res, ResourceImportHandler importHandler) {
 		DataType dt = (DataType) res;
-		dt.setType(getType());
+		dt.setDataTypeType(getType());
 		dt.setMaxLength(getMaxLength());
 		dt.setDecimals(getDecimals());
 		dt.setRegularExpr(getRegularExpr());
@@ -151,7 +151,7 @@ public class DataTypeBean extends ResourceBean {
             } else if (Timestamp.class.equals(type)) {
                 value = convertSqlTimestamp(stringValue);
             } else {
-                throw new IllegalStateException("Cannot fix Castor " + (type != null ?  "for class" + type.getSimpleName() : "for type "+dt.getType()));
+                throw new IllegalStateException("Cannot fix Castor " + (type != null ?  "for class" + type.getSimpleName() : "for type "+dt.getDataTypeType()));
             }
         }
         return (Comparable) value;

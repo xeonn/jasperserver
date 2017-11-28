@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2012 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -23,6 +23,7 @@ package com.jaspersoft.jasperserver.search.filter;
 
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceLookup;
 import com.jaspersoft.jasperserver.api.metadata.common.service.ResourceFactory;
 import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.persistent.RepoResourceItem;
 import com.jaspersoft.jasperserver.api.search.SearchCriteria;
@@ -46,7 +47,7 @@ import java.util.Map;
  * <p/>
  * Other things that should be addressed are to make it MT-aware
  * (currently, you have to manually adjust any repo path you're using in a filter)
- * @version $Id: ResourceTypeSearchCriteriaFactory.java 35226 2013-08-09 07:08:53Z inesterenko $
+ * @version $Id: ResourceTypeSearchCriteriaFactory.java 51276 2014-11-09 17:44:57Z ktsaregradskyi $
  */
 public class ResourceTypeSearchCriteriaFactory implements SearchCriteriaFactory, Cloneable {
     private ResourceFactory persistentClassMappings;
@@ -60,7 +61,7 @@ public class ResourceTypeSearchCriteriaFactory implements SearchCriteriaFactory,
                 Class classToReplace = Class.forName(type);
                 Class oldClass = Class.forName(resourceType);
 
-                if (!classToReplace.isAssignableFrom(oldClass)){
+                if (!classToReplace.isAssignableFrom(oldClass) || (oldClass.equals(ResourceLookup.class) && classToReplace.equals(Resource.class))){
                     newOne.setResourceType(type);
                 }
             } else {

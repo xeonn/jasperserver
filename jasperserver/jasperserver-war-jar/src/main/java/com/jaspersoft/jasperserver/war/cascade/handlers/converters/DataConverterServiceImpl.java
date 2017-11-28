@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005 - 2009 Jaspersoft Corporation. All rights  reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
 * http://www.jaspersoft.com.
 *
 * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -16,7 +16,7 @@
 * GNU Affero  General Public License for more details.
 *
 * You should have received a copy of the GNU Affero General Public  License
-* along with this program.&nbsp; If not, see <http://www.gnu.org/licenses/>.
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 package com.jaspersoft.jasperserver.war.cascade.handlers.converters;
 
@@ -37,7 +37,7 @@ import static com.jaspersoft.jasperserver.war.cascade.handlers.converters.InputC
 
 /**
  * @author Sergey Prilukin
- * @version $Id: DataConverterServiceImpl.java 26539 2012-12-07 16:31:32Z sergey.prilukin $
+ * @version $Id: DataConverterServiceImpl.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
 @Service("dataConverterService")
 public class DataConverterServiceImpl implements DataConverterService {
@@ -84,7 +84,7 @@ public class DataConverterServiceImpl implements DataConverterService {
         }
         String result;
         // For special case when JRParameter class is Timestamp, but control data type is Date
-        if (dataType != null && DataType.TYPE_DATE == dataType.getType() && getDateParser(valueClass) != null) {
+        if (dataType != null && DataType.TYPE_DATE == dataType.getDataTypeType() && getDateParser(valueClass) != null) {
             result = ((DateParser) getDateParser(valueClass)).dateToString(typedValue);
         } else {
             result = ((DataConverter) getDataConverter(valueClass)).valueToString(typedValue);
@@ -113,7 +113,7 @@ public class DataConverterServiceImpl implements DataConverterService {
         // value should be null if null substitution is received or if value class isn't String (in this case empty sting also means null)
         try {
             // For special case when JRParameter class is Timestamp, but control data type is Date
-            if (dataType != null && DataType.TYPE_DATE == dataType.getType() && getDateParser(valueClass) != null) {
+            if (dataType != null && DataType.TYPE_DATE == dataType.getDataTypeType() && getDateParser(valueClass) != null) {
                 result = getDateParser(valueClass).parsDate(rawValue);
             } else {
                 result = getDataConverter(valueClass).stringToValue(rawValue);

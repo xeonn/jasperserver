@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -27,9 +27,11 @@ import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceReference;
 import com.jaspersoft.jasperserver.export.modules.repository.beans.ResourceBean;
 import com.jaspersoft.jasperserver.export.modules.repository.beans.ResourceReferenceBean;
 
+import java.util.Map;
+
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ResourceImportHandler.java 22839 2012-03-28 09:01:12Z lchirita $
+ * @version $Id: ResourceImportHandler.java 51369 2014-11-12 13:59:41Z sergey.prilukin $
  */
 public interface ResourceImportHandler {
 
@@ -50,4 +52,8 @@ public interface ResourceImportHandler {
     String getSourceJsVersion();
 
     String getTargetJsVersion();
+
+    Resource getHandledResource(String uri);
+    
+    boolean fileExists(String filename);
 }

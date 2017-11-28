@@ -40,7 +40,6 @@
     <bean id="repositoryExplorerTreeDataProvider" class="com.jaspersoft.jasperserver.war.model.impl.RepositoryExplorerTreeDataProviderImpl">
         <property name="repositoryService" ref="${bean.repositoryService}"/>
         <property name="repositoryServiceSecurityChecker" ref="${bean.repositoryServiceSecurityChecker}"/>
-        <property name="objectPermissionService" ref="objectPermissionService"/>
         <property name="themeService" ref="themeService" />
     </bean>
 
@@ -121,6 +120,7 @@
         <property name="messageSource" ref="messageSource"/>
         <property name="repositoryService" ref="${bean.repositoryService}" />
         <property name="awsDataSourceService" ref="awsDataSourceService" />
+        <property name="awsCredentialUtil" ref="awsCredentialUtil" />
         <property name="amazonDBServices">
             <list>
                 <value>RDS</value>

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2012 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -26,7 +26,7 @@ import java.util.Collection;
 
 /**
  * @author Ivan Chan (ichan@jaspersoft.com)
- * @version $Id: VirtualDataSourceQueryService.java 40926 2014-01-24 19:36:53Z ichan $
+ * @version $Id: VirtualDataSourceQueryService.java 47331 2014-07-18 09:13:06Z kklein $
  */
 @JasperServerAPI
 public interface VirtualDataSourceQueryService {

@@ -1,5 +1,5 @@
 <%--
-  ~ Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+  ~ Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
   ~ http://www.jaspersoft.com.
   ~
   ~ Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -57,6 +57,13 @@
 					<li class="leaf"><p class="wrap separator" href="#"><b class="icon"></b></p></li>
 				</ul>
 			</li>
+            <li class="node">
+                <p href="#" class="wrap header"><b class="icon"></b>New CSS structure</p>
+                <ul class="list filters">
+                    <li class="leaf"><a class="wrap button" href="flow.html?_flowId=sampleFlow&page=newCss"><b class="icon"></b>New CSS structure</a></li>
+                    <li class="leaf"><p class="wrap separator" href="#"><b class="icon"></b></p></li>
+                </ul>
+            </li>
 		</ul>
 		
     </t:putAttribute>

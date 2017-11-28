@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2014 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -23,7 +23,9 @@ define(function(require) {
     "use strict";
 
     var BaseDataSourceView = require("dataSource/view/BaseDataSourceView"),
-		CustomDataSourceModel = require("dataSource/model/CustomDataSourceModel");
+        _ = require("underscore"),
+		CustomDataSourceModel = require("dataSource/model/CustomDataSourceModel"),
+		InternalDiagnosticTemplate = require("text!dataSource/template/InternalDiagnosticTemplate.htm");
 
     return BaseDataSourceView.extend({
         PAGE_TITLE_NEW_MESSAGE_CODE: "resource.datasource.jndi.page.title.new",
@@ -34,10 +36,13 @@ define(function(require) {
         render: function() {
             this.$el.empty();
 
-            this.renderNameAndDescriptionSection();
-            this.renderSaveLocationSection();
+			this.renderBlankBody();
 
             return this;
-        }
-    });
+        },
+
+		renderBlankBody: function() {
+			this.$el.append(_.template(InternalDiagnosticTemplate));
+		}
+	});
 });

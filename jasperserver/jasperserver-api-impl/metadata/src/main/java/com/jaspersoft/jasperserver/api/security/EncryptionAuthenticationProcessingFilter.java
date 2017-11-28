@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2012 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -22,7 +22,7 @@ package com.jaspersoft.jasperserver.api.security;
 
 import com.jaspersoft.jasperserver.api.security.encryption.EncryptionRequestUtils;
 import org.apache.log4j.Logger;
-import org.springframework.security.ui.webapp.AuthenticationProcessingFilter;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -35,9 +35,8 @@ import javax.servlet.http.HttpServletRequest;
  * @author norm
  * @see com.jaspersoft.jasperserver.api.security.encryption.EncryptionFilter
  */
-public class EncryptionAuthenticationProcessingFilter extends AuthenticationProcessingFilter {
+public class EncryptionAuthenticationProcessingFilter extends UsernamePasswordAuthenticationFilter {
     private Logger log = Logger.getLogger(this.getClass());
-    public static final String WEB_FLOW_CONTROLLER_MAPPING = "flow.html";
 
     /**
      * When the password is encrypted in the EncryptionFilter, the encrypted value is passed into the
@@ -49,22 +48,5 @@ public class EncryptionAuthenticationProcessingFilter extends AuthenticationProc
     @Override
     protected String obtainPassword(HttpServletRequest request) {
         return EncryptionRequestUtils.getValue(request, SPRING_SECURITY_FORM_PASSWORD_KEY);
-    }
-
-    @Override
-    protected String determineTargetUrl(HttpServletRequest request) {
-        String url;
-        final String forceDefaultRedirect = request.getParameter("forceDefaultRedirect");
-        if (forceDefaultRedirect != null && forceDefaultRedirect.equalsIgnoreCase("true")) {
-            // client doesn't want to follow redirect to any stored URL. Redirect to default URL is requested
-            url = getDefaultTargetUrl();
-        } else {
-            url = super.determineTargetUrl(request);
-            if (url.endsWith(WEB_FLOW_CONTROLLER_MAPPING)) {
-                url = getDefaultTargetUrl();
-                log.info("Cannot restore web flow state, redirection to default page");
-            }
-        }
-        return url;
     }
 }

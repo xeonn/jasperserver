@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -51,7 +51,7 @@ import java.util.*;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: DefaultReportParametersTranslator.java 25420 2012-10-20 16:36:09Z sergey.prilukin $
+ * @version $Id: DefaultReportParametersTranslator.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
 public class DefaultReportParametersTranslator implements
 		ReportParametersTranslator {
@@ -242,7 +242,7 @@ public class DefaultReportParametersTranslator implements
 	}
 
 	protected boolean isMulti(InputControl control) {
-		byte type = control.getType();
+		byte type = control.getInputControlType();
 		return type == InputControl.TYPE_MULTI_SELECT_LIST_OF_VALUES
 				|| type == InputControl.TYPE_MULTI_SELECT_LIST_OF_VALUES_CHECKBOX
 				|| type == InputControl.TYPE_MULTI_SELECT_QUERY

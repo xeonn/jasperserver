@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005 - 2009 Jaspersoft Corporation. All rights  reserved.
+* Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
 * http://www.jaspersoft.com.
 *
 * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -48,7 +48,7 @@ import static org.junit.Assert.assertTrue;
 
 /**
  * @author Yaroslav.Kovalchyk
- * @version $Id: MultiAndSingleSelectListOfValuesInputControlHandlerTest.java 35226 2013-08-09 07:08:53Z inesterenko $
+ * @version $Id: MultiAndSingleSelectListOfValuesInputControlHandlerTest.java 48468 2014-08-21 07:47:20Z yuriy.plakosh $
  */
 public class MultiAndSingleSelectListOfValuesInputControlHandlerTest extends UnitilsJUnit4 {
     private ApplicationContext context;
@@ -58,7 +58,7 @@ public class MultiAndSingleSelectListOfValuesInputControlHandlerTest extends Uni
         final HashMap<String, Object> mockedServices = new HashMap<String, Object>();
         Mock<CachedRepositoryService> cachedRepositoryService = MockUnitils.createMock(CachedRepositoryService.class);
         mockedServices.put("cachedRepositoryService", cachedRepositoryService.getMock());
-        mockedServices.put("messagesCalendarFormatProvider", createCalendarFormatProvider());
+        mockedServices.put("isoCalendarFormatProvider", createCalendarFormatProvider());
         mockedServices.put("filterResolver", createFilterResolver());
         mockedServices.put("cachedEngineService", MockUnitils.createMock(CachedEngineService.class).getMock());
         mockedServices.put("engineService", createEngineService());

@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005 - 2009 Jaspersoft Corporation. All rights  reserved.
+* Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
 * http://www.jaspersoft.com.
 *
 * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -31,13 +31,14 @@ import com.jaspersoft.jasperserver.api.metadata.user.domain.client.ObjectPermiss
 import com.jaspersoft.jasperserver.dto.resources.ClientMondrianConnection;
 import com.jaspersoft.jasperserver.dto.resources.ClientMondrianXmlaDefinition;
 import com.jaspersoft.jasperserver.remote.resources.ClientTypeHelper;
+import com.jaspersoft.jasperserver.remote.resources.validation.BasicResourceValidator;
 import com.jaspersoft.jasperserver.remote.services.PermissionsService;
 import com.jaspersoft.jasperserver.war.cascade.handlers.GenericTypeProcessorRegistry;
 import com.jaspersoft.jasperserver.war.util.CalendarFormatProvider;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.security.Authentication;
+import org.springframework.security.core.Authentication;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -53,7 +54,7 @@ import static org.testng.Assert.assertEquals;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: MondrianXmlaDefinitionResourceConverterTest.java 42684 2014-03-06 14:26:22Z ykovalchyk $
+ * @version $Id: MondrianXmlaDefinitionResourceConverterTest.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
 public class MondrianXmlaDefinitionResourceConverterTest {
     @InjectMocks
@@ -64,8 +65,8 @@ public class MondrianXmlaDefinitionResourceConverterTest {
     @Mock private ResourceReferenceConverter resourceReferenceConverter;
     @Mock private ResourceReferenceConverterProvider resourceReferenceConverterProvider;
     @Mock private PermissionsService permissionsService;
-    @Mock
-    private GenericTypeProcessorRegistry genericTypeProcessorRegistry;
+    @Mock private GenericTypeProcessorRegistry genericTypeProcessorRegistry;
+    @Mock private BasicResourceValidator resourceValidator;
 
     private final ClientMondrianXmlaDefinition client = new ClientMondrianXmlaDefinition();
     private final MondrianXMLADefinition server = new MondrianXMLADefinitionImpl();

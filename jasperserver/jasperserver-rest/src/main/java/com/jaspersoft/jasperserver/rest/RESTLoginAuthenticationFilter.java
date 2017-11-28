@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -27,13 +27,13 @@ import org.apache.commons.lang.CharEncoding;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.security.Authentication;
-import org.springframework.security.AuthenticationException;
-import org.springframework.security.AuthenticationManager;
-import org.springframework.security.context.SecurityContextHolder;
-import org.springframework.security.providers.UsernamePasswordAuthenticationToken;
-import org.springframework.security.ui.WebAuthenticationDetails;
-import org.springframework.security.ui.webapp.AuthenticationProcessingFilter;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.WebAuthenticationDetails;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -52,13 +52,13 @@ import java.net.URLDecoder;
  * Authentication, which does not work well with UTF8 usernames.
  * <p/>
  * The filter looks inside the request for an username and a password parameters:
- * AuthenticationProcessingFilter.SPRING_SECURITY_FORM_USERNAME_KEY
- * AuthenticationProcessingFilter.SPRING_SECURITY_FORM_PASSWORD_KEY
+ * UsernamePasswordAuthenticationFilter.SPRING_SECURITY_FORM_USERNAME_KEY
+ * UsernamePasswordAuthenticationFilter.SPRING_SECURITY_FORM_PASSWORD_KEY
  * <p/>
  * Username could be in the form of user|organization
  *
  * @author gtoffoli
- * @version $Id: RESTLoginAuthenticationFilter.java 44312 2014-04-09 14:30:12Z vsabadosh $
+ * @version $Id: RESTLoginAuthenticationFilter.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
 public class RESTLoginAuthenticationFilter implements Filter {
 
@@ -75,8 +75,8 @@ public class RESTLoginAuthenticationFilter implements Filter {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         HttpServletResponse httpResponse = (HttpServletResponse) response;
 
-        String username = EncryptionRequestUtils.getValue(request, AuthenticationProcessingFilter.SPRING_SECURITY_FORM_USERNAME_KEY);
-        String password = EncryptionRequestUtils.getValue(request, AuthenticationProcessingFilter.SPRING_SECURITY_FORM_PASSWORD_KEY);
+        String username = EncryptionRequestUtils.getValue(request, UsernamePasswordAuthenticationFilter.SPRING_SECURITY_FORM_USERNAME_KEY);
+        String password = EncryptionRequestUtils.getValue(request, UsernamePasswordAuthenticationFilter.SPRING_SECURITY_FORM_PASSWORD_KEY);
 
         if (!StringUtils.isEmpty(username)) {
             // decoding since | is not http safe
@@ -94,7 +94,7 @@ public class RESTLoginAuthenticationFilter implements Filter {
                 }
 
                 if (log.isWarnEnabled()) {
-                    log.warn("User " + username + " failed to authenticate: " + e.toString() + " " + e, e.getRootCause());
+                    log.warn("User " + username + " failed to authenticate: " + e.toString() + " " + e, e.getCause());
                 }
 
                 SecurityContextHolder.getContext().setAuthentication(null);
@@ -125,8 +125,8 @@ public class RESTLoginAuthenticationFilter implements Filter {
             httpResponse.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             PrintWriter pw = httpResponse.getWriter();
             pw.print("Bad request."
-                    + (StringUtils.isEmpty(username) ? " Parameter " + AuthenticationProcessingFilter.SPRING_SECURITY_FORM_USERNAME_KEY + " not found." : "")
-                    + (StringUtils.isEmpty(password) ? " Parameter " + AuthenticationProcessingFilter.SPRING_SECURITY_FORM_PASSWORD_KEY + " not found." : ""));
+                    + (StringUtils.isEmpty(username) ? " Parameter " + UsernamePasswordAuthenticationFilter.SPRING_SECURITY_FORM_USERNAME_KEY + " not found." : "")
+                    + (StringUtils.isEmpty(password) ? " Parameter " + UsernamePasswordAuthenticationFilter.SPRING_SECURITY_FORM_PASSWORD_KEY + " not found." : ""));
         }
     }
 

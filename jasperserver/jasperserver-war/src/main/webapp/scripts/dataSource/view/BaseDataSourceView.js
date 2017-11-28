@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2014 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -24,7 +24,6 @@ define(function(require) {
 
     var $ = require("jquery"),
         _ = require("underscore"),
-        resourceLocator = require("resource.locate"),
 		ResourceModel = require("common/model/RepositoryResourceModel"),
         BaseDataSourceModel = require("dataSource/model/BaseDataSourceModel"),
         i18n = require("bundle!jasperserver_messages"),
@@ -37,13 +36,9 @@ define(function(require) {
         dialogs = require("components.dialogs"),
         testConnectionTemplate = require("text!dataSource/template/testConnectionTemplate.htm"),
 		testConnectionInProgress,
-		testConnectionDetailsMessage,
-        // tree dialog element ID. Should be removed if new tree component implemented
-        TREE_DIALOG_ID="dataSource_selectFromRepository",
-        // tree list element ID. Should be removed if new tree component implemented
-        TREE_ID="addFileTreeRepoLocation";
+		testConnectionDetailsMessage;
 
-    require("dataSource/validation/backboneValidationExtension");
+    var Validation = require("backbone.validation");
 
     return Backbone.View.extend({
         PAGE_TITLE_NEW_MESSAGE_CODE: undefined,
@@ -52,7 +47,7 @@ define(function(require) {
         modelConstructor: BaseDataSourceModel,
 
         events: {
-			"keyup input[type='text'], input[type='password'], input[type='checkbox'], textarea, select": "updateModelProperty",
+			"keyup input[type='text'], input[type='password'], textarea, select": "updateModelProperty",
             "change input[type='text'], input[type='password'], input[type='checkbox'], textarea, select": "updateModelProperty",
             "click #testDataSource": "testConnection",
 			"click [name=testConnectionMessageDetails]" : "showTestConnectionMessageDetails"
@@ -62,7 +57,6 @@ define(function(require) {
             this.options = options;
             this.isEditMode = options.isEditMode;
             this.timezones = options.timezones ? options.timezones : timezones;
-            this.skipLocation = options.skipLocation ? options.skipLocation : false;
 
             var modelAttrs = {};
             if(options.dataSource){
@@ -70,7 +64,7 @@ define(function(require) {
             }
             this.model = new this.modelConstructor(modelAttrs, options);
 
-            Backbone.Validation.bind(this, {
+            Validation.bind(this, {
                 valid: this.fieldIsValid,
                 invalid: this.fieldIsInvalid,
                 forceUpdate: true,
@@ -114,12 +108,8 @@ define(function(require) {
 
             }).fail(function(xhr) {
 
-				//parse the response
-				var response = false;
-				try { response = $.parseJSON(xhr.responseText) } catch(e){}
-
 				// now, compose the message
-				var errMsg = self.getTestConnectionErrorMessage(response);
+				var errMsg = self.getTestConnectionErrorMessage(xhr);
 
 				// and display it !
 				msg.addClass("warning").find("span").text(errMsg.text);
@@ -141,16 +131,22 @@ define(function(require) {
 			dialogs.errorPopup.show(testConnectionDetailsMessage);
 		},
 
-		getTestConnectionErrorMessage: function(response) {
-            var text = i18n["resource.dataSource.connectionState.failed"], details = false;
+		getTestConnectionErrorMessage: function(xhr) {
+
+            //parse the response
+            var response = false, text = i18n["resource.dataSource.connectionState.failed"], details = false;
+            try { response = $.parseJSON(xhr.responseText) } catch(e){
+                // in this case show at least what was sent ot us
+                details = xhr.responseText;
+            }
 
             if (response) {
                 if(response.parameters && response.parameters[2]){
-                    // if 3d parameter exist, then it's exception message and should be shown as connection error text
+                    // if 3rd parameter exist, then it's an exception message and should be shown as connection error text
                     text = response.parameters[2];
                 }
                 if(response.parameters && response.parameters[3]){
-                    // if 4th parameter exist, then it's exception stack trace, which should be shown as error details
+                    // if 4th parameter exist, then it's an exception stack trace, which should be shown as error details
                     details = response.parameters[3];
                 }
             }
@@ -163,13 +159,13 @@ define(function(require) {
 
         updateModelProperty: function(e) {
             var $targetEl = $(e.target),
-                valueObj = {},
+                update = {},
                 attr = $targetEl.attr("name"),
                 value = "checkbox" === $targetEl.attr("type") ? $targetEl.is(':checked') : $.trim($targetEl.val());
 
-            valueObj[attr] = value;
+            update[attr] = value;
 
-            this.model.set(valueObj);
+            this.model.set(update);
 
             if (!this.isEditMode) {
                 if (attr === "name") {
@@ -184,7 +180,7 @@ define(function(require) {
                 }
             }
 
-			this.model.validate(valueObj);
+			this.model.validate(update);
         },
 
         render: function() {
@@ -192,44 +188,49 @@ define(function(require) {
             return this;
         },
 
-        renderNameAndDescriptionSection: function() {
-            this.$el.append(_.template(nameAndDescriptionTemplate, this.templateData()));
-        },
-
         renderTimezoneSection: function() {
             this.$el.append(_.template(timezoneTemplate, this.templateData()));
-        },
-
-        renderSaveLocationSection: function () {
-            if (!this.skipLocation) {
-                this.$el.append(_.template(saveLocationTemplate, this.templateData()));
-
-                this.$el.append(_.template(selectFromRepository, {
-                    dialogId: TREE_DIALOG_ID,
-                    treeId: TREE_ID,
-                    i18n: i18n}));
-
-                resourceLocator.initialize({
-                    id: TREE_DIALOG_ID,
-                    resourceInput: "parentFolderUri",
-                    browseButton: "parentFolderUriBrowse",
-                    treeId: TREE_ID,
-                    providerId: "repositoryExplorerTreeFoldersProvider",
-                    dialogTitle: i18n["resource.Add.Files.Title"],
-                    onChange: _.bind(function (value) {
-                        this.model.set("parentFolderUri", value);
-                        this.model.validate({"parentFolderUri": value});
-                    }, this)
-                });
-            }
         },
 
         renderTestConnectionSection: function() {
             this.$el.append(_.template(testConnectionTemplate, this.templateData()));
         },
 
+		renderOrAddAnyBlock: function(container, html) {
+
+			if (_.isString(html)) {
+				try{
+					html = $(html);
+				} catch(e){
+					html = false;
+				}
+				if (!html) {
+					return false;
+				}
+			}
+
+			// check if html has already been rendered in the container
+			// (it's possible because each html fragment is covered with "fieldset" tag
+			var fragmentName = html.first().attr("name");
+			if (!fragmentName) {
+				return false;
+			}
+
+			if (container.find("[name=" + fragmentName + "]").length > 0) {
+				// the render has happened already, so we need to clean the container
+				// and put dom fragment inside it
+				container.find("[name=" + fragmentName + "]").empty().append(html.children());
+			} else {
+				// the render happens first time, there is no any custom field elements and there is no custom
+				// container, so we can simply put it there
+				container.append(html);
+			}
+			return true;
+		},
+
         templateData: function() {
             return {
+				_: _,
                 i18n: i18n,
                 modelAttributes: _.clone(this.model.attributes),
                 timezones: this.timezones,
@@ -238,9 +239,16 @@ define(function(require) {
         },
 
         setPageTitle: function() {
-            var title = this.isEditMode ? this.model.get("label") : i18n[this.PAGE_TITLE_NEW_MESSAGE_CODE];
+            var title, $pageTitleEl = $("#display .showingToolBar > .content > .header > .title");
+
+            if (this.isEditMode) {
+                title = i18n[this.PAGE_TITLE_EDIT_MESSAGE_CODE] + ": " + this.model.get("label");
+            } else {
+                title = i18n[this.PAGE_TITLE_NEW_MESSAGE_CODE];
+            }
+
             document.title = i18n["jsp.home.content_title"] + ": " + title;
-			$("#display .showingToolBar > .content > .header > .title").text(title);
+            $pageTitleEl.text(title);
         },
 
         fieldIsValid: function(view, attr, selector) {
@@ -264,7 +272,7 @@ define(function(require) {
             // remove all resource locator DOM elements
             // 1 and 2 are the beginning of timestamp
             $("div[id^='selectFromRepository1'], div[id^='selectFromRepository2']").remove();
-            Backbone.Validation.unbind(this);
+            Validation.unbind(this);
             Backbone.View.prototype.remove.call(this);
             return this;
         }

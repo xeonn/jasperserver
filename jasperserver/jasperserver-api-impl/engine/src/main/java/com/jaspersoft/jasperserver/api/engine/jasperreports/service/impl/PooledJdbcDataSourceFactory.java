@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -20,10 +20,9 @@
  */
 package com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl;
 
-
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: PooledJdbcDataSourceFactory.java 19922 2010-12-11 14:59:51Z tmatyashovsky $
+ * @version $Id: PooledJdbcDataSourceFactory.java 49286 2014-09-23 13:32:25Z ykovalchyk $
  */
 public interface PooledJdbcDataSourceFactory {
 	

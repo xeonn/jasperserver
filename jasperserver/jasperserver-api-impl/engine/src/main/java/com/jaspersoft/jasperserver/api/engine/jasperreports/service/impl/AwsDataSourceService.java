@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2012 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -67,6 +67,20 @@ public class AwsDataSourceService extends JdbcDataSourceService {
         }
     }
 
+    @Override
+    public boolean testConnection() throws SQLException {
+        awsDataSourceRecovery.createAwsDSSecurityGroup(awsReportDataSource);
+        try {
+            return super.testConnection();
+        } catch (SQLException ex) {
+            if (isConnectionRefusedEx(ex)) {
+                throw new JSException(getErrorMessage("aws.exception.datasource.recovery.timeout"), ex);
+            } else {
+                throw ex;
+            }
+        }
+    }
+
     /**
      * @return Returns the dataSource.
      */
@@ -92,17 +106,13 @@ public class AwsDataSourceService extends JdbcDataSourceService {
                 return c;
             } catch (SQLException e) {
                 //Amazon Security recovery block in case of ConnectionException or SocketTimeoutException
-                Throwable throwable = ExceptionUtils.getRootCause(e);
                 //The condition is complicated just for double checking. In theory checking SQL_STATE_CLASS is enough.
-                if (throwable instanceof ConnectException || throwable instanceof SocketTimeoutException ||
-                        e.getSQLState().startsWith(SQL_STATE_CLASS)) {
+                if (isConnectionRefusedEx(e)) {
                     awsDataSourceRecovery.createAwsDSSecurityGroup(awsReportDataSource);
                     try {
                         return this.dataSource.getConnection();
                     } catch (SQLException ex) {
-                        throwable = ExceptionUtils.getRootCause(e);
-                        if (throwable instanceof ConnectException || throwable instanceof SocketTimeoutException ||
-                                e.getSQLState().startsWith(SQL_STATE_CLASS)) {
+                        if (isConnectionRefusedEx(ex)) {
                             throw new JSAwsDataSourceRecoveryException(e.getMessage() + "\n" +
                                     getErrorMessage("aws.exception.datasource.recovery.timeout"));
                         } else {
@@ -126,6 +136,12 @@ public class AwsDataSourceService extends JdbcDataSourceService {
         public <T> T unwrap(Class<T> tClass) throws SQLException {
             return this.dataSource.unwrap(tClass);
         }
+    }
+
+    private boolean isConnectionRefusedEx(SQLException ex) {
+        Throwable throwable = ExceptionUtils.getRootCause(ex);
+        return throwable instanceof ConnectException || throwable instanceof SocketTimeoutException ||
+                ex.getSQLState() != null && ex.getSQLState().startsWith(SQL_STATE_CLASS);
     }
 
     private String getErrorMessage(String errorCode) {

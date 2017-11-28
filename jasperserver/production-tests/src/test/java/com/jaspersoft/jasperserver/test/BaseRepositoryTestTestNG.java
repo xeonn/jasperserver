@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -58,7 +58,7 @@ import com.jaspersoft.jasperserver.util.test.BaseServiceSetupTestNG;
 
 /**
  * @author Lucian Chirita
- * @version $Id: BaseRepositoryTestTestNG.java 21733 2011-12-09 17:32:09Z schubar $
+ * @version $Id: BaseRepositoryTestTestNG.java 47331 2014-07-18 09:13:06Z kklein $
  */
 public abstract class BaseRepositoryTestTestNG extends BaseServiceSetupTestNG {
 

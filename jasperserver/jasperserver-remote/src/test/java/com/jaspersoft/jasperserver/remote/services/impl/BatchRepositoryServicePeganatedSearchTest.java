@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2012 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
  * the following license terms  apply:
@@ -71,7 +71,7 @@ import static org.testng.Assert.assertEquals;
  * <p></p>
  *
  * @author Zakhar.Tomchenco
- * @version $Id$
+ * @version $Id: $
  */
 @Ignore
 public class BatchRepositoryServicePeganatedSearchTest {
@@ -163,7 +163,7 @@ public class BatchRepositoryServicePeganatedSearchTest {
     @Test(expectedExceptions = ResourceNotFoundException.class)
     public void shouldFailToSearch() throws ResourceNotFoundException, IllegalParameterValueException {
         reset(repositoryService);
-        service.getResources(null, "/doesnt/exist", null, null, null, null, null, null, null, null, null);
+        service.getResources(null, "/doesnt/exist", null, null, null, null, null, null, null, null, null, null);
     }
 
     @Test(groups = {"All lookups"})

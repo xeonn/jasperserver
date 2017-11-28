@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005 - 2009 Jaspersoft Corporation. All rights  reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
 * http://www.jaspersoft.com.
 *
 * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -16,7 +16,7 @@
 * GNU Affero  General Public License for more details.
 *
 * You should have received a copy of the GNU Affero General Public  License
-* along with this program.&nbsp; If not, see <http://www.gnu.org/licenses/>.
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 package com.jaspersoft.jasperserver.remote.resources.converters;
 
@@ -31,7 +31,7 @@ import javax.xml.bind.DatatypeConverter;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: ContentResourceConverter.java 35226 2013-08-09 07:08:53Z inesterenko $
+ * @version $Id: ContentResourceConverter.java 51276 2014-11-09 17:44:57Z ktsaregradskyi $
  */
 @Service
 public class ContentResourceConverter extends ResourceConverterImpl<ContentResource, ClientFile>{
@@ -64,9 +64,9 @@ public class ContentResourceConverter extends ResourceConverterImpl<ContentResou
     @Override
     protected ClientFile resourceSpecificFieldsToClient(ClientFile client, ContentResource serverObject, ToClientConversionOptions options) {
         if (ContentResource.TYPE_UNSPECIFIED.equals(serverObject.getFileType())){
-           client.setType(ClientFile.FileType.unspecified);
+            client.setType(ClientFile.FileType.unspecified);
         } else {
-           client.setType(ClientFile.FileType.valueOf(serverObject.getFileType()));
+            client.setType(ClientFile.FileType.valueOf(serverObject.getFileType()));
         }
         return client;
     }

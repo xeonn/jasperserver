@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005 - 2009 Jaspersoft Corporation. All rights  reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
 * http://www.jaspersoft.com.
 *
 * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -16,7 +16,7 @@
 * GNU Affero  General Public License for more details.
 *
 * You should have received a copy of the GNU Affero General Public  License
-* along with this program.&nbsp; If not, see <http://www.gnu.org/licenses/>.
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 package com.jaspersoft.jasperserver.remote.resources.converters;
 
@@ -33,7 +33,7 @@ import javax.annotation.Resource;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: DataTypeResourceConverter.java 35226 2013-08-09 07:08:53Z inesterenko $
+ * @version $Id: DataTypeResourceConverter.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
 @Service
 public class DataTypeResourceConverter extends ResourceConverterImpl<DataType, ClientDataType> {
@@ -46,30 +46,30 @@ public class DataTypeResourceConverter extends ResourceConverterImpl<DataType, C
         if (clientObject.getType() != null) {
             switch (clientObject.getType()) {
                 case text:
-                    resultToUpdate.setType(DataType.TYPE_TEXT);
+                    resultToUpdate.setDataTypeType(DataType.TYPE_TEXT);
                     resultToUpdate.setRegularExpr(clientObject.getPattern());
                     resultToUpdate.setMaxLength(clientObject.getMaxLength());
                     break;
                 case date:
-                    resultToUpdate.setType(DataType.TYPE_DATE);
+                    resultToUpdate.setDataTypeType(DataType.TYPE_DATE);
                     setNumbers(clientObject, resultToUpdate);
                     break;
                 case datetime:
-                    resultToUpdate.setType(DataType.TYPE_DATE_TIME);
+                    resultToUpdate.setDataTypeType(DataType.TYPE_DATE_TIME);
                     setNumbers(clientObject, resultToUpdate);
                     break;
                 case number:
-                    resultToUpdate.setType(DataType.TYPE_NUMBER);
+                    resultToUpdate.setDataTypeType(DataType.TYPE_NUMBER);
                     setNumbers(clientObject, resultToUpdate);
                     break;
                 case time:
-                    resultToUpdate.setType(DataType.TYPE_TIME);
+                    resultToUpdate.setDataTypeType(DataType.TYPE_TIME);
                     setNumbers(clientObject, resultToUpdate);
                     break;
             }
         } else {
             // to get validation error later, because user did not specified type, which is mandatory
-            resultToUpdate.setType((byte) 0);
+            resultToUpdate.setDataTypeType((byte) 0);
         }
         return resultToUpdate;
     }
@@ -92,7 +92,7 @@ public class DataTypeResourceConverter extends ResourceConverterImpl<DataType, C
     @Override
     protected ClientDataType resourceSpecificFieldsToClient(ClientDataType client, DataType serverObject, ToClientConversionOptions options) {
         ClientDataType.TypeOfDataType type;
-        switch (serverObject.getType()) {
+        switch (serverObject.getDataTypeType()) {
             case DataType.TYPE_TEXT:
                 type = ClientDataType.TypeOfDataType.text;
                 break;
@@ -109,7 +109,7 @@ public class DataTypeResourceConverter extends ResourceConverterImpl<DataType, C
                 type = ClientDataType.TypeOfDataType.time;
                 break;
             default:
-                throw new IllegalStateException("Unsupported dataType '" + serverObject.getType() + "'");
+                throw new IllegalStateException("Unsupported dataType '" + serverObject.getDataTypeType() + "'");
         }
         client.setType(type);
         if (serverObject.getMaxValue() != null) {

@@ -141,7 +141,8 @@ and (max-device-width : 1024px) {
 .collapsible>li>.wrap,
 .list.tabular>li>.wrap,
 .list.filters>li>.wrap,
-.list.fields>li>.wrap {
+.list.fields>li>.wrap
+{
 	text-decoration: none;
 	padding: 0 5px;
 	white-space: nowrap;
@@ -1709,6 +1710,9 @@ and (max-device-width : 1024px) {
 }
 
 .list.settings .node>.description {
+	background-color:#fff;
+	border-top:none;
+	margin-top:0;
 	border-bottom:1px solid #E0E0E0;
 	color:#999999;
 	padding:5px 0 10px 20px;
@@ -1911,4 +1915,10 @@ and (max-device-width : 1024px) {
 
 .list.responsive>li>.wrap.pressed {
 	background-color:#0061a2;
+}
+
+
+/* no result message */
+.list div.noSearchResults {
+    text-align: center;
 }

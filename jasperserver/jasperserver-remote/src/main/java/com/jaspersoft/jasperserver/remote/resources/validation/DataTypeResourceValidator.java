@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2013 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -23,11 +23,9 @@ package com.jaspersoft.jasperserver.remote.resources.validation;
 
 import com.jaspersoft.jasperserver.api.common.domain.ValidationErrors;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.DataType;
-import org.apache.oro.text.regex.PatternMatcher;
 import org.springframework.stereotype.Component;
 
 import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
 
 import static com.jaspersoft.jasperserver.remote.resources.validation.ValidationHelper.addIllegalParameterValueError;
 import static com.jaspersoft.jasperserver.remote.resources.validation.ValidationHelper.addMandatoryParameterNotFoundError;
@@ -47,7 +45,7 @@ public class DataTypeResourceValidator extends GenericResourceValidator<DataType
             addIllegalParameterValueError(errors, "maxValue", resource.getMaxValue().toString(), "The max value must be greater than min value");
         }
 
-        if (resource.getType() == 0){
+        if (resource.getDataTypeType() == 0){
             addMandatoryParameterNotFoundError(errors, "Type");
         }
 

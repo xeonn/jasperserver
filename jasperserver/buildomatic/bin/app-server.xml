@@ -1,6 +1,6 @@
 <!-- =========================================================================== -->
 <!--                                                                             -->
-<!-- Copyright (C) 2005 - 2010 Jaspersoft Corporation. All rights reserved.      -->
+<!-- Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.      -->
 <!-- http://www.jaspersoft.com.                                                  -->
 <!--                                                                             -->
 <!-- Unless you have purchased a commercial license agreement from Jaspersoft,   -->
@@ -608,11 +608,23 @@ tomcat copies to this location from the jasperserver war file META-INF/context.x
                 <if>
                     <equals arg1="${appServerType}" arg2="glassfish2" />
                     <then>
-                        <runasadmin>
-                            <arg value="add-resources"/>
-                            <arg line="${additionalParams}"/>
-                            <arg value="${currentConf}/js-glassfish-ds.xml"/>
-                        </runasadmin>
+                        <if>
+                            <equals arg1="${dbType}" arg2="oracle" />
+                            <then>
+                                <runasadmin>
+                                    <arg value="add-resources"/>
+                                    <arg line="${additionalParams}"/>
+                                    <arg value="${currentConf}/js-glassfish-oracle-ds.xml"/>
+                                </runasadmin>
+                            </then>
+                            <else>
+                                <runasadmin>
+                                    <arg value="add-resources"/>
+                                    <arg line="${additionalParams}"/>
+                                    <arg value="${currentConf}/js-glassfish-ds.xml"/>
+                                </runasadmin>
+                            </else>
+                        </if>
                         <runasadmin failOnError="false">
                             <arg value="delete-jvm-options"/>
                             <arg line="${additionalParams}"/>
@@ -626,11 +638,23 @@ tomcat copies to this location from the jasperserver war file META-INF/context.x
                     </then>
                     <else>
                         <!-- in glassfish 3 additional params should be before actual command -->
-                        <runasadmin>
-                            <arg line="${additionalParams}"/>
-                            <arg value="add-resources"/>
-                            <arg value="${currentConf}/js-glassfish-ds.xml"/>
-                        </runasadmin>
+                        <if>
+                            <equals arg1="${dbType}" arg2="oracle" />
+                            <then>
+                                <runasadmin>
+                                    <arg line="${additionalParams}"/>
+                                    <arg value="add-resources"/>
+                                    <arg value="${currentConf}/js-glassfish-oracle-ds.xml"/>
+                                </runasadmin>
+                            </then>
+                            <else>
+                                <runasadmin>
+                                    <arg line="${additionalParams}"/>
+                                    <arg value="add-resources"/>
+                                    <arg value="${currentConf}/js-glassfish-ds.xml"/>
+                                </runasadmin>
+                            </else>
+                        </if>
                         <runasadmin failOnError="false">
                             <arg line="${additionalParams}"/>
                             <arg value="delete-jvm-options"/>
@@ -1366,6 +1390,9 @@ tomcat copies to this location from the jasperserver war file META-INF/context.x
                         <copy toDir="${appServerJdbcDir}">
                             <fileset dir="${dbDir}/app-srv-jdbc-drivers" includes="*.jar"/>
                         </copy>
+                        <delete>
+                            <fileset dir="${appServerJdbcDir}" includes="ji-*-driver-*.jar"/>
+                        </delete>
                     </else>
                     </if>
                 </then>
@@ -1429,9 +1456,26 @@ tomcat copies to this location from the jasperserver war file META-INF/context.x
                 <then>
                     <echo>  Copy jdbc driver from: ${currentDbDir}/jdbc/${jdbcJar}</echo>
                     <echo>  Copy jdbc driver to:   ${appServerJdbcDir}</echo>
+
                     <copy toDir="${appServerJdbcDir}" verbose="true">
                         <fileset dir="${currentDbDir}/jdbc" includes="${jdbcJar}"/>
                     </copy>
+                    <delete verbose="true">
+                        <fileset dir="${appServerJdbcDir}" includes="TI*-5.13.jar"/>
+                    </delete>
+                    <if>
+                        <or>
+                            <equals arg1="${appServerType}" arg2="tomcat5"/>
+                            <equals arg1="${appServerType}" arg2="tomcat6"/>
+                            <equals arg1="${appServerType}" arg2="tomcat7"/>
+                        </or>
+                        <then>
+                            <echo>  Note: ji*-driver*.jar files are for internal use only.  Those jar files won't get copied to app server jdbc directory</echo>
+                            <delete verbose="true">
+                                <fileset dir="${appServerJdbcDir}" includes="ji-*-driver-*.jar"/>
+                            </delete>
+                        </then>
+                    </if>
                 </then>
                 <else>
                     <echo>INFO: property deployJDBCDriver is set to false. No copy of JDBC jar to ${appServerJdbcDir}</echo>

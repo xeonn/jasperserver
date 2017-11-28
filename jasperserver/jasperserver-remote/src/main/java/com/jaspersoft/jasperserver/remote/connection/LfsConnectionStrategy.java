@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005 - 2013 Jaspersoft Corporation. All rights  reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
 * http://www.jaspersoft.com.
 *
 * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -16,12 +16,12 @@
 * GNU Affero  General Public License for more details.
 *
 * You should have received a copy of the GNU Affero General Public  License
-* along with this program.&nbsp; If not, see <http://www.gnu.org/licenses/>.
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 package com.jaspersoft.jasperserver.remote.connection;
 
 import com.jaspersoft.jasperserver.dto.connection.LfsConnection;
-import org.springframework.security.AccessDeniedException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -32,7 +32,7 @@ import java.util.Map;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: LfsConnectionStrategy.java 42684 2014-03-06 14:26:22Z ykovalchyk $
+ * @version $Id: LfsConnectionStrategy.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
 @Service
 public class LfsConnectionStrategy implements ConnectionManagementStrategy<LfsConnection> {

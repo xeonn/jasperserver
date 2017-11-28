@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -36,7 +36,7 @@ import com.jaspersoft.jasperserver.api.JSExceptionWrapper;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: JndiJdbcDataSourceService.java 23601 2012-05-04 16:46:23Z ogavavka $
+ * @version $Id: JndiJdbcDataSourceService.java 50011 2014-10-09 16:57:26Z vzavadskii $
  */
 public class JndiJdbcDataSourceService extends BaseJdbcDataSource {
 	
@@ -47,7 +47,24 @@ public class JndiJdbcDataSourceService extends BaseJdbcDataSource {
 	public JndiJdbcDataSourceService(String jndiName) {
 		this.jndiName = jndiName;
 	}
-	
+
+    public boolean testConnection() throws Exception {
+        Context ctx = new InitialContext();
+        DataSource dataSource = (DataSource) ctx.lookup("java:comp/env/" + jndiName);
+        Connection conn = null;
+        try {
+            conn = dataSource.getConnection();
+            return conn != null;
+        } finally {
+            if(conn != null)
+                try {
+                    conn.close();
+                } catch (SQLException e) {
+                    log.error("Couldn't disconnect JNDI connection", e);
+                }
+        }
+    }
+
 	protected Connection createConnection() {
 
 		try

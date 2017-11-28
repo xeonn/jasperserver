@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2013 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -24,6 +24,7 @@ package com.jaspersoft.jasperserver.remote.resources.validation;
 import com.jaspersoft.jasperserver.api.JSValidationException;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Query;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.client.QueryImpl;
+import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributesResolver;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -48,6 +49,8 @@ public class QueryResourceValidatorTest {
     final QueryResourceValidator validator = new QueryResourceValidator();
     @Mock
     private List<String> queryLanguages;
+    @Mock
+    private ProfileAttributesResolver profileAttributesResolver;
 
     Query query;
 

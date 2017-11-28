@@ -10,7 +10,7 @@
     <parent>
         <groupId>com.jaspersoft.jasperserver</groupId>
         <artifactId>jasperserver-api-impl</artifactId>
-        <version>5.6.0</version>
+        <version>6.0.1</version>
     </parent>
     <dependencies>
         <dependency>
@@ -21,22 +21,27 @@
 	    <dependency>
             <groupId>org.jboss.teiid</groupId>
             <artifactId>teiid-api</artifactId>
-            <version>8.7.0.Beta1</version>
+            <version>8.8.1</version>
         </dependency>
         <dependency>
             <groupId>org.jboss.teiid</groupId>
             <artifactId>teiid-client</artifactId>
-            <version>8.7.0.Beta1</version>
+            <version>8.8.1</version>
         </dependency>
         <dependency>
             <groupId>org.jboss.teiid</groupId>
             <artifactId>teiid-common-core</artifactId>
-            <version>8.7.0.Beta1</version>
+            <version>8.8.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.teiid</groupId>
+            <artifactId>teiid-metadata</artifactId>
+            <version>8.8.1</version>
         </dependency>
         <dependency>
             <groupId>org.jboss.teiid</groupId>
             <artifactId>teiid-engine</artifactId>
-            <version>8.7.0.Beta1</version>
+            <version>8.8.1</version>
             <exclusions>
             <exclusion>
                 <groupId>org.jboss.as</groupId>
@@ -51,7 +56,7 @@
         <dependency>
             <groupId>org.jboss.teiid</groupId>
             <artifactId>teiid-runtime</artifactId>
-            <version>8.7.0.Beta1</version>
+            <version>8.8.1</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.rhq.helpers</groupId>
@@ -69,18 +74,22 @@
                     <groupId>org.jboss.as</groupId>
                     <artifactId>jboss-as-parent</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>org.infinispan</groupId>
+                    <artifactId>infinispan-core</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
             <groupId>org.jboss.teiid.connectors</groupId>
             <artifactId>translator-jdbc</artifactId>
-            <version>8.7.0.Beta1</version>
+            <version>8.8.1</version>
         </dependency>
         <dependency>
             <groupId>org.jboss.teiid.connectors</groupId>
             <artifactId>connector-file</artifactId>
             <classifier>lib</classifier>
-            <version>8.7.0.Beta1</version>
+            <version>8.8.1</version>
         </dependency>
         <!--  MONGODB DEPENDENCIES  -->
         <dependency>
@@ -91,18 +100,18 @@
         <dependency>
             <groupId>org.jboss.teiid.connectors</groupId>
             <artifactId>mongodb-api</artifactId>
-            <version>8.7.0.Beta1</version>
+            <version>8.8.1</version>
         </dependency>
         <dependency>
             <groupId>org.jboss.teiid.connectors</groupId>
             <artifactId>connector-mongodb</artifactId>
             <classifier>lib</classifier>
-            <version>8.7.0.Beta1</version>
+            <version>8.8.1</version>
         </dependency>
         <dependency>
             <groupId>org.jboss.teiid.connectors</groupId>
             <artifactId>translator-mongodb</artifactId>
-            <version>8.7.0.Beta1</version>
+            <version>8.8.1</version>
         </dependency>
         <!--  CASSANDRA DEPENDENCIES  -->
         <!-- dependency>
@@ -196,11 +205,6 @@
             <version>14.0.1</version>
         </dependency>
         <dependency>
-            <groupId>com.yammer.metrics</groupId>
-            <artifactId>metrics-core</artifactId>
-            <version>2.2.0</version>
-        </dependency>
-        <dependency>
             <groupId>org.xerial.snappy</groupId>
             <artifactId>snappy-java</artifactId>
             <version>1.0.5</version>
@@ -208,7 +212,7 @@
         <dependency>
             <groupId>org.jboss.teiid.connectors</groupId>
             <artifactId>translator-cassandra</artifactId>
-            <version>8.7.0.Beta1</version>
+            <version>8.8.1</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.datastax.cassandra</groupId>
@@ -220,19 +224,19 @@
             <groupId>org.jboss.teiid.connectors</groupId>
             <artifactId>connector-cassandra</artifactId>
             <classifier>lib</classifier>
-            <version>8.7.0.Beta1</version>
+            <version>8.8.1</version>
         </dependency>
         <!-- HIVE CONNECTOR  -->
         <dependency>
             <groupId>org.jboss.teiid.connectors</groupId>
             <artifactId>translator-hive</artifactId>
-            <version>8.7.0.Beta1</version>
+            <version>8.8.1</version>
         </dependency>
         <!-- OTHER CONNECTOR -->
         <dependency>
             <groupId>org.jboss.teiid.connectors</groupId>
             <artifactId>translator-file</artifactId>
-            <version>8.7.0.Beta1</version>
+            <version>8.8.1</version>
         </dependency>
 		<!-- TEIID DEPENDENCIES  -->
         <dependency>
@@ -266,6 +270,11 @@
                     <artifactId>jboss-logging</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.logging</groupId>
+            <artifactId>jboss-logging</artifactId>
+            <version>3.1.2.GA</version>
         </dependency>
         <dependency>
             <groupId>org.jboss.modules</groupId>
@@ -385,6 +394,18 @@
          <scope>test</scope>
        </dependency> -->
         <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>6.1.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <version>1.9.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.unitils</groupId>
             <artifactId>unitils</artifactId>
             <version>2.4</version>
@@ -421,14 +442,9 @@
           <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.poi</groupId>
-            <artifactId>poi</artifactId>
-            <version>3.7</version>
-        </dependency>
-        <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk</artifactId>
-            <version>1.7.5</version>
+            <version>1.8.6</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.fasterxml.jackson.core</groupId>

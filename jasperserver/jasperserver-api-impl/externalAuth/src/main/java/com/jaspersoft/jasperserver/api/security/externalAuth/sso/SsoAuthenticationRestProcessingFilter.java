@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2012 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -15,15 +15,15 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Affero  General Public License for more details.
  *
- *  You should have received a copy of the GNU Affero General Public  License
- *  along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public  License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 
 package com.jaspersoft.jasperserver.api.security.externalAuth.sso;
 
-import org.springframework.security.AuthenticationException;
-import org.springframework.security.ui.rememberme.NullRememberMeServices;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.web.authentication.NullRememberMeServices;
 import org.springframework.util.Assert;
 
 import javax.servlet.http.HttpServletRequest;
@@ -38,10 +38,8 @@ import java.io.IOException;
  */
 public class SsoAuthenticationRestProcessingFilter extends SsoAuthenticationProcessingFilter {
 
-    public void afterPropertiesSet() throws Exception {
+    public void afterPropertiesSet() {
         Assert.notNull(getAuthenticationManager(), "authenticationManager must be specified");
-        Assert.notNull(getExternalDataSynchronizer(), "externalDataSynchronizer cannot be null");
-//        Assert.notNull(getExternalAuthProperties(), "externalAuthProperties cannot be null");
 
         if (getRememberMeServices() == null) {
             setRememberMeServices(new NullRememberMeServices());

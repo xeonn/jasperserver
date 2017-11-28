@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2014 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: admin.users.main.js 43122 2014-03-18 12:44:22Z psavushchik $
+ * @version: $Id: admin.users.main.js 7788 2014-09-19 13:11:20Z sergey.prilukin $
  */
 
 define(function(require){
@@ -38,7 +38,7 @@ define(function(require){
     require("backbone");
     require("attributes.view");
     require("org.user.mng.components");
-    require("encryption.utils");
+    require("common/util/encrypter");
     require("utils.common");
     require("csrf.guard");
 

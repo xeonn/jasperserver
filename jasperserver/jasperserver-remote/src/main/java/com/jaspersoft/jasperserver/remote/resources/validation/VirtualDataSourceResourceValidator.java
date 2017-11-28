@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2013 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -28,8 +28,9 @@ import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceLookup;
 import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.VirtualReportDataSource;
+import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributesResolver;
 import com.jaspersoft.jasperserver.api.search.SearchCriteriaFactory;
-import org.springframework.security.AccessDeniedException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
@@ -54,6 +55,8 @@ public class VirtualDataSourceResourceValidator extends GenericResourceValidator
     private RepositoryService service;
     @javax.annotation.Resource
     private SearchCriteriaFactory searchCriteriaFactory;
+    @javax.annotation.Resource
+    ProfileAttributesResolver profileAttributesResolver;
 
     @Override
     protected void internalValidate(VirtualReportDataSource resource, ValidationErrors errors) {
@@ -65,7 +68,7 @@ public class VirtualDataSourceResourceValidator extends GenericResourceValidator
             for (String id : resource.getDataSourceUriMap().keySet()) {
                 if (empty(id)) {
                     addIllegalParameterValueError(errors, "SubDataSource.id", "", "An id must be specified");
-                } else if (specCharacters.matcher(id).matches()) {
+                } else if (!profileAttributesResolver.containsAttribute(id) && specCharacters.matcher(id).matches()) {
                     addIllegalParameterValueError(errors, "SubDataSource.id", id, "An id should not contain symbols ~.,!@#$%^&*():[]? and curly braces");
                 } else if (!uris.add((uri = resource.getDataSourceUriMap().get(id).getTargetURI()))) {
                     addIllegalParameterValueError(errors, "SubDataSource.uri", id, "Duplicated URI: " + uri);

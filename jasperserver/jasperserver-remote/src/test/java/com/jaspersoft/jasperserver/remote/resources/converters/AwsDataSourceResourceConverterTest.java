@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005 - 2009 Jaspersoft Corporation. All rights  reserved.
+* Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
 * http://www.jaspersoft.com.
 *
 * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -32,7 +32,7 @@ import static org.testng.Assert.*;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: AwsDataSourceResourceConverterTest.java 42684 2014-03-06 14:26:22Z ykovalchyk $
+ * @version $Id: AwsDataSourceResourceConverterTest.java 51542 2014-11-19 19:16:56Z vsabadosh $
  */
 public class AwsDataSourceResourceConverterTest {
     private AwsDataSourceResourceConverter converter = new AwsDataSourceResourceConverter();
@@ -119,5 +119,16 @@ public class AwsDataSourceResourceConverterTest {
         assertSame(result, clientObject);
         assertNull(clientObject.getSecretKey());
         assertEquals(serverObject.getAWSSecretKey(), expectedSecretKey);
+    }
+
+    @Test
+    public void resourceSpecificFieldsToServer_secretKeyChangedToValueInClientObjectIfAccessKeyNull(){
+        AwsReportDataSource serverObject = new AwsReportDataSourceImpl();
+        serverObject.setAWSSecretKey("Old Value");
+
+        ClientAwsDataSource clientObject = new ClientAwsDataSource();
+
+        final AwsReportDataSource result = converter.resourceSpecificFieldsToServer(clientObject, serverObject, null);
+        assertNull(result.getAWSSecretKey());
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2012 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -40,7 +40,7 @@ import java.util.Set;
  * @see {@link com.jaspersoft.jasperserver.war.cascade.InputControlsLogicService}
  * @see {@link com.jaspersoft.jasperserver.war.cascade.ControlLogic}
  *
- * @version $Id: InputControlHandler.java 38009 2013-09-24 10:54:51Z agodovanets $
+ * @version $Id: InputControlHandler.java 47331 2014-07-18 09:13:06Z kklein $
  */
 @JasperServerAPI
 public interface InputControlHandler {

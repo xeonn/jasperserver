@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2014 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: attributes.model.js 43122 2014-03-18 12:44:22Z psavushchik $
+ * @version: $Id: attributes.model.js 8074 2014-12-09 18:08:41Z ztomchenco $
  */
 
 if (!jaspersoft) {
@@ -160,7 +160,11 @@ jaspersoft.attributes || (jaspersoft.attributes = {});
          * @return url of representing collection
          */
         url: function(modelId) {
-            return TemplateEngine.renderUrl(this.urlTemplate, _.extend({}, this.context, {modelId: modelId}), true);
+            var data = _.extend({}, this.context, {modelId: modelId});
+            data.tenantId && (data.tenantId = encodeURIComponent(data.tenantId).replace("'","%27"));
+            data.userName && (data.userName = encodeURIComponent(data.userName).replace("'","%27"));
+
+            return TemplateEngine.renderUrl(this.urlTemplate, data, true);
         },
 
         /**

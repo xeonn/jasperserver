@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -20,9 +20,10 @@
  */
 package com.jaspersoft.jasperserver.api.metadata.user.service.impl;
 
+import org.springframework.security.authentication.AbstractAuthenticationToken;
+
 import java.util.Map;
 
-import org.springframework.security.providers.AbstractAuthenticationToken;
 
 /**
  * @author swood
@@ -47,7 +48,7 @@ public class RequestAuthenticationToken extends AbstractAuthenticationToken {
 	}
 
 	/* (non-Javadoc)
-	 * @see org.springframework.security.Authentication#getCredentials()
+	 * @see org.springframework.security.core.Authentication#getCredentials()
 	 */
 	public Object getCredentials() {
 		if (credentials != null)
@@ -64,7 +65,7 @@ public class RequestAuthenticationToken extends AbstractAuthenticationToken {
 	}
 
 	/* (non-Javadoc)
-	 * @see org.springframework.security.Authentication#getPrincipal()
+	 * @see org.springframework.security.core.Authentication#getPrincipal()
 	 */
 	public Object getPrincipal() {
 		return principal;

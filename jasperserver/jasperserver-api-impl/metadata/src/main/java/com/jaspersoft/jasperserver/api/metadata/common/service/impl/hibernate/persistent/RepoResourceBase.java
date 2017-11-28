@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -39,7 +39,7 @@ import java.util.Set;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: RepoResourceBase.java 35226 2013-08-09 07:08:53Z inesterenko $
+ * @version $Id: RepoResourceBase.java 50693 2014-10-26 23:00:43Z yuriy.plakosh $
  */
 public abstract class RepoResourceBase implements IdedRepoObject {
 	
@@ -56,6 +56,7 @@ public abstract class RepoResourceBase implements IdedRepoObject {
 	protected String description = null;
 
     protected Set<AccessEvent> accessEvents = null;
+    protected Set<RepoReportThumbnail> thumbnails = null;
 
 	protected RepoFolder parent;
 
@@ -262,6 +263,14 @@ public abstract class RepoResourceBase implements IdedRepoObject {
 
     public void setAccessEvents(Set<AccessEvent> accessEvents) {
         this.accessEvents = accessEvents;
+    }
+
+    public Set<RepoReportThumbnail> getThumbnails() {
+        return thumbnails;
+    }
+
+    public void setThumbnails(Set<RepoReportThumbnail> thumbnails) {
+        this.thumbnails = thumbnails;
     }
 
     public String getResourceType() {

@@ -128,6 +128,12 @@
     alter table JIReportJobSimpleTrigger 
         drop constraint FKB9337C5CD2B2EB53;
 
+    alter table JIReportThumbnail 
+        drop constraint FKFDB3DED932282198;
+
+    alter table JIReportThumbnail 
+        drop constraint FKFDB3DED9F254B53E;
+
     alter table JIReportUnit 
         drop constraint FK98818B77A8BF376D;
 
@@ -264,6 +270,8 @@
     drop table JIReportJobSimpleTrigger;
 
     drop table JIReportJobTrigger;
+
+    drop table JIReportThumbnail;
 
     drop table JIReportUnit;
 

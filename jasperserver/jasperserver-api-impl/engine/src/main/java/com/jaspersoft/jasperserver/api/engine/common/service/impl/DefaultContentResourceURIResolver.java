@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2013 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -30,7 +30,7 @@ import com.jaspersoft.jasperserver.api.JSExceptionWrapper;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: DefaultContentResourceURIResolver.java 32262 2013-05-31 16:05:18Z inesterenko $
+ * @version $Id: DefaultContentResourceURIResolver.java 47331 2014-07-18 09:13:06Z kklein $
  */
 public class DefaultContentResourceURIResolver implements
 		ContentResourceURIResolver, InitializingBean {

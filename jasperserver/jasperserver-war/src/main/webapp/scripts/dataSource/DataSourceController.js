@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2014 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -27,16 +27,24 @@ define(function (require) {
         $ = require("jquery"),
         i18n = require("bundle!all"),
         BaseDataSourceModel = require("dataSource/model/BaseDataSourceModel"),
-        TouchController = require("touchcontroller"),
+		TouchController = require("touchcontroller"),
         featureDetection = require("common/util/featureDetection"),
 		history = require("common/util/historyHelper"),
         dataSourceViewFactory = require("dataSource/factory/dataSourceViewFactory"),
         dataSourceResourceTypes = require("dataSource/enum/dataSourceResourceTypes"),
+        saveDialogViewFactory = require("dataSource/factory/saveDialogViewFactory"),
         dataSourceMainTemplate = require("text!dataSource/template/dataSourceMainTemplate.htm"),
 		jrsConfigs = require('jrs.configs'),
-        CustomDataSourcesCollection = require("dataSource/collection/CustomDataSourceCollection");
+        CustomDataSourcesCollection = require("dataSource/collection/CustomDataSourceCollection"),
+        awsSettings = require("settings!awsSettings"),
+        settingsUtility = require("dataSource/util/settingsUtility");
 
     return Backbone.View.extend({
+
+		dataSourceType: false,
+		dataSourceView: false,
+		saveDialog: false,
+
         events: {
             "change select[name='dataSourceType']" : "onDataSourceTypeChange",
             "click #saveBtn" : "onSaveClick",
@@ -49,10 +57,10 @@ define(function (require) {
 
 			// since the options object will be changed, we need to make the copy of it
 			options = $.extend(true, {}, options);
-			var args = arguments; args[0] = options;
+			arguments[0] = options;
 
             this.isEditMode = options.isEditMode;
-            Backbone.View.apply(this, args);
+            Backbone.View.apply(this, arguments);
         },
 
         initialize: function(options) {
@@ -79,6 +87,9 @@ define(function (require) {
             this.customDataSourceCollection = new CustomDataSourcesCollection();
             this.customDataSourceCollection.fetch().done(_.bind(function(){this.renderDataSourceContainer();}, this));
 
+            var deepDefaults = settingsUtility.deepDefaults(options, {
+                awsSettings: awsSettings
+            });
 			// Also, deciding if we are in the editing mode, and if we are, then we need to fetch the model
 			// If we aren't, then we can just resolve the deferred object
             if (this.options.resourceUri) {
@@ -95,6 +106,10 @@ define(function (require) {
                 this.dataSourceType = dataSourceViewFactory.getViewType(this.options.dataSourceClientType, this.options.dataSource);
                 this.fetchingTheModelDeferred.resolve();
             } else {
+                // if this product working on AWS - by default we create AWS Data Source
+                if (deepDefaults.awsSettings.productTypeIsEc2) {
+                    this.dataSourceType = dataSourceViewFactory.getViewType(dataSourceResourceTypes.AWS, null);
+                }
                 this.fetchingTheModelDeferred.resolve();
             }
         },
@@ -120,8 +135,13 @@ define(function (require) {
                 .value();
 
 			// now, add custom data sources which are defined in XML files on the server
-            this.customDataSourceCollection.forEach(function(element){
+            this.customDataSourceCollection.forEach(function(element) {
                 var currentCustomDataSourceType = element.get("id");
+                // disable file data sources for now
+                if (currentCustomDataSourceType in {"xlsDataSource": 1, "xlsxDataSource": 1, "textDataSource":1}) {
+                    return;
+                }
+
                 dataSourceTypeOptions.push({
                     value: currentCustomDataSourceType,
                     label: i18n[currentCustomDataSourceType + '.name'] ? i18n[currentCustomDataSourceType + '.name'] : currentCustomDataSourceType
@@ -172,14 +192,19 @@ define(function (require) {
             if (this.$(".row.inputs .body:eq(0)").length === 0) {
                 this.$(".row.inputs > .column > .content").append("<div class='body dataSourceBody'></div>");
             }
+
+			if (!this.dataSourceType) {
+				this.dataSourceType = dataSourceResourceTypes.JDBC.toLowerCase();
+
+				// TODO: REMOVE ME IF YOU ARE ABOUT TO COMMIT TO TRUNK
+				//this.dataSourceType = "textDataSource";
+			}
+
             this.dataSourceView = dataSourceViewFactory.getView(_.extend(this.options, {
                 dataSourceType: this.dataSourceType,
                 dataSource: _.extend({}, this.dataSource, saveParams),
                 el: this.$(".row.inputs .body:eq(0)")
             }));
-            if(!this.dataSourceType){
-                this.dataSourceType = dataSourceResourceTypes.JDBC.toLowerCase();
-            }
 
 			// set specific class to help customize specific page with css styles
 			this.$(".dataSourceBody").attr("dstype", this.dataSourceType.toLowerCase());
@@ -197,19 +222,37 @@ define(function (require) {
             }
         },
 
-        onSaveClick: function() {
-            var self = this;
 
-            if (this.dataSourceView.model.isValid(true)) {
-                if (this.options.saveFn) {
-                    this.options.saveFn(this.dataSourceView.model.attributes, this.dataSourceView.model)
-                } else {
-					this.dataSourceView.model.save(null, {
-						success: _.bind(self._onSaveDone, self),
-						error: _.bind(self._onSaveFail, self)
-					});
-                }
+        _prepareSaveDialog: function() {
+            this.saveDialog && this.saveDialog.remove();
+
+            var SaveDialog = saveDialogViewFactory.getView(this.dataSourceType);
+
+            this.saveDialog = new SaveDialog(_.extend({}, this.options, {
+                model: this.dataSourceView.model,
+                saveFn: this.options.saveFn,
+                success: _.bind(this._onSaveDone, this),
+                error: _.bind(this._onSaveFail, this)
+            }));
+        },
+
+        onSaveClick: function() {
+
+            if (!this.dataSourceView.model.isValid(true)) {
+                return;
             }
+
+            var self = this, funcOnceValidationPassed = function() {
+                self._prepareSaveDialog();
+                self.saveDialog.startSaveDialog();
+            };
+
+            if (!_.isUndefined(this.dataSourceView.model.validationMethodOnSaveClick)) {
+                this.dataSourceView.model.validationMethodOnSaveClick(funcOnceValidationPassed);
+                return;
+            }
+
+            funcOnceValidationPassed();
         },
 
 		_onSaveDone: function() {
@@ -221,11 +264,11 @@ define(function (require) {
 			try { response = JSON.parse(xhr.responseText); } catch(e) {}
 
 			// check if we faced Conflict issue, it's when we are trying to save DS under existing resourceID
-			if (response.errorCode === "version.not.match" || response.errorCode === "resource.already.exists") {
+			if (response.errorCode === "version.not.match") {
 				this.dataSourceView.fieldIsInvalid(
 					this.dataSourceView,
 					"name",
-					i18n["resource.dataSource.resource.alreadyInUser"],
+					i18n["resource.dataSource.resource.exists"],
 					"name"
 				);
 				return;

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -58,7 +58,7 @@ import java.util.Set;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ResourceExporter.java 30221 2013-03-25 17:26:02Z ztomchenco $
+ * @version $Id: ResourceExporter.java 51369 2014-11-12 13:59:41Z sergey.prilukin $
  */
 public class ResourceExporter extends BaseExporterModule implements ResourceExportHandler {
     private TenantService tenantService;
@@ -179,7 +179,7 @@ public class ResourceExporter extends BaseExporterModule implements ResourceExpo
 		exportedURIs = new HashSet();
 	}
 
-	protected void markExported(String uri) {
+	public void markExported(String uri) {
 		exportedURIs.add(uri);
 	}
 

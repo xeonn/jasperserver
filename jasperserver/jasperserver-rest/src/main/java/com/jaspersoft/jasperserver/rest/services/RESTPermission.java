@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -35,7 +35,7 @@ import com.jaspersoft.jasperserver.rest.utils.JAXBList;
 import org.apache.axis.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.security.AccessDeniedException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -51,7 +51,7 @@ import java.util.List;
 
 /**
  * @author carbiv
- * @version $Id: RESTPermission.java 28947 2013-02-26 15:02:08Z vsabadosh $
+ * @version $Id: RESTPermission.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
 @Service("restPermissionService")
 public class RESTPermission extends RESTAbstractService

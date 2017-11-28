@@ -157,6 +157,7 @@
                           clientTest="canBeRun" className="up"/>
         </condition>
 
+
         <condition test="checkMode" testArgs="browse,search,library">
             <simpleAction labelKey="RM_BUTTON_RUN_IN_NEW_TAB" action="invokeRedirectAction" actionArgs="RunResourceInNewTabAction"
                           clientTest="canBeRun" className="up"/>

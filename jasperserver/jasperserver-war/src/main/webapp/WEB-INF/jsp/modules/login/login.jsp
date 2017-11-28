@@ -1,5 +1,5 @@
 <%--
-  ~ Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+  ~ Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
   ~ http://www.jaspersoft.com.
   ~
   ~ Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -76,7 +76,12 @@
                 <t:putAttribute name="containerID" value="copy"/>
                 <t:putAttribute name="bodyContent">
                     <div id="welcome" class="row">
-                        <h1 class="textAccent02"><spring:message code='LOGIN_WELCOME_OS'/></h1>
+                        <h1 class="textAccent02">
+                        	<span class="text">Welcome to</span><span class="logo">TIBCO Jaspersoft</span>  
+                        	<!-- <spring:message code='LOGIN_WELCOME_OS'/> -->
+                        	       	
+                        
+                        </h1>
                     </div>
 <%--
                     <div id="buttons" class="row">

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2014 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: output.js 43122 2014-03-18 12:44:22Z psavushchik $
+ * @version: $Id: output.js 7751 2014-08-21 07:47:20Z yuriy.plakosh $
  */
 
 define('scheduler/view/editor/output', function (require) {
@@ -49,7 +49,7 @@ define('scheduler/view/editor/output', function (require) {
             var t = this;
 
             // adjust this checkbox into proper state depending on the server-side variable
-            t.$("[name=outputToHostFileSystem]").attr("disabled", config.enableSaveToHostFS ? false : "disabled");
+            t.$("[name=outputToHostFileSystem]").attr("disabled", config.enableSaveToHostFS === "true" ? false : "disabled");
 
             //
             t.map = [

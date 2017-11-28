@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -24,13 +24,13 @@ package com.jaspersoft.jasperserver.war.util;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
-import org.springframework.security.context.SecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: SecurityContextHolderStrategyInitializer.java 19932 2010-12-11 15:24:29Z tmatyashovsky $
+ * @version $Id: SecurityContextHolderStrategyInitializer.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
 public class SecurityContextHolderStrategyInitializer implements ServletContextListener {
 	

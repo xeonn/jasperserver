@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -44,7 +44,7 @@ import java.util.List;
  * </p>
  * 
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ReportJobsScheduler.java 22586 2012-03-16 16:18:50Z tchow $
+ * @version $Id: ReportJobsScheduler.java 47331 2014-07-18 09:13:06Z kklein $
  * @since 1.0
  * @see ReportSchedulingService
  * @see ReportJobsPersistenceService

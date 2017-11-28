@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -22,7 +22,7 @@ package com.jaspersoft.jasperserver.api.engine.jasperreports.domain.impl;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ReportExecutionListenerFactory.java 23936 2012-05-28 09:30:59Z lchirita $
+ * @version $Id: ReportExecutionListenerFactory.java 47331 2014-07-18 09:13:06Z kklein $
  */
 public interface ReportExecutionListenerFactory {
 

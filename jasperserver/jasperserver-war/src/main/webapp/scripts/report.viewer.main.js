@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2014 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: report.viewer.main.js 43455 2014-03-25 12:12:51Z sergey.prilukin $
+ * @version: $Id: report.viewer.main.js 7999 2014-11-07 03:05:15Z tdanciu $
  */
 
 define(function (require) {
@@ -69,21 +69,24 @@ define(function (require) {
         require(["ReportRequireJsConfig"], function() {
             //We can start load report viewer only when additional requirejs config is loaded
             //so check that additional config is for sure loaded
-            require(['report/viewer'], function(Viewer) {
-                window.viewer = new Viewer({
-                    at: '#reportContainer',
-                    reporturi: Report.reportUnitURI,
-                    async: true,
-                    page: 0,
-                    contextPath: __jrsConfigs__.contextPath
-                });
-
-                window.jasperreports = {
-                    reportviewertoolbar: window.viewer
-                }
-
-                Report.initialize();
+        require(['reportViewer/viewer'], function(Viewer) {
+            window.viewer = new Viewer({
+                at: '#reportContainer',
+                reporturi: Report.reportUnitURI,
+                async: true,
+                page: 0,
+                contextPath: __jrsConfigs__.contextPath
             });
+
+            window.jasperreports = {
+                reportviewertoolbar: window.viewer
+                };
+
+            Report.initialize();
+
+                //this code allow custom code to listen when controls are actually initialized
+                jQuery(document).trigger('controls:initialized', []);
         });
+    });
     });
 });

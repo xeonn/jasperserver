@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -27,6 +27,7 @@ import com.jaspersoft.jasperserver.api.engine.jasperreports.service.DataSnapshot
 import com.jaspersoft.jasperserver.api.metadata.common.domain.DataContainer;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.MemoryDataContainer;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceReference;
 import com.jaspersoft.jasperserver.api.metadata.data.cache.DataCacheSnapshotData;
 import com.jaspersoft.jasperserver.api.metadata.data.cache.DefaultDataCacheSnapshotMetadata;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportUnit;
@@ -36,7 +37,7 @@ import com.jaspersoft.jasperserver.export.modules.repository.ResourceModuleConfi
 
 /**
  * @author tkavanagh
- * @version $Id: ReportUnitBean.java 23956 2012-05-30 12:23:37Z lchirita $
+ * @version $Id: ReportUnitBean.java 51276 2014-11-09 17:44:57Z ktsaregradskyi $
  */
 
 public class ReportUnitBean extends ResourceBean {
@@ -124,8 +125,15 @@ public class ReportUnitBean extends ResourceBean {
 
 	protected void additionalCopyTo(Resource res, ResourceImportHandler importHandler) {
 		ReportUnit ru = (ReportUnit) res;
-		ru.setDataSource(importHandler.handleReference(getDataSource()));
-		ru.setQuery(importHandler.handleReference(getQuery()));
+
+        if (getDataSource() != null) {
+            Resource processedDS = importHandler.getHandledResource(getDataSource().getExternalURI());
+            ru.setDataSource(processedDS != null
+                    ? new ResourceReference(processedDS)
+                    : importHandler.handleReference(getDataSource()));
+        }
+
+        ru.setQuery(importHandler.handleReference(getQuery()));
 		ru.setInputControls(handleReferences(getInputControls(), importHandler));
 		ru.setMainReport(importHandler.handleReference(getMainReport()));
         List rs = handleReferences(getResources(), importHandler);

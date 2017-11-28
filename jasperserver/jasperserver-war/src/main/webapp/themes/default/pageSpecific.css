@@ -230,11 +230,66 @@ text-align:right;
 
 /* #addResource_dataSource_aws #driverID, */
 [name=selectedDriverClass] {
-    width:auto;;
+    width:auto;
     display:inline-block;
     margin-top:6px;
     margin-right:8px;
     width:500px\9;
+}
+
+#addNewDataSource [name=fileSourceType] {
+    width:auto;
+    display:inline-block;
+    margin-top:6px;
+    margin-right:8px;
+    width:500px\9;
+}
+
+.dataSourceSaveDialog {
+    width: 440px;
+    height: auto;
+    min-height: 410px;
+    min-width: 440px;
+}
+
+.dataSourceSaveDialog > .content {
+    height: 100%;
+}
+
+.dataSourceSaveDialog .treeBox {
+    height: calc(100% - 250px);
+    min-height: 100px;
+    overflow: auto;
+}
+
+.dataSourceSaveDialog .viewPortChunk{
+    width: auto;
+}
+
+.dataSourceSaveDialog .list .leaf, .dataSourceSaveDialog .list .node {
+    overflow: visible;
+}
+
+.dataSourceSaveDialog .collapsible>li>.wrap {
+    overflow: visible;
+}
+
+.dataSourceSaveDialog .hideRoot>.node>.subcontainer>.viewPortChunk>.collapsible{
+    margin-left: 0;
+}
+
+.dataSourceSaveDialog .treeBox > .content > .body {
+    padding: 6px;
+}
+
+.dataSourceSaveDialog.panel.dialog .content .subcontainer {
+    margin-bottom: 32px;
+    height: calc(100% - 95px);
+}
+
+.dataSourceSaveDialog.panel > div.content.hasFooter .footer {
+    position: absolute;
+    bottom: 0;
 }
 
 #urlID, /* old selector */
@@ -242,6 +297,103 @@ text-align:right;
     width:595px;
 }
 
+.panel.dialog.overlay.dataSourceSaveDialog {
+    height: 410px;
+}
+
+/* addResource_dataSource, general */
+
+#addDataSourceForm #stepDisplay {
+    padding: 24px 32px;
+}
+
+#addDataSourceForm .column.primary .body {
+	top:34px;
+}
+
+#addDataSourceForm .row.inputs .header > .title {
+    padding-left:0;
+    margin-left:0;
+}
+
+#dataSourceTypeSelector {
+	padding-bottom:3px;
+	margin-top:8px;
+}
+
+#dataSourceTypeSelector .message.warning {
+	margin-left:6px;
+}
+
+/*
+#addDataSourceForm .flow .row.instructions {
+    padding: 24px 32px;
+}
+*/
+
+#addResource_dataSource_text #fileLocation input[type=text],
+#addResource_dataSource_text #fileLocation input[type=password],
+#addResource_dataSource_excel #fileLocation input[type=text],
+#addResource_dataSource_excel #fileLocation input[type=password] {
+	width:400px;
+}
+
+#addResource_dataSource_text #repositoryInput input[type=text],
+#addResource_dataSource_excel #repositoryInput input[type=text],
+#addResource_dataSource_text #serverInput input[type=text],
+#addResource_dataSource_excel #serverInput input[type=text] {
+	display:inline-block;
+}
+
+#addResource_dataSource_text #ftpInput .control,
+#addResource_dataSource_excel #ftpInput .control {
+	margin-bottom:16px;
+}
+
+#addResource_dataSource_text #ftpInput fieldset,
+#addResource_dataSource_excel #ftpInput fieldset {
+	margin-right:24px;
+}
+
+#addResource_dataSource_text [name=fieldDelimiterOtherInput] input[type=text],
+#addResource_dataSource_text [name=rowDelimiterOtherInput] input[type=text],
+#addResource_dataSource_text [name=qualifierOtherInput] input[type=text] {
+	width:80px;
+}
+
+#addResource_dataSource_text [name=fieldDelimiterRegexInput] input[type=text],
+#addResource_dataSource_text [name=rowDelimiterRegexInput] input[type=text] {
+	width:250px;
+}
+
+#addResource_dataSource_text [name=fieldDelimiterPluginInput],
+#addResource_dataSource_text [name=rowDelimiterPluginInput] {
+	width:650px;
+}
+
+#addResource_dataSource_text [name=fieldDelimiterPluginInput] input[type=text],
+#addResource_dataSource_text [name=rowDelimiterPluginInput] input[type=text]  {
+	display:inline-block;
+	width:320px;
+}
+
+
+#addResource_dataSource_text .group .control select,
+#addResource_dataSource_excel .group .control select {
+	width:auto;
+	min-width:200px;
+}
+
+#addResource_dataSource_text [name=datePatternInput] input[type=text],
+#addResource_dataSource_text [name=numberPatternInput] input[type=text],
+#addResource_dataSource_excel [name=datePatternInput] input[type=text],
+#addResource_dataSource_excel [name=numberPatternInput] input[type=text] {
+	width:190px;
+}
+
+#addResource_dataSource_text .table input {
+	width:100%;
+}
 
 /* addResource_dataSource_aws */
 
@@ -523,6 +675,14 @@ x:-o-prefocus, #selectedDataSources label {
 #dashboardViewer fieldset.control a {
     display: none;
 }
+
+/* persists the body font rules in dashboard view mode */
+#dashboardViewerFrame .componentContainer.control {
+    font-size:11px;
+    font-weight:normal;
+    font-family: Verdana, Arial, Helvetica, sans-serif;
+} 
+
 
 #dashboardViewerFrame {
     top: 29px;
@@ -1044,6 +1204,28 @@ x:-o-prefocus, #selectedDataSources label {
     min-height: 500px;
 }
 
+#dataChooserSource .sourceDialogNew {
+    min-width: 450px;
+    min-height: 510px;
+    height: 510px;
+    width: 450px;
+}
+
+#dataChooserSource .sourceDialogNew .treeBox {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+/*#dataChooserSource .sourceDialogNew .tabContainer {
+    min-height: 410px;
+    height: 410px;
+    overflow: auto;
+}*/
+
 #dataChooserSource .list.resources .column.one,
 #dataChooserSource .list.resources .column.four {
     display: none;
@@ -1306,6 +1488,10 @@ and (orientation:landscape) {
 
 #designer .toolbar .button .wrap {
     text-indent: -5000px;
+}
+
+#designer .toolbar #closeDesigner.button .wrap {
+    text-indent: 0px;
 }
 
 #designer #viewMode {}
@@ -1613,6 +1799,20 @@ and (max-device-width : 1024px) {
 #designer .toolbar .button .icon {
     background-image: url(images/adhoc_toolbar_buttons_sprite.png);
     background-repeat: no-repeat;
+}
+
+#designer .toolbar #closeDesigner.button .icon {
+    background-image: none;
+    background-repeat: no-repeat;
+}
+
+#designer #closeDesigenr.closeIcon {
+    float: right;
+    width: 19px;
+    height: 19px;
+    margin: 5px;
+    background: url("images/dialogClose.png");
+    cursor: pointer;
 }
 
 #designer .toolbar #presentation .icon {
@@ -2871,6 +3071,27 @@ li.dragging.measure {
     -webkit-border-radius: 0;
 }
 
+#loginPage #welcome .text {
+	display: inline-block;
+	height: 42px;
+    vertical-align: top;
+    margin-right: 9px;
+}
+
+#loginPage #welcome .logo {
+	background:url(images/logo_welcome.png) no-repeat #fff 0px 5px;
+	display: inline-block;
+    text-indent: -5000px;
+	width: 314px;
+	height: 42px;
+}
+
+@media all and (-ms-high-contrast:none)
+     {
+     #loginPage #welcome .logo { background-position-y: 4px; } /* IE10 */
+     *::-ms-backdrop, #loginPage #welcome .logo { background-position-y: 4px; } /* IE11 */
+     }
+
 #copy .body {
     overflow:hidden;
 }
@@ -2902,9 +3123,16 @@ li.dragging.measure {
 #loginPage #rotating >.primary,
 #loginPage #rotating >.secondary {
     float:left;
-    width:350px;
     padding-left:25px;
     position: relative;
+}
+
+#loginPage #rotating >.primary {
+    width:400px;
+}
+
+#loginPage #rotating >.secondary {
+	width: 300px;
 }
 
 #loginPage #welcome {
@@ -2926,8 +3154,11 @@ li.dragging.measure {
 #loginPage #welcome h1 {
     font-size: 36px;
     margin-bottom:0px;
+    margin-top:10px;
     text-align: center;
     font-weight: normal;
+    line-height: 36px;
+    height: 42px;
 }
 
 #loginPage #login h2 {
@@ -3430,7 +3661,7 @@ li.dragging.measure {
     display:inline;
 }
 
-#reportViewer #viewerToolbar #asyncIndicator {
+#reportViewer #asyncIndicator {
     float:left;
 }
 
@@ -3566,7 +3797,12 @@ li.dragging.measure {
     background-position: 3px -251px;
 }
 
-#reportViewer .toolbar .list.buttonSet #asyncCancel.button .icon {
+#reportViewer #asyncCancel {
+    margin-top: 2px;
+    margin-left: 10px;
+}
+
+#reportViewer #asyncCancel.button .icon {
     background-image: url(images/report_load_animation.gif);
     background-repeat: no-repeat;
     background-position: 6px 3px;
@@ -3576,7 +3812,7 @@ li.dragging.measure {
     padding-left:30px;
 }
 
-#reportViewer .toolbar .list.buttonSet #asyncCancel.button[disabled] .icon {
+#reportViewer #asyncCancel.button[disabled] .icon {
     background-image:none;
 }
 
@@ -4140,7 +4376,6 @@ prevents the style from affecting the global search control */
 }
 
 #scheduler_editor #stepDisplay > fieldset > legend { 
-    color: #217EB5;
     display: block;
     height: 24px;
     line-height: 24px;
@@ -4478,9 +4713,9 @@ prevents the style from affecting the global search control */
     margin-top: 0;
 }
 
-#ftpTestButton.checking,
-#ftpTestButton.checking.over,
-#ftpTestButton.checking.pressed {
+#schedulerTab-output #ftpTestButton.checking,
+#schedulerTab-output #ftpTestButton.checking.over,
+#schedulerTab-output #ftpTestButton.checking.pressed {
     color: #aaa;
     background: url("images/button_action_sprite.png") repeat-x scroll 0 0 #d8dad7;
     cursor: default;
@@ -4548,6 +4783,16 @@ prevents the style from affecting the global search control */
 #serverError #completeStackTrace p {
     white-space: pre;
 }
+
+#serverError #closeErrorPage.closeIcon {
+    float: right;
+    width: 19px;
+    height: 19px;
+    margin: 5px;
+    background: url("images/dialogClose.png");
+    cursor: pointer;
+}
+
 /*
  * From: systemError.css
  */
@@ -5176,6 +5421,7 @@ workflow-icon-datasource {
 .buttonIconToggle {
     background-image: url("images/disclosure_indicators_sprite.png");
     background-color:transparent;
+    background-repeat: no-repeat;
     margin-left:6px;
     width:12px;
     height:inherit;
@@ -5849,3 +6095,37 @@ input[type="text"].mSelect-input {
 #designer #availableMeasuresMutton, #designer #availableMeasuresMutton.over {
     right: 16px;
 }
+
+.sourceDialogNew.overlay > .content > .header.mover,
+.sourceDialogNew.overlay > .content > .footer {
+    border: none;
+}
+
+.sourceDialogNew.overlay > .content > .header.mover > .sub.header.tabHeaderContainer {
+    margin: 15px 8px 0 17px;
+    border: none;
+}
+
+.sourceDialogNew.overlay > .content > .subcontainer {
+    padding: 4px 15px 10px;
+}
+
+
+.sourceDialogNew.overlay > .content > .header > .sub.header > .control {
+    margin: 6px 1.5em 0 0;
+    width: 100%;
+    float: right;
+    padding-left: 100px;
+    box-sizing: border-box;
+}
+
+.sourceDialogNew.overlay > .content > .header > .sub.header > .button {
+    position: absolute;
+    top: 4px;
+    left: 0;
+}
+
+.sourceDialogNew.overlay > .content > .header > .sub.header > .button.list {
+    left: 38px;
+}
+

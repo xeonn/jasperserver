@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2012 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -40,7 +40,7 @@ import java.util.*;
 
 /**
  * @author vsabadosh
- * @version $Id: AwsDataSourceServiceImpl.java 33096 2013-06-21 14:30:12Z vsabadosh $
+ * @version $Id: AwsDataSourceServiceImpl.java 47331 2014-07-18 09:13:06Z kklein $
  */
 public class AwsDataSourceServiceImpl implements AwsDataSourceService {
     

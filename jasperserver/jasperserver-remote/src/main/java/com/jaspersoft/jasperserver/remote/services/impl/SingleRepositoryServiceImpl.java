@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2013 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -22,12 +22,8 @@
 package com.jaspersoft.jasperserver.remote.services.impl;
 
 import com.jaspersoft.jasperserver.api.JSExceptionWrapper;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.ContentResource;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.FileResource;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.FileResourceData;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.Folder;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceLookup;
+import com.jaspersoft.jasperserver.api.common.domain.impl.ExecutionContextImpl;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.*;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.client.ContentResourceImpl;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.client.FileResourceImpl;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.client.FolderImpl;
@@ -35,33 +31,24 @@ import com.jaspersoft.jasperserver.api.metadata.common.service.JSResourceVersion
 import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
 import com.jaspersoft.jasperserver.api.search.SearchCriteriaFactory;
 import com.jaspersoft.jasperserver.dto.resources.ClientResource;
-import com.jaspersoft.jasperserver.remote.exception.AccessDeniedException;
-import com.jaspersoft.jasperserver.remote.exception.FolderAlreadyExistsException;
-import com.jaspersoft.jasperserver.remote.exception.FolderNotFoundException;
-import com.jaspersoft.jasperserver.remote.exception.IllegalParameterValueException;
-import com.jaspersoft.jasperserver.remote.exception.MandatoryParameterNotFoundException;
-import com.jaspersoft.jasperserver.remote.exception.NotAFileException;
-import com.jaspersoft.jasperserver.remote.exception.RemoteException;
-import com.jaspersoft.jasperserver.remote.exception.ResourceAlreadyExistsException;
-import com.jaspersoft.jasperserver.remote.exception.ResourceInUseException;
-import com.jaspersoft.jasperserver.remote.exception.ResourceNotFoundException;
-import com.jaspersoft.jasperserver.remote.exception.VersionNotMatchException;
+import com.jaspersoft.jasperserver.remote.exception.*;
 import com.jaspersoft.jasperserver.remote.resources.ClientTypeHelper;
 import com.jaspersoft.jasperserver.remote.resources.converters.ResourceConverterProvider;
 import com.jaspersoft.jasperserver.remote.resources.converters.ToClientConversionOptions;
 import com.jaspersoft.jasperserver.remote.resources.converters.ToServerConversionOptions;
 import com.jaspersoft.jasperserver.remote.resources.converters.ToServerConverter;
+import com.jaspersoft.jasperserver.remote.resources.operation.CopyMoveOperationStrategy;
 import com.jaspersoft.jasperserver.remote.services.SingleRepositoryService;
 import com.jaspersoft.jasperserver.war.common.ConfigurationBean;
 import org.hibernate.JDBCException;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.security.SpringSecurityException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -86,10 +73,14 @@ public class SingleRepositoryServiceImpl implements SingleRepositoryService {
     private ResourceConverterProvider resourceConverterProvider;
     @javax.annotation.Resource
     private SearchCriteriaFactory searchCriteriaFactory;
+    @javax.annotation.Resource
+    private Map<String, CopyMoveOperationStrategy> copyMoveStrategies;
+
+    private DefaultCopyMoveStrategy defaultCopyMoveStrategy = new DefaultCopyMoveStrategy();
 
     @Override
     public Resource getResource(String uri) {
-        Resource resource = repositoryService.getResource(null, uri);
+        Resource resource = repositoryService.getResource(ExecutionContextImpl.getRuntimeExecutionContext(), uri);
         if (resource == null) {
             resource = repositoryService.getFolder(null, uri);
         }
@@ -140,19 +131,10 @@ public class SingleRepositoryServiceImpl implements SingleRepositoryService {
                     repositoryService.deleteFolder(null, uri);
                 }
             }
-        } catch (SpringSecurityException sse) {
+        } catch (org.springframework.security.access.AccessDeniedException sse) {
             throw new AccessDeniedException(uri);
         } catch (JSExceptionWrapper w){
-            if (w.getOriginalException() instanceof RuntimeException){
-                RuntimeException original = (RuntimeException) w.getOriginalException();
-                if (original instanceof JDBCException){
-                    throw new DataIntegrityViolationException(original.getMessage(), original);
-                } else {
-                    throw original;
-                }
-            } else {
-                throw w;
-            }
+            throw getRootException(w);
         }
     }
 
@@ -175,16 +157,7 @@ public class SingleRepositoryServiceImpl implements SingleRepositoryService {
                 repositoryService.saveResource(null, serverResource);
             }
         } catch (JSExceptionWrapper w) {
-            if (w.getOriginalException() instanceof RuntimeException) {
-                RuntimeException original = (RuntimeException) w.getOriginalException();
-                if (original instanceof JDBCException) {
-                    throw new DataIntegrityViolationException(original.getMessage(), original);
-                } else {
-                    throw original;
-                }
-            } else {
-                throw w;
-            }
+            throw getRootException(w);
         }
 
         return getResource(serverResource.getURIString());
@@ -208,7 +181,12 @@ public class SingleRepositoryServiceImpl implements SingleRepositoryService {
                 }
             } else {
                 if (!new Integer(resource.getVersion()).equals(clientResource.getVersion())){
-                    throw new VersionNotMatchException();
+                    if (overwrite) {
+                        deleteResource(uri);
+                        resource = null;
+                    } else {
+                        throw new VersionNotMatchException();
+                    }
                 }
             }
         }
@@ -234,46 +212,26 @@ public class SingleRepositoryServiceImpl implements SingleRepositoryService {
         } catch (JSResourceVersionNotMatchException e){
             throw new VersionNotMatchException();
         } catch (JSExceptionWrapper w) {
-            if (w.getOriginalException() instanceof RuntimeException) {
-                RuntimeException original = (RuntimeException) w.getOriginalException();
-                if (original instanceof JDBCException) {
-                    throw new DataIntegrityViolationException(original.getMessage(), original);
-                } else {
-                    throw original;
-                }
-            } else {
-                throw w;
-            }
+                throw getRootException(w);
         }
     }
 
     @Override
-    public void copyResource(String sourceUri, String destinationUri, boolean createFolders, boolean overwrite) throws ResourceNotFoundException, AccessDeniedException, ResourceAlreadyExistsException, IllegalParameterValueException {
-        Resource resource = prepareToOperation(sourceUri, destinationUri, createFolders, overwrite);
-        // underlying service requires full uri, not just parent uri
-        // after setting new parent uri we obtain the new uri of resource
-        resource.setParentFolder(destinationUri);
-        if (resource instanceof Folder) {
-            if (destinationUri.startsWith(sourceUri + Folder.SEPARATOR)){
-                throw new IllegalParameterValueException("sourceUri", sourceUri);
-            }
-            repositoryService.copyFolder(null, sourceUri, resource.getURIString());
-        } else {
-            repositoryService.copyResource(null, sourceUri, resource.getURIString());
-        }
+    public String copyResource(String sourceUri, String destinationUri, boolean createFolders, boolean overwrite) throws ResourceNotFoundException, AccessDeniedException, ResourceAlreadyExistsException, IllegalParameterValueException {
+        Resource resource = prepareSource(sourceUri);
+        Resource destination = prepareDestination(resource, destinationUri, createFolders);
+
+        return prepareStrategy(destination)
+                .copyResource(resource, destination, overwrite);
     }
 
     @Override
-    public void moveResource(String sourceUri, String destinationUri, boolean createFolders, boolean overwrite) throws ResourceNotFoundException, AccessDeniedException, ResourceAlreadyExistsException, IllegalParameterValueException {
-        Resource resource = prepareToOperation(sourceUri, destinationUri, createFolders, overwrite);
-        if (resource instanceof Folder) {
-            if (destinationUri.startsWith(sourceUri + Folder.SEPARATOR)){
-                throw new IllegalParameterValueException("sourceUri", sourceUri);
-            }
-            repositoryService.moveFolder(null, sourceUri, destinationUri);
-        } else {
-            repositoryService.moveResource(null, sourceUri, destinationUri);
-        }
+    public String moveResource(String sourceUri, String destinationUri, boolean createFolders, boolean overwrite) throws ResourceNotFoundException, AccessDeniedException, ResourceAlreadyExistsException, IllegalParameterValueException {
+        Resource resource = prepareSource(sourceUri);
+        Resource destination = prepareDestination(resource, destinationUri, createFolders);
+
+        return prepareStrategy(destination)
+                .moveResource(resource, destination, overwrite);
     }
 
     @Override
@@ -329,7 +287,7 @@ public class SingleRepositoryServiceImpl implements SingleRepositoryService {
         return generateName(parenUri, name);
     }
 
-    private Resource prepareToOperation(String sourceUri, String destinationUri, boolean createFolders, boolean overwrite) throws ResourceNotFoundException, AccessDeniedException, ResourceAlreadyExistsException, IllegalParameterValueException {
+    private Resource prepareSource(String sourceUri) throws ResourceNotFoundException, AccessDeniedException, ResourceAlreadyExistsException, IllegalParameterValueException {
         if (sourceUri == null || "".equals(sourceUri)) {
             throw new IllegalParameterValueException("sourceUri", sourceUri);
         }
@@ -338,29 +296,37 @@ public class SingleRepositoryServiceImpl implements SingleRepositoryService {
             throw new AccessDeniedException("", sourceUri);
         }
 
-        Resource resource = getResource(sourceUri), existing = null;
+        Resource resource = getResource(sourceUri);
         if (resource == null) {
             throw new ResourceNotFoundException(sourceUri);
         }
 
-        String newUri = (destinationUri.endsWith(Folder.SEPARATOR) ? destinationUri : destinationUri + Folder.SEPARATOR) + resource.getName();
-        existing = getResource(newUri);
+        return resource;
+    }
 
-        if (existing != null) {
-            if (overwrite) {
-                deleteResource(newUri);
+    private Resource prepareDestination(Resource resource, String destinationUri, boolean createFolders) {
+        Resource destination = getResource(destinationUri);
+
+        if (destination == null){
+            if (createFolders) {
+                destination = ensureFolderUri(destinationUri);
             } else {
-                throw new ResourceAlreadyExistsException(newUri);
+                destination = repositoryService.getFolder(null, destinationUri);
+                if (destination == null) {
+                    throw new FolderNotFoundException(destinationUri);
+                }
             }
         }
 
-        if (createFolders) {
-            ensureFolderUri(destinationUri);
-        } else if (!repositoryService.folderExists(null, destinationUri)) {
-            throw new FolderNotFoundException(destinationUri);
+        return destination;
+    }
+
+    private CopyMoveOperationStrategy prepareStrategy(Resource destination) {
+        if (copyMoveStrategies.containsKey(destination.getClass().getName())) {
+            return copyMoveStrategies.get(destination.getClass().getName());
         }
 
-        return resource;
+        return defaultCopyMoveStrategy;
     }
 
     private Folder ensureFolderUri(String uri) throws AccessDeniedException, ResourceAlreadyExistsException, IllegalParameterValueException {
@@ -391,7 +357,7 @@ public class SingleRepositoryServiceImpl implements SingleRepositoryService {
                 }
             }
             return folder;
-        } catch (SpringSecurityException spe) {
+        } catch (org.springframework.security.access.AccessDeniedException spe) {
             throw new AccessDeniedException("Access denied", uri);
         }
     }
@@ -420,4 +386,81 @@ public class SingleRepositoryServiceImpl implements SingleRepositoryService {
     private String transformLabelToName(String label){
         return label.replaceAll(configurationBean.getResourceIdNotSupportedSymbols(), "_");
     }
+
+    private class DefaultCopyMoveStrategy implements CopyMoveOperationStrategy {
+
+        @Override
+        public String copyResource(Resource resource, Resource destination, boolean overwrite) throws ResourceNotFoundException, AccessDeniedException, ResourceAlreadyExistsException, IllegalParameterValueException {
+            String newUri = handleOverwrite(resource, destination, overwrite);
+            // underlying service requires full uri, not just parent uri
+            // after setting new parent uri we obtain the new uri of resource
+
+            if (resource instanceof Folder) {
+                if (destination.getURIString().startsWith(resource.getURIString() + Folder.SEPARATOR)){
+                    throw new IllegalParameterValueException("sourceUri", resource.getURIString());
+                }
+                repositoryService.copyFolder(null, resource.getURIString(), newUri);
+            } else {
+                repositoryService.copyResource(null, resource.getURIString(), newUri);
+            }
+
+            return newUri;
+        }
+
+        @Override
+        public String moveResource(Resource resource, Resource destination, boolean overwrite) throws ResourceNotFoundException, AccessDeniedException, ResourceAlreadyExistsException, IllegalParameterValueException {
+            String newUri = handleOverwrite(resource, destination, overwrite);
+
+            if (resource instanceof Folder) {
+                if (destination.getURIString().startsWith(resource.getURIString() + Folder.SEPARATOR)){
+                    throw new IllegalParameterValueException("sourceUri", resource.getURIString());
+                }
+                repositoryService.moveFolder(null, resource.getURIString(), destination.getURIString());
+            } else {
+                repositoryService.moveResource(null, resource.getURIString(), destination.getURIString());
+            }
+
+            return newUri;
+        }
+
+        private String handleOverwrite(Resource resource, Resource destination, boolean overwrite){
+            String newUri = (destination.getURIString().endsWith(Folder.SEPARATOR) ? destination.getURIString() : destination.getURIString() + Folder.SEPARATOR) + resource.getName();
+            Resource existing = getResource(newUri);
+
+            if (existing != null) {
+                if (overwrite) {
+                    deleteResource(newUri);
+                } else {
+                    throw new ResourceAlreadyExistsException(newUri);
+                }
+            }
+
+            return newUri;
+        }
+    }
+
+    protected static RuntimeException getRootException(JSExceptionWrapper w) {
+        Exception original = w.getOriginalException();
+        if (original != null) {
+            // Workaround:  Progress Oracle driver throws simple java.sql.Exception for data integrity violation
+            if (original instanceof DataIntegrityViolationException) {
+				return (DataIntegrityViolationException) original;
+            } else if (original.getMessage() != null) {
+                String originalMessage = original.getMessage().toLowerCase();
+                if ((originalMessage.indexOf("integrity") >= 0) && (originalMessage.indexOf("violate") >= 0)) {
+                    return new DataIntegrityViolationException(original.getMessage(), original);
+                }
+            }
+            if (original instanceof RuntimeException) {
+                if (original instanceof JDBCException) {
+                    return new DataIntegrityViolationException(original.getMessage(), original);
+                } else {
+                    return (RuntimeException) original;
+                }
+            }
+        }
+        return w;
+    }
+
+
 }

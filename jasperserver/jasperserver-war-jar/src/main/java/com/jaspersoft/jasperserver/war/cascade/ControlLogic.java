@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -34,7 +34,7 @@ import java.util.Set;
  * Interface which implements startegy of how input controls will be handled.
  *
  * @author jwhang
- * @version $Id: ControlLogic.java 35226 2013-08-09 07:08:53Z inesterenko $
+ * @version $Id: ControlLogic.java 51276 2014-11-09 17:44:57Z ktsaregradskyi $
  *          Interface implemented for use by anyone creating custom business rules.
  *
  * @see {@link com.jaspersoft.jasperserver.war.cascade.handlers.InputControlHandler}
@@ -168,5 +168,4 @@ public interface ControlLogic<T extends InputControlsContainer> {
      */
     public Map<String, String[]> formatTypedParameters(T container, Map<String, Object> typedParameters)
             throws CascadeResourceNotFoundException;
-
 }

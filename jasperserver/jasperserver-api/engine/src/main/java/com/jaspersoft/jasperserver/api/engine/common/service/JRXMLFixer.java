@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -31,7 +31,7 @@ import net.sf.jasperreports.engine.design.JasperDesign;
  * then compiled in preparation for running the report.
  *  
  * @author btinsman
- * @version $Id: JRXMLFixer.java 45502 2014-05-08 14:06:14Z lchirita $
+ * @version $Id: JRXMLFixer.java 47331 2014-07-18 09:13:06Z kklein $
  */
 public interface JRXMLFixer {
     /**

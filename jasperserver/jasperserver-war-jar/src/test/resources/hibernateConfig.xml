@@ -24,7 +24,7 @@
 	<!-- Note that DriverManagerDataSource does not pool; it is not intended for production -->
 	<!-- See JPetStore for an example of using Commons DBCP BasicDataSource as alternative -->
 	<!-- See Image Database for an example of using C3P0 ComboPooledDataSource as alternative -->
-	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+	<bean id="dataSource" class="com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl.BasicDataSourceWrapper" destroy-method="close">
 		<property name="driverClassName" value="${metadata.jdbc.driverClassName}"/>
 		<property name="url" value="${metadata.jdbc.url}"/>
 		<property name="username" value="${metadata.jdbc.username}"/>

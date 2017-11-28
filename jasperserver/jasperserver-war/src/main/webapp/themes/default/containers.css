@@ -43,7 +43,7 @@
 
 /* CHROME AND SAFARI ONLY */
 @media screen and (-webkit-min-device-pixel-ratio:0) {
- #frameFooter  { position: fixed;  }
+    #frameFooter  { position: fixed;  }
 }
 
 
@@ -778,7 +778,7 @@ There are 3 types:
 /* .panel.info.nothingToDisplay */
 
 .panel.info.nothingToDisplay {
-    border:none;
+	border:none;
 	background-color:transparent;
 }
 
@@ -1647,6 +1647,10 @@ In particular, .sizeable requires that .dialog>.content be position:absolute.
 	height:20px;
 }
 
+.dialog.dialogV2 {
+    overflow: hidden;
+}
+
 /*
  * From: bg.css
  */
@@ -1746,4 +1750,14 @@ decorated_column.css
 
 .pane .header {
 	background-color: #F0F0F0;
+}
+
+#dashboard #banner,
+#dashboard #frame{
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }

@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005 - 2013 Jaspersoft Corporation. All rights  reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
 * http://www.jaspersoft.com.
 *
 * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -16,7 +16,7 @@
 * GNU Affero  General Public License for more details.
 *
 * You should have received a copy of the GNU Affero General Public  License
-* along with this program.&nbsp; If not, see <http://www.gnu.org/licenses/>.
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 package com.jaspersoft.jasperserver.war.action;
 
@@ -27,13 +27,16 @@ import org.springframework.webflow.execution.Event;
 import org.springframework.webflow.execution.RequestContext;
 
 import javax.annotation.Resource;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 
 /**
  * <p></p>
  *
  * @author yaroslav.kovalchyk
- * @version $Id: RepositoryConfirmAction.java 44312 2014-04-09 14:30:12Z vsabadosh $
+ * @version $Id: RepositoryConfirmAction.java 49286 2014-09-23 13:32:25Z ykovalchyk $
  */
 public class RepositoryConfirmAction extends MultiAction {
 
@@ -41,10 +44,16 @@ public class RepositoryConfirmAction extends MultiAction {
     private MessageSource messageSource;
 
     public Event acceptConfirmation(RequestContext context){
-        final String resourceType = context.getRequestParameters().get("resourceType");
+        final String[] resourceTypes = context.getRequestParameters().getArray("resourceType");
+        final List<String> resourceTypesList = Arrays.asList(resourceTypes);
+        Collections.sort(resourceTypesList);
+        final StringBuilder resourceTypesSuffixBuilder = new StringBuilder("resource.saved.confirmation");
+        for(String currentResourceType : resourceTypesList){
+            resourceTypesSuffixBuilder.append(".").append(currentResourceType);
+        }
         final Locale locale = LocaleContextHolder.getLocale();
         context.getExternalContext().getSessionMap().put("repositorySystemConfirm",
-                messageSource.getMessage("resource.saved.confirmation."  + resourceType, null, locale));
+                messageSource.getMessage(resourceTypesSuffixBuilder.toString(), null, locale));
         return success();
     }
 }

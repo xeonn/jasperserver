@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -33,7 +33,7 @@ import java.util.Date;
  * since they are not directly supported serialization due to immutability.
  *
  * @author Sergey Prilukin
- * @version $Id: DateRangeDTO.java 26539 2012-12-07 16:31:32Z sergey.prilukin $
+ * @version $Id: DateRangeDTO.java 47331 2014-07-18 09:13:06Z kklein $
  */
 public class DateRangeDTO {
     private String expression;

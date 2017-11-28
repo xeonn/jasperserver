@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -28,6 +28,8 @@ package com.jaspersoft.jasperserver.api.engine.common.service.impl;
  * Time: 1:09:14 PM
  */
 import com.jaspersoft.jasperserver.api.engine.common.service.ActionModelService;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.jdom.Document;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ResourceLoaderAware;
@@ -45,6 +47,7 @@ import java.util.*;
  * startup
  */
 public class ActionModelServiceImpl implements ActionModelService, InitializingBean, ResourceLoaderAware {
+    private static final Log log = LogFactory.getLog(ActionModelServiceImpl.class);
     private static String actionModelBaseURI;
     private static Map<String, Document> actionModelMap;
     private static List<String> actionModelTypes;
@@ -56,7 +59,7 @@ public class ActionModelServiceImpl implements ActionModelService, InitializingB
     private ActionModelServiceImpl(){
         actionModelMap = new HashMap<String, Document>();
         actionModelTypes = new ArrayList<String>();
-        System.out.println("Creating ActionModelService object.");
+        log.debug("Creating ActionModelService object.");
     }
 
     /**
@@ -101,7 +104,7 @@ public class ActionModelServiceImpl implements ActionModelService, InitializingB
      * @see com.jaspersoft.jasperserver.api.engine.common.service.ActionModelService#generateActionModelMenus()
      */
     public void generateActionModelMenus(){
-        System.out.println("Creating action model infrastructure.");
+        log.debug("Creating action model infrastructure.");
         ActionModel singleTon = ActionModel.getInstance();
 
         for(String model : actionModelTypes){

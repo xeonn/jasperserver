@@ -1,3 +1,23 @@
+/*
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
+ * http://www.jaspersoft.com.
+ *
+ * Unless you have purchased  a commercial license agreement from Jaspersoft,
+ * the following license terms  apply:
+ *
+ * This program is free software: you can redistribute it and/or  modify
+ * it under the terms of the GNU Affero General Public License  as
+ * published by the Free Software Foundation, either version 3 of  the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero  General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public  License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 package com.jaspersoft.jasperserver.jaxrs.authority;
 
 import com.jaspersoft.jasperserver.api.JSException;
@@ -34,14 +54,7 @@ import java.util.regex.Pattern;
 public class UsersJaxrsService {
     @Resource
     private UserConverter userConverter;
-    @Resource
-    private UserAttributesConverter userAttributesConverter;
-
     private UserAndRoleService service;
-    private GenericAttributesService<User> attributesService;
-    private int maxLengthAttrName = 255,  // defaults
-                maxLengthAttrValue = 255;
-    private Pattern empty = Pattern.compile("^\\s*$");
 
     public Response getUsers(int startIndex,
                              int maxRecords,
@@ -170,228 +183,6 @@ public class UsersJaxrsService {
         return Response.noContent().build();
     }
 
-    public Response getAttributesOfUser(int startIndex, int maxRecords,
-                                        String name,
-                                        String tenantId,
-                                        Set<String> attrNames) throws RemoteException {
-
-        UserImpl user = new UserImpl();
-        user.setUsername(name);
-        user.setTenantId("".equals(tenantId) ? null : tenantId);
-
-        List<ProfileAttribute> attributes;
-        try {
-            attributes = getAttributes(user, attrNames);
-        } catch (ServiceException se) {
-            throw new ResourceNotFoundException(name);
-        }
-
-        int totalCount = attributes.size();
-
-        if (totalCount < startIndex) {
-            attributes.clear();
-        } else {
-            if (maxRecords != 0) {
-                if (startIndex + maxRecords > totalCount) {
-                    attributes = attributes.subList(startIndex, totalCount);
-                } else {
-                    attributes = attributes.subList(startIndex, startIndex + maxRecords);
-                }
-            } else {
-                if (startIndex > 0){
-                    attributes = attributes.subList(startIndex, totalCount);
-                }
-            }
-        }
-        List<ClientUserAttribute> clientUserAttributes = new ArrayList<ClientUserAttribute>(attributes.size());
-        for (ProfileAttribute pa : attributes){
-            clientUserAttributes.add(userAttributesConverter.toClient(pa, null));
-        }
-
-        Response response;
-        if (attributes.size() == 0) {
-            response = Response.status(Response.Status.NO_CONTENT)
-                    .header(RestConstants.HEADER_START_INDEX, startIndex)
-                    .header(RestConstants.HEADER_RESULT_COUNT, attributes.size())
-                    .header(RestConstants.HEADER_TOTAL_COUNT, totalCount)
-                    .build();
-        } else {
-            response = Response.ok()
-                    .entity(new UserAttributesListWrapper(clientUserAttributes))
-                    .header(RestConstants.HEADER_START_INDEX, startIndex)
-                    .header(RestConstants.HEADER_RESULT_COUNT, attributes.size())
-                    .header(RestConstants.HEADER_TOTAL_COUNT, totalCount)
-                    .build();
-        }
-
-
-       return response;
-    }
-
-    public Response putAttributes(List<ClientUserAttribute> newCollection,
-                                  String name,
-                                  String tenantId) throws RemoteException {
-
-        for (ClientUserAttribute pa: newCollection){
-            if (isEmpty(pa.getName()) || pa.getName().length() > maxLengthAttrName){
-                 throw new IllegalParameterValueException("name",pa.getName());
-            }
-            if (isEmpty(pa.getValue()) || pa.getValue().length() > maxLengthAttrValue){
-                throw new IllegalParameterValueException("value",pa.getValue());
-            }
-        }
-
-        User user = findUser(name, tenantId);
-
-        if (user == null){
-            throw new ResourceNotFoundException(name);
-        }
-
-        List<ProfileAttribute> oldCollection = getAttributes(user, null);
-
-        for (ProfileAttribute pa : oldCollection){
-            attributesService.deleteAttribute(user, pa);
-        }
-
-        for (ClientUserAttribute pa : newCollection){
-            attributesService.putAttribute(user,userAttributesConverter.toServer(pa, null));
-        }
-
-        return Response.ok().build();
-    }
-
-    public Response addAttribute(ClientUserAttribute clientUserAttribute,
-                                 String name,
-                                 String tenantId) throws RemoteException {
-        ProfileAttribute pa = userAttributesConverter.toServer(clientUserAttribute, null);
-        User user = findUser(name, tenantId);
-
-        if (user == null){
-            throw new ResourceNotFoundException(name);
-        }
-
-        if (attributesService.getAttribute(user, pa.getAttrName()) != null){
-            throw new ResourceAlreadyExistsException(pa.getAttrName());
-        }
-
-        attributesService.putAttribute(user, pa);
-
-        return Response.status(Response.Status.CREATED).entity(pa).build();
-    }
-
-    public Response deleteAttributes (String name,
-                                      String tenantId,
-                                      Set<String> attrNames) throws RemoteException {
-
-        User user = findUser(name, tenantId);
-
-        if (user == null){
-            throw new ResourceNotFoundException(name);
-        }
-
-        List<ProfileAttribute> list = getAttributes(user, attrNames);
-
-        for (ProfileAttribute pa : list){
-            attributesService.deleteAttribute(user, pa);
-        }
-        return Response.noContent().build();
-    }
-
-    public Response getSpecificAttributeOfUser(String name,
-                                               String tenantId,
-                                               String attrName) throws RemoteException {
-        List<ProfileAttribute> attributes = new ArrayList<ProfileAttribute>(1);
-
-        UserImpl user = new UserImpl();
-        user.setUsername(name);
-        user.setTenantId("".equals(tenantId) ? null : tenantId);
-
-        ProfileAttribute attribute = null;
-
-        try {
-            attribute = attributesService.getAttribute(user, attrName);
-        } catch (JSException np) {
-            throw new ResourceNotFoundException(name, np);
-        }
-
-        if (attribute == null) {
-            throw new ResourceNotFoundException(attrName);
-        }
-
-        return Response.ok(userAttributesConverter.toClient(attribute, null)).build();
-    }
-
-    public Response putAttribute(ClientUserAttribute clientUserAttribute,
-                                 String name,
-                                 String tenantId,
-                                 String attrName) throws RemoteException {
-        Response.Status status = Response.Status.OK;
-        ProfileAttribute attr = userAttributesConverter.toServer(clientUserAttribute, null);
-
-        if (attr.getAttrName() == null) {
-            attr.setAttrName(attrName);
-        } else if (isEmpty(attr.getAttrName())) {
-            throw new IllegalParameterValueException("name", "<empty>");
-        }
-
-        User user = findUser(name, tenantId);
-
-        if (user == null) {
-            throw new ResourceNotFoundException(name);
-        }
-
-        if (attrName.equals(attr.getAttrName())) {
-            if (isEmpty(attr.getAttrValue())) {
-                throw new IllegalParameterValueException("value", "<empty>");
-            }
-            if (attributesService.getAttribute(user, attr.getAttrName()) == null){
-                status = Response.Status.CREATED;
-            }
-            attributesService.putAttribute(user, attr);
-        } else {
-            ProfileAttribute existing = attributesService.getAttribute(user, attrName);
-            if (existing == null) {
-                throw new ResourceNotFoundException(attrName);
-            }
-            if (attr.getAttrValue() == null) {
-                attr.setAttrValue(existing.getAttrValue());
-            }
-            attributesService.putAttribute(user, attr);
-            attributesService.deleteAttribute(user, existing);
-        }
-
-        return Response.status(status).build();
-    }
-
-    public Response postToAttribute(String name, String attrName) throws RemoteException {
-        return Response.status(Response.Status.FORBIDDEN).build();
-    }
-
-    public Response deleteAttribute(String name, String tenantId,String attrName) throws RemoteException {
-
-        User user = findUser(name, tenantId);
-
-        if (user == null){
-            throw new ResourceNotFoundException(name);
-        }
-
-        ProfileAttributeImpl dto = new ProfileAttributeImpl();
-        dto.setAttrName(attrName);
-
-        try {
-            attributesService.deleteAttribute(user, dto);
-        } catch (ServiceException se) {
-            if (se.getErrorCode() == ServiceException.RESOURCE_NOT_FOUND) {
-                throw new ResourceNotFoundException(attrName);
-            }
-            throw se;
-        }
-
-        return Response.noContent().build();
-    }
-
-
-
     private User findUser(String name, String tenantId) throws RemoteException {
         UserSearchCriteria criteria = new UserSearchCriteria();
         criteria.setName(name);
@@ -419,27 +210,6 @@ public class UsersJaxrsService {
                 (user.getTenantId() != null && user.getTenantId().equals(tenantId)));
     }
 
-    private List<ProfileAttribute> getAttributes (User user, Set<String> attrNames) throws RemoteException {
-        List<ProfileAttribute> found = attributesService.getAttributes(user), needed;
-
-        if (attrNames != null && !attrNames.isEmpty()){
-            needed = new LinkedList<ProfileAttribute>();
-            for(ProfileAttribute pa : found){
-                if (attrNames.contains(pa.getAttrName())){
-                    needed.add(pa);
-                }
-            }
-        } else {
-            needed = found;
-        }
-
-        return needed;
-    }
-
-    private boolean isEmpty(String val){
-         return val == null || empty.matcher(val).matches();
-    }
-
     private Role findRole(String name) throws RemoteException{
        return ((UserAndRoleServiceImpl)service).getUserAuthorityService().getRole(null,name);
     }
@@ -452,27 +222,4 @@ public class UsersJaxrsService {
         this.service = service;
     }
 
-    public GenericAttributesService<User> getAttributesService() {
-        return attributesService;
-    }
-
-    public void setAttributesService(GenericAttributesService<User> attributesService) {
-        this.attributesService = attributesService;
-    }
-
-    public int getMaxLengthAttrName() {
-        return maxLengthAttrName;
-    }
-
-    public void setMaxLengthAttrName(int maxLengthAttrName) {
-        this.maxLengthAttrName = maxLengthAttrName;
-    }
-
-    public int getMaxLengthAttrValue() {
-        return maxLengthAttrValue;
-    }
-
-    public void setMaxLengthAttrValue(int maxLengthAttrValue) {
-        this.maxLengthAttrValue = maxLengthAttrValue;
-    }
 }

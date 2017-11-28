@@ -1,5 +1,5 @@
 <%--
-  ~ Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+  ~ Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
   ~ http://www.jaspersoft.com.
   ~
   ~ Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -52,7 +52,13 @@
         <%@ include file="minimalDecorator.jsp" %>
     </c:when>
     <c:otherwise>
-        <%@ include file="decorator.jsp" %>
+        <c:choose>
+            <c:when test="${param['_flowId'] == 'sampleFlow' && param['page'] == 'newCss' }">
+                <%@ include file="newCssDecorator.jsp" %>
+            </c:when>
+            <c:otherwise>
+                <%@ include file="decorator.jsp" %>
+            </c:otherwise>
+        </c:choose>
     </c:otherwise>
-
 </c:choose>

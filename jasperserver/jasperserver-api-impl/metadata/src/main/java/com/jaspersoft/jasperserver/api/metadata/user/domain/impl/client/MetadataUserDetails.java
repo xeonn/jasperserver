@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -25,11 +25,13 @@ import com.jaspersoft.jasperserver.api.metadata.user.domain.Role;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.client.UserImpl;
 
-import org.springframework.security.Authentication;
-import org.springframework.security.GrantedAuthority;
-import org.springframework.security.userdetails.UserDetails;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -39,7 +41,7 @@ import java.util.Set;
  * User object for security in JasperServer with Spring Security.
  *
  * @author swood
- * @version $Id: MetadataUserDetails.java 41549 2014-02-06 22:17:13Z udavidovich $
+ * @version $Id: MetadataUserDetails.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
 @JasperServerAPI
 public class MetadataUserDetails implements UserDetails, User {
@@ -79,13 +81,13 @@ public class MetadataUserDetails implements UserDetails, User {
     /**
      * Get Spring security GrantedAuthoritys from Jasperserver Roles
      *
-     * @see org.springframework.security.userdetails.UserDetails#getAuthorities()
+     * @see org.springframework.security.core.userdetails.UserDetails#getAuthorities()
      * @see com.jaspersoft.jasperserver.api.metadata.user.domain.Role
      */
-    public GrantedAuthority[] getAuthorities() {
+    public Collection<? extends GrantedAuthority> getAuthorities() {
             Set currentRoles = getRoles();
 
-            GrantedAuthority[] authorities = currentRoles == null ? new GrantedAuthority[0] : new GrantedAuthority[currentRoles.size()];
+            List<GrantedAuthority> authorities = currentRoles == null ? new ArrayList<GrantedAuthority>() : new ArrayList<GrantedAuthority>(currentRoles.size());
 
             if (currentRoles == null) {
                     return authorities;
@@ -95,7 +97,7 @@ public class MetadataUserDetails implements UserDetails, User {
             int i = 0;
             while (it.hasNext()) {
                     Role aRole = (Role) it.next();
-                    authorities[i++] = new TenantAwareGrantedAuthority(aRole.getRoleName(), aRole.getTenantId());
+                    authorities.add(new TenantAwareGrantedAuthority(aRole.getRoleName(), aRole.getTenantId()));
             }
             return authorities;
     }
@@ -103,7 +105,7 @@ public class MetadataUserDetails implements UserDetails, User {
     /**
      * Get password for user
      *
-     * @see org.springframework.security.userdetails.UserDetails#getPassword()
+     * @see org.springframework.security.core.userdetails.UserDetails#getPassword()
      */
     public String getPassword() {
             return password;
@@ -121,7 +123,7 @@ public class MetadataUserDetails implements UserDetails, User {
     /**
      * Get user name
      *
-     * @see org.springframework.security.userdetails.UserDetails#getUsername()
+     * @see org.springframework.security.core.userdetails.UserDetails#getUsername()
      */
     public String getUsername() {
             return username;
@@ -192,7 +194,7 @@ public class MetadataUserDetails implements UserDetails, User {
     /**
      * Is the user account active? True if user is "enabled"
      *
-     * @see org.springframework.security.userdetails.UserDetails#isAccountNonExpired()
+     * @see org.springframework.security.core.userdetails.UserDetails#isAccountNonExpired()
      */
     public boolean isAccountNonExpired() {
             return enabled;
@@ -201,7 +203,7 @@ public class MetadataUserDetails implements UserDetails, User {
     /**
      * Can the user login?  True if user is "enabled"
      *
-     * @see org.springframework.security.userdetails.UserDetails#isAccountNonLocked()
+     * @see org.springframework.security.core.userdetails.UserDetails#isAccountNonLocked()
      */
     public boolean isAccountNonLocked() {
             return enabled;
@@ -210,7 +212,7 @@ public class MetadataUserDetails implements UserDetails, User {
     /**
      * Is the user not expired?   True if user is "enabled"
      *
-     * @see org.springframework.security.userdetails.UserDetails#isCredentialsNonExpired()
+     * @see org.springframework.security.core.userdetails.UserDetails#isCredentialsNonExpired()
      */
     public boolean isCredentialsNonExpired() {
             return enabled;
@@ -219,7 +221,7 @@ public class MetadataUserDetails implements UserDetails, User {
     /**
      * Is the user enabled? (active, allowed to login)
      *
-     * @see org.springframework.security.userdetails.UserDetails#isEnabled()
+     * @see org.springframework.security.core.userdetails.UserDetails#isEnabled()
      */
     public boolean isEnabled() {
             return enabled;

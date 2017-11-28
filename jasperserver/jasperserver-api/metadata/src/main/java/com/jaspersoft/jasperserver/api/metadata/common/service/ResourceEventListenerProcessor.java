@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -30,7 +30,7 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
  * with a listener registrar.
  * 
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ResourceEventListenerProcessor.java 19921 2010-12-11 14:52:49Z tmatyashovsky $
+ * @version $Id: ResourceEventListenerProcessor.java 47331 2014-07-18 09:13:06Z kklein $
  * @see RepositoryEventListenerRegistry
  * @since 2.0.0
  */

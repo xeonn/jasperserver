@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2013 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -74,7 +74,7 @@ import java.util.regex.Pattern;
  * so they will not be registered twice.
  *
  * @author Sergey Prilukin (sprilukin@jaspersoft.com)
- * @version $Id: JdbcDriverServiceImpl.java 33117 2013-06-21 21:35:49Z tchow $
+ * @version $Id: JdbcDriverServiceImpl.java 47331 2014-07-18 09:13:06Z kklein $
  */
 public class JdbcDriverServiceImpl implements JdbcDriverService, ApplicationContextAware {
     protected final Log logger = LogFactory.getLog(getClass());

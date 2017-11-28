@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -36,7 +36,7 @@ import java.util.Date;
  * </p>
  * 
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ReportJobTrigger.java 38683 2013-10-09 02:39:26Z carbiv $
+ * @version $Id: ReportJobTrigger.java 47331 2014-07-18 09:13:06Z kklein $
  * @see ReportJob#getTrigger()
  * @see ReportJobSimpleTrigger
  * @see ReportJobCalendarTrigger

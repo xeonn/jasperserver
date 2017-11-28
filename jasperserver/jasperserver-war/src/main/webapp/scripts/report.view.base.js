@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2014 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: report.view.base.js 43122 2014-03-18 12:44:22Z psavushchik $
+ * @version: $Id: report.view.base.js 8036 2014-11-20 06:08:27Z nmarcu $
  */
 
 ;(function (exports) {
@@ -58,6 +58,7 @@
         PAGINATION_PAGE_TOTAL: "page_total",
         DATA_TIMESTAMP_SPAN: "dataTimestampMessage",
         DATA_REFRESH_BUTTON: "dataRefreshButton",
+        ASYNC_CANCEL_BUTTON: "asyncCancel",
 
         getMessage: function (messageId, object) {
             var message = this._messages[messageId];
@@ -168,6 +169,7 @@
                 });
                 */
                 if(Report.isLoaded) {
+                    viewer.reportInstance.eventManager.triggerEvent("beforeAction", {name: "beforeAction", type: "reportRefresh"});
                     viewer.reportInstance.refreshPage(0);
                 } else {
                     Report.isLoaded = true;

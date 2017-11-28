@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -24,19 +24,15 @@ package com.jaspersoft.jasperserver.search.service.impl;
 import com.jaspersoft.jasperserver.api.JSException;
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
 import com.jaspersoft.jasperserver.api.common.domain.impl.ExecutionContextImpl;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceLookup;
 import com.jaspersoft.jasperserver.api.metadata.common.service.impl.RepositorySecurityChecker;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 import com.jaspersoft.jasperserver.api.metadata.view.domain.FilterCriteria;
-import com.jaspersoft.jasperserver.api.metadata.user.service.ObjectPermissionService;
 import com.jaspersoft.jasperserver.api.search.SearchCriteriaFactory;
-import com.jaspersoft.jasperserver.search.service.ResourceService;
-import com.jaspersoft.jasperserver.search.service.ChildrenLoaderService;
 import com.jaspersoft.jasperserver.search.common.ResourceDetails;
 import com.jaspersoft.jasperserver.search.common.SchedulingChecker;
-
-import java.util.*;
-
+import com.jaspersoft.jasperserver.search.service.ChildrenLoaderService;
+import com.jaspersoft.jasperserver.search.service.ResourceService;
 import com.jaspersoft.jasperserver.search.service.ResourceTypeResolver;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.logging.Log;
@@ -44,6 +40,8 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.SessionFactory;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.*;
 
 /**
  * Resources management service.
@@ -59,7 +57,6 @@ public class ResourceServiceImpl extends BaseService implements ResourceService 
     private SessionFactory sessionFactory;
 
     private RepositorySecurityChecker securityChecker;
-    protected ObjectPermissionService permissionService;
     private SchedulingChecker schedulingChecker;
     private ResourceTypeResolver typeResolver;
     private Map<String, ChildrenLoaderService> childrenLoaders;
@@ -105,11 +102,11 @@ public class ResourceServiceImpl extends BaseService implements ResourceService 
     private void deleteTempDependencies(Resource resource) {
         ExecutionContext context = ExecutionContextImpl.getRuntimeExecutionContext();
         List<ResourceLookup> dependentResources = repositoryService.getDependentResources(context, resource.getURIString(), searchCriteriaFactory, 0, 0); //from zero index, unlimited count
-        if(dependentResources == null) {
+        if (dependentResources == null) {
             return;
         }
-        for(ResourceLookup depResource: dependentResources) {
-            if(depResource.getURIString().startsWith(tempFolderName)) {
+        for (ResourceLookup depResource : dependentResources) {
+            if (depResource.getURIString().startsWith(tempFolderName)) {
                 deleteTempDependencies(depResource);
                 repositoryService.deleteResource(context, depResource.getURIString());
             }
@@ -164,7 +161,7 @@ public class ResourceServiceImpl extends BaseService implements ResourceService 
                 checkDependentResourcesFor.contains(resource.getResourceType())) {
 
             List<ResourceLookup> dependentResources = repositoryService.getDependentResources(context, resourceUri, searchCriteriaFactory, 0, maxDependentReports);
-            if(dependentResources == null) {
+            if (dependentResources == null) {
                 if (log.isDebugEnabled()) {
                     log.debug("Can't check for dependent reports of resource type!");
                 }
@@ -172,7 +169,7 @@ public class ResourceServiceImpl extends BaseService implements ResourceService 
             }
             result = new ArrayList<ResourceDetails>();
             for (ResourceLookup lookup : dependentResources) {
-                if(!lookup.getParentFolder().equals(tempFolderName)) {
+                if (!lookup.getParentFolder().equals(tempFolderName)) {
                     result.add(new ResourceDetails(lookup));
                 }
             }
@@ -223,7 +220,7 @@ public class ResourceServiceImpl extends BaseService implements ResourceService 
         if (resourceMap.size() != getResourcesWithUniqueName(resourceMap).size()) {
             throw new JSException("jsexception.search.duplicate.name", new Object[]{"", destinationFolderUri});
         }
-        
+
         for (String uri : resourceMap.keySet()) {
             repositoryService.moveResource(null, uri, destinationFolderUri);
         }
@@ -238,17 +235,19 @@ public class ResourceServiceImpl extends BaseService implements ResourceService 
             resourceDetails.setReadable(true);
             resourceDetails.setEditable(securityChecker.isEditable(resource));
             resourceDetails.setRemovable(securityChecker.isRemovable(resource));
-            resourceDetails.setAdministrable(permissionService.isObjectAdministrable(null, resource));
-
-            resourceDetails.setScheduled(schedulingChecker.isScheduled(null, resource));
+            resourceDetails.setAdministrable(securityChecker.isAdministrable(resource));
         } else {
-            if (log.isDebugEnabled()) { log.debug("Repository security checker is null!"); }
+            if (log.isDebugEnabled()) {
+                log.debug("Repository security checker is null!");
+            }
         }
 
         if (schedulingChecker != null) {
             resourceDetails.setScheduled(schedulingChecker.isScheduled(null, resource));
         } else {
-            if (log.isDebugEnabled()) { log.debug("Scheduling checker is null!"); }
+            if (log.isDebugEnabled()) {
+                log.debug("Scheduling checker is null!");
+            }
         }
 
         ChildrenLoaderService childrenLoaderService = childrenLoaders.get(resource.getResourceType());
@@ -272,10 +271,6 @@ public class ResourceServiceImpl extends BaseService implements ResourceService 
 
     public void setDeleteOrder(List<String> deleteOrder) {
         this.deleteOrder = deleteOrder;
-    }
-
-    public void setPermissionService(ObjectPermissionService permissionService) {
-        this.permissionService = permissionService;
     }
 
     public void setSchedulingChecker(SchedulingChecker schedulingChecker) {

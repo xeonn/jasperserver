@@ -3,20 +3,28 @@
     <!--Toolbar menus-->
     <context name="toolbar_save">
         <condition test="getCanSave">
-            <condition test="getIsNotWritable">
-                <simpleAction labelKey="ADH_030_MENU_SAVE_REPORT" disabled="disabled"/>
+            <!-- We display different Save menu when Ad Hoc Designer is run from Dashboard-->
+            <condition test="isEmbeddedDesigner">
+                <simpleAction labelKey="ADH_030_MENU_SAVE_REPORT" action="adhocDesigner.handleBack"/>
+                <simpleAction labelKey="ADH_010_BUTTON_CANCEL" action="adhocDesigner.handleCancel"/>
             </condition>
-            <condition test="getIsWritable">
-                <simpleAction labelKey="ADH_030_MENU_SAVE_REPORT" action="designerBase.handleSave"/>
-            </condition>
+            <!-- Ordinary Ad Hoc Save Menu-->
+            <condition test="!isEmbeddedDesigner">
+                <condition test="getIsNotWritable">
+                    <simpleAction labelKey="ADH_030_MENU_SAVE_REPORT" disabled="disabled"/>
+                </condition>
+                <condition test="getIsWritable">
+                    <simpleAction labelKey="ADH_030_MENU_SAVE_REPORT" action="designerBase.handleSave"/>
+                </condition>
 
-            <simpleAction labelKey="ADH_037_MENU_SAVE_REPORT_AS" action="designerBase.handleSaveAs"/>
+                <simpleAction labelKey="ADH_037_MENU_SAVE_REPORT_AS" action="designerBase.handleSaveAs"/>
 
-            <condition test="getIsNotWritable">
-                <simpleAction labelKey="ADH_037_MENU_SAVE_DATA_VIEW_AND_REPORT" disabled="disabled"/>
-            </condition>
-            <condition test="getIsWritable">
-                <simpleAction labelKey="ADH_037_MENU_SAVE_DATA_VIEW_AND_REPORT" action="designerBase.handleSaveAndGenerate"/>
+                <condition test="getIsNotWritable">
+                    <simpleAction labelKey="ADH_037_MENU_SAVE_DATA_VIEW_AND_REPORT" disabled="disabled"/>
+                </condition>
+                <condition test="getIsWritable">
+                    <simpleAction labelKey="ADH_037_MENU_SAVE_DATA_VIEW_AND_REPORT" action="designerBase.handleSaveAndGenerate"/>
+                </condition>
             </condition>
         </condition>
     </context>
@@ -208,7 +216,7 @@
         <condition test="!getIsPieChart">
             <simpleAction labelKey="ADH_560_MENU_EDIT_LEGEND_LABEL" action="adhocDesigner.editLegendLabel"/>
         </condition>
-            <simpleAction labelKey="ADH_1212_DYNAMIC_FILTER_CREATE" clientTest="adhocDesigner.canShowFilterOption" action="adhocDesigner.filtersController.addFilter" actionArgs="${selected}"/>
+        	<simpleAction labelKey="ADH_1212_DYNAMIC_FILTER_CREATE" clientTest="adhocDesigner.canShowFilterOption" action="adhocDesigner.filtersController.addFilter" actionArgs="${selected}"/>
         <separator />
         <condition test="getUseSummaries">
             <selectAction className="flyout" clientTest="selectedMeasureShowsSummaryOptions" labelKey="ADH_230_MENU_CHANGE_FUNCTION">
@@ -251,7 +259,7 @@
         <simpleAction labelKey="ADH_317_REPLACE_GROUP" clientTest="canReplaceGroup" action="addFieldAsGroup"/>
         <simpleAction labelKey="ADH_1212_DYNAMIC_FILTER_CREATE" clientTest="adhocDesigner.canShowFilterOption" action="adhocDesigner.filtersController.addFilter" actionArgs="${selected}"/>
         <condition test="getIsDesignView">
-            <separator />
+        <separator />
             <simpleAction labelKey="ADH_1213_USE_AS_MEASURE" clientTest="adhocDesigner.canMoveToMeasures" action="adhocDesigner.moveToMeasures"/>
             <simpleAction labelKey="ADH_1213_USE_AS_FIELD" clientTest="adhocDesigner.canMoveToDimensions" action="adhocDesigner.moveToDimensions"/>
             <separator clientTest="adhocDesigner.isSelectedFieldCustom" />

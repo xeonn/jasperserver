@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -28,7 +28,7 @@ import com.jaspersoft.jasperserver.api.metadata.common.util.NullValue;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: PersistentReportJobSource.java 22210 2012-02-17 00:22:20Z ichan $
+ * @version $Id: PersistentReportJobSource.java 47331 2014-07-18 09:13:06Z kklein $
  */
 public class PersistentReportJobSource {
 

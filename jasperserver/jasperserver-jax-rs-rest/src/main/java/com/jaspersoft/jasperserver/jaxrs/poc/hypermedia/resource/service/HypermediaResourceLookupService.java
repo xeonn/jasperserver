@@ -1,27 +1,28 @@
 /*
-* Copyright (C) 2005 - 2009 Jaspersoft Corporation. All rights  reserved.
-* http://www.jaspersoft.com.
-*
-* Unless you have purchased  a commercial license agreement from Jaspersoft,
-* the following license terms  apply:
-*
-* This program is free software: you can redistribute it and/or  modify
-* it under the terms of the GNU Affero General Public License  as
-* published by the Free Software Foundation, either version 3 of  the
-* License, or (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-* GNU Affero  General Public License for more details.
-*
-* You should have received a copy of the GNU Affero General Public  License
-* along with this program.&nbsp; If not, see <http://www.gnu.org/licenses/>.
-*/
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
+ * http://www.jaspersoft.com.
+ *
+ * Unless you have purchased  a commercial license agreement from Jaspersoft,
+ * the following license terms  apply:
+ *
+ * This program is free software: you can redistribute it and/or  modify
+ * it under the terms of the GNU Affero General Public License  as
+ * published by the Free Software Foundation, either version 3 of  the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero  General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public  License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 package com.jaspersoft.jasperserver.jaxrs.poc.hypermedia.resource.service;
 
 import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
+import com.jaspersoft.jasperserver.api.search.SearchFilter;
 import com.jaspersoft.jasperserver.jaxrs.common.RestConstants;
 import com.jaspersoft.jasperserver.jaxrs.poc.hypermedia.common.representation.HypermediaRepresentation;
 import com.jaspersoft.jasperserver.jaxrs.poc.hypermedia.common.MediaTypes;
@@ -35,12 +36,13 @@ import com.jaspersoft.jasperserver.search.mode.SearchMode;
 import com.jaspersoft.jasperserver.search.service.RepositorySearchCriteria;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
-import org.springframework.security.context.SecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -116,6 +118,11 @@ public class HypermediaResourceLookupService {
             if("showHiddenItems".equals(paramName)){
                 boolean showHidden = value == null ? DEFAULT_SHOW_HIDDEN  : Boolean.parseBoolean(value);
                 criteria.setShowHidden(showHidden);
+            }
+
+            if("forceFullPage".equals(paramName)){
+                boolean showHidden = value == null ? true  : Boolean.parseBoolean(value);
+                criteria.setForceFullPage(showHidden);
             }
             if("relativeUriToExclude".equals(paramName)){
                 criteria.setExcludeRelativePaths(values);

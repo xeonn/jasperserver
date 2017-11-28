@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -20,8 +20,6 @@
  */
 package com.jaspersoft.jasperserver.api.engine.jasperreports.util;
 
-import com.jaspersoft.jasperserver.api.engine.jasperreports.util.MessageSourceLoader;
-import com.jaspersoft.jasperserver.api.engine.jasperreports.util.RepositoryUtil;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.FileResource;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.FileResourceData;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceContainer;
@@ -125,6 +123,13 @@ public class MessageSourceLoaderTest extends UnitilsJUnit4 {
                 return resourcesMap.get(proxyInvocation.getArguments().get(1));
             }
         }).getResource(null, null, FileResource.class);
+
+        repositoryServiceMock.performs(new MockBehavior() {
+            @Override
+            public Object execute(ProxyInvocation proxyInvocation) throws Throwable {
+                return resourcesMap.get(proxyInvocation.getArguments().get(1));
+            }
+        }).getResource(null, null);
 
         repositoryServiceMock.performs(new MockBehavior() {
             @Override

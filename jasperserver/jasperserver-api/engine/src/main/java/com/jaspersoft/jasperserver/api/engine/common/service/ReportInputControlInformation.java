@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -31,7 +31,7 @@ import net.sf.jasperreports.engine.JRParameter;
  * persisted input control objects.
  * 
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ReportInputControlInformation.java 23939 2012-05-28 13:18:09Z lchirita $
+ * @version $Id: ReportInputControlInformation.java 47331 2014-07-18 09:13:06Z kklein $
  */
 @JasperServerAPI
 public interface ReportInputControlInformation {

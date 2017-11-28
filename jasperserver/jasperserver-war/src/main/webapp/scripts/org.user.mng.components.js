@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2014 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -21,13 +21,13 @@
 
 
 /**
- * @version: $Id: org.user.mng.components.js 44312 2014-04-09 14:30:12Z vsabadosh $
+ * @version: $Id: org.user.mng.components.js 7846 2014-09-19 16:27:14Z sergey.prilukin $
  */
 
 //////////////////////////////////
 // Panel which shows users list
 //////////////////////////////////
-define(["jquery", "org.user.mng.main", "mng.common.actions", "encryption.utils"], function(jQuery, _tmp1, _tmp2, JSEncrypter) {
+define(["jquery", "org.user.mng.main", "mng.common.actions", "common/util/encrypter"], function(jQuery, _tmp1, _tmp2, JSEncrypter) {
 
 	orgModule.userManager.userList = {
 		CE_LIST_TEMPLATE_ID: "tabular_twoColumn",

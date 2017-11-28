@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -20,38 +20,39 @@
  */
 package com.jaspersoft.jasperserver.test;
 
-import java.io.InputStream;
-import java.util.*;
-
+import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.FileResource;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.Folder;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceReference;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.client.FolderImpl;
+import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.JdbcReportDataSource;
+import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.JndiJdbcReportDataSource;
+import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportUnit;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.VirtualReportDataSource;
+import com.jaspersoft.jasperserver.api.metadata.olap.domain.MondrianConnection;
+import com.jaspersoft.jasperserver.api.metadata.olap.domain.MondrianXMLADefinition;
+import com.jaspersoft.jasperserver.api.metadata.olap.domain.OlapUnit;
+import com.jaspersoft.jasperserver.api.metadata.olap.domain.XMLAConnection;
+import com.jaspersoft.jasperserver.api.metadata.olap.service.impl.OlapConnectionServiceImpl;
+import com.jaspersoft.jasperserver.api.metadata.security.JasperServerPermission;
+import com.jaspersoft.jasperserver.api.metadata.user.domain.Role;
+import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
+import com.jaspersoft.jasperserver.api.metadata.xml.domain.impl.ResourceDescriptor;
 import com.jaspersoft.jasperserver.crypto.EncryptionEngine;
 import com.jaspersoft.jasperserver.crypto.KeystoreManager;
+import com.jaspersoft.jasperserver.util.test.BaseServiceSetupTestNG;
+import com.jaspersoft.jasperserver.war.common.JasperServerUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.FileResource;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.Folder;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.client.FolderImpl;
-import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.JdbcReportDataSource;
-import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.JndiJdbcReportDataSource;
-import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportUnit;
-import com.jaspersoft.jasperserver.api.metadata.olap.domain.MondrianConnection;
-import com.jaspersoft.jasperserver.api.metadata.olap.domain.MondrianXMLADefinition;
-import com.jaspersoft.jasperserver.api.metadata.olap.domain.OlapUnit;
-import com.jaspersoft.jasperserver.api.metadata.olap.domain.XMLAConnection;
-import com.jaspersoft.jasperserver.api.metadata.olap.service.impl.OlapConnectionServiceImpl;
-import com.jaspersoft.jasperserver.api.metadata.security.JasperServerAclEntry;
-import com.jaspersoft.jasperserver.api.metadata.user.domain.Role;
-import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
-import com.jaspersoft.jasperserver.api.metadata.xml.domain.impl.ResourceDescriptor;
-import com.jaspersoft.jasperserver.util.test.BaseServiceSetupTestNG;
-import com.jaspersoft.jasperserver.war.common.JasperServerUtil;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * @author srosen
@@ -93,6 +94,7 @@ public class FullDataCreateTestNG extends BaseServiceSetupTestNG {
         addContentRepositoryTestResources();
         addUserAuthorityServiceTestResources();
         addOlapConnectionResources();
+        addInteractiveReportResources();
     }
 
 
@@ -155,21 +157,6 @@ public class FullDataCreateTestNG extends BaseServiceSetupTestNG {
     private void addHibernateRepositoryReportResources()  {
         m_logger.info("addHibernateRepositoryReportResources() called");
 
-        // create the reports folder
-        m_logger.info("addHibernateRepositoryReportResources() => creating /reports");
-        Folder reportsFolder = new FolderImpl();
-        reportsFolder.setName("reports");
-        reportsFolder.setLabel("Reports");
-        reportsFolder.setDescription("Reports");
-        getUnsecureRepositoryService().saveFolder(null, reportsFolder);
-
-        // bug #22094. ROLE_USER should have write access to the /reports folder.
-        Role userRole = getRole(ROLE_USER);
-        createObjectPermission("/reports", userRole, JasperServerAclEntry.READ_WRITE_CREATE_DELETE);
-
-        // create the interactive folder and its resources
-        createInteractiveFolderAndReportResources(reportsFolder);
-
         // create an images folder and sample image
         createImagesFolderAndSampleImage();
 
@@ -228,19 +215,19 @@ public class FullDataCreateTestNG extends BaseServiceSetupTestNG {
 
     private void setupExecuteOnlyPermissions() {
         Role userRole = getRole(ROLE_USER);
-        createObjectPermission("/datasources", userRole, JasperServerAclEntry.EXECUTE);
+        createObjectPermission("/datasources", userRole, JasperServerPermission.EXECUTE.getMask());
 
         // bug 21880; we still need read access for datatypes
-        // createObjectPermission("/datatypes", userRole, JasperServerAclEntry.EXECUTE);
-        createObjectPermission("/images", userRole, JasperServerAclEntry.EXECUTE);
-        createObjectPermission("/themes", userRole, JasperServerAclEntry.EXECUTE);
+        // createObjectPermission("/datatypes", userRole, JasperServerPermission.EXECUTE);
+        createObjectPermission("/images", userRole, JasperServerPermission.EXECUTE.getMask());
+        createObjectPermission("/themes", userRole, JasperServerPermission.EXECUTE.getMask());
     }
 
     private void setupNoAccessPermissions() {
         // bug 29635; we need prevent access for User role, so only
         // ROLE_SUPERUSER & ROLE_ADMINISTRATOR should be able to execute that data source.
         Role userRole = getRole(ROLE_USER);
-        createObjectPermission("/datasources/repositoryDS", userRole, JasperServerAclEntry.NOTHING);
+        createObjectPermission("/datasources/repositoryDS", userRole, JasperServerPermission.NOTHING.getMask());
     }
 
     private void createImagesFolderAndSampleImage() {
@@ -913,11 +900,23 @@ public class FullDataCreateTestNG extends BaseServiceSetupTestNG {
 		return olapConnectionServiceTarget;
 	}
 
-    private void createInteractiveFolderAndReportResources(Folder reportsFolder)  {
-        m_logger.info("createInteractiveFolderAndReportResources() called");
+    private void addInteractiveReportResources()  {
+        m_logger.info("addInteractiveReportResources() called");
+
+        // create the reports folder
+        m_logger.info("addInteractiveReportResources() => creating /reports");
+        Folder reportsFolder = new FolderImpl();
+        reportsFolder.setName("reports");
+        reportsFolder.setLabel("Reports");
+        reportsFolder.setDescription("Reports");
+        getUnsecureRepositoryService().saveFolder(null, reportsFolder);
+
+        // bug #22094. ROLE_USER should have write access to the /reports folder.
+        Role userRole = getRole(ROLE_USER);
+        createObjectPermission("/reports", userRole, JasperServerPermission.READ_WRITE_CREATE_DELETE.getMask());
 
         // create the interactive folder
-        m_logger.info("createInteractiveFolderAndReportResources() => creating /reports/interactive");
+        m_logger.info("addInteractiveReportResources() => creating /reports/interactive");
         Folder interactiveFolder = new FolderImpl();
         interactiveFolder.setName("interactive");
         interactiveFolder.setLabel("Interactive");

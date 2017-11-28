@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2014 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: namespace.js 43122 2014-03-18 12:44:22Z psavushchik $
+ * @version: $Id: namespace.js 7878 2014-10-05 23:18:41Z inesterenko $
  */
 
 //JasperServer namespace  mess
@@ -97,8 +97,6 @@ if (typeof(localContext) == "undefined"){
 
 //TODO: move to common module
 if (__jrsConfigs__.calendar){
-
-    jQuery.timepicker.setDefaults(__jrsConfigs__.calendar.timepicker);
 
     JRS.i18n["bundledCalendarFormat"] = __jrsConfigs__.calendar.i18n.bundledCalendarFormat;
     JRS.i18n["bundledCalendarTimeFormat"] = __jrsConfigs__.calendar.i18n.bundledCalendarTimeFormat;

@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005 - 2009 Jaspersoft Corporation. All rights  reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
 * http://www.jaspersoft.com.
 *
 * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -16,7 +16,7 @@
 * GNU Affero  General Public License for more details.
 *
 * You should have received a copy of the GNU Affero General Public  License
-* along with this program.&nbsp; If not, see <http://www.gnu.org/licenses/>.
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 package com.jaspersoft.jasperserver.remote.resources.converters;
 
@@ -29,14 +29,13 @@ import com.jaspersoft.jasperserver.remote.exception.IllegalParameterValueExcepti
 import com.jaspersoft.jasperserver.remote.exception.MandatoryParameterNotFoundException;
 import com.jaspersoft.jasperserver.remote.resources.ClientTypeHelper;
 import com.jaspersoft.jasperserver.remote.resources.attachments.AttachmentsProcessor;
-import com.jaspersoft.jasperserver.remote.resources.validation.BasicResourceValidator;
 import com.jaspersoft.jasperserver.remote.resources.validation.ResourceValidator;
 import com.jaspersoft.jasperserver.remote.services.PermissionsService;
 import com.jaspersoft.jasperserver.war.cascade.handlers.GenericTypeProcessorRegistry;
 import com.jaspersoft.jasperserver.war.helper.GenericParametersHelper;
 import com.jaspersoft.jasperserver.war.util.CalendarFormatProvider;
-import org.springframework.security.Authentication;
-import org.springframework.security.context.SecurityContextHolder;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -46,13 +45,13 @@ import java.util.List;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: ResourceConverterImpl.java 42684 2014-03-06 14:26:22Z ykovalchyk $
+ * @version $Id: ResourceConverterImpl.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
 public abstract class ResourceConverterImpl<ResourceType extends Resource, ClientType extends ClientResource<ClientType>> implements ResourceConverter<ResourceType, ClientType> {
     @javax.annotation.Resource(name = "mappingResourceFactory")
     protected ResourceFactory objectFactory;
 
-    @javax.annotation.Resource(name = "messagesCalendarFormatProvider")
+    @javax.annotation.Resource(name = "isoCalendarFormatProvider")
     protected CalendarFormatProvider calendarFormatProvider;
 
     @javax.annotation.Resource(name = "concretePermissionsService")
@@ -67,7 +66,8 @@ public abstract class ResourceConverterImpl<ResourceType extends Resource, Clien
 
     private String clientResourceType;
 
-    private final ResourceValidator defaultValidator = new BasicResourceValidator();
+    @javax.annotation.Resource(name = "basicResourceValidator")
+    private ResourceValidator defaultValidator;
 
     // object factory returns correct type of resource. So, cast below is safe
     @SuppressWarnings("unchecked")
@@ -110,7 +110,9 @@ public abstract class ResourceConverterImpl<ResourceType extends Resource, Clien
                 resource = attachmentsProcessor.processAttachments(resource, options.getAttachments());
             }
         }
-        validateResource(resource);
+        if(options == null || !options.isSuppressValidation()){
+            validateResource(resource);
+        }
         return resource;
     }
 
@@ -120,9 +122,6 @@ public abstract class ResourceConverterImpl<ResourceType extends Resource, Clien
     }
 
     protected ResourceType genericFieldsToServer(ClientType clientObject, ResourceType resultToUpdate, ToServerConversionOptions options) throws IllegalParameterValueException, MandatoryParameterNotFoundException {
-        if (clientObject.getLabel() == null || "".equals(clientObject.getLabel())) {
-            throw new MandatoryParameterNotFoundException(getClientResourceType() + ".label");
-        }
         if (resultToUpdate == null) {
             resultToUpdate = getNewResourceInstance();
             resultToUpdate.setVersion(Resource.VERSION_NEW);

@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright (C) 2005 - 2013 Jaspersoft Corporation. All rights reserved.
+  ~ Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
   ~ http://www.jaspersoft.com.
   ~ Licensed under commercial Jaspersoft Subscription License Agreement
   -->
@@ -11,53 +11,48 @@
     <!-- ########## External JDBC Auth ###########
       - Sample configuration of JasperServer authentication via an external database
     -->
-    <bean id="proxyAuthenticationProcessingFilter" class="com.jaspersoft.jasperserver.api.security.externalAuth.BaseAuthenticationProcessingFilter">
+    <bean id="proxyAuthenticationProcessingFilter" class="com.jaspersoft.jasperserver.api.security.EncryptionAuthenticationProcessingFilter"
+          parent="authenticationProcessingFilter">
         <property name="authenticationManager">
             <ref local="dbAuthenticationManager"/>
         </property>
-        <property name="externalDataSynchronizer">
-            <ref local="externalDataSynchronizer"/>
-        </property>
 
-        <property name="sessionRegistry">
-            <ref bean="sessionRegistry"/>
-        </property>
-
-        <property name="internalAuthenticationFailureUrl" value="/login.html?error=1"/>
-        <property name="defaultTargetUrl" value="/loginsuccess.html"/>
-        <property name="invalidateSessionOnSuccessfulAuthentication" value="true"/>
-        <property name="migrateInvalidatedSessionAttributes" value="true"/>
-
+        <property name="authenticationSuccessHandler" ref="externalAuthSuccessHandler" />
     </bean>
 
     <bean id="proxyAuthenticationSoapProcessingFilter"
           class="com.jaspersoft.jasperserver.api.security.externalAuth.DefaultAuthenticationSoapProcessingFilter">
         <property name="authenticationManager" ref="dbAuthenticationManager"/>
-        <property name="externalDataSynchronizer" ref="externalDataSynchronizer"/>
+        <property name="authenticationSuccessHandler" ref="externalAuthSuccessHandler" />
 
-        <property name="invalidateSessionOnSuccessfulAuthentication" value="true"/>
-        <property name="migrateInvalidatedSessionAttributes" value="true"/>
+        <property name="filterProcessesUrl" value="/services"/>
+    </bean>
+
+    <bean id="proxyAuthenticationRestProcessingFilter" class="com.jaspersoft.jasperserver.api.security.externalAuth.DefaultAuthenticationRestProcessingFilter">
+        <property name="authenticationManager">
+            <ref local="dbAuthenticationManager"/>
+        </property>
+        <property name="authenticationSuccessHandler" ref="externalAuthSuccessHandler" />
+        <property name="filterProcessesUrl" value="/rest/login"/>
     </bean>
 
     <bean id="proxyRequestParameterAuthenticationFilter"
-          class="com.jaspersoft.jasperserver.war.util.ExternalRequestParameterAuthenticationFilter">
+          class="com.jaspersoft.jasperserver.war.util.ExternalRequestParameterAuthenticationFilter" parent="requestParameterAuthenticationFilter">
         <property name="authenticationManager">
             <ref local="dbAuthenticationManager"/>
         </property>
         <property name="externalDataSynchronizer" ref="externalDataSynchronizer"/>
+    </bean>
 
-        <property name="authenticationFailureUrl">
-            <value>/login.html?error=1</value>
-        </property>
-        <property name="excludeUrls">
-            <list>
-                <value>/j_spring_switch_user</value>
-            </list>
+    <bean id="externalAuthSuccessHandler"
+          class="com.jaspersoft.jasperserver.api.security.externalAuth.JrsExternalAuthenticationSuccessHandler" parent="successHandler">
+        <property name="externalDataSynchronizer">
+            <ref local="externalDataSynchronizer"/>
         </property>
     </bean>
 
     <bean id="proxyBasicProcessingFilter"
-          class="com.jaspersoft.jasperserver.api.security.externalAuth.ExternalAuthBasicProcessingFilter">
+          class="com.jaspersoft.jasperserver.api.security.externalAuth.ExternalAuthBasicProcessingFilter" parent="basicProcessingFilter">
         <property name="authenticationManager" ref="dbAuthenticationManager"/>
         <property name="externalDataSynchronizer" ref="externalDataSynchronizer"/>
 
@@ -66,20 +61,7 @@
         </property>
     </bean>
 
-    <bean id="proxyAuthenticationRestProcessingFilter" class="com.jaspersoft.jasperserver.api.security.externalAuth.DefaultAuthenticationRestProcessingFilter">
-        <property name="authenticationManager">
-            <ref local="dbAuthenticationManager"/>
-        </property>
-        <property name="externalDataSynchronizer">
-            <ref local="externalDataSynchronizer"/>
-        </property>
-
-        <property name="filterProcessesUrl" value="/rest/login"/>
-        <property name="invalidateSessionOnSuccessfulAuthentication" value="true"/>
-        <property name="migrateInvalidatedSessionAttributes" value="true"/>
-    </bean>
-
-    <bean id="dbAuthenticationManager" class="org.springframework.security.providers.ProviderManager">
+    <bean id="dbAuthenticationManager" class="com.jaspersoft.jasperserver.api.security.externalAuth.wrappers.spring.JSProviderManager">
         <property name="providers">
             <list>
                 <ref bean="externalDaoAuthenticationProvider"/>
@@ -87,14 +69,10 @@
             </list>
         </property>
     </bean>
-    <bean id="externalDaoAuthenticationProvider" class="org.springframework.security.providers.dao.DaoAuthenticationProvider">
-        <property name="userDetailsService"><ref bean="externalUserDetailsService"/></property>
-        <property name="passwordEncoder"><ref local="passwordValidator"/></property>
 
-        <!-- Refer to Spring Security reference documentation and
-            <property name="passwordEncoder"><ref local="externalDBPasswordEncoder"/></property>
-            <property name="saltSource"><ref local="externalDBSaltSource"/></property>
-        -->
+    <bean id="externalDaoAuthenticationProvider" class="com.jaspersoft.jasperserver.api.security.externalAuth.wrappers.spring.jdbc.JSDaoAuthenticationProvider">
+        <property name="userDetailsService"><ref local="externalUserDetailsService"/></property>
+        <property name="passwordEncoder"><ref local="passwordValidator"/></property>
     </bean>
 
     <bean id="externalUserDetailsService" class="com.jaspersoft.jasperserver.api.security.externalAuth.db.ExternalJDBCUserDetailsService">
@@ -116,7 +94,7 @@
     <bean id="externalDataSynchronizer"
           class="com.jaspersoft.jasperserver.api.security.externalAuth.ExternalDataSynchronizerImpl">
         <property name="externalUserDetailsService">
-            <ref bean="externalUserDetailsService"/>
+            <ref local="externalUserDetailsService"/>
         </property>
         <property name="externalUserProcessors">
             <list>
@@ -168,7 +146,7 @@
 
 
     <!-- ############## external dataSource: config in master.properties ############### -->
-    <bean id="externalDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+    <bean id="externalDataSource" class="com.jaspersoft.jasperserver.api.security.externalAuth.wrappers.spring.jdbc.JSDriverManagerDataSource">
         <property name="driverClassName" value="${external.jdbc.driverClassName}"/>
         <property name="url" value="${external.jdbc.url}"/>
         <property name="username" value="${external.jdbc.username}"/>

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2014 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -21,7 +21,7 @@
 
 /**
  * @author yaroslav.kovalchyk
- * @version $Id: CustomDataSourceCollection.js 45232 2014-04-29 16:34:51Z dgorbenko $
+ * @version $Id: CustomDataSourceCollection.js 47331 2014-07-18 09:13:06Z kklein $
  */
 define(function(require) {
     "use strict";

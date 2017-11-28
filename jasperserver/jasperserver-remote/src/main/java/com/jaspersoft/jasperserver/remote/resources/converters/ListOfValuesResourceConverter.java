@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005 - 2009 Jaspersoft Corporation. All rights  reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
 * http://www.jaspersoft.com.
 *
 * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -16,13 +16,14 @@
 * GNU Affero  General Public License for more details.
 *
 * You should have received a copy of the GNU Affero General Public  License
-* along with this program.&nbsp; If not, see <http://www.gnu.org/licenses/>.
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 package com.jaspersoft.jasperserver.remote.resources.converters;
 
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ListOfValues;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ListOfValuesItem;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.client.ListOfValuesItemImpl;
+import com.jaspersoft.jasperserver.crypto.EncryptionEngine;
 import com.jaspersoft.jasperserver.dto.resources.ClientListOfValues;
 import com.jaspersoft.jasperserver.dto.resources.ClientListOfValuesItem;
 import com.jaspersoft.jasperserver.remote.exception.IllegalParameterValueException;
@@ -35,7 +36,7 @@ import java.util.List;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: ListOfValuesResourceConverter.java 35226 2013-08-09 07:08:53Z inesterenko $
+ * @version $Id: ListOfValuesResourceConverter.java 50011 2014-10-09 16:57:26Z vzavadskii $
  */
 @Service
 public class ListOfValuesResourceConverter extends ResourceConverterImpl<ListOfValues, ClientListOfValues> {
@@ -64,7 +65,11 @@ public class ListOfValuesResourceConverter extends ResourceConverterImpl<ListOfV
             List<ClientListOfValuesItem> clientItems = new ArrayList<ClientListOfValuesItem>(values.length);
             client.setItems(clientItems);
             for(ListOfValuesItem currentItem : values){
-                clientItems.add(new ClientListOfValuesItem(currentItem.getLabel(), currentItem.getValue().toString()));
+                String currentItemValue = currentItem.getValue().toString();
+                if (EncryptionEngine.isEncrypted(currentItemValue)) {
+                    currentItemValue = null;
+                }
+                clientItems.add(new ClientListOfValuesItem(currentItem.getLabel(), currentItemValue));
             }
         }
         return client;

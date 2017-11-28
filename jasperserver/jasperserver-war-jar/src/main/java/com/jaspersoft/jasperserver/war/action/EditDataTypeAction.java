@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -44,12 +44,14 @@ import org.springframework.webflow.execution.Event;
 import org.springframework.webflow.execution.RequestContext;
 import org.springframework.webflow.execution.ScopeType;
 
+import javax.annotation.Resource;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.util.Date;
 
 /**
  * @author Ionut Nedelcu (ionutned@users.sourceforge.net)
- * @version $Id: EditDataTypeAction.java 38983 2013-10-17 12:32:51Z ztomchenco $
+ * @version $Id: EditDataTypeAction.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
 public class EditDataTypeAction extends FormAction {
     private static final String ATTRIBUTE_RESOURCE_ID_NOT_SUPPORTED_SYMBOLS = "resourceIdNotSupportedSymbols";
@@ -60,8 +62,11 @@ public class EditDataTypeAction extends FormAction {
 	private static final String IS_EDIT = "isEdit";//FIXME use wrapper to disable name in UI
 
 	private RepositoryService repository;
-	private CalendarFormatProvider calendarFormatProvider;
     private DataConverterService dataConverterService;
+    @Resource(name = "isoCalendarFormatProvider")
+    protected CalendarFormatProvider isoCalendarFormatProvider;
+    @Resource(name = "messagesCalendarFormatProvider")
+    protected CalendarFormatProvider messagesCalendarFormatProvider;
 
     protected MessageSource messages;
     private ConfigurationBean configuration;
@@ -130,7 +135,7 @@ public class EditDataTypeAction extends FormAction {
 			}
 			wrapper = new DataTypeWrapper(dataType);
 			wrapper.setMode(BaseDTO.MODE_STAND_ALONE_EDIT);
-			byte type = dataType.getType();
+			byte type = dataType.getDataTypeType();
 			if (JasperServerUtil.isDateType(type)) {
 				DateFormat df = getFormat(type);
 				if(dataType.getMinValue() != null){
@@ -170,11 +175,14 @@ public class EditDataTypeAction extends FormAction {
 	 */
 	public Event saveDataType(RequestContext context) throws Exception
 	{
-		DataTypeWrapper wrapper = (DataTypeWrapper) getFormObject(context);
+		final DataTypeWrapper wrapper = (DataTypeWrapper) getFormObject(context);
 
-        DataType dataType = wrapper.getDataType();
-        dataType.setMaxValue(extractMaxValue(wrapper));
-        dataType.setMinValue(extractMinValue(wrapper));
+        final DataType dataType = wrapper.getDataType();
+        byte type = dataType.getDataTypeType();
+        if (type != DataType.TYPE_TEXT && type != DataType.TYPE_NUMBER) {
+            dataType.setMaxValue(convertRestrictionValue(wrapper.getMaxValueText(), dataType));
+            dataType.setMinValue(convertRestrictionValue(wrapper.getMinValueText(), dataType));
+        }
 
         if (wrapper.isStandAloneMode())
 			try {
@@ -209,57 +217,74 @@ public class EditDataTypeAction extends FormAction {
 		return success();
 	}
 
-	public CalendarFormatProvider getCalendarFormatProvider()
-	{
-		return calendarFormatProvider;
-	}
+    public Event resetEditFormAndBindType(RequestContext context) throws Exception {
+        MutableAttributeMap rs = context.getRequestScope();
 
-	public void setCalendarFormatProvider(CalendarFormatProvider calendarFormatProvider)
-	{
-		this.calendarFormatProvider = calendarFormatProvider;
-	}
-	
+        DataTypeWrapper wrapper = (DataTypeWrapper) getFormObject(context);
+        DataType dataType = wrapper.getDataType();
+
+        byte newDataType = dataType.getDataTypeType();
+        resetDatatype(dataType);
+        dataType.setDataTypeType(newDataType);
+
+        rs.put(FORM_OBJECT_KEY, wrapper);
+
+        return success();
+    }
+
+    private void resetDatatype(DataType dataType){
+        dataType.setDataTypeType(DataType.TYPE_TEXT);
+        dataType.setDecimals(null);
+        dataType.setMaxLength(null);
+        dataType.setMaxValue(null);
+        dataType.setMinValue(null);
+        dataType.setRegularExpr(null);
+        dataType.setStrictMax(false);
+        dataType.setStrictMin(false);
+    }
+
 	private DateFormat getFormat(byte type) {
         switch (type) {
             case DataType.TYPE_DATE:
-                return getCalendarFormatProvider().getDateFormat();
+                return messagesCalendarFormatProvider.getDateFormat();
             case DataType.TYPE_DATE_TIME:
-                return getCalendarFormatProvider().getDatetimeFormat();
+                return messagesCalendarFormatProvider.getDatetimeFormat();
             case DataType.TYPE_TIME:
-                return getCalendarFormatProvider().getTimeFormat();
+                return messagesCalendarFormatProvider.getTimeFormat();
             default:
-                return getCalendarFormatProvider().getDateFormat();
+                return messagesCalendarFormatProvider.getDateFormat();
         }
     }
 
-    private Comparable extractMinValue(DataTypeWrapper wrapper) throws InputControlValidationException {
-        Comparable minValue = null;
-        DataType dataType = wrapper.getDataType();
-        if (dataType.getType() == DataType.TYPE_NUMBER) {
-            if (dataType.getMinValue() != null) {
-                minValue = (Comparable) dataConverterService.convertSingleValue(dataType.getMinValue().toString(), dataType);
+private Comparable convertRestrictionValue(String restrictionValueString, DataType dataType) throws InputControlValidationException, ParseException {
+        Comparable result = null;
+        if (restrictionValueString != null && !"".equals(restrictionValueString)) {
+            final String valueToConvert;
+            switch (dataType.getDataTypeType()) {
+                case DataType.TYPE_DATE: {
+                    // convert localized date string to ISO8601
+                    valueToConvert = isoCalendarFormatProvider.getDateFormat()
+                            .format(messagesCalendarFormatProvider.getDateFormat().parse(restrictionValueString));
+                }
+                break;
+                case DataType.TYPE_TIME: {
+                    // convert localized time string to ISO8601
+                    valueToConvert = isoCalendarFormatProvider.getTimeFormat()
+                            .format(messagesCalendarFormatProvider.getTimeFormat().parse(restrictionValueString));
+                }
+                break;
+                case DataType.TYPE_DATE_TIME: {
+                    // convert localized dateTime string to ISO8601
+                    valueToConvert = isoCalendarFormatProvider.getDatetimeFormat()
+                            .format(messagesCalendarFormatProvider.getDatetimeFormat().parse(restrictionValueString));
+                }
+                break;
+                default:
+                    valueToConvert = restrictionValueString;
             }
-        } else {
-            if (wrapper.getMinValueText() != null && !"".equals(wrapper.getMinValueText())) {
-                minValue = (Comparable) dataConverterService.convertSingleValue(wrapper.getMinValueText(), dataType);
-            }
+            result = (Comparable) dataConverterService.convertSingleValue(valueToConvert, dataType);
         }
-        return minValue;
-    }
-
-    private Comparable extractMaxValue(DataTypeWrapper wrapper) throws InputControlValidationException {
-        Comparable maxValue = null;
-        DataType dataType = wrapper.getDataType();
-        if (dataType.getType() == DataType.TYPE_NUMBER) {
-            if (dataType.getMaxValue() != null) {
-                maxValue = (Comparable) dataConverterService.convertSingleValue(dataType.getMaxValue().toString(), dataType);
-            }
-        } else {
-            if (wrapper.getMaxValueText() != null && !"".equals(wrapper.getMaxValueText())) {
-                maxValue = (Comparable) dataConverterService.convertSingleValue(wrapper.getMaxValueText(), dataType);
-            }
-        }
-        return maxValue;
+        return result;
     }
 }
 

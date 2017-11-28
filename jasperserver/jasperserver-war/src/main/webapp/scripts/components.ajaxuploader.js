@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2014 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -22,7 +22,7 @@
 
 /**
  * @author: ztomchenco
- * @version: $Id: components.ajaxuploader.js 43122 2014-03-18 12:44:22Z psavushchik $
+ * @version: $Id: components.ajaxuploader.js 8025 2014-11-12 13:10:12Z ktsaregradskyi $
  */
 
 jaspersoft || (jaspersoft = {components:{}});
@@ -142,9 +142,7 @@ jaspersoft.components.AjaxUploader = (function ($, Template) {
     };
 
     AjaxUploader.prototype.isTimeout = function() {
-        if(!this.timeout) false;
-        if (this._intervalId === -1) return true;
-        return false;
+        return this._intervalId === -1;
     };
 
     return AjaxUploader;

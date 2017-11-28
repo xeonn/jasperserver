@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005 - 2013 Jaspersoft Corporation. All rights  reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
 * http://www.jaspersoft.com.
 *
 * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -16,7 +16,7 @@
 * GNU Affero  General Public License for more details.
 *
 * You should have received a copy of the GNU Affero General Public  License
-* along with this program.&nbsp; If not, see <http://www.gnu.org/licenses/>.
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 package com.jaspersoft.jasperserver.remote.services.impl;
 
@@ -35,7 +35,7 @@ import javax.annotation.Resource;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: ReportExecutionAccessorIml.java 45722 2014-05-14 10:24:22Z sergey.prilukin $
+ * @version $Id: ReportExecutionAccessorIml.java 49882 2014-10-07 17:45:11Z sergey.prilukin $
  */
 @Service("reportExecutionAccessor")
 public class ReportExecutionAccessorIml implements GlobalReportExecutionAccessor {
@@ -47,7 +47,7 @@ public class ReportExecutionAccessorIml implements GlobalReportExecutionAccessor
     public ReportUnitResult getReportUnitResult(String executionId) {
         ReportUnitResult result = null;
         try {
-            result = runReportService.getReportExecution(executionId).getReportUnitResult();
+            result = runReportService.getReportExecution(executionId).getFinalReportUnitResult();
         } catch (ResourceNotFoundException e) {
             // just log for now. No executions found.
             log.error(e);

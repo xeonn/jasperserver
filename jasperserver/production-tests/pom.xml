@@ -10,7 +10,7 @@
     <parent>
         <groupId>com.jaspersoft.jasperserver</groupId>
         <artifactId>server</artifactId>
-        <version>5.6.0</version>
+        <version>6.0.1</version>
     </parent>
     <dependencies>
         <dependency>
@@ -125,19 +125,19 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
-            <version>3.1.4.RELEASE</version>
+            <version>${spring.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-core</artifactId>
-            <version>3.1.4.RELEASE</version>
+            <version>${spring.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-core</artifactId>
-            <version>2.0.7.RELEASE</version>
+            <version>3.0.7.RELEASE</version>
             <type>test-jar</type>
             <scope>test</scope>
             <exclusions>
@@ -171,6 +171,10 @@
                 </exclusion>
                 <exclusion>
                     <groupId>org.springframework</groupId>
+                    <artifactId>spring-tx</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.springframework</groupId>
                     <artifactId>spring-context-support</artifactId>
                 </exclusion>
                 <exclusion>
@@ -185,24 +189,28 @@
                     <groupId>org.springframework</groupId>
                     <artifactId>spring-test</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>org.springframework</groupId>
+                    <artifactId>spring-expression</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-core</artifactId>
-            <version>3.1.4.RELEASE</version>
+            <version>${spring.version}</version>
         </dependency>
         <dependency>
             <groupId>com.jaspersoft.jasperserver</groupId>
             <artifactId>jasperserver-war</artifactId>
-            <version>5.6.0</version>
+            <version>6.0.1</version>
             <type>war</type>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
-            <version>6.2</version>
+            <version>6.8.8</version>
             <scope>test</scope>
         </dependency>
         <!-- COMMENT: TESTNG: not currently using the testng-spring classes -->
@@ -221,7 +229,7 @@
         <dependency>
             <groupId>com.jaspersoft.connectors.hive</groupId>
             <artifactId>js-hive-datasource</artifactId>
-            <version>1.0.7</version>
+            <version>1.2.0-cdh5</version>
             <scope>test</scope>
             <exclusions>
                 <exclusion>

@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005 - 2013 Jaspersoft Corporation. All rights  reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
 * http://www.jaspersoft.com.
 *
 * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -16,7 +16,7 @@
 * GNU Affero  General Public License for more details.
 *
 * You should have received a copy of the GNU Affero General Public  License
-* along with this program.&nbsp; If not, see <http://www.gnu.org/licenses/>.
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 package com.jaspersoft.jasperserver.api.engine.scheduling.domain.jaxb;
 
@@ -28,7 +28,7 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: FtpTypeAdapter.java 38348 2013-09-30 04:57:18Z carbiv $
+ * @version $Id: FtpTypeAdapter.java 49286 2014-09-23 13:32:25Z ykovalchyk $
  */
 public class FtpTypeAdapter extends XmlAdapter<String, String> {
     private static final String CLIENT_TYPE_FTP = "ftp";

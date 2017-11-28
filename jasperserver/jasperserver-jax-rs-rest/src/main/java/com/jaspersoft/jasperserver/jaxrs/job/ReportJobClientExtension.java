@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005 - 2013 Jaspersoft Corporation. All rights  reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
 * http://www.jaspersoft.com.
 *
 * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -16,7 +16,7 @@
 * GNU Affero  General Public License for more details.
 *
 * You should have received a copy of the GNU Affero General Public  License
-* along with this program.&nbsp; If not, see <http://www.gnu.org/licenses/>.
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 package com.jaspersoft.jasperserver.jaxrs.job;
 
@@ -37,7 +37,7 @@ import java.util.TimeZone;
  * Here it is real property and not saved to the source's parameters map.
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: ReportJobClientExtension.java 38743 2013-10-10 11:18:44Z ykovalchyk $
+ * @version $Id: ReportJobClientExtension.java 49286 2014-09-23 13:32:25Z ykovalchyk $
  */
 @XmlRootElement(name = "job")
 public class ReportJobClientExtension extends ReportJob {

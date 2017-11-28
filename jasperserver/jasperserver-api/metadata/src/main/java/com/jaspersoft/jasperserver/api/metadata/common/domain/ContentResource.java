@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -28,7 +28,7 @@ import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 
 /**
  * ContentResource is the interface which represents the JasperServer resource containing some data of any type:
- * pdf,html,xls,rtf,csv,odt,txt,docx,ods,xlsx,img. It extends {@link com.jaspersoft.jasperserver.api.metadata.common.domain.Resource}
+ * pdf,html,xls,rtf,csv,odt,txt,docx,ods,xlsx,img, pptx. It extends {@link com.jaspersoft.jasperserver.api.metadata.common.domain.Resource}
  *
  * @version
  * @see com.jaspersoft.jasperserver.api.metadata.common.domain.client.ContentResourceImpl
@@ -48,6 +48,7 @@ public interface ContentResource extends Resource
 	String TYPE_ODS = "ods";
 	String TYPE_XLSX = "xlsx";
 	String TYPE_IMAGE = "img";//unspecified image type
+	String TYPE_PPTX = "pptx";
 	String TYPE_UNSPECIFIED = "contentResource";
 
 

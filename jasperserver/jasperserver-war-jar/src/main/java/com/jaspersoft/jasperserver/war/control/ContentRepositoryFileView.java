@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2013 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -93,6 +93,8 @@ public class ContentRepositoryFileView extends AbstractView
 				response.setContentType("application/vnd.oasis.opendocument.text");
 	        } else if (fileType.equals(ContentResource.TYPE_ODS)) {
 				response.setContentType("application/vnd.oasis.opendocument.spreadsheet");
+	        } else if (fileType.equals(ContentResource.TYPE_PPTX)) {
+				response.setContentType("application/vnd.openxmlformats-officedocument.presentationml.presentation");
 			}
 
 			if (fileData.hasData()) {

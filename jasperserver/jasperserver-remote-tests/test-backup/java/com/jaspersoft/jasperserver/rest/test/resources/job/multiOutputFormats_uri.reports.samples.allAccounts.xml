@@ -23,6 +23,7 @@
     <outputFormats>ODS</outputFormats>
     <outputFormats>XLSX</outputFormats>
     <outputFormats>XLS_NOPAG</outputFormats>
+    <outputFormats>PPTX</outputFormats>
     <outputLocale></outputLocale>
     <reportUnitURI>/reports/samples/AllAccounts</reportUnitURI>
     <repositoryDestination>

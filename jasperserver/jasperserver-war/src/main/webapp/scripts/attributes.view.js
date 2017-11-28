@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2014 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: attributes.view.js 43122 2014-03-18 12:44:22Z psavushchik $
+ * @version: $Id: attributes.view.js 7896 2014-10-09 09:54:01Z vzavadskii $
  */
 
 if (!jaspersoft) {
@@ -30,6 +30,8 @@ if (!jaspersoft) {
 jaspersoft.attributes || (jaspersoft.attributes = {});
 
 ;(function(jQuery, _, Backbone, attributes, TemplateEngine) {
+
+    var SECURE_VALUE_SUBSTITUTION = "~secure~";
 
     /**
      Attributes view
@@ -48,6 +50,8 @@ jaspersoft.attributes || (jaspersoft.attributes = {});
 
         events: {
             "click textarea": "enable",
+            "click input[type=password]": "enable",
+            "blur input[type=password]": "blurSecure",
             "click #newAttribute a": "addModel"
         },
 
@@ -249,13 +253,27 @@ jaspersoft.attributes || (jaspersoft.attributes = {});
         },
 
         /**
-         * Event handler, enables input for editing.
+         * Event handler, enables input for editing and clears the substitution of secure attributes.
          * @instance
          * @memberof MainView
          */
         enable: function(evt) {
             if (this.editMode) {
                 jQuery(evt.target).attr("readonly", false);
+                if (jQuery(evt.target).val() == SECURE_VALUE_SUBSTITUTION) {
+                    jQuery(evt.target).val("");
+                }
+            }
+        },
+
+        /**
+         * Event handler, restores the substitution value for secure attributes
+         * @instance
+         * @memberof MainView
+         */
+        blurSecure: function(evt) {
+            if (this.editMode && jQuery(evt.target).val().length == 0) {
+                jQuery(evt.target).val(SECURE_VALUE_SUBSTITUTION);
             }
         },
 
@@ -266,6 +284,7 @@ jaspersoft.attributes || (jaspersoft.attributes = {});
          */
         disableAll: function(){
             this.$subEl.find("textarea").attr("readonly", true);
+            this.$subEl.find("input").attr("readonly", true);
         },
 
         /**
@@ -335,7 +354,8 @@ jaspersoft.attributes || (jaspersoft.attributes = {});
          * @memberof AttributeView
          */
         initialize: function() {
-            this.mainTemplateId = "attributesItem";
+            this.secure = !!this.model.get("secure");
+            this.mainTemplateId = this.secure ? "attributesSecureItem" : "attributesItem";
             this.value = this.model.get("value");
             this.name = this.model.get("name");
         },
@@ -343,6 +363,7 @@ jaspersoft.attributes || (jaspersoft.attributes = {});
         registerEvents: function(){
             this.$el.find(".attrName textarea").on("input propertychange", _.bind(this.respondOnInputName, this));
             this.$el.find(".attrValue textarea").on("input propertychange", _.bind(this.respondOnInputValue, this));
+            this.$el.find(".attrValue input").on("input propertychange", _.bind(this.respondOnInputValue, this));
         },
 
         /**
@@ -355,7 +376,11 @@ jaspersoft.attributes || (jaspersoft.attributes = {});
                 this.mainTemplate = TemplateEngine.createTemplate(this.mainTemplateId);
             }
 
-            this.$el.html(this.mainTemplate(this.model.attributes));
+            var params = {
+                name: this.model.get("name"),
+                value: this.secure ? SECURE_VALUE_SUBSTITUTION : this.model.get("value")
+            };
+            this.$el.html(this.mainTemplate(params));
 
             this.registerEvents();
 
@@ -400,7 +425,7 @@ jaspersoft.attributes || (jaspersoft.attributes = {});
         },
 
         /**
-         * Sets valuew from input to model's attribute with name of param
+         * Sets value from input to model's attribute with name of param
          * @param input input for value
          * @param param param name to set
          * @instance
@@ -462,8 +487,13 @@ jaspersoft.attributes || (jaspersoft.attributes = {});
         respondOnInputValue: function(evt){
             var input = jQuery(evt.target);
             if (this.hasChanged(input, "value")) {
-                this.setParam(input, "value");
-                adjustSizeOfTextarea(input);
+                if (this.secure && input.val().length == 0 || input.val() == SECURE_VALUE_SUBSTITUTION) {
+                    this.model.unset("value");
+                    this.action = "nothing";
+                } else {
+                    this.setParam(input, "value");
+                    adjustSizeOfTextarea(input);
+                }
             }
         },
 

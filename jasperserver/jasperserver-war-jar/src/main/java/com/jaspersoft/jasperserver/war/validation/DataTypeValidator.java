@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -23,7 +23,6 @@ package com.jaspersoft.jasperserver.war.validation;
 import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.regex.Pattern;
 
@@ -32,14 +31,12 @@ import org.springframework.validation.Errors;
 import com.jaspersoft.jasperserver.war.common.JasperServerUtil;
 import com.jaspersoft.jasperserver.war.dto.DataTypeWrapper;
 import com.jaspersoft.jasperserver.war.util.MessagesCalendarFormatProvider;
-import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportUnit;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.DataType;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceLookup;
 import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
 
 /**
  * @author Ionut Nedelcu (ionutned@users.sourceforge.net)
- * @version $Id: DataTypeValidator.java 38534 2013-10-03 23:15:29Z schubar $
+ * @version $Id: DataTypeValidator.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
 public class DataTypeValidator implements Validator
 {
@@ -99,8 +96,8 @@ public class DataTypeValidator implements Validator
 		String strMinValue = null;
 		String strMaxValue = null;
 
-		if(dataType.getType() == DataType.TYPE_DATE || dataType.getType() == DataType.TYPE_DATE_TIME
-                || dataType.getType() == DataType.TYPE_TIME)
+		if(dataType.getDataTypeType() == DataType.TYPE_DATE || dataType.getDataTypeType() == DataType.TYPE_DATE_TIME
+                || dataType.getDataTypeType() == DataType.TYPE_TIME)
 		{
 			strMinValue = wrapper.getMinValueText();
 			strMaxValue = wrapper.getMaxValueText();
@@ -127,7 +124,7 @@ public class DataTypeValidator implements Validator
 			errors.rejectValue("dataType.regularExpr", "DataTypeValidator.error.too.long");
 		}
 
-		if (dataType.getType() == DataType.TYPE_NUMBER) {
+		if (dataType.getDataTypeType() == DataType.TYPE_NUMBER) {
 			BigDecimal minValue = null;
 			BigDecimal maxValue = null;
 			try {
@@ -152,21 +149,21 @@ public class DataTypeValidator implements Validator
 		}
 		
 		DateFormat df = null;
-		if (dataType.getType() == DataType.TYPE_DATE) {
+		if (dataType.getDataTypeType() == DataType.TYPE_DATE) {
 			df = calendarFormatProvider.getDateFormat();
 			validateDateTime(df, strMinValue, strMaxValue, "DataTypeValidator.error.invalid.date.format", errors);
 		}
-		if (dataType.getType() == DataType.TYPE_DATE_TIME) {
+		if (dataType.getDataTypeType() == DataType.TYPE_DATE_TIME) {
 			df = calendarFormatProvider.getDatetimeFormat();
 			validateDateTime(df, strMinValue, strMaxValue, "DataTypeValidator.error.invalid.date.time.format", errors);
 		}
 		
-		if (dataType.getType() == DataType.TYPE_TIME) {
+		if (dataType.getDataTypeType() == DataType.TYPE_TIME) {
 			df = calendarFormatProvider.getTimeFormat();
 			validateDateTime(df, strMinValue, strMaxValue, "DataTypeValidator.error.invalid.time.format", errors);
 		}
 
-		if (dataType.getType() == DataType.TYPE_TEXT && dataType.getRegularExpr() != null && dataType.getRegularExpr().trim().length() > 0) {
+		if (dataType.getDataTypeType() == DataType.TYPE_TEXT && dataType.getRegularExpr() != null && dataType.getRegularExpr().trim().length() > 0) {
 			if (
 				strMinValue != null
 				&& strMinValue.trim().length() > 0

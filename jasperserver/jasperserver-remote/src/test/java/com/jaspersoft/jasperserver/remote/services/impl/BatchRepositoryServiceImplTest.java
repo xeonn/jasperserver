@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2012 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
  * the following license terms  apply:
@@ -50,7 +50,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.springframework.security.AccessDeniedException;
+import org.springframework.security.access.AccessDeniedException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -70,7 +70,7 @@ import static org.testng.Assert.*;
  * <p></p>
  *
  * @author Zakhar.Tomchenco
- * @version $Id$
+ * @version $Id: $
  */
 public class BatchRepositoryServiceImplTest {
     @InjectMocks
@@ -134,13 +134,13 @@ public class BatchRepositoryServiceImplTest {
 
     @Test(expectedExceptions = IllegalParameterValueException.class)
     public void getResources_validateFolderUri_invalidFormat() throws ResourceNotFoundException, IllegalParameterValueException {
-        service.getResources(null, "not.valid.uri", null, null, null, null, null, null, null, null, null);
+        service.getResources(null, "not.valid.uri", null, null, null, null, null, null, null, null, null, null);
     }
 
     @Test(expectedExceptions = ResourceNotFoundException.class)
     public void getResources_validateFolderUri_folderDoesntExist() throws ResourceNotFoundException, IllegalParameterValueException {
         reset(repositoryService);
-        service.getResources(null, "/doesnt/exist", null, null, null, null, null, null, null, null, null);
+        service.getResources(null, "/doesnt/exist", null, null, null, null, null, null, null, null, null, null);
     }
 
     @Test(groups = {"GET"})
@@ -159,7 +159,7 @@ public class BatchRepositoryServiceImplTest {
         when(converterMock.getServerResourceType()).thenReturn(serverType);
         when(resourceConverterProvider.getToServerConverter(type.get(0))).thenReturn(converterMock);
         when(repositoryService.getFolder(any(ExecutionContext.class), anyString())).thenReturn(new FolderImpl());
-        service.getResources(q, folderUri, type, start, limit, recursive, showHidden, sortBy, null, null, null);
+        service.getResources(q, folderUri, type, type, start, limit, recursive, showHidden, sortBy, null, null, null);
         final RepositorySearchCriteria value = repositorySearchCriteriaArgumentCaptor.getValue();
         assertEquals(value.getSearchText(), q);
         assertEquals(value.getFolderUri(), folderUri);
@@ -188,7 +188,7 @@ public class BatchRepositoryServiceImplTest {
         when(repositorySearchService.getResultsCount(isNull(ExecutionContext.class), any(RepositorySearchCriteria.class))).thenReturn(20);
         when(resourceLoadStrategy.getItemsToLoadCount(20, 0)).thenReturn(20);
 
-        service.getResources(q, folderUri, type, start, limit, recursive, showHidden, sortBy, null, null, null);
+        service.getResources(q, folderUri, type, type, start, limit, recursive, showHidden, sortBy, null, null, null);
 
         verify(repositorySearchService).
                 getLookups(isNull(ExecutionContext.class), repositorySearchCriteriaArgumentCaptor.capture());
@@ -218,7 +218,7 @@ public class BatchRepositoryServiceImplTest {
         ToServerConverter converterMock = mock(ToServerConverter.class);
         when(converterMock.getServerResourceType()).thenReturn(serverType);
         when(resourceConverterProvider.getToServerConverter(type.get(0))).thenReturn(converterMock);
-        service.getResources(q, folderUri, type, start, limit, recursive, showHidden, sortBy, null, null, null);
+        service.getResources(q, folderUri, type, type, start, limit, recursive, showHidden, sortBy, null, null, null);
         final RepositorySearchCriteria value = repositorySearchCriteriaArgumentCaptor.getValue();
         assertEquals(value.getSearchText(), q);
         assertEquals(value.getFolderUri(), folderUri);
@@ -234,7 +234,7 @@ public class BatchRepositoryServiceImplTest {
         final String resourceLookupType = ClientTypeHelper.extractClientType(ClientResource.class);
         when(resourceConverterProvider.getToServerConverter(resourceLookupType)).thenReturn((ToServerConverter)new LookupResourceConverter());
         try {
-            final List<ClientResourceLookup> resources = service.getResources(null, null, Arrays.asList(resourceLookupType), null, null, null, null, null, null, null, null).getItems();
+            final List<ClientResourceLookup> resources = service.getResources(null, null, Arrays.asList(resourceLookupType), null, null, null, null, null, null, null, null, null).getItems();
             assertTrue(resources.isEmpty());
         } catch (IllegalParameterValueException e) {
             exception = e;
@@ -246,7 +246,7 @@ public class BatchRepositoryServiceImplTest {
     public void getResources_defaultValues() throws IllegalParameterValueException, ResourceNotFoundException {
         when(resourceLoadStrategy.getItemsToLoadCount(100, 0)).thenReturn(100);
 
-        service.getResources(null, null, null, null, null, null, null, null, null, null, null);
+        service.getResources(null, null, null, null, null, null, null, null, null, null, null, null);
 
         final RepositorySearchCriteria value = repositorySearchCriteriaArgumentCaptor.getValue();
         assertEquals(value.getStartIndex(), 0);
@@ -264,7 +264,7 @@ public class BatchRepositoryServiceImplTest {
         }
         ClientResourceLookup clientResourceLookup = new ClientResourceLookup();
         when(lookupResourceConverter.toClient(any(ResourceDetails.class), isNull(ToClientConversionOptions.class))).thenReturn(clientResourceLookup);
-        List<ClientResourceLookup> entity = service.getResources(null, null, null, null, null,null, null, null, null, null, null).getItems();
+        List<ClientResourceLookup> entity = service.getResources(null, null, null, null, null, null,null, null, null, null, null, null).getItems();
 
         assertEquals(entity.size(), resultsCount);
         for(ClientResource currentResultItem : entity){
@@ -283,7 +283,7 @@ public class BatchRepositoryServiceImplTest {
         when(resourceLoadStrategy.getItemsToLoadCount(20, 10)).thenReturn(expectedResourceDetailsListSize);
         when(lookupResourceConverter.toClient(any(ResourceDetails.class), isNull(ToClientConversionOptions.class))).thenReturn(clientResourceLookup);
 
-        final List<ClientResourceLookup> result = service.getResources(null, null, null, null, null, null, null, null, null, null, null).getItems();
+        final List<ClientResourceLookup> result = service.getResources(null, null, null, null, null, null, null, null, null, null, null, null).getItems();
 
         assertEquals(result.size(), resultsCount);
     }
@@ -292,7 +292,7 @@ public class BatchRepositoryServiceImplTest {
     public void getResources_ResponseCode_204() throws IllegalParameterValueException, ResourceNotFoundException {
         ClientResourceLookup clientResourceLookup = new ClientResourceLookup();
         when(lookupResourceConverter.toClient(any(ResourceDetails.class), isNull(ToClientConversionOptions.class))).thenReturn(clientResourceLookup);
-        final List<ClientResourceLookup> result = service.getResources(null, null, null, null, null,null, null, null, null, null, null).getItems();
+        final List<ClientResourceLookup> result = service.getResources(null, null, null, null, null, null,null, null, null, null, null, null).getItems();
 
         assertEquals(expectedResourceDetailsList.size(), 0);
     }

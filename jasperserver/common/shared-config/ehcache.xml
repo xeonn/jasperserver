@@ -10,16 +10,13 @@
 	<!-- Below is a configuration for ehcache distribution over RMI with autodiscovery based on multicast.
 		 to use it uncomment this section, and the one below under the cache decleration.
 		 For this to work IP-Multicasting must be enabled on all nodes --> 
-	<!--
 	<cacheManagerPeerProviderFactory
 	   class="net.sf.ehcache.distribution.RMICacheManagerPeerProviderFactory"
-	   properties="peerDiscovery=automatic,multicastGroupAddress=224.0.0.1,multicastGroupPort=4446,timeToLive=1"/>
+		properties="peerDiscovery=automatic,multicastGroupAddress=228.0.0.1,multicastGroupPort=4446,timeToLive=1"/>
 	               
 	<cacheManagerPeerListenerFactory
 		class="net.sf.ehcache.distribution.RMICacheManagerPeerListenerFactory"
-		properties="hostName=<insert-ip-address-or-host-name>,port=40001,socketTimeoutMillis=120000"/>
-	 -->
-		
+		properties="port=40011,remoteObjectPort=40012,socketTimeoutMillis=120000"/>
 	<defaultCache 
 		maxElementsInMemory="10000" 
 		eternal="false" 
@@ -28,7 +25,6 @@
 		timeToLiveSeconds="120" 
 		diskPersistent="false" 
 		diskExpiryThreadIntervalSeconds="120"/>
-
 	<!-- cache used by the object permission service -->
 	<cache name="aclCache"
 		maxElementsInMemory="10000"
@@ -41,7 +37,7 @@
 		<!-- 
 		<cacheEventListenerFactory
 			class="net.sf.ehcache.distribution.RMICacheReplicatorFactory"
-			properties="replicateAsynchronously=true, replicatePuts=true, replicateUpdates=true,replicateUpdatesViaCopy=false, replicateRemovals=true "/>
+			properties="replicateAsynchronously=true, replicatePuts=false, replicateUpdates=true,replicateUpdatesViaCopy=false, replicateRemovals=true "/>
         <bootstrapCacheLoaderFactory
             class="net.sf.ehcache.distribution.RMIBootstrapCacheLoaderFactory"
             properties="bootstrapAsynchronously=true, maximumChunkSizeBytes=5000000"/>
@@ -60,7 +56,7 @@
 		maxElementsInMemory="10000"
 		eternal="false"
 		overflowToDisk="false"
-		timeToIdleSeconds="600"
+		timeToIdleSeconds="120"
 		timeToLiveSeconds="1200"
 		diskPersistent="false"/>
 

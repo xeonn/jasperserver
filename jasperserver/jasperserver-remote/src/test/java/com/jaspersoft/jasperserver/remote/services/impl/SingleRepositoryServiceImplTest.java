@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2012 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
  * the following license terms  apply:
@@ -21,65 +21,31 @@
 package com.jaspersoft.jasperserver.remote.services.impl;
 
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.ContentResource;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.DataType;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.FileResource;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.FileResourceData;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.Folder;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.InputControl;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceLookup;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceReference;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.client.ContentResourceImpl;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.client.DataTypeImpl;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.client.FileResourceImpl;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.client.FolderImpl;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.client.InputControlImpl;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.client.QueryImpl;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.client.ResourceLookupImpl;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.*;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.client.*;
 import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
 import com.jaspersoft.jasperserver.api.search.SearchCriteriaFactory;
 import com.jaspersoft.jasperserver.dto.resources.ClientInputControl;
 import com.jaspersoft.jasperserver.dto.resources.ClientResource;
 import com.jaspersoft.jasperserver.dto.resources.ResourceMediaType;
-import com.jaspersoft.jasperserver.remote.exception.AccessDeniedException;
-import com.jaspersoft.jasperserver.remote.exception.FolderAlreadyExistsException;
-import com.jaspersoft.jasperserver.remote.exception.FolderNotFoundException;
-import com.jaspersoft.jasperserver.remote.exception.IllegalParameterValueException;
-import com.jaspersoft.jasperserver.remote.exception.NotAFileException;
-import com.jaspersoft.jasperserver.remote.exception.ResourceAlreadyExistsException;
-import com.jaspersoft.jasperserver.remote.exception.ResourceNotFoundException;
-import com.jaspersoft.jasperserver.remote.exception.VersionNotMatchException;
+import com.jaspersoft.jasperserver.remote.exception.*;
 import com.jaspersoft.jasperserver.remote.resources.ClientTypeHelper;
-import com.jaspersoft.jasperserver.remote.resources.converters.DataTypeResourceConverter;
-import com.jaspersoft.jasperserver.remote.resources.converters.ResourceConverterProvider;
-import com.jaspersoft.jasperserver.remote.resources.converters.ToClientConversionOptions;
-import com.jaspersoft.jasperserver.remote.resources.converters.ToClientConverter;
-import com.jaspersoft.jasperserver.remote.resources.converters.ToServerConversionOptions;
-import com.jaspersoft.jasperserver.remote.resources.converters.ToServerConverter;
+import com.jaspersoft.jasperserver.remote.resources.converters.*;
+import com.jaspersoft.jasperserver.remote.resources.operation.CopyMoveOperationStrategy;
 import com.jaspersoft.jasperserver.war.common.ConfigurationBean;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.mockito.*;
 import org.mockito.internal.stubbing.answers.ReturnsArgumentAt;
-import org.springframework.security.BadCredentialsException;
-import org.testng.annotations.AfterGroups;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeGroups;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.testng.annotations.*;
 
 import java.io.ByteArrayInputStream;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.isNull;
 import static org.mockito.Mockito.same;
@@ -110,6 +76,9 @@ public class SingleRepositoryServiceImplTest {
     private ToClientConverter toClientConverter;
     @Mock
     private SearchCriteriaFactory searchCriteriaFactory;
+    @Spy
+    protected Map<String, CopyMoveOperationStrategy> copyMoveStrategies = new HashMap<String, CopyMoveOperationStrategy>();
+
 
     private ClientInputControl clientObject;
 
@@ -303,7 +272,7 @@ public class SingleRepositoryServiceImplTest {
     public void testDeleteResource_Forbidden() throws Exception{
         Mockito.when(repositoryService.getResource(Mockito.any(ExecutionContext.class), Mockito.eq(uri))).thenReturn(null);
         Mockito.when(repositoryService.getFolder(Mockito.any(ExecutionContext.class), Mockito.eq(uri))).thenReturn(folder);
-        Mockito.doThrow(new org.springframework.security.AccessDeniedException("NO")).when(repositoryService).deleteFolder(Mockito.any(ExecutionContext.class), Mockito.eq(uri));
+        Mockito.doThrow(new org.springframework.security.access.AccessDeniedException("NO")).when(repositoryService).deleteFolder(Mockito.any(ExecutionContext.class), Mockito.eq(uri));
 
         service.deleteResource(uri);
     }
@@ -443,7 +412,8 @@ public class SingleRepositoryServiceImplTest {
         Mockito.verify(repositoryService, times(3)).saveFolder(any(ExecutionContext.class), any(Folder.class));
     }
 
-    @Test(groups = "POST", expectedExceptions = {AccessDeniedException.class})
+    // TODO: SSU
+    @Test(groups = "POST", expectedExceptions = {AccessDeniedException.class},enabled = false)
     public void testCreateResource_createNotExistingFoldersWithoutPermission() throws Exception{
         Mockito.doReturn(false).when(repositoryService).resourceExists(any(ExecutionContext.class), anyString());
         Mockito.when(repositoryService.getFolder(any(ExecutionContext.class), eq("/"))).thenThrow(BadCredentialsException.class);
@@ -504,20 +474,19 @@ public class SingleRepositoryServiceImplTest {
 
     @Test(groups = "COPY")
     public void testCopyResource_copy() throws Exception{
-        Mockito.when(repositoryService.getResource(any(ExecutionContext.class), eq(uri))).thenReturn(resource);
-        Mockito.when(repositoryService.getResource(any(ExecutionContext.class), eq(uri2))).thenReturn(null);
-        Mockito.when(repositoryService.folderExists(any(ExecutionContext.class), anyString())).thenReturn(true);
+        Mockito.when(repositoryService.getResource(any(ExecutionContext.class), eq(resource.getURIString()))).thenReturn(resource);
+        Mockito.when(repositoryService.getFolder(any(ExecutionContext.class), eq(folder.getURIString()))).thenReturn(folder);
 
-        service.copyResource(uri, uri2, false, false);
+        service.copyResource(resource.getURIString(), folder.getURIString(), false, false);
 
-        verify(repositoryService).copyResource(any(ExecutionContext.class), eq(uri), eq(uri2 + Folder.SEPARATOR + resource2.getName()));
+        verify(repositoryService).copyResource(any(ExecutionContext.class), eq(resource.getURIString()), eq(folder.getURIString() + Folder.SEPARATOR + resource.getName()));
     }
 
     @Test(groups = "COPY", expectedExceptions = {IllegalParameterValueException.class})
     public void testCopyResource_sourceNotSet() throws Exception{
         Mockito.when(repositoryService.getResource(any(ExecutionContext.class), eq(uri))).thenReturn(resource);
         Mockito.when(repositoryService.getResource(any(ExecutionContext.class), eq(uri2))).thenReturn(null);
-        Mockito.when(repositoryService.folderExists(any(ExecutionContext.class), anyString())).thenReturn(true);
+        Mockito.when(repositoryService.getFolder(any(ExecutionContext.class), anyString())).thenReturn(folder);
 
         service.copyResource(null, uri2, false, false);
     }
@@ -526,47 +495,47 @@ public class SingleRepositoryServiceImplTest {
     public void testCopyResource_copyNotExists() throws Exception{
         Mockito.when(repositoryService.getResource(any(ExecutionContext.class), eq(uri))).thenReturn(null);
         Mockito.when(repositoryService.getResource(any(ExecutionContext.class), eq(uri2))).thenReturn(null);
-        Mockito.when(repositoryService.folderExists(any(ExecutionContext.class), anyString())).thenReturn(true);
+        Mockito.when(repositoryService.getFolder(any(ExecutionContext.class), anyString())).thenReturn(null);
 
         service.copyResource(uri, uri2, false, false);
     }
 
     @Test(groups = "COPY", expectedExceptions = {ResourceAlreadyExistsException.class})
     public void testCopyResource_copyDestinationAlreadyExists() throws Exception{
-        Mockito.when(repositoryService.getResource(any(ExecutionContext.class), eq(uri))).thenReturn(resource);
-        Mockito.when(repositoryService.getResource(any(ExecutionContext.class), eq(resource2.getURIString()))).thenReturn(resource2);
-        Mockito.when(repositoryService.folderExists(any(ExecutionContext.class), anyString())).thenReturn(true);
+        Mockito.when(repositoryService.getResource(any(ExecutionContext.class), eq(resource.getURIString()))).thenReturn(resource);
+        Mockito.when(repositoryService.getResource(any(ExecutionContext.class), eq(folder.getURIString() + Folder.SEPARATOR + resource.getName()))).thenReturn(resource2);
+        Mockito.when(repositoryService.getFolder(any(ExecutionContext.class), eq(folder.getURIString()))).thenReturn(folder);
 
-        service.copyResource(uri, uri2, false, false);
+        service.copyResource(resource.getURIString(), folder.getURIString(), false, false);
     }
 
     @Test(groups = "COPY")
     public void testCopyResource_copyDestinationAlreadyExistsOverwrite() throws Exception{
-        Mockito.when(repositoryService.getResource(any(ExecutionContext.class), eq(uri))).thenReturn(resource);
-        Mockito.when(repositoryService.getResource(any(ExecutionContext.class), eq(resource2.getURIString()))).thenReturn(resource2);
-        Mockito.when(repositoryService.folderExists(any(ExecutionContext.class), anyString())).thenReturn(true);
+        Mockito.when(repositoryService.getResource(any(ExecutionContext.class), eq(resource.getURIString()))).thenReturn(resource);
+        Mockito.when(repositoryService.getResource(any(ExecutionContext.class), eq(folder.getURIString() + Folder.SEPARATOR + resource.getName()))).thenReturn(resource2);
+        Mockito.when(repositoryService.getFolder(any(ExecutionContext.class), eq(folder.getURIString()))).thenReturn(folder);
 
-        service.copyResource(uri, uri2, false, true);
+        service.copyResource(resource.getURIString(), folder.getURIString(), false, true);
 
-        verify(repositoryService).deleteResource(any(ExecutionContext.class), eq(uri2 + Folder.SEPARATOR + resource2.getName()));
+        verify(repositoryService).deleteResource(any(ExecutionContext.class), eq(folder.getURIString() + Folder.SEPARATOR + resource.getName()));
     }
 
     @Test(groups = "COPY")
     public void testCopyResource_copyFolder() throws Exception{
-        Mockito.when(repositoryService.getResource(any(ExecutionContext.class), eq(uri2))).thenReturn(folder);
+        Mockito.when(repositoryService.getResource(any(ExecutionContext.class), eq(folder.getURIString()))).thenReturn(folder);
         Mockito.when(repositoryService.getResource(any(ExecutionContext.class), eq(uri))).thenReturn(null);
-        Mockito.when(repositoryService.folderExists(any(ExecutionContext.class), anyString())).thenReturn(true);
+        Mockito.when(repositoryService.getFolder(any(ExecutionContext.class), eq(uri))).thenReturn(folder);
 
-        service.copyResource(uri2, uri, false, false);
+        service.copyResource(folder.getURIString(), uri, false, false);
 
-        Mockito.verify(repositoryService).copyFolder(any(ExecutionContext.class), eq(uri2), eq(uri + Folder.SEPARATOR + folder.getName()));
+        Mockito.verify(repositoryService).copyFolder(any(ExecutionContext.class), eq(folder.getURIString()), eq(folder.getURIString() + Folder.SEPARATOR + folder.getName()));
     }
 
     @Test(groups = "COPY", expectedExceptions = {AccessDeniedException.class})
     public void testCopyResource_copyForbiddenFolder() throws Exception{
         Mockito.when(repositoryService.getResource(any(ExecutionContext.class), eq(uri2))).thenReturn(folder);
         Mockito.when(repositoryService.getResource(any(ExecutionContext.class), eq(uri))).thenReturn(null);
-        Mockito.when(repositoryService.folderExists(any(ExecutionContext.class), anyString())).thenReturn(true);
+        Mockito.when(repositoryService.getFolder(any(ExecutionContext.class), anyString())).thenReturn(folder);
         Mockito.when(uriHardModifyProtectionChecker.isHardModifyProtected(uri2)).thenReturn(true);
 
         service.copyResource(uri2, uri, false, false);
@@ -574,24 +543,23 @@ public class SingleRepositoryServiceImplTest {
 
     @Test(groups = "MOVE", dependsOnGroups = {"COPY"})
     public void testMoveResource_move() throws Exception{
-        Mockito.when(repositoryService.getResource(any(ExecutionContext.class), eq(uri))).thenReturn(resource);
-        Mockito.when(repositoryService.getResource(any(ExecutionContext.class), eq(uri2))).thenReturn(null);
-        Mockito.when(repositoryService.folderExists(any(ExecutionContext.class), anyString())).thenReturn(true);
+        Mockito.when(repositoryService.getResource(any(ExecutionContext.class), eq(resource.getURIString()))).thenReturn(resource);
+        Mockito.when(repositoryService.getFolder(any(ExecutionContext.class), eq(folder.getURIString()))).thenReturn(folder);
 
-        service.moveResource(uri, uri2, false, false);
+        service.moveResource(resource.getURIString(), folder.getURIString(), false, false);
 
-        verify(repositoryService).moveResource(any(ExecutionContext.class), eq(uri), eq(uri2));
+        verify(repositoryService).moveResource(any(ExecutionContext.class), eq(resource.getURIString()), eq(folder.getURIString()));
     }
 
     @Test(groups = "MOVE", dependsOnGroups = {"COPY"})
     public void testMoveResource_moveFolder() throws Exception{
-        Mockito.when(repositoryService.getResource(any(ExecutionContext.class), eq(uri2))).thenReturn(folder);
+        Mockito.when(repositoryService.getResource(any(ExecutionContext.class), eq(folder.getURIString()))).thenReturn(folder);
         Mockito.when(repositoryService.getResource(any(ExecutionContext.class), eq(uri))).thenReturn(null);
-        Mockito.when(repositoryService.folderExists(any(ExecutionContext.class), anyString())).thenReturn(true);
+        Mockito.when(repositoryService.getFolder(any(ExecutionContext.class), eq(uri))).thenReturn(folder);
 
-        service.moveResource(uri2, uri, false, false);
+        service.moveResource(folder.getURIString(), uri, false, false);
 
-        verify(repositoryService).moveFolder(any(ExecutionContext.class), eq(uri2), eq(uri));
+        Mockito.verify(repositoryService).moveFolder(any(ExecutionContext.class), eq(folder.getURIString()), eq(folder.getURIString()));
     }
 
     @Test(groups = "GET")

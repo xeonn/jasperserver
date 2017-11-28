@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -21,14 +21,14 @@
 package com.jaspersoft.jasperserver.api.logging.filter;
 
 import com.jaspersoft.jasperserver.api.logging.context.LoggingContextProvider;
-import com.jaspersoft.jasperserver.api.JSException;
 
-import javax.servlet.*;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import java.io.IOException;
-import java.io.StringWriter;
-import java.io.PrintWriter;
-
-import org.springframework.security.AccessDeniedException;
 
 /**
  * @author Sergey Prilukin

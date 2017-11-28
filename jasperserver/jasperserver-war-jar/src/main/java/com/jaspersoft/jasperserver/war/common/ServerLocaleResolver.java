@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -30,7 +30,7 @@ import org.springframework.context.i18n.LocaleContextHolder;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ServerLocaleResolver.java 37915 2013-09-21 04:21:45Z yuriy.plakosh $
+ * @version $Id: ServerLocaleResolver.java 47331 2014-07-18 09:13:06Z kklein $
  */
 public class ServerLocaleResolver implements WebLocaleResolver {
 

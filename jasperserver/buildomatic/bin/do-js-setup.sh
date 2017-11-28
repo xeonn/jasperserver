@@ -104,7 +104,7 @@ fi
 
 JS_OPTION=$3
 JS_ANT_TARGET=$4
-JS_ANT_OPTIONS="$5 $6 $7 -Djs.setup.mode=$JS_SETUP_MODE"
+JS_ANT_OPTIONS="$5 $6 $7 -Djs.setup.mode=$JS_SETUP_MODE -Djava.net.preferIPv4Stack=true"
 
 #
 # Initializing time variable.
@@ -128,7 +128,7 @@ log
 log "Running JasperReports Server $JS_SETUP_MODE script at $JS_CURRENT_TIME"
 log
 
-export ANT_OPTS="$ANT_OPTS -Xms512m -Xmx2048m -XX:PermSize=128m"
+export ANT_OPTS="$ANT_OPTS -Dnet.sf.ehcache.disabled=true -Xms512m -Xmx2048m -XX:PermSize=128m"
 
 log
 log "Using ANT_OPTS: $ANT_OPTS"

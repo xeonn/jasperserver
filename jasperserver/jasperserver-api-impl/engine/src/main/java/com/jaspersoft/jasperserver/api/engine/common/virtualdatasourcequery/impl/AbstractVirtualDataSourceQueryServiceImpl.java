@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2012 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -40,7 +40,7 @@ import java.util.Set;
 
 /**
  * @author Ivan Chan (ichan@jaspersoft.com)
- * @version $Id: AbstractVirtualDataSourceQueryServiceImpl.java 44712 2014-04-17 19:11:49Z ichan $
+ * @version $Id: AbstractVirtualDataSourceQueryServiceImpl.java 47331 2014-07-18 09:13:06Z kklein $
  */
 public abstract class AbstractVirtualDataSourceQueryServiceImpl implements VirtualDataSourceQueryService {
 

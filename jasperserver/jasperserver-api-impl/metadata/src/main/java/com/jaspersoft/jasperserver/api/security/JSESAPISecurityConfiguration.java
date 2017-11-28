@@ -1,20 +1,24 @@
-package com.jaspersoft.jasperserver.api.security;
-
-/**
- * OWASP Enterprise Security API (ESAPI)
+/*
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
+ * http://www.jaspersoft.com.
  *
- * This file is part of the Open Web Application Security Project (OWASP)
- * Enterprise Security API (ESAPI) project. For details, please see
- * <a href="http://www.owasp.org/index.php/ESAPI">http://www.owasp.org/index.php/ESAPI</a>.
+ * Unless you have purchased  a commercial license agreement from Jaspersoft,
+ * the following license terms  apply:
  *
- * Copyright (c) 2007 - The OWASP Foundation
+ * This program is free software: you can redistribute it and/or  modify
+ * it under the terms of the GNU Affero General Public License  as
+ * published by the Free Software Foundation, either version 3 of  the
+ * License, or (at your option) any later version.
  *
- * The ESAPI is published by OWASP under the BSD license. You should read and accept the
- * LICENSE before you use, modify, and/or redistribute this software.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero  General Public License for more details.
  *
- * @author Jeff Williams <a href="http://www.aspectsecurity.com">Aspect Security</a>
- * @created 2007
+ * You should have received a copy of the GNU Affero General Public  License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+package com.jaspersoft.jasperserver.api.security;
 
 import org.owasp.esapi.ESAPI;
 import org.owasp.esapi.Logger;

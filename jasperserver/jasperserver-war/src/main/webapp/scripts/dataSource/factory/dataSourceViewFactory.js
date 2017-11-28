@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2014 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -30,9 +30,8 @@ define(function(require) {
         AwsDataSourceView = require("dataSource/view/AwsDataSourceView"),
         VirtualDataSourceView = require("dataSource/view/VirtualDataSourceView"),
         BeanDataSourceView = require("dataSource/view/BeanDataSourceView"),
-        DiagnosticCustomDataSourceView = require("dataSource/view/DiagnosticCustomDataSourceView"),
-        HiveDataSourceView = require("dataSource/view/HiveDataSourceView"),
-        MongoDbDataSourceView = require("dataSource/view/MongoDbDataSourceView");
+        DiagnosticCustomDataSourceView = require("dataSource/view/DiagnosticCustomDataSourceView");
+        //TextDataSourceView = require("dataSource/fileDataSource/TextDataSourceView");
 
 
     var registeredViews = {};
@@ -44,18 +43,24 @@ define(function(require) {
 	// next, we pre-define the custom views for some of the custom data sources
 	// you also can define your own views here
     registeredViews[customDataSourceTypes.DIAGNOSTIC] = DiagnosticCustomDataSourceView;
-    registeredViews[customDataSourceTypes.HIVE] = HiveDataSourceView;
-    registeredViews[customDataSourceTypes.MONGODB] = MongoDbDataSourceView;
+
+    // disable file data sources for now
+	//registeredViews[customDataSourceTypes.TEXT_FILE] = TextDataSourceView;
 
     return {
         getView: function(options) {
-            var constructor = JdbcDataSourceView;
+            var constructor;
+
             if (options.dataSourceType) {
                 constructor = registeredViews[options.dataSourceType];
                 if (!constructor) {
                     constructor = CustomDataSourceView;
                 }
+            } else {
+                // by default
+                constructor = JdbcDataSourceView;
             }
+
             return new constructor(options);
         },
 

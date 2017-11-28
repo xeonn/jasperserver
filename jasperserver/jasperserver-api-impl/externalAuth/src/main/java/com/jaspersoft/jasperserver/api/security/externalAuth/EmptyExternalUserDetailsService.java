@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2012 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -15,8 +15,8 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Affero  General Public License for more details.
  *
- *  You should have received a copy of the GNU Affero General Public  License
- *  along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public  License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 package com.jaspersoft.jasperserver.api.security.externalAuth;
@@ -24,9 +24,9 @@ package com.jaspersoft.jasperserver.api.security.externalAuth;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.springframework.dao.DataAccessException;
-import org.springframework.security.GrantedAuthority;
-import org.springframework.security.userdetails.UserDetails;
-import org.springframework.security.userdetails.UsernameNotFoundException;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.util.Collections;
 import java.util.List;
@@ -37,13 +37,13 @@ import java.util.Map;
  * It returns empty user details list, empty authorities for user name, etc.
  *
  * @author Dmitriy Litvak
- * Extends {@link org.springframework.security.userdetails.jdbc.JdbcDaoImpl}
+ * Extends {@link org.springframework.security.core.userdetails.jdbc.JdbcDaoImpl}
  */
 public class EmptyExternalUserDetailsService implements ExternalUserDetailsService {
 	public static final Logger logger = LogManager.getLogger(EmptyExternalUserDetailsService.class);
 
     /**
-     * {@link org.springframework.security.userdetails.jdbc.JdbcDaoImpl}
+     * {@link org.springframework.security.core.userdetails.jdbc.JdbcDaoImpl}
      */
 	@Override
 	public List<GrantedAuthority> loadAuthoritiesByUsername(String username) throws DataAccessException {
@@ -62,9 +62,9 @@ public class EmptyExternalUserDetailsService implements ExternalUserDetailsServi
 	 * <code>UserDetails</code> object that comes back may have a username that is of a different case than what was
 	 * actually requested..
 	 *
-	 * @param username the username presented to the {@link org.springframework.security.providers.dao.DaoAuthenticationProvider}
+	 * @param username the username presented to the {@link org.springframework.security.authentication.dao.DaoAuthenticationProvider}
 	 * @return a fully populated user record (never <code>null</code>)
-	 * @throws org.springframework.security.userdetails.UsernameNotFoundException
+	 * @throws org.springframework.security.core.userdetails.UsernameNotFoundException
 	 *          if the user could not be found or the user has no GrantedAuthority
 	 * @throws org.springframework.dao.DataAccessException
 	 *          if user could not be found for a repository-specific reason

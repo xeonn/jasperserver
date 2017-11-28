@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -57,7 +57,7 @@ import com.jaspersoft.jasperserver.war.util.SessionObjectSerieAccessor;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: AbstractReportExporter.java 44903 2014-04-22 12:24:57Z tdanciu $
+ * @version $Id: AbstractReportExporter.java 49286 2014-09-23 13:32:25Z ykovalchyk $
  */
 public abstract class AbstractReportExporter extends MultiAction {
 	
@@ -122,10 +122,10 @@ public abstract class AbstractReportExporter extends MultiAction {
 			boolean isPaginated = result.isPaginated();
 			if (isPaginationPreferred != null && isPaginated != isPaginationPreferred) 
 			{
-				if (log.isDebugEnabled()) {
+			if (log.isDebugEnabled()) {
 					log.debug("requested report pagination flag: " + isPaginationPreferred + ", current report pagination flag: " + isPaginated);
-				}
-				
+			}
+			
 				context.getRequestScope().put(getViewReportAction().getAttributeIgnorePagination(), !isPaginationPreferred);
 				result = getViewReportAction().executeReport(context);
 			}

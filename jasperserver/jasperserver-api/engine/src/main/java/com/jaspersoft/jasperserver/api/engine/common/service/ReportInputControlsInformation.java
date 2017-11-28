@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -31,7 +31,7 @@ import java.util.Set;
  * Represents a list of ReportInputControlInformation objects associated with a ReportUnit
  * 
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ReportInputControlsInformation.java 23025 2012-04-06 10:22:59Z andy21ca $
+ * @version $Id: ReportInputControlsInformation.java 47331 2014-07-18 09:13:06Z kklein $
  */
 @JasperServerAPI
 public interface ReportInputControlsInformation {

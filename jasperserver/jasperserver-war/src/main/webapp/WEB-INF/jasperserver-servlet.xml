@@ -97,9 +97,6 @@
                 <prop key="/providers/**">bifController</prop>
                 <prop key="/mods/**">bifController</prop>
 
-                <!-- Visualize.js -->
-                <prop key="/client/visualize.js">visualizeController</prop>
-
                 <!--scheduler-->
                 <prop key="/scheduler/jobsummary.html">schedulerController</prop>
                 <prop key="/scheduler/jobdetails.html">schedulerController</prop>
@@ -133,6 +130,7 @@
     <util:map id="commonProperties" scope="request">
         <entry key="organizationId" value="#{${bean.securityContextProvider}.contextUser.tenantId}"/>
         <entry key="publicFolderUri" value="#{configurationBean.publicFolderUri}"/>
+        <entry key="tempFolderUri" value="#{configurationBean.tempFolderUri}"/>
     </util:map>
 
     <util:map id="jsOptimizationProperties" scope="request">
@@ -193,7 +191,7 @@
     </bean>
 
     <bean id="homePageByRole" class="java.util.ArrayList">
-        <constructor-arg>
+        <constructor-arg index="0" type="java.util.Collection">
             <list>
                 <value>ROLE_ADMINISTRATOR|redirect:/flow.html?_flowId=searchFlow</value>
                 <value>ROLE_USER|redirect:/flow.html?_flowId=searchFlow</value>
@@ -240,12 +238,7 @@
 	</bean>
 
 	<bean id="logSettingsController" class="com.jaspersoft.jasperserver.war.control.LogSettingsController">
-		<property name="loggerDescriptionFiles">
-			<list>
-                <value>WEB-INF/bundles/logger_descriptions.properties</value>
-			</list>
-		</property>
-        <property name="messageSource" ref="messageSource"/>
+		<property name="log4jSettingsService" ref="log4jSettingsService"/>
         <property name="propertiesManagementService" ref="propertiesManagementService"/>
 	</bean>
 
@@ -374,7 +367,7 @@
     <bean id="exceptionResolver"  class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
         <property name="exceptionMappings">
             <props>
-                <prop key="org.springframework.security.AccessDeniedException">modules/system/AccessDeniedPage</prop>
+                <prop key="org.springframework.security.access.AccessDeniedException">modules/system/AccessDeniedPage</prop>
                 <prop key="org.springframework.webflow.execution.repository.NoSuchFlowExecutionException">modules/system/sessionExpiredErrorPage</prop>
                 <prop key="java.lang.Exception">modules/system/errorPage</prop>
             </props>
@@ -457,15 +450,13 @@
         <property name="hyperlinkProducerFactory">
             <ref bean="viewReportHyperlinkProducerFactory"/>
         </property>
-
+        <property name="reportContextFactory" ref="${bean.reportExecutionControllerReportContextFactory}" />
 	</bean>
+
+    <bean id="reportExecutionControllerReportContextFactory" class="com.jaspersoft.jasperserver.war.action.hyperlinks.DefaultReportContextFactory"/>
 
     <bean id="bifController" class="com.jaspersoft.jasperserver.war.BIFController">
         <property name="pagesLocation" value="modules/bif" />
-    </bean>
-
-    <bean id="visualizeController" class="com.jaspersoft.jasperserver.war.VisualizeJSController">
-        <property name="defaultUrl" value="${deploy.base.url}"/>
     </bean>
 
 </beans>

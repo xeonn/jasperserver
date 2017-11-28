@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005 - 2013 Jaspersoft Corporation. All rights  reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
 * http://www.jaspersoft.com.
 *
 * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -16,85 +16,72 @@
 * GNU Affero  General Public License for more details.
 *
 * You should have received a copy of the GNU Affero General Public  License
-* along with this program.&nbsp; If not, see <http://www.gnu.org/licenses/>.
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 package com.jaspersoft.jasperserver.remote.connection;
 
+import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.BeanReportDataSource;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.service.ReportDataSourceService;
-import com.jaspersoft.jasperserver.dto.connection.BeanConnection;
+import com.jaspersoft.jasperserver.api.metadata.jasperreports.service.ReportDataSourceServiceFactory;
+import com.jaspersoft.jasperserver.dto.resources.ClientBeanDataSource;
 import com.jaspersoft.jasperserver.remote.exception.IllegalParameterValueException;
-import com.jaspersoft.jasperserver.remote.exception.MandatoryParameterNotFoundException;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
+import com.jaspersoft.jasperserver.remote.resources.converters.BeanDataSourceResourceConverter;
+import com.jaspersoft.jasperserver.remote.resources.converters.ToServerConversionOptions;
 import org.springframework.stereotype.Service;
 
-import java.lang.reflect.Method;
+import javax.annotation.Resource;
 import java.util.Map;
 
 /**
  * <p></p>
  *
  * @author yaroslav.kovalchyk
- * @version $Id: BeanConnectionStrategy.java 42684 2014-03-06 14:26:22Z ykovalchyk $
+ * @version $Id: BeanConnectionStrategy.java 50011 2014-10-09 16:57:26Z vzavadskii $
  */
 @Service
-public class BeanConnectionStrategy implements ConnectionManagementStrategy<BeanConnection> {
-    @Autowired
-    private ApplicationContext ctx;
+public class BeanConnectionStrategy implements ConnectionManagementStrategy<ClientBeanDataSource> {
+    @Resource(name = "beanDataSourceServiceFactory")
+    private ReportDataSourceServiceFactory dataSourceFactory;
+    @Resource
+    private BeanDataSourceResourceConverter beanDataSourceResourceConverter;
 
     @Override
-    public BeanConnection createConnection(BeanConnection connectionDescription, Map<String, Object> data) throws IllegalParameterValueException {
+    public ClientBeanDataSource createConnection(ClientBeanDataSource connectionDescription, Map<String, Object> data) throws IllegalParameterValueException {
         // functionality of this method is copied from com.jaspersoft.jasperserver.war.action.DataSourceAction.testBeanDataSource()
-        final Object bean;
+        Exception exception = null;
+        boolean passed = false;
+        BeanReportDataSource beanReportDataSource = beanDataSourceResourceConverter.
+                toServer(connectionDescription, ToServerConversionOptions.getDefault().setSuppressValidation(true));
+
         try {
-            bean = ctx.getBean(connectionDescription.getBeanName());
-        } catch (NoSuchBeanDefinitionException e) {
-            throw new ConnectionFailedException(connectionDescription.getBeanName(), "beanName", null, e);
-        }
-        if (bean == null) {
-            throw new ConnectionFailedException(connectionDescription.getBeanName(), "beanName", null, null);
-        } else {
-            final String beanMethod = connectionDescription.getBeanMethod();
-            if (beanMethod == null) {
-                // The bean had better be a ReportDataSourceService
-                if (!(bean instanceof ReportDataSourceService)) {
-                    throw new MandatoryParameterNotFoundException("beanMethod");
-                }
-            } else {
-                // The method on this bean returns a ReportDataSourceService
-                Method serviceMethod;
-                try {
-                    serviceMethod = bean.getClass().getMethod(beanMethod, null);
-                    Object obj = serviceMethod.invoke(bean, null);
-                    if (obj == null) {
-                        throw new ConnectionFailedException(connectionDescription);
-                    }
-                } catch (NoSuchMethodException e) {
-                    throw new ConnectionFailedException(connectionDescription.getBeanMethod(), "beanMethod",
-                            "No such method: " + connectionDescription.getBeanMethod(), e);
-                } catch (SecurityException e) {
-                    throw new ConnectionFailedException(connectionDescription.getBeanMethod(), "beanMethod", null, e);
-                } catch (Exception e) {
-                    throw new ConnectionFailedException(connectionDescription, e);
-                }
+            ReportDataSourceService beanReportDataSourceService = dataSourceFactory.createService(beanReportDataSource);
+            if (beanReportDataSourceService != null) {
+                passed = true;
             }
+        } catch(Exception e) {
+            exception = e;
         }
+
+        if(!passed){
+            throw new ConnectionFailedException(connectionDescription, exception);
+        }
+
+
         return connectionDescription;
     }
 
     @Override
-    public void deleteConnection(BeanConnection connectionDescription, Map<String, Object> data) {
+    public void deleteConnection(ClientBeanDataSource connectionDescription, Map<String, Object> data) {
     }
 
     @Override
-    public BeanConnection modifyConnection(BeanConnection newConnectionDescription, BeanConnection oldConnectionDescription, Map<String, Object> data) throws IllegalParameterValueException {
+    public ClientBeanDataSource modifyConnection(ClientBeanDataSource newConnectionDescription, ClientBeanDataSource oldConnectionDescription, Map<String, Object> data) throws IllegalParameterValueException {
         // here is nothing to update, just check if it can be connected.
         return createConnection(newConnectionDescription, data);
     }
 
     @Override
-    public BeanConnection secureGetConnection(BeanConnection connectionDescription, Map<String, Object> data) {
+    public ClientBeanDataSource secureGetConnection(ClientBeanDataSource connectionDescription, Map<String, Object> data) {
         // no hidden attributes
         return connectionDescription;
     }

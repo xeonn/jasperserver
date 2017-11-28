@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -31,7 +31,7 @@ import java.util.List;
  * It extends {@link com.jaspersoft.jasperserver.api.metadata.common.domain.Resource}
  *
  * @author Teodor Danciu (teodord@users.sourceforge.net)
- * @version $Id: InputControl.java 22756 2012-03-23 10:39:15Z sergey.prilukin $
+ * @version $Id: InputControl.java 51947 2014-12-11 14:38:38Z ogavavka $
  * @see com.jaspersoft.jasperserver.api.metadata.common.domain.client.InputControlImpl
  */
 @JasperServerAPI
@@ -56,14 +56,14 @@ public interface InputControl extends Resource
      *
      * @return numeric type
      */
-	public byte getType();
+	public byte getInputControlType();
 
     /**
      * Sets the type for the input control
      *
      * @param type numeric type
      */
-	public void setType(byte type);
+	public void setInputControlType(byte type);
 
     /**
      * Shows if the input control should have some value for report layout. It means

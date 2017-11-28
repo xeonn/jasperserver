@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -33,6 +33,8 @@ import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.BeanReportD
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportDataSource;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.service.ReportDataSourceService;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.service.ReportDataSourceServiceFactory;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 
 /**
  * @author swood
@@ -41,6 +43,8 @@ import com.jaspersoft.jasperserver.api.metadata.jasperreports.service.ReportData
 public class BeanReportDataSourceServiceFactory implements ReportDataSourceServiceFactory, ApplicationContextAware {
 
 	ApplicationContext ctx;
+
+    private MessageSource messageSource;
 	
 	/**
 	 * 
@@ -56,25 +60,29 @@ public class BeanReportDataSourceServiceFactory implements ReportDataSourceServi
 		ctx = arg0;
 	}
 
-	/* (non-Javadoc)
-	 * @see com.jaspersoft.jasperserver.api.metadata.jasperreports.service.ReportDataSourceServiceFactory#createService(com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportDataSource)
-	 */
+    public void setMessageSource(MessageSource messageSource) {
+        this.messageSource = messageSource;
+    }
+
+    /* (non-Javadoc)
+         * @see com.jaspersoft.jasperserver.api.metadata.jasperreports.service.ReportDataSourceServiceFactory#createService(com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportDataSource)
+         */
 	public ReportDataSourceService createService(ReportDataSource reportDataSource) {
 		if (!(reportDataSource instanceof BeanReportDataSource)) {
-			throw new JSException("jsexception.invalid.bean.datasource", new Object[] {reportDataSource.getClass()});
+			throw new JSException(getErrorMessage("jsexception.invalid.bean.datasource", new String[] {reportDataSource.getClass().toString()}));
 		}
 		BeanReportDataSource beanDataSource = (BeanReportDataSource) reportDataSource;
 	
 		Object bean = ctx.getBean(beanDataSource.getBeanName());
 		
 		if (bean == null) {
-			throw new JSException("jsexception.bean.no.name", new Object[] {beanDataSource.getBeanName()});
+			throw new JSException(getErrorMessage("jsexception.bean.no.name", new String[] {beanDataSource.getBeanName()}));
 		}
 		
 		if (beanDataSource.getBeanMethod() == null) {
 			// The bean had better be a ReportDataSourceService
 			if (!(bean instanceof ReportDataSourceService)) {
-				throw new JSException("jsexception.bean.not.a.ReportDataSourceService", new Object[] {beanDataSource.getBeanName()});
+				throw new JSException(getErrorMessage("jsexception.bean.not.a.ReportDataSourceService", new String[] {beanDataSource.getBeanName()}));
 			} else {
 				return (ReportDataSourceService) bean;
 			}
@@ -87,7 +95,7 @@ public class BeanReportDataSourceServiceFactory implements ReportDataSourceServi
 			} catch (SecurityException e) {
 				throw new JSExceptionWrapper(e);
 			} catch (NoSuchMethodException e) {
-				throw new JSException("jsexception.bean.has.no.method", new Object[] {beanDataSource.getBeanName(), beanDataSource.getBeanMethod()});
+				throw new JSException(getErrorMessage("jsexception.bean.has.no.method", new String[] {beanDataSource.getBeanName(), beanDataSource.getBeanMethod()}));
 			} catch (IllegalArgumentException e) {
 				throw new JSExceptionWrapper(e);
 			} catch (IllegalAccessException e) {
@@ -97,5 +105,9 @@ public class BeanReportDataSourceServiceFactory implements ReportDataSourceServi
 			}
 		}
 	}
+
+    private String getErrorMessage(String key, String[] params) {
+        return messageSource.getMessage(key, params, LocaleContextHolder.getLocale());
+    }
 
 }

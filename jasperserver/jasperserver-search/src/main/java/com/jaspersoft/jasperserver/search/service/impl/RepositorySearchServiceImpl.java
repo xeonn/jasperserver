@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -44,21 +44,30 @@ import com.jaspersoft.jasperserver.search.filter.TextFilter;
 import com.jaspersoft.jasperserver.search.mode.AccessType;
 import com.jaspersoft.jasperserver.search.mode.SearchMode;
 import com.jaspersoft.jasperserver.search.mode.SearchModeSettingsResolver;
-import com.jaspersoft.jasperserver.search.service.*;
+import com.jaspersoft.jasperserver.search.service.ChildrenLoaderService;
+import com.jaspersoft.jasperserver.search.service.RepositorySearchCriteria;
+import com.jaspersoft.jasperserver.search.service.RepositorySearchResult;
+import com.jaspersoft.jasperserver.search.service.RepositorySearchService;
+import com.jaspersoft.jasperserver.search.service.ResourceService;
 import com.jaspersoft.jasperserver.search.sorter.ByLabelSorter;
-import net.sf.ehcache.CacheManager;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Implementation of {@link RepositorySearchService}.
  *
  * @author Yuriy Plakosh
- * @version $Id: RepositorySearchServiceImpl.java 45878 2014-05-21 00:15:48Z schubar $
+ * @version $Id: RepositorySearchServiceImpl.java 49286 2014-09-23 13:32:25Z ykovalchyk $
  */
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 public class RepositorySearchServiceImpl implements RepositorySearchService, Diagnostic {

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -29,10 +29,10 @@ import com.jaspersoft.jasperserver.ws.authority.WSUser;
 import com.jaspersoft.jasperserver.ws.authority.WSUserSearchCriteria;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.security.Authentication;
-import org.springframework.security.GrantedAuthority;
-import org.springframework.security.context.SecurityContextHolder;
-import org.springframework.security.userdetails.UserDetails;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
@@ -54,6 +54,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -65,7 +66,7 @@ import java.util.StringTokenizer;
 /**
  *
  * @author gtoffoli
- * @version $Id: Utils.java 28947 2013-02-26 15:02:08Z vsabadosh $
+ * @version $Id: Utils.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
 @Service("restUtils")
 public class Utils {
@@ -502,7 +503,7 @@ public class Utils {
         return (UserDetails)authenticationToken.getPrincipal();
     }
 
-    public GrantedAuthority[] getCurrentlyLoggedUserAuthorities(){
+    public Collection<? extends GrantedAuthority> getCurrentlyLoggedUserAuthorities(){
         Authentication authenticationToken = SecurityContextHolder.getContext().getAuthentication();
         return authenticationToken.getAuthorities();
     }
@@ -516,9 +517,9 @@ public class Utils {
     }
 
     public boolean isCurrentlyLoggedUserHasSuperUserRole() {
-        final GrantedAuthority[] currentlyLoggedUserAuthorities = getCurrentlyLoggedUserAuthorities();
+        final Collection<? extends GrantedAuthority> currentlyLoggedUserAuthorities = getCurrentlyLoggedUserAuthorities();
         final String superuserAuthority = getSpecialRoles().get(SUPERUSER);
-        if (currentlyLoggedUserAuthorities != null && currentlyLoggedUserAuthorities.length > 0)
+        if (currentlyLoggedUserAuthorities != null && currentlyLoggedUserAuthorities.size() > 0)
             for (GrantedAuthority authority : currentlyLoggedUserAuthorities)
                 if (authority.getAuthority() != null && authority.getAuthority().equals(superuserAuthority)) {
                     return true;

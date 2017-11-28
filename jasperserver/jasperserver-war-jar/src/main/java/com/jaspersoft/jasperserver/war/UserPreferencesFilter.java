@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -31,8 +31,8 @@ import com.jaspersoft.jasperserver.api.security.encryption.EncryptionRequestUtil
 import com.jaspersoft.jasperserver.war.common.JasperServerConstImpl;
 import com.jaspersoft.jasperserver.war.common.JasperServerHttpConstants;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.security.Authentication;
-import org.springframework.security.context.SecurityContextHolder;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -52,7 +52,7 @@ import java.util.TimeZone;
 
 /**
  * @author Ionut Nedelcu (ionutned@users.sourceforge.net)
- * @version $Id: UserPreferencesFilter.java 44312 2014-04-09 14:30:12Z vsabadosh $
+ * @version $Id: UserPreferencesFilter.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
 public class UserPreferencesFilter implements Filter
 {

@@ -1,5 +1,26 @@
+/*
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
+ * http://www.jaspersoft.com.
+ *
+ * Unless you have purchased  a commercial license agreement from Jaspersoft,
+ * the following license terms  apply:
+ *
+ * This program is free software: you can redistribute it and/or  modify
+ * it under the terms of the GNU Affero General Public License  as
+ * published by the Free Software Foundation, either version 3 of  the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero  General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public  License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 package com.jaspersoft.jasperserver.jaxrs.authority;
 
+import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.client.ProfileAttributeImpl;
 import com.jaspersoft.jasperserver.dto.authority.ClientUser;
 import com.jaspersoft.jasperserver.dto.authority.ClientUserAttribute;
@@ -22,9 +43,10 @@ import java.util.Set;
 @Component
 @Path("/users")
 public class UsersJaxrsServiceWrapper {
-
     @Resource(name = "usersJaxrsService")
     private UsersJaxrsService service;
+    @Resource(name = "userAttributesJaxrsService")
+    private UserAttributesJaxrsService attributeService;
 
     @GET
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
@@ -80,7 +102,8 @@ public class UsersJaxrsServiceWrapper {
                                         @QueryParam(RestConstants.QUERY_PARAM_OFFSET) Integer startIndex,
                                         @QueryParam(RestConstants.QUERY_PARAM_LIMIT) Integer limit) throws RemoteException {
 
-        return service.getAttributesOfUser(startIndex == null ? 0 : startIndex, limit == null ? 0 : limit, name, null, attrNames);
+        User recipient = attributeService.generateRecipient(name, null);
+        return attributeService.getAttributesOfRecipient(startIndex == null ? 0 : startIndex, limit == null ? 0 : limit, recipient, attrNames);
     }
 
     @PUT
@@ -89,16 +112,16 @@ public class UsersJaxrsServiceWrapper {
     @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public Response putAttributes(UserAttributesListWrapper newCollection,
                                   @PathParam("name") String name) throws RemoteException {
-
-        return service.putAttributes(newCollection.getProfileAttributes(), name, null);
+        User recipient = attributeService.generateRecipient(name, null);
+        return attributeService.putAttributes(newCollection.getProfileAttributes(), recipient);
     }
 
     @DELETE
     @Path("/{name}/attributes")
     public Response deleteAttributes (@PathParam("name") String name,
                                       @QueryParam("name") Set<String> attrNames) throws RemoteException {
-
-        return service.deleteAttributes(name, null, attrNames);
+        User recipient = attributeService.generateRecipient(name, null);
+        return attributeService.deleteAttributes(recipient, attrNames);
     }
 
 
@@ -107,8 +130,8 @@ public class UsersJaxrsServiceWrapper {
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public Response getSpecificAttributeOfUser(@PathParam("name") String name,
                                                @PathParam("attrName") String attrName) throws RemoteException {
-
-        return service.getSpecificAttributeOfUser(name, null, attrName);
+        User recipient = attributeService.generateRecipient(name, null);
+        return attributeService.getSpecificAttributeOfRecipient(recipient, attrName);
     }
 
     @PUT
@@ -117,8 +140,8 @@ public class UsersJaxrsServiceWrapper {
     public Response putAttribute(ClientUserAttribute attr,
                                  @PathParam("name") String name,
                                  @PathParam("attrName") String attrName) throws RemoteException {
-
-        return service.putAttribute(attr, name, null, attrName);
+        User recipient = attributeService.generateRecipient(name, null);
+        return attributeService.putAttribute(attr, recipient, attrName);
     }
 
 
@@ -126,7 +149,7 @@ public class UsersJaxrsServiceWrapper {
     @Path("/{name}/attributes/{attrName}")
     public Response deleteAttribute(@PathParam("name") String name,
                                     @PathParam("attrName") String attrName) throws RemoteException{
-
-        return service.deleteAttribute(name, null, attrName);
+        User recipient = attributeService.generateRecipient(name, null);
+        return attributeService.deleteAttribute(recipient, attrName);
     }
 }

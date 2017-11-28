@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2012 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -15,15 +15,16 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Affero  General Public License for more details.
  *
- *  You should have received a copy of the GNU Affero General Public  License
- *  along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public  License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 package com.jaspersoft.jasperserver.api.security.externalAuth;
 
-import org.springframework.security.AuthenticationException;
-import org.springframework.security.ui.rememberme.NullRememberMeServices;
-import org.springframework.security.util.UrlUtils;
+import com.jaspersoft.jasperserver.api.security.EncryptionAuthenticationProcessingFilter;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.web.authentication.NullRememberMeServices;
+import org.springframework.security.web.util.UrlUtils;
 import org.springframework.util.Assert;
 
 import javax.servlet.http.HttpServletRequest;
@@ -35,21 +36,18 @@ import java.io.IOException;
  * @version $id$
  * set the correct responses for the REST login.
  */
-public class DefaultAuthenticationRestProcessingFilter extends BaseAuthenticationProcessingFilter {
+public class DefaultAuthenticationRestProcessingFilter extends EncryptionAuthenticationProcessingFilter {
 
     @Override
-    public void afterPropertiesSet() throws Exception {
+    public void afterPropertiesSet() {
         Assert.hasLength(getFilterProcessesUrl(), "filterProcessesUrl must be specified");
         Assert.isTrue(UrlUtils.isValidRedirectUrl(getFilterProcessesUrl()), getFilterProcessesUrl()+ " isn't a valid redirect URL");
 
         Assert.notNull(getAuthenticationManager(), "authenticationManager must be specified");
-        Assert.notNull(getTargetUrlResolver(), "targetUrlResolver cannot be null");
 
         if (getRememberMeServices() == null) {
             setRememberMeServices(new NullRememberMeServices());
         }
-
-        Assert.notNull(getExternalDataSynchronizer(), "externalDataSynchronizer cannot be null");
     }
 
     // On successful login it should let the filter chain end and handle the response (which should be 200)

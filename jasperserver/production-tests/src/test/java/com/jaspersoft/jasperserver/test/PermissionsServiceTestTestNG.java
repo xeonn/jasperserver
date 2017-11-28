@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -20,35 +20,21 @@
  */
 package com.jaspersoft.jasperserver.test;
 
-import java.util.Iterator;
-import java.util.List;
-
-import org.springframework.security.AccessDeniedException;
-import org.springframework.security.Authentication;
-import org.springframework.security.acl.AclEntry;
-import org.springframework.security.acl.AclProvider;
-import org.springframework.security.acl.basic.BasicAclEntry;
-import org.springframework.security.acl.basic.SimpleAclEntry;
-import org.springframework.security.context.SecurityContextHolder;
-
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Folder;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceLookup;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportUnit;
-import com.jaspersoft.jasperserver.api.metadata.user.domain.ObjectPermission;
+import com.jaspersoft.jasperserver.api.metadata.security.JasperServerPermission;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.Role;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
-import com.jaspersoft.jasperserver.api.metadata.user.service.impl.AclService;
-import com.jaspersoft.jasperserver.api.metadata.view.domain.FilterCriteria;
 import com.jaspersoft.jasperserver.util.test.BaseServiceSetupTestNG;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import static org.testng.AssertJUnit.*;
+
+import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.AssertJUnit.assertNotNull;
+import static org.testng.AssertJUnit.assertTrue;
 
 /**
  * @author swood
@@ -86,7 +72,7 @@ public class PermissionsServiceTestTestNG extends BaseServiceSetupTestNG {
 
         // set the admin user to be the authenticated user
         setAuthenticatedUser(USER_ADMIN);
-        createObjectPermission("/", m_adminRole, SimpleAclEntry.ADMINISTRATION);
+        createObjectPermission("/", m_adminRole, JasperServerPermission.ADMINISTRATION.getMask());
 
         m_reportsFolder = getRepositoryService().getFolder(null, reportsFolderPath);
         assertTrue("null m_reportsFolder", m_reportsFolder != null);
@@ -155,7 +141,7 @@ public class PermissionsServiceTestTestNG extends BaseServiceSetupTestNG {
      * doObjectPermissionSetupTest
      *
      * For our report unit without a parent:
-     *      ROLE_ADMINISTRATOR: SimpleAclEntry.ADMINISTRATION
+     *      ROLE_ADMINISTRATOR: JasperServerPermission.ADMINISTRATION
      *      testUserName: TestUser has role: ROLE_TEST
      *      adminUserName: admin has role: ROLE_ADMINISTRATOR
      */
@@ -167,16 +153,15 @@ public class PermissionsServiceTestTestNG extends BaseServiceSetupTestNG {
 
         try {
 	        int i1 = getPermissionsService().getAppliedPermissionMaskForObjectAndCurrentUser(reportUnitPath);
-	        assertEquals(i1, SimpleAclEntry.ADMINISTRATION);
+	        assertEquals(i1, JasperServerPermission.ADMINISTRATION.getMask());
 
-	        createObjectPermission(reportsFolderPath, m_adminRole, SimpleAclEntry.READ_WRITE);
-	        createObjectPermission(reportUnitFolder, m_testRole, SimpleAclEntry.DELETE);
-	
+	        createObjectPermission(reportsFolderPath, m_adminRole, JasperServerPermission.READ_WRITE.getMask());
+	        createObjectPermission(reportUnitFolder, m_testRole, JasperServerPermission.DELETE.getMask());
 	        int i2 = getPermissionsService().getAppliedPermissionMaskForObjectAndCurrentUser(reportUnitPath);
-	        assertEquals(i2, SimpleAclEntry.READ_WRITE|SimpleAclEntry.DELETE);
+	        assertEquals(i2, JasperServerPermission.READ_WRITE.getMask()|JasperServerPermission.DELETE.getMask());
 
 	        int i3 = getPermissionsService().getAppliedPermissionMaskForObjectAndCurrentUser(reportsFolderPath);
-	        assertEquals(i3, SimpleAclEntry.READ_WRITE);
+	        assertEquals(i3, JasperServerPermission.READ_WRITE.getMask());
 
         } catch (Exception e) {
         	throw new RuntimeException(e);

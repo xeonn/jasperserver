@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005 - 2013 Jaspersoft Corporation. All rights  reserved.
+* Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
 * http://www.jaspersoft.com.
 *
 * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -20,12 +20,11 @@
 */
 package com.jaspersoft.jasperserver.remote.connection;
 
-import com.jaspersoft.jasperserver.api.common.service.JdbcDriverService;
-import com.jaspersoft.jasperserver.api.engine.jasperreports.util.AwsDataSourceRecovery;
+import com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl.AwsDataSourceService;
+import com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl.AwsReportDataSourceServiceFactory;
 import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.client.AwsReportDataSourceImpl;
 import com.jaspersoft.jasperserver.dto.resources.ClientAwsDataSource;
-import com.jaspersoft.jasperserver.remote.exception.IllegalParameterValueException;
 import com.jaspersoft.jasperserver.remote.resources.converters.AwsDataSourceResourceConverter;
 import com.jaspersoft.jasperserver.remote.resources.converters.ToServerConversionOptions;
 import org.mockito.InjectMocks;
@@ -36,7 +35,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.sql.Connection;
 import java.util.Locale;
 
 import static org.mockito.Matchers.any;
@@ -46,8 +44,7 @@ import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertSame;
 
@@ -55,7 +52,7 @@ import static org.testng.Assert.assertSame;
  * <p></p>
  *
  * @author yaroslav.kovalchyk
- * @version $Id: AwsConnectionStrategyTest.java 41578 2014-02-07 14:59:02Z ykovalchyk $
+ * @version $Id: AwsConnectionStrategyTest.java 50011 2014-10-09 16:57:26Z vzavadskii $
  */
 public class AwsConnectionStrategyTest {
     private static ClientAwsDataSource AWS_DATA_SOURCE_TEMPLATE = new ClientAwsDataSource()
@@ -64,18 +61,16 @@ public class AwsConnectionStrategyTest {
     @InjectMocks
     private AwsConnectionStrategy strategy = new AwsConnectionStrategy();
     @Mock
-    private JdbcDriverService jdbcDriverService;
-    @Mock
     private MessageSource messageSource;
     @Mock
     private RepositoryService repository;
     @Mock
-    private AwsDataSourceRecovery awsDataSourceRecovery;
+    private AwsReportDataSourceServiceFactory awsDataSourceFactory;
     @Mock
     private AwsDataSourceResourceConverter awsDataSourceResourceConverter;
     @Mock
-    private Connection connection;
-    private AwsConnectionStrategy strategySpy;
+    private AwsDataSourceService awsDataSourceService;
+
     private ClientAwsDataSource awsDataSource;
     private AwsReportDataSourceImpl awsReportDataSource;
 
@@ -83,28 +78,25 @@ public class AwsConnectionStrategyTest {
     @BeforeClass
     public void init(){
         MockitoAnnotations.initMocks(this);
-        strategySpy = spy(strategy);
     }
 
     @BeforeMethod
     public void refresh() throws Exception {
-        reset(strategySpy, messageSource, jdbcDriverService, repository, awsDataSourceRecovery,
-                awsDataSourceResourceConverter, connection);
+        reset(messageSource, repository, awsDataSourceFactory, awsDataSourceService, repository,
+                awsDataSourceResourceConverter);
         awsDataSource = new ClientAwsDataSource(AWS_DATA_SOURCE_TEMPLATE);
-        doReturn(connection).when(strategySpy).establishConnection(AWS_DATA_SOURCE_TEMPLATE.getConnectionUrl(),
-                AWS_DATA_SOURCE_TEMPLATE.getUsername(), AWS_DATA_SOURCE_TEMPLATE.getPassword());
+
+        doReturn(true).when(awsDataSourceService).testConnection();
         awsReportDataSource = new AwsReportDataSourceImpl();
         doReturn(awsReportDataSource).when(awsDataSourceResourceConverter)
-                .toServer(same(awsDataSource), any(ToServerConversionOptions.class));
+                .toServer(same(awsDataSource), eq(ToServerConversionOptions.getDefault().setSuppressValidation(true)));
+        doReturn(awsDataSourceService).when(awsDataSourceFactory).createService(awsReportDataSource);
     }
 
     @Test
     public void createConnection_withPasswordAndSecretKey_success() throws Exception {
-        final ClientAwsDataSource result = strategySpy.createConnection(awsDataSource, null);
+        final ClientAwsDataSource result = strategy.createConnection(awsDataSource, null);
         assertSame(result, awsDataSource);
-        verify(jdbcDriverService).register(awsDataSource.getDriverClass());
-        verify(awsDataSourceRecovery).createAwsDSSecurityGroup(awsReportDataSource);
-        verify(connection).close();
     }
 
     @Test
@@ -115,17 +107,11 @@ public class AwsConnectionStrategyTest {
         awsDataSource.setPassword(passwordSubstitution).setSecretKey(passwordSubstitution);
         awsReportDataSource.setPassword("realPassword");
         awsReportDataSource.setAWSSecretKey("realSecretKey");
-        reset(strategySpy);
-        doReturn(connection).when(strategySpy).establishConnection(awsDataSource.getConnectionUrl(),
-                awsDataSource.getUsername(), awsReportDataSource.getPassword());
         doReturn(awsReportDataSource).when(repository).getResource(null, awsDataSource.getUri());
-        final ClientAwsDataSource result = strategySpy.createConnection(awsDataSource, null);
+        final ClientAwsDataSource result = strategy.createConnection(awsDataSource, null);
         assertSame(result, awsDataSource);
         assertEquals(result.getPassword(), awsReportDataSource.getPassword());
         assertEquals(result.getSecretKey(), awsReportDataSource.getAWSSecretKey());
-        verify(jdbcDriverService).register(awsDataSource.getDriverClass());
-        verify(awsDataSourceRecovery).createAwsDSSecurityGroup(awsReportDataSource);
-        verify(connection).close();
     }
 
     @Test
@@ -133,31 +119,24 @@ public class AwsConnectionStrategyTest {
         awsDataSource.setPassword(null).setSecretKey(null);
         awsReportDataSource.setPassword("realPassword");
         awsReportDataSource.setAWSSecretKey("realSecretKey");
-        reset(strategySpy);
-        doReturn(connection).when(strategySpy).establishConnection(awsDataSource.getConnectionUrl(),
-                awsDataSource.getUsername(), awsReportDataSource.getPassword());
         doReturn(awsReportDataSource).when(repository).getResource(null, awsDataSource.getUri());
-        final ClientAwsDataSource result = strategySpy.createConnection(awsDataSource, null);
+        final ClientAwsDataSource result = strategy.createConnection(awsDataSource, null);
         assertSame(result, awsDataSource);
         assertEquals(result.getPassword(), awsReportDataSource.getPassword());
         assertEquals(result.getSecretKey(), awsReportDataSource.getAWSSecretKey());
-        verify(jdbcDriverService).register(awsDataSource.getDriverClass());
-        verify(awsDataSourceRecovery).createAwsDSSecurityGroup(awsReportDataSource);
-        verify(connection).close();
     }
 
-    @Test(expectedExceptions = IllegalParameterValueException.class)
-    public void createConnection_establishConnectionReturnsNull_exception() throws Exception{
-        reset(strategySpy);
-        strategySpy.createConnection(awsDataSource, null);
+
+    @Test(expectedExceptions = ConnectionFailedException.class)
+    public void createConnection_createConnectionReturnsNull_exception() throws Exception{
+        when(awsDataSourceService.testConnection()).thenReturn(false);
+        strategy.createConnection(awsDataSource, null);
     }
 
     @Test(expectedExceptions = ConnectionFailedException.class)
-    public void createConnection_establishConnectionThrowsException_exception() throws Exception{
-        reset(strategySpy);
-        doThrow(new RuntimeException()).when(strategySpy).establishConnection(any(String.class), any(String.class),
-                any(String.class));
-        strategySpy.createConnection(awsDataSource, null);
+    public void createConnection_createConnectionThrowsException_exception() throws Exception{
+        doThrow(new RuntimeException()).when(awsDataSourceService).testConnection();
+        strategy.createConnection(awsDataSource, null);
     }
 
 

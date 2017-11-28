@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2014 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: mng.main.js 43122 2014-03-18 12:44:22Z psavushchik $
+ * @version: $Id: mng.main.js 8025 2014-11-12 13:10:12Z ktsaregradskyi $
  */
 
 function invokeServerAction(actionName, options) {
@@ -135,14 +135,15 @@ orgModule.manager = {
 
         orgModule.observe("searchAvailable:loaded", function(event) {
             var data = event.memo.responseData;
-
-            orgModule.properties.setAvailableEntities(data.entities.collect(this.relatedEntityJsonToObject));
+            if (data && data.entities) {
+                orgModule.properties.setAvailableEntities(data.entities.collect(this.relatedEntityJsonToObject));
+            }
         }.bindAsEventListener(this));
 
         orgModule.observe("searchAssigned:loaded", function(event) {
             var data = event.memo.responseData;
 
-            if(data.entities) {
+            if(data && data.entities && data.entities.length > 0) {
                 orgModule.properties.setAssignedEntities(data.entities.collect(this.relatedEntityJsonToObject));
             }
         }.bindAsEventListener(this));
@@ -150,7 +151,7 @@ orgModule.manager = {
         orgModule.observe("nextAvailable:loaded", function(event) {
             var data = event.memo.responseData;
 
-            if (data && data.entities.length > 0) {
+            if (data && data.entities && data.entities.length > 0) {
                 orgModule.properties.addAvailableEntities(data.entities.collect(this.relatedEntityJsonToObject));
             }
         }.bindAsEventListener(this));
@@ -158,14 +159,16 @@ orgModule.manager = {
         orgModule.observe("nextAssigned:loaded", function(event) {
             var data = event.memo.responseData;
 
-            if (data && data.entities.length > 0) {
+            if (data && data.entities && data.entities.length > 0) {
                 orgModule.properties.addAssignedEntities(data.entities.collect(this.relatedEntityJsonToObject));
             }
         }.bindAsEventListener(this));
 
         orgModule.observe("server:error", function(event) {
             var error = event.memo.responseData;
-            alert(error.message + "\n\n" + (error.description) ? error.description : "");
+            if(error) {
+                alert(error.message + "\n\n" + (error.description) ? error.description : "");
+            }
         }) ;
 
         orgModule.observe("entity:created", function(event) {

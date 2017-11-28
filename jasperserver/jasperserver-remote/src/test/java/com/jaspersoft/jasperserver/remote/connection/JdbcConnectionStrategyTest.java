@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005 - 2013 Jaspersoft Corporation. All rights  reserved.
+* Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
 * http://www.jaspersoft.com.
 *
 * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -20,21 +20,22 @@
 */
 package com.jaspersoft.jasperserver.remote.connection;
 
-import com.jaspersoft.jasperserver.api.common.service.JdbcDriverService;
+import com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl.JdbcDataSourceService;
+import com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl.JdbcReportDataSourceServiceFactory;
 import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.JdbcReportDataSource;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.client.JdbcReportDataSourceImpl;
 import com.jaspersoft.jasperserver.dto.resources.ClientJdbcDataSource;
+import com.jaspersoft.jasperserver.remote.resources.converters.JdbcDataSourceResourceConverter;
+import com.jaspersoft.jasperserver.remote.resources.converters.ToServerConversionOptions;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.internal.verification.Times;
 import org.springframework.context.MessageSource;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Locale;
 
@@ -44,8 +45,8 @@ import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.same;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertSame;
@@ -54,7 +55,7 @@ import static org.testng.Assert.assertSame;
  * <p></p>
  *
  * @author yaroslav.kovalchyk
- * @version $Id: JdbcConnectionStrategyTest.java 41578 2014-02-07 14:59:02Z ykovalchyk $
+ * @version $Id: JdbcConnectionStrategyTest.java 50011 2014-10-09 16:57:26Z vzavadskii $
  */
 public class JdbcConnectionStrategyTest {
     private static ClientJdbcDataSource INITIAL_CONNECTION_DESCRIPTION = new ClientJdbcDataSource()
@@ -62,37 +63,43 @@ public class JdbcConnectionStrategyTest {
             .setDriverClass("someDriverClass").setUri("/test/resource/uri");
     @InjectMocks
     private JdbcConnectionStrategy strategy = new JdbcConnectionStrategy();
-    private JdbcConnectionStrategy strategySpy;
-    @Mock
-    private JdbcDriverService jdbcDriverService;
     @Mock
     private MessageSource messageSource;
     @Mock
     private RepositoryService repository;
     @Mock
-    private Connection connection;
+    private JdbcReportDataSourceServiceFactory jdbcDataSourceFactory;
+    @Mock
+    private JdbcDataSourceResourceConverter jdbcDataSourceResourceConverter;
+    @Mock
+    private JdbcDataSourceService jdbcDataSourceService;
     private ClientJdbcDataSource testConnectionDescription;
+
 
     @BeforeClass
     public void init(){
         MockitoAnnotations.initMocks(this);
-        strategySpy = spy(strategy);
     }
+
     @BeforeMethod
     public void refresh() throws SQLException {
-        reset(jdbcDriverService, messageSource, repository, strategySpy, connection);
-        doReturn(connection).when(strategySpy).establishConnection(any(String.class), any(String.class), any(String.class));
+        reset(messageSource, repository, jdbcDataSourceFactory, jdbcDataSourceService, repository,
+                jdbcDataSourceResourceConverter);
+
         testConnectionDescription = new ClientJdbcDataSource(INITIAL_CONNECTION_DESCRIPTION);
+
+        JdbcReportDataSource serverJdbcReportDataSource = new JdbcReportDataSourceImpl();
+
+        when(jdbcDataSourceResourceConverter.toServer(same(testConnectionDescription),
+                any(ToServerConversionOptions.class))).thenReturn(serverJdbcReportDataSource);
+        when(jdbcDataSourceFactory.createService(serverJdbcReportDataSource)).thenReturn(jdbcDataSourceService);
+        when(jdbcDataSourceService.testConnection()).thenReturn(true);
     }
 
     @Test
     public void createConnection_withPassword_passed() throws Exception {
-        final ClientJdbcDataSource result = strategySpy.createConnection(testConnectionDescription, null);
-        verify(jdbcDriverService).register(INITIAL_CONNECTION_DESCRIPTION.getDriverClass());
-        verify(strategySpy).establishConnection(INITIAL_CONNECTION_DESCRIPTION.getConnectionUrl(),
-                INITIAL_CONNECTION_DESCRIPTION.getUsername(), INITIAL_CONNECTION_DESCRIPTION.getPassword());
+        final ClientJdbcDataSource result = strategy.createConnection(testConnectionDescription, null);
         assertSame(result, testConnectionDescription);
-        verify(connection, new Times(1)).close();
     }
 
     @Test
@@ -103,11 +110,9 @@ public class JdbcConnectionStrategyTest {
         final String expectedPassword = "expectedPassword";
         dataSource.setPassword(expectedPassword);
         doReturn(dataSource).when(repository).getResource(null, INITIAL_CONNECTION_DESCRIPTION.getUri());
-        final ClientJdbcDataSource result = strategySpy.createConnection(testConnectionDescription.setPassword(passwordSubstitution), null);
+        final ClientJdbcDataSource result = strategy.createConnection(testConnectionDescription.setPassword(passwordSubstitution), null);
         assertSame(result, testConnectionDescription);
         assertEquals(result.getPassword(), passwordSubstitution);
-        verify(strategySpy).establishConnection(INITIAL_CONNECTION_DESCRIPTION.getConnectionUrl(),
-                INITIAL_CONNECTION_DESCRIPTION.getUsername(), expectedPassword);
     }
 
     @Test
@@ -116,25 +121,21 @@ public class JdbcConnectionStrategyTest {
         final String expectedPassword = "expectedPassword";
         dataSource.setPassword(expectedPassword);
         doReturn(dataSource).when(repository).getResource(null, INITIAL_CONNECTION_DESCRIPTION.getUri());
-        final ClientJdbcDataSource result = strategySpy.createConnection(testConnectionDescription.setPassword(null), null);
+        final ClientJdbcDataSource result = strategy.createConnection(testConnectionDescription.setPassword(null), null);
         assertSame(result, testConnectionDescription);
         assertNull(result.getPassword());
-        verify(strategySpy).establishConnection(INITIAL_CONNECTION_DESCRIPTION.getConnectionUrl(),
-                INITIAL_CONNECTION_DESCRIPTION.getUsername(), expectedPassword);
     }
 
     @Test(expectedExceptions = ConnectionFailedException.class)
     public void createConnection_connectionIsNull_exception()throws Exception{
-        reset(strategySpy);
-        doReturn(null).when(strategySpy).establishConnection(any(String.class), any(String.class), any(String.class));
-        strategySpy.createConnection(testConnectionDescription, null);
+        when(jdbcDataSourceService.testConnection()).thenReturn(false);
+        strategy.createConnection(testConnectionDescription, null);
     }
 
     @Test(expectedExceptions = ConnectionFailedException.class)
-    public void createConnection_connectionEstablishingThrowsException_exception()throws Exception{
-        reset(strategySpy);
-        doThrow(new RuntimeException()).when(strategySpy).establishConnection(any(String.class), any(String.class), any(String.class));
-        strategySpy.createConnection(testConnectionDescription, null);
+    public void createConnection_connectionCreatingThrowsException_exception()throws Exception{
+        doThrow(new RuntimeException()).when(jdbcDataSourceService).testConnection();
+        strategy.createConnection(testConnectionDescription, null);
     }
 
 }

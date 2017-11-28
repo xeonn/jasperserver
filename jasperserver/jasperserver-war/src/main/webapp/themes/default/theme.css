@@ -286,6 +286,9 @@ button,
 
 /* .gray20 */
 .palette03,
+.button.action.checking,
+.button.action.checking.over,
+.button.action.checking.pressed,
 .disabled,
 .button.disabled,
 [disabled],
@@ -383,6 +386,7 @@ a#about:active {
 
 /* dark blue in gradient */
 .content .header > .title,
+.panel > .header > .title,
 .column.decorated.minimized .vtitle,
 .tabSet.horizontal.buttons .selected>.button>.wrap,
 #filter-container .filterName,
@@ -412,6 +416,7 @@ a#about:active,
 .resourceName,
 .fsection,
 #reportContainer a,
+#scheduler_editor #stepDisplay > fieldset > legend,
 .homeSidebar-title,
 .workflow-title,
 .resourceBlock a:link,
@@ -422,6 +427,7 @@ a#about:active,
 .plusminus .node>.wrap>.jrbookmark {
 	color:#217EB5;
 }
+
 #reportContainer .inputControls a {
     color: inherit;
 }
@@ -742,11 +748,11 @@ Others are the selectors that are assigned to objects automatically.
  */
 
 #logo {
-	width:115px;
+	width:156px;
 	height:20px;
 	background:url(images/logo.png) no-repeat 0 0 transparent;
 	border:none;
-	margin:4px 4px 0px 8px;
+	margin:6px 4px 0 8px;
 }
 
 /* ----------- */

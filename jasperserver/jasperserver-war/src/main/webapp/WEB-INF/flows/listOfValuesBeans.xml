@@ -11,7 +11,7 @@
 		</property>
 		<property name="validator" ref="listOfValuesValidator"/>
         <property name="configuration" ref="configurationBean"/>
-	</bean>
+    </bean>
 	<bean id="listOfValuesValidator" class="com.jaspersoft.jasperserver.war.validation.ListOfValuesValidator">
 		<property name="repository">
 		   <ref bean="${bean.repositoryService}"/>

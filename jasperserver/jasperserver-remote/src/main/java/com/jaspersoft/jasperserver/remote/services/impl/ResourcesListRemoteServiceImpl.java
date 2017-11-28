@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -44,10 +44,10 @@ import com.jaspersoft.jasperserver.search.service.RepositorySearchService;
 import com.jaspersoft.jasperserver.search.service.impl.RepositorySearchCriteriaImpl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.security.Authentication;
-import org.springframework.security.GrantedAuthority;
-import org.springframework.security.context.SecurityContextHolder;
-import org.springframework.security.userdetails.UserDetails;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -64,7 +64,7 @@ import java.util.Set;
  * This service just return a succesful login message
  *
  * @author gtoffoli
- * @version $Id: ResourcesListRemoteServiceImpl.java 35226 2013-08-09 07:08:53Z inesterenko $
+ * @version $Id: ResourcesListRemoteServiceImpl.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
 @Component("resourcesListRemoteService")
 public class ResourcesListRemoteServiceImpl implements ResourcesListRemoteService {

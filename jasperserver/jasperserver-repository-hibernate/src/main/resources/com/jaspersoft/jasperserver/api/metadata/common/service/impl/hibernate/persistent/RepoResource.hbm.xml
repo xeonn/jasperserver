@@ -24,5 +24,9 @@
             <key column="resource_id" on-delete="cascade"/>
             <one-to-many class="com.jaspersoft.jasperserver.api.logging.access.domain.hibernate.RepoAccessEvent"/>
         </set>
+        <set inverse="true" cascade="all-delete-orphan" name="thumbnails">
+            <key column="resource_id" on-delete="cascade"/>
+            <one-to-many class="com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.persistent.RepoReportThumbnail"/>
+        </set>
 	</class>
 </hibernate-mapping>

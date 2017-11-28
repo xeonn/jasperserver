@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -55,8 +55,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
-import org.springframework.security.Authentication;
-import org.springframework.security.context.SecurityContextHolder;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.webflow.core.collection.SharedAttributeMap;
 import org.springframework.webflow.execution.Event;
 import org.springframework.webflow.execution.RequestContext;
@@ -124,6 +124,8 @@ public class RepositorySearchAction extends BaseSearchAction {
 
     @javax.annotation.Resource
     protected TextFilter textFilter;
+
+    protected boolean methodOverride = false;
 
     public void setSecurityContextProvider(SecurityContextProvider securityContextProvider) {
         this.securityContextProvider = securityContextProvider;
@@ -342,14 +344,19 @@ public class RepositorySearchAction extends BaseSearchAction {
         if (state.getResultIndex() == 0) {
             int resultsCount = 0;
 
-            try{
-                resultsCount = repositorySearchService.getResultsCount(executionContext, searchCriteriaFactory,
-                        filters, getSorter(context, state.getSortBy()));
-            } catch (InvalidDataAccessResourceUsageException exception){
+            if (!this.methodOverride) {
+                try {
+                    resultsCount = repositorySearchService.getResultsCount(executionContext, searchCriteriaFactory,
+                            filters, getSorter(context, state.getSortBy()));
+                } catch (InvalidDataAccessResourceUsageException exception) {
+                    this.methodOverride = true;
+                    return next(context);
+                }
+            } else {
                 // See http://bugzilla.jaspersoft.com/show_bug.cgi?id=31126
                 // Fixes ReportOptions quantity problem with MS SQL
                 List<SearchFilter> safeFilters = new ArrayList<SearchFilter>(filters.size());
-                for (SearchFilter filter : filters){
+                for (SearchFilter filter : filters) {
                     safeFilters.add(filter instanceof TextFilter ? textFilter : filter);
                 }
 

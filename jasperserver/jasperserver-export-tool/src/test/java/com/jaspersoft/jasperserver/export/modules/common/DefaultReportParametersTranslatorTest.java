@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -25,7 +25,6 @@ import net.sf.jasperreports.types.date.DateRangeBuilder;
 import net.sf.jasperreports.types.date.DateRangeExpression;
 import net.sf.jasperreports.types.date.FixedTimestamp;
 import net.sf.jasperreports.types.date.RelativeDateRange;
-import net.sf.jasperreports.types.date.RelativeTimestampRange;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl.ReportLoadingService;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.InputControl;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.InputControlsContainer;
@@ -67,7 +66,7 @@ import static org.mockito.Mockito.when;
 
 /**
  * @author Sergey Prilukin
- * @version $Id: DefaultReportParametersTranslatorTest.java 28947 2013-02-26 15:02:08Z vsabadosh $
+ * @version $Id: DefaultReportParametersTranslatorTest.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
 @RunWith(MockitoJUnitRunner.class)
 public class DefaultReportParametersTranslatorTest {
@@ -349,7 +348,7 @@ public class DefaultReportParametersTranslatorTest {
     private static InputControl control(String name, byte type) {
         InputControl inputControl = mock(InputControl.class);
         when(inputControl.getName()).thenReturn(name);
-        when(inputControl.getType()).thenReturn(type);
+        when(inputControl.getInputControlType()).thenReturn(type);
 
         return inputControl;
     }

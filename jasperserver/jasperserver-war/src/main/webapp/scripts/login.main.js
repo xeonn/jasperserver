@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2014 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -21,18 +21,21 @@
 
 
 /**
- * @version: $Id: login.main.js 44312 2014-04-09 14:30:12Z vsabadosh $
+ * @version: $Id: login.main.js 8012 2014-11-09 16:08:03Z ktsaregradskyi $
  */
 
 define(function(require) {
 
     "use strict";
     var domReady = require("!domReady");
-    require("login");
+
+    require("login.form");
 
     var jQuery = require("jquery");
     var loginBox = require("components.loginBox");
     var jrsConfigs = require("jrs.configs");
+
+    window.location.hash && (window.localStorage.previousPageHash = window.location.hash);
 
     domReady(function(){
         isIPad() && jQuery('#frame').hide();

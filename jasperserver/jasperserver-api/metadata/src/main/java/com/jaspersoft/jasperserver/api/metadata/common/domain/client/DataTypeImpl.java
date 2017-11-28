@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -51,7 +51,7 @@ public class DataTypeImpl extends ResourceImpl implements DataType
 	/**
 	 * 
 	 */
-	public byte getType()
+	public byte getDataTypeType()
 	{
 		return type;
 	}
@@ -59,7 +59,7 @@ public class DataTypeImpl extends ResourceImpl implements DataType
 	/**
 	 * 
 	 */
-	public void setType(byte type)
+	public void setDataTypeType(byte type)
 	{
 		this.type = type;
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -27,8 +27,8 @@ import com.jaspersoft.jasperserver.ws.scheduling.Job;
 import org.apache.axis.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.security.context.SecurityContextHolder;
-import org.springframework.security.userdetails.UserDetails;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -40,7 +40,7 @@ import java.io.StringWriter;
 
 /**
  * @author carbiv
- * @version $Id: RESTJob.java 22699 2012-03-21 15:26:53Z ogavavka $
+ * @version $Id: RESTJob.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
 @Component("restJobSchedService")
 public class RESTJob extends RESTAbstractService {

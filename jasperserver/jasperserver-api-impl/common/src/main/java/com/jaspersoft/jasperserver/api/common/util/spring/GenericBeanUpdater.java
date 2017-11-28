@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -22,6 +22,10 @@
 package com.jaspersoft.jasperserver.api.common.util.spring;
 
 import com.jaspersoft.jasperserver.api.JSException;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.springframework.beans.factory.config.BeanReference;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.beans.factory.support.ManagedList;
@@ -29,7 +33,11 @@ import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.beans.factory.support.ManagedProperties;
 import org.springframework.beans.factory.support.ManagedSet;
 
-import java.util.*;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 
 /**
  * @author bob
@@ -38,6 +46,8 @@ import java.util.*;
 public class GenericBeanUpdater extends AbstractBeanPropertyProcessor {
 
     public static final String TYPE_STRING = "string";
+    public static final String TYPE_SECURITY_METADATA_SOURCE = "securityMetadataSource";
+    public static final String TYPE_FILTER_CHAIN_MAP = "filterChainMap";
     public static final String TYPE_REF = "ref";
     public static final String TYPE_IDREF = "idRef";
     public static final String TYPE_STRING_LIST = "stringList";
@@ -59,11 +69,26 @@ public class GenericBeanUpdater extends AbstractBeanPropertyProcessor {
 	private boolean orderSet = false;
 	private String oldValue = null;
 	private String replacement = null;
+    private String securityMetadataSourceDefinition;
+    private ConfigurableListableBeanFactory beanFactory;
 
+    @Override
+    public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
+        this.beanFactory = beanFactory;
+        super.postProcessBeanFactory(beanFactory);
+    }
 
-	/* (non-Javadoc)
-	 * @see com.jaspersoft.jasperserver.api.common.util.spring.AbstractBeanPropertyProcessor#getProcessedPropertyValue(java.lang.Object)
-	 */
+    public String getSecurityMetadataSourceDefinition() {
+        return securityMetadataSourceDefinition;
+    }
+
+    public void setSecurityMetadataSourceDefinition(String securityMetadataSourceDefinition) {
+        this.securityMetadataSourceDefinition = securityMetadataSourceDefinition;
+    }
+
+    /* (non-Javadoc)
+             * @see com.jaspersoft.jasperserver.api.common.util.spring.AbstractBeanPropertyProcessor#getProcessedPropertyValue(java.lang.Object)
+             */
 	protected Object getProcessedPropertyValue(Object originalValue) {
 		try {
 			if (definition.getOperation().equals(GenericBeanUpdaterDefinition.APPEND)) {
@@ -170,9 +195,30 @@ public class GenericBeanUpdater extends AbstractBeanPropertyProcessor {
                 throw new JSException("jsexception.cant.append", new Object[] {getPropertyName(), getBeanName(), value});
             }
             return newValue;
-        }
-
-        else if (originalValue instanceof TypedStringValue) {
+        } else if(TYPE_SECURITY_METADATA_SOURCE.equals(valueType)){
+            if(securityMetadataSourceDefinition == null){
+                throw new IllegalStateException("securityMetadataSourceDefinition can't be null");
+            }
+            BeanDefinition beanDefinition = beanFactory.getBeanDefinition(securityMetadataSourceDefinition);
+            if(beanDefinition == null){
+                throw new IllegalStateException("bean '" + securityMetadataSourceDefinition + "' is not defined");
+            } else if(!"org.springframework.security.web.access.intercept.DefaultFilterInvocationSecurityMetadataSource".equals(beanDefinition.getBeanClassName())){
+                try{
+                    final Object bean = beanFactory.getBean(securityMetadataSourceDefinition);
+                    if(bean instanceof BeanDefinition){
+                        beanDefinition = (BeanDefinition) bean;
+                    }
+                }catch (Exception e){
+                    // do nothing. Unknown unsupported bean.
+                }
+            }
+            // getting of originalSecurityMetadataSourceDefinition and metadataSourceDefinitionToAppend is tricky and found while debugging
+            // I don't see any other option to extend securityMetadataSource. So, let's hope it will work for future Spring releases...
+            final ManagedMap<BeanDefinition, BeanDefinition> originalSecurityMetadataSourceDefinition = (ManagedMap<BeanDefinition, BeanDefinition>) ((BeanDefinitionHolder) originalValue).getBeanDefinition().getConstructorArgumentValues().getIndexedArgumentValues().get(0).getValue();
+            final ManagedMap<BeanDefinition, BeanDefinition> metadataSourceDefinitionToAppend = (ManagedMap<BeanDefinition, BeanDefinition>) beanDefinition.getConstructorArgumentValues().getIndexedArgumentValues().get(0).getValue();
+            originalSecurityMetadataSourceDefinition.putAll(metadataSourceDefinitionToAppend);
+            return originalValue;
+        } else if (originalValue instanceof TypedStringValue) {
 			return new TypedStringValue(((TypedStringValue) originalValue).getValue() + value);
 		} else {
 			throw new JSException("jsexception.cant.append", new Object[] {getPropertyName(), getBeanName(), value});
@@ -193,7 +239,39 @@ public class GenericBeanUpdater extends AbstractBeanPropertyProcessor {
 	 * @return TypedStringValue
 	 */
 	private Object insert(Object originalValue) {
-		if (originalValue instanceof TypedStringValue) {
+        if(TYPE_FILTER_CHAIN_MAP.equals(valueType) && originalValue instanceof Map && value instanceof String){
+            Map<BeanDefinition, List<BeanReference>> filterChainMap = (Map<BeanDefinition, List<BeanReference>>) originalValue;
+            if(before != null && !before.isEmpty()){
+                for(List<BeanReference> filters : filterChainMap.values()){
+                    for(int i = 0; i < filters.size(); i++){
+                        if(before.equals(filters.get(i).getBeanName())){
+                            final String[] namesToInsert = ((String) value).split(",");
+                            for(int j = namesToInsert.length - 1; j >= 0; j--){
+                                if(namesToInsert[j] != null && !namesToInsert[j].isEmpty()){
+                                    filters.add(i, new RuntimeBeanReference(namesToInsert[j]));
+                                }
+                            }
+                            break;
+                        }
+                    }
+                }
+            } else if(after != null && !after.isEmpty()){
+                for(BeanDefinition urlPatternDefinition: filterChainMap.keySet()){
+                    final String pattern = (String) urlPatternDefinition.getConstructorArgumentValues().getIndexedArgumentValues().get(0).getValue();
+                    if(after.equals(pattern)){
+                        List<BeanReference> filters = filterChainMap.get(urlPatternDefinition);
+                        final String[] namesToInsert = ((String) value).split(",");
+                        for(int j = namesToInsert.length - 1; j >= 0; j--){
+                            if(namesToInsert[j] != null && !namesToInsert[j].isEmpty()){
+                                filters.add(0, new RuntimeBeanReference(namesToInsert[j]));
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+            return originalValue;
+        } else if (originalValue instanceof TypedStringValue) {
 			StringBuffer newValue = new StringBuffer(((TypedStringValue) originalValue).getValue());
 			int index = 0;
 			if (before != null) {

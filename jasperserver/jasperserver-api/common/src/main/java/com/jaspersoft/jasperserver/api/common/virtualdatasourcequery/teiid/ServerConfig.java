@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2012 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -25,7 +25,7 @@ import javax.resource.spi.XATerminator;
 
 /**
  * @author Ivan Chan (ichan@jaspersoft.com)
- * @version $Id: ServerConfig.java 24704 2012-08-29 22:13:51Z ichan $
+ * @version $Id: ServerConfig.java 47331 2014-07-18 09:13:06Z kklein $
  */
 @JasperServerAPI
 public class ServerConfig {

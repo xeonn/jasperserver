@@ -347,7 +347,7 @@ public class SingleSelectQueryInputControlHandlerTest extends UnitilsJUnit4 {
         String[] rawData =  {"123"};
 
         DataType type = new DataTypeImpl();
-        type.setType(DataType.TYPE_NUMBER);
+        type.setDataTypeType(DataType.TYPE_NUMBER);
         type.setMaxValue("30");
         ph.setDataType(NUMBER, type);
 
@@ -368,7 +368,7 @@ public class SingleSelectQueryInputControlHandlerTest extends UnitilsJUnit4 {
         String[] rawData =  {"123"};
 
         DataType type = new DataTypeImpl();
-        type.setType(DataType.TYPE_NUMBER);
+        type.setDataTypeType(DataType.TYPE_NUMBER);
         type.setMaxValue((double) 30);
         ph.setDataType(NUMBER, type);
 
@@ -607,7 +607,7 @@ public class SingleSelectQueryInputControlHandlerTest extends UnitilsJUnit4 {
         mockedServices.put("filterResolver", createFilterResolver());
         mockedServices.put("cachedEngineService", cachedEngineService.getMock());
         mockedServices.put("engineService", createEngineService());
-        mockedServices.put("messagesCalendarFormatProvider", createCalendarFormatProvider());
+        mockedServices.put("isoCalendarFormatProvider", createCalendarFormatProvider());
         mockedServices.put("messageSource", messageSource.getMock());
 
         ApplicationContext context = setUpApplicationContext(mockedServices, "classpath:/com/jaspersoft/jasperserver/war/cascade/applicationContext-cascade-test.xml");

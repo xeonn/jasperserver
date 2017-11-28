@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2012 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -38,7 +38,8 @@ import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.CustomRepor
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.VirtualReportDataSource;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.JdbcReportDataSource;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.JndiJdbcReportDataSource;
-import org.springframework.security.AccessDeniedException;
+import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributesResolver;
+import org.springframework.security.access.AccessDeniedException;
 
 import java.lang.String;
 import java.util.ArrayList;
@@ -49,12 +50,13 @@ import java.util.Set;
 
 /**
  * @author Ivan Chan (ichan@jaspersoft.com)
- * @version $Id: VirtualDataSourceHandler.java 44712 2014-04-17 19:11:49Z ichan $
+ * @version $Id: VirtualDataSourceHandler.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
 public class VirtualDataSourceHandler {
 
     RepositoryService repositoryService;
     VirtualDataSourceQueryService virtualDataSourceQueryService;
+    private ProfileAttributesResolver profileAttributesResolver;
     private static String dataSourceSchemaSeparator = "_";
 
     /*
@@ -100,9 +102,13 @@ public class VirtualDataSourceHandler {
 		this.repositoryService = repository;
 	}
 
+    public void setProfileAttributesResolver(ProfileAttributesResolver profileAttributesResolver) {
+        this.profileAttributesResolver = profileAttributesResolver;
+    }
+
     /*
-     * generate sql data source for virtual data source
-     */
+         * generate sql data source for virtual data source
+         */
     public javax.sql.DataSource getSqlDataSource(ExecutionContext context, VirtualReportDataSource jsDataSource) throws Exception {
         Collection<DataSource> subDataSourceList = new ArrayList<DataSource>();
 
@@ -121,7 +127,7 @@ public class VirtualDataSourceHandler {
                     subDataSourceList.add(jndiDataSource);
                 }
                 if (reportDataSource instanceof CustomReportDataSource) {
-                    CustomDataSource customDataSource = new CustomDataSourceImpl((CustomReportDataSource) reportDataSource, findSchemas(jsDataSource.getSchemas(), entry.getKey()), entry.getKey(),
+                    CustomDataSource customDataSource = new CustomDataSourceImpl(resolveCustomDataSourceAttributes((CustomReportDataSource) reportDataSource), findSchemas(jsDataSource.getSchemas(), entry.getKey()), entry.getKey(),
                             jsDataSource);
                     subDataSourceList.add(customDataSource);
                 }
@@ -135,6 +141,12 @@ public class VirtualDataSourceHandler {
         // create javax.sql.DataSource from connection factory
         VirtualSQLDataSource virtualSQLDataSource = new VirtualSQLDataSource(connectionFactory);
         return virtualSQLDataSource;
+    }
+
+    //We should additionally resolve attributes for Custom Report Data Source there because connection service for it is not
+    // handled via implementation of ReportDataSourceServiceFactory.createService(which is intercepted by ProfileAttributesResolverAspect).
+    private CustomReportDataSource resolveCustomDataSourceAttributes(CustomReportDataSource customReportDataSource) {
+        return profileAttributesResolver.merge(customReportDataSource);
     }
 
     private Object getResource(ExecutionContext context, ResourceReference resourceReference) {

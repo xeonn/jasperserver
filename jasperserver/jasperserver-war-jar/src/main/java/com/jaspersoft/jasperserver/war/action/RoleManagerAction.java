@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -289,8 +289,14 @@ public class RoleManagerAction extends BaseManagerAction {
 
         try {
             List<String> roleNames = getEntities(context);
-            
-            if (roleNames.size() > 0) {
+
+            //Bug 40143
+            if (roleNames.size() == 1) {
+                createAuditEvent("deleteRole");
+                roleManagerService.deleteAll(null, roleNames);
+                closeAuditEvent("deleteRole");
+            }
+            else if (roleNames.size() > 0) {
                 createAuditEvent("deleteAllRoles");
                 roleManagerService.deleteAll(null, roleNames);
                 closeAuditEvent("deleteAllRoles");

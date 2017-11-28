@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005 - 2009 Jaspersoft Corporation. All rights  reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
 * http://www.jaspersoft.com.
 *
 * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -16,7 +16,7 @@
 * GNU Affero  General Public License for more details.
 *
 * You should have received a copy of the GNU Affero General Public  License
-* along with this program.&nbsp; If not, see <http://www.gnu.org/licenses/>.
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 package com.jaspersoft.jasperserver.remote.common;
 
@@ -26,7 +26,7 @@ import com.jaspersoft.jasperserver.remote.exception.RemoteException;
  * Use implementation of this interface to call remote service within template.
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: RemoteServiceInTemplateCaller.java 21936 2012-01-25 13:39:03Z ykovalchyk $
+ * @version $Id: RemoteServiceInTemplateCaller.java 49286 2014-09-23 13:32:25Z ykovalchyk $
  */
 public interface RemoteServiceInTemplateCaller<CallResultType, RemoteServiceType> {
     CallResultType call(RemoteServiceType remoteService) throws RemoteException;

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -26,7 +26,9 @@ import com.jaspersoft.jasperserver.api.metadata.xml.domain.impl.Argument;
 import com.jaspersoft.jasperserver.war.util.JRHtmlExportUtils;
 import net.sf.jasperreports.engine.JRExporter;
 import net.sf.jasperreports.engine.JRExporterParameter;
+import net.sf.jasperreports.engine.JasperReportsContext;
 import net.sf.jasperreports.engine.ReportContext;
+import net.sf.jasperreports.engine.SimpleJasperReportsContext;
 import net.sf.jasperreports.engine.export.AbstractHtmlExporter;
 import net.sf.jasperreports.engine.export.HtmlResourceHandler;
 import net.sf.jasperreports.engine.export.JRHtmlExporterParameter;
@@ -75,6 +77,8 @@ public class HtmlExporter extends AbstractExporter {
     public static final String CONTEXT_PATH_PARAM_NAME = "contextPath";
     public static final String BASE_URL_PARAM_NAME = "baseUrl";
     public static final String REPORT_CONTEXT_PARAM_NAME = "reportContext";
+    public static final String INTERACTIVE_PARAM_NAME = "interactive";
+    public static final String ALLOW_INLINE_SCRIPTS_PARAM_NAME = "allowInlineScripts";
 
     @Resource
     private List<String> htmlReportHeaderIncludes;
@@ -133,7 +137,7 @@ public class HtmlExporter extends AbstractExporter {
         Map<String, byte[]> imagesMap = new LinkedHashMap<String, byte[]>();
         exporter.setParameter(JRHtmlExporterParameter.IMAGES_MAP, imagesMap);
 
-        String resourcePattern = null;
+        String resourcePattern;
         if (exportParameters.get(Argument.RUN_OUTPUT_IMAGES_URI) != null) 
         {
              resourcePattern = exportParameters.get(Argument.RUN_OUTPUT_IMAGES_URI) + "{0}";
@@ -148,9 +152,13 @@ public class HtmlExporter extends AbstractExporter {
             	imagesMap
         		);
         htmlExporter.setImageHandler(resourceHandler);
-        htmlExporter.setFontHandler(resourceHandler);
         htmlExporter.setResourceHandler(resourceHandler);
         htmlExporter.setReportContext((ReportContext) exportParameters.get(REPORT_CONTEXT_PARAM_NAME));
+        final boolean allowInlineScripts = exportParameters.get(ALLOW_INLINE_SCRIPTS_PARAM_NAME) != null ? (Boolean)exportParameters.get(ALLOW_INLINE_SCRIPTS_PARAM_NAME) : false;
+        final boolean interactive = exportParameters.get(INTERACTIVE_PARAM_NAME) != null ? (Boolean)exportParameters.get(INTERACTIVE_PARAM_NAME) : false;
+        if(interactive && allowInlineScripts){
+            htmlExporter.getJasperReportsContext().setProperty("com.jaspersoft.jasperreports.highcharts.html.export.type", "standalone");
+        }
         htmlExporter.setFontHandler(new WebHtmlResourceHandler(contextPath + "/reportresource?&font={0}"));
         exporter.setParameter(JRHtmlExporterParameter.IS_USING_IMAGES_TO_ALIGN, Boolean.TRUE);
     }
@@ -158,5 +166,13 @@ public class HtmlExporter extends AbstractExporter {
     @Override
     public String getContentType() {
         return "text/html";
+    }
+
+    @Override
+    public JasperReportsContext getJasperReportsContext() {
+        // return copy of jasper reports context to allow modifications
+        SimpleJasperReportsContext context = new SimpleJasperReportsContext();
+        context.setParent(super.getJasperReportsContext());
+        return context;
     }
 }

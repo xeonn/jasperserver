@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -22,25 +22,39 @@
 package com.jaspersoft.jasperserver.export.modules.common;
 
 import com.jaspersoft.jasperserver.api.metadata.user.domain.ProfileAttribute;
+import com.jaspersoft.jasperserver.export.modules.repository.beans.ResourceBean;
+
+import java.security.Key;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ProfileAttributeBean.java 19925 2010-12-11 15:06:41Z tmatyashovsky $
+ * @version $Id: ProfileAttributeBean.java 51858 2014-12-06 20:46:19Z vsabadosh $
  */
 public class ProfileAttributeBean {
 
 	private String name;
 	private String value;
-	
+
 	public void copyFrom(ProfileAttribute attribute) {
 		setName(attribute.getAttrName());
-		setValue(attribute.getAttrValue());
+        String attrValue = attribute.getAttrValue();
+        if (attribute.isSecure()) {
+            attrValue = ResourceBean.encryptSecureAttribute(attrValue);
+        }
+        setValue(attrValue);
 	}
-	
+
 	public void copyTo(ProfileAttribute attribute) {
 		attribute.setAttrName(getName());
 		attribute.setAttrValue(getValue());
-	}
+
+        String attrValue = getValue();
+        if (ResourceBean.isEncrypted(getValue())) {
+            attrValue = ResourceBean.decryptSecureAttribute(attrValue);
+            attribute.setSecure(true);
+        }
+        attribute.setAttrValue(attrValue);
+    }
 	
 	public String getName() {
 		return name;

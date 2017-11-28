@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2013 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -90,7 +90,7 @@ public class InputControlResourceValidator extends GenericResourceValidator<Inpu
 
     @Override
     protected void internalValidate(InputControl resource, ValidationErrors errors) {
-        String type = Integer.toString(resource.getType());
+        String type = Integer.toString(resource.getInputControlType());
         Map<String, Object> config = inputControlTypeConfiguration.get(type);
         if (config == null) {
             addIllegalParameterValueError(errors, "type", type, "The type " + type + " is invalid");

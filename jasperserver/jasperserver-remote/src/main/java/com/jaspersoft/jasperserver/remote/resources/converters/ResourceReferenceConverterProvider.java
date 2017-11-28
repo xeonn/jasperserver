@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005 - 2009 Jaspersoft Corporation. All rights  reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
 * http://www.jaspersoft.com.
 *
 * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -16,12 +16,13 @@
 * GNU Affero  General Public License for more details.
 *
 * You should have received a copy of the GNU Affero General Public  License
-* along with this program.&nbsp; If not, see <http://www.gnu.org/licenses/>.
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 package com.jaspersoft.jasperserver.remote.resources.converters;
 
 import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
 import com.jaspersoft.jasperserver.dto.resources.ClientReferenceable;
+import com.jaspersoft.jasperserver.remote.services.PermissionsService;
 import com.jaspersoft.jasperserver.war.common.ConfigurationBean;
 import org.springframework.stereotype.Service;
 
@@ -29,7 +30,7 @@ import org.springframework.stereotype.Service;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: ResourceReferenceConverterProvider.java 35226 2013-08-09 07:08:53Z inesterenko $
+ * @version $Id: ResourceReferenceConverterProvider.java 51276 2014-11-09 17:44:57Z ktsaregradskyi $
  */
 @Service
 public class ResourceReferenceConverterProvider {
@@ -37,13 +38,15 @@ public class ResourceReferenceConverterProvider {
     private ResourceConverterProvider resourceConverterProvider;
     @javax.annotation.Resource(name = "concreteRepository")
     private RepositoryService repositoryService;
+    @javax.annotation.Resource(name = "permissionsService")
+    private PermissionsService permissionsService;
     @javax.annotation.Resource
     private ConfigurationBean configurationBean;
 
     // generic type is controlled by corresponding ReferenceClassRestriction. So, cast is safe.
     @SuppressWarnings("unchecked")
     public <T extends ClientReferenceable> ResourceReferenceConverter<T> getConverterForType(Class<T> referenceableClass){
-        return new ResourceReferenceConverter(resourceConverterProvider, repositoryService, configurationBean,
+        return new ResourceReferenceConverter(resourceConverterProvider, repositoryService, permissionsService, configurationBean,
                 new ResourceReferenceConverter.ReferenceClassRestriction(referenceableClass));
     }
 }

@@ -127,7 +127,7 @@
     create table JIJdbcDatasource (
         id int8 not null,
         driver varchar(100) not null,
-        password varchar(100),
+        password varchar(250),
         connectionUrl varchar(500),
         username varchar(100),
         timezone varchar(100),
@@ -308,7 +308,7 @@
         using_def_rpt_opt_folder_uri bool not null,
         output_local_folder varchar(250),
         user_name varchar(50),
-        password varchar(50),
+        password varchar(250),
         server_name varchar(150),
         folder_path varchar(250),
         primary key (id)
@@ -332,6 +332,15 @@
         calendar_name varchar(50),
         misfire_instruction int4 not null,
         primary key (id)
+    );
+
+    create table JIReportThumbnail (
+        id int8 not null,
+        user_id int8 not null,
+        resource_id int8 not null,
+        thumbnail bytea not null,
+        primary key (id),
+        unique (user_id, resource_id)
     );
 
     create table JIReportUnit (
@@ -433,7 +442,7 @@
         tenantId int8 not null,
         fullname varchar(100) not null,
         emailAddress varchar(100),
-        password varchar(100),
+        password varchar(250),
         externallyDefined bool,
         enabled bool,
         previousPasswordChangeTime timestamp,
@@ -464,7 +473,7 @@
         id int8 not null,
         catalog varchar(100) not null,
         username varchar(100) not null,
-        password varchar(100) not null,
+        password varchar(250) not null,
         datasource varchar(100) not null,
         uri varchar(100) not null,
         primary key (id)
@@ -695,6 +704,18 @@
         add constraint FKB9337C5CD2B2EB53 
         foreign key (id) 
         references JIReportJobTrigger;
+
+    alter table JIReportThumbnail 
+        add constraint FKFDB3DED932282198 
+        foreign key (user_id) 
+        references JIUser 
+        on delete cascade;
+
+    alter table JIReportThumbnail 
+        add constraint FKFDB3DED9F254B53E 
+        foreign key (resource_id) 
+        references JIResource 
+        on delete cascade;
 
     alter table JIReportUnit 
         add constraint FK98818B77A8BF376D 

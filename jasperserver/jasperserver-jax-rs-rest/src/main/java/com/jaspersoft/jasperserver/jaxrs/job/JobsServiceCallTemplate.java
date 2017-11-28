@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005 - 2009 Jaspersoft Corporation. All rights  reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
 * http://www.jaspersoft.com.
 *
 * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -16,7 +16,7 @@
 * GNU Affero  General Public License for more details.
 *
 * You should have received a copy of the GNU Affero General Public  License
-* along with this program.&nbsp; If not, see <http://www.gnu.org/licenses/>.
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 package com.jaspersoft.jasperserver.jaxrs.job;
 
@@ -32,14 +32,14 @@ import com.jaspersoft.jasperserver.remote.exception.xml.ErrorDescriptor;
 import com.jaspersoft.jasperserver.remote.services.JobsService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.security.AccessDeniedException;
+import org.springframework.security.access.AccessDeniedException;
 
 import javax.ws.rs.core.Response;
 
 
 /**
  * @author Yaroslav.Kovalchyk
- * @version $Id: JobsServiceCallTemplate.java 22656 2012-03-20 13:43:39Z ykovalchyk $
+ * @version $Id: JobsServiceCallTemplate.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
 public class JobsServiceCallTemplate implements RemoteServiceCallTemplate<JobsService> {
     private static final Log log = LogFactory.getLog(JobsServiceCallTemplate.class);

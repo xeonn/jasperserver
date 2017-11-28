@@ -1,6 +1,7 @@
 /*
- * Copyright (C) 2005 - 2013 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
+ *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
  * the following license terms  apply:
  *
@@ -32,7 +33,7 @@ import javax.ws.rs.ext.Provider;
 
 /**
  * @author Yaroslav.Kovalchyk
- * @version $Id: GenericExceptionMapper.java 45722 2014-05-14 10:24:22Z sergey.prilukin $
+ * @version $Id: GenericExceptionMapper.java 47331 2014-07-18 09:13:06Z kklein $
  */
 @Provider
 @Component

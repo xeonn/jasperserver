@@ -102,7 +102,7 @@ public class TeiidEmbeddedServer extends EmbeddedServer {
                     config.setTransactionManager(createTransactionManager(transactionManagerConfiguration));
                 } catch (Exception ex) {
                     log.debug("Fail to initialize transaction manager for teiid engine", ex);
-                }
+            }
             }
             if ((serverConfig != null) && (serverConfig.getXaTerminator() != null)) {
                 setXaTerminator(serverConfig.getXaTerminator());
@@ -199,7 +199,6 @@ public class TeiidEmbeddedServer extends EmbeddedServer {
  **/
 	@Override
     protected BufferService getBufferService() {
-        /**
         if (memoryConfig != null) {
             if (memoryConfig.getDiskDirectory() != null) {
                 bufferService.setDiskDirectory(memoryConfig.getDiskDirectory());
@@ -230,7 +229,6 @@ public class TeiidEmbeddedServer extends EmbeddedServer {
             bufferService.setMemoryBufferOffHeap(memoryConfig.isMemoryBufferOffHeap());
             log.debug("[Teiid Memory Setting] Memory Buffer Off Heap = " + memoryConfig.isMemoryBufferOffHeap());
         }
-        **/
         return super.getBufferService();
     }
 

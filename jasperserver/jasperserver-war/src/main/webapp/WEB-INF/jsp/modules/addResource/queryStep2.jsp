@@ -1,5 +1,5 @@
 <%--
-  ~ Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+  ~ Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
   ~ http://www.jaspersoft.com.
   ~
   ~ Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -53,7 +53,7 @@
         </c:choose>
     </t:putAttribute>
 
-    <t:putAttribute name="moduleName" value="addQuery.page"/>
+    <t:putAttribute name="moduleName" value="addQueryWithResourceLocator.page"/>
     <t:putAttribute name="headerContent">
         <jsp:include page="queryStep2State.jsp"/>
     </t:putAttribute>

@@ -1,5 +1,5 @@
 <%--
-~ Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+~ Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
 ~ http://www.jaspersoft.com.
 ~
 ~ Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -24,7 +24,7 @@
 <%@ page language="java" isErrorPage="true" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ page import="com.jaspersoft.jasperserver.api.JSException"%>
-<%@ page import="org.springframework.security.AccessDeniedException"%>
+<%@ page import="org.springframework.security.access.AccessDeniedException"%>
 <%@ page import="org.springframework.webflow.conversation.NoSuchConversationException"%>
 <%@ page import="com.jaspersoft.jasperserver.war.action.ReportCanceledException" %>
 <%@ page import="com.jaspersoft.jasperserver.api.JSShowOnlyErrorMessage" %>
@@ -39,12 +39,18 @@
 <t:insertTemplate template="/WEB-INF/jsp/templates/page.jsp">
     <t:putAttribute name="pageTitle"><spring:message code="jsp.JSErrorPage.title"/></t:putAttribute>
     <t:putAttribute name="bodyID" value="serverError"/>
-    <t:putAttribute name="moduleName" value="commons.main"/>
+    <t:putAttribute name="moduleName" value="errorPage"/>
     <t:putAttribute name="bodyClass" value="oneColumn flow"/>
     <t:putAttribute name="bodyContent">
 		<t:insertTemplate template="/WEB-INF/jsp/templates/container.jsp">
 			<t:putAttribute name="containerClass" value="column decorated primary"/>
 		    <t:putAttribute name="containerTitle"><spring:message code="jsp.JSErrorPage.error"/></t:putAttribute>
+            <t:putAttribute name="headerContent" cascade="false">
+                <%-- this code allows to close error page in case it was embedded as an iframe --%>
+                <c:if test="${param.embeddedDesigner != null && param.embeddedDesigner != ''}">
+                    <div id="closeErrorPage" class="closeIcon"></div>
+                </c:if>
+            </t:putAttribute>
 		    <t:putAttribute name="bodyID" value="errorPageContent"/>
 		    <t:putAttribute name="bodyContent">
                 <%

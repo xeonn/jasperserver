@@ -11,30 +11,49 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:security="http://www.springframework.org/schema/security"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
-       	http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.1.xsd">
+       	http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.1.xsd
+       	http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.2.xsd">
        
     <!-- ======================== FILTER CHAIN =======================  -->
-    <bean id="filterChainProxy" class="org.springframework.security.util.FilterChainProxy">
-        <property name="filterInvocationDefinitionSource">
-            <value>
-                CONVERT_URL_TO_LOWERCASE_BEFORE_COMPARISON
-                PATTERN_TYPE_APACHE_ANT
-                /**=authenticationProcessingFilter,JSAuthenticationSynchronizer
-            </value>
-        </property>
+
+    <bean id="filterChainProxy" class="org.springframework.security.web.FilterChainProxy">
+        <security:filter-chain-map path-type="ant">
+            <security:filter-chain pattern="/**" filters="authenticationProcessingFilter,JSAuthenticationSynchronizer"/>
+        </security:filter-chain-map>
+    </bean>
+
+    <bean id="authenticationProcessingFilter"
+          class="org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter">
+        <property name="authenticationManager" ref="authenticationManager"/>
+        <property name="authenticationFailureHandler" ref="failureHandler" />
+        <property name="authenticationSuccessHandler" ref="successHandler" />
+        <property name="filterProcessesUrl" value="/j_spring_security_check"/>
+        <property name="allowSessionCreation" value="true" />
+        <property name="sessionAuthenticationStrategy" ref="sas"/>
+    </bean>
+
+    <bean id="successHandler" class="org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler" >
+        <property name="defaultTargetUrl" value="/loginsuccess.html" />
+    </bean>
+    <bean id="failureHandler" class="org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler" >
+        <property name="defaultFailureUrl" value="/login.html?error=1" />
+    </bean>
+    <bean id="sas" class="org.springframework.security.web.authentication.session.SessionFixationProtectionStrategy">
+        <property name="migrateSessionAttributes" value="true" />
     </bean>
     
     <!--TODO class=com.jaspersoft.jasperserver.api.security.externalAuth.BaseAuthenticationProcessingFilter-->
-    <bean id="authenticationProcessingFilter" class="org.springframework.security.ui.webapp.AuthenticationProcessingFilter">
-        <property name="authenticationManager"><ref local="authenticationManager"/></property>
-        <property name="authenticationFailureUrl"><value>/login.html?error=1</value></property>
-        <property name="defaultTargetUrl"><value>/loginsuccess.html</value></property>
-        <property name="filterProcessesUrl"><value>/j_acegi_security_check</value></property>
-    </bean>
+    <!--<bean id="authenticationProcessingFilter" class="org.springframework.security.ui.webapp.AuthenticationProcessingFilter">-->
+        <!--<property name="authenticationManager"><ref local="authenticationManager"/></property>-->
+        <!--<property name="authenticationFailureUrl"><value>/login.html?error=1</value></property>-->
+        <!--<property name="defaultTargetUrl"><value>/loginsuccess.html</value></property>-->
+        <!--<property name="filterProcessesUrl"><value>/j_acegi_security_check</value></property>-->
+    <!--</bean>-->
 
     <!-- ======================== AUTHENTICATION ======================= -->
-    <bean id="authenticationManager" class="org.springframework.security.providers.ProviderManager">
+    <bean id="authenticationManager" class="org.springframework.security.authentication.ProviderManager">
         <property name="providers">
             <list>
                 <!-- not on by default <ref local="ldapAuthenticationProvider"/>  -->
@@ -45,16 +64,16 @@
         </property>
     </bean>
 	
-    <bean id="jasperServerAuthenticationProvider" class="org.springframework.security.providers.dao.DaoAuthenticationProvider">
+    <bean id="jasperServerAuthenticationProvider" class="org.springframework.security.authentication.dao.DaoAuthenticationProvider">
         <property name="userDetailsService"><ref bean="${bean.internalUserAuthorityService}"/></property>
     </bean>
     
     <!-- returns a UserDetails object that is not a MetadataUserDetails -->
-    <bean id="staticPrincipalAuthenticationProvider" class="org.springframework.security.providers.dao.DaoAuthenticationProvider">
+    <bean id="staticPrincipalAuthenticationProvider" class="org.springframework.security.authentication.dao.DaoAuthenticationProvider">
         <property name="userDetailsService"><ref bean="inMemoryDaoImpl"/></property>
     </bean>
 
-    <bean id="inMemoryDaoImpl" class="org.springframework.security.userdetails.memory.InMemoryDaoImpl">
+    <bean id="inMemoryDaoImpl" class="org.springframework.security.core.userdetails.memory.InMemoryDaoImpl">
         <property name="userMap">
             <!-- tomcat/tomcat -->
             <value>

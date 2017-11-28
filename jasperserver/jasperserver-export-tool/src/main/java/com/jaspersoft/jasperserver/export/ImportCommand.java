@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -24,7 +24,7 @@ package com.jaspersoft.jasperserver.export;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ImportCommand.java 19925 2010-12-11 15:06:41Z tmatyashovsky $
+ * @version $Id: ImportCommand.java 47331 2014-07-18 09:13:06Z kklein $
  */
 public class ImportCommand extends BaseExportImportCommand {
 	

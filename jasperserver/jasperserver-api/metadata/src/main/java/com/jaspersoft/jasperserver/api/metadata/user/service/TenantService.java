@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -31,7 +31,7 @@ import java.util.Map;
  * TenantService is the interface which is used to manage {@link Tenant} objects.
  *
  * @author achan
- * @version $Id: TenantService.java 30161 2013-03-22 19:20:15Z inesterenko $
+ * @version $Id: TenantService.java 47331 2014-07-18 09:13:06Z kklein $
  * @since 3.5.0
  */
 @JasperServerAPI

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -22,8 +22,9 @@ package com.jaspersoft.jasperserver.api.metadata.user.domain.impl.hibernate;
 
 import com.jaspersoft.jasperserver.api.metadata.common.domain.impl.IdedObject;
 import com.jaspersoft.jasperserver.api.metadata.common.service.ResourceFactory;
-import com.jaspersoft.jasperserver.api.metadata.common.service.impl.PasswordCipherer;
+import com.jaspersoft.jasperserver.api.common.crypto.PasswordCipherer;
 import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.PersistentObjectResolver;
+import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.persistent.RepoReportThumbnail;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.Role;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.impl.client.TenantAwareGrantedAuthority;
@@ -32,13 +33,13 @@ import com.jaspersoft.jasperserver.api.metadata.user.service.impl.UserAuthorityP
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
-import org.springframework.security.GrantedAuthority;
+import org.springframework.security.core.GrantedAuthority;
 
 import java.util.*;
 
 /**
  * @author swood
- * @version $Id: RepoUser.java 19922 2010-12-11 14:59:51Z tmatyashovsky $
+ * @version $Id: RepoUser.java 51947 2014-12-11 14:38:38Z ogavavka $
  *
  * @hibernate.class table="JSUser"
  */
@@ -55,6 +56,7 @@ public class RepoUser implements User, IdedObject {
 	private Date previousPasswordChangeTime = null;
     private List attributes = null;
     private RepoTenant tenant = null;
+    protected Set<RepoReportThumbnail> thumbnails = null;
 
 	/**
 	 * @return
@@ -204,10 +206,10 @@ public class RepoUser implements User, IdedObject {
 
 	/**
 	 * @hibernate.property
-	 * 		column="password" type="string" length="100"
+	 * 		column="password" type="string" length="250"
 	 * 
 	 * (non-Javadoc)
-	 * @see org.springframework.security.userdetails.UserDetails#getPassword()
+	 * @see org.springframework.security.core.userdetails.UserDetails#getPassword()
 	 */
 	public String getPassword() {
 		return password;
@@ -221,7 +223,7 @@ public class RepoUser implements User, IdedObject {
 	}
 
 	/* (non-Javadoc)
-	 * @see org.springframework.security.userdetails.UserDetails#isAccountNonExpired()
+	 * @see org.springframework.security.core.userdetails.UserDetails#isAccountNonExpired()
 	 */
 	public boolean isAccountNonExpired() {
 		return enabled;
@@ -262,7 +264,7 @@ public class RepoUser implements User, IdedObject {
 	 * 		column="enabled" type="boolean"
 	 * 
      *  (non-Javadoc)
-	 * @see org.springframework.security.userdetails.UserDetails#isEnabled()
+	 * @see org.springframework.security.core.userdetails.UserDetails#isEnabled()
 	 */
 	public boolean isEnabled() {
 		return enabled;
@@ -397,4 +399,12 @@ public class RepoUser implements User, IdedObject {
 	public void setTenantId(String tenantId) {
 		throw new UnsupportedOperationException("Cannot set tenant ID on persistent user");
 	}
+
+    public Set<RepoReportThumbnail> getThumbnails() {
+        return thumbnails;
+    }
+
+    public void setThumbnails(Set<RepoReportThumbnail> thumbnails) {
+        this.thumbnails = thumbnails;
+    }
 }

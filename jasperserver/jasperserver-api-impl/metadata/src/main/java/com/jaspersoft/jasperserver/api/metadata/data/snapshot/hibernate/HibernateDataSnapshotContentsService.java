@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -49,7 +49,7 @@ import com.jaspersoft.jasperserver.api.metadata.data.cache.DataSnapshotSerialize
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: HibernateDataSnapshotContentsService.java 23695 2012-05-10 11:39:36Z lchirita $
+ * @version $Id: HibernateDataSnapshotContentsService.java 47331 2014-07-18 09:13:06Z kklein $
  */
 public class HibernateDataSnapshotContentsService extends HibernateDaoImpl implements DataSnapshotContentsPersistenceService {
 

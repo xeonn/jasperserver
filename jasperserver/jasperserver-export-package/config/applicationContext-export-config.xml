@@ -55,7 +55,7 @@
 
   <!-- this is not really satisfactory; these two lists need to be defined in six places: ce/pro * webapp/unit-test/export-import -->
   <bean id="hibernateCompositeDeleteListenerListeners" class="java.util.ArrayList">
-     <constructor-arg>
+     <constructor-arg index="0" type="java.util.Collection">
         <list>
             <ref bean="hibernateReportJobsUserDeleteListener"/>
             <ref bean="hibernateLoggingServiceUserDeleteListener"/>
@@ -66,7 +66,7 @@
     </bean>
 
   <bean id="hibernateCompositeSaveOrUpdateListeners" class="java.util.ArrayList">
-     <constructor-arg>
+     <constructor-arg index="0" type="java.util.Collection">
         <list>
             <ref bean="dataSnapshotReportUnitListener" />
         </list>
@@ -74,7 +74,7 @@
   </bean>
 
   <bean id="hibernateCompositePostUpdateListeners" class="java.util.ArrayList">
-        <constructor-arg>
+        <constructor-arg index="0" type="java.util.Collection">
             <list>
                 <!-- don't need listener for import/ export -->
             </list>

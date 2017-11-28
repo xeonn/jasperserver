@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2014 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: jpivot.jaPro.js 45377 2014-05-05 15:45:05Z sergey.prilukin $
+ * @version: $Id: jpivot.jaPro.js 7872 2014-10-04 09:08:52Z inesterenko $
  */
 
 // TODO: center overly dialog
@@ -186,51 +186,51 @@ function initialize() {
     // save view
     saveAsViewName = document.getElementById("viewName");
     if ((saveAsViewName) && (saveAsViewName.value=="")) {
-        saveAsViewName.value = "${olapSession.olapUnit.label}"+"_"+"<%=copyString%>";
+  saveAsViewName.value = "${olapSession.olapUnit.label}"+"_"+"<%=copyString%>";
     }
 
     images = $$('img');
     for (var i = 0; i < images.length; i++) {
-        images[i].onclick = function(event){
-            pageAlert = false;
-        }
+    images[i].onclick = function(event){
+        pageAlert = false;
+    }
     }
 
     links = $$('a');
     for (var i = 0; i < links.length; i++) {
-        links[i].onclick = function(event){
-            pageAlert = false;
-        }
+    links[i].onclick = function(event){
+        pageAlert = false;
+    }
     }
 
     //override for help
     helpElement = $('help');
     if (helpElement) {
-        helpElement.onclick = webHelpModule.displayWebHelp;
+    helpElement.onclick = webHelpModule.displayWebHelp;
     }
 
     inputs = $$('input.corner');
     for (var i = 0; i < inputs.length; i++) {
-        inputs[i].onclick = function(event){
-            pageAlert = false;
-        }
+    inputs[i].onclick = function(event){
+        pageAlert = false;
+    }
     }
 
 
     inputs = $$('input.nav');
     for (var i = 0; i < inputs.length; i++) {
-        inputs[i].onclick = function(event){
-            pageAlert = false;
-            t=setTimeout('click()',250);
-            argv=inputs[i].id;
-            return false;
-        }
+    inputs[i].onclick = function(event){
+        pageAlert = false;
+        t=setTimeout('click()',250);
+        argv=inputs[i].id;
+        return false;
+    }
 
-        inputs[i].ondblclick = function(event){
-            clearTimeout(t);
-            dblClick(inputs[i].id);
-            return false;
-        }
+    inputs[i].ondblclick = function(event){
+        clearTimeout(t);
+        dblClick(inputs[i].id);
+        return false;
+    }
     }
 }
 

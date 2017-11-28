@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright (C) 2005 - 2012 Jaspersoft Corporation. All rights reserved.
+  ~ Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
   ~ http://www.jaspersoft.com.
   ~
   ~ Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -29,30 +29,24 @@
 
     -->
 
-    <bean id="proxyAuthenticationProcessingFilter" class="com.jaspersoft.jasperserver.api.security.externalAuth.custom.CustomAuthenticationProcessingFilter">
+    <bean id="proxyAuthenticationProcessingFilter" class="com.jaspersoft.jasperserver.api.security.externalAuth.custom.CustomAuthenticationProcessingFilter"
+          parent="authenticationProcessingFilter">
         <property name="authenticationManager">
             <ref local="customAuthenticationManager"/>
         </property>
+        <property name="authenticationSuccessHandler" ref="externalAuthSuccessHandler" />
+    </bean>
+
+    <bean id="externalAuthSuccessHandler"
+          class="com.jaspersoft.jasperserver.api.security.externalAuth.JrsExternalAuthenticationSuccessHandler" parent="successHandler">
         <property name="externalDataSynchronizer">
             <ref local="externalDataSynchronizer"/>
         </property>
-
-        <property name="sessionRegistry">
-            <ref bean="sessionRegistry"/>
-        </property>
-
-        <property name="internalAuthenticationFailureUrl" value="/login.html?error=1"/>
-        <property name="defaultTargetUrl" value="/loginsuccess.html"/>
-        <property name="invalidateSessionOnSuccessfulAuthentication" value="true"/>
-        <property name="migrateInvalidatedSessionAttributes" value="true"/>
-
-        <property name="filterProcessesUrl" value="/j_spring_security_check"/>
-
     </bean>
 
-    <bean id="proxyExceptionTranslationFilter" class="org.springframework.security.ui.ExceptionTranslationFilter">
+    <bean id="proxyExceptionTranslationFilter" class="com.jaspersoft.jasperserver.api.security.externalAuth.wrappers.spring.JSExceptionTranslationFilter">
         <property name="authenticationEntryPoint">
-            <bean class="org.springframework.security.ui.webapp.AuthenticationProcessingFilterEntryPoint">
+            <bean class="com.jaspersoft.jasperserver.api.security.externalAuth.wrappers.spring.JSLoginUrlAuthenticationEntryPoint">
                 <property name="loginFormUrl">
                     <value>/j_spring_security_check</value>
                 </property>
@@ -70,7 +64,7 @@
         </property>
     </bean>
 
-    <bean id="customAuthenticationManager" class="org.springframework.security.providers.ProviderManager">
+    <bean id="customAuthenticationManager" class="com.jaspersoft.jasperserver.api.security.externalAuth.wrappers.spring.JSProviderManager">
         <property name="providers">
             <list>
                 <ref bean="customAuthenticationProvider"/>

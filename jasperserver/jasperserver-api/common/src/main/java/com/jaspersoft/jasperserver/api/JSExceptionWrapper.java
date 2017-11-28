@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -25,7 +25,7 @@ import java.io.StringWriter;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: JSExceptionWrapper.java 22726 2012-03-22 08:47:56Z lchirita $
+ * @version $Id: JSExceptionWrapper.java 47331 2014-07-18 09:13:06Z kklein $
  */
 public class JSExceptionWrapper extends JSException {
 

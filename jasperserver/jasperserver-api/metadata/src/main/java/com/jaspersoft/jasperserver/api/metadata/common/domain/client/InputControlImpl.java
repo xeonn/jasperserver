@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -24,18 +24,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import com.jaspersoft.jasperserver.api.metadata.common.domain.DataType;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.InputControl;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.ListOfValues;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.Query;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceReference;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.*;
 
 
 /**
  * @author Ionut Nedelcu (ionutned@users.sourceforge.net)
- * @version $Id: InputControlImpl.java 20115 2011-02-04 13:58:37Z apetrichkovich $
+ * @version $Id: InputControlImpl.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
-public class InputControlImpl extends ResourceImpl implements InputControl
+public class InputControlImpl extends ResourceImpl implements InputControl, InputControlsContainer
 {
 	
 	/**
@@ -78,7 +74,7 @@ public class InputControlImpl extends ResourceImpl implements InputControl
     /**
 	 * 
 	 */
-	public byte getType()
+	public byte getInputControlType()
 	{
 		return type;
 	}
@@ -86,7 +82,7 @@ public class InputControlImpl extends ResourceImpl implements InputControl
 	/**
 	 * 
 	 */
-	public void setType(byte type)
+	public void setInputControlType(byte type)
 	{
 		this.type = type;
 	}
@@ -295,4 +291,52 @@ public class InputControlImpl extends ResourceImpl implements InputControl
 		return InputControl.class;
 	}
 
+    @Override
+    public ResourceReference getDataSource() {
+        // will be resolved anyway
+        return null;
+    }
+
+    @Override
+    public List<ResourceReference> getInputControls() {
+        return Arrays.asList(new ResourceReference(this));
+    }
+
+    @Override
+    public void setInputControls(List<ResourceReference> inputControls) {
+       // TODO cascading?
+    }
+
+    @Override
+    public void addInputControl(InputControl inputControl) {
+       // TODO cascading?
+    }
+
+    @Override
+    public void addInputControl(ResourceReference inputControlReference) {
+       // TODO cascading?
+    }
+
+    @Override
+    public void addInputControlReference(String referenceURI) {
+        // TODO cascading?
+    }
+
+    @Override
+    public ResourceReference removeInputControl(int index) {
+        // TODO cascading?
+        return null;
+    }
+
+    @Override
+    public boolean removeInputControlReference(String referenceURI) {
+        // TODO cascading?
+        return false;
+    }
+
+    @Override
+    public InputControl removeInputControlLocal(String name) {
+        // TODO cascading?
+        return null;
+    }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -25,14 +25,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import com.jaspersoft.jasperserver.api.metadata.common.domain.impl.IdedObject;
+import com.jaspersoft.jasperserver.api.metadata.common.service.ResourceFactory;
+import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.PersistentObjectResolver;
 import com.jaspersoft.jasperserver.api.metadata.tenant.service.TenantPersistenceResolver;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.Tenant;
+import com.jaspersoft.jasperserver.api.metadata.user.service.impl.UserAuthorityPersistenceService;
 
 /**
  * @author achan
  *
  */
-public class RepoTenant {
+public class RepoTenant implements IdedObject {
 	
 	private long id;
 	private String tenantId = null;
@@ -57,7 +61,7 @@ public class RepoTenant {
 		this.id = id;
 	}
 
-	public String getTenantId() {
+    public String getTenantId() {
 		return tenantId;
 	}
 	
@@ -129,7 +133,43 @@ public class RepoTenant {
         r.setTheme(getTheme());
 	}
 
-	protected String getParentId() {
+    public Object toClient(ResourceFactory clientMappingFactory) {
+        // this -> r
+        Tenant r = (Tenant) clientMappingFactory.newObject(Tenant.class);
+
+        r.setId(getTenantId());
+        r.setAlias(getTenantAlias());
+        r.setParentId(getParentId());
+        r.setTenantName(getTenantName());
+        r.setAttributes(getAttributes());
+        r.setTenantDesc(getTenantDesc());
+        r.setTenantNote(getTenantNote());
+        r.setTenantUri(getTenantUri());
+        r.setTenantFolderUri(getTenantFolderUri());
+        r.setTheme(getTheme());
+
+        return r;
+    }
+
+    @Override
+    public void copyFromClient(Object objIdent, PersistentObjectResolver resolver) {
+        Tenant r = (Tenant) objIdent;
+        setTenantId(r.getId());
+        setTenantAlias(r.getAlias());
+
+        RepoTenant parentTenant = ((UserAuthorityPersistenceService) resolver).getPersistentTenant(tenantId, true);
+        setParent(parentTenant);
+
+        setTenantName(r.getTenantName());
+        setAttributes(r.getAttributes());
+        setTenantDesc(r.getTenantDesc());
+        setTenantNote(r.getTenantNote());
+        setTenantUri(r.getTenantUri());
+        setTenantFolderUri(r.getTenantFolderUri());
+        setTheme(r.getTheme());
+    }
+
+    protected String getParentId() {
 		return parent == null ? null : parent.getTenantId();
 	}
 	

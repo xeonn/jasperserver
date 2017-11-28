@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -31,7 +31,7 @@ import org.springframework.web.servlet.ViewResolver;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: JsonFlowViewResolver.java 22765 2012-03-23 16:53:15Z lchirita $
+ * @version $Id: JsonFlowViewResolver.java 51276 2014-11-09 17:44:57Z ktsaregradskyi $
  */
 public class JsonFlowViewResolver implements ViewResolver, PriorityOrdered {
 	
@@ -44,7 +44,7 @@ public class JsonFlowViewResolver implements ViewResolver, PriorityOrdered {
 			throws Exception {
 		if (viewName.startsWith(viewPrefix)) {
 			if (log.isDebugEnabled()) {
-				log.debug("creting json view for " + viewName);
+				log.debug("creating json view for " + viewName);
 			}
 			
 			String modelName = viewName.substring(viewPrefix.length());

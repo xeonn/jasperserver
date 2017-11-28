@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2013 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -24,10 +24,9 @@ package com.jaspersoft.jasperserver.remote.resources.validation;
 import com.jaspersoft.jasperserver.api.JSValidationException;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl.CustomReportDataSourceServiceFactory;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.util.CustomDataSourceDefinition;
-import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.BeanReportDataSource;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.CustomReportDataSource;
-import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.client.BeanReportDataSourceImpl;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.client.CustomReportDataSourceImpl;
+import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributesResolver;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -50,12 +49,15 @@ import static org.mockito.Mockito.when;
 public class CustomDataSourceResourceValidatorTest {
     @InjectMocks
     private final CustomDataSourceResourceValidator validator = new CustomDataSourceResourceValidator();
-    @Mock CustomReportDataSourceServiceFactory customDataSourceFactory;
+    @Mock
+    private CustomReportDataSourceServiceFactory customDataSourceFactory;
+    @Mock
+    private ProfileAttributesResolver profileAttributesResolver;
 
     private CustomReportDataSource dataSource;
 
     @BeforeClass
-    public void initialize(){
+    public void initialize() {
         MockitoAnnotations.initMocks(this);
     }
 

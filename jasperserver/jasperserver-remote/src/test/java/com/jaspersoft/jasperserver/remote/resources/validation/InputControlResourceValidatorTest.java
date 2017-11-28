@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2013 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -24,9 +24,9 @@ package com.jaspersoft.jasperserver.remote.resources.validation;
 import com.jaspersoft.jasperserver.api.JSValidationException;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.InputControl;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.client.InputControlImpl;
+import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributesResolver;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.testng.annotations.BeforeClass;
@@ -54,9 +54,10 @@ public class InputControlResourceValidatorTest {
     private InputControlResourceValidator validator = new InputControlResourceValidator();
     @Mock
     private Map<String, Map<String, Object>> inputControlTypeConfiguration;
+    @Mock
+    private ProfileAttributesResolver profileAttributesResolver;
     @Spy
     private Map<String, PropertyDescriptor> properties = new HashMap<String, PropertyDescriptor>();
-
     @Mock
     private Map<String, Object> configuration;
 

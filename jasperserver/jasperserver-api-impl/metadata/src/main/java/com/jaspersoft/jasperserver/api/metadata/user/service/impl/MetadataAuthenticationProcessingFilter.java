@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -20,8 +20,16 @@
  */
 package com.jaspersoft.jasperserver.api.metadata.user.service.impl;
 
-import com.jaspersoft.jasperserver.api.JSException;
-import java.io.IOException;
+import com.jaspersoft.jasperserver.api.common.util.spring.StaticApplicationContext;
+import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
+import com.jaspersoft.jasperserver.api.metadata.user.domain.impl.client.MetadataUserDetails;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.util.Assert;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -29,20 +37,7 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-
-import com.jaspersoft.jasperserver.api.common.util.spring.StaticApplicationContext;
-import org.springframework.beans.BeansException;
-import org.springframework.security.Authentication;
-import org.springframework.security.context.SecurityContextHolder;
-import org.springframework.security.providers.anonymous.AnonymousAuthenticationToken;
-import org.springframework.security.userdetails.UserDetails;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.util.Assert;
-
-import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
-import com.jaspersoft.jasperserver.api.metadata.user.domain.impl.client.MetadataUserDetails;
+import java.io.IOException;
 
 /**
  * To be used as part of an Acegi FilterChainProxy.

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -45,14 +45,14 @@ import com.jaspersoft.jasperserver.export.modules.repository.beans.PermissionRec
 import com.jaspersoft.jasperserver.export.modules.repository.beans.RepositoryObjectPermissionBean;
 import com.jaspersoft.jasperserver.export.modules.repository.beans.ResourceBean;
 import com.jaspersoft.jasperserver.export.modules.repository.beans.ResourceReferenceBean;
-import com.jaspersoft.jasperserver.export.util.PathUtils;
-import com.jaspersoft.jasperserver.export.util.PathUtils.SplittedPath;
+import com.jaspersoft.jasperserver.core.util.PathUtils;
+import com.jaspersoft.jasperserver.core.util.PathUtils.SplittedPath;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dom4j.Element;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
-import org.springframework.security.SpringSecurityException;
+import org.springframework.security.access.AccessDeniedException;
 
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
@@ -61,22 +61,14 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ResourceImporter.java 45663 2014-05-13 00:36:56Z yuriy.plakosh $
+ * @version $Id: ResourceImporter.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
 public class ResourceImporter extends BaseImporterModule implements ResourceImportHandler, InitializingBean {
 	
@@ -84,7 +76,7 @@ public class ResourceImporter extends BaseImporterModule implements ResourceImpo
 	
 	private final static Log log = LogFactory.getLog(ResourceImporter.class);
 	
-	private ResourceModuleConfiguration configuration;
+	protected ResourceModuleConfiguration configuration;
     private TenantService tenantService;
 	private String prependPathArg;
 	private String updateArg;
@@ -101,6 +93,7 @@ public class ResourceImporter extends BaseImporterModule implements ResourceImpo
 	protected Set importedURIs;
 	private LinkedList folderQueue;
 	private LinkedList resourceQueue;
+    Deque<ResourceReference> createdResourcesStack;
 	private Map roles;
 	private Map users;
 
@@ -242,7 +235,7 @@ public class ResourceImporter extends BaseImporterModule implements ResourceImpo
 				commandOut.debug("About to save folder " + path);
 				try{
 				    repository.saveFolder(executionContext, folder);
-                } catch (SpringSecurityException er) {
+                } catch (AccessDeniedException er) {
                     this.updateSecuredResource(executionContext, folder);
                 }
  			}
@@ -253,7 +246,8 @@ public class ResourceImporter extends BaseImporterModule implements ResourceImpo
 		importedURIs = new HashSet();
 		folderQueue = new LinkedList();
 		resourceQueue = new LinkedList();
-		
+		createdResourcesStack = new ArrayDeque<ResourceReference>();
+
 		roles = new HashMap();
 		users = new HashMap();
 	}
@@ -305,7 +299,7 @@ public class ResourceImporter extends BaseImporterModule implements ResourceImpo
             try{
                 commandOut.debug("About to save folder " + importUri);
                 repository.saveFolder(executionContext, folder);
-            } catch (SpringSecurityException er) {
+            } catch (AccessDeniedException er) {
                 this.updateSecuredResource(executionContext, folder);
             }
 
@@ -321,7 +315,7 @@ public class ResourceImporter extends BaseImporterModule implements ResourceImpo
             try {
                 commandOut.debug("About to save folder " + importUri);
                 repository.saveFolder(executionContext, folder);
-            } catch (SpringSecurityException er) {
+            } catch (AccessDeniedException er) {
                 this.updateSecuredResource(executionContext, folder);
             }
             commandOut.info("Updating folder " + importUri);
@@ -351,7 +345,7 @@ public class ResourceImporter extends BaseImporterModule implements ResourceImpo
         return themesPattern.matcher(uri).matches() && skipThemes();
     }
 
-    protected void queueSubFolders(String uri, FolderBean folderBean) {
+	protected void queueSubFolders(String uri, FolderBean folderBean) {
 		String[] subFolders = folderBean.getSubFolders();
 		if (subFolders != null) {
 			for (int i = 0; i < subFolders.length; i++) {
@@ -461,7 +455,7 @@ public class ResourceImporter extends BaseImporterModule implements ResourceImpo
                     commandOut.debug("About to save resource " + importUri);
                     try {
                         repository.saveResource(executionContext, resource);
-                    } catch (SpringSecurityException er) {
+                    } catch (AccessDeniedException er) {
                         this.updateSecuredResource(executionContext, resource);
                     }
 
@@ -480,10 +474,11 @@ public class ResourceImporter extends BaseImporterModule implements ResourceImpo
 						// http://bugzilla.jaspersoft.com/show_bug.cgi?id=27803
 						Resource resource2 = repository.getResource(executionContext, importUri);
 						updated.setVersion(resource2.getVersion());
+						handleSubResources(resource, updated);
                         commandOut.debug("About to save resource " + importUri);
                         try {
                             repository.saveResource(executionContext, updated);
-                        } catch (SpringSecurityException er) {
+                        } catch (AccessDeniedException er) {
                             this.updateSecuredResource(executionContext, resource);
                         }
                         if (bean.isExportedWithPermissions()){
@@ -514,6 +509,10 @@ public class ResourceImporter extends BaseImporterModule implements ResourceImpo
         commandOut.info("Access denied for " + resource.getURIString());
     }
 
+	protected void handleSubResources(Resource resource, Resource clientResource) {
+		;
+	}
+
 	protected void registerUpdateResource(String resourceUri) {
 		Set updateResources = (Set) getContextAttributes().getAttribute(
 				ATTRIBUTE_UPDATE_RESOURCES);
@@ -529,8 +528,14 @@ public class ResourceImporter extends BaseImporterModule implements ResourceImpo
 	protected Resource createResource(ResourceBean bean) {
 		Class resourceItf = configuration.getCastorBeanMappings().getInterface(bean.getClass());
 		Resource resource = repository.newResource(executionContext, resourceItf);
-		bean.copyTo(resource, this);
-		resource.setParentFolder(prependedPath(resource.getParentFolder()));
+
+        this.createdResourcesStack.push(new ImportResourceReference(resource));
+        try {
+            bean.copyTo(resource, this);
+        } finally {
+            this.createdResourcesStack.pop();
+        }
+        resource.setParentFolder(prependedPath(resource.getParentFolder()));
 		return resource;
 	}
 
@@ -572,7 +577,14 @@ public class ResourceImporter extends BaseImporterModule implements ResourceImpo
 			if (referenceURI == null || referenceURI.equals("")) {
                 return null;
             }
-			importResource(referenceURI, false);
+			
+			 // Import referenced URI, or the containing URI
+			 // In some cases the containing URI needs to be imported instead of the specific resource
+			 if (beanReference.useContainingURI()) {
+			     importResource(beanReference.getContainingURI(), false);
+			 } else {
+				 importResource(referenceURI, false);
+			 }
 			reference = new ResourceReference(prependedPath(referenceURI));
 		}
 		return reference;
@@ -746,5 +758,21 @@ public class ResourceImporter extends BaseImporterModule implements ResourceImpo
 
     public void setSkipThemesArgument(String skipThemesArgument) {
         this.skipThemesArgument = skipThemesArgument;
+    }
+
+    @Override
+    public Resource getHandledResource(String uri) {
+        ResourceReference lookup = new ImportResourceReference(uri);
+        for (ResourceReference reference : this.createdResourcesStack) {
+            if (reference.equals(lookup)){
+                return reference.getLocalResource();
+            }
+        }
+
+        return null;
+    }
+    
+    public boolean fileExists(String filename) {
+    	return input.fileExists(configuration.getResourcesDirName(), filename);
     }
 }

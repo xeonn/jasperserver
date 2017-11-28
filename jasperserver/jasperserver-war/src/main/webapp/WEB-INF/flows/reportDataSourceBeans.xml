@@ -51,7 +51,7 @@
 		   <ref bean="${bean.repositoryService}"/>
 	   </property>
         <property name="configuration" ref="configurationBean"/>
-        <property name="jdbcConnectionMap" ref="jdbcConnectionMap"/>
+        <property name="jdbcConnectionMap" ref="${bean.jdbcConnectionMap}"/>
         <property name="dynamicUrlPartPattern" ref="dynamicJdbcUrlPartPattern"/>
         <property name="validationPatternsMap" ref="dataSourcePatterns"/>
 

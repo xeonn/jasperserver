@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -27,7 +27,7 @@ import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
 import com.jaspersoft.jasperserver.api.metadata.common.service.ResourceFactory;
 import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.PersistentObjectResolver;
-import com.jaspersoft.jasperserver.api.metadata.security.JasperServerAclEntry;
+import com.jaspersoft.jasperserver.api.metadata.security.JasperServerPermission;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.ObjectPermission;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.Role;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.TenantQualified;
@@ -36,13 +36,16 @@ import com.jaspersoft.jasperserver.api.metadata.user.domain.client.ObjectPermiss
 import com.jaspersoft.jasperserver.api.metadata.user.domain.client.RoleImpl;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.client.UserImpl;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.impl.client.MetadataUserDetails;
+import com.jaspersoft.jasperserver.api.metadata.user.domain.impl.client.TenantAwareGrantedAuthority;
 import com.jaspersoft.jasperserver.api.metadata.user.service.ObjectPermissionService;
 import com.jaspersoft.jasperserver.api.metadata.user.service.UserAuthorityService;
-import com.jaspersoft.jasperserver.api.metadata.user.service.impl.AclService;
+import com.jaspersoft.jasperserver.api.metadata.user.service.impl.AclPermissionsSecurityChecker;
+import com.jaspersoft.jasperserver.api.metadata.user.service.impl.InternalURIDefinition;
+import com.jaspersoft.jasperserver.api.metadata.user.service.impl.JasperServerSidRetrievalStrategyImpl;
 import com.jaspersoft.jasperserver.api.metadata.user.service.impl.ObjectPermissionServiceImpl;
+import com.jaspersoft.jasperserver.api.security.JasperServerAclHelper;
 import com.jaspersoft.jasperserver.remote.exception.AccessDeniedException;
 import com.jaspersoft.jasperserver.remote.exception.IllegalParameterValueException;
-import com.jaspersoft.jasperserver.remote.exception.ModificationNotAllowedException;
 import com.jaspersoft.jasperserver.remote.exception.RemoteException;
 import com.jaspersoft.jasperserver.remote.exception.ResourceAlreadyExistsException;
 import com.jaspersoft.jasperserver.remote.exception.ResourceNotFoundException;
@@ -52,30 +55,28 @@ import com.jaspersoft.jasperserver.remote.services.ResourcesManagementRemoteServ
 import com.jaspersoft.jasperserver.remote.utils.AuditHelper;
 import com.jaspersoft.jasperserver.search.model.permission.Permission;
 import org.apache.commons.lang.StringUtils;
-import org.springframework.security.Authentication;
-import org.springframework.security.GrantedAuthority;
-import org.springframework.security.GrantedAuthorityImpl;
-import org.springframework.security.acl.AclProvider;
-import org.springframework.security.acl.basic.AclObjectIdentity;
-import org.springframework.security.acl.basic.BasicAclEntry;
-import org.springframework.security.context.SecurityContextHolder;
-import org.springframework.security.providers.UsernamePasswordAuthenticationToken;
+import org.springframework.security.acls.domain.CumulativePermission;
+import org.springframework.security.acls.domain.GrantedAuthoritySid;
+import org.springframework.security.acls.domain.PrincipalSid;
+import org.springframework.security.acls.model.AccessControlEntry;
+import org.springframework.security.acls.model.Acl;
+import org.springframework.security.acls.model.AclService;
+import org.springframework.security.acls.model.ObjectIdentity;
+import org.springframework.security.acls.model.Sid;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.GrantedAuthorityImpl;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Volodya Sabadosh (vsabadosh@jaspersoft.com)
  * @author Zakhar Tomchenco (ztomchenco@jaspersoft.com)
- * @version $Id: PermissionsServiceImpl.java 41549 2014-02-06 22:17:13Z udavidovich $
+ * @version $Id: PermissionsServiceImpl.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
 @Component("permissionsService")
 @Transactional(rollbackFor = Exception.class)
@@ -84,7 +85,7 @@ public class PermissionsServiceImpl implements PermissionsService {
 
     static {
         Set<Integer> set = new HashSet<Integer>();
-        for (Permission perm : Permission.values()){
+        for (Permission perm : Permission.values()) {
             set.add(perm.getMask());
         }
         ALLOWED_MASKS = Collections.unmodifiableSet(set);
@@ -92,10 +93,10 @@ public class PermissionsServiceImpl implements PermissionsService {
 
     @javax.annotation.Resource(name = "objectPermissionService")
     protected ObjectPermissionService objectPermissionService;
-    @javax.annotation.Resource(name = "objectPermissionService")
-    protected AclProvider aclService;
-    @javax.annotation.Resource(name = "objectPermissionService")
-    protected AclService ourAclService;
+    @javax.annotation.Resource(name = "internalAclService")
+    protected AclService aclService;
+    @javax.annotation.Resource(name = "aclSecurityChecker")
+    protected AclPermissionsSecurityChecker aclPermissionsSecurityChecker;
     @javax.annotation.Resource(name = "objectPermissionService")
     protected PersistentObjectResolver persistentObjectResolver;
     @javax.annotation.Resource(name = "concreteRepository")
@@ -109,21 +110,21 @@ public class PermissionsServiceImpl implements PermissionsService {
     @javax.annotation.Resource(name = "concreteUserAuthorityService")
     protected UserAuthorityService userAuthorityService;
 
-    protected Comparator<BasicAclEntry> aclCompartor = new Comparator<BasicAclEntry>() {
+    protected Comparator<AccessControlEntry> aclCompartor = new Comparator<AccessControlEntry>() {
         @Override
-        public int compare(BasicAclEntry o1, BasicAclEntry o2) {
+        public int compare(AccessControlEntry o1, AccessControlEntry o2) {
             // 1 is the highest mask value
-            int mask1 = o1.getMask() == JasperServerAclEntry.ADMINISTRATION ? Integer.MAX_VALUE : o1.getMask();
-            int mask2 = o2.getMask() == JasperServerAclEntry.ADMINISTRATION ? Integer.MAX_VALUE : o2.getMask();
+            int mask1 = o1.getPermission().equals(JasperServerPermission.ADMINISTRATION) ? Integer.MAX_VALUE : o1.getPermission().getMask();
+            int mask2 = o2.getPermission().equals(JasperServerPermission.ADMINISTRATION) ? Integer.MAX_VALUE : o2.getPermission().getMask();
             // 32 is a lowest except 0
-            mask1 = mask1 == JasperServerAclEntry.EXECUTE ? 1 : mask1;
-            mask2 = mask2 == JasperServerAclEntry.EXECUTE ? 1 : mask2;
+            mask1 = mask1 == JasperServerPermission.EXECUTE.getMask() ? 1 : mask1;
+            mask2 = mask2 == JasperServerPermission.EXECUTE.getMask() ? 1 : mask2;
 
             int result = mask1 - mask2;
-            if (result == 0){
+            if (result == 0) {
                 //if masks are equal, closest(longer identity's uri) is bigger
-                result = ((ObjectPermissionServiceImpl.URIObjectIdentity) o1.getAclObjectIdentity()).getURI().length() -
-                        ((ObjectPermissionServiceImpl.URIObjectIdentity) o2.getAclObjectIdentity()).getURI().length();
+                result = (o1.getAcl().getObjectIdentity().getIdentifier().toString().length()) -
+                        (o2.getAcl().getObjectIdentity().getIdentifier().toString().length());
             }
             return result;
         }
@@ -144,18 +145,22 @@ public class PermissionsServiceImpl implements PermissionsService {
 
     public List<ObjectPermission> getPermissions(String resourceURI, Class<?> recipientType, String recipientId, boolean effectivePermissions, boolean resolveAll) throws RemoteException {
         List<ObjectPermission> result;
-        if (resolveAll){
+        if (resolveAll) {
             result = resolveAll(resourceURI, recipientType, recipientId, effectivePermissions);
         } else {
             Resource resource = resolveResource(resourceURI);
-            if (effectivePermissions){
+            if (effectivePermissions) {
                 result = objectPermissionService.getEffectivePermissionsForObject(makeExecutionContext(), resource);
+                //Normlize URI and Permission recipients, because getEffectivePermissionsForObject using ACL service to pickup permissions
+                for(ObjectPermission op: result) {
+                    normalizeObjectPermission(op);
+                }
             } else {
                 result = objectPermissionService.getObjectPermissionsForObject(makeExecutionContext(), resource);
             }
-            if (recipientType != null){
+            if (recipientType != null) {
                 result = filterByType(result, recipientType);
-                if (recipientId != null){
+                if (recipientId != null) {
                     //just to make sure, that recipient exists
                     resolveRecipientObject(recipientType, recipientId);
                     result = filterById(result, recipientId);
@@ -165,6 +170,14 @@ public class PermissionsServiceImpl implements PermissionsService {
         return result;
     }
 
+    private Object resolveRecipientFromSid(Sid sid) {
+        if (sid instanceof PrincipalSid) {
+            return resolveRecipientObject(User.class,((PrincipalSid) sid).getPrincipal());
+        } else {
+            return resolveRecipientObject(Role.class,((GrantedAuthoritySid)sid).getGrantedAuthority());
+        }
+
+    }
     public ObjectPermission getPermission(String resourceURI, Class<?> recipientType, String recipientId) throws RemoteException {
         Object recipient = resolveRecipientObject(recipientType, recipientId);
         Resource object = resolveResource(resourceURI);
@@ -187,21 +200,36 @@ public class PermissionsServiceImpl implements PermissionsService {
     public ObjectPermission getEffectivePermission(Resource resource, Authentication authentication) {
         ObjectPermission permission = new ObjectPermissionImpl();
         permission.setPermissionRecipient(authentication.getPrincipal());
-        BasicAclEntry[] effectiveAcls = (BasicAclEntry[]) aclService.getAcls(resource, authentication);
+        List<Sid> sids = new JasperServerSidRetrievalStrategyImpl().getSids(authentication);
+        Acl effectiveAcl = aclService.readAclById(resource, sids);
 
-        if (effectiveAcls != null) {
-            BasicAclEntry entry = Collections.max(Arrays.asList(effectiveAcls), aclCompartor);
+        if (effectiveAcl != null) {
+            List<AccessControlEntry> permissions = new ArrayList<AccessControlEntry>();
+            AccessControlEntry ace;
+            for (Sid sid : sids) {
+                ace = JasperServerAclHelper.locateAceForSid(effectiveAcl, sid);
+                if (ace != null) {
+                    permissions.add(ace);
+                }
 
-            permission.setPermissionMask(entry.getMask());
-            permission.setURI(extractUriFromEntry(entry));
+            }
+            if (!permissions.isEmpty()) {
+                AccessControlEntry entry = Collections.max(permissions, aclCompartor);
+                permission.setPermissionMask(entry.getPermission().getMask());
+                permission.setURI(this.extractUriFromAcl(entry.getAcl()));
+
+            } else {
+                permission.setPermissionMask(JasperServerPermission.NOTHING.getMask());
+            }
+
         } else {
-            permission.setPermissionMask(JasperServerAclEntry.NOTHING);
+            permission.setPermissionMask(JasperServerPermission.NOTHING.getMask());
         }
         return permission;
     }
 
     public List<ObjectPermission> getPermissionsForObject(String targetURI) throws RemoteException {
-        if (!objectPermissionService.isObjectAdministrable(makeExecutionContext(), targetURI)) {
+        if (!aclPermissionsSecurityChecker.isPermitted(JasperServerPermission.ADMINISTRATION, targetURI)) {
             throw new AccessDeniedException("Access is denied");
         }
         Resource res = repositoryService.getResource(makeExecutionContext(), targetURI);
@@ -226,7 +254,7 @@ public class PermissionsServiceImpl implements PermissionsService {
 
     public List<ObjectPermission> putPermissions(String uri, List<ObjectPermission> objectPermissions) throws RemoteException {
         // make sure that permissions will be definitely assigned to this resource
-        for (ObjectPermission permission : objectPermissions){
+        for (ObjectPermission permission : objectPermissions) {
             permission.setURI(REPO_URI_PREFIX + uri);
         }
         return doPutPermissions(REPO_URI_PREFIX + uri, objectPermissions, false);
@@ -268,39 +296,16 @@ public class PermissionsServiceImpl implements PermissionsService {
 
         Set<Integer> allUserPermissions = null;
 
-        List<Object> currentUserRecipients = getCurrentUserRecipients();
-        if (currentUserRecipients != null && currentUserRecipients.size() > 0) {
-            allUserPermissions = new HashSet<Integer>();
-            for (Object recipient : getCurrentUserRecipients()) {
-            	BasicAclEntry[] acls = ourAclService.getAcls(resource, recipient);
-            	for (BasicAclEntry acl : acls) {
-            		allUserPermissions.add(acl.getMask());
-            	}
-            }
-        }
-        if (allUserPermissions != null && allUserPermissions.size() > 0) {
-            JasperServerAclEntry jasperServerAclEntry = new JasperServerAclEntry();
-            // returns permissions mask
-            return jasperServerAclEntry.printPermissionsOverlappingBlock(allUserPermissions);
-        } else {
-            // returns no permissions.
-            return 0;
-        }
-    }
-
-    protected List<Object> getCurrentUserRecipients() {
         Authentication authenticationToken = SecurityContextHolder.getContext().getAuthentication();
-        List<Object> recipients = new ArrayList<Object>();
-        if (authenticationToken.getPrincipal() instanceof User) {
-            User user = (User) authenticationToken.getPrincipal();
-            recipients.add(user);
-            recipients.addAll(user.getRoles());
-
-            return recipients;
-        } else {
-            return null;
+        List<Sid> sids = new JasperServerSidRetrievalStrategyImpl().getSids(authenticationToken);
+        Acl acl = aclService.readAclById(resource, sids);
+        CumulativePermission cPermission = new CumulativePermission();
+        for (Sid sid : sids) {
+            cPermission.set(JasperServerAclHelper.getPermissionForSid(acl, sid));
         }
+        return cPermission.getMask();
     }
+
 
     protected void changePermissionConsistencyCheck(ObjectPermission objectPermission) throws RemoteException {
         if (StringUtils.isBlank(objectPermission.getURI())) {
@@ -310,11 +315,11 @@ public class PermissionsServiceImpl implements PermissionsService {
         if (objectPermission.getPermissionRecipient() == null) {
             throw new IllegalParameterValueException("recepient", "null");
         }
-        if (!ALLOWED_MASKS.contains(objectPermission.getPermissionMask())){
-            throw new IllegalParameterValueException("mask",new Integer(objectPermission.getPermissionMask()).toString());
+        if (!ALLOWED_MASKS.contains(objectPermission.getPermissionMask())) {
+            throw new IllegalParameterValueException("mask", new Integer(objectPermission.getPermissionMask()).toString());
         }
-        if (objectPermission.getPermissionRecipient() instanceof PermissionsRecipientIdentity){
-            PermissionsRecipientIdentity identity = (PermissionsRecipientIdentity)objectPermission.getPermissionRecipient();
+        if (objectPermission.getPermissionRecipient() instanceof PermissionsRecipientIdentity) {
+            PermissionsRecipientIdentity identity = (PermissionsRecipientIdentity) objectPermission.getPermissionRecipient();
             objectPermission.setPermissionRecipient(resolveRecipientObject(identity.getRecipientClass(), identity.getId()));
         } else if (objectPermission.getPermissionRecipient() instanceof TenantQualified) {
             if (persistentObjectResolver.getPersistentObject(objectPermission.getPermissionRecipient()) == null) {
@@ -328,7 +333,7 @@ public class PermissionsServiceImpl implements PermissionsService {
                 }
             }
         } else {
-            throw new IllegalStateException("Unknown recipient class:"+objectPermission.getPermissionRecipient().getClass().getName());
+            throw new IllegalStateException("Unknown recipient class:" + objectPermission.getPermissionRecipient().getClass().getName());
         }
 
         // make sure, that resource exists
@@ -361,10 +366,10 @@ public class PermissionsServiceImpl implements PermissionsService {
         if (existingObjectPermission == null) {
             auditEventType = "createPermission";
         } else {
-            if (allowUpdate){
+            if (allowUpdate) {
                 auditEventType = "updatePermission";
             } else {
-                throw new ResourceAlreadyExistsException(objectPermission.getURI()+";"+((InternalURI)objectPermission.getPermissionRecipient()).getURI());
+                throw new ResourceAlreadyExistsException(objectPermission.getURI() + ";" + ((InternalURI) objectPermission.getPermissionRecipient()).getURI());
             }
         }
 
@@ -390,32 +395,46 @@ public class PermissionsServiceImpl implements PermissionsService {
         return result;
     }
 
-    protected String extractUriFromEntry(BasicAclEntry entry) {
-        return ((ObjectPermissionServiceImpl.URIObjectIdentity) entry.getAclObjectIdentity()).getURI();
+    protected String extractUriFromAcl(Acl entry) {
+        final ObjectIdentity objectIdentity = entry.getObjectIdentity();
+        return objectIdentity instanceof ObjectPermissionServiceImpl.URIObjectIdentity
+                ? ((ObjectPermissionServiceImpl.URIObjectIdentity) objectIdentity).getURI()
+                : objectIdentity.getIdentifier().toString();
+    }
+    protected ObjectPermission normalizeObjectPermission(ObjectPermission op) {
+        op.setURI(normalizeUri(op.getURI()));
+        if (op.getPermissionRecipient() instanceof Sid) {
+            op.setPermissionRecipient(resolveRecipientFromSid((Sid) op.getPermissionRecipient()));
+        }
+        return op;
     }
 
-    protected Object resolveRecipientObject(Class<?> clazz, String id) throws ResourceNotFoundException{
+    protected String normalizeUri(String uri) {
+        return uri;
+    }
+
+    protected Object resolveRecipientObject(Class<?> clazz, String id) throws ResourceNotFoundException {
         Object res = null;
-        if (Role.class.equals(clazz)){
+        if (Role.class.equals(clazz)) {
             Role role = new RoleImpl();
             role.setRoleName(id);
             res = role;
         }
-        if (User.class.equals(clazz)){
+        if (User.class.equals(clazz)) {
             User user = new UserImpl();
             user.setUsername(id);
             res = user;
         }
 
-        if (persistentObjectResolver.getPersistentObject(res) == null){
-            throw new ResourceNotFoundException(clazz.getSimpleName()+" "+ id);
+        if (persistentObjectResolver.getPersistentObject(res) == null) {
+            throw new ResourceNotFoundException(clazz.getSimpleName() + " " + id);
         }
 
         return res;
     }
 
     protected Resource resolveResource(String uri) throws RemoteException {
-        if (uri.startsWith(REPO_URI_PREFIX)){
+        if (uri.startsWith(REPO_URI_PREFIX)) {
             uri = uri.substring(REPO_URI_PREFIX.length());
         }
 
@@ -423,11 +442,11 @@ public class PermissionsServiceImpl implements PermissionsService {
         if (resource == null) {
             resource = repositoryService.getFolder(makeExecutionContext(), uri);
         }
-        if (resource == null){
+        if (resource == null) {
             throw new ResourceNotFoundException(uri);
         }
 
-        if (!objectPermissionService.isObjectAdministrable(null, resource)){
+        if (!aclPermissionsSecurityChecker.isPermitted(JasperServerPermission.ADMINISTRATION, resource)) {
             throw new AccessDeniedException("Access denied", uri);
         }
 
@@ -441,8 +460,8 @@ public class PermissionsServiceImpl implements PermissionsService {
 
     protected List<ObjectPermission> filterByType(List<ObjectPermission> data, Class<?> recipientType) {
         List<ObjectPermission> result = new LinkedList<ObjectPermission>();
-        for (ObjectPermission permission : data){
-            if (recipientType.isInstance(permission.getPermissionRecipient())){
+        for (ObjectPermission permission : data) {
+            if (recipientType.isInstance(permission.getPermissionRecipient())) {
                 result.add(permission);
             }
         }
@@ -451,8 +470,8 @@ public class PermissionsServiceImpl implements PermissionsService {
 
     protected List<ObjectPermission> filterById(List<ObjectPermission> data, String recipientId) {
         List<ObjectPermission> result = new LinkedList<ObjectPermission>();
-        for (ObjectPermission permission : data){
-            if (isSameId(permission.getPermissionRecipient(), recipientId)){
+        for (ObjectPermission permission : data) {
+            if (isSameId(permission.getPermissionRecipient(), recipientId)) {
                 result.add(permission);
             }
         }
@@ -460,32 +479,33 @@ public class PermissionsServiceImpl implements PermissionsService {
     }
 
     protected Authentication createAuthentication(Role role) {
-        GrantedAuthority[] grantedAuthorities = new GrantedAuthority[]{new GrantedAuthorityImpl(role.getRoleName())};
+        List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>(1);
+        authorities.add(new GrantedAuthorityImpl(role.getRoleName()));
         MetadataUserDetails dummy = new MetadataUserDetails(new UserImpl());
         dummy.setUsername("dummyUserdummyUserdummyUserdummyUserdummyUser");
 
-        return new UsernamePasswordAuthenticationToken(dummy, null, grantedAuthorities);
+        return new UsernamePasswordAuthenticationToken(dummy, null, authorities);
     }
 
     protected Authentication createAuthentication(User user) {
-        GrantedAuthority[] grantedAuthorities = new GrantedAuthority[user.getRoles().size()];
-        Role[] roles = (Role[]) user.getRoles().toArray(new Role[user.getRoles().size()]);
+        final Set<Role> roles = user.getRoles();
+        List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>(roles.size());
 
-        for (int i = 0; i < roles.length; i++) {
-            grantedAuthorities[i] = new GrantedAuthorityImpl(roles[i].getRoleName());
+        for (Role role : roles) {
+            authorities.add(new GrantedAuthorityImpl(role.getRoleName()));
         }
 
-        return new UsernamePasswordAuthenticationToken(new MetadataUserDetails(user), null, grantedAuthorities);
+        return new UsernamePasswordAuthenticationToken(new MetadataUserDetails(user), null, authorities);
     }
 
     private List<ObjectPermission> resolveAll(String resourceURI, Class<?> recipientType, String recipientId, boolean effectivePermissions) throws RemoteException {
         List<ObjectPermission> res;
-        if (recipientType == null){
-            res = resolveAllUsers(resourceURI,recipientId, effectivePermissions);
+        if (recipientType == null) {
+            res = resolveAllUsers(resourceURI, recipientId, effectivePermissions);
             res.addAll(resolveAllRoles(resourceURI, recipientId));
         } else {
-            if (recipientType.equals(User.class)){
-                res = resolveAllUsers(resourceURI,recipientId, effectivePermissions);
+            if (recipientType.equals(User.class)) {
+                res = resolveAllUsers(resourceURI, recipientId, effectivePermissions);
             } else {
                 res = resolveAllRoles(resourceURI, recipientId);
             }
@@ -500,7 +520,7 @@ public class PermissionsServiceImpl implements PermissionsService {
         List<ObjectPermission> res = new LinkedList<ObjectPermission>();
         for (Role role : roles) {
             res.add(getEffectivePermission(resource, role));
-        }
+            }
 
         return res;
     }
@@ -516,7 +536,8 @@ public class PermissionsServiceImpl implements PermissionsService {
                 permission = getEffectivePermission(resource, user);
             } else {
                 //create authentication without roles, based on user, so result will be for user only
-                Authentication authentication = new UsernamePasswordAuthenticationToken(user,null,new GrantedAuthority[0]);
+                user.setRoles(new HashSet<Role>());
+                Authentication authentication = new UsernamePasswordAuthenticationToken(user, null, new ArrayList<GrantedAuthority>());
                 permission = getEffectivePermission(resource, authentication);
             }
             res.add(permission);

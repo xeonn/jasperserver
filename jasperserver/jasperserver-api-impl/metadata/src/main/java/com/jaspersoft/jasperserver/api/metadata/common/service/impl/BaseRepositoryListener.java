@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -22,7 +22,7 @@ package com.jaspersoft.jasperserver.api.metadata.common.service.impl;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: BaseRepositoryListener.java 23577 2012-05-03 17:23:08Z lchirita $
+ * @version $Id: BaseRepositoryListener.java 47331 2014-07-18 09:13:06Z kklein $
  */
 public abstract class BaseRepositoryListener implements RepositoryListener {
 

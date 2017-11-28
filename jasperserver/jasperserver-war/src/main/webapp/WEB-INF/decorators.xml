@@ -11,7 +11,6 @@
         <pattern>/index.htm</pattern>
         <pattern>/WEB-INF/jsp/modules/viewReport/reportOutput.jsp*</pattern>
         <pattern>/WEB-INF/jsp/modules/requirejs.config.jsp*</pattern>
-        <pattern>/WEB-INF/jsp/modules/visualize.jsp*</pattern>
         <pattern>/WEB-INF/jsp/modules/xdm.jsp*</pattern>
         <pattern>*bif/*</pattern>
         <pattern>*JSONState*</pattern>

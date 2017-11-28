@@ -1,5 +1,5 @@
 <%--
-  ~ Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+  ~ Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
   ~ http://www.jaspersoft.com.
   ~
   ~ Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -69,7 +69,7 @@
                                     <t:putAttribute name="containerClass" value="column primary"/>
                                     <t:putAttribute name="containerTitle"><spring:message code="jsp.editDataTypeForm.type"/>:</t:putAttribute>
                                     <t:putAttribute name="headerContent">
-                                        <spring:bind path="dataType.dataType.type">
+                                        <spring:bind path="dataType.dataType.dataTypeType">
                                             <label class="control select inline" for="dataTypeKind" title="<spring:message code='resource.dataType.dataTypeKind'/>">
                                                 <span class="wrap offLeft"><spring:message code="resource.dataType.dataTypeKind"/></span>
                                                 <select id="${status.expression}" name="${status.expression}" <%--onchange="javascript:$('changeCombo').click();"--%>>
@@ -121,7 +121,7 @@
                                         <fieldset class="group">
                                             <legend class="offLeft"><span><spring:message code="resource.dataType.values"/></span></legend>
                                             <!-- NOTE: add value 'hidden' to class attribute for pattern label if (kind != 'text') -->
-                                            <c:if test="${dataType.dataType.type == 1}">
+                                            <c:if test="${dataType.dataType.dataTypeType == 1}">
                                                 <spring:bind path="dataType.dataType.regularExpr">
                                                     <label class="control input text <c:if test="${status.error}">error</c:if>" class="" for="${status.expression}" title="<spring:message code='resource.dataType.textPattern'/>">
                                                         <span class="wrap"><spring:message code="jsp.editDataTypeForm.pattern"/>:</span>
@@ -136,20 +136,20 @@
                                             </c:if>
 
                                             <c:choose>
-                                                <c:when test="${dataType.dataType.type == 3 || dataType.dataType.type == 4 || dataType.dataType.type == 5}">
+                                                <c:when test="${dataType.dataType.dataTypeType == 3 || dataType.dataType.dataTypeType == 4 || dataType.dataType.dataTypeType == 5}">
                                                     <spring:bind path="dataType.minValueText">
                                                         <label class="control picker minPicker <c:if test="${status.error}">error</c:if>" class="" for="${status.expression}" title="<spring:message code='resource.dataType.minimumValue'/>">
                                                             <span class="wrap"><spring:message code="jsp.editDataTypeForm.minValue"/>:</span>
                                                             <c:choose>
-                                                                 <c:when test="${dataType.dataType.type == 3}">
+                                                                 <c:when test="${dataType.dataType.dataTypeType == 3}">
                                                                     <c:set var="date" value="true"/>
                                                                     <c:set var="time" value="false"/>
                                                                  </c:when>
-                                                                 <c:when test="${dataType.dataType.type == 4}">
+                                                                 <c:when test="${dataType.dataType.dataTypeType == 4}">
                                                                     <c:set var="date" value="true"/>
                                                                     <c:set var="time" value="true"/>
                                                                 </c:when>
-                                                                 <c:when test="${dataType.dataType.type == 5}">
+                                                                 <c:when test="${dataType.dataType.dataTypeType == 5}">
                                                                     <c:set var="date" value="false"/>
                                                                     <c:set var="time" value="true"/>
                                                                 </c:when>
@@ -176,7 +176,7 @@
                                                         </label>
                                                     </spring:bind>
                                                 </c:when>
-                                                <c:when test="${dataType.dataType.type == 2}">
+                                                <c:when test="${dataType.dataType.dataTypeType == 2}">
                                                     <spring:bind path="dataType.dataType.minValue">
                                                         <label class="control input text <c:if test="${status.error}">error</c:if>" class="" for="${status.expression}" title="<spring:message code='resource.dataType.minimumValue'/>">
                                                             <span class="wrap"><spring:message code="jsp.editDataTypeForm.minValue"/>:</span>
@@ -192,20 +192,20 @@
                                             </c:choose>
 
                                             <c:choose>
-                                                <c:when test="${dataType.dataType.type == 3 || dataType.dataType.type == 4 || dataType.dataType.type == 5}">
+                                                <c:when test="${dataType.dataType.dataTypeType == 3 || dataType.dataType.dataTypeType == 4 || dataType.dataType.dataTypeType == 5}">
                                                     <spring:bind path="dataType.maxValueText">
                                                         <label class="control picker maxPicker <c:if test="${status.error}">error</c:if>" class="" for="${status.expression}" title="<spring:message code='resource.dataType.maximumValue'/>">
                                                             <span class="wrap"><spring:message code="jsp.editDataTypeForm.maxValue"/></span>
                                                             <c:choose>
-                                                                 <c:when test="${dataType.dataType.type == 3}">
+                                                                 <c:when test="${dataType.dataType.dataTypeType == 3}">
                                                                     <c:set var="date" value="true"/>
                                                                     <c:set var="time" value="false"/>
                                                                  </c:when>
-                                                                 <c:when test="${dataType.dataType.type == 4}">
+                                                                 <c:when test="${dataType.dataType.dataTypeType == 4}">
                                                                     <c:set var="date" value="true"/>
                                                                     <c:set var="time" value="true"/>
                                                                 </c:when>
-                                                                 <c:when test="${dataType.dataType.type == 5}">
+                                                                 <c:when test="${dataType.dataType.dataTypeType == 5}">
                                                                     <c:set var="date" value="false"/>
                                                                     <c:set var="time" value="true"/>
                                                                 </c:when>
@@ -235,27 +235,27 @@
                                                 <c:otherwise>
                                                     <spring:bind path="dataType.dataType.maxValue">
                                                             <c:choose>
-                                                                <c:when test="${dataType.dataType.type == 3}">
+                                                                <c:when test="${dataType.dataType.dataTypeType == 3}">
                                                         <label class="control picker" class="" for="${status.expression}" title="<spring:message code='resource.dataType.maximumValue'/>">
                                                             <span class="wrap"><spring:message code="jsp.editDataTypeForm.maxValue"/></span>
                                                                     <js:calendarInput name="${status.expression}" value="${status.value}"
                                                                         time="false"
                                                                         imageTipMessage="jsp.defaultParametersForm.pickDate"/>
                                                                 </c:when>
-                                                                <c:when test="${dataType.dataType.type == 4}">
+                                                                <c:when test="${dataType.dataType.dataTypeType == 4}">
                                                         <label class="control picker" class="" for="${status.expression}" title="<spring:message code='resource.dataType.maximumValue'/>">
                                                             <span class="wrap"><spring:message code="jsp.editDataTypeForm.maxValue"/></span>
                                                                     <js:calendarInput name="${status.expression}" value="${status.value}"
                                                                         imageTipMessage="jsp.defaultParametersForm.pickDate"/>
                                                                 </c:when>
-                                                                 <c:when test="${dataType.dataType.type == 5}">
+                                                                 <c:when test="${dataType.dataType.dataTypeType == 5}">
                                                         <label class="control picker" class="" for="${status.expression}" title="<spring:message code='resource.dataType.maximumValue'/>">
                                                             <span class="wrap"><spring:message code="jsp.editDataTypeForm.maxValue"/></span>
                                                                     <js:calendarInput name="${status.expression}" value="${status.value}"
                                                                         date="false" showSecond="${true}"
                                                                         imageTipMessage="jsp.defaultParametersForm.pickDate"/>
                                                                 </c:when>
-                                                                <c:when test="${dataType.dataType.type == 2}">
+                                                                <c:when test="${dataType.dataType.dataTypeType == 2}">
                                                         <label class="control input text <c:if test="${status.error}">error</c:if>" class="" for="${status.expression}" title="<spring:message code='resource.dataType.maximumValue'/>">
                                                             <span class="wrap"><spring:message code="jsp.editDataTypeForm.maxValue"/></span>
                                                                     <input type="text" name="${status.expression}" value="${status.value}" size="40"/>
@@ -271,7 +271,7 @@
                                                 </c:otherwise>
                                             </c:choose>
 
-                                            <c:if test="${dataType.dataType.type != 1}">
+                                            <c:if test="${dataType.dataType.dataTypeType != 1}">
                                             <ul class="list inputSet">
                                                 <spring:bind path="dataType.dataType.strictMin">
                                                     <li class="leaf">

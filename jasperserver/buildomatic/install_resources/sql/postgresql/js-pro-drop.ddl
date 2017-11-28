@@ -14,6 +14,12 @@
     alter table JIAdhocDataView 
         drop constraint FK200A2AC931211827;
 
+    alter table JIAdhocDataViewBasedReports 
+        drop constraint FKFFD9AFF5B22FF3B2;
+
+    alter table JIAdhocDataViewBasedReports 
+        drop constraint FKFFD9AFF5830BA6DB;
+
     alter table JIAdhocDataViewInputControl 
         drop constraint FKA248C79CB22FF3B2;
 
@@ -64,6 +70,15 @@
 
     alter table JIDashboardFrameProperty 
         drop constraint FK679EF04DFA08F0B4;
+
+    alter table JIDashboardModel 
+        drop constraint FK8BB7D814A8BF376D;
+
+    alter table JIDashboardModelResource 
+        drop constraint FK273EAC4230711005;
+
+    alter table JIDashboardModelResource 
+        drop constraint FK273EAC42F254B53E;
 
     alter table JIDashboardResource 
         drop constraint FK37B53B43326276AC;
@@ -218,6 +233,12 @@
     alter table JIReportOptionsInput 
         drop constraint options_fk;
 
+    alter table JIReportThumbnail 
+        drop constraint FKFDB3DED932282198;
+
+    alter table JIReportThumbnail 
+        drop constraint FKFDB3DED9F254B53E;
+
     alter table JIReportUnit 
         drop constraint FK98818B77A8BF376D;
 
@@ -288,6 +309,8 @@
 
     drop table JIAdhocDataView;
 
+    drop table JIAdhocDataViewBasedReports;
+
     drop table JIAdhocDataViewInputControl;
 
     drop table JIAdhocDataViewResource;
@@ -319,6 +342,10 @@
     drop table JIDashboard;
 
     drop table JIDashboardFrameProperty;
+
+    drop table JIDashboardModel;
+
+    drop table JIDashboardModelResource;
 
     drop table JIDashboardResource;
 
@@ -399,6 +426,8 @@
     drop table JIReportOptions;
 
     drop table JIReportOptionsInput;
+
+    drop table JIReportThumbnail;
 
     drop table JIReportUnit;
 

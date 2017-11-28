@@ -20,6 +20,7 @@
         </transition>
         <transition on="changeCombo" to="editDataTypeForm">
             <evaluate expression="editDataTypeAction.bind"/>
+            <evaluate expression="editDataTypeAction.resetEditFormAndBindType"/>
         </transition>
         <transition on="cancel" to="cancel"/>
         <transition on="back" to="back"/>

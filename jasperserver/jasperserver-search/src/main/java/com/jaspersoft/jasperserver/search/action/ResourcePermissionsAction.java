@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -38,6 +38,7 @@ import org.json.JSONObject;
 import org.springframework.webflow.execution.Event;
 import org.springframework.webflow.execution.RequestContext;
 
+import java.io.Serializable;
 import java.util.*;
 
 /**
@@ -111,7 +112,7 @@ public class ResourcePermissionsAction extends BaseSearchAction {
      *
      * @author Yuriy Plakosh.
      */
-    class State {
+    class State implements Serializable {
         private Map<String, ResourcePermissionsState> resourcePermissionsStateMap =
                 new HashMap<String, ResourcePermissionsState>();
 

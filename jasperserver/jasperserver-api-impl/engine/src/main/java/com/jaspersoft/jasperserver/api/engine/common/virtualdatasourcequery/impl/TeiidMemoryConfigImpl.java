@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2012 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -28,7 +28,7 @@ import org.teiid.common.buffer.impl.SplittableStorageManager;
 
 /**
  * @author Ivan Chan (ichan@jaspersoft.com)
- * @version $Id: TeiidMemoryConfigImpl.java 40926 2014-01-24 19:36:53Z ichan $
+ * @version $Id: TeiidMemoryConfigImpl.java 47331 2014-07-18 09:13:06Z kklein $
  */
 public class TeiidMemoryConfigImpl implements MemoryConfig {
 

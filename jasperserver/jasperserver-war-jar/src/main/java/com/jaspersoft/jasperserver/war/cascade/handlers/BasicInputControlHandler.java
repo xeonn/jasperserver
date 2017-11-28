@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005 - 2009 Jaspersoft Corporation. All rights  reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
 * http://www.jaspersoft.com.
 *
 * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -16,7 +16,7 @@
 * GNU Affero  General Public License for more details.
 *
 * You should have received a copy of the GNU Affero General Public  License
-* along with this program.&nbsp; If not, see <http://www.gnu.org/licenses/>.
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 package com.jaspersoft.jasperserver.war.cascade.handlers;
 
@@ -49,7 +49,7 @@ import java.util.Set;
 
 /**
  * @author Yaroslav.Kovalchyk
- * @version $Id: BasicInputControlHandler.java 37599 2013-09-17 15:27:15Z afomin $
+ * @version $Id: BasicInputControlHandler.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
 @Service
 public class BasicInputControlHandler implements InputControlHandler {
@@ -69,7 +69,7 @@ public class BasicInputControlHandler implements InputControlHandler {
     protected DataConverterService dataConverterService;
     @Resource
     protected MessageSource messageSource;
-    @Resource(name = "messagesCalendarFormatProvider")
+    @Resource(name = "isoCalendarFormatProvider")
     protected CalendarFormatProvider calendarFormatProvider;
 
     @Override
@@ -113,7 +113,7 @@ public class BasicInputControlHandler implements InputControlHandler {
     protected String getType(InputControl inputControl, String uiType) throws CascadeResourceNotFoundException {
         String type = uiType;
         if (MULTI_DATA_TYPE_UI_TYPE.equals(uiType)) {
-            byte dataType = cachedRepositoryService.getResource(DataType.class, inputControl.getDataType()).getType();
+            byte dataType = cachedRepositoryService.getResource(DataType.class, inputControl.getDataType()).getDataTypeType();
             type = multyDataTypeMapping.get(String.valueOf(dataType));
         }
         return type;
@@ -138,7 +138,7 @@ public class BasicInputControlHandler implements InputControlHandler {
         }
         final DataType dataType = inputControl.getDataType() != null ? cachedRepositoryService.getResource(DataType.class, inputControl.getDataType()) : null;
         if(dataType != null){
-            switch (dataType.getType()){
+            switch (dataType.getDataTypeType()){
                 case DataType.TYPE_DATE:{
                     final DateTimeFormatValidationRule dateFormatValidationRule = new DateTimeFormatValidationRule();
                     dateFormatValidationRule.setFormat(calendarFormatProvider.getDatePattern());

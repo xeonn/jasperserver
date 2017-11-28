@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -53,20 +53,21 @@ import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.DetachedCriteria;
+import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.dao.DataAccessException;
 import org.springframework.orm.hibernate3.HibernateCallback;
-import org.springframework.security.Authentication;
-import org.springframework.security.GrantedAuthority;
-import org.springframework.security.context.SecurityContextHolder;
-import org.springframework.security.providers.UsernamePasswordAuthenticationToken;
-import org.springframework.security.ui.switchuser.SwitchUserGrantedAuthority;
-import org.springframework.security.userdetails.UserDetails;
-import org.springframework.security.userdetails.UserDetailsService;
-import org.springframework.security.userdetails.UsernameNotFoundException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.web.authentication.switchuser.SwitchUserGrantedAuthority;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -83,7 +84,7 @@ import java.util.regex.Pattern;
 
 /**
  * @author swood
- * @version $Id: UserAuthorityServiceImpl.java 45842 2014-05-20 10:39:07Z ztomchenco $
+ * @version $Id: UserAuthorityServiceImpl.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 public class UserAuthorityServiceImpl extends HibernateDaoImpl implements UserDetailsService, ExternalUserService,
@@ -253,7 +254,7 @@ public class UserAuthorityServiceImpl extends HibernateDaoImpl implements UserDe
     }
 
     /* (non-Javadoc)
-      * @see org.springframework.security.userdetails.UserDetailsService#loadUserByUsername(java.lang.String)
+      * @see org.springframework.security.core.userdetails.UserDetailsService#loadUserByUsername(java.lang.String)
       */
     @Transactional(propagation = Propagation.REQUIRED)
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException, DataAccessException {
@@ -847,6 +848,8 @@ public class UserAuthorityServiceImpl extends HibernateDaoImpl implements UserDe
         } else if (clientObject instanceof User) {
             User u = (User) clientObject;
             return getRepoUser(null, u);
+        } else if (clientObject instanceof Tenant) {
+            return getPersistentTenant(((Tenant)clientObject).getId(), true);
         }
         return null;
     }
@@ -857,7 +860,7 @@ public class UserAuthorityServiceImpl extends HibernateDaoImpl implements UserDe
      * @param externalUserDetails
      */
     @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-    public User maintainInternalUser(UserDetails externalUserDetails, GrantedAuthority[] authorities) {
+    public User maintainInternalUser(UserDetails externalUserDetails, Collection<? extends GrantedAuthority> authorities) {
 
         log.debug("External user: " + externalUserDetails.getUsername());
 
@@ -880,7 +883,7 @@ public class UserAuthorityServiceImpl extends HibernateDaoImpl implements UserDe
      * @param authorities
      */
     @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-    public User maintainInternalUser(String userName, GrantedAuthority[] authorities) {
+    public User maintainInternalUser(String userName, Collection<? extends GrantedAuthority> authorities) {
 
         log.debug("External user(String): " + userName);
 
@@ -1024,16 +1027,14 @@ public class UserAuthorityServiceImpl extends HibernateDaoImpl implements UserDe
      * @param authorities from authenticated user
      * @return Set of externally defined Roles
      */
-    protected Set getRolesFromGrantedAuthorities(GrantedAuthority[] authorities) {
+    protected Set getRolesFromGrantedAuthorities(Collection<? extends GrantedAuthority> authorities) {
         Set set = new HashSet();
 
-        if (authorities == null || authorities.length == 0)
+        if (authorities == null || authorities.isEmpty())
             return set;
 
-        for (int i = 0; i < authorities.length; i++) {
-            GrantedAuthority auth = authorities[i];
-
-            String authorityName = auth.getAuthority();
+        for (GrantedAuthority authority : authorities) {
+            String authorityName = authority.getAuthority();
 
             // Make spaces in the authority name be underscores
 
@@ -1073,12 +1074,12 @@ public class UserAuthorityServiceImpl extends HibernateDaoImpl implements UserDe
         Authentication original = null;
 
         // iterate over granted authorities and find the 'switch user' authority
-        GrantedAuthority[] authorities = current.getAuthorities();
+        Collection<? extends GrantedAuthority> authorities = current.getAuthorities();
 
-        for (int i = 0; i < authorities.length; i++) {
+        for (GrantedAuthority authority : authorities) {
             // check for switch user type of authority
-            if (authorities[i] instanceof SwitchUserGrantedAuthority) {
-                original = ((SwitchUserGrantedAuthority) authorities[i]).getSource();
+            if (authority instanceof SwitchUserGrantedAuthority) {
+                original = ((SwitchUserGrantedAuthority) authority).getSource();
                 log.debug("Found original switch user granted authority [" + original + "]");
             }
         }
@@ -1171,7 +1172,7 @@ public class UserAuthorityServiceImpl extends HibernateDaoImpl implements UserDe
 
             // Don't set the authentication if we have no roles
 
-            if (ourUserDetails.getAuthorities().length != 0) {
+            if (!ourUserDetails.getAuthorities().isEmpty()) {
                 UsernamePasswordAuthenticationToken ourAuthentication = new UsernamePasswordAuthenticationToken(ourUserDetails,
                         ourUserDetails.getPassword(), ourUserDetails.getAuthorities());
 
@@ -1390,7 +1391,24 @@ public class UserAuthorityServiceImpl extends HibernateDaoImpl implements UserDe
             criteria.add(Restrictions.eq("tenant.tenantId", TenantService.ORGANIZATIONS));
         } else {
             if (!internalTenantIds.isEmpty()) {
-                criteria.add(Restrictions.in("tenant.tenantId", internalTenantIds));
+                if (internalTenantIds.size() < 1000) {
+                    criteria.add(Restrictions.in("tenant.tenantId", internalTenantIds));
+                } else {
+                    // chunk the ID set by 1000 because Oracle cannot process more than 1000 elements in IN(?,?...?) condition
+                    HashSet subset = new HashSet(1000);
+                    Disjunction or = Restrictions.disjunction();
+                    for (Iterator iter = internalTenantIds.iterator(); iter.hasNext(); ) {
+                        subset.add(iter.next());
+                        if (subset.size() == 1000) {
+                            or.add(Restrictions.in("tenant.tenantId", subset));
+                            subset.clear();
+                        }
+                    }
+                    if (subset.size() > 0) {
+                        or.add(Restrictions.in("tenant.tenantId", subset));
+                    }
+                    criteria.add(or);
+                }
             }
         }
 
@@ -1984,6 +2002,12 @@ public class UserAuthorityServiceImpl extends HibernateDaoImpl implements UserDe
             return getTenantPersistenceResolver().getPersistentTenant(TenantService.ORGANIZATIONS, true);
         }
         throw new IllegalArgumentException("This implementation does not support tenants");
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public List<RepoTenant> getPersistentTenants(List<String> tenantIds) {
+        return getTenantPersistenceResolver().getPersistentTenants(tenantIds);
     }
 
     public TenantPersistenceResolver getTenantPersistenceResolver() {

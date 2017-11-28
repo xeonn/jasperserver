@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2013 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -25,6 +25,7 @@ import com.jaspersoft.jasperserver.api.JSValidationException;
 import com.jaspersoft.jasperserver.api.common.service.JdbcDriverService;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.JdbcReportDataSource;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.client.AwsReportDataSourceImpl;
+import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributesResolver;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -45,25 +46,29 @@ import static org.mockito.Mockito.when;
 public class JdbcDataSourceResourceValidatorTest {
     @InjectMocks
     private final JdbcDataSourceResourceValidator validator = new JdbcDataSourceResourceValidator();
-    @Mock JdbcDriverService jdbcDriverService;
+    @Mock
+    private JdbcDriverService jdbcDriverService;
+    @Mock
+    private ProfileAttributesResolver profileAttributesResolver;
 
     private JdbcReportDataSource dataSource;
 
     @BeforeClass
-    public void init(){
+    public void init() {
         MockitoAnnotations.initMocks(this);
     }
 
     @BeforeMethod
     public void setUp() throws Exception {
         reset(jdbcDriverService);
+        reset(profileAttributesResolver);
         when(jdbcDriverService.isRegistered(anyString())).thenReturn(true);
+        when(profileAttributesResolver.containsAttribute(anyString())).thenReturn(false);
 
         dataSource = new AwsReportDataSourceImpl();
         dataSource.setLabel("tets");
 
         dataSource.setDriverClass("fas");
-        dataSource.setUsername("faf");
         dataSource.setConnectionUrl("jdbc:ajfa");
         dataSource.setTimezone("America/New_York");
     }
@@ -88,13 +93,6 @@ public class JdbcDataSourceResourceValidatorTest {
     }
 
     @Test(expectedExceptions = {JSValidationException.class})
-    public void testValidate_noUsername() throws Exception {
-        dataSource.setUsername(null);
-
-        validator.validate(dataSource);
-    }
-
-    @Test(expectedExceptions = {JSValidationException.class})
     public void testValidate_noConnection() throws Exception {
         dataSource.setConnectionUrl(null);
 
@@ -108,4 +106,19 @@ public class JdbcDataSourceResourceValidatorTest {
         validator.validate(dataSource);
     }
 
+    @Test
+    public void testValidate_driverContainsAttribute() {
+        reset(jdbcDriverService);
+        when(profileAttributesResolver.containsAttribute(dataSource.getDriverClass())).thenReturn(true);
+
+        validator.validate(dataSource);
+    }
+
+    @Test
+    public void testValidate_connectionUrlContainsAttribute() {
+        dataSource.setConnectionUrl("{attribute('name', 'category')}");
+        when(profileAttributesResolver.containsAttribute(dataSource.getConnectionUrl())).thenReturn(true);
+
+        validator.validate(dataSource);
+    }
 }

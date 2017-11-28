@@ -1,22 +1,5 @@
-package com.jaspersoft.jasperserver.api.engine.scheduling.quartz;
-
-import org.quartz.impl.triggers.CronTriggerImpl;
-import org.quartz.JobDetail;
-import org.quartz.JobKey;
-import org.springframework.beans.factory.BeanNameAware;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.core.Constants;
-import org.springframework.scheduling.quartz.JobDetailAwareTrigger;
-import org.springframework.util.Assert;
-
-import java.util.Map;
-import java.util.Date;
-import java.util.TimeZone;
-
-import com.jaspersoft.jasperserver.api.JSException;
-
 /*
- * Copyright (C) 2005 - 2012 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -35,6 +18,22 @@ import com.jaspersoft.jasperserver.api.JSException;
  * You should have received a copy of the GNU Affero General Public  License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+package com.jaspersoft.jasperserver.api.engine.scheduling.quartz;
+
+import org.quartz.impl.triggers.CronTriggerImpl;
+import org.quartz.JobDetail;
+import org.quartz.JobKey;
+import org.springframework.beans.factory.BeanNameAware;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.core.Constants;
+import org.springframework.scheduling.quartz.JobDetailAwareTrigger;
+import org.springframework.util.Assert;
+
+import java.util.Map;
+import java.util.Date;
+import java.util.TimeZone;
+
+import com.jaspersoft.jasperserver.api.JSException;
 
 public class JSCronTriggerBean extends CronTriggerImpl
     implements JobDetailAwareTrigger, BeanNameAware, InitializingBean {

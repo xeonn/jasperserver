@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -20,9 +20,13 @@
  */
 package com.jaspersoft.jasperserver.export.modules.mt;
 
+import com.jaspersoft.jasperserver.api.metadata.user.domain.ProfileAttribute;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.Tenant;
+import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributeService;
 import com.jaspersoft.jasperserver.api.metadata.user.service.TenantService;
 import com.jaspersoft.jasperserver.export.modules.BaseImporterModule;
+import com.jaspersoft.jasperserver.export.modules.common.ProfileAttributeBean;
+import com.jaspersoft.jasperserver.export.modules.mt.beans.TenantBean;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dom4j.Element;
@@ -61,10 +65,10 @@ public class TenantImporter extends BaseImporterModule
         Tenant existingTenant = getTenantService().getTenant(executionContext, tenantId);
         if (existingTenant != null) {
             if (hasParameter(getUpdateArg())) {
-                Tenant tenant = (Tenant) deserialize(getModuleConfiguration().getTenantsDirectory(),
+                TenantBean tenantBean = (TenantBean) deserialize(getModuleConfiguration().getTenantsDirectory(),
                         getTenantFileName(tenantId),
                         getModuleConfiguration().getTenantSerializer());
-                updateTenant(existingTenant, tenant);
+                updateTenant(existingTenant, tenantBean);
             } else {
                 commandOut.info("Tenant " + tenantId + " already exists, skipping");
             }
@@ -87,19 +91,10 @@ public class TenantImporter extends BaseImporterModule
                     log.debug("Deserializing tenant " + tenantId);
                 }
 
-                Tenant tenant = (Tenant) deserialize(getModuleConfiguration().getTenantsDirectory(),
+                TenantBean tenantBean = (TenantBean) deserialize(getModuleConfiguration().getTenantsDirectory(),
                         getTenantFileName(tenantId),
                         getModuleConfiguration().getTenantSerializer());
-                // In previous versions of JasperServer we did not have tenant alias and theme.
-                // So, setting alias with tenant id value and default theme for such versions.
-                if (tenant.getAlias() == null) {
-                    tenant.setAlias(tenant.getId());
-                }
-                if (tenant.getTheme() == null) {
-                    tenant.setTheme(getModuleConfiguration().getTenantExportConfiguration().getDefaultThemeName());
-                }
-                getTenantService().putTenant(executionContext, tenant);
-
+                createTenant(tenantBean);
                 commandOut.info("Imported tenant " + tenantId);
             } else {
                 commandOut.warn("This feature is unavailable under the current license. " +
@@ -116,14 +111,28 @@ public class TenantImporter extends BaseImporterModule
         return getModuleConfiguration().getTenantService();
     }
 
-    private void updateTenant(Tenant existing, Tenant newTenant) {
+    private void createTenant(TenantBean tenantBean) {
+        Tenant tenant = (Tenant)moduleConfiguration.getObjectMappingFactory().newObject(Tenant.class);
+        tenantBean.copyTo(tenant);
+        // In previous versions of JasperServer we did not have tenant alias and theme.
+        // So, setting alias with tenant id value and default theme for such versions.
+        if (tenant.getAlias() == null) {
+            tenant.setAlias(tenant.getId());
+        }
+        if (tenant.getTheme() == null) {
+            tenant.setTheme(getModuleConfiguration().getTenantExportConfiguration().getDefaultThemeName());
+        }
+        getTenantService().putTenant(executionContext, tenant);
+        saveTenantAttributes(tenant, tenantBean.getAttributes());
+    }
+
+    private void updateTenant(Tenant existing, TenantBean newTenant) {
         existing.setParentId(newTenant.getParentId());
         existing.setTenantDesc(newTenant.getTenantDesc());
         existing.setTenantFolderUri(newTenant.getTenantFolderUri());
         existing.setTenantName(newTenant.getTenantName());
         existing.setTenantNote(newTenant.getTenantNote());
         existing.setTenantUri(existing.getTenantUri());
-        existing.setAttributes(newTenant.getAttributes());
 
         if (newTenant.getAlias() != null) {
             existing.setAlias(newTenant.getAlias());
@@ -132,9 +141,27 @@ public class TenantImporter extends BaseImporterModule
             existing.setTheme(newTenant.getTheme());
         }
         getTenantService().putTenant(executionContext, existing);
+        saveTenantAttributes(existing, newTenant.getAttributes());
 
         commandOut.info("Updated tenant " + existing.getId());
     }
+
+    protected void saveTenantAttributes(Tenant tenant, ProfileAttributeBean[] attributes) {
+        if (attributes != null && attributes.length > 0) {
+            for (ProfileAttributeBean profileAttributeBean : attributes) {
+                saveTenantAttribute(tenant, profileAttributeBean);
+            }
+        }
+    }
+
+    protected void saveTenantAttribute(Tenant tenant, ProfileAttributeBean attributeBean) {
+        ProfileAttributeService attributeService = moduleConfiguration.getAttributeService();
+        ProfileAttribute attribute = attributeService.newProfileAttribute(executionContext);
+        attribute.setPrincipal(tenant);
+        attributeBean.copyTo(attribute);
+        attributeService.putProfileAttribute(executionContext, attribute);
+    }
+
 
     public TenantModuleConfiguration getModuleConfiguration() {
         return moduleConfiguration;

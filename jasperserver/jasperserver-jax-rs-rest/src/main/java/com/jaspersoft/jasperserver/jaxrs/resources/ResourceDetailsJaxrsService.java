@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005 - 2009 Jaspersoft Corporation. All rights  reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
 * http://www.jaspersoft.com.
 *
 * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -16,7 +16,7 @@
 * GNU Affero  General Public License for more details.
 *
 * You should have received a copy of the GNU Affero General Public  License
-* along with this program.&nbsp; If not, see <http://www.gnu.org/licenses/>.
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 package com.jaspersoft.jasperserver.jaxrs.resources;
 
@@ -72,7 +72,7 @@ import java.util.regex.Pattern;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: ResourceDetailsJaxrsService.java 44312 2014-04-09 14:30:12Z vsabadosh $
+ * @version $Id: ResourceDetailsJaxrsService.java 51276 2014-11-09 17:44:57Z ktsaregradskyi $
  */
 @Component
 public class ResourceDetailsJaxrsService {
@@ -85,6 +85,7 @@ public class ResourceDetailsJaxrsService {
     private Map<String, String> contentTypeMapping;
 
     public Response getResourceDetails(String uri, String accept, Boolean _expanded) throws RemoteException {
+        final String firstMatch = accept != null ? accept.split(";")[0].split(",")[0] : null;
         boolean expanded = _expanded != null ? _expanded : false;
         Resource resource = singleRepositoryService.getResource(uri);
         if (resource == null) {
@@ -92,7 +93,7 @@ public class ResourceDetailsJaxrsService {
         }
         Response response;
 
-        if ((resource instanceof FileResource || resource instanceof ContentResource) && !ResourceMediaType.FILE_XML.equals(accept) && !ResourceMediaType.FILE_JSON.equals(accept)) {
+        if ((resource instanceof FileResource || resource instanceof ContentResource) && !ResourceMediaType.FILE_XML.equals(firstMatch) && !ResourceMediaType.FILE_JSON.equals(firstMatch)) {
             FileResourceData data = singleRepositoryService.getFileResourceData(resource);
             FileResourceData wrapper = new SelfCleaningFileResourceDataWrapper(data);
             String type = resource instanceof FileResource ? ((FileResource) resource).getFileType() : ((ContentResource) resource).getFileType();
@@ -101,7 +102,7 @@ public class ResourceDetailsJaxrsService {
             final ToClientConverter<? super Resource, ? extends ClientResource> toClientConverter =
                     resourceConverterProvider.getToClientConverter(resource);
             final ClientResource clientResource = toClientConverter.toClient(resource, ToClientConversionOptions.getDefault().setExpanded(expanded));
-            String contentTypeTemplate = accept != null && accept.endsWith("json") ? ResourceMediaType.RESOURCE_JSON_TEMPLATE : ResourceMediaType.RESOURCE_XML_TEMPLATE;
+            String contentTypeTemplate = firstMatch != null && firstMatch.endsWith("json") ? ResourceMediaType.RESOURCE_JSON_TEMPLATE : ResourceMediaType.RESOURCE_XML_TEMPLATE;
             response = Response.ok(clientResource)
                     .header(HttpHeaders.CONTENT_TYPE,
                             contentTypeTemplate.replace(ResourceMediaType.RESOURCE_TYPE_PLACEHOLDER,
@@ -172,7 +173,7 @@ public class ResourceDetailsJaxrsService {
     public Response defaultPostHandler(InputStream stream, String uri, String sourceUri, String disposition, String description, String rawMimeType, String accept, Boolean createFolders, Boolean overwrite) throws RemoteException, IOException {
         Response response;
         if (sourceUri != null) {
-            singleRepositoryService.copyResource(sourceUri, uri, createFolders, overwrite);
+            String newUri = singleRepositoryService.copyResource(sourceUri, uri, createFolders, overwrite);
             // if user copies file, we have to return descriptor, not its content
             // See ResourceDetailsJaxrsService#getResourceDetails
             if (MediaType.APPLICATION_JSON.equals(accept)) {
@@ -180,7 +181,6 @@ public class ResourceDetailsJaxrsService {
             } else {
                 accept = ResourceMediaType.FILE_XML;
             }
-            String newUri = (uri.endsWith(Folder.SEPARATOR)? uri : uri + Folder.SEPARATOR) + sourceUri.substring(sourceUri.lastIndexOf(Folder.SEPARATOR) + 1);
             response = getResourceDetails(newUri, accept, false);
         } else {
             if (disposition == null || !disposition.contains("filename=") || disposition.endsWith("filename=")) {
@@ -235,7 +235,7 @@ public class ResourceDetailsJaxrsService {
         Response response;
         if (sourceUri != null) {
             // uri - parent folder uri
-            singleRepositoryService.moveResource(sourceUri, uri, createFolders, overwrite);
+            String newUri = singleRepositoryService.moveResource(sourceUri, uri, createFolders, overwrite);
             // if user copies file, we have to return descriptor, not its content
             // (matters only '+json' or '+xml' part, so file here works for all kinds of resources))
             if (MediaType.APPLICATION_JSON.equals(accept)) {
@@ -243,7 +243,6 @@ public class ResourceDetailsJaxrsService {
             } else {
                 accept = ResourceMediaType.FILE_XML;
             }
-            String newUri = (uri.endsWith(Folder.SEPARATOR) ? uri : uri + Folder.SEPARATOR) + sourceUri.substring(sourceUri.lastIndexOf(Folder.SEPARATOR) + 1);
             response = getResourceDetails(newUri, accept, false);
         } else {
             // uri - uri of resource
@@ -349,7 +348,7 @@ public class ResourceDetailsJaxrsService {
         Response.ResponseBuilder builder = Response.ok(data.getDataStream());
         builder.header("Pragma", "").header("Cache-Control", "no-store");
 
-        if (ContentResource.TYPE_XLS.equals(fileType) || ContentResource.TYPE_XLSX.equals(fileType) || ContentResource.TYPE_DOCX.equals(fileType)) {
+        if (ContentResource.TYPE_XLS.equals(fileType) || ContentResource.TYPE_XLSX.equals(fileType) || ContentResource.TYPE_DOCX.equals(fileType) || ContentResource.TYPE_PPTX.equals(fileType)) {
             builder.header("Content-Disposition", "inline");
         }
 

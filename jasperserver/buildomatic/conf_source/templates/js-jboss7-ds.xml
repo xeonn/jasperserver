@@ -33,9 +33,9 @@
             <prefill>true</prefill>
 	</pool>
 	<validation>
-            <validate-on-match>true</validate-on-match>
+            <validate-on-match>false</validate-on-match>
             <background-validation>false</background-validation>
-            <check-valid-connection-sql>${jdbcTestTableQuery}</check-valid-connection-sql>
+            <!-- check-valid-connection-sql>${jdbcTestTableQuery}</check-valid-connection-sql -->
         </validation>
         <statement>
             <share-prepared-statements>false</share-prepared-statements>
@@ -54,9 +54,9 @@
             <prefill>true</prefill>
 	</pool>
 	<validation>
-            <validate-on-match>true</validate-on-match>
+            <validate-on-match>false</validate-on-match>
             <background-validation>false</background-validation>
-            <check-valid-connection-sql>${jdbcTestTableQuery}</check-valid-connection-sql>
+            <!-- check-valid-connection-sql>${jdbcTestTableQuery}</check-valid-connection-sql -->
         </validation>
         <statement>
             <share-prepared-statements>false</share-prepared-statements>
@@ -75,9 +75,9 @@
             <prefill>true</prefill>
 	</pool>
 	<validation>
-            <validate-on-match>true</validate-on-match>
+            <validate-on-match>false</validate-on-match>
             <background-validation>false</background-validation>
-            <check-valid-connection-sql>${jdbcTestTableQuery}</check-valid-connection-sql>
+            <!-- check-valid-connection-sql>${jdbcTestTableQuery}</check-valid-connection-sql -->
         </validation>
         <statement>
             <share-prepared-statements>false</share-prepared-statements>

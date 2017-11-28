@@ -15,7 +15,6 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
 		<property name="validator" ref="reportJobValidator"/>
 		<property name="messageSource" ref="messageSource"/>
         <property name="schedulingService" ref="reportSchedulingService"/>
-        <property name="repositoryService" ref="${bean.repositoryServiceForAclUpdate}"/>
         <property name="securityContextProvider" ref="${bean.securityContextProvider}"/>
         <property name="isNewModeAttrName" value="isNewMode"/>
 		<property name="reportUnitURIAttrName" value="reportUnitURI"/>
@@ -188,6 +187,14 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
 			</property>
 			<property name="labelMessage">
 				<value>report.output.xlsx.nopag.label</value>
+			</property>
+		</bean>
+		<bean class="com.jaspersoft.jasperserver.war.dto.ByteEnum">
+			<property name="code">
+				<util:constant static-field="com.jaspersoft.jasperserver.api.engine.scheduling.domain.ReportJob.OUTPUT_FORMAT_PPTX"/>
+			</property>
+			<property name="labelMessage">
+				<value>report.output.pptx.label</value>
 			</property>
 		</bean>
 		<!-- 

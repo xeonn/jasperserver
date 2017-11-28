@@ -222,6 +222,9 @@
         <property name="tenantSerializer">
             <ref bean="tenantSerializer"/>
         </property>
+        <property name="attributeService" ref="profileAttributeServiceTarget"/>
+        <property name="objectMappingFactory" ref="mappingResourceFactory"/>
+
     </bean>
 
     <bean id="tenantSerializer" class="com.jaspersoft.jasperserver.export.io.CastorSerializer">

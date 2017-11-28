@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -24,19 +24,20 @@ import com.jaspersoft.jasperserver.api.metadata.common.domain.ListOfValues;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ListOfValuesItem;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.client.ListOfValuesItemImpl;
+import com.jaspersoft.jasperserver.api.common.crypto.PasswordCipherer;
 import com.jaspersoft.jasperserver.export.modules.repository.ResourceExportHandler;
 import com.jaspersoft.jasperserver.export.modules.repository.ResourceImportHandler;
 
 
 /**
  * @author tkavanagh
- * @version $Id: ListOfValuesBean.java 19925 2010-12-11 15:06:41Z tmatyashovsky $
+ * @version $Id: ListOfValuesBean.java 51858 2014-12-06 20:46:19Z vsabadosh $
  */
 
 
 public class ListOfValuesBean extends ResourceBean {
 
-	
+
 	private ListOfValuesItemBean[] items;
 
 	protected void additionalCopyFrom(Resource res, ResourceExportHandler referenceHandler) {
@@ -52,6 +53,12 @@ public class ListOfValuesBean extends ResourceBean {
 			items = new ListOfValuesItemBean[lovItems.length];
 			for (int i = 0; i < lovItems.length; i++) {
 				ListOfValuesItem lovItem = lovItems[i];
+				Object value = lovItem.getValue();
+				if (value instanceof String && PasswordCipherer.getInstance().isEncrypted((String) value)) {
+					String rawValue = PasswordCipherer.getInstance().decryptSecureAttribute((String)value);
+					lovItem.setValue(encryptSecureAttribute(rawValue));
+				}
+
 				ListOfValuesItemBean itemBean = new ListOfValuesItemBean(lovItem);
 				items[i] = itemBean;
 			}
@@ -67,6 +74,10 @@ public class ListOfValuesBean extends ResourceBean {
 		if (items != null) {
 			for (int i = 0; i < items.length; i++) {
 				ListOfValuesItemBean item = items[i];
+				Object value = item.getValue();
+				if (value != null && value instanceof String && isEncrypted((String) value)) {
+					item.setValue(PasswordCipherer.getInstance().encryptSecureAttribute(decryptSecureAttribute((String) value)));
+				}
 				ListOfValuesItem lovItem = new ListOfValuesItemImpl();
 				item.copyTo(lovItem);
 				lov.addValue(lovItem);

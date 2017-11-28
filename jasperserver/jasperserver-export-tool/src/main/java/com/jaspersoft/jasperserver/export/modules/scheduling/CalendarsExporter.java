@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -21,22 +21,9 @@
 
 package com.jaspersoft.jasperserver.export.modules.scheduling;
 
-import com.jaspersoft.jasperserver.api.JSException;
-import com.jaspersoft.jasperserver.api.engine.scheduling.domain.ReportJob;
-import com.jaspersoft.jasperserver.api.engine.scheduling.domain.ReportJobRuntimeInformation;
-import com.jaspersoft.jasperserver.api.engine.scheduling.domain.ReportJobSummary;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.Folder;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceLookup;
-import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportUnit;
-import com.jaspersoft.jasperserver.api.metadata.user.domain.Role;
-import com.jaspersoft.jasperserver.api.metadata.view.domain.FilterCriteria;
-import com.jaspersoft.jasperserver.core.util.ResourceUtil;
 import com.jaspersoft.jasperserver.export.modules.BaseExporterModule;
 import com.jaspersoft.jasperserver.export.modules.scheduling.beans.HolidayCalendarBean;
-import com.jaspersoft.jasperserver.export.modules.scheduling.beans.ReportJobBean;
-import com.jaspersoft.jasperserver.export.modules.scheduling.beans.ReportUnitJobsIndexBean;
-import com.jaspersoft.jasperserver.export.util.PathUtils;
+import com.jaspersoft.jasperserver.core.util.PathUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.dom4j.Element;

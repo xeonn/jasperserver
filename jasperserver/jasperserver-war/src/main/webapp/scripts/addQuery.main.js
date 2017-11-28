@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2014 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: addQuery.main.js 43122 2014-03-18 12:44:22Z psavushchik $
+ * @version: $Id: addQuery.main.js 8025 2014-11-12 13:10:12Z ktsaregradskyi $
  */
 
 define(function(require) {
@@ -42,13 +42,7 @@ define(function(require) {
         _.extend(window.localContext, jrsConfigs.addQuery.localContext);
         _.extend(resource.messages, jrsConfigs.addQuery.resource.messages);
 
-        if (jrsConfigs.addQuery.loadResourceLocator) {
-            require(["resource.locate"], function() {
-                resourceQuery.initialize(options);
-            });
-        } else {
-            resourceQuery.initialize(options);
-        }
+        resourceQuery.initialize(options);
 
         if (jrsConfigs.addQuery.buttonFlowControls) {
             jQuery("#steps1_2").on("click", function() { return resourceQuery.jumpTo("reportNaming"); });

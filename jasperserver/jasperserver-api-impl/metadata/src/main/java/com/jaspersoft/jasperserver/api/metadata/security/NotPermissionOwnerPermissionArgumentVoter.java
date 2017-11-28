@@ -1,6 +1,7 @@
 /*
- * Copyright (C) 2005 - 2012 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
+ *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
  * the following license terms  apply:
  *
@@ -22,15 +23,15 @@ package com.jaspersoft.jasperserver.api.metadata.security;
 
 import com.jaspersoft.jasperserver.api.metadata.user.domain.ObjectPermission;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
-import org.springframework.security.Authentication;
-import org.springframework.security.ConfigAttribute;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.access.ConfigAttribute;
 import org.springframework.stereotype.Component;
 
 /**
  * <p></p>
  *
  * @author Zakhar.Tomchenco
- * @version $Id: NotPermissionOwnerPermissionArgumentVoter.java 32262 2013-05-31 16:05:18Z inesterenko $
+ * @version $Id: NotPermissionOwnerPermissionArgumentVoter.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
 @Component
 public class NotPermissionOwnerPermissionArgumentVoter extends BasicObjectPermissionArgumentVoter {

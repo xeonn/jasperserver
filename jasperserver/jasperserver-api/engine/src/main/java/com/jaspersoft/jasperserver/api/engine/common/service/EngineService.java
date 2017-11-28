@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -29,6 +29,8 @@ import com.jaspersoft.jasperserver.api.metadata.common.domain.InputControlsConta
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceLookup;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceReference;
+import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.CustomDomainMetaData;
+import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.CustomReportDataSource;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportDataSource;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportUnit;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.service.ReportDataSourceService;
@@ -394,6 +396,11 @@ public interface EngineService
 	 */
     List<ReportExecutionStatusInformation> getSchedulerReportExecutionStatusList(SchedulerReportExecutionStatusSearchCriteria searchCriteria);
 
-
+    /*
+     *  This function is used for retrieving the metadata layer of the data connector in form of TableSourceMetadata
+     *  TableSourceMetadata contains information JRFields, query, query language and field name mapping (actual JRField name, name used in domain)
+     *  Currently, this function only supports data adapter CustomReportDataSource object such as CSV, XLS and XLSX data adapter CustomReportDataSource object.
+     */
+    public CustomDomainMetaData getMetaDataFromConnector(CustomReportDataSource customReportDataSource) throws Exception;
 
 }

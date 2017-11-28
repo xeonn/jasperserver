@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2012 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -15,8 +15,8 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Affero  General Public License for more details.
  *
- *  You should have received a copy of the GNU Affero General Public  License
- *  along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public  License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 package com.jaspersoft.jasperserver.api.security.externalAuth.processors;
@@ -26,13 +26,13 @@ import com.jaspersoft.jasperserver.api.common.domain.impl.ExecutionContextImpl;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Folder;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.client.FolderImpl;
 import com.jaspersoft.jasperserver.api.metadata.common.util.RepositoryLabelIDHelper;
-import com.jaspersoft.jasperserver.api.metadata.security.JasperServerAclEntry;
+import com.jaspersoft.jasperserver.api.metadata.security.JasperServerPermission;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.ObjectPermission;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
 import com.jaspersoft.jasperserver.api.metadata.user.service.ObjectPermissionService;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
-import org.springframework.security.context.SecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -82,7 +82,7 @@ public class ExternalUserFolderProcessor extends AbstractExternalUserProcessor {
         ObjectPermission userFolderPermission = getObjectPermissionService().newObjectPermission(context);
         userFolderPermission.setURI(folder.getURI());
         userFolderPermission.setPermissionRecipient(currentUser);
-        userFolderPermission.setPermissionMask(JasperServerAclEntry.READ_WRITE_CREATE_DELETE);
+        userFolderPermission.setPermissionMask(JasperServerPermission.READ_WRITE_CREATE_DELETE.getMask());
 
         getObjectPermissionService().putObjectPermission(context, userFolderPermission);
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2013 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -31,7 +31,7 @@ import org.springframework.stereotype.Component;
  * @author Zakhar.Tomchenco
  * @version $Id$
  */
-@Component
+@Component("basicResourceValidator")
 public class BasicResourceValidator extends GenericResourceValidator<Resource> {
     @Override
     protected void internalValidate(Resource resource, ValidationErrors errors) {

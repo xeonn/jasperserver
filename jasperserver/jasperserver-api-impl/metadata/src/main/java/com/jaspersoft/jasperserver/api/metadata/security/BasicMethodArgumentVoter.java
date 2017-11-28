@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -21,16 +21,21 @@
 
 package com.jaspersoft.jasperserver.api.metadata.security;
 
-import org.springframework.security.Authentication;
-import org.springframework.security.AuthorizationServiceException;
-import org.springframework.security.acl.AclEntry;
-import org.springframework.security.acl.AclManager;
-import org.springframework.security.acl.basic.BasicAclEntry;
+import com.jaspersoft.jasperserver.api.common.util.Functor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.security.access.AuthorizationServiceException;
+import org.springframework.security.acls.domain.GrantedAuthoritySid;
+import org.springframework.security.acls.domain.SidRetrievalStrategyImpl;
+import org.springframework.security.acls.model.*;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 
-import com.jaspersoft.jasperserver.api.common.util.Functor;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * @author Lucian Chirita
@@ -42,12 +47,15 @@ public class BasicMethodArgumentVoter implements MethodArgumentAclVoter {
 
 	private Class argumentType;
 	private int argumentIndex = 1;
-	private int[] accessPermissions;
+	private Permission[] accessPermissions;
 	private Functor argumentFunctor;
+    private SidRetrievalStrategy sidRetrievalStrategy;
+    private AclService aclService;
+    private ObjectIdentityRetrievalStrategy objectIdentityRetrievalStrategy;
 	
-	public boolean allow(MethodInvocation methodCall, Authentication authentication, AclManager aclManager) {
+	public boolean allow(MethodInvocation methodCall, Authentication authentication) {
 		Object secureObject = getSecureObject(methodCall);
-		return accessPermitted(authentication, aclManager, secureObject);
+		return accessPermitted(authentication, secureObject);
 	}
 
 	protected Object getSecureObject(MethodInvocation methodCall) {
@@ -86,10 +94,11 @@ public class BasicMethodArgumentVoter implements MethodArgumentAclVoter {
 		return arg;
 	}
 
-	protected boolean accessPermitted(Authentication authentication,
-			AclManager aclManager, Object secureObject) {
-		AclEntry[] acls = aclManager.getAcls(secureObject, authentication);
-		boolean permitted = accessPermitted(acls);
+	protected boolean accessPermitted(Authentication authentication,Object secureObject) {
+        ObjectIdentity objectIdentity = getObjectIdentityRetrievalStrategy().getObjectIdentity(secureObject);
+        List<Sid> sidList = getSidRetrievalStrategy().getSids(authentication);
+        Acl acl = getAclService().readAclById(objectIdentity, sidList);
+        boolean permitted = acl.isGranted(new ArrayList<Permission>(Arrays.asList(accessPermissions)),sidList,false);
 		if (log.isDebugEnabled()) {
 			if (permitted) {
 				log.debug("Access permitted on " + secureObject + " for " + authentication);
@@ -100,43 +109,6 @@ public class BasicMethodArgumentVoter implements MethodArgumentAclVoter {
 		return permitted;
 	}
 
-	protected boolean accessPermitted(AclEntry[] acls) {
-		boolean matches = false;
-		if (acls != null && acls.length > 0) {
-			for (int i = 0; i < acls.length; i++) {
-				AclEntry aclEntry = acls[i];
-				if (aclEntry instanceof BasicAclEntry) {
-					BasicAclEntry basicAclEntry = (BasicAclEntry) aclEntry;
-					if (accessPermitted(basicAclEntry)) {
-						matches = true;
-						break;
-					}
-				} else {
-					if (log.isDebugEnabled()) {
-						log.debug("Ignoring non BasicAclEntry ACL entry instance " 
-								+ aclEntry);
-					}
-				}
-			}
-		}
-		return matches;
-	}
-	
-	protected boolean accessPermitted(BasicAclEntry basicAclEntry) {
-		boolean access = false;
-		for (int i = 0; i < accessPermissions.length; i++) {
-			if (basicAclEntry.isPermitted(accessPermissions[i])) {
-				if (log.isDebugEnabled()) {
-					log.debug("ACL entry " + basicAclEntry + " matched permission " 
-							+ accessPermissions[i] + ", access permitted");
-				}
-				
-				access = true;
-				break;
-			}
-		}
-		return access;
-	}
 
 	public Class getArgumentType() {
 		return argumentType;
@@ -154,11 +126,11 @@ public class BasicMethodArgumentVoter implements MethodArgumentAclVoter {
 		this.argumentIndex = argumentIndex;
 	}
 
-	public int[] getAccessPermissions() {
+	public Permission[] getAccessPermissions() {
 		return accessPermissions;
 	}
 
-	public void setAccessPermissions(int[] accessPermissions) {
+	public void setAccessPermissions(Permission[] accessPermissions) {
 		this.accessPermissions = accessPermissions;
 	}
 
@@ -169,5 +141,29 @@ public class BasicMethodArgumentVoter implements MethodArgumentAclVoter {
 	public void setArgumentFunctor(Functor argumentFunctor) {
 		this.argumentFunctor = argumentFunctor;
 	}
+    @Override
+    public void setSidRetrievalStrategy(SidRetrievalStrategy sidRetrievalStrategy) {
+        this.sidRetrievalStrategy = sidRetrievalStrategy;
+    }
+    @Override
+    public void setAclService(AclService aclService) {
+        this.aclService = aclService;
+    }
+    @Override
+    public void setObjectIdentityRetrievalStrategy(ObjectIdentityRetrievalStrategy objectIdentityRetrievalStrategy) {
+        this.objectIdentityRetrievalStrategy = objectIdentityRetrievalStrategy;
+    }
 
+
+    public SidRetrievalStrategy getSidRetrievalStrategy() {
+        return sidRetrievalStrategy;
+    }
+
+    public AclService getAclService() {
+        return aclService;
+    }
+
+    public ObjectIdentityRetrievalStrategy getObjectIdentityRetrievalStrategy() {
+        return objectIdentityRetrievalStrategy;
+    }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -21,11 +21,11 @@
 package com.jaspersoft.jasperserver.api.metadata.user.domain.client;
 
 import com.jaspersoft.jasperserver.api.metadata.user.domain.ProfileAttribute;
+import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributeCategory;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
-import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import java.io.Serializable;
@@ -36,58 +36,82 @@ import java.io.Serializable;
 
 @XmlRootElement(name = "profileAttribute")
 public class ProfileAttributeImpl implements ProfileAttribute, Serializable {
-
     private String attrName;
     private String attrValue;
+    private ProfileAttributeCategory category;
+    private boolean secure = false;
 
     @XmlTransient
     private Object principal;
 
     public String getAttrName() {
-	return attrName;
+        return attrName;
     }
+
     public void setAttrName(String s) {
-	this.attrName = s;
+        this.attrName = s;
     }
 
     public String getAttrValue() {
-	return attrValue;
+        return attrValue;
     }
+
     public void setAttrValue(String s) {
-	this.attrValue = s;
+        this.attrValue = s;
     }
 
     @XmlTransient
     public Object getPrincipal() {
-	return principal;
+        return principal;
     }
 
+    @Override
+    public ProfileAttributeCategory getCategory() {
+        return category;
+    }
+
+    @Override
+    public void setCategory(ProfileAttributeCategory category) {
+        this.category = category;
+    }
 
     public void setPrincipal(Object o) {
-	this.principal = o;
+        this.principal = o;
+    }
+
+    public boolean isSecure() {
+        return secure;
+    }
+
+    public void setSecure(boolean secure) {
+        this.secure = secure;
     }
 
     public String toString() {
-	return new ToStringBuilder(this)
-	    .append("attrName", getAttrName())
-	    .append("attrValue", getAttrValue())
-	    .append("principal", getPrincipal())
-	    .toString();
+        return new ToStringBuilder(this)
+                .append("attrName", getAttrName())
+                .append("attrValue", getAttrValue())
+                .append("principal", getPrincipal())
+                .append("secure", Boolean.valueOf(isSecure()))
+                .append("category", getCategory())
+                .toString();
     }
 
     public boolean equals(Object other) {
-        if ( !(other instanceof ProfileAttributeImpl) ) return false;
+        if (!(other instanceof ProfileAttributeImpl)) return false;
         ProfileAttributeImpl castOther = (ProfileAttributeImpl) other;
         return new EqualsBuilder()
-            .append(this.getAttrName(), castOther.getAttrName())
-            .append(this.getPrincipal(), castOther.getPrincipal())
-            .isEquals();
+                .append(this.getAttrName(), castOther.getAttrName())
+                .append(this.getPrincipal(), castOther.getPrincipal())
+                .append(this.getCategory(), castOther.getCategory())
+                .isEquals();
     }
 
     public int hashCode() {
         return new HashCodeBuilder()
-            .append(getAttrName())
-            .append(getPrincipal())
-            .toHashCode();
+                .append(getAttrName())
+                .append(getPrincipal())
+                .append(getCategory())
+                .toHashCode();
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -22,17 +22,14 @@ package com.jaspersoft.jasperserver.war.action;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.jaspersoft.jasperserver.war.action.hyperlinks.ReportContextFactory;
 import net.sf.jasperreports.engine.DefaultJasperReportsContext;
 import net.sf.jasperreports.engine.JRExporterParameter;
 import net.sf.jasperreports.engine.JRPropertiesUtil;
@@ -42,6 +39,7 @@ import net.sf.jasperreports.engine.ReportContext;
 import net.sf.jasperreports.engine.export.JRHtmlExporterParameter;
 import net.sf.jasperreports.engine.export.JRHyperlinkProducerFactory;
 import net.sf.jasperreports.engine.export.JsonExporter;
+import net.sf.jasperreports.engine.export.JsonExporterParameter;
 import net.sf.jasperreports.web.JRInteractiveException;
 import net.sf.jasperreports.web.actions.AbstractAction;
 import net.sf.jasperreports.web.actions.Action;
@@ -71,93 +69,102 @@ import com.jaspersoft.jasperserver.war.util.SessionObjectSerieAccessor;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ReportExecutionController.java 45722 2014-05-14 10:24:22Z sergey.prilukin $
+ * @version $Id: ReportExecutionController.java 51449 2014-11-14 16:14:56Z inesterenko $
  */
 public class ReportExecutionController extends MultiActionController {
 
-    private static final Log log = LogFactory.getLog(ViewReportAction.class);
+	private static final Log log = LogFactory.getLog(ViewReportAction.class);
 
-    public static final String REPORT_EXECUTION_PREFIX = "flowReportExecution";
-    public static final String REPORT_EXECUTION_ID_PREFIX = "flowReportExecutionId";
+    //TODO: move to front-end
+	private static final List<String> MODULES_NAMES = Arrays.asList(
+            "jr.LocalAnchor", "jr.LocalPage", "jr.Reference",
+            "jr.RemoteAnchor", "jr.ReportExecution", "jasperreports-loader"
+    );
+
+	public static final String REPORT_EXECUTION_PREFIX = "flowReportExecution";
+	public static final String REPORT_EXECUTION_ID_PREFIX = "flowReportExecutionId";
 
 	public static final String REPORT_CONTEXT_HTML_PRINT_ID = "htmlReportJRPrintId";
 	public static final String REPORT_CONTEXT_HTML_FLOW_KEY = "htmlReportFlowExecutionKey";
 
     public static final String JASPER_PRINT_PARAM_NAME = "jasperPrintName";
 
+    private static final String LICENSE_MANAGER = "com.jaspersoft.ji.license.LicenseManager";
 
-    private static final View NULL_VIEW = new View() {
+
+	private static final View NULL_VIEW = new View() {
 		public String getContentType() {
 			return null;
 		}
 
-        public void render(Map model, HttpServletRequest request,
-                HttpServletResponse response) throws Exception {
-            // NOP
-        }
-    };
+		public void render(Map model, HttpServletRequest request,
+				HttpServletResponse response) throws Exception {
+			// NOP
+		}
+	};
 
-    private EngineService engineService;
-    private SessionObjectSerieAccessor jasperPrintAccessor;
-    private DataCacheProvider dataCacheProvider;
+	private EngineService engineService;
+	private SessionObjectSerieAccessor jasperPrintAccessor;
+	private DataCacheProvider dataCacheProvider;
     private JasperReportsContext jasperReportsContext;
     private WebflowReportContextAccessor reportContextAccessor;
     private HyperlinkProducerFactoryFlowFactory hyperlinkProducerFactory;
     @Resource(name="reportExecutionAccessor")
     private GlobalReportExecutionAccessor reportExecutionAccessor;
+    private ReportContextFactory reportContextFactory;
 
-    public ModelAndView viewReportCancel(HttpServletRequest req, HttpServletResponse res) {
-        String flowExecutionKey = req.getParameter("_flowExecutionKey");
-        String sessionName = REPORT_EXECUTION_PREFIX + flowExecutionKey;
+	public ModelAndView viewReportCancel(HttpServletRequest req, HttpServletResponse res) {
+		String flowExecutionKey = req.getParameter("_flowExecutionKey");
+		String sessionName = REPORT_EXECUTION_PREFIX + flowExecutionKey;
         ReportExecutionAttributes execution =
-                (ReportExecutionAttributes) req.getSession().getAttribute(sessionName);
+			(ReportExecutionAttributes) req.getSession().getAttribute(sessionName);
 
-        if (execution == null) {
-            if (log.isDebugEnabled()) {
-                log.debug("No report execution to cancel");
-            }
-        } else {
-            boolean canceled = engineService.cancelExecution(execution.getRequestId());
+		if (execution == null) {
+			if (log.isDebugEnabled()) {
+				log.debug("No report execution to cancel");
+			}
+		} else {
+			boolean canceled = engineService.cancelExecution(execution.getRequestId());
 
-            if (log.isDebugEnabled()) {
+			if (log.isDebugEnabled()) {
                 log.debug("Report execution " + execution.getRequestId()
-                        + " cancel status: " + canceled);
-            }
-        }
+						+ " cancel status: " + canceled);
+			}
+		}
 
-        return new ModelAndView(NULL_VIEW);
-    }
+		return new ModelAndView(NULL_VIEW);
+	}
 
-    public ModelAndView viewReportAsyncCancel(HttpServletRequest req, HttpServletResponse res) throws Exception {
-        ReportUnitResult result = getReportResult(req);
-        String requestId = result == null ? null : result.getRequestId();
+	public ModelAndView viewReportAsyncCancel(HttpServletRequest req, HttpServletResponse res) throws Exception {
+		ReportUnitResult result = getReportResult(req);
+		String requestId = result == null ? null : result.getRequestId();
 
-        LinkedHashMap<String, Object> actionResult = new LinkedHashMap<String, Object>();
-        if (requestId == null) {
-            if (log.isDebugEnabled()) {
-                log.debug("No async report execution to cancel");
-            }
-        } else {
-            boolean canceled = engineService.cancelExecution(requestId);
+		LinkedHashMap<String, Object> actionResult = new LinkedHashMap<String, Object>();
+		if (requestId == null) {
+			if (log.isDebugEnabled()) {
+				log.debug("No async report execution to cancel");
+			}
+		} else {
+			boolean canceled = engineService.cancelExecution(requestId);
 
-            if (log.isDebugEnabled()) {
+			if (log.isDebugEnabled()) {
                 log.debug("Report execution " + requestId
-                        + " cancel status: " + canceled);
-            }
+						+ " cancel status: " + canceled);
+			}
 
-            JasperPrintAccessor resultPrintAccessor = result.getJasperPrintAccessor();
-            try {
-                // this will wait for the report to end
-                resultPrintAccessor.getFinalJasperPrint();
-            } catch (JRRuntimeException e) {
-                // we don't need to handle the exception here, we're doing getReportStatus() below
-            }
+			JasperPrintAccessor resultPrintAccessor = result.getJasperPrintAccessor();
+			try {
+				// this will wait for the report to end
+				resultPrintAccessor.getFinalJasperPrint();
+			} catch (JRRuntimeException e) {
+				// we don't need to handle the exception here, we're doing getReportStatus() below
+			}
 
-            putReportStatusResult(res, result, actionResult);
-        }
+			putReportStatusResult(res, result, actionResult);
+		}
 
-        return new ModelAndView("json:result", Collections.singletonMap("result", actionResult));
-    }
+		return new ModelAndView("json:result", Collections.singletonMap("result", actionResult));
+	}
 
 	protected String getReportName(HttpServletRequest req) {
 		return req.getParameter(JASPER_PRINT_PARAM_NAME);
@@ -171,14 +178,14 @@ public class ReportExecutionController extends MultiActionController {
 		}
 		
 		ReportUnitResult result = (ReportUnitResult) getJasperPrintAccessor().getObject(req, jasperPrintName);
-        return result;
-    }
+		return result;
+	}
     
-    protected ReportUnitResult getReportResult(HttpServletRequest req) {
+	protected ReportUnitResult getReportResult(HttpServletRequest req) {
         String jasperPrintName = req.getParameter(JASPER_PRINT_PARAM_NAME);
         if (jasperPrintName == null){
             jasperPrintName = req.getHeader(JASPER_PRINT_PARAM_NAME);
-        }
+	}
         ReportUnitResult result = (ReportUnitResult) getJasperPrintAccessor().getObject(req, jasperPrintName);
         if(result == null){
             result = reportExecutionAccessor.getReportUnitResult(jasperPrintName);
@@ -187,40 +194,40 @@ public class ReportExecutionController extends MultiActionController {
         
      }
 
-    public ModelAndView viewReportPageUpdateCheck(HttpServletRequest req, HttpServletResponse res) throws Exception {
-        ReportUnitResult reportResult = getReportResult(req);
-        JasperPrintAccessor printAccessor = reportResult == null ? null : reportResult.getJasperPrintAccessor();
-        if (printAccessor == null) {
-            return null;
-        }
+	public ModelAndView viewReportPageUpdateCheck(HttpServletRequest req, HttpServletResponse res) throws Exception {
+		ReportUnitResult reportResult = getReportResult(req);
+		JasperPrintAccessor printAccessor = reportResult == null ? null : reportResult.getJasperPrintAccessor();
+		if (printAccessor == null) {
+			return null;
+		}
 
-        String pageIdxParam = req.getParameter("pageIndex");
-        Integer pageIndex = pageIdxParam == null ? null : Integer.valueOf(pageIdxParam);
-        String pageTimestampParam = req.getParameter("pageTimestamp");
-        Long pageTimestamp = pageTimestampParam == null ? null : Long.valueOf(pageTimestampParam);
+		String pageIdxParam = req.getParameter("pageIndex");
+		Integer pageIndex = pageIdxParam == null ? null : Integer.valueOf(pageIdxParam);
+		String pageTimestampParam = req.getParameter("pageTimestamp");
+		Long pageTimestamp = pageTimestampParam == null ? null : Long.valueOf(pageTimestampParam);
 
-        if (log.isDebugEnabled()) {
-            log.debug("report page update check for " + reportResult.getRequestId()
-                    + ", pageIndex: " + pageIndex + ", pageTimestamp: " + pageTimestamp);
-        }
+		if (log.isDebugEnabled()) {
+			log.debug("report page update check for " + reportResult.getRequestId()
+					+ ", pageIndex: " + pageIndex + ", pageTimestamp: " + pageTimestamp);
+		}
 
-        LinkedHashMap<String, Object> result = new LinkedHashMap<String, Object>();
-        putReportStatusResult(res, reportResult, result);
+		LinkedHashMap<String, Object> result = new LinkedHashMap<String, Object>();
+		putReportStatusResult(res, reportResult, result);
         ReportExecutionStatus reportStatus = printAccessor.getReportStatus();
         ReportPageStatus pageStatus = null;
 
         if (pageIndex != null && pageTimestamp != null) {
-            pageStatus = printAccessor.pageStatus(pageIndex, pageTimestamp);
-            boolean modified = pageStatus.hasModified();
-            result.put("pageModified", modified);
+			pageStatus = printAccessor.pageStatus(pageIndex, pageTimestamp);
+			boolean modified = pageStatus.hasModified();
+			result.put("pageModified", modified);
 
-            if (log.isDebugEnabled()) {
-                log.debug("page modified " + modified);
-            }
-        }
+			if (log.isDebugEnabled()) {
+				log.debug("page modified " + modified);
+			}
+		}
 
-        return new ModelAndView("json:result", Collections.singletonMap("result", result));
-    }
+		return new ModelAndView("json:result", Collections.singletonMap("result", result));
+	}
 
     public ModelAndView runReportAction(HttpServletRequest req, HttpServletResponse res) throws Exception {
         String reportContextId = req.getParameter("jr_ctxid"); // FIXME use constant
@@ -244,14 +251,14 @@ public class ReportExecutionController extends MultiActionController {
             } else {
                 Action action = getAction(req, reportContext, currentJasperReportsContext);
                 JSController controller = new JSController(currentJasperReportsContext);
-                try {
+            try {
                     // clear search stuff before performing an action
                     if (action.requiresRefill()) {
                         reportContext.setParameterValue("net.sf.jasperreports.search.term.highlighter", null);
                     }
                     
-                    controller.runAction(reportContext, action);
-                    result.put("contextid", reportContextId);
+                controller.runAction(reportContext, action);
+                result.put("contextid", reportContextId);
 
                     // FIXMEJIVE: actions shoud return their own ActionResult that would contribute with JSON object to the output
                     JsonNode actionResult = (JsonNode) reportContext.getParameterValue("net.sf.jasperreports.web.actions.result.json");
@@ -260,15 +267,15 @@ public class ReportExecutionController extends MultiActionController {
                         reportContext.setParameterValue("net.sf.jasperreports.web.actions.result.json", null);
                     }
                     
-                } catch (JRInteractiveException e) {
-                    res.setStatus(500);
-                    result = new LinkedHashMap<String, Object>();
-                    result.put("msg", "The server encountered an error!"); //FIXME use i18n for messages
-                    result.put("devmsg", e.getMessage());
+            } catch (JRInteractiveException e) {
+                res.setStatus(500);
+                result = new LinkedHashMap<String, Object>();
+                result.put("msg", "The server encountered an error!"); //FIXME use i18n for messages
+                result.put("devmsg", e.getMessage());
                 } finally {
                     if(shouldRefreshExecutionOutput){
                         reportExecutionAccessor.refreshOutput(reportContextId);
-                    }
+            }
                 }
             }
         } else {
@@ -280,7 +287,7 @@ public class ReportExecutionController extends MultiActionController {
     }
 
     private Action getAction(HttpServletRequest request, ReportContext webReportContext, JasperReportsContext jrContext) {
-        String jsonData = request.getParameter("jr_action");    //FIXME use constant
+        String jsonData = request.getParameter("jr_action");	//FIXME use constant
         Action result = null;
         List<AbstractAction> actions = JacksonUtil.getInstance(jrContext).loadAsList(jsonData, AbstractAction.class);
         if (actions != null) {
@@ -301,7 +308,7 @@ public class ReportExecutionController extends MultiActionController {
         }
 
         public void render(Map model, HttpServletRequest request,
-                HttpServletResponse response) throws Exception {
+                           HttpServletResponse response) throws Exception {
 
             try {
                 String htmlType = JRPropertiesUtil.getInstance(jasperReportsContext).getProperty("com.jaspersoft.jasperreports.export.html.type");
@@ -331,11 +338,18 @@ public class ReportExecutionController extends MultiActionController {
 
                 JsonExporter exporter = new JsonExporter(jasperReportsContext);
                 ReportPageStatus pageStatus = null;
+				boolean isReportComponentsExportOnly = false;
 
                 if (hasPages)
                 {
                     String reportPage = request.getParameter("pageIndex");
-                    int pageIdx = reportPage == null ? 0 : Integer.parseInt(reportPage);
+					int pageIdx;
+					if (reportPage == null) {
+						isReportComponentsExportOnly = true;
+						pageIdx = 0;
+					} else {
+						pageIdx = Integer.parseInt(reportPage);
+					}
 
                     pageStatus = jasperPrintAccessor.pageStatus(pageIdx, null);
 
@@ -349,16 +363,15 @@ public class ReportExecutionController extends MultiActionController {
 
                 response.setContentType(getContentType());
 
-                ReportContext reportContext = reportResult.getReportContext();
+                ReportContext reportContext = reportContextFactory.getReportContext(reportResult.getReportContext());
+
                 prepareExport(request, reportName, reportContext);
 
 				exporter.setReportContext(reportContext);
                 exporter.setParameter(JRExporterParameter.JASPER_PRINT, jasperPrintAccessor.getJasperPrint());
                 exporter.setParameter(JRExporterParameter.OUTPUT_WRITER, response.getWriter());
-                exporter.setParameter(JRHtmlExporterParameter.HTML_HEADER, null);
-                exporter.setParameter(JRHtmlExporterParameter.BETWEEN_PAGES_HTML, null);
-                exporter.setParameter(JRHtmlExporterParameter.HTML_FOOTER, null);
 				exporter.setParameter(JRHtmlExportUtils.PARAMETER_HTTP_REQUEST, request);
+				exporter.setParameter(JsonExporterParameter.REPORT_COMPONENTS_EXPORT_ONLY, isReportComponentsExportOnly);
 
                 JRHyperlinkProducerFactory hyperlinkFactory = getHyperlinkProducerFactory().getHyperlinkProducerFactory(
                         request, response);
@@ -404,19 +417,43 @@ public class ReportExecutionController extends MultiActionController {
         return new ModelAndView(REPORT_COMPONENTS_VIEW);
     }
 
+    //TODO: move it to front-end
+    private boolean isProVersion(){
+        boolean isPro = false;
+        try {
+            Class clazz = Class.forName(LICENSE_MANAGER);
+            if(clazz != null){
+                isPro = true;
+            }
+        } catch (ClassNotFoundException e) {
+            if(log.isDebugEnabled()){
+                log.info("This is not a pro version. Access is denied");
+            }
+        }
+        return isPro;
+    }
+
+    //TODO: move it to frontend during migration of ReportViewer to bi-report
     public ModelAndView getRequirejsConfig(HttpServletRequest request, HttpServletResponse response) throws Exception {
         WebUtil webUtil = WebUtil.getInstance(getJasperReportsContext());
 
         List<RequirejsModuleMapping> requirejsMappings = getJasperReportsContext().getExtensions(RequirejsModuleMapping.class);
         Map<String, String> modulePaths = new LinkedHashMap<String, String>();
 
+        boolean isPro = isProVersion();
+
         for (RequirejsModuleMapping requirejsMapping : requirejsMappings) {
-            if (!modulePaths.containsKey(requirejsMapping.getName())) {
+            String moduleName = requirejsMapping.getName();
+            if (!modulePaths.containsKey(moduleName)) {
                 String modulePath = requirejsMapping.getPath();
                 if (requirejsMapping.isClasspathResource()) {
                     modulePath = ".." + webUtil.getResourcesBasePath() + modulePath;
+                }else if (MODULES_NAMES.contains(moduleName) && isPro){
+                    //in pro we need to reference to ReportViewer as part of jrs-ui package
+                    modulePath = "bower_components/jrs-ui/src/" + modulePath;
                 }
-                modulePaths.put(requirejsMapping.getName(), modulePath);
+
+                modulePaths.put(moduleName, modulePath);
             }
         }
 
@@ -426,104 +463,105 @@ public class ReportExecutionController extends MultiActionController {
         return new ModelAndView("modules/requirejs.config");
     }
 
+
     protected void putReportStatusResult(HttpServletResponse res,
-            ReportUnitResult reportResult, LinkedHashMap<String, Object> result) throws Exception {
-        JasperPrintAccessor printAccessor = reportResult.getJasperPrintAccessor();
-        ReportExecutionStatus reportStatus = printAccessor.getReportStatus();
-        result.put("lastPartialPageIndex", reportStatus.getCurrentPageCount() - 1);
+			ReportUnitResult reportResult, LinkedHashMap<String, Object> result) throws Exception {
+		JasperPrintAccessor printAccessor = reportResult.getJasperPrintAccessor();
+		ReportExecutionStatus reportStatus = printAccessor.getReportStatus();
+		result.put("lastPartialPageIndex", reportStatus.getCurrentPageCount() - 1);
 
-        String status;
-        switch (reportStatus.getStatus()) {
-            case FINISHED:
-                status = "finished";
-                Integer totalPageCount = reportStatus.getTotalPageCount();
-                result.put("lastPageIndex", totalPageCount - 1);
+		String status;
+		switch (reportStatus.getStatus()) {
+		case FINISHED:
+			status = "finished";
+			Integer totalPageCount = reportStatus.getTotalPageCount();
+			result.put("lastPageIndex", totalPageCount - 1);
 
-                ReportContext reportContext = reportResult.getReportContext();
+			ReportContext reportContext = reportResult.getReportContext();
                 DataCacheProvider.SnapshotSaveStatus snapshotSaveStatus =
-                        dataCacheProvider.getSnapshotSaveStatus(reportContext);
-                if (snapshotSaveStatus != null) {
-                    result.put("snapshotSaveStatus", snapshotSaveStatus.toString());
-                }
+					dataCacheProvider.getSnapshotSaveStatus(reportContext);
+			if (snapshotSaveStatus != null) {
+				result.put("snapshotSaveStatus", snapshotSaveStatus.toString());
+			}
 
-                if (log.isDebugEnabled()) {
-                    log.debug("report finished " + totalPageCount + " pages; snapshot status " + snapshotSaveStatus);
-                }
-                break;
-            case ERROR:
-                status = "error";
-                handleReportUpdateError(res, reportStatus);
-                break;
-            case CANCELED:
-                status = "canceled";
+			if (log.isDebugEnabled()) {
+				log.debug("report finished " + totalPageCount + " pages; snapshot status " + snapshotSaveStatus);
+			}
+			break;
+		case ERROR:
+			status = "error";
+			handleReportUpdateError(res, reportStatus);
+			break;
+		case CANCELED:
+			status = "canceled";
 
-                if (log.isDebugEnabled()) {
-                    log.debug("report canceled");
-                }
-                break;
-            case RUNNING:
-            default:
-                status = "running";
+			if (log.isDebugEnabled()) {
+				log.debug("report canceled");
+			}
+			break;
+		case RUNNING:
+		default:
+			status = "running";
 
-                if (log.isDebugEnabled()) {
-                    log.debug("report running");
-                }
-                break;
-        }
+			if (log.isDebugEnabled()) {
+				log.debug("report running");
+			}
+			break;
+		}
 
-        result.put("status", status);
-    }
+		result.put("status", status);
+	}
 
-    protected void handleReportUpdateError(HttpServletResponse res, ReportExecutionStatus reportStatus) throws Exception {
-        Throwable error = reportStatus.getError();
-        if (log.isDebugEnabled()) {
-            log.debug("report error " + error);// only message
-        }
-        // set a header so that the UI knows it's a report execution error
-        res.setHeader("reportError", "true");
-        // set as a header because we don't have other way to pass it
-        res.setHeader("lastPartialPageIndex", Integer.toString(reportStatus.getCurrentPageCount() - 1));
+	protected void handleReportUpdateError(HttpServletResponse res, ReportExecutionStatus reportStatus) throws Exception {
+		Throwable error = reportStatus.getError();
+		if (log.isDebugEnabled()) {
+			log.debug("report error " + error);// only message
+		}
+		// set a header so that the UI knows it's a report execution error
+		res.setHeader("reportError", "true");
+		// set as a header because we don't have other way to pass it
+		res.setHeader("lastPartialPageIndex", Integer.toString(reportStatus.getCurrentPageCount() - 1));
 
-        // throw an exception to get to the error page
-        if (error instanceof Exception) {
-            // copied from ViewReportAction.executeReport
-            // note that the message is not localized
+		// throw an exception to get to the error page
+		if (error instanceof Exception) {
+			// copied from ViewReportAction.executeReport
+			// note that the message is not localized
             int indexIO = ExceptionUtils.indexOfThrowable(error, IOException.class);
             if (indexIO != -1) {
                 Exception sourceException = (Exception) ExceptionUtils.getThrowableList(error).get(indexIO);
-                throw new JSShowOnlyErrorMessage(sourceException.getMessage());
+				throw new JSShowOnlyErrorMessage(sourceException.getMessage());
             }
 
-            throw (Exception) error;
-        }
+			throw (Exception) error;
+		}
 
-        throw new JSException("jsexception.view.report.error", error);
-    }
+		throw new JSException("jsexception.view.report.error", error);
+	}
 
-    public EngineService getEngineService() {
-        return engineService;
-    }
+	public EngineService getEngineService() {
+		return engineService;
+	}
 
-    public void setEngineService(EngineService engineService) {
-        this.engineService = engineService;
-    }
+	public void setEngineService(EngineService engineService) {
+		this.engineService = engineService;
+	}
 
-    public SessionObjectSerieAccessor getJasperPrintAccessor() {
-        return jasperPrintAccessor;
-    }
+	public SessionObjectSerieAccessor getJasperPrintAccessor() {
+		return jasperPrintAccessor;
+	}
 
-    public void setJasperPrintAccessor(
-            SessionObjectSerieAccessor jasperPrintAccessor) {
-        this.jasperPrintAccessor = jasperPrintAccessor;
-    }
+	public void setJasperPrintAccessor(
+			SessionObjectSerieAccessor jasperPrintAccessor) {
+		this.jasperPrintAccessor = jasperPrintAccessor;
+	}
 
-    public DataCacheProvider getDataCacheProvider() {
-        return dataCacheProvider;
-    }
+	public DataCacheProvider getDataCacheProvider() {
+		return dataCacheProvider;
+	}
 
-    public void setDataCacheProvider(DataCacheProvider dataCacheProvider) {
-        this.dataCacheProvider = dataCacheProvider;
-    }
+	public void setDataCacheProvider(DataCacheProvider dataCacheProvider) {
+		this.dataCacheProvider = dataCacheProvider;
+	}
 
     public JasperReportsContext getJasperReportsContext() {
         return this.jasperReportsContext;
@@ -550,4 +588,7 @@ public class ReportExecutionController extends MultiActionController {
 		this.hyperlinkProducerFactory = hyperlinkProducerFactory;
 	}
 
+    public void setReportContextFactory(ReportContextFactory reportContextFactory) {
+        this.reportContextFactory = reportContextFactory;
+    }
 }

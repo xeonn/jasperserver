@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -29,7 +29,7 @@ import java.util.Date;
  * criteria object to use for filtering report job service
  *
  * @author Ivan Chan (ichan@jaspersoft.com)
- * @version $Id: SchedulerReportExecutionStatusSearchCriteria.java 25010 2012-09-26 16:56:35Z sergey.prilukin $
+ * @version $Id: SchedulerReportExecutionStatusSearchCriteria.java 47331 2014-07-18 09:13:06Z kklein $
  * @since 4.7
  * @see com.jaspersoft.jasperserver.api.engine.common.service.EngineService#getSchedulerReportExecutionStatusList(SchedulerReportExecutionStatusSearchCriteria);
  */

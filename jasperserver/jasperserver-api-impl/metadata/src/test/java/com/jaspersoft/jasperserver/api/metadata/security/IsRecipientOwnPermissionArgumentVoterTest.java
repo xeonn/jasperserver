@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2013 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
  * the following license terms  apply:
@@ -26,12 +26,15 @@ import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.client.ObjectPermissionImpl;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.client.RoleImpl;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.client.UserImpl;
-import org.springframework.security.Authentication;
-import org.springframework.security.GrantedAuthority;
-import org.springframework.security.GrantedAuthorityImpl;
-import org.springframework.security.providers.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.GrantedAuthorityImpl;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
@@ -68,7 +71,9 @@ public class IsRecipientOwnPermissionArgumentVoterTest {
         permission.setURI("repo:/");
         permission.setPermissionMask(1);
 
-        authentication = new UsernamePasswordAuthenticationToken(user, user, new GrantedAuthority[]{new GrantedAuthorityImpl(role.getRoleName())});
+        List<GrantedAuthority> authorityList = new ArrayList<GrantedAuthority>(1);
+        authorityList.add(new GrantedAuthorityImpl(role.getRoleName()));
+        authentication = new UsernamePasswordAuthenticationToken(user, user, authorityList);
     }
 
     @Test

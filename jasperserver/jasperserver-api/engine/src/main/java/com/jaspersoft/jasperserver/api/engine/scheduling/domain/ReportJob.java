@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -53,7 +53,7 @@ import java.util.TimeZone;
  * </p>
  * 
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ReportJob.java 38348 2013-09-30 04:57:18Z carbiv $
+ * @version $Id: ReportJob.java 48468 2014-08-21 07:47:20Z yuriy.plakosh $
  * @since 1.0
  * @see ReportSchedulingService#scheduleJob(com.jaspersoft.jasperserver.api.common.domain.ExecutionContext, ReportJob)
  */
@@ -158,6 +158,13 @@ public class ReportJob implements Serializable {
 	 * @see #getOutputFormats()
 	 */
 	public static final byte OUTPUT_FORMAT_XLSX_NOPAG = 12;
+	
+	/**
+	 * Non paginated PPTX output constant.
+	 * 
+	 * @see #getOutputFormats()
+	 */
+	public static final byte OUTPUT_FORMAT_PPTX = 14;
 	
 	/**
 	 * Report unit with data snapshot output format.

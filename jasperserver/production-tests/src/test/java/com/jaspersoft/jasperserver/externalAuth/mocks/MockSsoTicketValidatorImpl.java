@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2012 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -25,7 +25,7 @@ import com.jaspersoft.jasperserver.api.security.externalAuth.sso.SsoTicketValida
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.security.AuthenticationServiceException;
+import org.springframework.security.authentication.AuthenticationServiceException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Text;

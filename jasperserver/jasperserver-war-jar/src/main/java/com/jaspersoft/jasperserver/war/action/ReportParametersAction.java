@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -43,16 +43,16 @@ import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceContainer;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceReference;
 import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportUnit;
-import com.jaspersoft.jasperserver.api.metadata.security.JasperServerAclEntry;
+import com.jaspersoft.jasperserver.api.metadata.security.JasperServerPermission;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.ObjectPermission;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
 import com.jaspersoft.jasperserver.api.metadata.user.service.ObjectPermissionService;
+import com.jaspersoft.jasperserver.dto.reports.inputcontrols.InputControlState;
 import com.jaspersoft.jasperserver.war.cascade.CascadeResourceNotFoundException;
 import com.jaspersoft.jasperserver.war.cascade.InputControlValidationError;
 import com.jaspersoft.jasperserver.war.cascade.InputControlsLogicService;
 import com.jaspersoft.jasperserver.war.cascade.InputControlsValidationException;
 import com.jaspersoft.jasperserver.war.common.JasperServerUtil;
-import com.jaspersoft.jasperserver.dto.reports.inputcontrols.InputControlState;
 import com.jaspersoft.jasperserver.war.util.CalendarFormatProvider;
 import com.jaspersoft.jasperserver.war.util.ServletContextWrapper;
 import org.apache.commons.lang.StringEscapeUtils;
@@ -61,9 +61,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.springframework.context.MessageSource;
-import org.springframework.security.Authentication;
-import org.springframework.security.acl.basic.SimpleAclEntry;
-import org.springframework.security.context.SecurityContextHolder;
+import org.springframework.security.acls.domain.CumulativePermission;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.webflow.action.FormAction;
 import org.springframework.webflow.core.collection.MutableAttributeMap;
 import org.springframework.webflow.core.collection.ParameterMap;
@@ -85,7 +85,7 @@ import java.util.Set;
 
 /**
  * @author Ionut Nedelcu (ionutned@users.sourceforge.net)	
- * @version $Id: ReportParametersAction.java 44312 2014-04-09 14:30:12Z vsabadosh $
+ * @version $Id: ReportParametersAction.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
 public abstract class ReportParametersAction extends FormAction implements ReportInputControlsAction
 {
@@ -338,12 +338,11 @@ public abstract class ReportParametersAction extends FormAction implements Repor
                 }
             }
         }
-        if (allUserPermissions != null && allUserPermissions.size() > 0) {
-            JasperServerAclEntry jasperServerAclEntry = new JasperServerAclEntry();
-            return jasperServerAclEntry.printPermissionsOverlappingBlock(allUserPermissions) == SimpleAclEntry.READ;
-        } else {
-            return false;
+        CumulativePermission cPermission = new CumulativePermission();
+        for(Integer permission: allUserPermissions) {
+            cPermission.set(new JasperServerPermission(permission));
         }
+        return cPermission.equals(JasperServerPermission.READ);
     }
 
 
@@ -458,7 +457,7 @@ public abstract class ReportParametersAction extends FormAction implements Repor
 
         try {
             /* Resolve values for controls. */
-            List<InputControlState> inputControlStates = inputControlsLogicService.getValuesForInputControls(inputControlsContainerURI, infos.getControlNames(), requestParametersForControlLogic);
+            List<InputControlState> inputControlStates = inputControlsLogicService.getValuesForInputControls(inputControlsContainerURI, infos.getControlNames(), requestParametersForControlLogic, false);
             checkInputControlStateForValidationErrors(inputControlStates);
 
             Map<String, String[]> inputControlFormattedValues = ReportParametersUtils.getValueMapFromInputControlStates(inputControlStates);

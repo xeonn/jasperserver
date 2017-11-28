@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -29,7 +29,7 @@ import com.jaspersoft.jasperserver.api.engine.jasperreports.util.repo.Repository
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: RepositoryResourceClassLoader.java 30356 2013-03-27 17:35:50Z lchirita $
+ * @version $Id: RepositoryResourceClassLoader.java 47331 2014-07-18 09:13:06Z kklein $
  */
 public class RepositoryResourceClassLoader extends ClassLoader {
 

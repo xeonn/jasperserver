@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2013 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -22,9 +22,10 @@ package com.jaspersoft.jasperserver.war.util;
 
 import com.jaspersoft.jasperserver.api.security.externalAuth.ExternalDataSynchronizer;
 import com.jaspersoft.jasperserver.api.security.internalAuth.InternalAuthenticationToken;
-import org.springframework.security.Authentication;
-import org.springframework.security.context.SecurityContextHolder;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -37,10 +38,12 @@ public class ExternalRequestParameterAuthenticationFilter extends RequestParamet
 	private ExternalDataSynchronizer externalDataSynchronizer;
 
 	protected void onSuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
-											  Authentication authResult) throws IOException {
+											  Authentication authResult) throws IOException, ServletException {
 		try {
 			if (!(authResult instanceof InternalAuthenticationToken))
 				externalDataSynchronizer.synchronize();
+
+			super.onSuccessfulAuthentication(request, response, authResult);
 		} catch (RuntimeException e) {
 			SecurityContextHolder.getContext().setAuthentication(null);
 			throw e;

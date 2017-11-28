@@ -203,6 +203,11 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
 		<property name="setResponseContentLength" value="true"/>
 	</bean>
 
+	<bean id="reportPptxExporter" class="com.jaspersoft.jasperserver.war.action.ReportPptxExporter" parent="baseReportExporter">
+		<property name="exportParameters" ref="pptxExportParameters"/>
+		<property name="setResponseContentLength" value="true"/>
+	</bean>
+
 	<bean id="reportExporter" class="com.jaspersoft.jasperserver.war.action.ReportExporterAction">
 		<property name="configuredExporters" ref="exporterConfigMap"/>
 		<property name="exportParameters">
@@ -308,6 +313,14 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
 		<property name="currentExporter" ref="reportOdsExporter"/>
 	</bean>
 	
+	<bean id="pptxExporterConfiguration" class="com.jaspersoft.jasperserver.war.action.ExporterConfigurationBean" scope="prototype">
+		<property name="descriptionKey" value="jasper.report.view.hint.export.pptx"/>
+		<property name="iconSrc" value="/images/pptx.png"/>
+		<property name="parameterDialogName" value=""/>
+		<property name="exportParameters" ref="pptxExportParameters"/>
+		<property name="currentExporter" ref="reportPptxExporter"/>
+	</bean>
+	
 	<!-- end specific exporter configurations -->
 	
 	
@@ -327,6 +340,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
         <entry key="ods" value-ref="odsExporterConfiguration"/>
         <entry key="xlsx" value-ref="xlsxExporterConfiguration"/>
         <entry key="xlsxNoPag" value-ref="xlsxNoPaginationExporterConfiguration"/>
+        <entry key="pptx" value-ref="pptxExporterConfiguration"/>
         <!-- 
         <entry key="txt" value-ref="txtExporterConfiguration"/>
         -->

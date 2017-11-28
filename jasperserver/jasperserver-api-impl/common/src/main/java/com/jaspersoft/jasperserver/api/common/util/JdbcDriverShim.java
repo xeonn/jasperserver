@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2013 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -42,7 +42,7 @@ import java.util.logging.Logger;
  *
  *
  * @author Sergey Prilukin (sprilukin@jaspersoft.com)
- * @version $Id: JdbcDriverShim.java 30890 2013-04-06 15:26:45Z afomin $
+ * @version $Id: JdbcDriverShim.java 47331 2014-07-18 09:13:06Z kklein $
  */
 public class JdbcDriverShim implements Driver {
     private Driver driver;

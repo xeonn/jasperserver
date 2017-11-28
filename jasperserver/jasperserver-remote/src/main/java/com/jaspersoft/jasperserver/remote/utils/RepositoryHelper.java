@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -20,10 +20,15 @@
  */
 package com.jaspersoft.jasperserver.remote.utils;
 
+import com.jaspersoft.jasperserver.api.common.domain.impl.ExecutionContextImpl;
 import com.jaspersoft.jasperserver.api.common.util.LocaleHelper;
+import com.jaspersoft.jasperserver.api.common.util.rd.DateRangeFactory;
 import com.jaspersoft.jasperserver.api.engine.common.service.EngineService;
 import net.sf.jasperreports.engine.JRParameter;
 import net.sf.jasperreports.engine.JRReport;
+import net.sf.jasperreports.types.date.DateRange;
+import net.sf.jasperreports.types.date.InvalidDateRangeExpressionException;
+import net.sf.jasperreports.types.date.TimestampRange;
 import org.apache.commons.collections.set.ListOrderedSet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -39,16 +44,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-
-import com.jaspersoft.jasperserver.api.common.util.rd.DateRangeFactory;
-
-import net.sf.jasperreports.types.date.DateRange;
-import net.sf.jasperreports.types.date.InvalidDateRangeExpressionException;
-import net.sf.jasperreports.types.date.TimestampRange;
 /**
  *
  * @author gtoffoli
- * @version $Id: RepositoryHelper.java 25420 2012-10-20 16:36:09Z sergey.prilukin $
+ * @version $Id: RepositoryHelper.java 50801 2014-10-29 00:20:56Z inesterenko $
  */
 public class RepositoryHelper
 {
@@ -66,7 +65,7 @@ public class RepositoryHelper
     public static Map convertParameterValues(String reportUri, Map currentParameters, EngineService engine) {
 		Map parametersMap = new HashMap();
 
-		JRReport report = engine.getMainJasperReport(null, reportUri);
+		JRReport report = engine.getMainJasperReport(ExecutionContextImpl.getRuntimeExecutionContext(), reportUri);
 		JRParameter[] parameters = report.getParameters();
 		if (parameters != null)
 		{

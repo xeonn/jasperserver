@@ -1,23 +1,23 @@
 /*
-* Copyright (C) 2005 - 2009 Jaspersoft Corporation. All rights  reserved.
-* http://www.jaspersoft.com.
-*
-* Unless you have purchased  a commercial license agreement from Jaspersoft,
-* the following license terms  apply:
-*
-* This program is free software: you can redistribute it and/or  modify
-* it under the terms of the GNU Affero General Public License  as
-* published by the Free Software Foundation, either version 3 of  the
-* License, or (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-* GNU Affero  General Public License for more details.
-*
-* You should have received a copy of the GNU Affero General Public  License
-* along with this program.&nbsp; If not, see <http://www.gnu.org/licenses/>.
-*/
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
+ * http://www.jaspersoft.com.
+ *
+ * Unless you have purchased  a commercial license agreement from Jaspersoft,
+ * the following license terms  apply:
+ *
+ * This program is free software: you can redistribute it and/or  modify
+ * it under the terms of the GNU Affero General Public License  as
+ * published by the Free Software Foundation, either version 3 of  the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero  General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public  License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 package com.jaspersoft.jasperserver.jaxrs.poc.hypermedia.resource.activity;
 
@@ -46,7 +46,8 @@ public class RunResourceActivity extends ReadResourceActivity {
             ResourceMediaType.REPORT_UNIT_CLIENT_TYPE,
             ResourceMediaType.OLAP_UNIT_CLIENT_TYPE,
             ResourceMediaType.DASHBOARD_CLIENT_TYPE,
-            ResourceMediaType.ADHOC_DATA_VIEW_CLIENT_TYPE
+            ResourceMediaType.ADHOC_DATA_VIEW_CLIENT_TYPE,
+            ResourceMediaType.LEGACY_DASHBOARD_CLIENT_TYPE
     );
 
     @Resource
@@ -95,11 +96,11 @@ public class RunResourceActivity extends ReadResourceActivity {
                 url += MessageFormat.format("new=true&parentFlow=searchFlow&ParentFolderUri={0}&name={1}",
                         parentFolderUri, resourceUri);
             }else if (ResourceMediaType.DASHBOARD_CLIENT_TYPE.equals(resourceType)){
-                url += MessageFormat.format("dashboardRuntimeFlow&dashboardResource={0}",
-                        resourceUri);
+                url = requestInfoProvider.getBaseUrl().concat("dashboard/viewer.html#").concat(resourceUri);
+            }else if (ResourceMediaType.LEGACY_DASHBOARD_CLIENT_TYPE.equals(resourceType)) {
+                url += MessageFormat.format("dashboardRuntimeFlow&dashboardResource={0}", resourceUri);
             }else if (ResourceMediaType.ADHOC_DATA_VIEW_CLIENT_TYPE.equals(resourceType)){
-                url += MessageFormat.format("adhocFlow&resource={0}&ParentFolderUri={1}",
-                        resourceUri, parentFolderUri);
+                url += MessageFormat.format("adhocFlow&resource={0}&ParentFolderUri={1}", resourceUri, parentFolderUri);
             }
 
             link = new Link().setHref(url)

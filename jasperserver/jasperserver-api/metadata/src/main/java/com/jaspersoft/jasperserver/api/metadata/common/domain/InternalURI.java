@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -20,7 +20,7 @@
  */
 package com.jaspersoft.jasperserver.api.metadata.common.domain;
 
-import org.springframework.security.acl.basic.AclObjectIdentity;
+import org.springframework.security.acls.model.ObjectIdentity;
 
 /**
  * A URI reference to an object in our metadata
@@ -28,7 +28,7 @@ import org.springframework.security.acl.basic.AclObjectIdentity;
  * @author swood
  *
  */
-public interface InternalURI extends AclObjectIdentity {
+public interface InternalURI extends ObjectIdentity {
 	
 	public String getURI();
 

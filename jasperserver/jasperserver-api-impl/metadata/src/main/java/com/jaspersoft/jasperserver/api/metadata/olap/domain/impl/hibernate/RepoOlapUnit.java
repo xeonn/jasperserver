@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -25,6 +25,7 @@ import java.beans.XMLEncoder;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 
+import com.jaspersoft.jasperserver.api.metadata.olap.util.XMLDecoderHandler;
 import org.hibernate.Hibernate;
 import org.hibernate.lob.SerializableBlob;
 
@@ -35,8 +36,11 @@ import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.Re
 import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.persistent.RepoResource;
 import com.jaspersoft.jasperserver.api.metadata.olap.domain.OlapUnit;
 import com.jaspersoft.jasperserver.api.metadata.olap.domain.client.OlapUnitImpl;
+
+import javax.xml.parsers.SAXParserFactory;
 import java.beans.XMLDecoder;
 import java.io.BufferedInputStream;
+import java.io.InputStream;
 import java.sql.SQLException;
 
 /**
@@ -104,12 +108,26 @@ public class RepoOlapUnit extends RepoResource {
         
         if (getOlapViewOptions() != null) {
             Object state = null;
+            InputStream stream = null;
+
+            try{
+                stream = new BufferedInputStream(((SerializableBlob)getOlapViewOptions()).getBinaryStream());
+            } catch (SQLException e) {
+                throw new JSException(e);
+            }
+
             try {
-                XMLDecoder d = new XMLDecoder(new BufferedInputStream(((SerializableBlob)getOlapViewOptions()).getBinaryStream()));
+                XMLDecoder d = new XMLDecoder(stream);
                 state = d.readObject();
                 d.close();
-            } catch (SQLException e) {
-                    throw new JSException(e);
+            } catch (Exception e){
+                XMLDecoderHandler handler = new XMLDecoderHandler();
+                try {
+                    SAXParserFactory.newInstance().newSAXParser().parse(stream, handler);
+                    state = handler.getResult();
+                } catch (Exception e1) {
+                    throw new JSException("Cannot parse file state of Olap Unit");
+                }
             }
             view.setOlapViewOptions(state);
         }

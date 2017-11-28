@@ -30,7 +30,7 @@
     <property name="ce.production-tests.path" value="${js-path}/production-tests/shared-config"/>
     <!-- 1/30/2013 - New functionality to copy single application context files from <module>'s to a classpath:
                     example - copy applicationContext-security-web.xml from jasperserver-war/shared-config to production-tests/target/target-classes-->
-    <property name="ce.production-tests.files" value="${js-path}/jasperserver-war/shared-config/applicationContext-security-web.xml, ${js-path}/jasperserver-war/shared-config/applicationContext-propertySettings.xml"/>
+    <property name="ce.production-tests.files" value="${js-path}/jasperserver-war/shared-config/applicationContext-security-web.xml"/>
 
     <property name="ce.export.path" value="${js-path}/jasperserver-export-package/config"/>
     <property name="ce.export-shared.path" value="${js-path}/jasperserver-export-package/shared-config"/>
@@ -50,7 +50,7 @@
         <!-- after copy-deps, copy over the list of platform-specific files -->
         <if>
             <and>
-                <isset property="platform-path"/>
+            <isset property="platform-path"/>
                 <or>
                     <not>
                         <isset property="exclude.platform.files"/>

@@ -1,5 +1,5 @@
 <%--
-  ~ Copyright (C) 2005 - 2013 Jaspersoft Corporation. All rights reserved.
+  ~ Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
   ~ http://www.jaspersoft.com.
   ~
   ~ Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -40,7 +40,7 @@
                 <li><span class="emphasis">demo/demo</span> <spring:message code='LOGIN_TO_VIEW_DEMO'/></li>
             </c:if>
         </ul>
-        <p class="message"><spring:message code='CONTACT_ADMIN'/>.</p>
+        <p class="message"><spring:message code='CONTACT_ADMIN'/></p>
     </t:putAttribute>
 
     <t:putAttribute name="footerContent">

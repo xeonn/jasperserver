@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -23,6 +23,7 @@ package com.jaspersoft.jasperserver.api.metadata.common.domain;
 import com.jaspersoft.jasperserver.api.JasperServerAPI;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportDataSource;
 
+import java.util.List;
 
 
 /**
@@ -32,7 +33,7 @@ import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportDataS
  * It extends {@link com.jaspersoft.jasperserver.api.metadata.common.domain.Resource}
  *
  * @author Teodor Danciu (teodord@users.sourceforge.net)
- * @version $Id: Query.java 19921 2010-12-11 14:52:49Z tmatyashovsky $
+ * @version $Id: Query.java 50801 2014-10-29 00:20:56Z inesterenko $
  */
 @JasperServerAPI
 public interface Query extends Resource
@@ -93,4 +94,8 @@ public interface Query extends Resource
      * @param language SQL language name
      */    
 	public void setLanguage(String language);
+
+    public void setParameters(List<QueryParameterDescriptor> descriptors);
+
+    public List<QueryParameterDescriptor> getParameters();
 }

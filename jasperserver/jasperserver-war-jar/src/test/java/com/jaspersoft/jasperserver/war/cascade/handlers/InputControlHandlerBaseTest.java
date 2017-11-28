@@ -42,7 +42,7 @@ public abstract class InputControlHandlerBaseTest extends UnitilsJUnit4 {
         mockedServices.put("filterResolver", createFilterResolver());
         mockedServices.put("cachedEngineService", setUpCachedEngineService(getApplicationContextForTestCases(), testCaseName));
         mockedServices.put("engineService", createEngineService());
-        mockedServices.put("messagesCalendarFormatProvider", createCalendarFormatProvider());
+        mockedServices.put("isoCalendarFormatProvider", createCalendarFormatProvider());
         mockedServices.put("messageSource", createMessageSource());
 
         ApplicationContext context = setUpApplicationContext(mockedServices, getHandlersConfigContextPath());

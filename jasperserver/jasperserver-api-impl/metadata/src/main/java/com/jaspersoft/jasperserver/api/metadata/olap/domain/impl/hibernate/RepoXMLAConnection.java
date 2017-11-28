@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -22,7 +22,7 @@ package com.jaspersoft.jasperserver.api.metadata.olap.domain.impl.hibernate;
 
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 import com.jaspersoft.jasperserver.api.metadata.common.service.ResourceFactory;
-import com.jaspersoft.jasperserver.api.metadata.common.service.impl.PasswordCipherer;
+import com.jaspersoft.jasperserver.api.common.crypto.PasswordCipherer;
 import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.ReferenceResolver;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.impl.datasource.RepoReportDataSource;
 import com.jaspersoft.jasperserver.api.metadata.olap.domain.XMLAConnection;
@@ -79,7 +79,7 @@ public class RepoXMLAConnection extends RepoOlapClientConnection implements Repo
 	}
 
 	/**
-	 * @hibernate.property column="password" type="string" length="100"
+	 * @hibernate.property column="password" type="string" length="250"
 	 * 
 	 * @return Returns the password.
 	 */

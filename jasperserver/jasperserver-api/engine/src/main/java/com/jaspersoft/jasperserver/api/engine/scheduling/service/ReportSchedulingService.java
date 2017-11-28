@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -44,7 +44,7 @@ import java.util.Map;
  * </p>
  *
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ReportSchedulingService.java 22767 2012-03-23 17:50:51Z ichan $
+ * @version $Id: ReportSchedulingService.java 47331 2014-07-18 09:13:06Z kklein $
  * @since 1.0
  */
 @JasperServerAPI

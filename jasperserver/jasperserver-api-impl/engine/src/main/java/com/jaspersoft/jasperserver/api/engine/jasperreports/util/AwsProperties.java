@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2012 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -47,12 +47,6 @@ public class AwsProperties implements Diagnostic, InitializingBean {
     private String securityGroupIngressPublicIp;
     private Boolean suppressEc2CredentialsWarnings;
     
-    public static final String DB_SECURITY_GROUP_CHANGES_ENABLED = "aws.db.security.group.changes.enabled";
-    public static final String DB_SECURITY_GROUP_NAME = "aws.db.security.group.name";
-    public static final String DB_SECURITY_GROUP_DESCRIPTION = "aws.db.security.group.description";
-    public static final String DB_SECURITY_GROUP_INGRESS_PUBLIC_IP = "aws.db.security.group.ingressPublicIp";
-    public static final String DB_SECURITY_GROUP_CHANGES_SUPPRESS_EC2_CREDENTIALS_WARNINGS = "aws.db.security.group.suppressEc2CredentialsWarnings";
-
     private MessageSource messageSource;
     private AwsEc2MetadataClient awsEc2MetadataClient;
 
@@ -106,16 +100,16 @@ public class AwsProperties implements Diagnostic, InitializingBean {
             .addDiagnosticAttribute(DiagnosticAttributeBuilder.AWS_SETTINGS, new DiagnosticCallback<Map<String, Object>>() {
                 public Map<String, Object> getDiagnosticAttributeValue() {
                     Map<String, Object> awsSettings = new HashMap<String, Object>();
-                    awsSettings.put(DB_SECURITY_GROUP_CHANGES_ENABLED,
-                            generateValueWithDescription(securityGroupChangesEnabled, DB_SECURITY_GROUP_CHANGES_ENABLED));
-                    awsSettings.put(DB_SECURITY_GROUP_NAME,
-                            generateValueWithDescription(securityGroupName, DB_SECURITY_GROUP_NAME));
-                    awsSettings.put(DB_SECURITY_GROUP_DESCRIPTION,
-                            generateValueWithDescription(securityGroupDescription, DB_SECURITY_GROUP_DESCRIPTION));
-                    awsSettings.put(DB_SECURITY_GROUP_INGRESS_PUBLIC_IP,
-                            generateValueWithDescription(securityGroupIngressPublicIp, DB_SECURITY_GROUP_INGRESS_PUBLIC_IP));
-                    awsSettings.put(DB_SECURITY_GROUP_CHANGES_SUPPRESS_EC2_CREDENTIALS_WARNINGS,
-                            generateValueWithDescription(suppressEc2CredentialsWarnings, DB_SECURITY_GROUP_CHANGES_SUPPRESS_EC2_CREDENTIALS_WARNINGS));
+                    awsSettings.put(Property.DB_SECURITY_GROUP_CHANGES_ENABLED.toString(),
+                            generateValueWithDescription(securityGroupChangesEnabled, Property.DB_SECURITY_GROUP_CHANGES_ENABLED.toString()));
+                    awsSettings.put(Property.DB_SECURITY_GROUP_NAME.toString(),
+                            generateValueWithDescription(securityGroupName, Property.DB_SECURITY_GROUP_NAME.toString()));
+                    awsSettings.put(Property.DB_SECURITY_GROUP_DESCRIPTION.toString(),
+                            generateValueWithDescription(securityGroupDescription, Property.DB_SECURITY_GROUP_DESCRIPTION.toString()));
+                    awsSettings.put(Property.DB_SECURITY_GROUP_INGRESS_PUBLIC_IP.toString(),
+                            generateValueWithDescription(securityGroupIngressPublicIp, Property.DB_SECURITY_GROUP_INGRESS_PUBLIC_IP.toString()));
+                    awsSettings.put(Property.DB_SECURITY_GROUP_CHANGES_SUPPRESS_EC2_CREDENTIALS_WARNINGS.toString(),
+                            generateValueWithDescription(suppressEc2CredentialsWarnings, Property.DB_SECURITY_GROUP_CHANGES_SUPPRESS_EC2_CREDENTIALS_WARNINGS.toString()));
 
                     return awsSettings;
                 }
@@ -135,6 +129,34 @@ public class AwsProperties implements Diagnostic, InitializingBean {
             description = " (" + description + ")";
         }
         return awsValue + description;
+    }
+
+    public enum Property {
+        DB_SECURITY_GROUP_CHANGES_ENABLED("aws.db.security.group.changes.enabled"),
+        DB_SECURITY_GROUP_NAME("aws.db.security.group.name"),
+        DB_SECURITY_GROUP_DESCRIPTION("aws.db.security.group.description"),
+        DB_SECURITY_GROUP_INGRESS_PUBLIC_IP("aws.db.security.group.ingressPublicIp"),
+        DB_SECURITY_GROUP_CHANGES_SUPPRESS_EC2_CREDENTIALS_WARNINGS("aws.db.security.group.suppressEc2CredentialsWarnings");
+
+        private final String label;
+        private static final Map<String, Property> stringToEnum = new HashMap<String, Property>();
+        static {
+            for (Property property : values())
+                stringToEnum.put(property.toString(), property);
+        }
+
+        public static Property fromString(String symbol) {
+            return stringToEnum.get(symbol);
+        }
+
+        Property(String symbol) {
+            this.label = symbol;
+        }
+
+        @Override
+        public String toString() {
+            return label;
+        }
     }
 
     @Override

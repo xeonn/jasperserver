@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -21,17 +21,18 @@
 
 package com.jaspersoft.jasperserver.api.security;
 
-import java.util.Iterator;
+import org.aopalliance.intercept.MethodInvocation;
+import org.springframework.security.access.ConfigAttribute;
+import org.springframework.security.access.vote.AbstractAclVoter;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 
-import org.springframework.security.Authentication;
-import org.springframework.security.ConfigAttribute;
-import org.springframework.security.ConfigAttributeDefinition;
-import org.springframework.security.GrantedAuthority;
-import org.springframework.security.vote.AbstractAclVoter;
+import java.util.Collection;
+import java.util.Iterator;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: FlowRoleAccessVoter.java 21035 2011-09-20 00:14:12Z afomin $
+ * @version $Id: FlowRoleAccessVoter.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
 public class FlowRoleAccessVoter extends AbstractAclVoter {
 	
@@ -49,10 +50,10 @@ public class FlowRoleAccessVoter extends AbstractAclVoter {
 		return attr != null && attr.equals(getFlowAccessAttribute());
 	}
 
-	public int vote(Authentication authentication, Object object, ConfigAttributeDefinition config) {
+	public int vote(Authentication authentication, MethodInvocation object, Collection<ConfigAttribute> attributes) {
 		int result = ACCESS_ABSTAIN;
 		
-		for (Iterator it = config.getConfigAttributes().iterator(); it.hasNext(); ) {
+		for (Iterator it = attributes.iterator(); it.hasNext(); ) {
 			ConfigAttribute attribute = (ConfigAttribute) it.next();
 			if (supports(attribute)) {
 				result = voteFlowAccess(authentication, object);
@@ -62,7 +63,7 @@ public class FlowRoleAccessVoter extends AbstractAclVoter {
 		return result;
 	}
 
-	protected int voteFlowAccess(Authentication authentication, Object object) {
+	protected int voteFlowAccess(Authentication authentication, MethodInvocation object) {
 		int result;
 		
 		String flowId = (String) getDomainObjectInstance(object);		
@@ -70,9 +71,9 @@ public class FlowRoleAccessVoter extends AbstractAclVoter {
 			result = ACCESS_ABSTAIN;
 		} else {
 	        result = ACCESS_DENIED;
-			
-			ConfigAttributeDefinition flowAttributes = getFlowDefinitionSource().getAttributes(flowId);
-	        for (Iterator iter = flowAttributes.getConfigAttributes().iterator(); iter.hasNext(); ) {
+
+            final Collection<ConfigAttribute> attributes = getFlowDefinitionSource().getAttributes(flowId);
+	        for (Iterator iter = attributes.iterator(); iter.hasNext(); ) {
 	            ConfigAttribute attribute = (ConfigAttribute) iter.next();
 
 				if (matchesAuthority(authentication, attribute.getAttribute())) {
@@ -86,10 +87,9 @@ public class FlowRoleAccessVoter extends AbstractAclVoter {
 	}
 
 	protected boolean matchesAuthority(Authentication authentication, String attribute) {
-		GrantedAuthority[] authorities = authentication.getAuthorities();
 		boolean matches = false;
-		for (int i = 0; i < authorities.length; i++) {
-		    if (attribute.equals(authorities[i].getAuthority())) {
+		for (GrantedAuthority authority : authentication.getAuthorities()) {
+		    if (attribute.equals(authority.getAuthority())) {
 		    	matches = true;
 		    	break;
 		    }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -45,7 +45,7 @@ import java.util.*;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: JRQueryExecuterAdapter.java 24202 2012-06-21 13:10:48Z afomin $
+ * @version $Id: JRQueryExecuterAdapter.java 49286 2014-09-23 13:32:25Z ykovalchyk $
  */
 public class JRQueryExecuterAdapter {
 	
@@ -66,6 +66,12 @@ public class JRQueryExecuterAdapter {
 	}
 
     public static OrderedMap executeQuery(final Query query,
+			final String keyColumn, final Class keyColumnClass, final String[] resultColumns,
+			Map parameterValues) {
+		return executeQuery(query, keyColumn, keyColumnClass, resultColumns, parameterValues, null, null, true);
+	}
+
+    public static OrderedMap executeQuery(final Query query,
                                           final String keyColumn, final String[] resultColumns,
                                           Map parameterValues, List additionalParameters) {
         return executeQuery(query, keyColumn, resultColumns, parameterValues, null, additionalParameters, true);
@@ -74,12 +80,20 @@ public class JRQueryExecuterAdapter {
 	public static OrderedMap executeQuery(final Query query, 
 			final String keyColumn, final String[] resultColumns, 
 			Map parameterValues, Map<String, Class<?>> parameterTypes, List additionalParameters, boolean formatValueColumns) {
+        return executeQuery(query, keyColumn, Object.class, resultColumns, parameterValues, parameterTypes, additionalParameters, formatValueColumns);
+    }
+
+    public static OrderedMap executeQuery(final Query query,
+			final String keyColumn, Class keyColumnClass, final String[] resultColumns,
+			Map parameterValues, Map<String, Class<?>> parameterTypes, List additionalParameters, boolean formatValueColumns) {
+
+
 		try {
 			JRQueryExecuterFactory queryExecuterFactory = JRQueryExecuterUtils.getQueryExecuterFactory(query.getLanguage());
 			
 			JRParameter[] dsParameters = getDatasetParameters(queryExecuterFactory, 
 					parameterValues, parameterTypes, additionalParameters);
-			JRField[] fields = getDatasetFields(keyColumn, resultColumns);			
+			JRField[] fields = getDatasetFields(keyColumn, keyColumnClass, resultColumns);
 			JRQuery dsQuery = makeReportQuery(query);
 			JSDataset dataset = new JSDataset(query.getName(), dsParameters, fields, dsQuery);
 			
@@ -139,9 +153,9 @@ public class JRQueryExecuterAdapter {
 		return reportQuery;
 	}
 
-	protected static JRField[] getDatasetFields(final String keyColumn, final String[] resultColumns) {
+	protected static JRField[] getDatasetFields(final String keyColumn, Class keyColumnClass, final String[] resultColumns) {
 		List fields = new ArrayList(resultColumns.length + 1);
-		fields.add(new ColumnField(keyColumn, Object.class));
+        fields.add(new ColumnField(keyColumn, keyColumnClass));
 		for (int idx = 0; idx < resultColumns.length; ++idx) {
 			String resultColumn = resultColumns[idx];
 			if (!resultColumn.equals(keyColumn))

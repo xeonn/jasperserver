@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2012 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -25,6 +25,7 @@ import com.jaspersoft.jasperserver.api.engine.common.virtualdatasourcequery.Virt
 import com.jaspersoft.jasperserver.api.engine.common.virtualdatasourcequery.teiid.TeiidEmbeddedServer;
 import com.jaspersoft.jasperserver.api.engine.common.virtualdatasourcequery.teiid.TranslatorConfig;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl.VirtualReportDataSourceServiceFactory;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.teiid.adminapi.Model;
@@ -36,18 +37,20 @@ import org.teiid.translator.TranslatorException;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
 /**
  * @author Ivan Chan (ichan@jaspersoft.com)
- * @version $Id: HiveTeiidConnectorImpl.java 45722 2014-05-14 10:24:22Z sergey.prilukin $
+ * @version $Id: HiveTeiidConnectorImpl.java 50647 2014-10-24 18:22:53Z ichan $
  */
 public class HiveTeiidConnectorImpl implements TeiidDataSource, com.jaspersoft.jasperserver.api.common.virtualdatasourcequery.ConnectionFactory {
 
@@ -55,7 +58,7 @@ public class HiveTeiidConnectorImpl implements TeiidDataSource, com.jaspersoft.j
     String dataSourceName;
     String databaseName;
     TranslatorConfig translatorConfig;
-    private Map<String, String> importPropertyMap;
+    private Map<String, String> importPropertyMap=new HashMap<String, String>();
     private static final Log log = LogFactory.getLog(TeiidEmbeddedServer.class);
     Connection connection;
     String userName = null;
@@ -109,14 +112,26 @@ public class HiveTeiidConnectorImpl implements TeiidDataSource, com.jaspersoft.j
     }
 
     public Object getConnectionFactory() throws Exception {
-        if (translatorConfig == null) {
-            translatorConfig = new TranslatorConfig();
-            translatorConfig.setProductName("hive");
-            translatorConfig.setTranslatorName("hive");
-            translatorConfig.setTranslatorFactoryClass("org.teiid.translator.hive.HiveExecutionFactory");
-        }
         Context ctx = new InitialContext();
         DataSource ds = (DataSource) ctx.lookup("java:comp/env/" + jndiName);
+        if (translatorConfig == null) {
+            Connection conn = null;
+            try {
+                conn = ds.getConnection();
+            } catch (SQLException sqlEx) {
+                log.debug("Fail to retrieve connection from HIVE data source", sqlEx);
+            }
+            translatorConfig = new TranslatorConfig();
+            if (conn != null && conn.getMetaData().getDatabaseProductName().equalsIgnoreCase("impala")) {
+                translatorConfig.setProductName("Impala");
+                translatorConfig.setTranslatorName("impala");
+                translatorConfig.setTranslatorFactoryClass("org.teiid.translator.hive.ImpalaExecutionFactory");
+            } else {
+                translatorConfig.setProductName("hive");
+                translatorConfig.setTranslatorName("hive");
+                translatorConfig.setTranslatorFactoryClass("org.teiid.translator.hive.HiveExecutionFactory");
+            }
+        }
         translatorConfig.setupTranslator();
         return ds;
     }
@@ -180,10 +195,22 @@ public class HiveTeiidConnectorImpl implements TeiidDataSource, com.jaspersoft.j
 
     public TranslatorConfig getTranslator() throws Exception {
         if (translatorConfig == null) {
+            Connection conn = null;
+            try {
+                if ((driver != null) && (jdbcURL != null)) conn = createConnection();
+            } catch (SQLException sqlEx) {
+                log.debug("Fail to retrieve connection from HIVE data source", sqlEx);
+            }
             translatorConfig = new TranslatorConfig();
-            translatorConfig.setProductName("hive");
-            translatorConfig.setTranslatorName("hive");
-            translatorConfig.setTranslatorFactoryClass("org.teiid.translator.hive.HiveExecutionFactory");
+            if (conn != null && conn.getMetaData().getDatabaseProductName().equalsIgnoreCase("impala")) {
+                translatorConfig.setProductName("Impala");
+                translatorConfig.setTranslatorName("impala");
+                translatorConfig.setTranslatorFactoryClass("org.teiid.translator.hive.ImpalaExecutionFactory");
+            } else {
+                translatorConfig.setProductName("hive");
+                translatorConfig.setTranslatorName("hive");
+                translatorConfig.setTranslatorFactoryClass("org.teiid.translator.hive.HiveExecutionFactory");
+            }
         }
         translatorConfig.setupTranslator();
         return translatorConfig;
@@ -208,13 +235,17 @@ public class HiveTeiidConnectorImpl implements TeiidDataSource, com.jaspersoft.j
         ModelMetaData model = new ModelMetaData();
         model.setModelType(Model.Type.PHYSICAL);
         model.setName(modelName);
+    	Properties importProperties = new Properties(){
+			private static final long serialVersionUID = 1L;
+			{
+				setProperty("importer.trimColumnNames", Boolean.TRUE.toString());
+			}
+		};
         if (importPropertyMap != null) {
-            Properties importProperties = new Properties();
-            for (Map.Entry<String, String> entry : importPropertyMap.entrySet()) {
-                importProperties.setProperty(entry.getKey(), entry.getValue());
+        	importProperties.putAll(importPropertyMap);
             }
             model.setProperties(importProperties);
-        }
+        
         model.addSourceMapping(subDataSourceID, translatorConfig.getTranslatorName(), subDataSourceID);
         return model;
     }

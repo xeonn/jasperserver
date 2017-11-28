@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2012 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -15,8 +15,8 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Affero  General Public License for more details.
  *
- *  You should have received a copy of the GNU Affero General Public  License
- *  along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public  License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 package com.jaspersoft.jasperserver.api.security.externalAuth.processors;
 
@@ -26,7 +26,6 @@ import com.jaspersoft.jasperserver.api.common.domain.impl.ExecutionContextImpl;
 import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.PersistentObjectResolver;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.Role;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
-import com.jaspersoft.jasperserver.api.metadata.user.domain.client.RoleImpl;
 import com.jaspersoft.jasperserver.api.metadata.user.service.UserAuthorityService;
 import com.jaspersoft.jasperserver.api.metadata.user.service.impl.ExternalUserService;
 import com.jaspersoft.jasperserver.api.security.externalAuth.ExternalAuthProperties;
@@ -35,14 +34,24 @@ import org.apache.commons.collections.Predicate;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
-import org.springframework.security.GrantedAuthority;
-import org.springframework.security.userdetails.UserDetails;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.jaspersoft.jasperserver.api.security.externalAuth.processors.ProcessorData.Key.*;
+import static com.jaspersoft.jasperserver.api.security.externalAuth.processors.ProcessorData.Key.EXTERNAL_AUTHORITIES;
+import static com.jaspersoft.jasperserver.api.security.externalAuth.processors.ProcessorData.Key.EXTERNAL_AUTH_DETAILS;
+import static com.jaspersoft.jasperserver.api.security.externalAuth.processors.ProcessorData.Key.EXTERNAL_JRS_USER_TENANT_ID;
 
 
 /**
@@ -143,14 +152,12 @@ public class ExternalUserSetupProcessor extends AbstractExternalUserProcessor {
 						(logoutUrl != null && logoutUrl.length() > 0 ?  "Click <a href=\"" + logoutUrl + "\">logout</a> to exit from external system." : ""));
 			}
 
-			GrantedAuthority[] grantedAuthorities = (GrantedAuthority[]) processorData.getData(EXTERNAL_AUTHORITIES);
+			List<GrantedAuthority> grantedAuthorities = (List<GrantedAuthority>) processorData.getData(EXTERNAL_AUTHORITIES);
 			final String tenantId = (String) processorData.getData(EXTERNAL_JRS_USER_TENANT_ID);
 
 			Set<Role> externalRoles = convertGrantedAuthoritiesToRoles(grantedAuthorities, tenantId);
 			user.setTenantId(tenantId);
-
-			Set roles = persistRoles(externalRoles);
-			alignInternalAndExternalUser(roles, user);
+			alignInternalAndExternalUser(externalRoles, user);
 
 			if (logger.isDebugEnabled())
 				logger.debug("External user " + userName + " has been synchronized.");
@@ -220,43 +227,11 @@ public class ExternalUserSetupProcessor extends AbstractExternalUserProcessor {
             logger.debug("jrsInternalRolesNotInRoleMap: " +roleCollectionToString(jrsInternalRolesNotInRoleMap));
         }
 
-        //map external roles to internal ones using organizationRoleMap (from app context xml config)
-        Collection<Role> remoteExternalUserRolesMappedToInternalRoles =
-                CollectionUtils.select(remoteExternalUserRoles, new Predicate() {
-                    @Override
-                    public boolean evaluate(Object rl) {
-                        return getOrganizationRoleMap().containsKey(((Role) rl).getRoleName().toUpperCase());
-                    }
-                });
-
-        //extract remote external roles to assign to the user as new JRS external roles
-        Collection<Role> externalUserRolesToPersist =
-                CollectionUtils.subtract(remoteExternalUserRoles, remoteExternalUserRolesMappedToInternalRoles);
-
-        //convert  remoteExternalUserRolesMappedToInternalRoles to the internal roles
-        for (Role rl : remoteExternalUserRolesMappedToInternalRoles) {
-            String mappedInternalRoleName = getOrganizationRoleMap().get(rl.getRoleName());
-
-            Role intRl = getUserAuthorityService().getRole(null, mappedInternalRoleName);
-
-            //create new internal role (in ext-int role map) if that role does not exist
-            if (intRl == null) {
-                intRl = new RoleImpl();
-                intRl.setRoleName(mappedInternalRoleName);
-            }
-
-            jrsInternalRolesNotInRoleMap.add(intRl);
-        }
-
-        if (logger.isDebugEnabled()){
-            logger.debug("externalUserRolesToPersist: " +roleCollectionToString(externalUserRolesToPersist));
-        }
-
-        //assign default internal roles if needed
+       //assign default internal roles if needed
         Collection<Role> defaultInternalRolesToAdd = CollectionUtils.subtract(getNewDefaultInternalRoles(user.getUsername()), jrsInternalRolesNotInRoleMap);
         jrsInternalRolesNotInRoleMap.addAll(defaultInternalRolesToAdd);
 
-        Collection<Role> newUserRoles = externalUserRolesToPersist;
+        Collection<Role> newUserRoles = remoteExternalUserRoles;
         newUserRoles.addAll(jrsInternalRolesNotInRoleMap);
 
         if (logger.isDebugEnabled()){
@@ -289,10 +264,10 @@ public class ExternalUserSetupProcessor extends AbstractExternalUserProcessor {
 	 *
 	 * protected scope for unit testing
      */
-    protected Set<Role> convertGrantedAuthoritiesToRoles(GrantedAuthority[] authorities, String tenantId) {
+    protected Set<Role> convertGrantedAuthoritiesToRoles(List<GrantedAuthority> authorities, String tenantId) {
         Set<Role> set = new HashSet<Role>();
 
-        if (authorities == null || authorities.length == 0)
+        if (authorities == null || authorities.isEmpty())
             return set;
 
 		final UserAuthorityService userAuthorityService = getUserAuthorityService();

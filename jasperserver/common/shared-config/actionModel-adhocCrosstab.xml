@@ -3,20 +3,28 @@
     <!--Toolbar menus-->
     <context name="toolbar_save">
         <condition test="getCanSave">
-            <condition test="getIsNotWritable">
-                <simpleAction labelKey="ADH_030_MENU_SAVE_REPORT" disabled="disabled"/>
+            <!-- We display different Save menu when Ad Hoc Designer is run from Dashboard-->
+            <condition test="isEmbeddedDesigner">
+                <simpleAction labelKey="ADH_030_MENU_SAVE_REPORT" action="adhocDesigner.handleBack"/>
+                <simpleAction labelKey="ADH_010_BUTTON_CANCEL" action="adhocDesigner.handleCancel"/>
             </condition>
-            <condition test="getIsWritable">
-                <simpleAction labelKey="ADH_030_MENU_SAVE_REPORT" action="designerBase.handleSave"/>
-            </condition>
+            <!-- Ordinary Ad Hoc Save Menu-->
+            <condition test="!isEmbeddedDesigner">
+                <condition test="getIsNotWritable">
+                    <simpleAction labelKey="ADH_030_MENU_SAVE_REPORT" disabled="disabled"/>
+                </condition>
+                <condition test="getIsWritable">
+                    <simpleAction labelKey="ADH_030_MENU_SAVE_REPORT" action="designerBase.handleSave"/>
+                </condition>
 
-            <simpleAction labelKey="ADH_037_MENU_SAVE_REPORT_AS" action="designerBase.handleSaveAs"/>
+                <simpleAction labelKey="ADH_037_MENU_SAVE_REPORT_AS" action="designerBase.handleSaveAs"/>
 
-            <condition test="getIsNotWritable">
-                <simpleAction labelKey="ADH_037_MENU_SAVE_DATA_VIEW_AND_REPORT" disabled="disabled"/>
-            </condition>
-            <condition test="getIsWritable">
-                <simpleAction labelKey="ADH_037_MENU_SAVE_DATA_VIEW_AND_REPORT" action="designerBase.handleSaveAndGenerate"/>
+                <condition test="getIsNotWritable">
+                    <simpleAction labelKey="ADH_037_MENU_SAVE_DATA_VIEW_AND_REPORT" disabled="disabled"/>
+                </condition>
+                <condition test="getIsWritable">
+                    <simpleAction labelKey="ADH_037_MENU_SAVE_DATA_VIEW_AND_REPORT" action="designerBase.handleSaveAndGenerate"/>
+                </condition>
             </condition>
         </condition>
     </context>

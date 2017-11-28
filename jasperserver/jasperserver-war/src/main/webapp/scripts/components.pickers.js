@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2014 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -22,7 +22,7 @@
 
 /**
  * @author: Sergey Prilukin
- * @version: $Id: components.pickers.js 43122 2014-03-18 12:44:22Z psavushchik $
+ * @version: $Id: components.pickers.js 7872 2014-10-04 09:08:52Z inesterenko $
  */
 
 var picker = {
@@ -65,6 +65,7 @@ picker.FileSelector = function(options) {
     this._uriTextbox = $(options.uriTextboxId);
     this._browseButtonId = $(options.browseButtonId);
 	this._onChange = options.onChange || false;
+	this._options = options;
 
     if (!this._disabled) {
         this._id = options.id;
@@ -84,20 +85,31 @@ picker.FileSelector = function(options) {
 };
 
 picker.FileSelector.addVar('DEFAULT_TEMPLATE_DOM_ID', "selectFromRepository");
+picker.FileSelector.addVar('DEFAULT_TREE_ID', "selectFromRepoTree");
 picker.FileSelector.addVar('OK_BUTTON_ID', "selectFromRepoBtnSelect");
 picker.FileSelector.addVar('CANCEL_BUTTON_ID', "selectFromRepoBtnCancel");
 picker.FileSelector.addVar('TITLE_PATTERN', "div.title");
 
 picker.FileSelector.addMethod('_process', function(options) {
-    !this._id && (this._id = this.DEFAULT_TEMPLATE_DOM_ID);
-    this._dom = $(this._id).cloneNode(true);
-    this._dom.writeAttribute('id', this._id + this._suffix);
-    
+
+	!this._id && (this._id = this.DEFAULT_TEMPLATE_DOM_ID);
+
+	if (!$(this._id) && this._options.template && this._options.i18n) {
+		this._dom = jQuery(_.template(this._options.template, {i18n: this._options.i18n}));
+		this._dom = this._dom[0];
+	} else {
+		this._dom = $(this._id).cloneNode(true);
+	}
+
+	this._dom.writeAttribute('id', this._id + this._suffix);
+
     this._okButton = this._dom.select('#' + this.OK_BUTTON_ID)[0];
     this._okButton.writeAttribute('id', this.OK_BUTTON_ID + this._suffix);
-    this._cancelButton = this._dom.select('#' + this.CANCEL_BUTTON_ID)[0];
+	this._cancelButton = this._dom.select('#' + this.CANCEL_BUTTON_ID)[0];
     this._cancelButton.writeAttribute('id', this.CANCEL_BUTTON_ID + this._suffix);
-    this._treeDom = this._dom.select('#' + this._treeDomId)[0];
+
+	!this._treeDomId && (this._treeDomId = this.DEFAULT_TREE_ID);
+	this._treeDom = this._dom.select('#' + this._treeDomId)[0];
     this._treeDom.writeAttribute('id', this._treeDomId + this._suffix);
 
     this._visible = false;
@@ -194,4 +206,8 @@ picker.FileSelector.addMethod('_show', function() {
     this._visible = true;
     this._selectedUri && this._tree.openAndSelectNode(this._selectedUri);
     this._refreshButtonsState();
+});
+
+picker.FileSelector.addMethod('remove', function() {
+	jQuery(this._dom).remove();
 });

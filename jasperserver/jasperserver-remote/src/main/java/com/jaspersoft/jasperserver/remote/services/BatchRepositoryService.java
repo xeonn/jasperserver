@@ -1,6 +1,7 @@
 /*
- * Copyright (C) 2005 - 2012 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
+ *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
  * the following license terms  apply:
  *
@@ -52,6 +53,7 @@ public interface BatchRepositoryService {
      *
      * @param q search query
      * @param folderUri folder, in which search should be
+     * @param excludeFolders folders from this list will be excluded, NOTE: uris are relative to organization, i.e. "/temp" will exclude /temp, /organizations/organization_1/temp, etc.
      * @param type type of resource to find
      * @param start start index for pagination
      * @param limit max quantity of results
@@ -64,7 +66,7 @@ public interface BatchRepositoryService {
      * @throws ResourceNotFoundException if specified folder uri not exists
      *
      */
-    RepositorySearchResult<ClientResourceLookup> getResources(String q, String folderUri, List<String> type, Integer start, Integer limit, Boolean recursive, Boolean showHiddenItems, String sortBy, AccessType accessType, User user, Boolean forceFullPage) throws IllegalParameterValueException, ResourceNotFoundException;
+    RepositorySearchResult<ClientResourceLookup> getResources(String q, String folderUri, List<String> type, List<String> excludeFolders, Integer start, Integer limit, Boolean recursive, Boolean showHiddenItems, String sortBy, AccessType accessType, User user, Boolean forceFullPage) throws IllegalParameterValueException, ResourceNotFoundException;
 
     /**
      * Searches resources
@@ -82,6 +84,7 @@ public interface BatchRepositoryService {
      * @param q search query
      * @param folderUri folder, in which search should be
      * @param type type of resource to find
+     * @param excludeFolders folders from this list will be excluded, NOTE: uris are relative to organization, i.e. "/temp" will exclude /temp, /organizations/organization_1/temp, etc.
      * @param recursive shows, if search should affect subfolders or take place in folderUri folder only
      * @param showHiddenItems show hidden
        @param accessType access type - all, modified, viewed
@@ -90,7 +93,7 @@ public interface BatchRepositoryService {
      * @throws ResourceNotFoundException if specified folder uri not exists
      *
      */
-     int getResourcesCount(String q, String folderUri, List<String> type, Boolean recursive, Boolean showHiddenItems, AccessType accessType, User user) throws IllegalParameterValueException, ResourceNotFoundException;
+     int getResourcesCount(String q, String folderUri, List<String> type, List<String> excludeFolders, Boolean recursive, Boolean showHiddenItems, AccessType accessType, User user) throws IllegalParameterValueException, ResourceNotFoundException;
 
     /**
      * Gets total count of resources who matches criteria

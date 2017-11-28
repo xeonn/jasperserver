@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -21,6 +21,7 @@
 package com.jaspersoft.jasperserver.api.logging.diagnostic.service.impl;
 
 import com.jaspersoft.jasperserver.api.common.properties.Log4jPropertyChanger;
+import com.jaspersoft.jasperserver.api.common.properties.Log4jSettingsService;
 import com.jaspersoft.jasperserver.api.common.properties.PropertiesManagementService;
 import com.jaspersoft.jasperserver.api.logging.diagnostic.domain.DiagnosticAttribute;
 import com.jaspersoft.jasperserver.api.logging.diagnostic.helper.DiagnosticAttributeBuilder;
@@ -40,18 +41,9 @@ import java.util.concurrent.ConcurrentHashMap;
  * @since 5.0
  */
 public class LogSettingsDiagnosticService implements Diagnostic {
-
-    private Map<String, String> loggers = new ConcurrentHashMap<String, String>();
-
     private PropertiesManagementService propertiesManagementService;
-
+    private Log4jSettingsService log4jSettingsService;
     private MessageSource messageSource;
-
-    public void initLoggers(Map<String, String> loggers) {
-        if (this.loggers.isEmpty()) {
-            this.loggers.putAll(loggers);
-        }
-    }
 
     public void setPropertiesManagementService(PropertiesManagementService propertiesManagementService) {
         this.propertiesManagementService = propertiesManagementService;
@@ -61,6 +53,10 @@ public class LogSettingsDiagnosticService implements Diagnostic {
         this.messageSource = messageSource;
     }
 
+    public void setLog4jSettingsService(Log4jSettingsService log4jSettingsService) {
+        this.log4jSettingsService = log4jSettingsService;
+    }
+
     @Override
     public Map<DiagnosticAttribute, DiagnosticCallback> getDiagnosticData() {
     return new DiagnosticAttributeBuilder()
@@ -68,6 +64,7 @@ public class LogSettingsDiagnosticService implements Diagnostic {
                 @Override
                 public Map<String, String> getDiagnosticAttributeValue() {
                     //Merge log settings with values from Global Properties List
+                    Map<String, String> loggers = log4jSettingsService.getLoggers();
                     for (Map.Entry<String,String> entry : (Set<Map.Entry<String,String>>)(propertiesManagementService.entrySet())) {
                         String key = entry.getKey();
                         if (key.startsWith(Log4jPropertyChanger.PROPERTY_PREFIX)) {

@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005 - 2009 Jaspersoft Corporation. All rights  reserved.
+* Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
 * http://www.jaspersoft.com.
 *
 * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -38,7 +38,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.springframework.security.Authentication;
+import org.springframework.security.core.Authentication;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -52,7 +52,7 @@ import static org.testng.Assert.*;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: DataSourceHolderResourceConverterTest.java 35226 2013-08-09 07:08:53Z inesterenko $
+ * @version $Id: DataSourceHolderResourceConverterTest.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
 public class DataSourceHolderResourceConverterTest {
     private static final String TEST_RESORUCE_URI = "/test/resoruce/uri";

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2013 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -27,10 +27,10 @@ import com.jaspersoft.jasperserver.api.common.domain.impl.ValidationResultImpl;
 import com.jaspersoft.jasperserver.api.metadata.olap.domain.OlapUnit;
 import com.jaspersoft.jasperserver.api.metadata.olap.domain.client.OlapUnitImpl;
 import com.jaspersoft.jasperserver.api.metadata.olap.service.OlapConnectionService;
+import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributesResolver;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.teiid.translator.Execution;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -47,7 +47,10 @@ import static org.mockito.Mockito.when;
 public class OlapUnitValidatorTest {
     @InjectMocks
     private final OlapUnitValidator validator = new OlapUnitValidator();
-    @Mock OlapConnectionService olapConnectionService;
+    @Mock
+    private OlapConnectionService olapConnectionService;
+    @Mock
+    private ProfileAttributesResolver profileAttributesResolver;
 
     private OlapUnit unit;
 

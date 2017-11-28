@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -30,7 +30,7 @@ import com.jaspersoft.jasperserver.api.metadata.common.domain.util.GzipDataConta
 
 /**
  * @author sanda zaharia (shertage@users.sourceforge.net)
- * @version $Id: ReportOutput.java 23223 2012-04-17 17:20:58Z lchirita $
+ * @version $Id: ReportOutput.java 47331 2014-07-18 09:13:06Z kklein $
  *
  */
 public class ReportOutput {

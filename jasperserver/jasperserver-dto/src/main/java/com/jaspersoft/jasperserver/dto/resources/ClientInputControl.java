@@ -1,6 +1,7 @@
 /*
- * Copyright (C) 2005 - 2012 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
+ *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
  * the following license terms  apply:
  *
@@ -30,7 +31,7 @@ import java.util.List;
 /**
  *
  * @author Zakhar.Tomchenco
- * @version $Id: ClientInputControl.java 44312 2014-04-09 14:30:12Z vsabadosh $
+ * @version $Id: ClientInputControl.java 47331 2014-07-18 09:13:06Z kklein $
  */
 @XmlRootElement(name = ResourceMediaType.INPUT_CONTROL_CLIENT_TYPE)
 public class ClientInputControl extends ClientResource<ClientInputControl> implements ClientReferenceableInputControl {

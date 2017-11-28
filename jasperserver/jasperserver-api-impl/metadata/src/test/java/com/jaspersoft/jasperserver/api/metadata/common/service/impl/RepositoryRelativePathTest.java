@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -28,7 +28,7 @@ import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.ut
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: RepositoryRelativePathTest.java 36482 2013-09-02 15:51:37Z ogavavka $
+ * @version $Id: RepositoryRelativePathTest.java 47331 2014-07-18 09:13:06Z kklein $
  */
 public class RepositoryRelativePathTest {
 	

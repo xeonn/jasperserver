@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -23,7 +23,6 @@ package com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.p
 import com.jaspersoft.jasperserver.api.metadata.common.domain.DataType;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 import com.jaspersoft.jasperserver.api.metadata.common.service.ResourceFactory;
-import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.PersistentObjectResolver;
 import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.ReferenceResolver;
 
 
@@ -187,7 +186,7 @@ public class RepoDataType extends RepoResource
 		
 		DataType dataType = (DataType) clientRes;
 		
-		setType(dataType.getType());
+		setType(dataType.getDataTypeType());
 		setMaxLength(dataType.getMaxLength());
 		setDecimals(dataType.getDecimals());
 		setRegularExpr(dataType.getRegularExpr());
@@ -206,7 +205,7 @@ public class RepoDataType extends RepoResource
 		super.copyTo(clientRes, resourceFactory);
 
 		DataType dataType = (DataType) clientRes;
-		dataType.setType(getType());
+		dataType.setDataTypeType(getType());
 		dataType.setMaxLength(getMaxLength());
 		dataType.setDecimals(getDecimals());
 		dataType.setRegularExpr(getRegularExpr());

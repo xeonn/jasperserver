@@ -1,29 +1,31 @@
 /*
-* Copyright (C) 2005 - 2009 Jaspersoft Corporation. All rights  reserved.
-* http://www.jaspersoft.com.
-*
-* Unless you have purchased  a commercial license agreement from Jaspersoft,
-* the following license terms  apply:
-*
-* This program is free software: you can redistribute it and/or  modify
-* it under the terms of the GNU Affero General Public License  as
-* published by the Free Software Foundation, either version 3 of  the
-* License, or (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-* GNU Affero  General Public License for more details.
-*
-* You should have received a copy of the GNU Affero General Public  License
-* along with this program.&nbsp; If not, see <http://www.gnu.org/licenses/>.
-*/
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
+ * http://www.jaspersoft.com.
+ *
+ * Unless you have purchased  a commercial license agreement from Jaspersoft,
+ * the following license terms  apply:
+ *
+ * This program is free software: you can redistribute it and/or  modify
+ * it under the terms of the GNU Affero General Public License  as
+ * published by the Free Software Foundation, either version 3 of  the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero  General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public  License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 package com.jaspersoft.jasperserver.remote.resources.converters;
 
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Folder;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceReference;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.client.ResourceLookupImpl;
 import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
+import com.jaspersoft.jasperserver.api.metadata.security.JasperServerPermission;
 import com.jaspersoft.jasperserver.dto.resources.ClientFile;
 import com.jaspersoft.jasperserver.dto.resources.ClientReference;
 import com.jaspersoft.jasperserver.dto.resources.ClientReferenceable;
@@ -32,7 +34,9 @@ import com.jaspersoft.jasperserver.dto.resources.ClientUriHolder;
 import com.jaspersoft.jasperserver.remote.exception.IllegalParameterValueException;
 import com.jaspersoft.jasperserver.remote.exception.MandatoryParameterNotFoundException;
 import com.jaspersoft.jasperserver.remote.resources.ClientTypeHelper;
+import com.jaspersoft.jasperserver.remote.services.PermissionsService;
 import com.jaspersoft.jasperserver.war.common.ConfigurationBean;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -50,10 +54,12 @@ public class ResourceReferenceConverter<T extends ClientReferenceable> {
     protected final RepositoryService repositoryService;
     protected final List<ClientReferenceRestriction> restrictions = new ArrayList<ClientReferenceRestriction>();
     protected ConfigurationBean configurationBean;
+    protected PermissionsService permissionsService;
 
     public ResourceReferenceConverter(ResourceConverterProvider resourceConverterProvider,
-            RepositoryService repositoryService, ConfigurationBean configurationBean, ClientReferenceRestriction... restriction) {
+            RepositoryService repositoryService, PermissionsService permissionsService, ConfigurationBean configurationBean, ClientReferenceRestriction... restriction) {
         this.repositoryService = repositoryService;
+        this.permissionsService = permissionsService;
         this.resourceConverterProvider = resourceConverterProvider;
         if (restriction != null) {
             restrictions.addAll(Arrays.asList(restriction));
@@ -80,9 +86,28 @@ public class ResourceReferenceConverter<T extends ClientReferenceable> {
         ClientUriHolder result = null;
         if (serverObject != null) {
             if ((options != null && options.isExpanded())) {
-                final Resource localResource = serverObject.isLocal() ?
-                        serverObject.getLocalResource() : repositoryService.getResource(null, serverObject.getTargetURI());
-                result = resourceConverterProvider.getToClientConverter(localResource).toClient(localResource, options);
+                Resource localResource = null;
+
+                if (serverObject.isLocal()) {
+                    localResource = serverObject.getLocalResource();
+                } else {
+                    Resource res = new ResourceLookupImpl();
+                    res.setURIString(serverObject.getTargetURI());
+
+                    int mask = permissionsService.getEffectivePermission(res, SecurityContextHolder.getContext().getAuthentication())
+                            .getPermissionMask();
+
+                    if ((mask & JasperServerPermission.ADMINISTRATION.getMask()) == JasperServerPermission.ADMINISTRATION.getMask() ||
+                        (mask & JasperServerPermission.READ.getMask()) == JasperServerPermission.READ.getMask()){
+                        localResource = repositoryService.getResource(null, serverObject.getTargetURI());
+                    }
+                }
+
+                if (localResource != null){
+                    result = resourceConverterProvider.getToClientConverter(localResource).toClient(localResource, options);
+                } else {
+                    result = new ClientReference(serverObject.getTargetURI());
+                }
             } else {
                 result = new ClientReference(serverObject.getTargetURI());
             }
@@ -183,7 +208,7 @@ public class ResourceReferenceConverter<T extends ClientReferenceable> {
     protected final boolean isAssignable(String parent, String child){
         boolean res = true;
         if (parent != null){
-            int suffixIndex = child.indexOf("_files");
+            int suffixIndex = child.lastIndexOf("_files");
             if (suffixIndex > 0){
                 String possibleParentUri = child.substring(0, suffixIndex);
                 if (!possibleParentUri.equals(parent)){

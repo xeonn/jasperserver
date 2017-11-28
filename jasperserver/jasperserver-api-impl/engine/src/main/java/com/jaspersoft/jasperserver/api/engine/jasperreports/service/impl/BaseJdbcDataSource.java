@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -35,7 +35,7 @@ import com.jaspersoft.jasperserver.api.metadata.jasperreports.service.ReportData
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: BaseJdbcDataSource.java 25429 2012-10-22 14:02:33Z agodovanets $
+ * @version $Id: BaseJdbcDataSource.java 50011 2014-10-09 16:57:26Z vzavadskii $
  */
 public abstract class BaseJdbcDataSource implements ReportDataSourceService {
 
@@ -67,6 +67,7 @@ public abstract class BaseJdbcDataSource implements ReportDataSourceService {
 		}
 	}
 	
-	
+	public abstract boolean testConnection() throws Exception;
+
 	protected abstract Connection createConnection();
 }

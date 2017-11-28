@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -20,26 +20,31 @@
  */
 package com.jaspersoft.jasperserver.api.engine.jasperreports.util.repo;
 
+import com.jaspersoft.jasperserver.api.engine.jasperreports.util.RepositoryContext;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.ContentResource;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.FileResource;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.Folder;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceContainer;
+import com.jaspersoft.jasperserver.api.metadata.common.service.JSResourceNotFoundException;
+import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import com.jaspersoft.jasperserver.api.engine.jasperreports.util.RepositoryContext;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.FileResource;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.FileResourceData;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.Folder;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceContainer;
-import com.jaspersoft.jasperserver.api.metadata.common.service.JSResourceNotFoundException;
-import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
 
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: RepositoryConnection.java 23486 2012-04-27 09:40:49Z lchirita $
+ * @version $Id: RepositoryConnection.java 49286 2014-09-23 13:32:25Z ykovalchyk $
  */
 public class RepositoryConnection extends URLConnection
 {
@@ -62,63 +67,70 @@ public class RepositoryConnection extends URLConnection
     public InputStream getInputStream() throws IOException
     {
     	try {
-        	InputStream data = null;
-			String path = url.getPath();
-    		if (!path.startsWith(Folder.SEPARATOR)) {
-				ResourceContainer reportUnit = repositoryContext.getReportUnit();
-				FileResource resource = null;
-				if (reportUnit != null) {
-					resource = reportUnit.getResourceLocal(path);
-				}
+            InputStream data = null;
+            String path = url.getPath();
+            if (!path.startsWith(Folder.SEPARATOR)) {
+                ResourceContainer reportUnit = repositoryContext.getReportUnit();
+                FileResource resource = null;
+                if (reportUnit != null) {
+                    resource = reportUnit.getResourceLocal(path);
+                }
 
-				if (resource == null || !resource.hasData()) {
-					path = repositoryContext.getContextURI() + Folder.SEPARATOR + path;
-				} else {
-					if (log.isDebugEnabled()) {
-						log.debug("Loading resource \"" + resource.getName() 
-								+ "\" from in-memory report unit");
-					}
-					data = resource.getDataStream();
-					if (resource.getFileType().equals(FileResource.TYPE_JRXML)) {
-						data = repositoryContext.getCompiledReportProvider().getCompiledReport(
-								repositoryContext.getExecutionContext(),
-								data);//FIXME not currently used, but should do autoUpdateJRXMLResource
-					}
-				}
-    		}
+                if (resource == null || !resource.hasData()) {
+                    path = repositoryContext.getContextURI() + Folder.SEPARATOR + path;
+                } else {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Loading resource \"" + resource.getName()
+                                + "\" from in-memory report unit");
+                    }
+                    data = resource.getDataStream();
+                    if (resource.getFileType().equals(FileResource.TYPE_JRXML)) {
+                        data = repositoryContext.getCompiledReportProvider().getCompiledReport(
+                                repositoryContext.getExecutionContext(),
+                                data);//FIXME not currently used, but should do autoUpdateJRXMLResource
+                    }
+                }
+            }
 
-    		if (data == null) {
-				if (log.isDebugEnabled()) {
-					log.debug("Loading resource \"" + path + "\" from repository");
-				}
-				
-				RepositoryService repository = repositoryContext.getRepository();
-				FileResource resource = (FileResource) repository.getResource(
-						repositoryContext.getExecutionContext(), path, FileResource.class);
-				while (resource != null && resource.isReference()) {
-					resource = (FileResource) repository.getResource(
-							repositoryContext.getExecutionContext(), 
-							resource.getReferenceURI(), FileResource.class);
-				}
-				
-				if (resource == null) {
-					throw new IOException("Repository file resource " + path 
-							+ " could not be loaded");
-				}
-				
-				if (resource.getFileType().equals(FileResource.TYPE_JRXML)) {
-					data = repositoryContext.getCompiledReportProvider().getCompiledReport(
-							repositoryContext.getExecutionContext(),
-							path);
-				} else {
-					FileResourceData resourceData = repository.getResourceData(
-							repositoryContext.getExecutionContext(), path);
-					data = resourceData.getDataStream();
-				}
-			}
+            if (data == null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Loading resource \"" + path + "\" from repository");
+                }
 
-    		return data;
-		} catch (JSResourceNotFoundException e) {
+                RepositoryService repository = repositoryContext.getRepository();
+                Resource resource = repository.getResource(repositoryContext.getExecutionContext(), path);
+                if (resource == null) {
+                    throw new IOException("Repository file resource " + path
+                            + " could not be loaded");
+                }
+                if (resource instanceof FileResource) {
+                    FileResource fileResource = (FileResource) repository.getResource(
+                            repositoryContext.getExecutionContext(), path, FileResource.class);
+                    while (fileResource != null && fileResource.isReference()) {
+                        fileResource = (FileResource) repository.getResource(
+                                repositoryContext.getExecutionContext(),
+                                fileResource.getReferenceURI(), FileResource.class);
+                    }
+
+                    if (fileResource == null) {
+                        throw new IOException("Repository file resource " + path
+                                + " could not be loaded");
+                    }
+
+                    if (fileResource.getFileType().equals(FileResource.TYPE_JRXML)) {
+                        data = repositoryContext.getCompiledReportProvider().getCompiledReport(
+                                repositoryContext.getExecutionContext(),
+                                path);
+                    } else {
+                        data = repository.getResourceData(repositoryContext.getExecutionContext(), path).getDataStream();
+                    }
+                } else if(resource instanceof ContentResource){
+                    data = repository.getContentResourceData(repositoryContext.getExecutionContext(), path).getDataStream();
+                }
+            }
+
+            return data;
+        } catch (JSResourceNotFoundException e) {
 			throw new IOException(e.getMessage());
 		}
     }

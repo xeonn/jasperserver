@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -31,7 +31,7 @@ import com.jaspersoft.jasperserver.war.common.JasperServerConstImpl;
 
 /**
  * @author Ionut Nedelcu (ionutned@users.sourceforge.net)
- * @version $Id: InputControlWrapper.java 19932 2010-12-11 15:24:29Z tmatyashovsky $
+ * @version $Id: InputControlWrapper.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
 public class InputControlWrapper extends BaseDTO
 {
@@ -262,24 +262,24 @@ public class InputControlWrapper extends BaseDTO
 		return isSingleValueType() || isMultiValueType();
 	}
 	public boolean isBooleanType(){
-		return InputControl.TYPE_BOOLEAN==inputControl.getType();
+		return InputControl.TYPE_BOOLEAN==inputControl.getInputControlType();
 	}
 	public boolean isMultiSelectLovType(){
-		return InputControl.TYPE_MULTI_SELECT_LIST_OF_VALUES==inputControl.getType()
-			|| inputControl.getType() == InputControl.TYPE_MULTI_SELECT_LIST_OF_VALUES_CHECKBOX;
+		return InputControl.TYPE_MULTI_SELECT_LIST_OF_VALUES==inputControl.getInputControlType()
+			|| inputControl.getInputControlType() == InputControl.TYPE_MULTI_SELECT_LIST_OF_VALUES_CHECKBOX;
 	}
 	
 	public boolean isSingleSelectLovType(){
-		return InputControl.TYPE_SINGLE_SELECT_LIST_OF_VALUES == inputControl.getType()
-				|| InputControl.TYPE_SINGLE_SELECT_LIST_OF_VALUES_RADIO == inputControl.getType();
+		return InputControl.TYPE_SINGLE_SELECT_LIST_OF_VALUES == inputControl.getInputControlType()
+				|| InputControl.TYPE_SINGLE_SELECT_LIST_OF_VALUES_RADIO == inputControl.getInputControlType();
 	}
 	
 	public boolean isMultiSelectQueryType(){
-		return InputControl.TYPE_MULTI_SELECT_QUERY==inputControl.getType()
-			|| inputControl.getType() == InputControl.TYPE_MULTI_SELECT_QUERY_CHECKBOX;
+		return InputControl.TYPE_MULTI_SELECT_QUERY==inputControl.getInputControlType()
+			|| inputControl.getInputControlType() == InputControl.TYPE_MULTI_SELECT_QUERY_CHECKBOX;
 	}
 	public boolean isMultiValueType(){
-		return InputControl.TYPE_MULTI_VALUE==inputControl.getType();
+		return InputControl.TYPE_MULTI_VALUE==inputControl.getInputControlType();
 	}
 	
 	public boolean isMulti() {
@@ -287,12 +287,12 @@ public class InputControlWrapper extends BaseDTO
 	}
 	
 	public boolean isSingleSelectQueryType() {
-		return InputControl.TYPE_SINGLE_SELECT_QUERY == inputControl.getType()
-				|| InputControl.TYPE_SINGLE_SELECT_QUERY_RADIO == inputControl.getType();
+		return InputControl.TYPE_SINGLE_SELECT_QUERY == inputControl.getInputControlType()
+				|| InputControl.TYPE_SINGLE_SELECT_QUERY_RADIO == inputControl.getInputControlType();
 	}
 	
 	public boolean isSingleValueType(){
-		return InputControl.TYPE_SINGLE_VALUE==inputControl.getType();
+		return InputControl.TYPE_SINGLE_VALUE==inputControl.getInputControlType();
 	}
 
 	public ResourceReference getInputControlURI()

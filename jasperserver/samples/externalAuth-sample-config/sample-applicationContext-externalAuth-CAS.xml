@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright (C) 2005 - 2012 Jaspersoft Corporation. All rights reserved.
+  ~ Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
   ~ http://www.jaspersoft.com.
   ~
   ~ Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -31,45 +31,57 @@
         <property name="authenticationManager">
             <ref local="casAuthenticationManager"/>
         </property>
-        <property name="externalDataSynchronizer">
-            <ref local="externalDataSynchronizer"/>
-        </property>
-
-        <property name="sessionRegistry">
-            <ref bean="sessionRegistry"/>
-        </property>
-
-        <property name="internalAuthenticationFailureUrl" value="/login.html?error=1"/>
-        <property name="defaultTargetUrl" value="/loginsuccess.html"/>
-        <property name="invalidateSessionOnSuccessfulAuthentication" value="true"/>
-        <property name="migrateInvalidatedSessionAttributes" value="true"/>
-
+        <property name="authenticationFailureHandler" ref="failureHandler" />
+        <property name="authenticationSuccessHandler" ref="externalAuthSuccessHandler" />
         <property name="filterProcessesUrl" value="/j_spring_security_check"/>
+        <property name="allowSessionCreation" value="true" />
+        <property name="sessionAuthenticationStrategy">
+            <ref local="casSessionAuthStrategy"/>
+        </property>
     </bean>
 
     <bean id="proxyAuthenticationSoapProcessingFilter"
-          class="com.jaspersoft.jasperserver.api.security.externalAuth.cas.JSSoapProcessingFilter">
+          class="com.jaspersoft.jasperserver.api.security.externalAuth.cas.JSSoapProcessingFilter" parent="proxyAuthenticationProcessingFilter">
         <property name="authenticationManager" ref="casSoapAuthenticationManager"/>
-        <property name="externalDataSynchronizer" ref="externalDataSynchronizer"/>
-
-        <property name="invalidateSessionOnSuccessfulAuthentication" value="true"/>
-        <property name="migrateInvalidatedSessionAttributes" value="true"/>
         <property name="filterProcessesUrl" value="/services"/>
     </bean>
 
     <bean id="proxyAuthenticationRestProcessingFilter"
-          class="com.jaspersoft.jasperserver.api.security.externalAuth.cas.CasRestProcessingFilter">
+          class="com.jaspersoft.jasperserver.api.security.externalAuth.cas.CasRestProcessingFilter" parent="proxyAuthenticationProcessingFilter">
         <property name="authenticationManager" ref="casRestAuthenticationManager"/>
-        <property name="externalDataSynchronizer" ref="externalDataSynchronizer"/>
-
         <property name="filterProcessesUrl" value="/rest/login"/>
-        <property name="invalidateSessionOnSuccessfulAuthentication" value="true"/>
-        <property name="migrateInvalidatedSessionAttributes" value="true"/>
     </bean>
 
-    <bean id="proxyExceptionTranslationFilter" class="org.springframework.security.ui.ExceptionTranslationFilter" depends-on="externalAuthProperties">
+    <bean id="externalAuthSuccessHandler"
+          class="com.jaspersoft.jasperserver.api.security.externalAuth.cas.JrsExternalCASAuthenticationSuccessHandler" parent="successHandler">
+        <property name="externalDataSynchronizer">
+            <ref local="externalDataSynchronizer"/>
+        </property>
+    </bean>
+
+    <!-- [40308] Single sign out START: links Spring's SessionFixationProtectionStrategy, creating a new session upon
+    authentication, with CAS SessionMappingStorage.  SessionFixationProtectionStrategy is thus able to enter the new
+    session into SessionMappingStorage as a CAS ticket-session id pair.  Upon CAS sign-out request, SingleSignOutFilter
+    in JasperReport Server locates the correct session SessionMappingStorage and invalidates it. -->
+    <bean name="casSingleSignOutFilter" class="org.jasig.cas.client.session.SingleSignOutFilter">
+        <property name="artifactParameterName"  value="ticket"/>
+        <property name="sessionMappingStorage">
+            <ref local="casSessionMappingStorage"/>
+        </property>
+    </bean>
+    <bean id="casSessionAuthStrategy" class="com.jaspersoft.jasperserver.api.security.externalAuth.cas.CasSessionFixationProtectionStrategy">
+        <property name="migrateSessionAttributes" value="true" />
+        <property name="sessionMappingStorage">
+            <ref local="casSessionMappingStorage"/>
+        </property>
+        <property name="artifactParameterName"  value="ticket"/>  <!-- MUST BE THE SAME AS artifactParameterName in casSingleSignOutFilter bean -->
+    </bean>
+    <bean id="casSessionMappingStorage" class="org.jasig.cas.client.session.HashMapBackedSessionMappingStorage"/>
+    <!-- Single sign out END -->
+
+    <bean id="proxyExceptionTranslationFilter" class="com.jaspersoft.jasperserver.api.security.externalAuth.wrappers.spring.JSExceptionTranslationFilter" depends-on="externalAuthProperties">
         <property name="authenticationEntryPoint">
-            <bean class="org.springframework.security.ui.cas.CasProcessingFilterEntryPoint">
+            <bean class="com.jaspersoft.jasperserver.api.security.externalAuth.wrappers.spring.cas.JSCasAuthenticationEntryPoint">
                 <property name="loginUrl" value="#{externalAuthProperties.externalLoginUrl}"/>
 
                 <property name="serviceProperties">
@@ -86,7 +98,7 @@
         </property>
     </bean>
 
-    <bean id="casAuthenticationManager" class="org.springframework.security.providers.ProviderManager">
+    <bean id="casAuthenticationManager" class="com.jaspersoft.jasperserver.api.security.externalAuth.wrappers.spring.JSProviderManager">
         <property name="providers">
             <list>
                 <ref local="casAuthenticationProvider"/>
@@ -97,7 +109,7 @@
         </property>
     </bean>
 
-    <bean id="casRestAuthenticationManager" class="org.springframework.security.providers.ProviderManager">
+    <bean id="casRestAuthenticationManager" class="com.jaspersoft.jasperserver.api.security.externalAuth.wrappers.spring.JSProviderManager">
         <property name="providers">
             <list>
                 <ref local="casRestAuthenticationProvider"/>
@@ -108,7 +120,7 @@
         </property>
     </bean>
 
-    <bean id="casSoapAuthenticationManager" class="org.springframework.security.providers.ProviderManager">
+    <bean id="casSoapAuthenticationManager" class="com.jaspersoft.jasperserver.api.security.externalAuth.wrappers.spring.JSProviderManager">
         <property name="providers">
             <list>
                 <ref local="casSoapAuthenticationProvider"/>
@@ -120,7 +132,7 @@
     </bean>
 
 
-    <bean id="casAuthenticationProvider" class="org.springframework.security.providers.cas.CasAuthenticationProvider" depends-on="externalAuthProperties">
+    <bean id="casAuthenticationProvider" class="com.jaspersoft.jasperserver.api.security.externalAuth.wrappers.spring.cas.JSCasAuthenticationProvider" depends-on="externalAuthProperties">
         <property name="userDetailsService"><ref local="casJDBCUserDetailsService"/></property>
 
         <property name="serviceProperties">
@@ -128,15 +140,15 @@
         </property>
 
         <property name="ticketValidator">
-            <bean class="org.jasig.cas.client.validation.Cas20ServiceTicketValidator">
+            <bean class="com.jaspersoft.jasperserver.api.security.externalAuth.wrappers.jasig.JSCas20ServiceTicketValidator">
                 <constructor-arg index="0" value="#{externalAuthProperties.ssoServerLocation}" />
             </bean>
         </property>
 
         <property name="statelessTicketCache">
-            <bean class="org.springframework.security.providers.cas.cache.EhCacheBasedTicketCache">
+            <bean class="com.jaspersoft.jasperserver.api.security.externalAuth.wrappers.spring.JSEhCacheBasedTicketCache">
                 <property name="cache">
-                    <bean id="ticketCache" class="org.springframework.cache.ehcache.EhCacheFactoryBean">
+                    <bean id="ticketCache" class="com.jaspersoft.jasperserver.api.security.externalAuth.wrappers.spring.JSEhCacheFactoryBean">
                         <property name="cacheManager" ref="cacheManager"/>
                         <property name="cacheName" value="casTicketCache"/>
                     </bean>
@@ -147,7 +159,7 @@
         <property name="key" value="casCacheKey"/>
     </bean>
 
-    <bean id="casRestAuthenticationProvider" class="org.springframework.security.providers.cas.CasAuthenticationProvider" depends-on="externalAuthProperties">
+    <bean id="casRestAuthenticationProvider" class="com.jaspersoft.jasperserver.api.security.externalAuth.wrappers.spring.cas.JSCasAuthenticationProvider" depends-on="externalAuthProperties">
         <property name="userDetailsService"><ref local="casJDBCUserDetailsService"/></property>
 
         <property name="serviceProperties">
@@ -155,15 +167,15 @@
         </property>
 
         <property name="ticketValidator">
-            <bean class="org.jasig.cas.client.validation.Cas20ServiceTicketValidator">
+            <bean class="com.jaspersoft.jasperserver.api.security.externalAuth.wrappers.jasig.JSCas20ServiceTicketValidator">
                 <constructor-arg index="0" value="#{externalAuthProperties.ssoServerLocation}" />
             </bean>
         </property>
 
         <property name="statelessTicketCache">
-            <bean class="org.springframework.security.providers.cas.cache.EhCacheBasedTicketCache">
+            <bean class="com.jaspersoft.jasperserver.api.security.externalAuth.wrappers.spring.JSEhCacheBasedTicketCache">
                 <property name="cache">
-                    <bean id="ticketCache" class="org.springframework.cache.ehcache.EhCacheFactoryBean">
+                    <bean id="ticketCache" class="com.jaspersoft.jasperserver.api.security.externalAuth.wrappers.spring.JSEhCacheFactoryBean">
                         <property name="cacheManager" ref="cacheManager"/>
                         <property name="cacheName" value="casTicketCache"/>
                     </bean>
@@ -174,7 +186,7 @@
         <property name="key" value="casCacheKey"/>
     </bean>
 
-    <bean id="casSoapAuthenticationProvider" class="org.springframework.security.providers.cas.CasAuthenticationProvider" depends-on="externalAuthProperties">
+    <bean id="casSoapAuthenticationProvider" class="com.jaspersoft.jasperserver.api.security.externalAuth.wrappers.spring.cas.JSCasAuthenticationProvider" depends-on="externalAuthProperties">
         <property name="userDetailsService"><ref local="casJDBCUserDetailsService"/></property>
 
         <property name="serviceProperties">
@@ -182,15 +194,15 @@
         </property>
 
         <property name="ticketValidator">
-            <bean class="org.jasig.cas.client.validation.Cas20ServiceTicketValidator">
+            <bean class="com.jaspersoft.jasperserver.api.security.externalAuth.wrappers.jasig.JSCas20ServiceTicketValidator">
                 <constructor-arg index="0" value="#{externalAuthProperties.ssoServerLocation}" />
             </bean>
         </property>
 
         <property name="statelessTicketCache">
-            <bean class="org.springframework.security.providers.cas.cache.EhCacheBasedTicketCache">
+            <bean class="com.jaspersoft.jasperserver.api.security.externalAuth.wrappers.spring.JSEhCacheBasedTicketCache">
                 <property name="cache">
-                    <bean id="ticketCache" class="org.springframework.cache.ehcache.EhCacheFactoryBean">
+                    <bean id="ticketCache" class="com.jaspersoft.jasperserver.api.security.externalAuth.wrappers.spring.JSEhCacheFactoryBean">
                         <property name="cacheManager" ref="cacheManager"/>
                         <property name="cacheName" value="casTicketCache"/>
                     </bean>
@@ -207,19 +219,19 @@
         <property name="authoritiesByUsernameQuery" value="SELECT u.username, r.rolename FROM jiuser u, jiuserrole ur, jirole r WHERE u.id = ur.userId and ur.roleId=r.id and u.username = ?"/>
     </bean>
 
-    <bean id="casServiceProperties" class="org.springframework.security.ui.cas.ServiceProperties">
+    <bean id="casServiceProperties" class="com.jaspersoft.jasperserver.api.security.externalAuth.wrappers.spring.cas.JSCASServiceProperties">
         <property name="service" value="http://localhost:8080/jasperserver/j_spring_security_check"/>
         <property name="sendRenew" value="false"/>
     </bean>
 
     <!--we rely on the customer coming with a ticket that was issued to their system. this is where they need to specify
     the url-->
-    <bean id="casRestServiceProperties" class="org.springframework.security.ui.cas.ServiceProperties">
+    <bean id="casRestServiceProperties" class="com.jaspersoft.jasperserver.api.security.externalAuth.wrappers.spring.cas.JSCASServiceProperties">
         <property name="service" value="http://localhost:8080/jasperserver/rest/login"/>
         <property name="sendRenew" value="false"/>
     </bean>
 
-    <bean id="casSoapServiceProperties" class="org.springframework.security.ui.cas.ServiceProperties">
+    <bean id="casSoapServiceProperties" class="com.jaspersoft.jasperserver.api.security.externalAuth.wrappers.spring.cas.JSCASServiceProperties">
         <property name="service" value="http://localhost:8080/jasperserver/services"/>
         <property name="sendRenew" value="false"/>
     </bean>
@@ -275,7 +287,7 @@
     <!-- ############ Synchronizer ############ -->
 
     <!-- ############## external dataSource: config in master.properties ############### -->
-    <bean id="externalDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+    <bean id="externalDataSource" class="com.jaspersoft.jasperserver.api.security.externalAuth.wrappers.spring.jdbc.JSDriverManagerDataSource">
         <property name="driverClassName" value="${external.jdbc.driverClassName}"/>
         <property name="url" value="${external.jdbc.url}"/>
         <property name="username" value="${external.jdbc.username}"/>

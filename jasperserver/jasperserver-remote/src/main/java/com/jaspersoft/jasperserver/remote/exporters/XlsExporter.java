@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -45,7 +45,7 @@ import java.util.Map;
 
 /**
  * @author Giulio Toffoli (original sanda zaharia (shertage@users.sourceforge.net))
- * @version $Id: XlsExporter.java 28947 2013-02-26 15:02:08Z vsabadosh $
+ * @version $Id: XlsExporter.java 47331 2014-07-18 09:13:06Z kklein $
  */
 @Service("remoteXlsExporter")
 @Scope("prototype")

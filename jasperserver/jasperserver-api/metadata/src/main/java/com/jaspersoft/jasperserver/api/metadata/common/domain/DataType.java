@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -50,14 +50,14 @@ public interface DataType extends Resource
      *
      * @return type
      */
-	public byte getType();
+	public byte getDataTypeType();
 
     /**
      * Sets the type number of input control
      *
      * @param type
      */
-	public void setType(byte type);
+	public void setDataTypeType(byte type);
 
     /**
      * Returns the maximal value length of text input control

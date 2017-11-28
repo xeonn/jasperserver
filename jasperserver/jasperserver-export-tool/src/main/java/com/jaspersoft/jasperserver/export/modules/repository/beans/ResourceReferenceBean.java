@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -23,12 +23,13 @@ package com.jaspersoft.jasperserver.export.modules.repository.beans;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ResourceReferenceBean.java 19925 2010-12-11 15:06:41Z tmatyashovsky $
+ * @version $Id: ResourceReferenceBean.java 51369 2014-11-12 13:59:41Z sergey.prilukin $
  */
 public class ResourceReferenceBean {
 
 	private ResourceBean localResource;
 	private String externalURI;
+	private String containingURI;
 
 	public ResourceReferenceBean() {
 	}
@@ -60,5 +61,16 @@ public class ResourceReferenceBean {
 	public void setExternalURI(String location) {
 		this.externalURI = location;
 	}
-	
+
+    public String getContainingURI() {
+        return containingURI;
+    }
+
+    public void setContainingURI(String containingURI) {
+        this.containingURI = containingURI;
+    }
+
+    public boolean useContainingURI() {
+        return (containingURI != null);
+    }
 }

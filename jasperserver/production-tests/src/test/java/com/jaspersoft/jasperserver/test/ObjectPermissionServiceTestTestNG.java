@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -20,34 +20,36 @@
  */
 package com.jaspersoft.jasperserver.test;
 
-import java.util.Iterator;
-import java.util.List;
-
-import org.springframework.security.AccessDeniedException;
-import org.springframework.security.Authentication;
-import org.springframework.security.acl.AclEntry;
-import org.springframework.security.acl.AclProvider;
-import org.springframework.security.acl.basic.BasicAclEntry;
-import org.springframework.security.acl.basic.SimpleAclEntry;
-
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Folder;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceLookup;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportUnit;
+import com.jaspersoft.jasperserver.api.metadata.security.JasperServerPermission;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.ObjectPermission;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.Role;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
-import com.jaspersoft.jasperserver.api.metadata.user.service.impl.AclService;
+import com.jaspersoft.jasperserver.api.metadata.user.service.impl.JasperServerSidRetrievalStrategyImpl;
 import com.jaspersoft.jasperserver.api.metadata.view.domain.FilterCriteria;
 import com.jaspersoft.jasperserver.util.test.BaseServiceSetupTestNG;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import org.testng.annotations.BeforeClass;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.acls.domain.SidRetrievalStrategyImpl;
+import org.springframework.security.acls.model.AccessControlEntry;
+import org.springframework.security.acls.model.Acl;
+import org.springframework.security.acls.model.AclService;
+import org.springframework.security.acls.model.SidRetrievalStrategy;
+import org.springframework.security.core.Authentication;
 import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import static org.testng.AssertJUnit.*;
+
+import java.util.Iterator;
+import java.util.List;
+
+import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.AssertJUnit.assertNotNull;
+import static org.testng.AssertJUnit.assertTrue;
+import static org.testng.AssertJUnit.fail;
 
 /**
  * @author swood
@@ -85,7 +87,7 @@ public class ObjectPermissionServiceTestTestNG extends BaseServiceSetupTestNG {
 
         // set the admin user to be the authenticated user
         setAuthenticatedUser(USER_ADMIN);
-        createObjectPermission("/", m_adminRole, SimpleAclEntry.ADMINISTRATION);
+        createObjectPermission("/", m_adminRole, JasperServerPermission.ADMINISTRATION.getMask());
 
         m_reportsFolder = getRepositoryService().getFolder(null, reportsFolderPath);
         assertTrue("null m_reportsFolder", m_reportsFolder != null);
@@ -164,7 +166,7 @@ public class ObjectPermissionServiceTestTestNG extends BaseServiceSetupTestNG {
      * doObjectPermissionSetupTest
      *
      * For our report unit without a parent:
-     *      ROLE_ADMINISTRATOR: SimpleAclEntry.ADMINISTRATION
+     *      ROLE_ADMINISTRATOR: JasperServerPermission.ADMINISTRATION
      *      testUserName: TestUser has role: ROLE_TEST
      *      adminUserName: admin has role: ROLE_ADMINISTRATOR
      */
@@ -196,29 +198,32 @@ public class ObjectPermissionServiceTestTestNG extends BaseServiceSetupTestNG {
     /**
      * doAclAccessTest
      */
+    // TODO Spring Security Upgrade: move test below to RepositoryAclService
     @Test(dependsOnMethods = "doObjectPermissionSetupTest")
     public void doAclAccessTest() {
         m_logger.info("ObjectPermissionServiceTestTestNG => doAclAccessTest() called");
-
+        //Tis test is disabled because ACL logic was moved from ObjectPermissionService to other place
+        return;
+/*
         Authentication aUser = setAuthenticatedUser(USER_ADMIN);
 
-        BasicAclEntry[] aclEntries = ((AclService) getObjectPermissionService()).getAcls(m_unit);
-        assertTrue("aclEntries = null", aclEntries != null);
+        Acl acl = ((AclService) getObjectPermissionService()).readAclById(m_unit);
+        assertTrue("aclEntries = null", acl != null);
 
-        printAclEntries("getAcls(m_unit)", aclEntries);
-        assertTrue("aclEntries.length = " + aclEntries.length + " not 2", aclEntries.length == 3);
+        printAcl("getAcls(m_unit)", acl);
+        assertTrue("aclEntries.length = " + acl.getEntries().size() + " not 2", acl.getEntries().size() == 3);
 
-        AclEntry[] userEntries = ((AclProvider) getObjectPermissionService()).getAcls(m_unit, aUser);
+        Acl userEntries = ((AclService) getObjectPermissionService()).readAclById(m_unit, new JasperServerSidRetrievalStrategyImpl().getSids(aUser));
         assertTrue("userEntries = null", userEntries != null);
 
-        printAclEntries("getAcls(m_unit, aUser)", (BasicAclEntry[]) userEntries);
-        AclEntry found = null;
-        for (int i = 0; i < userEntries.length && found == null; i++ ) {
-            Object entry = ((BasicAclEntry) userEntries[i]).getRecipient();
-            found = (entry instanceof Role && ((Role) entry).getRoleName().equals(BaseServiceSetupTestNG.ROLE_ADMINISTRATOR)) ?
-                    userEntries[i] : null;
+        printAcl("getAcls(m_unit, aUser)", userEntries);
+        AccessControlEntry found = null;
+        Object objectIdentity = acl.getObjectIdentity();
+        for(AccessControlEntry ace: acl.getEntries()) {
+            found= (objectIdentity instanceof Role && ((Role)objectIdentity).getRoleName().equals(BaseServiceSetupTestNG.ROLE_ADMINISTRATOR)) ? ace : null;
         }
         assertTrue("Role recipient not found", found != null);
+*/
     }
 
     /**
@@ -249,7 +254,7 @@ public class ObjectPermissionServiceTestTestNG extends BaseServiceSetupTestNG {
          * Now add permissions for the testUserName to the report unit
          */
         setAuthenticatedUser(USER_ADMIN);
-        ObjectPermission op = createObjectPermission(reportUnitPath, m_testUser, SimpleAclEntry.READ);
+        ObjectPermission op = createObjectPermission(reportUnitPath, m_testUser, JasperServerPermission.READ.getMask());
 
         /*
          * Should be able to access now
@@ -283,15 +288,13 @@ public class ObjectPermissionServiceTestTestNG extends BaseServiceSetupTestNG {
         }
     }
 
-    private void printAclEntries(String name, BasicAclEntry[] aclEntries) {
+    private void printAcl(String name, Acl acl) {
 
-        m_logger.info("AclEntry set: " + name);
+        m_logger.info("Acl: " + name);
+        m_logger.info("AclObjectIdentity: " + acl.getObjectIdentity().toString());
 
-        for (int i = 0; aclEntries != null && aclEntries.length > 0 && i < aclEntries.length; i++) {
-            m_logger.info("aclEntries[" + i + "]: " + aclEntries[i].getAclObjectIdentity() +
-                    "\n\tparent: " + aclEntries[i].getAclObjectParentIdentity() +
-                    "\n\trecipient: " + aclEntries[i].getRecipient() +
-                    "\n\tmask: " + aclEntries[i].getMask());
+        for(AccessControlEntry ace: acl.getEntries()) {
+            m_logger.info(ace.toString());
         }
 
     }

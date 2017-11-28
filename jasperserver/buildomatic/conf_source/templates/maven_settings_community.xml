@@ -19,8 +19,27 @@
         <platform-path>${currentConf}</platform-path>
         <test.hibernate.cfg>${currentConf}/hibernate.cfg.xml</test.hibernate.cfg>
         <test.hibernate.jdbc.properties>${currentConf}/js.jdbc.properties</test.hibernate.jdbc.properties>
+        <master.properties>${masterPropsSource}</master.properties>
+        <!-- workaround src w/o tibco drivers -->
+        <tibco.driver.available>false</tibco.driver.available>
+        <SKIP_TEST_ARG>skipTests</SKIP_TEST_ARG>
+        <disable.fafj>false</disable.fafj>
       </properties>
       <repositories>
+        <repository>
+          <id>JBoss</id>
+          <url>https://repository.jboss.org/nexus/content/groups/public</url>
+          <snapshots>
+            <enabled>false</enabled>
+          </snapshots>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+        </repository>
+        <repository>
+          <id>cloudera-repo-releases</id>
+          <url>https://repository.cloudera.com/artifactory/repo/</url>
+        </repository>
         <repository>
           <id>jaspersoft-external-addons</id>
           <url>http://jaspersoft.artifactoryonline.com/jaspersoft/jrs-ce-addons-releases</url>
@@ -40,6 +59,17 @@
           </snapshots>
           <releases>
             <enabled>false</enabled>
+          </releases>
+        </repository>
+        <repository>
+          <id>jaspersoft-js-modules</id>
+          <url>http://jaspersoft.artifactoryonline.com/jaspersoft/jrs-ce-js-modules</url>
+          <snapshots>
+            <enabled>true</enabled>
+            <updatePolicy>always</updatePolicy>
+          </snapshots>
+          <releases>
+            <enabled>true</enabled>
           </releases>
         </repository>
         <repository>
@@ -98,16 +128,6 @@
           <url>http://repo.springsource.org/release</url>
           <snapshots>
             <enabled>true</enabled>
-          </snapshots>
-          <releases>
-            <enabled>true</enabled>
-          </releases>
-        </repository>
-        <repository>
-          <id>JBoss</id>
-          <url>https://repository.jboss.org/nexus/content/groups/public</url>
-          <snapshots>
-            <enabled>false</enabled>
           </snapshots>
           <releases>
             <enabled>true</enabled>

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -146,7 +146,7 @@ public class DefineInputControlsAction extends FormAction {
 	{
 		InputControlWrapper formObject = (InputControlWrapper) getFormObject(context);
 		InputControl control = formObject.getInputControl();
-		byte selectedType = control.getType();
+		byte selectedType = control.getInputControlType();
 		if(selectedType==0)
 		{
 			log("Selected type was null");
@@ -256,7 +256,7 @@ public class DefineInputControlsAction extends FormAction {
 				}
 				wrapper = new DataTypeWrapper((DataType) control.getDataType().getLocalResource());
 				if(dt != null){
-					byte type = dt.getType();
+					byte type = dt.getDataTypeType();
 					if(JasperServerUtil.isDateType(type)) {
 						DateFormat df = getFormat(type);				
 						if ((dt.getMinValue() != null) && (!dt.getMinValue().equals(""))) {
@@ -354,8 +354,8 @@ public class DefineInputControlsAction extends FormAction {
 	{
 		InputControlWrapper formObject = (InputControlWrapper) getFormObject(context);
 		InputControl control = formObject.getInputControl();
-		if (control.getType() ==  InputControl.TYPE_SINGLE_VALUE ||
-			control.getType() ==  InputControl.TYPE_MULTI_VALUE) {
+		if (control.getInputControlType() ==  InputControl.TYPE_SINGLE_VALUE ||
+			control.getInputControlType() ==  InputControl.TYPE_MULTI_VALUE) {
 			DataType dataType = (DataType) control.getDataType().getLocalResource();
 			if (formObject.getDtMaxLength() != null && formObject.getDtMaxLength().length() > 0)
 				dataType.setMaxLength(new Integer(formObject.getDtMaxLength()));

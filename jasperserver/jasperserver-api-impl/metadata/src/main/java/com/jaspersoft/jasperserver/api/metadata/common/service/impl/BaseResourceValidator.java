@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -32,7 +32,7 @@ import org.apache.commons.lang.StringUtils;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: BaseResourceValidator.java 25724 2012-11-07 14:48:21Z plysak $
+ * @version $Id: BaseResourceValidator.java 47331 2014-07-18 09:13:06Z kklein $
  */
 public abstract class BaseResourceValidator {
 	

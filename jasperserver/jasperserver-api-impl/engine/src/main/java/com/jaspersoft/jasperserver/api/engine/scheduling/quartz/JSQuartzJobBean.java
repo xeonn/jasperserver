@@ -1,7 +1,5 @@
-package com.jaspersoft.jasperserver.api.engine.scheduling.quartz;
-
 /*
- * Copyright (C) 2005 - 2012 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -20,7 +18,7 @@ package com.jaspersoft.jasperserver.api.engine.scheduling.quartz;
  * You should have received a copy of the GNU Affero General Public  License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
+package com.jaspersoft.jasperserver.api.engine.scheduling.quartz;
 
 import java.lang.reflect.Method;
 import java.util.Map;

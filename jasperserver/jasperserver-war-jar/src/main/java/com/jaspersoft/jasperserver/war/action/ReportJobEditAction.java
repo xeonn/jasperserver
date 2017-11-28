@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -26,13 +26,19 @@ import com.jaspersoft.jasperserver.api.JSValidationException;
 import com.jaspersoft.jasperserver.api.common.domain.ValidationError;
 import com.jaspersoft.jasperserver.api.common.util.TimeZonesList;
 import com.jaspersoft.jasperserver.api.engine.common.service.SecurityContextProvider;
-import com.jaspersoft.jasperserver.api.engine.scheduling.domain.*;
+import com.jaspersoft.jasperserver.api.engine.scheduling.domain.ReportJob;
+import com.jaspersoft.jasperserver.api.engine.scheduling.domain.ReportJobAlert;
+import com.jaspersoft.jasperserver.api.engine.scheduling.domain.ReportJobCalendarTrigger;
+import com.jaspersoft.jasperserver.api.engine.scheduling.domain.ReportJobMailNotification;
+import com.jaspersoft.jasperserver.api.engine.scheduling.domain.ReportJobRepositoryDestination;
+import com.jaspersoft.jasperserver.api.engine.scheduling.domain.ReportJobSimpleTrigger;
+import com.jaspersoft.jasperserver.api.engine.scheduling.domain.ReportJobSource;
+import com.jaspersoft.jasperserver.api.engine.scheduling.domain.ReportJobTrigger;
 import com.jaspersoft.jasperserver.api.engine.scheduling.service.ReportJobNotFoundException;
 import com.jaspersoft.jasperserver.api.engine.scheduling.service.ReportSchedulingService;
 import com.jaspersoft.jasperserver.api.logging.audit.context.AuditContext;
 import com.jaspersoft.jasperserver.api.logging.audit.domain.AuditEvent;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Folder;
-import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
 import com.jaspersoft.jasperserver.war.common.ConfigurationBean;
 import com.jaspersoft.jasperserver.war.common.JasperServerUtil;
 import com.jaspersoft.jasperserver.war.common.LocalesList;
@@ -54,12 +60,23 @@ import org.springframework.webflow.execution.RequestContext;
 
 import java.beans.PropertyEditorSupport;
 import java.sql.Timestamp;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TimeZone;
+import java.util.TreeSet;
 import java.util.regex.Pattern;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ReportJobEditAction.java 38348 2013-09-30 04:57:18Z carbiv $
+ * @version $Id: ReportJobEditAction.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
 public class ReportJobEditAction extends FormAction {
 	
@@ -95,7 +112,6 @@ public class ReportJobEditAction extends FormAction {
 	}
 	
 	private MessageSource messageSource;
-	private RepositoryService repositoryService;
 	private ReportSchedulingService schedulingService;
     private SecurityContextProvider securityContextProvider;
 	private String isNewModeAttrName;
@@ -193,16 +209,6 @@ public class ReportJobEditAction extends FormAction {
 
 	public void setMessageSource(MessageSource messageSource) {
 		this.messageSource = messageSource;
-	}
-
-	public RepositoryService getRepositoryService()
-	{
-		return repositoryService;
-	}
-
-	public void setRepositoryService(RepositoryService repositoryService)
-	{
-		this.repositoryService = repositoryService;
 	}
 
 	public ReportSchedulingService getSchedulingService() {

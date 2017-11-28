@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -46,7 +46,7 @@ import java.util.Map;
 
 /**
  * @author gtoffoli
- * @version $Id: InputControlHandler.java 22215 2012-02-17 11:44:00Z ykovalchyk $
+ * @version $Id: InputControlHandler.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
 @Service
 public class InputControlHandler extends RepositoryResourceHandler {
@@ -74,7 +74,7 @@ public class InputControlHandler extends RepositoryResourceHandler {
         descriptor.setReadOnly(fileResource.isReadOnly());
         descriptor.setVisible(fileResource.isVisible());
 
-        descriptor.setControlType(fileResource.getType());
+        descriptor.setControlType(fileResource.getInputControlType());
 
         ResourceReference childReference = null;
         if (descriptor.getControlType() == ResourceDescriptor.IC_TYPE_SINGLE_VALUE) {
@@ -192,10 +192,10 @@ public class InputControlHandler extends RepositoryResourceHandler {
         inputControl.setReadOnly(descriptor.isReadOnly());
         inputControl.setVisible(descriptor.isVisible());
 
-        inputControl.setType(descriptor.getControlType());
+        inputControl.setInputControlType(descriptor.getControlType());
 
         // Look in children...
-        if (inputControl.getType() == ResourceDescriptor.IC_TYPE_SINGLE_VALUE) {
+        if (inputControl.getInputControlType() == ResourceDescriptor.IC_TYPE_SINGLE_VALUE) {
             // We have to set the datatype...
             if (descriptor.getChildren().isEmpty()) {
                 throw new ServiceException(ServiceException.GENERAL_ERROR2,
@@ -210,10 +210,10 @@ public class InputControlHandler extends RepositoryResourceHandler {
                 inputControl.setDataType(dataType);
             }
         } // Look in children...
-        else if (inputControl.getType() == ResourceDescriptor.IC_TYPE_SINGLE_SELECT_LIST_OF_VALUES
-                || inputControl.getType() == ResourceDescriptor.IC_TYPE_SINGLE_SELECT_LIST_OF_VALUES_RADIO
-                || inputControl.getType() == ResourceDescriptor.IC_TYPE_MULTI_SELECT_LIST_OF_VALUES
-                || inputControl.getType() == ResourceDescriptor.IC_TYPE_MULTI_SELECT_LIST_OF_VALUES_CHECKBOX) {
+        else if (inputControl.getInputControlType() == ResourceDescriptor.IC_TYPE_SINGLE_SELECT_LIST_OF_VALUES
+                || inputControl.getInputControlType() == ResourceDescriptor.IC_TYPE_SINGLE_SELECT_LIST_OF_VALUES_RADIO
+                || inputControl.getInputControlType() == ResourceDescriptor.IC_TYPE_MULTI_SELECT_LIST_OF_VALUES
+                || inputControl.getInputControlType() == ResourceDescriptor.IC_TYPE_MULTI_SELECT_LIST_OF_VALUES_CHECKBOX) {
 
             // We have to set the datatype...
             if (descriptor.getChildren().isEmpty()) {
@@ -228,10 +228,10 @@ public class InputControlHandler extends RepositoryResourceHandler {
                 ListOfValues lovResource = (ListOfValues) createChildResource(rd);
                 inputControl.setListOfValues(lovResource);
             }
-        } else if (inputControl.getType() == ResourceDescriptor.IC_TYPE_SINGLE_SELECT_QUERY
-                || inputControl.getType() == ResourceDescriptor.IC_TYPE_SINGLE_SELECT_QUERY_RADIO
-                || inputControl.getType() == ResourceDescriptor.IC_TYPE_MULTI_SELECT_QUERY
-                || inputControl.getType() == ResourceDescriptor.IC_TYPE_MULTI_SELECT_QUERY_CHECKBOX) {
+        } else if (inputControl.getInputControlType() == ResourceDescriptor.IC_TYPE_SINGLE_SELECT_QUERY
+                || inputControl.getInputControlType() == ResourceDescriptor.IC_TYPE_SINGLE_SELECT_QUERY_RADIO
+                || inputControl.getInputControlType() == ResourceDescriptor.IC_TYPE_MULTI_SELECT_QUERY
+                || inputControl.getInputControlType() == ResourceDescriptor.IC_TYPE_MULTI_SELECT_QUERY_CHECKBOX) {
 
             // We have to set the datatype...
             if (descriptor.getChildren().isEmpty()) {

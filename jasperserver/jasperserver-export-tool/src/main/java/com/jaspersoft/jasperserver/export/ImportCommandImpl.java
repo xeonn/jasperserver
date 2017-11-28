@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -21,23 +21,22 @@
 
 package com.jaspersoft.jasperserver.export;
 
-import java.util.Locale;
-
-import com.jaspersoft.jasperserver.api.metadata.user.service.UserAuthorityService;
-import org.springframework.beans.BeansException;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
-
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
 import com.jaspersoft.jasperserver.api.common.domain.impl.ExecutionContextImpl;
+import com.jaspersoft.jasperserver.api.metadata.user.service.ObjectPermissionService;
 import com.jaspersoft.jasperserver.export.io.ExportImportIOFactory;
 import com.jaspersoft.jasperserver.export.io.ImportInput;
 import com.jaspersoft.jasperserver.export.util.CommandOut;
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.i18n.LocaleContextHolder;
+
+import java.util.Locale;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ImportCommandImpl.java 44312 2014-04-09 14:30:12Z vsabadosh $
+ * @version $Id: ImportCommandImpl.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
 public class ImportCommandImpl implements CommandBean, ApplicationContextAware {
 	
@@ -75,6 +74,9 @@ public class ImportCommandImpl implements CommandBean, ApplicationContextAware {
 	protected ExecutionContext getExecutionContext(Parameters parameters) {
 		ExecutionContextImpl context = new ExecutionContextImpl();
 		context.setLocale(getLocale(parameters));
+        if(ObjectPermissionService.PRIVILEGED_OPERATION.equals(parameters.getParameterValue(ObjectPermissionService.PRIVILEGED_OPERATION))){
+            context.getAttributes().add(ObjectPermissionService.PRIVILEGED_OPERATION);
+        }
 		return context;
 	}
 

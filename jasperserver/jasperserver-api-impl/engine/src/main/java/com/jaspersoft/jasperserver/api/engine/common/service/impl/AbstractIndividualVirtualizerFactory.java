@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -33,7 +33,7 @@ import com.jaspersoft.jasperserver.api.engine.common.service.VirtualizerFactory;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: AbstractIndividualVirtualizerFactory.java 38151 2013-09-26 09:30:32Z vsabadosh $
+ * @version $Id: AbstractIndividualVirtualizerFactory.java 47331 2014-07-18 09:13:06Z kklein $
  */
 public abstract class AbstractIndividualVirtualizerFactory implements VirtualizerFactory, Serializable {
 	

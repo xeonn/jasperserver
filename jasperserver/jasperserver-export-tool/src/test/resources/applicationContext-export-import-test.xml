@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-  ~ Copyright (C) 2005 - 2012 Jaspersoft Corporation. All rights reserved.
+  ~ Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
   ~ http://www.jaspersoft.com.
   ~
   ~ Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -218,7 +218,7 @@
 
         NOTE.1: plain text key functionality was removed as insecure via dictionary attacks.
          -->
-    <bean id="importExportCipher" class="com.jaspersoft.jasperserver.api.metadata.common.service.impl.Cipherer">
+    <bean id="importExportCipher" class="com.jaspersoft.jasperserver.api.common.crypto.Cipherer">
         <property name="keyBytes"><value>0x1b 0xd4 0xa6 0x10 0x44 0x42 0x6f 0xb5 0x15 0xda 0xd3 0xf2 0x1f 0x18 0xaa 0x57</value></property>
         <property name="keyAlgorithm"><value>AES</value></property>
         <property name="cipherTransformation"><value>AES/CBC/PKCS5Padding</value></property>

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -32,7 +32,7 @@ import java.util.List;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ValidationErrorsImpl.java 21908 2012-01-20 13:56:21Z ykovalchyk $
+ * @version $Id: ValidationErrorsImpl.java 47331 2014-07-18 09:13:06Z kklein $
  */
 @XmlRootElement(name = "errors")
 public class ValidationErrorsImpl implements ValidationErrors, Serializable {

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2013 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -25,6 +25,7 @@ import com.jaspersoft.jasperserver.api.JSValidationException;
 import com.jaspersoft.jasperserver.api.common.service.JdbcDriverService;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.AwsReportDataSource;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.client.AwsReportDataSourceImpl;
+import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributesResolver;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -33,7 +34,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -50,20 +50,26 @@ import static org.mockito.Mockito.when;
 public class AwsDataSourceResourceValidatorTest {
     @InjectMocks
     private final AwsDataSourceResourceValidator validator = new AwsDataSourceResourceValidator();
-    @Mock JdbcDriverService jdbcDriverService;
-    @Spy  List<String> awsRegions = new LinkedList<String>();
+    @Mock
+    private JdbcDriverService jdbcDriverService;
+    @Mock
+    private ProfileAttributesResolver profileAttributesResolver;
+    @Spy
+    private List<String> awsRegions = new LinkedList<String>();
 
     private AwsReportDataSource dataSource;
 
     @BeforeClass
-    public void init(){
+    public void init() {
         MockitoAnnotations.initMocks(this);
     }
 
     @BeforeMethod
     public void setUp() throws Exception {
         reset(jdbcDriverService);
+        reset(profileAttributesResolver);
         when(jdbcDriverService.isRegistered(anyString())).thenReturn(true);
+        when(profileAttributesResolver.containsAttribute(anyString())).thenReturn(false);
 
         awsRegions.add("amazon");
 
@@ -82,6 +88,30 @@ public class AwsDataSourceResourceValidatorTest {
 
     @Test
     public void testValidate() throws Exception {
+        validator.validate(dataSource);
+    }
+
+    @Test(expectedExceptions = {JSValidationException.class})
+    public void testValidate_no_accessKey() throws Exception {
+        dataSource.setAWSAccessKey(null);
+        dataSource.setAWSSecretKey("secret_key");
+
+        validator.validate(dataSource);
+    }
+
+    @Test(expectedExceptions = {JSValidationException.class})
+    public void testValidate_noSecretKey() throws Exception {
+        dataSource.setAWSSecretKey(null);
+        dataSource.setAWSAccessKey("Access_key");
+
+        validator.validate(dataSource);
+    }
+
+    @Test
+    public void testValidate_no_keys() throws Exception {
+        dataSource.setAWSAccessKey(null);
+        dataSource.setAWSSecretKey(null);
+
         validator.validate(dataSource);
     }
 
@@ -137,6 +167,30 @@ public class AwsDataSourceResourceValidatorTest {
     @Test(expectedExceptions = {JSValidationException.class})
     public void testValidate_invalidRegion() throws Exception {
         dataSource.setAWSRegion("#$%^&*(OL)");
+
+        validator.validate(dataSource);
+    }
+
+    @Test
+    public void testValidate_driverContainsAttribute() {
+        reset(jdbcDriverService);
+        when(profileAttributesResolver.containsAttribute(dataSource.getDriverClass())).thenReturn(true);
+
+        validator.validate(dataSource);
+    }
+
+    @Test
+    public void testValidate_connectionUrlContainsAttribute() {
+        dataSource.setConnectionUrl("{attribute('name', 'category')}");
+        when(profileAttributesResolver.containsAttribute(dataSource.getConnectionUrl())).thenReturn(true);
+
+        validator.validate(dataSource);
+    }
+
+    @Test
+    public void testValidate_awsRegionContainsAttribute() {
+        dataSource.setAWSRegion("{attribute('name', 'category')}");
+        when(profileAttributesResolver.containsAttribute(dataSource.getAWSRegion())).thenReturn(true);
 
         validator.validate(dataSource);
     }

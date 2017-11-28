@@ -1,23 +1,23 @@
 /*
-* Copyright (C) 2005 - 2009 Jaspersoft Corporation. All rights  reserved.
-* http://www.jaspersoft.com.
-*
-* Unless you have purchased  a commercial license agreement from Jaspersoft,
-* the following license terms  apply:
-*
-* This program is free software: you can redistribute it and/or  modify
-* it under the terms of the GNU Affero General Public License  as
-* published by the Free Software Foundation, either version 3 of  the
-* License, or (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-* GNU Affero  General Public License for more details.
-*
-* You should have received a copy of the GNU Affero General Public  License
-* along with this program.&nbsp; If not, see <http://www.gnu.org/licenses/>.
-*/
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
+ * http://www.jaspersoft.com.
+ *
+ * Unless you have purchased  a commercial license agreement from Jaspersoft,
+ * the following license terms  apply:
+ *
+ * This program is free software: you can redistribute it and/or  modify
+ * it under the terms of the GNU Affero General Public License  as
+ * published by the Free Software Foundation, either version 3 of  the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero  General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public  License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 package com.jaspersoft.jasperserver.remote.services.impl;
 
 import com.jaspersoft.jasperserver.api.engine.jasperreports.domain.impl.ReportUnitResult;
@@ -25,6 +25,7 @@ import com.jaspersoft.jasperserver.api.metadata.xml.domain.impl.Argument;
 import com.jaspersoft.jasperserver.api.metadata.xml.domain.impl.OperationResult;
 import com.jaspersoft.jasperserver.remote.ServiceException;
 import com.jaspersoft.jasperserver.remote.ServicesUtils;
+import com.jaspersoft.jasperserver.remote.exporters.HtmlExporter;
 import com.jaspersoft.jasperserver.remote.services.LegacyRunReportService;
 import com.jaspersoft.jasperserver.remote.services.ReportExecutionOptions;
 import com.jaspersoft.jasperserver.remote.services.ReportExecutor;
@@ -52,6 +53,7 @@ import org.springframework.stereotype.Service;
 import javax.activation.DataSource;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -66,7 +68,7 @@ import java.util.Map;
  */
 @Service("legacyRunReportService")
 @Scope(value = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)
-public class LegacyRunReportServiceImpl implements LegacyRunReportService {
+public class LegacyRunReportServiceImpl implements LegacyRunReportService, Serializable {
     private final static Log log = LogFactory.getLog(LegacyRunReportServiceImpl.class);
     private static final String KEY_JASPER_PRINT_RESOURCE = "jasperPrint";
     @javax.annotation.Resource
@@ -127,7 +129,7 @@ public class LegacyRunReportServiceImpl implements LegacyRunReportService {
             final Map<String, String[]> rawParameters = parameters == null || parameters.isEmpty() ?
                     new HashMap<String, String[]>() : inputControlsLogicService.formatTypedParameters(reportUnitURI, parameters);
             final List<InputControlState> valuesForInputControls = inputControlsLogicService.getValuesForInputControls(
-                    reportUnitURI, null, rawParameters);
+                    reportUnitURI, null, rawParameters, executionOptions.isFreshData());
             final Map<String, String[]> inputControlFormattedValues = ReportParametersUtils
                     .getValueMapFromInputControlStates(valuesForInputControls);
             Map<String, Object> runtimeParameters = inputControlsLogicService.getTypedParameters(reportUnitURI, inputControlFormattedValues);
@@ -252,7 +254,7 @@ public class LegacyRunReportServiceImpl implements LegacyRunReportService {
                 bads = new ByteArrayDataSource(bos.toByteArray());
                 outputResourcesContainer.put(KEY_JASPER_PRINT_RESOURCE, bads);
             } else {
-                HashMap<String, String> exportParameters = new HashMap<String, String>();
+                HashMap<String, Object> exportParameters = new HashMap<String, Object>();
 
                 String value = arguments.get(Argument.RUN_OUTPUT_PAGE);
                 if (value != null) {
@@ -261,6 +263,7 @@ public class LegacyRunReportServiceImpl implements LegacyRunReportService {
 
                 value = arguments.get(Argument.RUN_OUTPUT_IMAGES_URI);
                 if (value != null) exportParameters.put(Argument.RUN_OUTPUT_IMAGES_URI, value);
+                exportParameters.put(HtmlExporter.INTERACTIVE_PARAM_NAME, Boolean.valueOf(arguments.get(Argument.PARAM_INTERACTIVE)));
 
                 Map<JRExporterParameter, Object> exporterParams;
                 try {

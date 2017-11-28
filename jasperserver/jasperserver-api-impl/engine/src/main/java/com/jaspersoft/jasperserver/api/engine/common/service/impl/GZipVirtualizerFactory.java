@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -28,7 +28,7 @@ import org.apache.commons.logging.LogFactory;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: GZipVirtualizerFactory.java 30437 2013-03-28 17:54:52Z lchirita $
+ * @version $Id: GZipVirtualizerFactory.java 47331 2014-07-18 09:13:06Z kklein $
  */
 public class GZipVirtualizerFactory extends AbstractIndividualVirtualizerFactory {
 

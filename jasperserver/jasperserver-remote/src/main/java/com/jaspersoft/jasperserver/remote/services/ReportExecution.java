@@ -1,23 +1,23 @@
 /*
-* Copyright (C) 2005 - 2009 Jaspersoft Corporation. All rights  reserved.
-* http://www.jaspersoft.com.
-*
-* Unless you have purchased  a commercial license agreement from Jaspersoft,
-* the following license terms  apply:
-*
-* This program is free software: you can redistribute it and/or  modify
-* it under the terms of the GNU Affero General Public License  as
-* published by the Free Software Foundation, either version 3 of  the
-* License, or (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-* GNU Affero  General Public License for more details.
-*
-* You should have received a copy of the GNU Affero General Public  License
-* along with this program.&nbsp; If not, see <http://www.gnu.org/licenses/>.
-*/
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
+ * http://www.jaspersoft.com.
+ *
+ * Unless you have purchased  a commercial license agreement from Jaspersoft,
+ * the following license terms  apply:
+ *
+ * This program is free software: you can redistribute it and/or  modify
+ * it under the terms of the GNU Affero General Public License  as
+ * published by the Free Software Foundation, either version 3 of  the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero  General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public  License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 package com.jaspersoft.jasperserver.remote.services;
 
 import com.jaspersoft.jasperserver.api.JSException;
@@ -157,11 +157,13 @@ public class ReportExecution {
 
     public void setErrorDescriptor(ErrorDescriptor errorDescriptor) {
         this.errorDescriptor = errorDescriptor;
-        this.status = ExecutionStatus.failed;
-        synchronized (this){
-            if(!exports.isEmpty()){
-                for(ExportExecution exportExecution : exports.values()){
-                    exportExecution.setErrorDescriptor(errorDescriptor);
+        if(errorDescriptor != null) {
+            this.status = ExecutionStatus.failed;
+            synchronized (this) {
+                if (!exports.isEmpty()) {
+                    for (ExportExecution exportExecution : exports.values()) {
+                        exportExecution.setErrorDescriptor(errorDescriptor);
+                    }
                 }
             }
         }
@@ -182,11 +184,16 @@ public class ReportExecution {
     public void setStatus(ExecutionStatus status) {
         if (this.status != status) {
             this.status = status;
-            if (status == ExecutionStatus.cancelled || status == ExecutionStatus.ready) {
+            if (status == ExecutionStatus.cancelled || status == ExecutionStatus.ready || status == ExecutionStatus.queued) {
                 synchronized (this) {
+                    if(status == ExecutionStatus.queued){
+                        setReportUnitResult(null);
+                        setErrorDescriptor(null);
+                    }
                     if (!exports.isEmpty()) {
                         for (ExportExecution exportExecution : exports.values()) {
                             switch (status) {
+                                case queued:
                                 case ready:
                                     exportExecution.reset();
                                     break;
@@ -207,5 +214,11 @@ public class ReportExecution {
 
     public void setTotalPages(Integer totalPages) {
         this.totalPages = totalPages;
+    }
+
+    public void reset() {
+        for (ExportExecution exportExecution : exports.values()) {
+            exportExecution.reset();
+        }
     }
 }

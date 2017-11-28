@@ -15,7 +15,8 @@
         <!-- in the absence of a JNDI service, use jndiFallbackResolver look up the properties in the file. -->
         <property name="jndiFallbackResolver" ref="jndiFallbackResolver"/>
         <property name="jdbcDriverService" ref="jdbcDriverService"/>
-        <!-- olap4j caching config 
+        <property name="profileAttributesResolver" ref="profileAttributesResolver"/>
+        <!-- olap4j caching config
         see javadoc here http://www.olap4j.org/api/org/olap4j/driver/xmla/cache/XmlaOlap4jNamedMemoryCache.html -->        
 	    <!--property name="OLAP4J_CACHE" value="org.olap4j.driver.xmla.cache.XmlaOlap4jNamedMemoryCache"/-->
 	    <property name="OLAP4J_CACHE" value="${class.olap4jCache}"/>
@@ -41,7 +42,14 @@
         <property name="repositoryService" ref="${bean.repositoryService}"/>
         <property name="olapConnectionService" ref="olapConnectionService"/>
         <property name="mondrianConnectionCache" ref="sharedMondrianConnectionCacheFactory"/>
+        <property name="olapFiltersCache" ref="olapFiltersCache"/>
         <!-- <property name="sharedMondrianConectionCacheFactory" ref="sharedMondrianConnectionCacheFactory"/> -->
+    </bean>
+
+    <bean id="olapFiltersCache" class="org.springframework.cache.ehcache.EhCacheFactoryBean"
+          lazy-init="true">
+        <property name="cacheManager" ref="${bean.olapCacheManager}"/>
+        <property name="cacheName" value="olapFilters" />
     </bean>
 
     <!-- Setup a cache for Mondrian connections to synch cache flushing -->
@@ -52,7 +60,7 @@
     </bean>
 
     <bean id="sharedMondrianConnectionCacheFactory" class="org.springframework.cache.ehcache.EhCacheFactoryBean"
-          lazy-init="true">
+          lazy-init="true" depends-on="contextApplicationContextProvider">
         <property name="cacheManager" ref="${bean.olapCacheManager}"/>
         <property name="cacheName">
             <value>sharedMondrianConnections</value>

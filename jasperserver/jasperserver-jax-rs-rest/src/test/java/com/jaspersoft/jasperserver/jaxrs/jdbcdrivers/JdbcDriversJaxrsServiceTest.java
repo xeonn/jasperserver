@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005 - 2013 Jaspersoft Corporation. All rights  reserved.
+* Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
 * http://www.jaspersoft.com.
 *
 * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -45,7 +45,7 @@ import static org.testng.Assert.assertTrue;
  * <p></p>
  *
  * @author yaroslav.kovalchyk
- * @version $Id: JdbcDriversJaxrsServiceTest.java 40684 2014-01-16 14:24:24Z ykovalchyk $
+ * @version $Id: JdbcDriversJaxrsServiceTest.java 47331 2014-07-18 09:13:06Z kklein $
  */
 public class JdbcDriversJaxrsServiceTest {
     @InjectMocks

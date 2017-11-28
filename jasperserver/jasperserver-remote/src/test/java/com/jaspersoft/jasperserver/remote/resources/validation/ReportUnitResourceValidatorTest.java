@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2013 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -29,6 +29,7 @@ import com.jaspersoft.jasperserver.api.metadata.common.domain.client.FileResourc
 import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportUnit;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.client.ReportUnitImpl;
+import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributesResolver;
 import net.sf.jasperreports.engine.JRException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -52,13 +53,15 @@ import static org.testng.Assert.assertTrue;
  * <p></p>
  *
  * @author Zakhar.Tomchenco
- * @version $Id: ReportUnitResourceValidatorTest.java 42684 2014-03-06 14:26:22Z ykovalchyk $
+ * @version $Id: ReportUnitResourceValidatorTest.java 51369 2014-11-12 13:59:41Z sergey.prilukin $
  */
 public class ReportUnitResourceValidatorTest {
     @InjectMocks
     private  ReportUnitResourceValidator validator;
     @Mock
     private RepositoryService repositoryService;
+    @Mock
+    private ProfileAttributesResolver profileAttributesResolver;
 
     private ReportUnit report;
 

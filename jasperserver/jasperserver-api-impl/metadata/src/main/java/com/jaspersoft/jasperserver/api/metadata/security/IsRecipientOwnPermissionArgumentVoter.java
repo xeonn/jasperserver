@@ -1,6 +1,7 @@
 /*
- * Copyright (C) 2005 - 2012 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
+ *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
  * the following license terms  apply:
  *
@@ -24,15 +25,17 @@ import com.jaspersoft.jasperserver.api.metadata.user.domain.ObjectPermission;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.Role;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.TenantQualified;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
-import org.springframework.security.Authentication;
-import org.springframework.security.ConfigAttribute;
-import org.springframework.security.GrantedAuthority;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.access.ConfigAttribute;
+import org.springframework.security.core.GrantedAuthority;
+
+import java.util.Collection;
 
 /**
  * <p></p>
  *
  * @author Zakhar.Tomchenco
- * @version $Id: IsRecipientOwnPermissionArgumentVoter.java 32262 2013-05-31 16:05:18Z inesterenko $
+ * @version $Id: IsRecipientOwnPermissionArgumentVoter.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
 public class IsRecipientOwnPermissionArgumentVoter extends BasicObjectPermissionArgumentVoter {
     private static final String ATTRIBUTE = "PERMISSION_RECIPIENT";
@@ -48,7 +51,7 @@ public class IsRecipientOwnPermissionArgumentVoter extends BasicObjectPermission
         } else
         if (objectPermission.getPermissionRecipient() instanceof Role){
             Role recipient = (Role)objectPermission.getPermissionRecipient();
-            GrantedAuthority[] authorities = authentication.getAuthorities();
+            final Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
 
             for (GrantedAuthority authority : authorities){
                 String name = authority.getAuthority();

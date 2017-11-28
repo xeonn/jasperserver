@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005 - 2013 Jaspersoft Corporation. All rights  reserved.
+* Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
 * http://www.jaspersoft.com.
 *
 * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -25,39 +25,62 @@ import com.jaspersoft.jasperserver.api.common.domain.ValidationErrors;
 import com.jaspersoft.jasperserver.api.common.domain.impl.ValidationErrorImpl;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.client.ResourceLookupImpl;
+import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributesResolver;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doCallRealMethod;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.same;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: GenericResourceValidatorTest.java 33305 2013-06-27 13:11:16Z ztomchenco $
+ * @version $Id: GenericResourceValidatorTest.java 51369 2014-11-12 13:59:41Z sergey.prilukin $
  */
 public class GenericResourceValidatorTest {
+    @InjectMocks
     private GenericResourceValidator<Resource> validator = mock(GenericResourceValidator.class);
+    @Mock
+    private ProfileAttributesResolver profileAttributesResolver;
+
     private Resource resource = new ResourceLookupImpl();
 
+    @BeforeClass
+    public void initialize() {
+        MockitoAnnotations.initMocks(this);
+    }
+
     @BeforeMethod
-    public void init(){
+    public void init() {
+        reset(profileAttributesResolver);
         resource.setURIString("/test/uri");
         resource.setLabel("testa");
+        resource.setDescription("description");
         reset(validator);
         doCallRealMethod().when(validator).validate(resource);
     }
 
     @Test
-    public void validate(){
+    public void validate() {
         validator.validate(resource);
         verify(validator).internalValidate(same(resource), any(ValidationErrors.class));
     }
 
     @Test(expectedExceptions = JSValidationException.class)
-    public void validate_exception(){
+    public void validate_exception() throws Exception {
         doAnswer(new Answer() {
             @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {
@@ -66,6 +89,24 @@ public class GenericResourceValidatorTest {
                 return null;
             }
         }).when(validator).internalValidate(same(resource), any(ValidationErrors.class));
+        validator.validate(resource);
+    }
+
+    @Test(expectedExceptions = JSValidationException.class)
+    public void validate_labelContainsAttributePlaceholder_exception() throws Exception {
+        when(profileAttributesResolver.containsAttribute(resource.getLabel())).thenReturn(true);
+        validator.validate(resource);
+    }
+
+    @Test(expectedExceptions = JSValidationException.class)
+    public void validate_descriptionContainsAttributePlaceholder_exception() throws Exception {
+        when(profileAttributesResolver.containsAttribute(resource.getDescription())).thenReturn(true);
+        validator.validate(resource);
+    }
+
+    @Test(expectedExceptions = JSValidationException.class)
+    public void validate_nameContainsAttributePlaceholder_exception() throws Exception {
+        when(profileAttributesResolver.containsAttribute(resource.getName())).thenReturn(true);
         validator.validate(resource);
     }
 }

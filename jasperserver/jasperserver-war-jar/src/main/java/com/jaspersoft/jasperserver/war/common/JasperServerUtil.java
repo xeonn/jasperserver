@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -64,7 +64,7 @@ import java.util.regex.PatternSyntaxException;
 
 /**
  * @author aztec
- * @version $Id: JasperServerUtil.java 30814 2013-04-04 21:14:31Z schubar $
+ * @version $Id: JasperServerUtil.java 47331 2014-07-18 09:13:06Z kklein $
  */
 public class JasperServerUtil {
 

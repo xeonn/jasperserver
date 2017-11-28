@@ -1,15 +1,10 @@
 package com.jaspersoft.jasperserver.export;
 
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.InternalURI;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.ObjectPermission;
 import com.jaspersoft.jasperserver.api.metadata.user.service.ObjectPermissionService;
-import com.jaspersoft.jasperserver.api.metadata.user.service.impl.AclService;
 
 import java.util.List;
-
-import org.springframework.security.acl.basic.AclObjectIdentity;
-import org.springframework.security.acl.basic.BasicAclEntry;
 
 /**
  * Created with IntelliJ IDEA.
@@ -18,7 +13,7 @@ import org.springframework.security.acl.basic.BasicAclEntry;
  * Time: 4:43 PM
  * To change this template use File | Settings | File Templates.
  */
-public class ObjectPermissionServiceMock implements ObjectPermissionService, AclService {
+public class ObjectPermissionServiceMock implements ObjectPermissionService {
     public ObjectPermission newObjectPermission(ExecutionContext context) {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
@@ -68,18 +63,4 @@ public class ObjectPermissionServiceMock implements ObjectPermissionService, Acl
         return 0;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
-	@Override
-	public BasicAclEntry[] getAcls(AclObjectIdentity aclObjectIdentity, Object recipient) {
-		return null;
-	}
-
-	@Override
-	public BasicAclEntry[] getAcls(InternalURI res) {
-		return null;
-	}
-
-	@Override
-	public BasicAclEntry[] getAcls(String resUri) {
-		return null;
-	}
 }

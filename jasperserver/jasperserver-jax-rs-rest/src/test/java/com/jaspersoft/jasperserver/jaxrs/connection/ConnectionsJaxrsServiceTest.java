@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005 - 2013 Jaspersoft Corporation. All rights  reserved.
+* Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
 * http://www.jaspersoft.com.
 *
 * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -34,9 +34,7 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Providers;
-import java.io.IOException;
 import java.io.InputStream;
-import java.net.URISyntaxException;
 import java.util.UUID;
 
 import static org.mockito.Mockito.doReturn;
@@ -51,7 +49,7 @@ import static org.testng.Assert.assertSame;
  * <p></p>
  *
  * @author yaroslav.kovalchyk
- * @version $Id: ConnectionsJaxrsServiceTest.java 39455 2013-11-20 14:26:47Z ykovalchyk $
+ * @version $Id: ConnectionsJaxrsServiceTest.java 49286 2014-09-23 13:32:25Z ykovalchyk $
  */
 public class ConnectionsJaxrsServiceTest {
     @InjectMocks
@@ -94,15 +92,6 @@ public class ConnectionsJaxrsServiceTest {
     @Test(expectedExceptions = WebApplicationException.class)
     public void getConnectionClass_nullMediaType_exception(){
         service.getConnectionClass(null);
-    }
-
-    @Test(expectedExceptions = WebApplicationException.class)
-    public void createConnection_metadata_typesMismatch() throws IOException, URISyntaxException {
-        final MediaType connectionType = MediaType.valueOf("application/connections.type1+json");
-        final MediaType metadataType = MediaType.valueOf("application/connections.type2.metadata+json");
-        doReturn(Number.class).when(spyService).getConnectionClass(connectionType);
-        doReturn(String.class).when(spyService).getConnectionClass(metadataType);
-        spyService.createConnection(null, connectionType, metadataType);
     }
 
     @Test

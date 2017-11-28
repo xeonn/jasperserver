@@ -1,5 +1,5 @@
 <%--
-  ~ Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+  ~ Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
   ~ http://www.jaspersoft.com.
   ~
   ~ Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -93,7 +93,7 @@
 					<td></td>
 					<td></td>
 				</tr>
-				</tbody>
+				</tbody>				
 				<tbody>
 				<tr>
 					<th class="rowHeader">.action.primary.jumbo</th>
@@ -126,7 +126,65 @@
 					<td></td>
 				</tr>
 				</tbody>
-		
+				
+				<tbody>
+				<tr>
+					<th class="rowHeader">.action.square.small</th>
+					<td colspan="7">Smaller version of the .action.square button.</td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>
+						<!-- up -->
+						<button class="button action square small tree up">
+							<span class="wrap">
+								<span class="icon"></span>
+							</span>
+						</button>					
+					</td>
+					<td>
+						<!-- up over -->
+						<button class="button action square small tree up over">
+							<span class="wrap">
+								<span class="icon"></span>
+							</span>
+						</button>
+					</td>
+					<td>
+						<!-- up pressed -->
+						<button class="button action square small tree up pressed">
+							<span class="wrap">
+								<span class="icon"></span>
+							</span>
+						</button>
+					</td>
+					<td></td>
+					<td>
+						<!-- down -->
+						<button class="button action square small tree down">
+							<span class="wrap">
+								<span class="icon"></span>
+							</span>
+						</button>
+					</td>
+					<td>
+						<!-- down over -->
+						<button class="button action square small tree down over">
+							<span class="wrap">
+								<span class="icon"></span>
+							</span>
+						</button>
+					</td>
+					<td>
+						<!-- down pressed -->
+						<button class="button action square small tree down pressed">
+							<span class="wrap">
+								<span class="icon"></span>
+							</span>
+						</button>
+					</td>
+				</tr>
+				</tbody>
 				<tbody>
 				<tr>
 					<th class="rowHeader">.options</th>

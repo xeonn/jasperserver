@@ -1,25 +1,22 @@
 /*
- * JasperReports - Free Java Reporting Library.
- * Copyright (C) 2001 - 2009 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased a commercial license agreement from Jaspersoft,
  * the following license terms apply:
  *
- * This program is part of JasperReports.
+ * This program is free software: you can redistribute it and/or  modify
+ * it under the terms of the GNU Affero General Public License  as
+ * published by the Free Software Foundation, either version 3 of  the
+ * License, or (at your option) any later version.
  *
- * JasperReports is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * JasperReports is distributed in the hope that it will be useful,
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Lesser General Public License for more details.
+ * GNU Affero  General Public License for more details.
  *
- * You should have received a copy of the GNU Lesser General Public License
- * along with JasperReports. If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public  License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 package com.jaspersoft.jasperserver.jaxrs.job;
 
@@ -75,7 +72,7 @@ import java.util.TimeZone;
  * JAX-RS service "jobs" implementation
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: JobsJaxrsService.java 44312 2014-04-09 14:30:12Z vsabadosh $
+ * @version $Id: JobsJaxrsService.java 49286 2014-09-23 13:32:25Z ykovalchyk $
  */
 @Component
 @Scope("prototype")

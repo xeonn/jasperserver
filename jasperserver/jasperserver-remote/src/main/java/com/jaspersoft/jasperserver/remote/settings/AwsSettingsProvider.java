@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005 - 2013 Jaspersoft Corporation. All rights  reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
 * http://www.jaspersoft.com.
 *
 * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -16,12 +16,13 @@
 * GNU Affero  General Public License for more details.
 *
 * You should have received a copy of the GNU Affero General Public  License
-* along with this program.&nbsp; If not, see <http://www.gnu.org/licenses/>.
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 package com.jaspersoft.jasperserver.remote.settings;
 
 import com.jaspersoft.jasperserver.api.engine.jasperreports.util.AwsEc2MetadataClient;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.util.AwsProperties;
+import com.jaspersoft.jasperserver.api.engine.jasperreports.util.InstanceProductTypeResolver;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -33,7 +34,7 @@ import java.util.List;
  * <p></p>
  *
  * @author yaroslav.kovalchyk
- * @version $Id: AwsSettingsProvider.java 41232 2014-01-31 14:42:48Z ykovalchyk $
+ * @version $Id: AwsSettingsProvider.java 49286 2014-09-23 13:32:25Z ykovalchyk $
  */
 @Service
 public class AwsSettingsProvider implements SettingsProvider {
@@ -43,12 +44,17 @@ public class AwsSettingsProvider implements SettingsProvider {
     private AwsEc2MetadataClient awsEc2MetadataClient;
     @Resource
     private AwsProperties awsProperties;
+    @Resource
+    private InstanceProductTypeResolver instanceProductTypeResolverBean;
     @Override
     public Object getSettings() {
         final HashMap<String, Object> settings = new HashMap<String, Object>();
         settings.put("awsRegions", new ArrayList<String>(awsRegions));
         settings.put("isEc2Instance", awsEc2MetadataClient.isEc2Instance());
         settings.put("suppressEc2CredentialsWarnings", awsProperties.isSuppressEc2CredentialsWarnings());
+        settings.put("productTypeIsEc2",instanceProductTypeResolverBean.isEC2());
+        settings.put("productTypeIsJrsAmi",instanceProductTypeResolverBean.isJrsAmi());
+        settings.put("productTypeIsMpAmi",instanceProductTypeResolverBean.isMpAmi());
         return settings;
     }
 }

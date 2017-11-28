@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2012 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -22,9 +22,9 @@ package com.jaspersoft.jasperserver.externalAuth.mocks;
 
 import com.jaspersoft.jasperserver.api.security.externalAuth.db.ExternalJDBCUserDetailsService;
 import org.springframework.dao.DataAccessException;
-import org.springframework.security.GrantedAuthority;
-import org.springframework.security.GrantedAuthorityImpl;
-import org.springframework.security.userdetails.UsernameNotFoundException;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -56,7 +56,7 @@ public class MockExternalJDBCUserDetailsService extends ExternalJDBCUserDetailsS
 
 		List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
 		for (String s : this.externalUserRoles)
-			authorities.add(new GrantedAuthorityImpl(s));
+			authorities.add(new SimpleGrantedAuthority(s));
 		return authorities;
 	}
 

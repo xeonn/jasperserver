@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -29,7 +29,7 @@ import com.jaspersoft.jasperserver.api.metadata.common.domain.DataSource;
  * Implementations are responsible for storing all the information needed to create a
  * data view.
  * @author Ivan Chan (ichan@jaspersoft.com)
- * @version $Id: DataView.java 34367 2013-07-24 17:43:17Z ichan $
+ * @version $Id: DataView.java 47331 2014-07-18 09:13:06Z kklein $
  */
 @JasperServerAPI
 public interface DataView extends DataSource

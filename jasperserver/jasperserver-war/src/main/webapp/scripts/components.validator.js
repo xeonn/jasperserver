@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2014 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: components.validator.js 43122 2014-03-18 12:44:22Z psavushchik $
+ * @version: $Id: components.validator.js 7762 2014-09-19 10:16:02Z sergey.prilukin $
  */
 
 var ControlValidator = Class.create({

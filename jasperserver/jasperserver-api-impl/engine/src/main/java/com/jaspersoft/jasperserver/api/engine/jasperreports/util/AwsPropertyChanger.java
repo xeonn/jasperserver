@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2012 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -20,16 +20,18 @@
  */
 package com.jaspersoft.jasperserver.api.engine.jasperreports.util;
 
-import com.jaspersoft.jasperserver.api.common.properties.PropertyChanger;
 import com.jaspersoft.jasperserver.api.common.properties.PropertyChangerAdapter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  *
  *
  * @author agodovanets@jaspersoft.com
- * @version $Id: AwsPropertyChanger.java 30890 2013-04-06 15:26:45Z afomin $
+ * @version $Id: AwsPropertyChanger.java 50011 2014-10-09 16:57:26Z vzavadskii $
  */
 public class AwsPropertyChanger extends PropertyChangerAdapter {
     final public static String PROPERTY_PREFIX = "aws.";
@@ -42,16 +44,17 @@ public class AwsPropertyChanger extends PropertyChangerAdapter {
     public void setProperty(String key, String val) {
         assert (key.startsWith(PROPERTY_PREFIX));
         log.debug("setting AWS property: " + key + " - " + val);
+        AwsProperties.Property property = AwsProperties.Property.fromString(key);
 
-        if (AwsProperties.DB_SECURITY_GROUP_CHANGES_ENABLED.equals(key)) {
+        if (AwsProperties.Property.DB_SECURITY_GROUP_CHANGES_ENABLED.equals(property)) {
             awsProperties.setSecurityGroupChangesEnabled(Boolean.valueOf(val));
-        } else if (AwsProperties.DB_SECURITY_GROUP_NAME.equals(key)) {
+        } else if (AwsProperties.Property.DB_SECURITY_GROUP_NAME.equals(property)) {
             awsProperties.setSecurityGroupName(val);
-        } else if (AwsProperties.DB_SECURITY_GROUP_DESCRIPTION.equals(key)) {
+        } else if (AwsProperties.Property.DB_SECURITY_GROUP_DESCRIPTION.equals(property)) {
             awsProperties.setSecurityGroupDescription(val);
-        } else if (AwsProperties.DB_SECURITY_GROUP_INGRESS_PUBLIC_IP.equals(key)) {
+        } else if (AwsProperties.Property.DB_SECURITY_GROUP_INGRESS_PUBLIC_IP.equals(property)) {
             awsProperties.setSecurityGroupIngressPublicIp(val);
-        } else if (AwsProperties.DB_SECURITY_GROUP_CHANGES_SUPPRESS_EC2_CREDENTIALS_WARNINGS.equals(key)) {
+        } else if (AwsProperties.Property.DB_SECURITY_GROUP_CHANGES_SUPPRESS_EC2_CREDENTIALS_WARNINGS.equals(property)) {
             awsProperties.setSuppressEc2CredentialsWarnings(Boolean.valueOf(val));
         } else {
             throw new RuntimeException("Unknown AWS config property: "+key);
@@ -62,24 +65,29 @@ public class AwsPropertyChanger extends PropertyChangerAdapter {
     public String getProperty(String key) {
         assert (key.startsWith(PROPERTY_PREFIX));
         log.debug("getting AWS property: " + key);
-        if (AwsProperties.DB_SECURITY_GROUP_CHANGES_ENABLED.equals(key)) {
+        AwsProperties.Property property = AwsProperties.Property.fromString(key);
+
+        if (AwsProperties.Property.DB_SECURITY_GROUP_CHANGES_ENABLED.equals(property)) {
             return Boolean.toString(awsProperties.isSecurityGroupChangesEnabled());
-            //return Boolean.toString(awsDataSourceRecovery.isSecurityGroupChangesEnabled());
-        } else if (AwsProperties.DB_SECURITY_GROUP_NAME.equals(key)) {
+        } else if (AwsProperties.Property.DB_SECURITY_GROUP_NAME.equals(property)) {
             return awsProperties.getSecurityGroupName();
-            //return awsDataSourceRecovery.getSecurityGroupName();
-        } else if (AwsProperties.DB_SECURITY_GROUP_DESCRIPTION.equals(key)) {
+        } else if (AwsProperties.Property.DB_SECURITY_GROUP_DESCRIPTION.equals(property)) {
             return awsProperties.getSecurityGroupDescription();
-            //return awsDataSourceRecovery.getSecurityGroupDescription();
-        } else if (AwsProperties.DB_SECURITY_GROUP_INGRESS_PUBLIC_IP.equals(key)) {
+        } else if (AwsProperties.Property.DB_SECURITY_GROUP_INGRESS_PUBLIC_IP.equals(property)) {
             return awsProperties.getSecurityGroupIngressPublicIp();
-            //return awsDataSourceRecovery.getSecurityGroupIngressPublicIp();
-        } else if (AwsProperties.DB_SECURITY_GROUP_CHANGES_SUPPRESS_EC2_CREDENTIALS_WARNINGS.equals(key)) {
+        } else if (AwsProperties.Property.DB_SECURITY_GROUP_CHANGES_SUPPRESS_EC2_CREDENTIALS_WARNINGS.equals(property)) {
             return Boolean.toString(awsProperties.isSuppressEc2CredentialsWarnings());
-            //return Boolean.toString(awsDataSourceRecovery.isSuppressEc2CredentialsWarnings());
         } else {
             throw new RuntimeException("Unknown AWS config property: "+key);
         }
+    }
+
+    public Map<String, String> getProperties() {
+        Map<String, String> map = new LinkedHashMap<String, String>();
+        for (AwsProperties.Property key : AwsProperties.Property.values()) {
+            map.put(key.toString(), getProperty(key.toString()));
+        }
+        return map;
     }
 
     public void setAwsProperties(AwsProperties awsProperties) {

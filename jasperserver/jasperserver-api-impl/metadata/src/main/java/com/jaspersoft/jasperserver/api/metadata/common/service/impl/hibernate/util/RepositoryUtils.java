@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -110,6 +110,23 @@ public class RepositoryUtils {
 		//if the ancestor is /, or the ancestor is followed by a / in the child path
 		return Folder.SEPARATOR.equals(ancestorPath) 
 				|| path.substring(ancestorPath.length()).startsWith(Folder.SEPARATOR);
+	}
+
+	/**
+	 * Determines whether a repository path is an local resource of another path.
+	 *
+	 * @param ancestorPath the parent path
+	 * @param path the path
+	 * @return whether <code>parent</code> is an ancestor of <path>
+	 */
+	public static boolean isLocalResource(String ancestorPath, String path) {
+		//if ancestor path is not a prefix
+		if (!path.startsWith(ancestorPath)) {
+			return false;
+		}
+
+		//if the ancestor is /, or the ancestor is followed by a '_files/' in the child path
+		return path.substring(ancestorPath.length()).startsWith("_files" + Folder.SEPARATOR);
 	}
 
 	public static String resolveRelativePath(String contextPath, String path) {

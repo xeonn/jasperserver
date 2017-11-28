@@ -8,6 +8,18 @@
         primary key (id)
     ) ENGINE=InnoDB;
 
+    create table JIAwsDatasource (
+        id bigint not null,
+        accessKey varchar(100),
+        secretKey varchar(100),
+        roleARN varchar(100),
+        region varchar(100) not null,
+        dbName varchar(100) not null,
+        dbInstanceIdentifier varchar(100) not null,
+        dbService varchar(100) not null,
+        primary key (id)
+    ) ENGINE=InnoDB;
+
     create table JIBeanDatasource (
         id bigint not null,
         beanName varchar(100) not null,
@@ -62,8 +74,8 @@
         maxLength integer,
         decimals integer,
         regularExpr varchar(255),
-        minValue tinyblob,
-        max_value tinyblob,
+        minValue blob,
+        max_value blob,
         strictMin bit,
         strictMax bit,
         primary key (id)
@@ -115,22 +127,10 @@
     create table JIJdbcDatasource (
         id bigint not null,
         driver varchar(100) not null,
-        password varchar(100),
+        password varchar(250),
         connectionUrl varchar(500),
         username varchar(100),
         timezone varchar(100),
-        primary key (id)
-    ) ENGINE=InnoDB;
-
-    create table JIAwsDatasource (
-        id bigint not null,
-        accessKey varchar(100),
-        secretKey varchar(100),
-        roleARN varchar(100),
-        region varchar(100) not null,
-        dbName varchar(100) not null,
-        dbInstanceIdentifier varchar(100) not null,
-        dbService varchar(100) not null,
         primary key (id)
     ) ENGINE=InnoDB;
 
@@ -308,7 +308,7 @@
         using_def_rpt_opt_folder_uri bit not null,
         output_local_folder varchar(250),
         user_name varchar(50),
-        password varchar(50),
+        password varchar(250),
         server_name varchar(150),
         folder_path varchar(250),
         primary key (id)
@@ -332,6 +332,15 @@
         calendar_name varchar(50),
         misfire_instruction integer not null,
         primary key (id)
+    ) ENGINE=InnoDB;
+
+    create table JIReportThumbnail (
+        id bigint not null auto_increment,
+        user_id bigint not null,
+        resource_id bigint not null,
+        thumbnail longblob not null,
+        primary key (id),
+        unique (user_id, resource_id)
     ) ENGINE=InnoDB;
 
     create table JIReportUnit (
@@ -433,7 +442,7 @@
         tenantId bigint not null,
         fullname varchar(100) not null,
         emailAddress varchar(100),
-        password varchar(100),
+        password varchar(250),
         externallyDefined bit,
         enabled bit,
         previousPasswordChangeTime datetime,
@@ -464,7 +473,7 @@
         id bigint not null,
         catalog varchar(100) not null,
         username varchar(100) not null,
-        password varchar(100) not null,
+        password varchar(250) not null,
         datasource varchar(100) not null,
         uri varchar(100) not null,
         primary key (id)
@@ -490,6 +499,12 @@
         foreign key (resource_id) 
         references JIResource (id) 
         on delete cascade;
+
+    alter table JIAwsDatasource 
+        add index FK6085542387E4472B (id), 
+        add constraint FK6085542387E4472B 
+        foreign key (id) 
+        references JIJdbcDatasource (id);
 
     alter table JIBeanDatasource 
         add index FK674BF34A8BF376D (id), 
@@ -586,12 +601,6 @@
         add constraint FKC8BDFCBFA8BF376D 
         foreign key (id) 
         references JIResource (id);
-
-    alter table JIAwsDatasource
-        add index FK6085542387E4472B (id),
-        add constraint FK6085542387E4472B
-        foreign key (id)
-        references JIJdbcDatasource (id);
 
     alter table JIListOfValues 
         add index FK4E86A776A8BF376D (id), 
@@ -738,6 +747,20 @@
         add constraint FKB9337C5CD2B2EB53 
         foreign key (id) 
         references JIReportJobTrigger (id);
+
+    alter table JIReportThumbnail 
+        add index FKFDB3DED932282198 (user_id), 
+        add constraint FKFDB3DED932282198 
+        foreign key (user_id) 
+        references JIUser (id) 
+        on delete cascade;
+
+    alter table JIReportThumbnail 
+        add index FKFDB3DED9F254B53E (resource_id), 
+        add constraint FKFDB3DED9F254B53E 
+        foreign key (resource_id) 
+        references JIResource (id) 
+        on delete cascade;
 
     alter table JIReportUnit 
         add index FK98818B77A8BF376D (id), 

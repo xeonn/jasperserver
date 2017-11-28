@@ -42,4 +42,13 @@
 
         </cache>
 
+    <cache name="olapFilters"
+           maxElementsInMemory="10000"
+           eternal="false"
+           overflowToDisk="false"
+           timeToIdleSeconds="1800"
+           timeToLiveSeconds="5400"
+           diskPersistent="false">
+    </cache>
+
 </ehcache>

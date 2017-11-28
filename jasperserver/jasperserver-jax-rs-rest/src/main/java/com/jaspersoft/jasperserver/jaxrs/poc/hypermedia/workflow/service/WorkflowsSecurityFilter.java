@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005 - 2013 Jaspersoft Corporation. All rights  reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
 * http://www.jaspersoft.com.
 *
 * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -16,19 +16,19 @@
 * GNU Affero  General Public License for more details.
 *
 * You should have received a copy of the GNU Affero General Public  License
-* along with this program.&nbsp; If not, see <http://www.gnu.org/licenses/>.
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 package com.jaspersoft.jasperserver.jaxrs.poc.hypermedia.workflow.service;
 
 import com.jaspersoft.jasperserver.jaxrs.poc.hypermedia.workflow.dto.UserWorkflow;
 import org.aopalliance.intercept.MethodInvocation;
-import org.springframework.security.AccessDeniedException;
-import org.springframework.security.Authentication;
-import org.springframework.security.ConfigAttribute;
-import org.springframework.security.ConfigAttributeDefinition;
-import org.springframework.security.GrantedAuthority;
-import org.springframework.security.afterinvocation.AfterInvocationProvider;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.AfterInvocationProvider;
+import org.springframework.security.access.ConfigAttribute;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -36,7 +36,7 @@ import java.util.List;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: WorkflowsSecurityFilter.java 37751 2013-09-19 15:02:56Z ykovalchyk $
+ * @version $Id: WorkflowsSecurityFilter.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
 public class WorkflowsSecurityFilter implements AfterInvocationProvider {
     private String supportedAttribute;
@@ -68,11 +68,11 @@ public class WorkflowsSecurityFilter implements AfterInvocationProvider {
     }
 
     @Override
-    public Object decide(Authentication authentication, Object object, ConfigAttributeDefinition config, Object returnedObject) throws AccessDeniedException {
+    public Object decide(Authentication authentication, Object object, Collection<ConfigAttribute> attributes, Object returnedObject) throws AccessDeniedException {
         // method supports(Class clazz) assures cast safety
         @SuppressWarnings("unchecked")
         List<UserWorkflow> workflows = (List<UserWorkflow>) returnedObject;
-        final GrantedAuthority[] authorities = authentication.getAuthorities();
+        final Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         boolean hasAuthority = false;
         for(GrantedAuthority authority : authorities){
             if(allowedRoles.contains(authority.getAuthority())){

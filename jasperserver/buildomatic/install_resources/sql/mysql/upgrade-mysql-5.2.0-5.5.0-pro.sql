@@ -14,3 +14,7 @@
         foreign key (resource_id)
         references JIResource (id)
         on delete cascade;
+-- Fix for the bug 32398 - REST: (Mysql, SqlServer, Oracle): can't create resource with PUT request
+    alter table JIDataType
+        modify column minValue blob,
+        modify column max_value blob;

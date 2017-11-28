@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -27,7 +27,7 @@ import java.util.Map;
 /**
  * SessionCacheImpl
  * @author jwhang
- * @version $Id: SessionCacheImpl.java 23731 2012-05-14 10:45:54Z afomin $
+ * @version $Id: SessionCacheImpl.java 47331 2014-07-18 09:13:06Z kklein $
  */
 public class SessionCacheImpl implements SessionCache {
 

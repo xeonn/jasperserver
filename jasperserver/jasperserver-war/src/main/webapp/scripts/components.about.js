@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2014 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -22,7 +22,7 @@
 
 /**
  * @author: Yuriy Plakosh
- * @version: $Id: components.about.js 43122 2014-03-18 12:44:22Z psavushchik $
+ * @version: $Id: components.about.js 7808 2014-09-19 13:18:27Z sergey.prilukin $
  */
 
 var about = {
@@ -58,7 +58,8 @@ about.aboutBox = {
     },
 
     registerListeners : function() {
-        jQuery(document).delegate('#about', 'click', function() {
+        jQuery(document).delegate('#about', 'click', function(e) {
+            e.preventDefault();
             about.aboutBox.show();
         });
 

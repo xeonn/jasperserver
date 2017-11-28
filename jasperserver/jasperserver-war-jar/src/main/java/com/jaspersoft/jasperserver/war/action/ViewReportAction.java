@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -21,26 +21,16 @@
 package com.jaspersoft.jasperserver.war.action;
 
 
-import com.jaspersoft.jasperserver.api.JSShowOnlyErrorMessage;
-import com.jaspersoft.jasperserver.api.JSValidationException;
-import com.jaspersoft.jasperserver.api.common.domain.ValidationErrors;
-import com.jaspersoft.jasperserver.api.common.domain.impl.ExecutionContextImpl;
-import com.jaspersoft.jasperserver.api.common.util.LocaleHelper;
-import com.jaspersoft.jasperserver.api.engine.common.domain.Request;
-import com.jaspersoft.jasperserver.api.engine.common.service.SecurityContextProvider;
-import com.jaspersoft.jasperserver.api.engine.common.service.VirtualizerFactory;
-import com.jaspersoft.jasperserver.api.engine.jasperreports.domain.impl.ReportUnitRequest;
-import com.jaspersoft.jasperserver.api.engine.jasperreports.domain.impl.ReportUnitResult;
-import com.jaspersoft.jasperserver.api.logging.audit.context.AuditContext;
-import com.jaspersoft.jasperserver.api.logging.audit.domain.AuditEvent;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.InputControl;
-import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.util.RepositoryUtils;
-import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportUnit;
-import com.jaspersoft.jasperserver.api.security.IPadSupportFilter;
-import com.jaspersoft.jasperserver.war.action.hyperlinks.HyperlinkProducerFactoryFlowFactory;
-import com.jaspersoft.jasperserver.war.cascade.InputControlValidationError;
-import com.jaspersoft.jasperserver.war.common.ConfigurationBean;
-import com.jaspersoft.jasperserver.war.util.SessionObjectSerieAccessor;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 
 import net.sf.jasperreports.engine.JRParameter;
 import net.sf.jasperreports.engine.JRPrintAnchorIndex;
@@ -77,21 +67,31 @@ import org.springframework.webflow.execution.Event;
 import org.springframework.webflow.execution.FlowExecutionKey;
 import org.springframework.webflow.execution.RequestContext;
 
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
-
-import java.io.IOException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
+import com.jaspersoft.jasperserver.api.JSShowOnlyErrorMessage;
+import com.jaspersoft.jasperserver.api.JSValidationException;
+import com.jaspersoft.jasperserver.api.common.domain.ValidationErrors;
+import com.jaspersoft.jasperserver.api.common.domain.impl.ExecutionContextImpl;
+import com.jaspersoft.jasperserver.api.common.util.LocaleHelper;
+import com.jaspersoft.jasperserver.api.engine.common.domain.Request;
+import com.jaspersoft.jasperserver.api.engine.common.service.SecurityContextProvider;
+import com.jaspersoft.jasperserver.api.engine.common.service.VirtualizerFactory;
+import com.jaspersoft.jasperserver.api.engine.jasperreports.domain.impl.ReportUnitRequest;
+import com.jaspersoft.jasperserver.api.engine.jasperreports.domain.impl.ReportUnitResult;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl.EhcacheEngineService;
+import com.jaspersoft.jasperserver.api.logging.audit.context.AuditContext;
+import com.jaspersoft.jasperserver.api.logging.audit.domain.AuditEvent;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.InputControl;
+import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.util.RepositoryUtils;
+import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportUnit;
+import com.jaspersoft.jasperserver.api.security.IPadSupportFilter;
+import com.jaspersoft.jasperserver.war.action.hyperlinks.HyperlinkProducerFactoryFlowFactory;
+import com.jaspersoft.jasperserver.war.cascade.InputControlValidationError;
+import com.jaspersoft.jasperserver.war.common.ConfigurationBean;
+import com.jaspersoft.jasperserver.war.util.SessionObjectSerieAccessor;
 
 /**
  * @author Ionut Nedelcu (ionutned@users.sourceforge.net)
- * @version $Id: ViewReportAction.java 44473 2014-04-14 12:16:30Z tdanciu $
+ * @version $Id: ViewReportAction.java 51559 2014-11-20 06:43:37Z nmarcu $
  */
 public class ViewReportAction extends ReportParametersAction
 {
@@ -324,7 +324,9 @@ public class ViewReportAction extends ReportParametersAction
 		
 		MutableAttributeMap flowScope = context.getFlowScope();
 		flowScope.put(getAttributeReportControlsLayout(), new Byte(reportUnit.getControlsLayout()));
-		flowScope.put(getAttributeReportForceControls(), Boolean.valueOf(reportUnit.isAlwaysPromptControls()));
+		flowScope.put(getAttributeReportForceControls(),
+                context != null && context.getCurrentEvent() != null && "drillReport".equals(
+                        context.getCurrentEvent().getId()) ? false : Boolean.valueOf(reportUnit.isAlwaysPromptControls()));
 	}
 
 	protected boolean toParseRequest(RequestContext context) {
@@ -763,6 +765,12 @@ public class ViewReportAction extends ReportParametersAction
         ReportContext reportContext = getReportContext(context);
 		reportContext.setParameterValue(WebUtil.REQUEST_PARAMETER_REPORT_URI, getReportURI(context));
         reportContext.setParameterValue("net.sf.jasperreports.engine.export.clear.json.cache", Boolean.TRUE);
+		return success();
+	}
+
+	public Event resetSearchCache(RequestContext context) {
+		ReportContext reportContext = getReportContext(context);
+		reportContext.setParameterValue("net.sf.jasperreports.search.term.highlighter", null);
 		return success();
 	}
 

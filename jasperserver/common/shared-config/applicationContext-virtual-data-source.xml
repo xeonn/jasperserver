@@ -8,6 +8,7 @@
              <ref bean="${bean.repositoryService}"/>
         </property>
         <property name="virtualDataSourceQueryService" ref="teiidVirtualQueryService"/>
+        <property name="profileAttributesResolver" ref="profileAttributesResolver"/>
     </bean>
 
     <bean id="teiidVirtualQueryService" class="com.jaspersoft.jasperserver.api.engine.common.virtualdatasourcequery.impl.TeiidVirtualDataSourceQueryServiceImpl">
@@ -21,26 +22,19 @@
         <property name="useSubDSTableList" value="true"/>
         <property name="virtualDataSourceConfigList">
             <list>
-                <bean class="com.jaspersoft.jasperserver.api.engine.common.virtualdatasourcequery.VirtualDataSourceConfig">
+                <!-- bean class="com.jaspersoft.jasperserver.api.engine.common.virtualdatasourcequery.VirtualDataSourceConfig">
                     <property name="dataSourceURI" value="/organizations/organization_1/datasources/BigDataConnectors"/>
                     <property name="additionalDataSourceList">
                         <list>
-                            <!--MONGODB CONNECTOR SAMPLE
-                                EXAMPLE OF MAPPING MONGODB DOCUMENT TO RELATIONAL SCHEMA:
-                                   DOCUMENT:  { h"_id": 1, "student_id": 0, "state": "OR", "score": 55.59}
-                                   SCHEMA:  CREATE FOREIGN TABLE student_scores(id varchar(25), student_id integer, state varchar(25), score integer) OPTIONS(UPDATABLE 'TRUE');
-                                Here is the reference link for defining relational schema for MongoDB:
-                                https://docs.jboss.org/author/display/TEIID/MongoDB+Translator
-                            -->
-                            <!-- bean class="com.jaspersoft.jasperserver.api.engine.common.virtualdatasourcequery.teiid.impl.MongoDBTeiidConnectorImpl">
+                            <bean class="com.jaspersoft.jasperserver.api.engine.common.virtualdatasourcequery.teiid.impl.MongoDBTeiidConnectorImpl">
                                 <property name="dataSourceName" value="MongoDB" />
                                 <property name="remoteServerList" value="127.0.0.1:27017" />
                                 <property name="schemaText" value="CREATE FOREIGN TABLE student_scores(id varchar(25), student_id integer, state varchar(25), score integer) OPTIONS(UPDATABLE 'TRUE');" />
                                 <property name="database" value="test" />
-                            </bean  -->
+                            </bean>
                         </list>
                     </property>
-                </bean>
+                </bean -->
             </list>
         </property>
 
@@ -92,6 +86,11 @@
                     <property name="translatorName" value="hive"/>
                     <property name="translatorFactoryClass" value="org.teiid.translator.hive.HiveExecutionFactory"/>
                 </bean>
+                <bean class="com.jaspersoft.jasperserver.api.engine.common.virtualdatasourcequery.teiid.TranslatorConfig">
+                    <property name="productName" value="Impala"/>
+                    <property name="translatorName" value="impala"/>
+                    <property name="translatorFactoryClass" value="org.teiid.translator.hive.ImpalaExecutionFactory"/>
+                </bean>
             </list>
         </property>
 
@@ -115,12 +114,6 @@
                 </entry>
                 <entry key="com.jaspersoft.hadoop.hive.jasperserver.HiveDataSourceService">
                     <bean class="com.jaspersoft.jasperserver.api.engine.common.virtualdatasourcequery.teiid.impl.HiveTeiidConnectorImpl">
-                        <!-- workaround for HIVE 0.11 driver
-                            it ignore the database name in the URL, and it is fixed in HIVE 0.13 driver
-                            we should turn off/ remove this workaround when we upgrade to HIVE 0.13 driver
-                            https://issues.apache.org/jira/browse/HIVE-4256
-                        -->
-                        <property name="useDatabaseExplicitly" value="true"/>
                     </bean>
                 </entry>
                 <entry key="com.jaspersoft.mongodb.jasperserver.MongoDbDataSourceService">

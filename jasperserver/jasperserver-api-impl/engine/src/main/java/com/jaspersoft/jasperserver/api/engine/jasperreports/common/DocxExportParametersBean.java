@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -24,7 +24,7 @@ package com.jaspersoft.jasperserver.api.engine.jasperreports.common;
 
 /**
  * @author sanda zaharia (shertage@users.sourceforge.net)
- * @version $Id: DocxExportParametersBean.java 44777 2014-04-18 15:39:15Z tdanciu $
+ * @version $Id: DocxExportParametersBean.java 47331 2014-07-18 09:13:06Z kklein $
  */
 public class DocxExportParametersBean extends AbstractExportParameters {
 

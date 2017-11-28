@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -50,7 +50,7 @@ import static org.mockito.Mockito.*;
 
 /**
  * @author vsabadosh
- * @version $Id: XmlaContentFinderImplTest.java 41794 2014-02-12 18:24:30Z vsabadosh $
+ * @version $Id: XmlaContentFinderImplTest.java 47331 2014-07-18 09:13:06Z kklein $
  */
 @RunWith(MockitoJUnitRunner.class)
 public class XmlaContentFinderImplTest {

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -26,7 +26,7 @@ import com.jaspersoft.jasperserver.api.engine.scheduling.domain.ReportJobReposit
 
 /**
  * @author tkavanagh
- * @version $Id: ReportJobRepositoryDestinationBean.java 22677 2012-03-20 23:33:43Z ichan $
+ * @version $Id: ReportJobRepositoryDestinationBean.java 47331 2014-07-18 09:13:06Z kklein $
  */
 public class ReportJobRepositoryDestinationBean {
 

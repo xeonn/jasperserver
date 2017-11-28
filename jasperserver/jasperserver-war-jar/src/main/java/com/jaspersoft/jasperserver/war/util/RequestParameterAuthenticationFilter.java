@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -24,13 +24,15 @@ package com.jaspersoft.jasperserver.war.util;
 import com.jaspersoft.jasperserver.api.security.encryption.EncryptionRequestUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.security.Authentication;
-import org.springframework.security.AuthenticationException;
-import org.springframework.security.AuthenticationManager;
-import org.springframework.security.context.SecurityContextHolder;
-import org.springframework.security.providers.UsernamePasswordAuthenticationToken;
-import org.springframework.security.ui.WebAuthenticationDetails;
-import org.springframework.security.ui.webapp.AuthenticationProcessingFilter;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.WebAuthenticationDetails;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -65,12 +67,13 @@ public class RequestParameterAuthenticationFilter implements Filter {
 		HttpServletResponse httpResponse = (HttpServletResponse) response;
 
 		if (requiresAuthentication(httpRequest)) {
-			String username = EncryptionRequestUtils.getValue(httpRequest, AuthenticationProcessingFilter.SPRING_SECURITY_FORM_USERNAME_KEY);
-			String password = EncryptionRequestUtils.getValue(httpRequest, AuthenticationProcessingFilter.SPRING_SECURITY_FORM_PASSWORD_KEY);
+			String username = EncryptionRequestUtils.getValue(httpRequest, UsernamePasswordAuthenticationFilter.SPRING_SECURITY_FORM_USERNAME_KEY);
+			String password = EncryptionRequestUtils.getValue(httpRequest, UsernamePasswordAuthenticationFilter.SPRING_SECURITY_FORM_PASSWORD_KEY);
 			UsernamePasswordAuthenticationToken authRequest = new UsernamePasswordAuthenticationToken(username, password);
 			authRequest.setDetails(new WebAuthenticationDetails(httpRequest));
 
 			Authentication authResult;
+			final SecurityContext securityContext = SecurityContextHolder.getContext();
 			try {
 				authResult = authenticationManager.authenticate(authRequest);
 			} catch (AuthenticationException e) {
@@ -78,7 +81,7 @@ public class RequestParameterAuthenticationFilter implements Filter {
 					log.debug("User " + username + " failed to authenticate: " + e.toString());
 				}
 
-				SecurityContextHolder.getContext().setAuthentication(null);
+				securityContext.setAuthentication(null);
 				httpResponse.sendRedirect(httpResponse.encodeRedirectURL(getFullFailureUrl(httpRequest)));
 				return;
 			}
@@ -87,7 +90,9 @@ public class RequestParameterAuthenticationFilter implements Filter {
 				log.debug("User " + username + " authenticated: " + authResult);
 			}
 
-			SecurityContextHolder.getContext().setAuthentication(authResult);
+			securityContext.setAuthentication(authResult);
+            //[bug 40360] - Fix Spring Security multi-threading bug.
+            new HttpSessionSecurityContextRepository().saveContext(securityContext, (HttpServletRequest)request, (HttpServletResponse)response);
 			onSuccessfulAuthentication(httpRequest, httpResponse, authResult);
 		}
 
@@ -95,12 +100,13 @@ public class RequestParameterAuthenticationFilter implements Filter {
 	}
 
 	protected void onSuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
-											  Authentication authResult) throws IOException {
+											  Authentication authResult) throws IOException, ServletException {
+
 	}
 
 	protected boolean requiresAuthentication(HttpServletRequest request) {
 		boolean authenticate;
-		String username = EncryptionRequestUtils.getValue(request, AuthenticationProcessingFilter.SPRING_SECURITY_FORM_USERNAME_KEY);
+		String username = EncryptionRequestUtils.getValue(request, UsernamePasswordAuthenticationFilter.SPRING_SECURITY_FORM_USERNAME_KEY);
 		if (username == null) {
 			authenticate = false;
 		} else {
@@ -163,5 +169,4 @@ public class RequestParameterAuthenticationFilter implements Filter {
 	public void setExcludeUrls(String[] excludeUrls) {
 		this.excludeUrls = excludeUrls;
 	}
-
 }

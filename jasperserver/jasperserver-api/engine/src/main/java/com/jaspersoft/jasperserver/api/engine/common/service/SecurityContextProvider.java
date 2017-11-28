@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -29,7 +29,7 @@ import com.jaspersoft.jasperserver.api.metadata.user.service.UserAuthorityServic
  * in the current thread context.
  * 
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: SecurityContextProvider.java 22538 2012-03-14 19:14:36Z ichan $
+ * @version $Id: SecurityContextProvider.java 47331 2014-07-18 09:13:06Z kklein $
  */
 @JasperServerAPI
 public interface SecurityContextProvider {

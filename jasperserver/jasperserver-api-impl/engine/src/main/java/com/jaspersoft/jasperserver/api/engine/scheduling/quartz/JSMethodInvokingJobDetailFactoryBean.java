@@ -1,18 +1,5 @@
-package com.jaspersoft.jasperserver.api.engine.scheduling.quartz;
-
-import java.lang.reflect.InvocationTargetException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.quartz.*;
-import org.quartz.impl.JobDetailImpl;
-import org.quartz.impl.matchers.KeyMatcher;
-import org.springframework.beans.*;
-import org.springframework.beans.factory.*;
-import org.springframework.beans.support.ArgumentConvertingMethodInvoker;
-import org.springframework.util.*;
-
 /*
- * Copyright (C) 2005 - 2012 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -31,7 +18,18 @@ import org.springframework.util.*;
  * You should have received a copy of the GNU Affero General Public  License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+package com.jaspersoft.jasperserver.api.engine.scheduling.quartz;
 
+import java.lang.reflect.InvocationTargetException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.quartz.*;
+import org.quartz.impl.JobDetailImpl;
+import org.quartz.impl.matchers.KeyMatcher;
+import org.springframework.beans.*;
+import org.springframework.beans.factory.*;
+import org.springframework.beans.support.ArgumentConvertingMethodInvoker;
+import org.springframework.util.*;
 
 public class JSMethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethodInvoker
     implements FactoryBean, BeanNameAware, BeanClassLoaderAware, BeanFactoryAware, InitializingBean

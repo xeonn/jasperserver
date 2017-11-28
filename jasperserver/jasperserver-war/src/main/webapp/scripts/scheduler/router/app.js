@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2014 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: app.js 43122 2014-03-18 12:44:22Z psavushchik $
+ * @version: $Id: app.js 8025 2014-11-12 13:10:12Z ktsaregradskyi $
  */
 
 define('scheduler/router/app', ['backbone'], function(Backbone){
@@ -78,7 +78,12 @@ define('scheduler/router/app', ['backbone'], function(Backbone){
 
         // save url to localstorage
         save: function(url){
-            window.localStorage && localStorage.setItem('scheduler-last-url', url);
+            try {
+                window.localStorage && localStorage.setItem('scheduler-last-url', url);
+            } catch(e) {
+                // TODO: use our logger
+                window.console && console.log(e);
+            }
         },
 
         // default view

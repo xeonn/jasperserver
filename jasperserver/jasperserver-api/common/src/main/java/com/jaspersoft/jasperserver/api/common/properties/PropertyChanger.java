@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -19,6 +19,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 package com.jaspersoft.jasperserver.api.common.properties;
+
+import java.util.Map;
 
 /**
  * PropertyChanger
@@ -43,6 +45,12 @@ public interface PropertyChanger {
      * @return associated value or null
      */
     public String getProperty(String key);
+
+    /**
+     * Return map of configuration properties from target property changer.
+     * @return map of configuration properties for particular property changer.
+     */
+    public Map<String, String> getProperties();
 
     /**
      * Called when property was removed from prop file.

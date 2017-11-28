@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -35,7 +35,7 @@ import java.util.Map;
 
 /**
  * @author gtoffoli
- * @version $Id: ListOfValuesHandler.java 21826 2012-01-04 09:43:55Z ykovalchyk $
+ * @version $Id: ListOfValuesHandler.java 47331 2014-07-18 09:13:06Z kklein $
  */
 @Service
 public class ListOfValuesHandler extends RepositoryResourceHandler {

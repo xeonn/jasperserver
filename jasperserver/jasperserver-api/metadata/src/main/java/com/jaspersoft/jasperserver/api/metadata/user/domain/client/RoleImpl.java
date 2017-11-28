@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -121,6 +121,16 @@ public class RoleImpl implements Role, InternalURI, Serializable {
                 .append(this.getRoleName(), castOther.getRoleName())
                 .append(this.getTenantId(), castOther.getTenantId())
                 .isEquals();
+    }
+
+    @Override
+    public Serializable getIdentifier() {
+        return getURI();
+    }
+
+    @Override
+    public String getType() {
+        return Role.class.getName();
     }
 
     public int hashCode() {

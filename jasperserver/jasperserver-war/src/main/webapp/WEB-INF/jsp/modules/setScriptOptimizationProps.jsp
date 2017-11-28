@@ -1,5 +1,5 @@
 <%--
-  ~ Copyright (C) 2005 - 2014 Jaspersoft Corporation. All rights reserved.
+  ~ Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
   ~ http://www.jaspersoft.com.
   ~
   ~ Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -22,6 +22,9 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jstl/core_rt" %>
 
 <c:set var="optimizeJavascript" value="${jsOptimizationProperties.useOptimizedJavascript}" scope="session"/>
+<c:if test="${optimizeJavascript == null}">
+    <c:set var="optimizeJavascript" value="${false}" scope="session"/>
+</c:if>
 
 <%-- Process HTTP parameters: check for '_opt' parameter --%>
 <c:choose>

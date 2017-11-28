@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -20,30 +20,29 @@
  */
 package com.jaspersoft.jasperserver.api.engine.common.service.impl;
 
-import com.jaspersoft.jasperserver.api.metadata.user.domain.Role;
-import com.jaspersoft.jasperserver.api.metadata.user.domain.client.RoleImpl;
-import com.jaspersoft.jasperserver.api.metadata.user.domain.client.UserImpl;
-import org.springframework.security.Authentication;
-import org.springframework.security.GrantedAuthority;
-import org.springframework.security.context.SecurityContextHolder;
-import org.springframework.security.providers.UsernamePasswordAuthenticationToken;
-import org.springframework.security.userdetails.UserDetails;
-import org.springframework.security.userdetails.UserDetailsService;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.jaspersoft.jasperserver.api.JSException;
 import com.jaspersoft.jasperserver.api.engine.common.service.SecurityContextProvider;
+import com.jaspersoft.jasperserver.api.metadata.user.domain.Role;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
+import com.jaspersoft.jasperserver.api.metadata.user.domain.client.RoleImpl;
+import com.jaspersoft.jasperserver.api.metadata.user.domain.client.UserImpl;
 import com.jaspersoft.jasperserver.api.metadata.user.service.UserAuthorityService;
-import org.springframework.security.userdetails.memory.UserAttribute;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.memory.UserAttribute;
 
 import java.util.HashSet;
 import java.util.Set;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: AcegiSecurityContextProvider.java 41549 2014-02-06 22:17:13Z udavidovich $
+ * @version $Id: AcegiSecurityContextProvider.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
 public class AcegiSecurityContextProvider implements SecurityContextProvider {
 	

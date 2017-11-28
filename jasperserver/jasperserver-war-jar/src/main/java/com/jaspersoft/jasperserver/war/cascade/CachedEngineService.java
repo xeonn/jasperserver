@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005 - 2012 Jaspersoft Corporation. All rights  reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
 * http://www.jaspersoft.com.
 *
 * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -16,7 +16,7 @@
 * GNU Affero  General Public License for more details.
 *
 * You should have received a copy of the GNU Affero General Public  License
-* along with this program.&nbsp; If not, see <http://www.gnu.org/licenses/>.
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 package com.jaspersoft.jasperserver.war.cascade;
 
@@ -30,7 +30,9 @@ import com.jaspersoft.jasperserver.api.metadata.common.domain.InputControl;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.InputControlsContainer;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Query;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceReference;
+import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportDataSource;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportUnit;
+import com.jaspersoft.jasperserver.api.metadata.jasperreports.service.ReportDataSourceService;
 import com.jaspersoft.jasperserver.war.cascade.cache.ControlLogicCacheManager;
 import com.jaspersoft.jasperserver.war.cascade.cache.SessionCache;
 import com.jaspersoft.jasperserver.war.cascade.token.FilterResolver;
@@ -41,13 +43,14 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
  * Provides cached access to some methods of EngineService.
  * @author Anton Fomin
- * @version $Id: CachedEngineService.java 44312 2014-04-09 14:30:12Z vsabadosh $
+ * @version $Id: CachedEngineService.java 49286 2014-09-23 13:32:25Z ykovalchyk $
  */
 @Service
 public class CachedEngineService {
@@ -96,6 +99,22 @@ public class CachedEngineService {
         //make own copy of list for each thread
         List<InputControl> copy = new ArrayList<InputControl>(inputControls.size());
         copy.addAll(inputControls);
+        return copy;
+    }
+
+    public Map getSLParameters(ReportDataSource dataSource) {
+        final SessionCache sessionCache = controlLogicCacheManager.getSessionCache();
+        // Cache SL parameters as Map class
+        Map parameters = sessionCache.getCacheInfo(Map.class, dataSource.getURIString());
+        if (!doCache || parameters == null) {
+            parameters = new HashMap();
+            ReportDataSourceService dataSourceService = engineService.createDataSourceService(dataSource);
+            dataSourceService.setReportParameterValues(parameters);
+            sessionCache.setCacheInfo(Map.class, dataSource.getURIString(), parameters);
+        }
+        //make own copy of list for each thread
+        Map copy = new HashMap(parameters.size());
+        copy.putAll(parameters);
         return copy;
     }
 

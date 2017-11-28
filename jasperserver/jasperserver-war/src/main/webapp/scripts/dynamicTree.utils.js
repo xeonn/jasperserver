@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2014 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: dynamicTree.utils.js 43122 2014-03-18 12:44:22Z psavushchik $
+ * @version: $Id: dynamicTree.utils.js 7872 2014-10-04 09:08:52Z inesterenko $
  */
 
     // Creating RepositoryFolder class.
@@ -39,8 +39,9 @@ dynamicTree.RepositoryFolder = function(options) {
         this.param.cssClass = this.ACTIVE_THEME_CLASS;
     }
 };
-
-dynamicTree.RepositoryFolder.prototype = deepClone(dynamicTree.TreeNode.prototype);
+if(dynamicTree.TreeNode) {
+    dynamicTree.RepositoryFolder.prototype = deepClone(dynamicTree.TreeNode.prototype);
+}
 
 dynamicTree.RepositoryFolder.addVar('ACTIVE_THEME_CLASS', "activeTheme");
 

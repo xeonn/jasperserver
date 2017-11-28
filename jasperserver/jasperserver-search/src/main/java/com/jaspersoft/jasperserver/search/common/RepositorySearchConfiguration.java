@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -33,7 +33,7 @@ import java.util.Map;
  * Repository search configuration.
  *
  * @author Yuriy Plakosh
- * @version $Id: RepositorySearchConfiguration.java 45878 2014-05-21 00:15:48Z schubar $
+ * @version $Id: RepositorySearchConfiguration.java 47331 2014-07-18 09:13:06Z kklein $
  */
 public class RepositorySearchConfiguration implements Serializable{
     private List<CustomSorter> customSorters;

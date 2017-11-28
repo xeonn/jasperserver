@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -25,7 +25,7 @@ import javax.servlet.http.HttpServletRequest;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: HttpUtils.java 19932 2010-12-11 15:24:29Z tmatyashovsky $
+ * @version $Id: HttpUtils.java 47331 2014-07-18 09:13:06Z kklein $
  */
 public interface HttpUtils {
 

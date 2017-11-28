@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -20,21 +20,13 @@
  */
 package com.jaspersoft.jasperserver.api.common.properties;
 
-import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
-
-import mondrian.olap.MondrianProperties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-
-import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
-import com.jaspersoft.jasperserver.api.common.properties.PropertyChanger;
-import com.jaspersoft.jasperserver.api.logging.audit.context.AuditContext;
-import com.jaspersoft.jasperserver.api.logging.audit.domain.AuditEvent;
-
 
 /**
  * Log4j changer manages log4j configuration.
@@ -45,8 +37,13 @@ public class Log4jPropertyChanger extends PropertyChangerAdapter {
 	final public static String PROPERTY_PREFIX = "log4j.";
 
     private static final Log log = LogFactory.getLog(Log4jPropertyChanger.class);
+    private Log4jSettingsService log4jSettingsService;
 
-	@Override
+    public void setLog4jSettingsService(Log4jSettingsService log4jSettingsService) {
+        this.log4jSettingsService = log4jSettingsService;
+    }
+
+    @Override
 	public void setProperty(String key, String value) {
         log.debug("setting log4j property: " + key + " - " + value);
         key=parseKey(key);
@@ -54,15 +51,24 @@ public class Log4jPropertyChanger extends PropertyChangerAdapter {
         log.setLevel(Level.toLevel(value));
 	}
 
-	@Override
+    @Override
 	public String getProperty(String key) {
         key=parseKey(key);
         Logger log = Logger.getLogger(key);
         return log.getEffectiveLevel().toString(); 
         //effective level can be inherited from a parent
 	}
-	
-	static public String parseKey(String key) {
+
+    @Override
+    public Map<String, String> getProperties() {
+        Map<String, String> propertiesMap = new LinkedHashMap<String, String>();
+        for (String key : log4jSettingsService.getLoggers().keySet()) {
+            propertiesMap.put(PROPERTY_PREFIX+key, log4jSettingsService.getLoggers().get(key));
+        }
+        return propertiesMap;
+    }
+
+    static public String parseKey(String key) {
 		assert (key.startsWith(PROPERTY_PREFIX));
 		return key.substring(PROPERTY_PREFIX.length());
 	}

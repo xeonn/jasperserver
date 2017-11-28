@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2013 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
  * the following license terms  apply:
@@ -25,11 +25,10 @@ import com.jaspersoft.jasperserver.api.metadata.user.domain.ObjectPermission;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.client.ObjectPermissionImpl;
 import com.jaspersoft.jasperserver.api.metadata.user.service.ObjectPermissionService;
 import org.aopalliance.intercept.MethodInvocation;
-import org.springframework.security.Authentication;
-import org.springframework.security.ConfigAttribute;
-import org.springframework.security.ConfigAttributeDefinition;
+import org.springframework.security.access.AccessDecisionVoter;
+import org.springframework.security.access.ConfigAttribute;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.util.SimpleMethodInvocation;
-import org.springframework.security.vote.AccessDecisionVoter;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -38,14 +37,22 @@ import java.util.Collection;
 import java.util.List;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
-import static org.testng.Assert.*;
+import static org.mockito.Mockito.isNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertSame;
+import static org.testng.Assert.assertTrue;
 
 /**
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: BasicObjectPermissionArgumentVoterTest.java 31291 2013-04-24 13:24:17Z ztomchenco $
+ * @version $Id: BasicObjectPermissionArgumentVoterTest.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
 public class BasicObjectPermissionArgumentVoterTest {
     Object object;
@@ -70,28 +77,41 @@ public class BasicObjectPermissionArgumentVoterTest {
         when(voter.supports(String.class)).thenReturn(true);
         when(voter.supports(Integer.class)).thenReturn(false);
         when(voter.supports(any(ConfigAttribute.class))).thenReturn(true);
-        when(voter.supports(any(Class.class), any(ConfigAttributeDefinition.class))).thenCallRealMethod();
-        final ConfigAttributeDefinition configAttributeDefinition = new ConfigAttributeDefinition("test");
-        assertTrue(voter.supports("testString", configAttributeDefinition));
-        assertFalse(voter.supports(Integer.valueOf(1), configAttributeDefinition));
+        when(voter.supports(any(Class.class), any(Collection.class))).thenCallRealMethod();
+        List<ConfigAttribute> attributes = new ArrayList<ConfigAttribute>(1);
+        attributes.add(new ConfigAttributeMock("test"));
+        assertTrue(voter.supports("testString", attributes));
+        assertFalse(voter.supports(Integer.valueOf(1), attributes));
+    }
+
+    private static class ConfigAttributeMock implements ConfigAttribute{
+        private String attribute;
+        public ConfigAttributeMock(String attribute){
+            this.attribute = attribute;
+        }
+        @Override
+        public String getAttribute() {
+            return attribute;
+        }
     }
 
     @Test
     public void supports_class_config_attributesCheck(){
         when(voter.supports(any(Class.class))).thenReturn(true);
         when(voter.supports(any(ConfigAttribute.class))).thenReturn(true);
-        when(voter.supports(any(Class.class), any(ConfigAttributeDefinition.class))).thenCallRealMethod();
-        ConfigAttributeDefinition definition = new ConfigAttributeDefinition("testAttribute");
-        assertTrue(voter.supports("testString", definition));
+        when(voter.supports(any(Class.class), any(Collection.class))).thenCallRealMethod();
+        List<ConfigAttribute> attributes = new ArrayList<ConfigAttribute>(1);
+        attributes.add(new ConfigAttributeMock("testAttribute"));
+        assertTrue(voter.supports("testString", attributes));
         when(voter.supports(any(ConfigAttribute.class))).thenReturn(false);
-        assertFalse(voter.supports("testString", definition));
+        assertFalse(voter.supports("testString", attributes));
     }
 
     @Test
     public void vote_ACCESS_ABSTAIN_noPermissions(){
         when(voter.getObjectPermissions(any(Object.class))).thenReturn(new ArrayList<ObjectPermission>());
-        when(voter.supports(any(Object.class), isNull(ConfigAttributeDefinition.class))).thenReturn(true);
-        when(voter.vote(isNull(Authentication.class), any(Object.class), isNull(ConfigAttributeDefinition.class))).thenCallRealMethod();
+        when(voter.supports(any(Object.class), isNull(Collection.class))).thenReturn(true);
+        when(voter.vote(isNull(Authentication.class), any(Object.class), isNull(Collection.class))).thenCallRealMethod();
         assertEquals(voter.vote(null, new Object(), null), AccessDecisionVoter.ACCESS_ABSTAIN);
     }
 
@@ -100,8 +120,8 @@ public class BasicObjectPermissionArgumentVoterTest {
         final ArrayList<ObjectPermission> objectPermissions = new ArrayList<ObjectPermission>();
         objectPermissions.add(new ObjectPermissionImpl());
         when(voter.getObjectPermissions(any(Object.class))).thenReturn(objectPermissions);
-        when(voter.supports(any(Object.class), isNull(ConfigAttributeDefinition.class))).thenReturn(false);
-        when(voter.vote(isNull(Authentication.class), any(Object.class), isNull(ConfigAttributeDefinition.class))).thenCallRealMethod();
+        when(voter.supports(any(Object.class), isNull(Collection.class))).thenReturn(false);
+        when(voter.vote(isNull(Authentication.class), any(Object.class), isNull(Collection.class))).thenCallRealMethod();
         assertEquals(voter.vote(null, new Object(), null), AccessDecisionVoter.ACCESS_ABSTAIN);
     }
 
@@ -111,8 +131,8 @@ public class BasicObjectPermissionArgumentVoterTest {
         final ObjectPermissionImpl objectPermission = new ObjectPermissionImpl();
         permissions.add(objectPermission);
         when(voter.getObjectPermissions(any(Object.class))).thenReturn(permissions);
-        when(voter.supports(any(Object.class), isNull(ConfigAttributeDefinition.class))).thenReturn(true);
-        when(voter.vote(isNull(Authentication.class), any(Object.class), isNull(ConfigAttributeDefinition.class))).thenCallRealMethod();
+        when(voter.supports(any(Object.class), isNull(Collection.class))).thenReturn(true);
+        when(voter.vote(isNull(Authentication.class), any(Object.class), isNull(Collection.class))).thenCallRealMethod();
         assertEquals(voter.vote(null, object, null), AccessDecisionVoter.ACCESS_DENIED);
         verify(voter).isPermitted(null, objectPermission, object);
     }
@@ -125,8 +145,8 @@ public class BasicObjectPermissionArgumentVoterTest {
         permissions.add(objectPermission1);
         permissions.add(objectPermission2);
         when(voter.getObjectPermissions(any(Object.class))).thenReturn(permissions);
-        when(voter.supports(any(Object.class), isNull(ConfigAttributeDefinition.class))).thenReturn(true);
-        when(voter.vote(isNull(Authentication.class), any(Object.class), isNull(ConfigAttributeDefinition.class))).thenCallRealMethod();
+        when(voter.supports(any(Object.class), isNull(Collection.class))).thenReturn(true);
+        when(voter.vote(isNull(Authentication.class), any(Object.class), isNull(Collection.class))).thenCallRealMethod();
         when(voter.isPermitted(null, objectPermission1, object)).thenReturn(true);
         when(voter.isPermitted(null, objectPermission2, object)).thenReturn(false);
         assertEquals(voter.vote(null, new Object(), null), AccessDecisionVoter.ACCESS_DENIED);
@@ -138,8 +158,8 @@ public class BasicObjectPermissionArgumentVoterTest {
         final ObjectPermissionImpl objectPermission = new ObjectPermissionImpl();
         permissions.add(objectPermission);
         when(voter.getObjectPermissions(any(Object.class))).thenReturn(permissions);
-        when(voter.supports(any(Object.class), isNull(ConfigAttributeDefinition.class))).thenReturn(true);
-        when(voter.vote(isNull(Authentication.class), any(Object.class), isNull(ConfigAttributeDefinition.class))).thenCallRealMethod();
+        when(voter.supports(any(Object.class), isNull(Collection.class))).thenReturn(true);
+        when(voter.vote(isNull(Authentication.class), any(Object.class), isNull(Collection.class))).thenCallRealMethod();
         when(voter.isPermitted(null, objectPermission, object)).thenReturn(true);
         assertEquals(voter.vote(null, object, null), AccessDecisionVoter.ACCESS_GRANTED);
     }
@@ -153,8 +173,8 @@ public class BasicObjectPermissionArgumentVoterTest {
         permissions.add(objectPermission);
         context.getAttributes().add(ObjectPermissionService.PRIVILEGED_OPERATION);
         when(voter.getObjectPermissions(any(Object.class))).thenReturn(permissions);
-        when(voter.supports(any(Object.class), isNull(ConfigAttributeDefinition.class))).thenReturn(true);
-        when(voter.vote(isNull(Authentication.class), any(Object.class), isNull(ConfigAttributeDefinition.class))).thenCallRealMethod();
+        when(voter.supports(any(Object.class), isNull(Collection.class))).thenReturn(true);
+        when(voter.vote(isNull(Authentication.class), any(Object.class), isNull(Collection.class))).thenCallRealMethod();
         assertEquals(voter.vote(null, methodInvocation, null), AccessDecisionVoter.ACCESS_GRANTED);
     }
 

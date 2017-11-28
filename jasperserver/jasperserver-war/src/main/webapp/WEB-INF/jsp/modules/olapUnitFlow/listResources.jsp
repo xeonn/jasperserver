@@ -1,5 +1,5 @@
 <%--
-  ~ Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+  ~ Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
   ~ http://www.jaspersoft.com.
   ~
   ~ Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -160,7 +160,7 @@
 								<c:forEach items="${wrapper.suggestedControls}" var="contWrap">
                                		    <tr>
 	                                        <td><strong><a href="javascript:editControl('${contWrap.inputControl.name}')">${contWrap.inputControl.name}</a></strong></td>
-	                                        <td><strong>${contWrap.supportedControlTypes[contWrap.inputControl.type]} <spring:message code="jsp.inputControl"/></strong></td>
+	                                        <td><strong>${contWrap.supportedControlTypes[contWrap.inputControl.inputControlType]} <spring:message code="jsp.inputControl"/></strong></td>
 	                                        <td>
 	                                            <c:choose><c:when test="${contWrap.located}"><input type="image" name="_eventId_RemoveControl" title="<spring:message code="jsp.listResources.button.removeControl"/>" alt="<spring:message code="button.remove"/>"  src="images/delete1.gif" onclick="document.fmCRExtRsrCh.resourceName.value='${contWrap.inputControl.name}';"></c:when>
 	                                            <c:otherwise><spring:message code="jsp.listResources.notAdded"/></c:otherwise></c:choose>

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2012 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -15,18 +15,19 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Affero  General Public License for more details.
  *
- *  You should have received a copy of the GNU Affero General Public  License
- *  along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public  License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 package com.jaspersoft.jasperserver.api.security.externalAuth.cas;
 
-import com.jaspersoft.jasperserver.api.metadata.user.service.impl.UserDetailsServiceImpl;
 import com.jaspersoft.jasperserver.api.security.externalAuth.db.ExternalJDBCUserDetailsService;
 import org.springframework.dao.DataAccessException;
-import org.springframework.security.GrantedAuthority;
-import org.springframework.security.userdetails.User;
-import org.springframework.security.userdetails.UserDetails;
-import org.springframework.security.userdetails.UsernameNotFoundException;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+
+import java.util.ArrayList;
 
 /**
  * User: dlitvak
@@ -39,6 +40,6 @@ public class CasJDBCUserDetailsService extends ExternalJDBCUserDetailsService {
 		} catch (UsernameNotFoundException unfe) {
 			logger.warn("Could not find " + username + " in external DB.");  //To change body of catch statement use File | Settings | File Templates.
 		}
-		return createUserDetails(username, new User(username, "", true, new GrantedAuthority[0]), new GrantedAuthority[0]);
+		return createUserDetails(username, new User(username, "", true, true, true, true, new ArrayList<GrantedAuthority>()), new ArrayList<GrantedAuthority>());
 	}
 }

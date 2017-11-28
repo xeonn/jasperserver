@@ -1,6 +1,7 @@
 /*
- * Copyright (C) 2005 - 2013 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
+ *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
  * the following license terms  apply:
  *
@@ -20,41 +21,50 @@
 
 package com.jaspersoft.jasperserver.api.metadata.security;
 
-import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
+import com.jaspersoft.jasperserver.api.JSException;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.ObjectPermission;
-import com.jaspersoft.jasperserver.api.metadata.user.service.ObjectPermissionService;
-import org.aopalliance.intercept.MethodInvocation;
-import org.springframework.security.Authentication;
-import org.springframework.security.ConfigAttribute;
-import org.springframework.security.acl.AclProvider;
-import org.springframework.security.acl.basic.BasicAclEntry;
+import com.jaspersoft.jasperserver.api.metadata.user.service.impl.InternalURIDefinition;
+import com.jaspersoft.jasperserver.api.metadata.user.service.impl.JasperServerSidRetrievalStrategyImpl;
+import com.jaspersoft.jasperserver.api.metadata.user.service.impl.ObjectPermissionServiceImpl;
+import org.springframework.security.access.ConfigAttribute;
+import org.springframework.security.acls.domain.GrantedAuthoritySid;
+import org.springframework.security.acls.domain.SidRetrievalStrategyImpl;
+import org.springframework.security.acls.model.*;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <p></p>
  *
  * @author Zakhar.Tomchenco
- * @version $Id: IsAdministrableObjectPermissionArgumentVoter.java 32262 2013-05-31 16:05:18Z inesterenko $
+ * @version $Id: IsAdministrableObjectPermissionArgumentVoter.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
 @Component
 public class IsAdministrableObjectPermissionArgumentVoter extends BasicObjectPermissionArgumentVoter {
     private static final String ATTRIBUTE = "CAN_ADMINISTER";
     // spring initializes interceptors twice in case if proxied bean is injected to one of it's interceptors.
     // let's use unsecure object permission service
-    @Resource(name = "objectPermissionServiceUnsecure")
-    private AclProvider resourcesAclProvider;
+    @Resource(name = "internalAclService")
+    private AclService resourcesAclService;
 
     @Override
     protected boolean isPermitted(Authentication authentication, ObjectPermission objectPermission, Object object) {
-        BasicAclEntry[] entries = (BasicAclEntry[])resourcesAclProvider.getAcls(objectPermission.getURI(), authentication);
-        if (entries != null) {
-            for (BasicAclEntry entry : entries) {
-                if (entry.isPermitted(JasperServerAclEntry.ADMINISTRATION)) {
-                    return true;
-                }
-            }
+        SidRetrievalStrategy sidStrategy = new JasperServerSidRetrievalStrategyImpl();
+        Acl acl;
+        try {
+            acl = resourcesAclService.readAclById(new InternalURIDefinition(objectPermission.getURI()), sidStrategy.getSids(authentication));
+        } catch (JSException e) {
+            // in some cases we are trying to reach not reachable resource, this will throw error
+            acl=null;
+        }
+        List<Permission> requiredPermissionsList = new ArrayList<Permission>();
+        requiredPermissionsList.add(JasperServerPermission.ADMINISTRATION);
+        if (acl!=null && acl.isGranted(requiredPermissionsList,sidStrategy.getSids(authentication),false)) {
+            return true;
         }
 
         return false;

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2014 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -22,7 +22,7 @@
 
 /**
  *  @author: Angus Croll
- * @version: $Id: core.ajax.js 45722 2014-05-14 10:24:22Z sergey.prilukin $
+ * @version: $Id: core.ajax.js 7762 2014-09-19 10:16:02Z sergey.prilukin $
  */
 
 /**
@@ -725,12 +725,12 @@ var ERROR_POPUP_CLOSE_BUTTON = "errorPopupCloseButton";
 /**
  * @private
  */
-function showErrorPopup(errorMessage)
+function showErrorPopup(errorMessage, options)
 {
     if ((errorMessage && errorMessage.indexOf("sessionAttributeMissingException")) > -1) {
         dialogs.clusterErrorPopup.show(errorMessage);
     } else {
-        dialogs.errorPopup.show(errorMessage);
+        dialogs.errorPopup.show(errorMessage, false, options);
     }
 }
 

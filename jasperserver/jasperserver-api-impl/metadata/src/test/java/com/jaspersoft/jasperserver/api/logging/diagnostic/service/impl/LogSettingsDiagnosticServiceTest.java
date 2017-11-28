@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -21,6 +21,7 @@
 
 package com.jaspersoft.jasperserver.api.logging.diagnostic.service.impl;
 
+import com.jaspersoft.jasperserver.api.common.properties.Log4jSettingsService;
 import com.jaspersoft.jasperserver.api.common.properties.PropertiesManagementService;
 import com.jaspersoft.jasperserver.api.logging.diagnostic.domain.DiagnosticAttribute;
 import com.jaspersoft.jasperserver.api.logging.diagnostic.domain.DiagnosticAttributeImpl;
@@ -56,6 +57,10 @@ public class LogSettingsDiagnosticServiceTest extends UnitilsJUnit4 {
 
     @InjectInto(property = "messageSource")
     private Mock<MessageSource> messageSource;
+
+    @InjectInto(property = "log4jSettingsService")
+    private Mock<Log4jSettingsService> log4jSettingsService;
+
 
     private Map<String, String> loggers = new HashMap <String, String>();
 
@@ -114,11 +119,12 @@ public class LogSettingsDiagnosticServiceTest extends UnitilsJUnit4 {
             }
         });
         propertiesManagementService.returns(globalPropertiesList).entrySet();
+        log4jSettingsService.returns(loggers).getLoggers();
+
     }
 
     @Test
     public void testGetAllEventsNotModifiable() throws Exception {
-        logSettingsDiagnosticService.initLoggers(loggers);
         Map<DiagnosticAttribute, DiagnosticCallback> resultDiagnosticData = logSettingsDiagnosticService.getDiagnosticData();
         //Test total size of diagnostic attributes
         assertEquals(2, resultDiagnosticData.size());

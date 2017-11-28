@@ -132,10 +132,11 @@ else
   fi
 fi
 
+JS_ANT_OPTIONS="-Djava.net.preferIPv4Stack=true"
 if [ "$IMPORT_FILE" == "" ]; then
-  JS_ANT_OPTIONS="-Dstrategy=$JS_UPGRADE_STRATEGY"
+  JS_ANT_OPTIONS="$JS_ANT_OPTIONS -Dstrategy=$JS_UPGRADE_STRATEGY"
 else
-  JS_ANT_OPTIONS="-Dstrategy=$JS_UPGRADE_STRATEGY -DimportFile=$IMPORT_FILE"
+  JS_ANT_OPTIONS="$JS_ANT_OPTIONS -Dstrategy=$JS_UPGRADE_STRATEGY -DimportFile=$IMPORT_FILE"
 fi
 if [[ "$JS_UPGRADE_STRATEGY" == "standard" && "$IS_INCLUDE_ACCESS_EVENTS" == "true" ]]; then
   JS_ANT_OPTIONS="$JS_ANT_OPTIONS -DincludeAccessEvents=include-access-events"

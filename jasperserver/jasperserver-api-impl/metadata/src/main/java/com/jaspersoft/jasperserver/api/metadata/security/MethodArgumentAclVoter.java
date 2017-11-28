@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -21,9 +21,11 @@
 
 package com.jaspersoft.jasperserver.api.metadata.security;
 
-import org.springframework.security.Authentication;
-import org.springframework.security.acl.AclManager;
 import org.aopalliance.intercept.MethodInvocation;
+import org.springframework.security.acls.model.AclService;
+import org.springframework.security.acls.model.ObjectIdentityRetrievalStrategy;
+import org.springframework.security.acls.model.SidRetrievalStrategy;
+import org.springframework.security.core.Authentication;
 
 /**
  * @author Lucian Chirita
@@ -31,6 +33,12 @@ import org.aopalliance.intercept.MethodInvocation;
  */
 public interface MethodArgumentAclVoter {
 
-	boolean allow(MethodInvocation methodCall, Authentication authentication, AclManager aclManager);
-	
+	boolean allow(MethodInvocation methodCall, Authentication authentication);
+
+    public void setSidRetrievalStrategy(SidRetrievalStrategy sidRetrievalStrategy);
+
+    public void setAclService(AclService aclService);
+
+    public void setObjectIdentityRetrievalStrategy(ObjectIdentityRetrievalStrategy objectIdentityRetrievalStrategy);
+
 }

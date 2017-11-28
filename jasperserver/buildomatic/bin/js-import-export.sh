@@ -53,7 +53,7 @@ fi
 
 # Add the java memory options to JAVA_OPTS
 
-export JAVA_OPTS="$JAVA_OPTS -Xms128m -Xmx512m -XX:PermSize=32m"
+export JAVA_OPTS="$JAVA_OPTS -Xms128m -Xmx512m -XX:PermSize=32m -Djava.net.preferIPv4Stack=true"
 # export JAVA_OPTS="$JAVA_OPTS -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005"
 
 # Add the config folders to EXP_CLASSPATH

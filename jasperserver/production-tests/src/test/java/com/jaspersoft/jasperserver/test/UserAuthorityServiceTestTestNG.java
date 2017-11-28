@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -23,9 +23,9 @@ package com.jaspersoft.jasperserver.test;
 import java.util.Date;
 import java.util.List;
 
-import org.springframework.security.GrantedAuthority;
-import org.springframework.security.userdetails.UserDetails;
-import org.springframework.security.userdetails.UserDetailsService;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 
 import com.jaspersoft.jasperserver.api.metadata.user.domain.Role;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
@@ -41,7 +41,7 @@ import static org.testng.AssertJUnit.*;
 
 /**
  * @author swood
- * @version $Id: UserAuthorityServiceTestTestNG.java 21774 2011-12-19 23:43:45Z srosen $
+ * @version $Id: UserAuthorityServiceTestTestNG.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
 public class UserAuthorityServiceTestTestNG extends BaseServiceSetupTestNG {
 

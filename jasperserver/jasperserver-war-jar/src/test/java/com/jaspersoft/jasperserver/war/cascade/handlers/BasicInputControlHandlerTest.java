@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005 - 2009 Jaspersoft Corporation. All rights  reserved.
+* Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
 * http://www.jaspersoft.com.
 *
 * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -136,7 +136,7 @@ public class BasicInputControlHandlerTest  extends InputControlHandlerBaseTest {
         calendarFormatProviderMock.returns(expectedDateTimePattern).getDatetimePattern();
         calendarFormatProviderMock.returns(expectedTimePattern).getTimePattern();
         // case with type date
-        dataType.setType(DataType.TYPE_DATE);
+        dataType.setDataTypeType(DataType.TYPE_DATE);
         List<ValidationRule> validationRules = handler.getValidationRules(inputControl);
         List<DateTimeFormatValidationRule> rules = getValidationRules(validationRules, DateTimeFormatValidationRule.class);
         Assert.assertNotNull(rules);
@@ -146,7 +146,7 @@ public class BasicInputControlHandlerTest  extends InputControlHandlerBaseTest {
         Assert.assertEquals(DateTimeFormatValidationRule.INVALID_DATE, rule.getErrorMessage());
         Assert.assertEquals(expectedDatePattern, rule.getFormat());
         // case with type datetime
-        dataType.setType(DataType.TYPE_DATE_TIME);
+        dataType.setDataTypeType(DataType.TYPE_DATE_TIME);
         validationRules = handler.getValidationRules(inputControl);
         rules = getValidationRules(validationRules, DateTimeFormatValidationRule.class);
         Assert.assertNotNull(rules);
@@ -156,7 +156,7 @@ public class BasicInputControlHandlerTest  extends InputControlHandlerBaseTest {
         Assert.assertEquals(DateTimeFormatValidationRule.INVALID_DATE_TIME, rule.getErrorMessage());
         Assert.assertEquals(expectedDateTimePattern, rule.getFormat());
         // case with type time
-        dataType.setType(DataType.TYPE_TIME);
+        dataType.setDataTypeType(DataType.TYPE_TIME);
         validationRules = handler.getValidationRules(inputControl);
         rules = getValidationRules(validationRules, DateTimeFormatValidationRule.class);
         Assert.assertNotNull(rules);

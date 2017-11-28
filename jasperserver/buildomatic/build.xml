@@ -1,7 +1,7 @@
 <!-- =========================================================================== -->
 <!--- test commit to verify ci behavior (fourth commit) -->
 <!--                                                                             -->
-<!-- Copyright (C) 2005 - 2010 Jaspersoft Corporation. All rights reserved.      -->
+<!-- Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.      -->
 <!-- http://www.jaspersoft.com.                                                  -->
 <!--                                                                             -->
 <!-- Unless you have purchased a commercial license agreement from Jaspersoft,   -->
@@ -74,9 +74,6 @@
 
     <!-- load module manager, if available -->
     <import file="bin/module-manager.xml" optional="true"/>
-
-    <!-- load JavaScript testing tasks if available -->
-    <import file="bin/js-tests.xml" optional="true"/>
 
     <!-- load targets which build separate modules -->
     <import file="bin/restart-build.xml" optional="true"/>

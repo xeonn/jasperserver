@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -20,40 +20,40 @@
  */
 package com.jaspersoft.jasperserver.war.cascade;
 
+import com.jaspersoft.jasperserver.api.JSException;
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
 import com.jaspersoft.jasperserver.api.common.domain.ValidationErrors;
 import com.jaspersoft.jasperserver.api.common.domain.impl.ExecutionContextImpl;
 import com.jaspersoft.jasperserver.api.common.domain.impl.ValidationErrorsImpl;
+import com.jaspersoft.jasperserver.api.common.util.ImportRunMonitor;
 import com.jaspersoft.jasperserver.api.engine.common.service.ReportInputControlInformation;
 import com.jaspersoft.jasperserver.api.engine.common.service.ReportInputControlValueInformation;
 import com.jaspersoft.jasperserver.api.engine.common.service.ReportInputControlValuesInformation;
 import com.jaspersoft.jasperserver.api.engine.common.service.ReportInputControlsInformation;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl.EhcacheEngineService;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.DataType;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.InputControl;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.InputControlsContainer;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.ListOfValues;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.ListOfValuesItem;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceReference;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.*;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.client.InputControlImpl;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.client.ListOfValuesImpl;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.client.ListOfValuesItemImpl;
+import com.jaspersoft.jasperserver.api.metadata.user.domain.ObjectPermission;
+import com.jaspersoft.jasperserver.api.metadata.user.domain.client.ObjectPermissionImpl;
+import com.jaspersoft.jasperserver.api.metadata.user.service.ObjectPermissionService;
+import com.jaspersoft.jasperserver.api.security.internalAuth.InternalAuthenticationTokenImpl;
 import com.jaspersoft.jasperserver.war.cascade.cache.ControlLogicCacheManager;
 import com.jaspersoft.jasperserver.war.cascade.handlers.InputControlHandler;
 import com.jaspersoft.jasperserver.war.cascade.token.FilterResolver;
 import com.jaspersoft.jasperserver.war.common.JasperServerUtil;
 import com.jaspersoft.jasperserver.dto.reports.inputcontrols.InputControlState;
 import com.jaspersoft.jasperserver.dto.reports.inputcontrols.ReportInputControl;
+import net.sf.saxon.functions.*;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.GrantedAuthorityImpl;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.Collection;
 
 import static com.jaspersoft.jasperserver.war.cascade.handlers.converters.InputControlValueClassResolver.getValueClass;
 
@@ -138,7 +138,7 @@ public class GenericInputControlLogic<T extends InputControlsContainer> implemen
         for (InputControl inputControl : inputControls) {
             if (inputControlIds == null || inputControlIds.isEmpty() || inputControlIds.contains(inputControl.getName())) {
 
-                final Map<String, Object> typeConfiguration = inputControlTypeConfiguration.get(String.valueOf(inputControl.getType()));
+                final Map<String, Object> typeConfiguration = inputControlTypeConfiguration.get(String.valueOf(inputControl.getInputControlType()));
                 final InputControlHandler handler = getHandlerForInputControl(inputControl, typeConfiguration);
 
                 String uiType = (String) typeConfiguration.get(INPUT_CONTROL_CONFIGURATION_KEY_UI_TYPE);
@@ -246,6 +246,80 @@ public class GenericInputControlLogic<T extends InputControlsContainer> implemen
         addValidationErrorsToInputControlStates(states, validationErrors, allControls);
 
         return states;
+    }
+
+    private void ensureQueryParametersInfos(List<InputControl> allControls, ReportInputControlsInformation infos) throws CascadeResourceNotFoundException {
+        for (InputControl control : allControls) {
+            if (control.getQuery() != null) {
+                Query query = cachedRepositoryService.getResource(Query.class, control.getQuery());
+
+                if (query.getParameters() == null) {
+                    ReportInputControlInformation information = infos.getInputControlInformation(control.getName());
+                    Set<String> queryParams = getHandlerForQueryControl(information).getMasterDependencies(control, query.getDataSource());
+
+                    if (queryParams != null) {
+                        List<QueryParameterDescriptor> descriptors = new ArrayList<QueryParameterDescriptor>();
+                        for (String param : queryParams) {
+                            QueryParameterDescriptor descriptor = new QueryParameterDescriptor();
+                            ReportInputControlInformation paramInformation = infos.getInputControlInformation(param);
+
+                            if (paramInformation == null) {
+                                throw new JSException("Query parameters not initialized yet");
+                            }
+
+                            if (Collection.class.isAssignableFrom(paramInformation.getValueType())) {
+                                descriptor.setCollection(true);
+                                if (paramInformation.getNestedType() != null) {
+                                    descriptor.setParameterType(paramInformation.getNestedType().getName());
+                                }
+                            } else {
+                                descriptor.setParameterType(paramInformation.getValueType().getName());
+                            }
+                            descriptor.setParameterName(paramInformation.getParameterName());
+
+                            descriptors.add(descriptor);
+                        }
+
+                        query.setParameters(descriptors);
+                        updateQuery(query);
+                    }
+                }
+            }
+        }
+    }
+
+    private void updateQuery(Query query){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        try{
+            // Authentication override will be bound for current thread only, for others threads existing authorities will be used.
+            Collection<? extends GrantedAuthority> basicAuthority = authentication.getAuthorities();
+
+            List<GrantedAuthority> newAut = new ArrayList<GrantedAuthority>(basicAuthority);
+            newAut.add(new GrantedAuthorityImpl(ObjectPermissionService.PRIVILEGED_OPERATION));
+
+            Authentication newAuth = new InternalAuthenticationTokenImpl(authentication.getPrincipal(),
+                    authentication.getCredentials(), newAut);
+
+            SecurityContextHolder.getContext().setAuthentication(newAuth);
+
+            ImportRunMonitor.start();
+            cachedRepositoryService.updateResource(query);
+        } finally {
+            ImportRunMonitor.stop();
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+        }
+    }
+
+    protected InputControlHandler getHandlerForQueryControl(ReportInputControlInformation information) throws CascadeResourceNotFoundException {
+        InputControl dummyControl = new InputControlImpl();
+        if (information.getValueType() != null && Collection.class.isAssignableFrom(information.getValueType())) {
+            dummyControl.setInputControlType(InputControl.TYPE_MULTI_SELECT_QUERY);
+        } else {
+            dummyControl.setInputControlType(InputControl.TYPE_SINGLE_SELECT_QUERY);
+        }
+
+        return getHandlerForInputControl(dummyControl);
     }
 
     private void addValidationErrorsToInputControlStates(List<InputControlState> states, ValidationErrors validationErrors, List<InputControl> allControls) {
@@ -426,7 +500,7 @@ public class GenericInputControlLogic<T extends InputControlsContainer> implemen
     }
 
     protected InputControlHandler getHandlerForInputControl(InputControl inputControl) {
-        final Map<String, Object> typeConfiguration = inputControlTypeConfiguration.get(String.valueOf(inputControl.getType()));
+        final Map<String, Object> typeConfiguration = inputControlTypeConfiguration.get(String.valueOf(inputControl.getInputControlType()));
         return getHandlerForInputControl(inputControl, typeConfiguration);
     }
 
@@ -436,11 +510,11 @@ public class GenericInputControlLogic<T extends InputControlsContainer> implemen
         InputControlHandler result = null;
         if (inputControl != null) {
             if (typeConfiguration == null) {
-                throw new IllegalArgumentException("Input control type '" + inputControl.getType() + "' isn't configured");
+                throw new IllegalArgumentException("Input control type '" + inputControl.getInputControlType() + "' isn't configured");
             } else if (typeConfiguration.get(INPUT_CONTROL_CONFIGURATION_KEY_HANDLER) == null) {
-                throw new IllegalStateException("Handler for input control type '" + inputControl.getType() + "' isn't configured");
+                throw new IllegalStateException("Handler for input control type '" + inputControl.getInputControlType() + "' isn't configured");
             } else if (!(typeConfiguration.get(INPUT_CONTROL_CONFIGURATION_KEY_HANDLER) instanceof InputControlHandler)) {
-                throw new IllegalStateException("Handler for input control type '" + inputControl.getType() + "' must be of type " + InputControlHandler.class.getName());
+                throw new IllegalStateException("Handler for input control type '" + inputControl.getInputControlType() + "' must be of type " + InputControlHandler.class.getName());
             }
             result = (InputControlHandler) typeConfiguration.get(INPUT_CONTROL_CONFIGURATION_KEY_HANDLER);
         }

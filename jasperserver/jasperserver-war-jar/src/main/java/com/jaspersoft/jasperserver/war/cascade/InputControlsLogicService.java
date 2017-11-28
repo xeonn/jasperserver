@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2012 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -97,6 +97,7 @@ public interface InputControlsLogicService {
      * @param inputControlIds   Set of id of input controls, which structures should be returned.
      * @param parameters map with control values where key is control name
      *                   and value is serialized to array of strings control value
+     * @param freshData cache isn't used if freshData is true, otherwise cached data are used.
      * @return List<InputControlState> instance of {@link InputControlState} which represents state of input control
      *                                 with it's values, errors etc.
      * @throws CascadeResourceNotFoundException
@@ -105,7 +106,7 @@ public interface InputControlsLogicService {
      * @see {@link ControlLogic#getValuesForInputControlsFromRawData}
      */
     List<InputControlState> getValuesForInputControls(
-            String containerUri, Set<String> inputControlIds, Map<String, String[]> parameters)
+            String containerUri, Set<String> inputControlIds, Map<String, String[]> parameters, boolean freshData)
                 throws CascadeResourceNotFoundException;
 
     /**

@@ -1,9 +1,9 @@
 /*
- * Copyright (C) 2005 - 2012 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
- * Unless you have purchased a commercial license agreement from Jaspersoft,
- * the following license terms apply:
+ * Unless you have purchased  a commercial license agreement from Jaspersoft,
+ * the following license terms  apply:
  *
  * This program is free software: you can redistribute it and/or  modify
  * it under the terms of the GNU Affero General Public License  as

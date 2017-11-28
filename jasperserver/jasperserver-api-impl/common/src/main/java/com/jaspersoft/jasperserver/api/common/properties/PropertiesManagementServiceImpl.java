@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -20,10 +20,10 @@
  */
 package com.jaspersoft.jasperserver.api.common.properties;
 
-import java.lang.reflect.Array;
 import java.util.*;
 import java.util.Map.Entry;
 
+import com.jaspersoft.jasperserver.api.common.crypto.PasswordCipherer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -55,7 +55,7 @@ import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService
  * TODO: mulitple VMs concurrent updates
  * TODO: mulitple namespaces
  */
-public class PropertiesManagementServiceImpl 
+public class PropertiesManagementServiceImpl
 implements PropertiesManagementService, ApplicationContextAware, ApplicationListener<ContextRefreshedEvent> {
 
     protected static final Log log = LogFactory
@@ -81,7 +81,7 @@ implements PropertiesManagementService, ApplicationContextAware, ApplicationList
     protected Map<String,String> previousMov;
 
     protected RepositoryService mRepository;
-    
+
     /*
      * c'tor
      */
@@ -120,7 +120,7 @@ implements PropertiesManagementService, ApplicationContextAware, ApplicationList
         int changerKeyLength = Math.min(key.length(), Math.min(semicolonPos, pointPos));
 
     	String changerKey = key.substring(0, changerKeyLength);
-    	return changerObjects.get(changerKey);    	
+    	return changerObjects.get(changerKey);
     }
 
     protected void applyProperty(String key, String val) {
@@ -128,23 +128,37 @@ implements PropertiesManagementService, ApplicationContextAware, ApplicationList
       PropertyChanger changer = null;
     	try {
     		changer = getChanger(key);
-        if(changer == null) {
-            log.error("PropertyChanger not found for property "+key);
-        } else {
-            changer.setProperty(key, val);
-        }
+            if (changer == null) {
+                log.debug("PropertyChanger not found for property " + key);
+            } else {
+                if (PasswordCipherer.getInstance().isEncrypted(val)) {
+                    val = PasswordCipherer.getInstance().decryptSecureAttribute(val);
+                }
+
+                changer.setProperty(key, val);
+            }
     	} catch (Exception e) {
-        	log.error("PropertyChanger "+changer+" failed to apply configuration property "+key+" = "+val, e);
+        	log.error("PropertyChanger " + changer + " failed to apply configuration property " + key + " = " + val, e);
     	}
     }
 
     protected void removeProperty(String key, String val) {
-        if (log.isDebugEnabled()) { log.debug("Removing configuration property " + key + " = " + val); }
+        if (log.isDebugEnabled()) {
+            log.debug("Removing configuration property " + key + " = " + val);
+        }
+        PropertyChanger changer = null;
+
         try {
-            getChanger(key).removeProperty(key, val);
+            changer = getChanger(key);
+
+            if (changer != null) {
+                changer.removeProperty(key, val);
+            } else {
+                log.debug("PropertyChanger not found for property " + key);
+            }
         } catch (Exception e) {
-            log.error("PropertyChanger " + getChanger(key) + "failed to remove configuration property " +
-                    key + " = " + val, e);
+            log.debug("PropertyChanger " + changer + " failed to remove configuration property " +
+					key + " = " + val);
         }
     }
 
@@ -164,13 +178,24 @@ implements PropertiesManagementService, ApplicationContextAware, ApplicationList
         	return null;
     	}
     }
-    
+
+    public Map<String, String> getProperties() {
+        Map<String, String> map = new LinkedHashMap<String, String>();
+        for (PropertyChanger propertyChanger : changerObjects.values()) {
+            map.putAll(propertyChanger.getProperties());
+        }
+        map.putAll(mov);
+
+        return map;
+    }
+
+
     protected void loadProperties() {
     	log.info("Loading configuration properties from "+RESOURCE_FULL_NAME);
 		RepositoryService rep = getRepository();
 		ListOfValues lov =
 		    (ListOfValues)
-		    (rep).getResource( null, RESOURCE_FULL_NAME );
+		    (rep).getResource(null, RESOURCE_FULL_NAME);
 		if (lov == null) {
 	    	log.debug(RESOURCE_FULL_NAME+" not found, creating it");
 		    lov = (ListOfValues) rep.newResource( null, ListOfValues.class );
@@ -261,7 +286,12 @@ implements PropertiesManagementService, ApplicationContextAware, ApplicationList
     }
 
     public String remove(String key) {
-    	return mov.remove(key);
+        String removed = mov.remove(key);
+        if (removed != null) {
+            removeProperty(key, null);
+            saveProperties();
+        }
+        return removed;
     }
 
     public Map<String, String> removeByValue(String val) {
@@ -364,5 +394,4 @@ implements PropertiesManagementService, ApplicationContextAware, ApplicationList
 			}
 		}		
 	}
-
 }

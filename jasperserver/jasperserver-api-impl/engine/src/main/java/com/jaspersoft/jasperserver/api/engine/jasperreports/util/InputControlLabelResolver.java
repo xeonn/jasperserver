@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -34,7 +34,7 @@ import java.util.regex.Pattern;
  * in the following precedence: report-specific bundles, server-wide bundles.
  *
  * @author Yuriy Plakosh
- * @version $Id: InputControlLabelResolver.java 23790 2012-05-17 12:26:14Z sergey.prilukin $
+ * @version $Id: InputControlLabelResolver.java 47331 2014-07-18 09:13:06Z kklein $
  */
 public class InputControlLabelResolver {
     private static Pattern LABEL_KEY_PATTERN = Pattern.compile("^\\$R\\{(.+)\\}(.*)$");

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2013 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -24,6 +24,7 @@ package com.jaspersoft.jasperserver.remote.resources.validation;
 import com.jaspersoft.jasperserver.api.common.domain.ValidationErrors;
 import com.jaspersoft.jasperserver.api.common.service.JdbcDriverService;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.AwsReportDataSource;
+import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributesResolver;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -44,44 +45,53 @@ import static com.jaspersoft.jasperserver.remote.resources.validation.Validation
 public class AwsDataSourceResourceValidator extends GenericResourceValidator<AwsReportDataSource> {
     @Resource
     private JdbcDriverService jdbcDriverService;
-
+    @Resource
+    private ProfileAttributesResolver profileAttributesResolver;
     @Resource
     private List<String> awsRegions;
 
     @Override
     protected void internalValidate(AwsReportDataSource resource, ValidationErrors errors) {
-        if (empty(resource.getDbName())){
+        if (empty(resource.getAWSAccessKey()) && !empty(resource.getAWSSecretKey())){
+            addMandatoryParameterNotFoundError(errors, "AccessKey");
+        }
+        if (empty(resource.getAWSSecretKey()) && !empty(resource.getAWSAccessKey())) {
+            addMandatoryParameterNotFoundError(errors, "SecretKey");
+        }
+        if (empty(resource.getDbName())) {
             addMandatoryParameterNotFoundError(errors, "DBName");
         }
-        if (empty(resource.getConnectionUrl())){
+        if (empty(resource.getConnectionUrl())) {
             addMandatoryParameterNotFoundError(errors, "ConnectionUrl");
         } else {
-            if (!resource.getConnectionUrl().trim().startsWith("jdbc:")){
-                addIllegalParameterValueError(errors, "ConnectionUrl", resource.getConnectionUrl(), "The JDBC URI must start with 'jdbc:'");
+            String url = resource.getConnectionUrl();
+            if (!profileAttributesResolver.containsAttribute(url) && !url.trim().startsWith("jdbc:")) {
+                addIllegalParameterValueError(errors, "ConnectionUrl", url, "The JDBC URI must start with 'jdbc:'");
             }
         }
-        if (empty(resource.getDriverClass())){
+        String driverClass = resource.getDriverClass();
+        if (empty(driverClass)) {
             addMandatoryParameterNotFoundError(errors, "DriverClass");
-        }  if (!jdbcDriverService.isRegistered(resource.getDriverClass())){
-            addIllegalParameterValueError(errors, "DriverClass", resource.getDriverClass(), "Specified driver class is not registered");
+        } else if (!profileAttributesResolver.containsAttribute(driverClass) && !jdbcDriverService.isRegistered(driverClass)) {
+            addIllegalParameterValueError(errors, "DriverClass", driverClass, "Specified driver class is not registered");
         }
-        if (empty(resource.getUsername())){
+        if (empty(resource.getUsername())) {
             addMandatoryParameterNotFoundError(errors, "Username");
         }
-        if (empty(resource.getAWSRegion())){
+        if (empty(resource.getAWSRegion())) {
             addMandatoryParameterNotFoundError(errors, "Region");
-        }else {
-            if (!awsRegions.contains(resource.getAWSRegion())){
+        } else {
+            String awsRegion = resource.getAWSRegion();
+            if (!profileAttributesResolver.containsAttribute(awsRegion) && !awsRegions.contains(awsRegion)) {
                 StringBuilder message = new StringBuilder("Invalid value for the field Region. Valid values:");
-                for (String region: awsRegions){
+                for (String region : awsRegions) {
                     message.append("\n").append(region);
                 }
-                addIllegalParameterValueError(errors, "Region", resource.getAWSRegion(), message.toString());
+                addIllegalParameterValueError(errors, "Region", awsRegion, message.toString());
             }
         }
-        if (!empty(resource.getTimezone()) && !resource.getTimezone().matches("^[a-zA-Z/_]+$")){
+        if (!empty(resource.getTimezone()) && !resource.getTimezone().matches("^[a-zA-Z/_]+$")) {
             addIllegalParameterValueError(errors, "Timezone", resource.getTimezone(), "The timezone value contains not permitted characters");
         }
-
     }
 }

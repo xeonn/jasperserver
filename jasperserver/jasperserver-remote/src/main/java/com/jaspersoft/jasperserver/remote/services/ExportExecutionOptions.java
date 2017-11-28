@@ -1,23 +1,23 @@
 /*
-* Copyright (C) 2005 - 2009 Jaspersoft Corporation. All rights  reserved.
-* http://www.jaspersoft.com.
-*
-* Unless you have purchased  a commercial license agreement from Jaspersoft,
-* the following license terms  apply:
-*
-* This program is free software: you can redistribute it and/or  modify
-* it under the terms of the GNU Affero General Public License  as
-* published by the Free Software Foundation, either version 3 of  the
-* License, or (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-* GNU Affero  General Public License for more details.
-*
-* You should have received a copy of the GNU Affero General Public  License
-* along with this program.&nbsp; If not, see <http://www.gnu.org/licenses/>.
-*/
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
+ * http://www.jaspersoft.com.
+ *
+ * Unless you have purchased  a commercial license agreement from Jaspersoft,
+ * the following license terms  apply:
+ *
+ * This program is free software: you can redistribute it and/or  modify
+ * it under the terms of the GNU Affero General Public License  as
+ * published by the Free Software Foundation, either version 3 of  the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero  General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public  License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 package com.jaspersoft.jasperserver.remote.services;
 
 import javax.xml.bind.annotation.XmlRootElement;
@@ -32,14 +32,21 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 @XmlRootElement(name = "export")
 public class ExportExecutionOptions {
 
-    public static final String PARAM_NAME_PAGES = "pages";
-    public static final String PARAM_NAME_ATTACHMENTS_PREFIX = "attachmentsPrefix";
-
     private String outputFormat;
     private String attachmentsPrefix;
     private ReportOutputPages pages;
     private String baseUrl;
     private boolean allowInlineScripts = true;
+    private String markupType;
+
+    public String getMarkupType() {
+        return markupType;
+    }
+
+    public ExportExecutionOptions setMarkupType(String markupType) {
+        this.markupType = markupType;
+        return this;
+    }
 
     public boolean isAllowInlineScripts() {
         return allowInlineScripts;
@@ -98,6 +105,7 @@ public class ExportExecutionOptions {
         if (attachmentsPrefix != null ? !attachmentsPrefix.equals(that.attachmentsPrefix) : that.attachmentsPrefix != null)
             return false;
         if (baseUrl != null ? !baseUrl.equals(that.baseUrl) : that.baseUrl != null) return false;
+        if (markupType != null ? !markupType.equals(that.markupType) : that.markupType != null) return false;
         if (outputFormat != null ? !outputFormat.equals(that.outputFormat) : that.outputFormat != null) return false;
         if (pages != null ? !pages.equals(that.pages) : that.pages != null) return false;
 
@@ -111,6 +119,7 @@ public class ExportExecutionOptions {
         result = 31 * result + (pages != null ? pages.hashCode() : 0);
         result = 31 * result + (baseUrl != null ? baseUrl.hashCode() : 0);
         result = 31 * result + (allowInlineScripts ? 1 : 0);
+        result = 31 * result + (markupType != null ? markupType.hashCode() : 0);
         return result;
     }
 
@@ -122,6 +131,7 @@ public class ExportExecutionOptions {
                 ", pages=" + pages +
                 ", baseUrl='" + baseUrl + '\'' +
                 ", allowInlineScripts=" + allowInlineScripts +
+                ", markupType='" + markupType + '\'' +
                 '}';
     }
 }

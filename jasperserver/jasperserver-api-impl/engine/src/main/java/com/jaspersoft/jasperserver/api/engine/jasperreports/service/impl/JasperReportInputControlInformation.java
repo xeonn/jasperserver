@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -29,7 +29,7 @@ import java.io.Serializable;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: JasperReportInputControlInformation.java 23061 2012-04-09 10:59:05Z afomin $
+ * @version $Id: JasperReportInputControlInformation.java 47331 2014-07-18 09:13:06Z kklein $
  */
 public class JasperReportInputControlInformation implements
 		ReportInputControlInformation, Serializable {

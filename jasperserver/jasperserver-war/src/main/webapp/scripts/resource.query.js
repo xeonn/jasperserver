@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2014 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: resource.query.js 44312 2014-04-09 14:30:12Z vsabadosh $
+ * @version: $Id: resource.query.js 7872 2014-10-04 09:08:52Z inesterenko $
  */
 
 var resourceQuery = {
@@ -172,6 +172,8 @@ var resourceQuery = {
                         }
                         var dataSourceController = new DataSourceController(options);
                         jquery("#display").append(dataSourceController.$el);
+                        // remove conflicting dom elements
+                        jquery("#selectFromRepository").remove();
                         dataSourceController.render();
                     });
                 }

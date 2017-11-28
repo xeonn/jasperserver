@@ -1,6 +1,6 @@
 <!-- =========================================================================== -->
 <!--                                                                             -->
-<!-- Copyright (C) 2005 - 2010 Jaspersoft Corporation. All rights reserved.      -->
+<!-- Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.      -->
 <!-- http://www.jaspersoft.com.                                                  -->
 <!--                                                                             -->
 <!-- Unless you have purchased a commercial license agreement from Jaspersoft,   -->
@@ -159,7 +159,7 @@
                 <jvmarg value="-Xms128m"/>
                 <jvmarg value="-Xmx512m"/>
                 <jvmarg value="-XX:PermSize=32m"/>
-                <jvmarg value="-XX:MaxPermSize=200m"/>
+                <jvmarg value="-XX:MaxPermSize=256m"/>
                 <sysproperty key="classworlds.conf" value="${maven.home}/bin/m2.conf"/>
                 <sysproperty key="maven.home" value="${maven.home}"/>
                 <sysproperty key="maven.surefire.debug" value="${remoteDebugArg}"/>
@@ -190,60 +190,6 @@
             <exec executable="${svn}" dir="@{dir}" failonerror="true">
                 <args/>
             </exec>
-        </sequential>
-    </macrodef>
-
-    <macrodef name="runnode">
-        <attribute name="dir"/>
-        <element name="args" implicit="yes"/>
-        <sequential>
-            <exec executable="${nodejs.executable}" dir="@{dir}" failonerror="true">
-                <args/>
-            </exec>
-        </sequential>
-    </macrodef>
-
-    <macrodef name="runrjs">
-        <attribute name="dir"/>
-        <attribute name="tools" default="${js-path}/jasperserver-war/src/main/tools"/>
-        <element name="args" implicit="yes"/>
-        <sequential>
-        <if>
-            <isset property="nodejs.executable"/>
-            <then>
-                <echo message="Optimizing using Node.js"/>
-                <echo message="Path to Node.js executable: ${nodejs.executable}"/>
-
-                <runnode dir="@{dir}">
-                    <args/>
-                </runnode>
-            </then>
-            <else>
-                <if>
-                    <equals arg1="${optimize.javascript.with.rhino}" arg2="true"/>
-                    <then>
-                        <echo message="WARNING: Node.js executable was not set, using Rhino which could be much slower."/>
-                        <echo message="WARNING: add property nodejs.executable with path to Node.js in order to use it for js optimization"/>
-
-                        <java classname="org.mozilla.javascript.tools.shell.Main" maxmemory="512m" failonerror="true" fork="true" dir="@{dir}">
-                            <classpath>
-                                <pathelement path="@{tools}/js.jar"/>
-                                <pathelement path="@{tools}/compiler.jar"/>
-                            </classpath>
-                            <args/>
-                        </java>
-                    </then>
-                    <else>
-                        <echo message="WARNING: Javascript optimization was enabled"/>
-                        <echo message="WARNING: But path to nodejs executable was not found."/>
-                        <echo message="WARNING: Optimization using Rhino engine is disabled by default since it's very slow."/>
-                        <echo message="WARNING: Thus optimization is in fact skipped."/>
-                        <echo message="WARNING: Add property nodejs.executable with path to Node.js in order to use fastest way to optimize javascript."/>
-                        <echo message="WARNING: Or Add property optimize.javascript.with.rhino=true in order to fallback to Rhino engine for javascript optimization."/>
-                    </else>
-                </if>
-            </else>
-        </if>
         </sequential>
     </macrodef>
 
@@ -412,7 +358,7 @@
         <property name="THREAD_ARG" value="package"/>
 
         <!--Run headless javascript tests before maven execution-->
-        <runtarget target="run-javascript-tests-ce"/>
+        <!-- <runtarget target="run-javascript-tests-ce"/> -->
 
         <if>
             <isset property="js.enable.unit.tests"/>
@@ -437,12 +383,6 @@
                 </runmaven>
             </else>
         </if>
-
-        <!-- JavaScript build process -->
-        <runtarget target="build-jasperjs"/>
-        <runtarget target="optimize-javascript-ce"/>
-        <runtarget target="update-war-with-optimized-javascripts"/>
-        <!-- END of JavaScript build process -->
 
         <delete dir="${warSourceDir}"/>
         <copy toDir="${warSourceDir}">
@@ -476,9 +416,6 @@
             depends="init-source-paths, set-pro-webapp-name, install-jdbc-dep"
             description="Builds JasperServer Pro and copies WAR to install resources">
 
-        <!--Run headless javascript tests before maven execution-->
-        <runtarget target="run-javascript-tests-pro"/>
-
         <if>
             <isset property="js.enable.unit.tests"/>
             <then>
@@ -499,17 +436,11 @@
                     <arg value="${obfuscationArg}"/>
                     <!-- skip execution of integration-tests in production-tests folder -->
                     <arg value="-D${SKIP_TEST_ARG}"/>
-                    <!-- arg value="${OFFLINE_ARG}"/>
-                    <arg value="${THREAD_ARG}"/ -->
+                    <!--<arg value="${OFFLINE_ARG}"/>
+                    <arg value="${THREAD_ARG}"/>-->
                 </runmaven>
             </else>
         </if>
-
-        <!-- JavaScript build process -->
-        <runtarget target="build-jasperjs"/>
-        <runtarget target="optimize-javascript-pro"/>
-        <runtarget target="update-war-with-optimized-javascripts"/>
-        <!-- END of JavaScript build process -->
 
         <runtarget target="copy-pro-war"/>
 
@@ -556,201 +487,9 @@
         </copy>
     </target>
 
-    <target name="optimize-javascript"
-            description="Concatenate JavaScript and CSS">
-
-        <if>
-            <and>
-                <equals arg1="${optimize.javascript}" arg2="true"/>
-                <not>
-                    <isset property="javascript.optimization.done"/>
-                </not>
-            </and>
-            <then>
-                <echo>Start JavaScript Optimization</echo>
-
-                <property name="rjs.src" value="${js-path}/jasperserver-war/target/jasperserver"/>
-                <property name="rjs.tools" value="${js-path}/jasperserver-war/src/main/tools"/>
-                <property name="rjs.appDir" value="${rjs.src}/scripts"/>
-                <property name="rjs.buildFile" value="${rjs.appDir}/build.js"/>
-                <property name="rjs.baseUrl" value="."/>
-                <property name="rjs.optimize" value="uglify2"/>
-                <property name="rjs.outputDir" value="${rjs.src}/optimized-scripts"/>
-                <property name="rjs.dir" value="${rjs.appDir}"/>
-                <property name="rjs.module" value=""/>
-                <property name="rjs.war.src" value="${rjs.src}/../jasperserver.war"/>
-
-                <echo>===================</echo>
-                <echo>rjs.src (root folder, where script sources are placed): ${rjs.src}</echo>
-                <echo>rjs.dir (base folder where process will be started): ${rjs.dir}</echo>
-                <echo>rjs.tools (folder where r.js and compiler.jar are placed): ${rjs.tools}</echo>
-                <echo>rjs.appDir (base folder wor whole application which will be optimized): ${rjs.appDir}</echo>
-                <echo>rjs.buildFile (path to build file for optimizer): ${rjs.buildFile}</echo>
-                <echo>rjs.baseUrl (path for all js files relative to rjs.appDir): ${rjs.baseUrl}</echo>
-                <echo>rjs.optimize (how js files will be optimized): ${rjs.optimize}</echo>
-                <echo>rjs.outputDir (where optimized application will be placed): ${rjs.outputDir}</echo>
-                <echo>rjs.module (module to optimize. All modules if empty): ${rjs.module}</echo>
-                <echo>====================</echo>
-
-
-                <if>
-                    <equals arg1="${rjs.module}" arg2=""/>
-                    <then>
-                        <echo>Optimize all modules. </echo>
-
-                        <runrjs dir="${rjs.dir}" tools="${rjs.tools}">
-                            <arg value="${rjs.tools}/r.js"/>
-                            <arg value="-o"/>
-                            <arg value="${rjs.buildFile}"/>
-                            <arg value="appDir=${rjs.appDir}"/>
-                            <arg value="baseUrl=${rjs.baseUrl}"/>
-                            <arg value="optimize=${rjs.optimize}"/>
-                            <arg value="dir=${rjs.outputDir}"/>
-                        </runrjs>
-                    </then>
-                    <else>
-                        <echo>Optimize module: ${rjs.module}</echo>
-
-                        <runrjs dir="${rjs.dir}" tools="${rjs.tools}">
-                            <arg value="${rjs.tools}/r.js"/>
-                            <arg value="-o"/>
-                            <arg value="${rjs.buildFile}"/>
-                            <arg value="baseUrl=${rjs.baseUrl}"/>
-                            <arg value="optimize=${rjs.optimize}"/>
-                            <arg value="name=${rjs.module}"/>
-                            <arg value="out=${rjs.outputDir}/${rjs.module}.js"/>
-                            <!-- stub modules property since it's incompatible with single module mode -->
-                            <arg value="modules="/>
-                        </runrjs>
-                    </else>
-                </if>
-
-                <property name="javascript.optimization.done" value="true"/>
-            </then>
-            <else>
-                <if>
-                    <not>
-                        <isset property="javascript.optimization.done"/>
-                    </not>
-                    <then>
-                        <echo message="============================================"/>
-                        <echo message="Javascript optimization disabled"/>
-                        <echo message="Add 'optimize.javascript=true' property"/>
-                        <echo message="to master.properties in order to enable it"/>
-                        <echo message="============================================"/>
-                    </then>
-                </if>
-            </else>
-        </if>
-    </target>
-
-    <target name="enable-jsoptimization-ce"
-            description="Skip optimization of CE javascript files">
-        <property name="optimize.javascript.ce" value="true"/>
-    </target>
-
-    <target name="optimize-javascript-ce"
-            depends="init-source-paths, set-ce-webapp-name"
-            description="Concatenate JavaScript and CSS for CE">
-
-        <property name="optimize.javascript.ce" value="false"/>
-
-        <if>
-            <equals arg1="${optimize.javascript.ce}" arg2="true"/>
-            <then>
-                <runtarget target="optimize-javascript"/>
-            </then>
-            <else>
-                <echo message="Javascript optimization of CE sources disabled"/>
-            </else>
-        </if>
-    </target>
-
-    <target name="optimize-javascript-pro"
-            depends="init-source-paths, set-pro-webapp-name"
-            description="Concatenate JavaScript and CSS for PRO">
-
-        <property name="rjs.src" value="${js-pro-path}/jasperserver-war/target/jasperserver-pro"/>
-
-        <if>
-            <equals arg1="${optimize.javascript}" arg2="true"/>
-            <then>
-                <runtarget target="set-rjs-war-src-pro"/>
-            </then>
-        </if>
-
-        <runtarget target="optimize-javascript"/>
-    </target>
-
-    <target name="optimize-javascript-ce-for-update"
-            depends="init-source-paths, set-ce-webapp-name"
-            description="Concatenate JavaScript and CSS for PRO">
-        <property name="rjs.src" value="${warSourceDir}"/>
-        <runtarget target="optimize-javascript-ce"/>
-    </target>
-
-    <target name="optimize-javascript-pro-for-update"
-            depends="init-source-paths, set-pro-webapp-name"
-            description="Concatenate JavaScript and CSS for PRO">
-        <property name="rjs.src" value="${warSourceDir}"/>
-        <runtarget target="optimize-javascript-pro"/>
-    </target>
-
-    <target name="set-rjs-war-src-pro">
-        <property name="rjs.war.src" value="${rjs.src}/../jasperserver-pro.war"/>
-    </target>
-
-    <target name="update-war-with-optimized-javascripts"
-            description="Updates WAR file with optimized scripts folder">
-        <if>
-            <isset property="rjs.war.src"/>
-            <then>
-                <zip destfile="${rjs.war.src}"
-                     basedir="${rjs.src}"
-                     update="true"
-                     includes="optimized-scripts/**" />
-            </then>
-        </if>
-    </target>
-
-
-    <target name="build-jasperjs"
-            description="Builds jasper.js function for Visualize.js">
-        <if>
-            <equals arg1="${optimize.javascript}" arg2="true"/>
-        <then>
-            <property name="jjs.src" value="${js-path}/jasperserver-war/src/main/webapp/scripts"/>
-            <property name="jjs.outputDir" value="${js-path}/jasperserver-war/target/jasperserver/optimized-scripts"/>
-            <property name="jjs.tools" value="${js-path}/jasperserver-war/src/main/tools"/>
-
-            <echo>Building jasper.js for Visualize.js</echo>
-
-            <runrjs dir="${jjs.src}" tools="${jjs.tools}">
-                <arg value="${jjs.tools}/r.js"/>
-                <arg value="-o"/>
-                <arg value="${jjs.src}/build.js"/>
-                <arg value="baseUrl=."/>
-                <arg value="optimize=none"/>
-                <arg value="name=common/jasper/jasper"/>
-                <arg value="out=${jjs.outputDir}/common/jasper/jasper.js"/>
-                <!-- stub modules property since it's incompatible with single module mode -->
-                <arg value="modules="/>
-            </runrjs>
-
-            <!--
-                Copy built version of jasper.js to sources.
-                Then it should be checked into CVS
-                in order to be able to use visualize.js without running optimization
-            -->
-            <copy file="${jjs.outputDir}/common/jasper/jasper.js"
-                  tofile="${jjs.src}/client/jasper.js" overwrite="true" failonerror="false"/>
-        </then>
-        </if>
-    </target>
-
     <target name="copy-pro-war"
             depends="init-source-paths, set-pro-webapp-name"
-            description="copy pro war directory to warDir">
+            description="Copy pro war directory to warDir">
         <delete dir="${warSourceDir}"/>
         <copy toDir="${warSourceDir}">
             <fileset dir="${js-pro-path}/jasperserver-war/target/jasperserver-pro"/>
@@ -846,6 +585,7 @@
         <!-- to use your own xml file from the command line:              -->
         <!--   run-integration-tests-pro -DtestXmlFile=myTestngFile.xml   -->
         <property name="testXmlFile" value="testng-production-tests-pro.xml"/>
+        <property name="testDashboardXmlFile" value="testng-dashboard-test-pro.xml"/>
         <property name="testSsoXmlFile" value="testng-production-sso-tests-pro.xml"/>
         <property name="testExternalDbXmlFile" value="testng-production-externaldb-tests-pro.xml"/>
 
@@ -857,6 +597,19 @@
             </then>
         </if>
         <echo></echo>
+
+        <echo>Running tests: testDashboardXmlFile=${testDashboardXmlFile}</echo>
+        <if>
+            <equals arg1="${dbType}" arg2="postgresql" />
+            <then>
+                <runmaven dir="${js-pro-path}/production-tests">
+                    <arg value="clean"/>
+                    <arg value="install"/>
+                    <!--<arg value="-o"/>-->
+                    <arg value="-DtestNgXmlFile=${testDashboardXmlFile}"/>
+                </runmaven>
+            </then>
+        </if>
 
         <echo>Running tests: testXmlFile=${testXmlFile}</echo>
         <runmaven dir="${js-pro-path}/production-tests">
@@ -885,6 +638,7 @@
             description="copies a generated POM for the JDBC dependency, then calls Maven to install that project">
         <mkdir dir="${buildBase}/jdbc-dep"/>
         <copy file="${currentConf}/jdbc-dep-pom.xml" tofile="${buildBase}/jdbc-dep/pom.xml" overwrite="true"/>
+
         <runmaven dir="${buildBase}/jdbc-dep">
             <arg value="install"/>
         </runmaven>
@@ -954,7 +708,7 @@
     </target>
 
     <target name="build-all-deploy"
-            depends="build-all,deploy-webapp-pro"
+            depends="build-all, deploy-webapp-pro"
             description="call build-all target, deploy webapp pro">
     </target>
 
@@ -966,14 +720,13 @@
 
     <target name="update-webapp-ce"
             depends="init-source-paths, set-ce-webapp-name, echo-values, 
-            build-jasperjs, update-webapp-src-ce, update-webapp-config-ce,
-            optimize-javascript-ce-for-update, refresh-webapp"
+            update-webapp-src-ce, update-webapp-config-ce, refresh-webapp"
             description="copy updated files to webapp"/>
 
     <target name="update-webapp-pro"
             depends="init-source-paths, set-pro-webapp-name, echo-values, 
-            build-jasperjs, update-webapp-src-ce, update-webapp-src-pro, update-webapp-config-pro,
-            optimize-javascript-pro-for-update, refresh-webapp"
+            update-webapp-src-ce, update-webapp-src-pro, update-webapp-config-pro,
+            refresh-webapp"
             description="copy updated files to webapp"/>
 
     <target name="echo-values">
@@ -1129,7 +882,14 @@
         <mkdir dir="${util-target}"/>
         <javac srcdir="${basedir}/src/main/java" destdir="${util-target}" debug="true">
             <classpath>
+                <fileset dir="${js-path}/buildomatic/target">
+                    <exclude name="buildomatic.jar"/>
+                    <include name="ant*.jar"/>
+                    <include name="commons-configuration*.jar"/>
+                </fileset>
                 <fileset dir="${js-path}/jasperserver-war/target/jasperserver/WEB-INF/lib">
+                    <exclude name="commons-configuration*.jar"/>
+                    <exclude name="ant*.jar"/>
                     <include name="*.jar"/>
                 </fileset>
             </classpath>
@@ -1228,6 +988,37 @@
                 <echo message="Property installerDir isn't set."/>
             </else>
         </if>
+    </target>
+
+    <target name="run-standalone-test-ce"
+            depends="init-source-paths,install-jdbc-dep"
+            description="build and run the ce production data creation">
+        <property name="OFFLINE_ARG" value="-V"/>
+        <property name="THREAD_ARG" value="-V"/>
+
+        <runmaven dir="${js-pro-path}/production-tests">
+            <arg value="clean"/>
+            <arg value="install"/>
+            <arg value="-DtestNgXmlFile=testng-standalone-test-ce.xml"/>
+            <arg value="${OFFLINE_ARG}"/>
+            <arg value="${THREAD_ARG}"/>
+        </runmaven>
+    </target>
+
+    <target name="run-standalone-test-pro"
+            depends="init-source-paths,install-jdbc-dep"
+            description="build and run the pro production data creation">
+        <property name="OFFLINE_ARG" value="-V"/>
+        <property name="THREAD_ARG" value="-V"/>
+
+        <runmaven dir="${js-pro-path}/production-tests">
+            <arg value="clean"/>
+            <arg value="install"/>
+            <arg value="-DtestNgXmlFile=testng-standalone-test-pro.xml"/>
+            <arg value="-DtestdbType=h2"/>
+            <arg value="${OFFLINE_ARG}"/>
+            <arg value="${THREAD_ARG}"/>
+        </runmaven>
     </target>
 
 </project>

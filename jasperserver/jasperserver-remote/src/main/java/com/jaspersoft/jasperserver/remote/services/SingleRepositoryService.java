@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2013 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -38,7 +38,7 @@ import java.io.InputStream;
  * <p>Performs  operations with single resources in transaction</p>
  *
  * @author Zakhar.Tomchenco
- * @version $Id: SingleRepositoryService.java 35226 2013-08-09 07:08:53Z inesterenko $
+ * @version $Id: SingleRepositoryService.java 51276 2014-11-09 17:44:57Z ktsaregradskyi $
  */
 public interface SingleRepositoryService {
     Resource getResource(String uri);
@@ -53,9 +53,9 @@ public interface SingleRepositoryService {
 
     void deleteResource(String uri) throws IllegalParameterValueException, AccessDeniedException;
 
-    void copyResource(String sourceUri, String destinationUri, boolean createFolders, boolean overwrite) throws ResourceNotFoundException, AccessDeniedException, ResourceAlreadyExistsException, IllegalParameterValueException;
+    String copyResource(String sourceUri, String destinationUri, boolean createFolders, boolean overwrite) throws ResourceNotFoundException, AccessDeniedException, ResourceAlreadyExistsException, IllegalParameterValueException;
 
-    void moveResource(String sourceUri, String destinationUri, boolean createFolders, boolean overwrite) throws ResourceNotFoundException, AccessDeniedException, ResourceAlreadyExistsException, IllegalParameterValueException;
+    String moveResource(String sourceUri, String destinationUri, boolean createFolders, boolean overwrite) throws ResourceNotFoundException, AccessDeniedException, ResourceAlreadyExistsException, IllegalParameterValueException;
 
     Resource createFileResource(InputStream stream, String parentUri, String name, String label, String description, String type, boolean createFolders) throws RemoteException;
 

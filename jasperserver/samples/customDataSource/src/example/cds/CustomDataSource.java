@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -27,7 +27,7 @@ import net.sf.jasperreports.engine.JRField;
 
 /**
  * @author Teodor Danciu (teodord@users.sourceforge.net)
- * @version $Id: CustomDataSource.java 19940 2010-12-13 09:29:40Z tmatyashovsky $
+ * @version $Id: CustomDataSource.java 47331 2014-07-18 09:13:06Z kklein $
  */
 public class CustomDataSource implements JRDataSource
 {

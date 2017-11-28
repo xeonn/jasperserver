@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -40,7 +40,7 @@ import java.util.Map;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: AuthorityImporter.java 26539 2012-12-07 16:31:32Z sergey.prilukin $
+ * @version $Id: AuthorityImporter.java 50011 2014-10-09 16:57:26Z vzavadskii $
  */
 public class AuthorityImporter extends BaseImporterModule {
 	
@@ -190,8 +190,7 @@ public class AuthorityImporter extends BaseImporterModule {
 
 	protected void saveUserAttributes(User user, ProfileAttributeBean[] attributes) {
 		if (attributes != null && attributes.length > 0) {
-			for (int i = 0; i < attributes.length; i++) {
-				ProfileAttributeBean profileAttributeBean = attributes[i];
+			for (ProfileAttributeBean profileAttributeBean : attributes) {
 				saveUserAttribute(user, profileAttributeBean);
 			}
 		}

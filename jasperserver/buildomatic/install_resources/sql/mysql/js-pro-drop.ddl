@@ -7,14 +7,6 @@
         drop 
         foreign key FK47FB3CD7F254B53E;
 
-    alter table JIAdhocChartMeasure 
-        drop 
-        foreign key FK89D1A3FAB0A3C8CB;
-
-    alter table JIAdhocColumn 
-        drop 
-        foreign key FK9265D330EC885ADB;
-
     alter table JIAdhocDataView 
         drop 
         foreign key FK200A2AC9A8BF376D;
@@ -26,6 +18,14 @@
     alter table JIAdhocDataView 
         drop 
         foreign key FK200A2AC931211827;
+
+    alter table JIAdhocDataViewBasedReports 
+        drop 
+        foreign key FKFFD9AFF5B22FF3B2;
+
+    alter table JIAdhocDataViewBasedReports 
+        drop 
+        foreign key FKFFD9AFF5830BA6DB;
 
     alter table JIAdhocDataViewInputControl 
         drop 
@@ -43,10 +43,6 @@
         drop 
         foreign key FK98179F7865B10DA;
 
-    alter table JIAdhocGroup 
-        drop 
-        foreign key FK704D9365EC885ADB;
-
     alter table JIAdhocReportUnit 
         drop 
         foreign key FK68AE6BB2981B13F0;
@@ -58,22 +54,6 @@
     alter table JIAdhocStateProperty 
         drop 
         foreign key FK2C7E3C6C298B519D;
-
-    alter table JIAdhocTableSortField 
-        drop 
-        foreign key FK1AF05FA8EC885ADB;
-
-    alter table JIAdhocXTabColumnGroup 
-        drop 
-        foreign key FK336E71F262231DA;
-
-    alter table JIAdhocXTabMeasure 
-        drop 
-        foreign key FK3CF53B0762231DA;
-
-    alter table JIAdhocXTabRowGroup 
-        drop 
-        foreign key FK9D33843C62231DA;
 
     alter table JIAuditEventProperty 
         drop 
@@ -114,6 +94,18 @@
     alter table JIDashboardFrameProperty 
         drop 
         foreign key FK679EF04DFA08F0B4;
+
+    alter table JIDashboardModel 
+        drop 
+        foreign key FK8BB7D814A8BF376D;
+
+    alter table JIDashboardModelResource 
+        drop 
+        foreign key FK273EAC4230711005;
+
+    alter table JIDashboardModelResource 
+        drop 
+        foreign key FK273EAC42F254B53E;
 
     alter table JIDashboardResource 
         drop 
@@ -319,6 +311,14 @@
         drop 
         foreign key options_fk;
 
+    alter table JIReportThumbnail 
+        drop 
+        foreign key FKFDB3DED932282198;
+
+    alter table JIReportThumbnail 
+        drop 
+        foreign key FKFDB3DED9F254B53E;
+
     alter table JIReportUnit 
         drop 
         foreign key FK98818B77A8BF376D;
@@ -409,31 +409,19 @@
 
     drop table if exists JIAccessEvent;
 
-    drop table if exists JIAdhocChartMeasure;
-
-    drop table if exists JIAdhocColumn;
-
     drop table if exists JIAdhocDataView;
+
+    drop table if exists JIAdhocDataViewBasedReports;
 
     drop table if exists JIAdhocDataViewInputControl;
 
     drop table if exists JIAdhocDataViewResource;
-
-    drop table if exists JIAdhocGroup;
 
     drop table if exists JIAdhocReportUnit;
 
     drop table if exists JIAdhocState;
 
     drop table if exists JIAdhocStateProperty;
-
-    drop table if exists JIAdhocTableSortField;
-
-    drop table if exists JIAdhocXTabColumnGroup;
-
-    drop table if exists JIAdhocXTabMeasure;
-
-    drop table if exists JIAdhocXTabRowGroup;
 
     drop table if exists JIAuditEvent;
 
@@ -456,6 +444,10 @@
     drop table if exists JIDashboard;
 
     drop table if exists JIDashboardFrameProperty;
+
+    drop table if exists JIDashboardModel;
+
+    drop table if exists JIDashboardModelResource;
 
     drop table if exists JIDashboardResource;
 
@@ -536,6 +528,8 @@
     drop table if exists JIReportOptions;
 
     drop table if exists JIReportOptionsInput;
+
+    drop table if exists JIReportThumbnail;
 
     drop table if exists JIReportUnit;
 

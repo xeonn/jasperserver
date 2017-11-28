@@ -49,7 +49,7 @@ import static org.unitils.reflectionassert.ReflectionAssert.assertReflectionEqua
 
 /**
  * @author Anton Fomin
- * @version $Id: SingleValueInputControlHandlerTest.java 37599 2013-09-17 15:27:15Z afomin $
+ * @version $Id: SingleValueInputControlHandlerTest.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
 public class SingleValueInputControlHandlerTest extends UnitilsJUnit4 {
 
@@ -69,7 +69,7 @@ public class SingleValueInputControlHandlerTest extends UnitilsJUnit4 {
         mockedServices.put("filterResolver", createFilterResolver());
         mockedServices.put("cachedEngineService", cachedEngineService.getMock());
         mockedServices.put("engineService", createEngineService());
-        mockedServices.put("messagesCalendarFormatProvider", calendarFormatProvider);
+        mockedServices.put("isoCalendarFormatProvider", calendarFormatProvider);
         mockedServices.put("messageSource", messageSource.getMock());
 
         ApplicationContext context = setUpApplicationContext(mockedServices, "classpath:/com/jaspersoft/jasperserver/war/cascade/applicationContext-cascade-test.xml");
@@ -135,7 +135,7 @@ public class SingleValueInputControlHandlerTest extends UnitilsJUnit4 {
         String[] rawData =  {"123"};
 
         DataType type = new DataTypeImpl();
-        type.setType(DataType.TYPE_NUMBER);
+        type.setDataTypeType(DataType.TYPE_NUMBER);
         type.setMaxValue("30");
         ph.setDataType(NUMBER, type);
 
@@ -156,7 +156,7 @@ public class SingleValueInputControlHandlerTest extends UnitilsJUnit4 {
         String[] rawData =  {"123"};
 
         DataType type = new DataTypeImpl();
-        type.setType(DataType.TYPE_NUMBER);
+        type.setDataTypeType(DataType.TYPE_NUMBER);
         type.setMaxValue((double) 30);
         ph.setDataType(NUMBER, type);
 

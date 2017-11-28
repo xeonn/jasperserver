@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -22,16 +22,18 @@ package com.jaspersoft.jasperserver.remote.services.impl;
 
 import com.jaspersoft.jasperserver.api.JSValidationException;
 import com.jaspersoft.jasperserver.api.common.domain.ValidationError;
+import com.jaspersoft.jasperserver.api.common.domain.impl.ExecutionContextImpl;
 import com.jaspersoft.jasperserver.api.common.util.TimeZoneContextHolder;
 import com.jaspersoft.jasperserver.api.engine.common.service.EngineService;
 import com.jaspersoft.jasperserver.api.engine.common.service.ReportExecutionStatusInformation;
 import com.jaspersoft.jasperserver.api.engine.common.service.SchedulerReportExecutionStatusSearchCriteria;
+import com.jaspersoft.jasperserver.api.engine.common.service.VirtualizerFactory;
+import com.jaspersoft.jasperserver.api.engine.jasperreports.common.JSReportExecutionRequestCancelledException;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.domain.impl.ReportUnitResult;
 import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
 import com.jaspersoft.jasperserver.api.metadata.xml.domain.impl.Argument;
-import com.jaspersoft.jasperserver.dto.reports.inputcontrols.InputControlState;
+import com.jaspersoft.jasperserver.dto.reports.inputcontrols.ReportInputControl;
 import com.jaspersoft.jasperserver.remote.ServiceException;
-import com.jaspersoft.jasperserver.remote.ServicesUtils;
 import com.jaspersoft.jasperserver.remote.exception.ErrorDescriptorBuildingService;
 import com.jaspersoft.jasperserver.remote.exception.ExportExecutionRejectedException;
 import com.jaspersoft.jasperserver.remote.exception.IllegalParameterValueException;
@@ -39,7 +41,7 @@ import com.jaspersoft.jasperserver.remote.exception.MandatoryParameterNotFoundEx
 import com.jaspersoft.jasperserver.remote.exception.RemoteException;
 import com.jaspersoft.jasperserver.remote.exception.ResourceNotFoundException;
 import com.jaspersoft.jasperserver.remote.exception.xml.ErrorDescriptor;
-import com.jaspersoft.jasperserver.remote.exporters.HtmlExporter;
+import com.jaspersoft.jasperserver.remote.reports.HtmlExportStrategy;
 import com.jaspersoft.jasperserver.remote.services.ExecutionStatus;
 import com.jaspersoft.jasperserver.remote.services.ExportExecution;
 import com.jaspersoft.jasperserver.remote.services.ExportExecutionOptions;
@@ -56,31 +58,29 @@ import com.jaspersoft.jasperserver.war.cascade.InputControlsLogicService;
 import com.jaspersoft.jasperserver.war.cascade.InputControlsValidationException;
 import net.sf.jasperreports.engine.JRExporterParameter;
 import net.sf.jasperreports.engine.JasperPrint;
-import net.sf.jasperreports.engine.ReportContext;
 import net.sf.jasperreports.engine.export.GenericElementReportTransformer;
-import net.sf.jasperreports.engine.export.JRHtmlExporterParameter;
 import net.sf.jasperreports.engine.util.JRSaver;
-import net.sf.jasperreports.engine.util.JRTypeSniffer;
 import net.sf.jasperreports.web.servlets.AsyncJasperPrintAccessor;
 import net.sf.jasperreports.web.servlets.JasperPrintAccessor;
 import net.sf.jasperreports.web.servlets.ReportExecutionStatus;
 import net.sf.jasperreports.web.servlets.ReportPageStatus;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.security.context.SecurityContext;
-import org.springframework.security.context.SecurityContextHolder;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -99,11 +99,11 @@ import java.util.regex.Pattern;
  * Run a report unit using the passing in parameters and options
  *
  * @author ykovalchyk
- * @version $Id: RunReportServiceImpl.java 45722 2014-05-14 10:24:22Z sergey.prilukin $
+ * @version $Id: RunReportServiceImpl.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
 @Service("runReportService")
 @Scope(value = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)
-public class RunReportServiceImpl implements RunReportService {
+public class RunReportServiceImpl implements RunReportService, Serializable, DisposableBean {
     private final static Log log = LogFactory.getLog(RunReportServiceImpl.class);
     private final static Pattern FILE_NAME_PATTERN = Pattern.compile(".*/([^/]+)$");
     @Resource
@@ -122,6 +122,12 @@ public class RunReportServiceImpl implements RunReportService {
     private ErrorDescriptorBuildingService errorDescriptorBuildingService;
     @Resource
     private Integer waitForFinalJasperPrintMs;
+    @Resource
+    private Map<String, HtmlExportStrategy> htmlExportStrategies;
+    @Resource(name = "defaultHtmlExportStrategy")
+    private HtmlExportStrategy defaultHtmlExportStrategy;
+    @Resource(name = "concreteVirtualizerFactory")
+    private VirtualizerFactory virtualizerFactory;
 
     private final Map<String, ReportExecution> executions = new ConcurrentHashMap<String, ReportExecution>();
 
@@ -172,13 +178,13 @@ public class RunReportServiceImpl implements RunReportService {
             ReportExecutionOptions reportExecutionOptions) {
         final ReportExecutionOptions options = reportExecutionOptions != null
                 ? reportExecutionOptions : reportExecution.getOptions();
+        if(ExecutionStatus.execution == reportExecution.getStatus()){
+            cancelReportExecution(reportExecution.getRequestId());
+        }
         reportExecution.setStatus(ExecutionStatus.queued);
-        reportExecution.setReportUnitResult(null);
         final Locale locale = LocaleContextHolder.getLocale();
         final TimeZone timeZone = TimeZoneContextHolder.getTimeZone();
         final SecurityContext context = SecurityContextHolder.getContext();
-        // reset exports if any
-        for (ExportExecution exportExecution : reportExecution.getExports().values()) exportExecution.reset();
         asyncExecutor.execute(new Runnable() {
             @Override
             public void run() {
@@ -191,7 +197,7 @@ public class RunReportServiceImpl implements RunReportService {
                     final String reportUnitUri = reportExecution.getReportURI();
                     final Map<String, String[]> rawParameters = reportExecution.getRawParameters();
                     // convert parameters from raw strings to objects
-                    Map<String, Object> convertedParameters = null;
+                    Map<String, Object> convertedParameters;
                     try {
                         convertedParameters = executeInputControlsCascadeWithRawInput(reportUnitUri, rawParameters);
                     } catch (CascadeResourceNotFoundException e) {
@@ -230,8 +236,14 @@ public class RunReportServiceImpl implements RunReportService {
                     reportUnitResult = reportExecutor.runReport(reportUnitUri, convertedParameters, options);
                 } catch (RemoteException e) {
                     errorDescriptor = e.getErrorDescriptor();
+                } catch (JSReportExecutionRequestCancelledException e){
+                    // do nothing in this thread. Correct status is set by the thread, cancelled the execution.
                 } catch (Exception e) {
-                    errorDescriptor = errorDescriptorBuildingService.buildErrorDescriptor(e);
+                    // if report execution is interrupted, then it's cancelled. Do nothing in this case.
+                    if(!(e.getCause() instanceof InterruptedException)){
+                        // if not the case, then let's build error descriptor
+                        errorDescriptor = errorDescriptorBuildingService.buildErrorDescriptor(e);
+                    }
                 }
                 if (errorDescriptor != null) {
                     reportExecution.setErrorDescriptor(errorDescriptor);
@@ -273,7 +285,8 @@ public class RunReportServiceImpl implements RunReportService {
             throw new MandatoryParameterNotFoundException("reportUnitUri");
         }
         // check report resource for existence
-        final com.jaspersoft.jasperserver.api.metadata.common.domain.Resource resource = repositoryService.getResource(null, reportUnitURI);
+        final com.jaspersoft.jasperserver.api.metadata.common.domain.Resource resource = repositoryService
+                .getResource(ExecutionContextImpl.getRuntimeExecutionContext(), reportUnitURI);
         if (resource == null) {
             throw new ResourceNotFoundException(reportUnitURI);
         } else if(!reportExecutor.isRunnableResource(resource)){
@@ -312,17 +325,6 @@ public class RunReportServiceImpl implements RunReportService {
     }
 
     protected void startExport(final ReportExecution reportExecution, final ExportExecution exportExecution) {
-        ExportExecutionOptions exportOptions = exportExecution.getOptions();
-        final ReportExecutionOptions options = reportExecution.getOptions();
-        String attachmentsPrefix = exportOptions.getAttachmentsPrefix() != null ?
-                exportOptions.getAttachmentsPrefix() : options.getDefaultAttachmentsPrefixTemplate();
-        if (attachmentsPrefix != null) {
-            attachmentsPrefix = attachmentsPrefix
-                    .replace(CONTEXT_PATH_ATTACHMENTS_PREFIX_TEMPLATE_PLACEHOLDER, options.getContextPath() != null ? options.getContextPath() : "")
-                    .replace(REPORT_EXECUTION_ID_ATTACHMENTS_PREFIX_TEMPLATE_PLACEHOLDER, reportExecution.getRequestId())
-                    .replace(EXPORT_EXECUTION_ID_ATTACHMENTS_PREFIX_TEMPLATE_PLACEHOLDER, exportExecution.getId());
-        }
-        final String attachmentsPrefixClosure = attachmentsPrefix;
         final SecurityContext context = SecurityContextHolder.getContext();
         asyncExecutor.execute(new Runnable() {
             @Override
@@ -340,7 +342,7 @@ public class RunReportServiceImpl implements RunReportService {
                                         + (reportExecution.getErrorDescriptor() != null
                                         ? " " + reportExecution.getErrorDescriptor().toString() : "")).getErrorDescriptor());
                     } else {
-                        executeExport(exportExecution, reportExecution, attachmentsPrefixClosure);
+                        executeExport(exportExecution, reportExecution);
                     }
                 } catch (Exception e) {
                     exportExecution.setErrorDescriptor(new RemoteException(e).getErrorDescriptor());
@@ -349,7 +351,7 @@ public class RunReportServiceImpl implements RunReportService {
         });
     }
 
-    protected void executeExport(ExportExecution exportExecution, ReportExecution reportExecution, String imagesUri) {
+    protected void executeExport(ExportExecution exportExecution, ReportExecution reportExecution) {
         JasperPrintAccessor jasperPrintAccessor = reportExecution.getFinalReportUnitResult().getJasperPrintAccessor();
         try {
             ExportExecutionOptions exportOptions = exportExecution.getOptions();
@@ -374,11 +376,27 @@ public class RunReportServiceImpl implements RunReportService {
             } else {
                 jasperPrint = jasperPrintAccessor.getFinalJasperPrint();
             }
-            exportExecution.setStatus(ExecutionStatus.execution);
-            generateReportOutput(reportExecution, jasperPrint, exportExecution.getOptions().getOutputFormat(),
-                    imagesUri, exportExecution, exportExecution.getOptions().getPages());
-            exportExecution.getOutputResource().setOutputFinal(isOutputFinal);
-            exportExecution.setStatus(ExecutionStatus.ready);
+            final ReportExecutionStatus.Status status = jasperPrintAccessor.getReportStatus().getStatus();
+            switch (status){
+                case CANCELED: exportExecution.setStatus(ExecutionStatus.cancelled);
+                    break;
+                case ERROR: exportExecution.setErrorDescriptor(errorDescriptorBuildingService
+                        .buildErrorDescriptor(jasperPrintAccessor.getReportStatus().getError()));
+                    break;
+                default:{
+                    exportExecution.setStatus(ExecutionStatus.execution);
+                    if (Argument.RUN_OUTPUT_FORMAT_HTML.equalsIgnoreCase(exportExecution.getOptions().getOutputFormat())) {
+                        HtmlExportStrategy htmlExportStrategy = htmlExportStrategies.get(exportExecution.getOptions().getMarkupType()) != null
+                                ? htmlExportStrategies.get(exportExecution.getOptions().getMarkupType()) : defaultHtmlExportStrategy;
+                        htmlExportStrategy.export(reportExecution, exportExecution, jasperPrint);
+                    } else {
+                        generateReportOutput(reportExecution, jasperPrint, exportExecution.getOptions().getOutputFormat(),
+                                exportExecution, exportExecution.getOptions().getPages());
+                    }
+                    exportExecution.getOutputResource().setOutputFinal(isOutputFinal);
+                    exportExecution.setStatus(ExecutionStatus.ready);
+                }
+            }
         } catch (RemoteException ex) {
             exportExecution.setErrorDescriptor(ex.getErrorDescriptor());
         } catch (Exception ex) {
@@ -394,11 +412,13 @@ public class RunReportServiceImpl implements RunReportService {
     }
 
     public ReportOutputResource getOutputResource(String executionId, String exportId) throws RemoteException {
+        final ReportExecution reportExecution = getReportExecution(executionId);
         final ExportExecution exportExecution = getExportExecution(executionId, exportId);
-        if (exportExecution.getStatus() == ExecutionStatus.cancelled) {
+        if (exportExecution.getStatus() == ExecutionStatus.cancelled
+                && !(reportExecution.getStatus() == ExecutionStatus.cancelled)) {
             // cancelled status means export reset is done. Need to rerun
             exportExecution.setStatus(ExecutionStatus.queued);
-            startExport(getReportExecution(executionId), exportExecution);
+            startExport(reportExecution, exportExecution);
         }
         return exportExecution.getFinalOutputResource();
     }
@@ -425,8 +445,8 @@ public class RunReportServiceImpl implements RunReportService {
     }
 
     protected Map<String, Object> executeInputControlsCascadeWithRawInput(String reportUnitUri, Map<String, String[]> rawInputParameters) throws CascadeResourceNotFoundException, InputControlsValidationException {
-        final List<InputControlState> valuesForInputControls = inputControlsLogicService.getValuesForInputControls(reportUnitUri, null, rawInputParameters);
-        final Map<String, String[]> inputControlFormattedValues = ReportParametersUtils.getValueMapFromInputControlStates(valuesForInputControls);
+        final List<ReportInputControl> inputControlsForReport = inputControlsLogicService.getInputControlsWithValues(reportUnitUri, null, rawInputParameters);
+        final Map<String, String[]> inputControlFormattedValues = ReportParametersUtils.getValueMapFromInputControls(inputControlsForReport);
         return inputControlsLogicService.getTypedParameters(reportUnitUri, inputControlFormattedValues);
     }
 
@@ -434,13 +454,12 @@ public class RunReportServiceImpl implements RunReportService {
      * @param reportExecution - the report execution instance. Holds all execution context related things.
      * @param jasperPrint     - filled with data jasper print object
      * @param rawOutputFormat - output format in raw format
-     * @param imagesURI       - images URI prefix
      * @param exportExecution - export execution model
      * @param pages           - what pages should be exported
      * @throws RemoteException
      */
     protected void generateReportOutput(ReportExecution reportExecution, JasperPrint jasperPrint,
-            String rawOutputFormat, String imagesURI, ExportExecution exportExecution, ReportOutputPages pages) throws RemoteException {
+            String rawOutputFormat, ExportExecution exportExecution, ReportOutputPages pages) throws RemoteException {
         try {
             String outputFormat = rawOutputFormat != null ? rawOutputFormat.toUpperCase() : Argument.RUN_OUTPUT_FORMAT_PDF;
             // Export...
@@ -459,17 +478,6 @@ public class RunReportServiceImpl implements RunReportService {
             } else {
                 HashMap<String, Object> exportParameters = new HashMap<String, Object>(reportExecution.getRawParameters());
                 if (pages != null) exportParameters.put(Argument.RUN_OUTPUT_PAGES, pages);
-                if (imagesURI != null) exportParameters.put(Argument.RUN_OUTPUT_IMAGES_URI, imagesURI);
-                exportParameters.put(HtmlExporter.CONTEXT_PATH_PARAM_NAME, reportExecutionOptions.getContextPath());
-                exportParameters.put(HtmlExporter.BASE_URL_PARAM_NAME, exportExecution.getOptions().getBaseUrl());
-                if (!exportExecution.getOptions().isAllowInlineScripts()) {
-                    ReportContext reportContext = reportExecution.getFinalReportUnitResult().getReportContext();
-                    if (reportContext != null) {
-                        reportContext.setParameterValue(ReportContext.REQUEST_PARAMETER_APPLICATION_DOMAIN, exportExecution.getOptions().getBaseUrl());
-                        exportParameters.put(HtmlExporter.REPORT_CONTEXT_PARAM_NAME, reportContext);
-                    }
-                }
-
                 Map<JRExporterParameter, Object> exporterParams;
                 final String reportURI = reportExecution.getReportURI();
                 auditHelper.createAuditEvent("export");
@@ -499,9 +507,6 @@ public class RunReportServiceImpl implements RunReportService {
                 final Matcher matcher = FILE_NAME_PATTERN.matcher(reportURI);
                 exportExecution.setOutputResource(new ReportOutputResource(reportExecutor.getContentType(outputFormat),
                         bos.toByteArray(), (matcher.find() ? matcher.group(1) : "report") + "." + outputFormat.toLowerCase()));
-                if (Argument.RUN_OUTPUT_FORMAT_HTML.equals(outputFormat)) {
-                    putImages(exporterParams, exportExecution.getAttachments());
-                }
             }
         } catch (RemoteException e) {
             throw e;
@@ -509,37 +514,6 @@ public class RunReportServiceImpl implements RunReportService {
             log.error("caught exception: " + e.getMessage(), e);
         } catch (Throwable e) {
             log.error("caught Throwable exception: " + e.getMessage(), e);
-        }
-    }
-
-    /**
-     * Place images to output container.
-     *
-     * @param exportParameters - export result, contains images
-     * @param outputContainer  - output container to fill with images
-     * @throws RemoteException if any error occurs
-     */
-    protected void putImages(Map<JRExporterParameter, Object> exportParameters, Map<String, ReportOutputResource> outputContainer) throws RemoteException {
-        try {
-            // cast is safe because of known parameter key
-            @SuppressWarnings("unchecked")
-            Map<String, byte[]> imagesMap = (Map<String, byte[]>) exportParameters.get(JRHtmlExporterParameter.IMAGES_MAP);
-            if (imagesMap != null && !imagesMap.isEmpty()) {
-                if (log.isDebugEnabled()) {
-                    log.debug("imagesMap : " + Arrays.asList(imagesMap.keySet().toArray()));
-                }
-                for (String name : imagesMap.keySet()) {
-                    byte[] data = imagesMap.get(name);
-                    if (log.isDebugEnabled()) {
-                        log.debug("Adding image for HTML: " + name);
-                    }
-                    outputContainer.put(name, new ReportOutputResource(JRTypeSniffer.getImageTypeValue(data).getMimeType(), data, name));
-                }
-            }
-        } catch (Throwable e) {
-            log.error(e);
-            throw new RemoteException(new ErrorDescriptor.Builder()
-                    .setErrorCode("webservices.error.errorAddingImage").setParameters(e.getMessage()).getErrorDescriptor(), e);
         }
     }
 
@@ -559,6 +533,28 @@ public class RunReportServiceImpl implements RunReportService {
     }
 
     public Boolean cancelReportExecution(String requestId) throws RemoteException {
-        return engine.cancelExecution(requestId);
+        final boolean cancelled = engine.cancelExecution(requestId);
+        final ReportExecution reportExecution = executions.get(requestId);
+        if(cancelled && reportExecution != null){
+            reportExecution.setStatus(ExecutionStatus.cancelled);
+        }
+        return cancelled;
+    }
+
+    @Override
+    public void destroy() throws Exception {
+        for (String requestId : executions.keySet()) {
+            ReportExecution execution = executions.get(requestId);
+            try {
+                cancelReportExecution(requestId);
+                execution.reset();
+                if (execution.getStatus() == ExecutionStatus.ready || execution.getStatus() == ExecutionStatus.cancelled) {
+                    virtualizerFactory.disposeReport(execution.getFinalReportUnitResult());
+                }
+            } catch (RuntimeException ex) {
+                log.error("Report execution cleanup failed: ", ex);
+            }
+        }
+        executions.clear();
     }
 }

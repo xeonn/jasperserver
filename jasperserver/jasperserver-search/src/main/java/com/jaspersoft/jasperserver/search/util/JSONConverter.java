@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -406,7 +406,7 @@ public class JSONConverter extends JSONConverterBase implements Serializable {
         JSONArray customDataSources = new JSONArray();
         if (definitions != null) {
             for (CustomDataSourceDefinition definition : this.definitions) {
-                customDataSources.put(definition.getServiceClassName());
+                customDataSources.put(definition.getName());
             }
         }
         jsonObject.put(CONFIGURATION_CUSTOM_DATA_SOURCES, customDataSources);

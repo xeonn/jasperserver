@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -32,7 +32,7 @@ import java.util.Map;
 
 /**
  * @author gtoffoli
- * @version $Id: DataTypeHandler.java 26539 2012-12-07 16:31:32Z sergey.prilukin $
+ * @version $Id: DataTypeHandler.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
 @Service
 public class DataTypeHandler extends RepositoryResourceHandler {
@@ -50,7 +50,7 @@ public class DataTypeHandler extends RepositoryResourceHandler {
         descriptor.setHasData(false);
         descriptor.setIsReference(false);
 
-        descriptor.setDataType(fileResource.getType());
+        descriptor.setDataType(fileResource.getDataTypeType());
         descriptor.setPattern(fileResource.getRegularExpr());
         descriptor.setMaxValue(fileResource.getMaxValue() == null ? null : dataConverterService.formatSingleValue(
                 fileResource.getMaxValue(), fileResource, fileResource.getMaxValue().getClass()));
@@ -67,7 +67,7 @@ public class DataTypeHandler extends RepositoryResourceHandler {
 
         DataType dataType = (DataType) resource;
         // Validations should be done in the save method...
-        dataType.setType(descriptor.getDataType());
+        dataType.setDataTypeType(descriptor.getDataType());
         dataType.setRegularExpr(descriptor.getPattern());
         dataType.setStrictMax(descriptor.isStrictMax());
         final String rawMaxValue = descriptor.getMaxValue();

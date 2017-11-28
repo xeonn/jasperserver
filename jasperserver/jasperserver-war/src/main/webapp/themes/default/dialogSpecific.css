@@ -715,8 +715,8 @@ and (max-device-width : 1024px) {
 
 #chartTypeSelector {
     min-width:526px;
-    height: 430px;
-    *width:463px; /* IE7 */
+    height: 495px;
+    *width:526px; /* IE7 */
     z-index: 1000; /* Bug 34694 - FiltersData Levels are visible thru Chart Format/Chart Types dialogs */
 }
 
@@ -740,7 +740,7 @@ and (max-device-width : 1024px) {
 	margin-left:5px;
 	cursor:pointer;
     border:1px solid transparent;
-    background:url("images/chart_type_sprite.png");
+    background: url("images/chart_type_sprite.png") no-repeat scroll 0 0 rgba(0, 0, 0, 0);
 }
 
 #chartTypeSelector div.body > .row > .cell[name="column"] {
@@ -863,68 +863,108 @@ and (max-device-width : 1024px) {
     background-position: 1px -1429px;
 }
 
+#chartTypeSelector div.body > .row > .cell[name="scatter_line"] {
+    background-position: 1px -1299px;
+}
+
+#chartTypeSelector div.body > .row > .cell[name="heat_map"] {
+    background-position: 1px -1754px;
+}
+
+#chartTypeSelector div.body > .row > .cell[name="heat_map_time_series"] {
+    background-position: 1px -1819px;
+}
+
+#chartTypeSelector div.body > .row > .cell[name="speedometer"] {
+    background-position: 1px -1299px;
+}
+
+#chartTypeSelector div.body > .row > .cell[name="arc_gauge"] {
+    background-position: 1px -1299px;
+}
+
 #chartTypeSelector div.body > .row > .cell[name="spider_line"].disabled {
-    background-position: 54px -1494px;
+    background-position: -89px -1494px;
 }
 
 #chartTypeSelector div.body > .row > .cell[name="spider_area"].disabled {
-    background-position: 54px -1689px;
+    background-position: -89px -1689px;
 }
 
 #chartTypeSelector div.body > .row > .cell[name="spider_column"].disabled {
-    background-position: 54px -1624px;
+    background-position: -89px -1624px;
 }
 
 #chartTypeSelector div.body > .row > .cell[name="line_time_series"].disabled {
-    background-position: 54px -389px;
+    background-position: -89px -389px;
 }
 
 #chartTypeSelector div.body > .row > .cell[name="spline_time_series"].disabled {
-    background-position: 54px -454px;
+    background-position: -89px -454px;
 }
 
 #chartTypeSelector div.body > .row > .cell[name="area_time_series"].disabled {
-    background-position: 54px -519px;
+    background-position: -89px -519px;
 }
 
 #chartTypeSelector div.body > .row > .cell[name="spline_area_time_series"].disabled {
-    background-position: 54px -714px;
+    background-position: -89px -714px;
 }
 
 #chartTypeSelector div.body > .row > .cell[name="column_line"].disabled {
-    background-position: 54px -844px;
+    background-position: -89px -844px;
 }
 
 #chartTypeSelector div.body > .row > .cell[name="column_spline"].disabled {
-    background-position: 54px -974px;
+    background-position: -89px -974px;
 }
 
 #chartTypeSelector div.body > .row > .cell[name="stacked_column_line"].disabled {
-    background-position: 54px -909px;
+    background-position: -89px -909px;
 }
 
 #chartTypeSelector div.body > .row > .cell[name="stacked_column_spline"].disabled {
-    background-position: 54px -1039px;
+    background-position: -89px -1039px;
 }
 
 #chartTypeSelector div.body > .row > .cell[name="multi_axis_line"].disabled {
-    background-position: 54px -1104px;
+    background-position: -89px -1104px;
 }
 
 #chartTypeSelector div.body > .row > .cell[name="multi_axis_spline"].disabled {
-    background-position: 54px -1169px;
+    background-position: -89px -1169px;
 }
 
 #chartTypeSelector div.body > .row > .cell[name="multi_axis_column"].disabled {
-    background-position: 54px -1234px;
+    background-position: -89px -1234px;
 }
 
 #chartTypeSelector div.body > .row > .cell[name="scatter"].disabled {
-    background-position: 54px -1299px;
+    background-position: -89px -1299px;
 }
 
 #chartTypeSelector div.body > .row > .cell[name="bubble"].disabled {
-    background-position: 54px -1429px;
+    background-position: -89px -1429px;
+}
+
+#chartTypeSelector div.body > .row > .cell[name="scatter_line"].disabled {
+    background-position: -89px -1299px;
+}
+
+#chartTypeSelector div.body > .row > .cell[name="heat_map"].disabled {
+    background-position: -89px -1754px;
+}
+
+#chartTypeSelector div.body > .row > .cell[name="heat_map_time_series"].disabled {
+    background-position: -89px -1819px;
+}
+
+#chartTypeSelector div.body > .row > .cell[name="speedometer"].disabled {
+    background-position: -89px -1299px;
+}
+
+#chartTypeSelector div.body > .row > .cell[name="arc_gauge"].disabled {
+    background-position: -89px -1299px;
 }
 
 #chartTypeSelector div.body > .row > .cell.selected {
@@ -963,7 +1003,7 @@ and (max-device-width : 1024px) {
     }
 }
 
-#chartFormatDialog .section {
+#chartFormatDialog .formattingSection {
     margin: 10px 0 10px 0;
 }
 
@@ -971,14 +1011,24 @@ and (max-device-width : 1024px) {
     margin-left:20px;
 }
 
-#chartFormatDialog .control {
+#chartFormatDialog .section .control {
     margin-left:15px;
     margin-bottom:12px;
+}
+#chartFormatDialog .section .control.child {
+    margin-left:34px;
 }
 
 #chartFormatDialog input {
     width:40px;
     padding-left:2px;
+}
+#chartFormatDialog .body.section.noTitle {
+    min-height: 130px;
+    min-width: 300px;
+    padding-bottom: 8px;
+    height: auto;
+    width: auto;
 }
 
 
@@ -986,9 +1036,9 @@ and (max-device-width : 1024px) {
 
 .selectFromRepository {
 	height:400px;
+	width:400px;
 	min-height:400px;
 	min-width:400px;
-	width:400px;
 }
 
 

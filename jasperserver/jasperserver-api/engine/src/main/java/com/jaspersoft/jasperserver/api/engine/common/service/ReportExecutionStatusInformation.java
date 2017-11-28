@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -29,7 +29,7 @@ import java.util.Map;
  * Service that provides status related to report execution
  *
  * @author Ivan Chan (ichan@jaspersoft.com)
- * @version $Id: ReportExecutionStatusInformation.java 25236 2012-10-14 11:19:18Z vsabadosh $
+ * @version $Id: ReportExecutionStatusInformation.java 47331 2014-07-18 09:13:06Z kklein $
  * @since 4.7
  */
 @JasperServerAPI

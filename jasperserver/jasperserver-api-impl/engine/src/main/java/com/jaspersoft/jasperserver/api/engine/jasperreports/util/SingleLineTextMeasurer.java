@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -48,7 +48,7 @@ import net.sf.jasperreports.engine.util.MaxFontSizeFinder;
  * Slightly modified Text Measurer to support single line outputs.
  * 
  * @author Jun-Sun Whang
- * @version $Id: SingleLineTextMeasurer.java 32364 2013-06-04 20:53:10Z sergey.prilukin $
+ * @version $Id: SingleLineTextMeasurer.java 47331 2014-07-18 09:13:06Z kklein $
  */
 public class SingleLineTextMeasurer implements JRTextMeasurer {
 

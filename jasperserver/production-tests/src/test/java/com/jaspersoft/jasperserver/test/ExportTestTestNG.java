@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -43,8 +43,6 @@ import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.JdbcReportD
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.JndiJdbcReportDataSource;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportUnit;
 import com.jaspersoft.jasperserver.export.Parameters;
-
-import com.jaspersoft.jasperserver.test.BaseExportTestCaseTestNG;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -636,7 +634,7 @@ public class ExportTestTestNG extends BaseExportTestCaseTestNG {
 		ic.setName(INPUT_CONTROL_NAME);
 		ic.setLabel(INPUT_CONTROL_NAME + "_label");
 		ic.setDescription(INPUT_CONTROL_NAME + " Description");
-		ic.setType(InputControl.TYPE_SINGLE_VALUE);
+		ic.setInputControlType(InputControl.TYPE_SINGLE_VALUE);
 		ic.setMandatory(false);
 		ic.setReadOnly(true);
 		ic.setVisible(true);
@@ -645,7 +643,7 @@ public class ExportTestTestNG extends BaseExportTestCaseTestNG {
 		dt.setName(INPUT_CONTROL_DATATYPE_NAME);
 		dt.setLabel(INPUT_CONTROL_DATATYPE_NAME + "_label");
 		dt.setDescription(INPUT_CONTROL_DATATYPE_NAME + " Description");
-		dt.setType(DataType.TYPE_NUMBER);
+		dt.setDataTypeType(DataType.TYPE_NUMBER);
 		dt.setMaxLength(new Integer(10));
 		dt.setMaxValue(new Integer(1000));
 		dt.setStrictMax(true);

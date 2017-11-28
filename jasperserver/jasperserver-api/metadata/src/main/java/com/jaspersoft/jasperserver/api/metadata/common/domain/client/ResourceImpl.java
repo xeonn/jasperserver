@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -20,6 +20,7 @@
  */
 package com.jaspersoft.jasperserver.api.metadata.common.domain.client;
 
+import java.awt.*;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Date;
@@ -31,7 +32,7 @@ import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 
 /**
  * @author Teodor Danciu (teodord@users.sourceforge.net)
- * @version $Id: ResourceImpl.java 38151 2013-09-26 09:30:32Z vsabadosh $
+ * @version $Id: ResourceImpl.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
 public abstract class ResourceImpl implements Resource, Serializable
 {
@@ -94,7 +95,17 @@ public abstract class ResourceImpl implements Resource, Serializable
         }
     }
 
-	public String getName()
+    @Override
+    public Serializable getIdentifier() {
+        return getURIString();
+    }
+
+    @Override
+    public String getType() {
+        return getResourceType();
+    }
+
+    public String getName()
 	{
 		return name;
 	}
@@ -125,18 +136,17 @@ public abstract class ResourceImpl implements Resource, Serializable
 		this.description = description;
 	}
 
-	public String getURIString()
-	{
-		if (uri == null) {
-			StringBuffer sb = new StringBuffer();
-			if (getParentFolder() != null && !getParentFolder().equals(Folder.SEPARATOR))
-				sb.append(getParentFolder());
-			sb.append(Folder.SEPARATOR);
-			if (!getName().equals(Folder.SEPARATOR))
-				sb.append(getName());
-			uri = sb.toString();
-		}
-		return uri;
+	public String getURIString() {
+        if (uri == null) {
+            StringBuffer sb = new StringBuffer();
+            if (getParentFolder() != null && !getParentFolder().equals(Folder.SEPARATOR))
+                sb.append(getParentFolder());
+            sb.append(Folder.SEPARATOR);
+            if (getName() != null && !getName().equals(Folder.SEPARATOR))
+                sb.append(getName());
+            uri = sb.toString();
+        }
+        return uri;
 	}
 
 	public void setURIString(String uri)

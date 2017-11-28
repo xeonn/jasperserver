@@ -19,6 +19,11 @@
         <platform-path>${currentConf}</platform-path>
         <test.hibernate.cfg>${currentConf}/hibernate.cfg.xml</test.hibernate.cfg>
         <test.hibernate.jdbc.properties>${currentConf}/js.jdbc.properties</test.hibernate.jdbc.properties>
+        <master.properties>${masterPropsSource}</master.properties>
+        <!-- workaround src w/o tibco drivers -->
+        <tibco.driver.available>false</tibco.driver.available>
+        <SKIP_TEST_ARG>skipTests</SKIP_TEST_ARG>
+        <disable.fafj>false</disable.fafj>
       </properties>
       <repositories>
         <repository>

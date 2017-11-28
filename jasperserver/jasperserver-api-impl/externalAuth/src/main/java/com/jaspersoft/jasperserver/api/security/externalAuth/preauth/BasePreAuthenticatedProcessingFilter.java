@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2013 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -23,12 +23,13 @@ package com.jaspersoft.jasperserver.api.security.externalAuth.preauth;
 import com.jaspersoft.jasperserver.api.common.crypto.CipherI;
 import com.jaspersoft.jasperserver.api.common.crypto.PlainTextNonCipher;
 import com.jaspersoft.jasperserver.api.security.externalAuth.ExternalDataSynchronizer;
-import org.springframework.security.Authentication;
-import org.springframework.security.ui.FilterChainOrder;
-import org.springframework.security.ui.preauth.AbstractPreAuthenticatedProcessingFilter;
+import org.apache.log4j.Logger;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 /**
  * This filter class extends AbstractPreAuthenticatedProcessingFilter to
@@ -38,12 +39,18 @@ import javax.servlet.http.HttpServletResponse;
  * Date: 10/1/13
  */
 public class BasePreAuthenticatedProcessingFilter extends AbstractPreAuthenticatedProcessingFilter {
+    private Logger log = Logger.getLogger(this.getClass());
 	private String principalParameter = "pp";
 	private Boolean tokenInRequestParam = null;
 
 	private CipherI tokenDecryptor = new PlainTextNonCipher();
 
 	private ExternalDataSynchronizer externalDataSynchronizer;
+    private String jsonRedirectUrl;
+
+    public void setJsonRedirectUrl(String jsonRedirectUrl) {
+        this.jsonRedirectUrl = jsonRedirectUrl;
+    }
 
 	/**
 	 * Override to extract the principal information from the current request
@@ -102,10 +109,14 @@ public class BasePreAuthenticatedProcessingFilter extends AbstractPreAuthenticat
 	 *
 	 * @return the order value
 	 */
+    // TODO Spring Security Upgrade: clarify getOrder() and FilterChainOrder.PRE_AUTH_FILTER
+/*
 	@Override
 	public int getOrder() {
 		return FilterChainOrder.PRE_AUTH_FILTER;
 	}
+*/
+
 
 	/**
 	 *
@@ -155,6 +166,16 @@ public class BasePreAuthenticatedProcessingFilter extends AbstractPreAuthenticat
 	protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, Authentication authResult) {
 		super.successfulAuthentication(request, response, authResult);
 		externalDataSynchronizer.synchronize();
+        final String accept = request.getHeader("Accept");
+        if (accept != null && accept.toLowerCase().contains("application/json")) {
+            // JSON response is requested, let's redirect to configured URL
+            // this is used by visualize.js authentication
+            final String redirectUrl = request.getContextPath() + jsonRedirectUrl;
+            try {
+                response.sendRedirect(response.encodeRedirectURL(redirectUrl));
+            } catch (IOException e) {
+                log.error("Unable to send redirect to " + redirectUrl, e);
+            }
+        }
 	}
-
 }

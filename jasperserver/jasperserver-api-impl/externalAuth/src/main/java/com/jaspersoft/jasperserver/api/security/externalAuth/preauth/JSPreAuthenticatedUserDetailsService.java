@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2013 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -24,22 +24,24 @@ import com.jaspersoft.jasperserver.api.security.externalAuth.ExternalUserDetails
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.security.Authentication;
-import org.springframework.security.BadCredentialsException;
-import org.springframework.security.GrantedAuthority;
-import org.springframework.security.GrantedAuthorityImpl;
-import org.springframework.security.providers.preauth.PreAuthenticatedGrantedAuthoritiesUserDetailsService;
-import org.springframework.security.userdetails.UserDetails;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.authentication.preauth.PreAuthenticatedGrantedAuthoritiesUserDetailsService;
 import org.springframework.util.Assert;
 
 import javax.security.auth.login.CredentialExpiredException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -57,7 +59,8 @@ public class JSPreAuthenticatedUserDetailsService extends PreAuthenticatedGrante
 	public static final String PREAUTH_EXPIRE_TIME = "expireTime";
 	public static final String PROFILE_ATTRIBUTES = "profile.attribs";
 
-	public static final String TOKEN_KEY_VALUE_PAIR_SEPARATOR = "=";
+
+    public static final String TOKEN_KEY_VALUE_PAIR_SEPARATOR = "=";
 	public static final String TOKEN_VALUE_SEPARATOR = ",";
 
 	private String tokenPairSeparator = "\\|";
@@ -92,7 +95,7 @@ public class JSPreAuthenticatedUserDetailsService extends PreAuthenticatedGrante
 	 * @param authorities the pre-authenticated authorities.
 	 */
 	@Override
-	protected UserDetails createuserDetails(Authentication token, GrantedAuthority[] authorities) {
+	protected UserDetails createuserDetails(Authentication token, Collection<? extends GrantedAuthority> authorities) {
 		try {
 			logger.debug("Start building pre-auth user details");
 
@@ -142,12 +145,12 @@ public class JSPreAuthenticatedUserDetailsService extends PreAuthenticatedGrante
 				}
 			}
 
-			GrantedAuthority[] grantedAuthoritiesArr = new GrantedAuthority[externalUserRoles.size()];
-			int index = 0;
-			for (String r : externalUserRoles)
-				grantedAuthoritiesArr[index++] = new GrantedAuthorityImpl(r);
+            List<GrantedAuthority> authorityList = new ArrayList<GrantedAuthority>(externalUserRoles.size());
+			for (String r : externalUserRoles) {
+                authorityList.add(new SimpleGrantedAuthority(r));
+            }
 
-			ExternalUserDetails eud = createExternalUserDetails(externalUsername, grantedAuthoritiesArr, externalUserOrg, tokenExpireDateStr);
+			ExternalUserDetails eud = createExternalUserDetails(externalUsername, authorityList, externalUserOrg, tokenExpireDateStr);
 			Map<String, Object> addlDetailsMap = eud.getAdditionalDetailsMap();
 			addlDetailsMap.put(ExternalUserDetails.PROFILE_ATTRIBUTES_ADDITIONAL_MAP_KEY, externalUserProfileAttribsMap);
 			addlDetailsMap.put(ExternalUserDetails.UNMAPPED_PARAMS_MAP_KEY, unmappedParamsMap);
@@ -165,13 +168,13 @@ public class JSPreAuthenticatedUserDetailsService extends PreAuthenticatedGrante
 	 * Method creating Authentication principal UserDetails
 	 *
 	 * @param externalUsername - external username
-	 * @param grantedAuthoritiesArr - array of the external user roles
+	 * @param authorities - array of the external user roles
 	 * @param externalUserOrgArr - Not Used in non-MT version
 	 * @param tokenExpireDateStr - Token expire date.  If absent, token never expires.
 	 * @return Authentication principal UserDetails
 	 * @throws Exception if the token expire date format cannot be parsed
 	 */
-	protected ExternalUserDetails createExternalUserDetails(String externalUsername, GrantedAuthority[] grantedAuthoritiesArr, String[] externalUserOrgArr, String tokenExpireDateStr)
+	protected ExternalUserDetails createExternalUserDetails(String externalUsername, Collection<? extends GrantedAuthority> authorities, String[] externalUserOrgArr, String tokenExpireDateStr)
 		throws Exception
 	{
 		if  (logger.isDebugEnabled())
@@ -183,7 +186,7 @@ public class JSPreAuthenticatedUserDetailsService extends PreAuthenticatedGrante
 				throw new CredentialExpiredException("Pre Auth token for " + externalUsername + " has expired.");
 		}
 
-		return new ExternalUserDetails(externalUsername, grantedAuthoritiesArr);
+		return new ExternalUserDetails(externalUsername, authorities);
 	}
 
 	public void setTokenPairSeparator(String tokenPairSeparator) {

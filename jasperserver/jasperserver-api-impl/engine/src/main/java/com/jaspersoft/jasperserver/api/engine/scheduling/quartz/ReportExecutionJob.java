@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -19,42 +19,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 package com.jaspersoft.jasperserver.api.engine.scheduling.quartz;
-
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.TimeZone;
-import java.util.WeakHashMap;
-
-import net.sf.jasperreports.engine.JRParameter;
-import net.sf.jasperreports.engine.JRPrintPage;
-import net.sf.jasperreports.engine.JasperPrint;
-import net.sf.jasperreports.engine.JasperReport;
-import net.sf.jasperreports.engine.JasperReportsContext;
-import net.sf.jasperreports.engine.ReportContext;
-import net.sf.jasperreports.engine.SimpleReportContext;
-import net.sf.jasperreports.engine.export.JRHyperlinkProducerFactory;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.quartz.Job;
-import org.quartz.JobDataMap;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
-import org.quartz.SchedulerContext;
-import org.quartz.SchedulerException;
-import org.springframework.context.ApplicationContext;
-import org.springframework.mail.javamail.JavaMailSender;
 
 import com.jaspersoft.jasperserver.api.JSException;
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
@@ -90,10 +54,44 @@ import com.jaspersoft.jasperserver.api.metadata.common.util.LockManager;
 import com.jaspersoft.jasperserver.api.metadata.data.cache.DataCacheSnapshot;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportUnit;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
+import net.sf.jasperreports.engine.JRParameter;
+import net.sf.jasperreports.engine.JRPrintPage;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.JasperReportsContext;
+import net.sf.jasperreports.engine.ReportContext;
+import net.sf.jasperreports.engine.SimpleReportContext;
+import net.sf.jasperreports.engine.export.JRHyperlinkProducerFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.quartz.Job;
+import org.quartz.JobDataMap;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
+import org.quartz.SchedulerContext;
+import org.quartz.SchedulerException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.mail.javamail.JavaMailSender;
+
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.TimeZone;
+import java.util.WeakHashMap;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ReportExecutionJob.java 44777 2014-04-18 15:39:15Z tdanciu $
+ * @version $Id: ReportExecutionJob.java 51369 2014-11-12 13:59:41Z sergey.prilukin $
  */
 public class ReportExecutionJob implements Job {
 	
@@ -158,6 +156,10 @@ public class ReportExecutionJob implements Job {
 	private boolean recordDataSnapshot;
 	private boolean recordedDataSnapshot;
 	private String dataSnapshotOutputName;
+	
+	private ReportUnitResult defaultReportResult;
+	private ReportUnitResult paginatedReportResult;
+	private ReportUnitResult nonPaginatedReportResult;
 	
 	private final WeakHashMap<DataContainer, Boolean> dataContainers = new WeakHashMap<DataContainer, Boolean>();
     
@@ -253,6 +255,10 @@ public class ReportExecutionJob implements Job {
 		recordDataSnapshot = false;
 		recordedDataSnapshot = false;
 		dataSnapshotOutputName = null;
+		
+		defaultReportResult = null;
+		paginatedReportResult = null;
+		nonPaginatedReportResult = null;
 		
 		for (DataContainer dataContainer : dataContainers.keySet()) {
 			dataContainer.dispose();
@@ -421,8 +427,6 @@ public class ReportExecutionJob implements Job {
             jobDetails = getJobDetails();
             initJobExecution();
             addReportJobLabelToAuditEvent(jobDetails.getId(), jobDetails.getLabel());
-            ReportUnitResult paginatedResult = null;
-            ReportUnitResult nonPaginatedResult = null;
             boolean isMailNotificationSent = false;
             try {
                 reportUnit = (ReportUnit) getRepository().getResource(executionContext,
@@ -439,51 +443,17 @@ public class ReportExecutionJob implements Job {
 
                 if (getReportExecutionJobInit() != null)
                     jobDetails = getReportExecutionJobInit().initJob(this, jobDetails);
-                boolean needPaginatedReport = false;
-                boolean needNonPaginatedReport = false;
 
                 JasperReport jasperReport = getEngineService().getMainJasperReport(executionContext, getReportUnitURI());
-
                 List<Output> outputs = createOutputs();
-                for (Output output : outputs) {
-                    Boolean isPaginationPreferred = output.isPaginationPreferred(jasperReport);
-                    if (isPaginationPreferred != null)
-                    {
-                        needPaginatedReport = needPaginatedReport || isPaginationPreferred;
-                        needNonPaginatedReport = needNonPaginatedReport || !isPaginationPreferred;
-                    }
-                }
-                isCancelRequested();
-                // if we have data snapshot output but no regular output, run the paginated report
-                if (hasDataSnapshotOutput && !needPaginatedReport && !needNonPaginatedReport) {
-                    needPaginatedReport = true;
-                }
+                executeReport(outputs, jasperReport);
 
-                // recording a data snapshot if saving is enabled or if we need to fill the report twice
-                recordDataSnapshot = getDataSnapshotService().isSnapshotPersistenceEnabled()
-                        || (needPaginatedReport && needNonPaginatedReport);
-
-                if (!needPaginatedReport && !needNonPaginatedReport)
-                {
-                	paginatedResult = executeReport(null);
-                }
-                else
-                {
-                    if (needPaginatedReport) {
-                        paginatedResult = executeReport(Boolean.FALSE);
-                    }
-
-                    if (needNonPaginatedReport) {
-                        nonPaginatedResult = executeReport(Boolean.TRUE);
-                    }
-                }
-
-                if (paginatedResult != null || nonPaginatedResult != null) {
+                if (hasReportResult()) {
                     isCancelRequested();
                     ReportJobMailNotification mailNotification = jobDetails.getMailNotification();
                     boolean skipEmpty = false;
                     if (mailNotification != null) {
-                        skipEmpty = mailNotification.isSkipEmptyReports() && (isEmpty(paginatedResult) || isEmpty(nonPaginatedResult));
+                        skipEmpty = mailNotification.isSkipEmptyReports() && isEmptyReportResult();
                     }
                     List<ReportOutput> reportOutputs = new ArrayList<ReportOutput>();
 
@@ -499,11 +469,7 @@ public class ReportExecutionJob implements Job {
 
                         for (Output output : outputs) {
                             ReportOutput reportOutput = null;
-                            Boolean isPaginationPreferred = output.isPaginationPreferred(jasperReport);
-                            ReportUnitResult resultToExport = 
-                                isPaginationPreferred == null
-                                ? (paginatedResult == null ? nonPaginatedResult : paginatedResult)
-                                : (isPaginationPreferred ? paginatedResult : nonPaginatedResult);
+                            ReportUnitResult resultToExport = getReportResultForOutput(output, jasperReport);
 
                             if (resultToExport != null) 
                             {
@@ -553,7 +519,7 @@ public class ReportExecutionJob implements Job {
                                 // if not using hierarchy, but contains children and requires to save to repository.  regenerate the output with folder hierarchy
                                 ReportOutput reportOutputForRepository = output.getOutput(getEngineService(), executionContext, getReportUnitURI(),
                                         createDataContainer(output), getHyperlinkProducerFactory(), getRepository(),
-                                        output.isIgnorePagination() ? nonPaginatedResult.getJasperPrint() : paginatedResult.getJasperPrint(),
+                                        resultToExport.getJasperPrint(),
                                         baseFileName, getLocale(), getCharacterEncoding());
                                 isCancelRequested();
                                 if (reportOutputForRepository != null)
@@ -581,8 +547,8 @@ public class ReportExecutionJob implements Job {
             } catch (Exception otherException) {
                 handleException(getMessage("error.generating.report", null), otherException);
             } finally {
-                disposeVirtualizer(paginatedResult);
-                disposeVirtualizer(nonPaginatedResult);
+            	disposeReportResults();
+            	
                 if (!isMailNotificationSent) {
                     try {
                         // only send mail notification when exception is found
@@ -605,7 +571,100 @@ public class ReportExecutionJob implements Job {
             checkExceptions();
         }
     }
+	
+	protected void executeReport(List<Output> outputs, JasperReport jasperReport) {
+		boolean needDefaultReport = false;
+		boolean needPaginatedReport = false;
+		boolean needNonPaginatedReport = false;
+		for (Output output : outputs) {
+			Boolean isPaginationPreferred = output.isPaginationPreferred(jasperReport);
+			if (isPaginationPreferred == null) {
+				// no preference, jasperReport.isIgnorePagination() will be honoured
+				needDefaultReport = true;
+			} else {
+				// strong preference
+				needPaginatedReport = needPaginatedReport || isPaginationPreferred;
+				needNonPaginatedReport = needNonPaginatedReport || !isPaginationPreferred;
+			}
+		}
 
+		// if we have data snapshot output but no regular output, run the default paginated report
+		if (hasDataSnapshotOutput 
+				&& !(needDefaultReport || needPaginatedReport || needNonPaginatedReport)) {
+			needDefaultReport = true;
+		}
+
+		// determining if we're going to run the report twice
+		// note that defaultReportResult.isPaginated() is the same as !jasperReport.isIgnorePagination()
+		boolean runsTwice =
+				// having both strong requirements for paginated and non paginated
+				(needPaginatedReport && needNonPaginatedReport)
+				// we need paginated and the default is not paginated
+				|| (needDefaultReport && needPaginatedReport && jasperReport.isIgnorePagination())
+				// we need non paginated and the default is paginated
+				|| (needDefaultReport && needNonPaginatedReport && !jasperReport.isIgnorePagination());
+        // recording a data snapshot if saving is enabled or if we need to fill the report twice
+        recordDataSnapshot = getDataSnapshotService().isSnapshotPersistenceEnabled() || runsTwice;
+
+        // running the report
+		if (needDefaultReport) {
+			defaultReportResult = executeReport(null);
+		}
+		
+		if (needPaginatedReport
+				// if the default result is paginated, not running again
+				&& (defaultReportResult == null || !defaultReportResult.isPaginated())) {
+			paginatedReportResult = executeReport(false);
+		}
+		
+		if (needNonPaginatedReport
+				// if the default result is not paginated, not running again
+				&& (defaultReportResult == null || defaultReportResult.isPaginated())) {
+			nonPaginatedReportResult = executeReport(true);
+		}
+	}
+	
+	protected boolean hasReportResult() {
+		return defaultReportResult != null || paginatedReportResult != null || nonPaginatedReportResult != null;
+	}
+	
+	protected boolean isEmptyReportResult() {
+		return isEmpty(defaultReportResult) || isEmpty(paginatedReportResult) || isEmpty(nonPaginatedReportResult);
+	}
+
+	protected ReportUnitResult getReportResultForOutput(Output output, JasperReport jasperReport) throws JobExecutionException {
+        Boolean isPaginationPreferred = output.isPaginationPreferred(jasperReport);
+        ReportUnitResult result;
+        if (isPaginationPreferred == null) {
+        	result = defaultReportResult;
+        } else if (isPaginationPreferred) {
+        	if (paginatedReportResult != null) {
+        		result = paginatedReportResult;
+        	} else if (defaultReportResult != null && defaultReportResult.isPaginated()) {
+        		result = defaultReportResult;
+        	} else {
+        		// should not happen
+        		throw new JobExecutionException("Did not find paginated report");
+        	}
+        } else {//!isPaginationPreferred
+        	if (nonPaginatedReportResult != null) {
+        		result = nonPaginatedReportResult;
+        	} else if (defaultReportResult != null && !defaultReportResult.isPaginated()) {
+        		result = defaultReportResult;
+        	} else {
+        		// should not happen
+        		throw new JobExecutionException("Did not find nonpaginated report");
+        	}
+        }
+        return result;
+	}
+	
+	protected void disposeReportResults() {
+        disposeVirtualizer(defaultReportResult);
+        disposeVirtualizer(paginatedReportResult);
+        disposeVirtualizer(nonPaginatedReportResult);
+	}
+    
     protected void sendAlertMail()  throws JobExecutionException {
 		ReportJobAlert alert = jobDetails.getAlert();
         if (alert == null) return;
@@ -642,6 +701,11 @@ public class ReportExecutionJob implements Job {
 
 	protected ReportUnitResult executeReport(Boolean ignorePagination) 
 	{
+		isCancelRequested();
+		if (log.isDebugEnabled()) {
+			log.debug("running report with ignorePagination " + ignorePagination);
+		}
+		
 		ReportUnitResult result = null;
 		try
 		{
@@ -1016,7 +1080,7 @@ public class ReportExecutionJob implements Job {
                 break;
             case OWNER_AND_ADMIN:
                 if (!isDisableSendingAlertToAdmin()) {
-                    userList = getSecurityContextProvider().getUserAuthorityService().getUsersInRole(executionContext, adminRoleName);
+                userList = getSecurityContextProvider().getUserAuthorityService().getUsersInRole(executionContext, adminRoleName);
                     if (userList != null) for (Object user1 : userList) if (((User) user1).getEmailAddress() != null && !(((User) user1).getEmailAddress()).trim().isEmpty() && fromSameOrganization(user, (User)user1))  toAddresses.add(((User)user1).getEmailAddress());
                 }
                 if (!isDisableSendingAlertToOwner()) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -21,9 +21,10 @@
 package com.jaspersoft.jasperserver.war.model;
 
 import com.jaspersoft.jasperserver.api.JasperServerAPI;
-import java.util.List;
-
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
+
+import java.io.Serializable;
+import java.util.List;
 
 /**
  * The base interface for tree data provider.
@@ -33,7 +34,7 @@ import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
  * @author asokolnikov
  */
 @JasperServerAPI
-public interface TreeDataProvider {
+public interface TreeDataProvider extends Serializable {
 
     /**
      * Returns an instance of TreeNode for a given URI.

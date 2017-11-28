@@ -351,7 +351,7 @@ public final class ParametersHelper {
         control.setName(name);
         control.setLabel(label);
         control.setMandatory(mandatory);
-        control.setType(type);
+        control.setInputControlType(type);
         control.setQueryValueColumn(queryValueColumn);
         control.addQueryVisibleColumn(queryValueColumn);
 
@@ -367,7 +367,7 @@ public final class ParametersHelper {
 
             if (controlDataType != null) {
                 DataType dataType = new DataTypeImpl();
-                dataType.setType(controlDataType);
+                dataType.setDataTypeType(controlDataType);
                 control.setDataType(dataType);
             }
         }
@@ -377,7 +377,7 @@ public final class ParametersHelper {
     public void setDataType(String controlName, Byte dataType) {
         if (dataType != null) {
             DataType type = new DataTypeImpl();
-            type.setType(dataType);
+            type.setDataTypeType(dataType);
             getInputControl(controlName).setDataType(type);
         } else {
             getInputControl(controlName).setDataType((ResourceReference) null);

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -38,6 +38,8 @@ import org.springframework.webflow.core.collection.ParameterMap;
 import org.springframework.webflow.core.collection.SharedAttributeMap;
 import org.springframework.webflow.execution.RequestContext;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.io.Serializable;
 import java.util.Collection;
 
@@ -110,9 +112,12 @@ public class BaseSearchAction extends BaseFormAction implements Serializable {
     }
 
     protected SearchHolder getSearchHolder(RequestContext context) {
-        SharedAttributeMap session = context.getExternalContext().getSessionMap();
+        //SharedAttributeMap session = context.getExternalContext().getSessionMap();
+        //return (SearchHolder)session.get(ATTRIBUTE_SEARCH_HOLDER);
 
-        return (SearchHolder)session.get(ATTRIBUTE_SEARCH_HOLDER);
+        //Bug 38179
+        HttpSession sess =((HttpServletRequest)context.getExternalContext().getNativeRequest()).getSession();
+        return (SearchHolder)sess.getAttribute(ATTRIBUTE_SEARCH_HOLDER);
     }
 
     protected SearchMode getMode(RequestContext context) {

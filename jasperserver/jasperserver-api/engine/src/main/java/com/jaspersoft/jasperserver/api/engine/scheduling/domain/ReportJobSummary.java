@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -37,7 +37,7 @@ import java.io.Serializable;
  * </p>
  * 
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ReportJobSummary.java 22152 2012-02-10 13:55:42Z ykovalchyk $
+ * @version $Id: ReportJobSummary.java 47331 2014-07-18 09:13:06Z kklein $
  * @see ReportSchedulingService#getScheduledJobs(com.jaspersoft.jasperserver.api.common.domain.ExecutionContext, String)
  * @see ReportSchedulingService#getScheduledJobs(com.jaspersoft.jasperserver.api.common.domain.ExecutionContext)
  * @see ReportJobRuntimeInformation

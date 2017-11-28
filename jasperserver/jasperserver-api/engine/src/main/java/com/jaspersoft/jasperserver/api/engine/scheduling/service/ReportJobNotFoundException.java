@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -29,7 +29,7 @@ import com.jaspersoft.jasperserver.api.engine.scheduling.domain.ReportJob;
  * Exception type used when a report job is not found for a specified ID.
  * 
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ReportJobNotFoundException.java 19921 2010-12-11 14:52:49Z tmatyashovsky $
+ * @version $Id: ReportJobNotFoundException.java 47331 2014-07-18 09:13:06Z kklein $
  * @since 1.0
  * @see ReportJob#getId()
  */

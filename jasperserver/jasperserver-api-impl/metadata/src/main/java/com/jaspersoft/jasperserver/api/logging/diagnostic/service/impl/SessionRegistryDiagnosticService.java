@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -22,10 +22,10 @@
 package com.jaspersoft.jasperserver.api.logging.diagnostic.service.impl;
 
 import com.jaspersoft.jasperserver.api.logging.diagnostic.domain.DiagnosticAttribute;
+import com.jaspersoft.jasperserver.api.logging.diagnostic.helper.DiagnosticAttributeBuilder;
 import com.jaspersoft.jasperserver.api.logging.diagnostic.service.Diagnostic;
 import com.jaspersoft.jasperserver.api.logging.diagnostic.service.DiagnosticCallback;
-import com.jaspersoft.jasperserver.api.logging.diagnostic.helper.DiagnosticAttributeBuilder;
-import org.springframework.security.concurrent.SessionRegistry;
+import org.springframework.security.core.session.SessionRegistry;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -43,7 +43,7 @@ public class SessionRegistryDiagnosticService implements Diagnostic {
             .addDiagnosticAttribute(DiagnosticAttributeBuilder.TOTAL_LOGGED_IN_USERS, new DiagnosticCallback<Integer>() {
                 @Override
                 public Integer getDiagnosticAttributeValue() {
-                    return sessionRegistry.getAllPrincipals().length;
+                    return sessionRegistry.getAllPrincipals().size();
                 }
             })
             .addDiagnosticAttribute(DiagnosticAttributeBuilder.TOTAL_SESSIONS_BY_USER, new DiagnosticCallback<Map<String, Integer>>() {
@@ -51,7 +51,7 @@ public class SessionRegistryDiagnosticService implements Diagnostic {
                 public Map<String, Integer> getDiagnosticAttributeValue() {
                     Map<String, Integer> sessionsCountForUser = new HashMap<String, Integer>();
                     for (Object principle : sessionRegistry.getAllPrincipals()) {
-                        sessionsCountForUser.put(principle.toString(), sessionRegistry.getAllSessions(principle, false).length);
+                        sessionsCountForUser.put(principle.toString(), sessionRegistry.getAllSessions(principle, false).size());
                     }
                     return sessionsCountForUser;
                 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2014 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -21,13 +21,13 @@
 
 define({
     AWS: "application/repository.awsDataSource+json",
-    BEAN: "application/connections.bean+json",
+    BEAN: "application/repository.beanDataSource+json",
     JDBC: "application/repository.jdbcDataSource+json",
-    JNDI: "application/connections.jndi+json",
+    JNDI: "application/repository.jndiJdbcDataSource+json",
     VIRTUAL: "application/repository.virtualDataSource+json",
     MONGODB: "application/connections.mongodb+json",
     HIVE: "application/connections.hive+json",
-    TXT_FILE: "application/connections.txtFile+json",
+    TEXT_FILE: "application/connections.txtFile+json",
     XLS_FILE: "application/connections.xlsFile+json",
     CUSTOM: "application/repository.customDataSource+json"
 });

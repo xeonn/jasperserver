@@ -13,13 +13,13 @@
     <alias name="${bean.userAuthorityService}" alias="concreteUserAuthorityService"/>
     <alias name="${bean.permissionsService}" alias="concretePermissionsService"/>
     <alias name="${bean.remoteResourceHandlerRegistry}" alias="remoteResourceHandlerRegistry"/>
-    <alias name="${bean.tenantService}" alias="concreteTenantService"/>
     <alias name="${bean.reportSchedulingService}" alias="concreteReportSchedulingService"/>
     <alias name="${bean.securityContextProvider}" alias="concreteSecurityContextProvider"/>
     <alias name="${bean.serverInfoService}" alias="concreteServerInfoService"/>
     <alias name="${bean.reportExecutor}" alias="reportExecutor"/>
     <alias name="${bean.reportJobsPersistenceService}" alias="concreteJobsPersistenceService"/>
     <alias name="${bean.filterResolver}" alias="filterResolver"/>
+    <alias name="fullHtmlExportStrategy" alias="defaultHtmlExportStrategy"/>
 
     <util:list id="defaultRoles">
         <bean class="com.jaspersoft.jasperserver.api.metadata.user.domain.client.RoleImpl">
@@ -77,7 +77,7 @@
     </util:list>
 
     <bean id="htmlHeaderPrefix" class="java.lang.String">
-        <constructor-arg index="0">
+        <constructor-arg index="0" type="java.lang.String">
             <value>
                 <![CDATA[
 <html>
@@ -91,19 +91,19 @@
 
 
     <bean id="htmlHeaderBody" class="java.lang.String">
-        <constructor-arg index="0">
+        <constructor-arg index="0" type="java.lang.String">
             <!--{contextPath} placeholder (multiple usage is supported) is replaced by real contextPath in runtime.-->
             <!--See com.jaspersoft.jasperserver.remote.exporters.HtmlExporter-->
             <value>
                 <![CDATA[
-                        <style type="text/css">.jrPage{margin-left: auto;margin-right: auto;}</style>
+        <style type="text/css">.jrPage{margin-left: auto;margin-right: auto;}</style>
                 ]]>
             </value>
         </constructor-arg>
     </bean>
 
     <bean id="htmlHeaderSuffix" class="java.lang.String">
-        <constructor-arg index="0">
+        <constructor-arg index="0" type="java.lang.String">
             <value>
                 <![CDATA[
     </head>
@@ -122,6 +122,7 @@
         <property name="propertiesMap">
             <props>
                 <prop key="com.jaspersoft.jasperreports.highcharts.generate.image">false</prop>
+                <!--<prop key="com.jaspersoft.jasperreports.highcharts.html.export.type">standalone</prop>-->
             </props>
         </property>
     </bean>
@@ -149,6 +150,13 @@
         <entry key="odt" value-ref="remoteOdtExporter"/>
         <entry key="ods" value-ref="remoteOdsExporter"/>
         <entry key="docx" value-ref="remoteDocxExporter"/>
+        <entry key="pptx" value-ref="remotePptxExporter"/>
+        <entry key="json" value-ref="remoteJsonMetadataExporter"/>
+    </util:map>
+
+    <util:map id="htmlExportStrategies">
+        <entry key="full" value-ref="fullHtmlExportStrategy"/>
+        <entry key="embeddable" value-ref="embeddableHtmlExportStrategy"/>
     </util:map>
 
     <!--The set of file types, which must be created as FileResource.
@@ -160,9 +168,11 @@
        <value>prop</value>
        <value>jrtx</value>
        <value>xml</value>
+       <value>json</value>
        <value>css</value>
        <value>accessGrantSchema</value>
        <value>olapMondrianSchema</value>
+       <value>dashboardComponent</value>
        <value>img</value>
     </util:set>
 

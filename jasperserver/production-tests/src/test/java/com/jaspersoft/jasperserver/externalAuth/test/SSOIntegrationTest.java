@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2012 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -31,9 +31,9 @@ import com.jaspersoft.jasperserver.externalAuth.mocks.MockSsoTicketValidatorImpl
 import org.springframework.mock.web.MockFilterChain;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.security.ui.ExceptionTranslationFilter;
-import org.springframework.security.ui.webapp.AuthenticationProcessingFilterEntryPoint;
-import org.springframework.security.util.FilterChainProxy;
+import org.springframework.security.web.access.ExceptionTranslationFilter;
+import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
+import org.springframework.security.web.FilterChainProxy;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -95,7 +95,8 @@ public class SSOIntegrationTest extends BaseTransactionalTestNGSpringContextTest
 
 			//test redirect to login screen
 			final MockHttpServletRequest mockRequest = new MockHttpServletRequest("GET", "/home.html");
-			mockRequest.setServletPath(null);
+			mockRequest.setServletPath("/home.html");
+
 			final MockHttpServletResponse mockResponse = new MockHttpServletResponse();
 			assertNull(mockResponse.getRedirectedUrl(), "Redirect url should be null at the start");
 			filterChainProxy.doFilter(mockRequest, mockResponse, new MockFilterChain());
@@ -105,7 +106,7 @@ public class SSOIntegrationTest extends BaseTransactionalTestNGSpringContextTest
 			assertNotNull(redirectUrlStr, "Redirect url should not be null");
 			logger.info("SSO redirect url: " + redirectUrlStr);
 			String configuredLoginFormUrl =
-					((AuthenticationProcessingFilterEntryPoint)proxyExceptionTranslationFilter.getAuthenticationEntryPoint()).getLoginFormUrl();
+					((LoginUrlAuthenticationEntryPoint)proxyExceptionTranslationFilter.getAuthenticationEntryPoint()).getLoginFormUrl();
 			assertNotNull(mockResponse.getRedirectedUrl(), "Redirect url should NOT be null at the start");
 			final String responseRedirectUrlPath = new URL(mockResponse.getRedirectedUrl()).getPath();
 			final String configuredLoginFormUrlPath = new URI(configuredLoginFormUrl).getPath();
@@ -115,14 +116,15 @@ public class SSOIntegrationTest extends BaseTransactionalTestNGSpringContextTest
 			assertNull(mockSsoTicketValidator.getTicketValidationUrl(), "Ticket validation url should be null at the start");
 			final String testTicket = "testTicket";
 			MockHttpServletRequest mockRequest2 = new MockHttpServletRequest("GET", "/j_spring_security_check");
-			mockRequest2.setServletPath(null);
+			mockRequest2.setServletPath("/j_spring_security_check");
+
 			mockRequest2.setParameter(externalAuthProperties.getTicketParameterName(), testTicket);
 			RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(mockRequest2));
 			filterChainProxy.doFilter(mockRequest2, new MockHttpServletResponse(), new MockFilterChain());
 
 			//check ticket validation Url is ok
 			final URI ticketValidationUrl = mockSsoTicketValidator.getTicketValidationUrl();
-			assertNotNull(ticketValidationUrl, "Ticket validation url should be not be null");
+			assertNotNull(ticketValidationUrl, "Ticket validation url should not be null");
 
 			final URI testTicketValidationUrl = new URI(externalAuthProperties.getSsoServerTicketValidationUrl() + "?" +
 					externalAuthProperties.getTicketParameterName() + "=" + testTicket +
@@ -172,7 +174,7 @@ public class SSOIntegrationTest extends BaseTransactionalTestNGSpringContextTest
 
 			//test redirect to login screen
 			final MockHttpServletRequest mockRequest = new MockHttpServletRequest("GET", "/home.html");
-			mockRequest.setServletPath(null);
+			mockRequest.setServletPath("/home.html");
 			final MockHttpServletResponse mockResponse = new MockHttpServletResponse();
 			assertNull(mockResponse.getRedirectedUrl(), "Redirect url should be null at the start");
 			filterChainProxy.doFilter(mockRequest, mockResponse, new MockFilterChain());
@@ -182,7 +184,7 @@ public class SSOIntegrationTest extends BaseTransactionalTestNGSpringContextTest
 			assertNotNull(redirectUrlStr, "Redirect url should not be null");
 			logger.info("SSO redirect url: " + redirectUrlStr);
 			String configuredLoginFormUrl =
-					((AuthenticationProcessingFilterEntryPoint)proxyExceptionTranslationFilter.getAuthenticationEntryPoint()).getLoginFormUrl();
+					((LoginUrlAuthenticationEntryPoint)proxyExceptionTranslationFilter.getAuthenticationEntryPoint()).getLoginFormUrl();
 			assertNotNull("Redirect url should NOT be null at the start", mockResponse.getRedirectedUrl());
 			final String responseRedirectUrlPath = new URL(mockResponse.getRedirectedUrl()).getPath();
 			final String configuredLoginFormUrlPath = new URI(configuredLoginFormUrl).getPath();
@@ -192,14 +194,15 @@ public class SSOIntegrationTest extends BaseTransactionalTestNGSpringContextTest
 			assertNull(mockSsoTicketValidator.getTicketValidationUrl(), "Ticket validation url should be null at the start");
 			final String testTicket = "testTicket";
 			MockHttpServletRequest mockRequest2 = new MockHttpServletRequest("GET", "/j_spring_security_check");
-			mockRequest2.setServletPath(null);
+			mockRequest2.setServletPath("/j_spring_security_check");
+
 			mockRequest2.setParameter(externalAuthProperties.getTicketParameterName(), testTicket);
 			RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(mockRequest2));
 			filterChainProxy.doFilter(mockRequest2, new MockHttpServletResponse(), new MockFilterChain());
 
 			//check ticket validation Url is ok
 			final URI ticketValidationUrl = mockSsoTicketValidator.getTicketValidationUrl();
-			assertNotNull(ticketValidationUrl, "Ticket validation url should be not be null");
+			assertNotNull(ticketValidationUrl, "Ticket validation url should not be null");
 
 			final URI testTicketValidationUrl = new URI(externalAuthProperties.getSsoServerTicketValidationUrl() + "?" +
 					externalAuthProperties.getTicketParameterName() + "=" + testTicket +
@@ -247,7 +250,7 @@ public class SSOIntegrationTest extends BaseTransactionalTestNGSpringContextTest
 			//re-login user
 			final String testTicket3 = "testTicket";
 			MockHttpServletRequest mockRequest3 = new MockHttpServletRequest("GET", "/j_spring_security_check");
-			mockRequest3.setServletPath(null);
+			mockRequest3.setServletPath("/test.html");
 			mockRequest3.setParameter(externalAuthProperties.getTicketParameterName(), testTicket3);
 			RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(mockRequest3));
 			filterChainProxy.doFilter(mockRequest3, new MockHttpServletResponse(), new MockFilterChain());

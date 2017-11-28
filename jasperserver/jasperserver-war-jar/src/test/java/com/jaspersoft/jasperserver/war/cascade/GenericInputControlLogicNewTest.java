@@ -62,7 +62,7 @@ import static org.unitils.reflectionassert.ReflectionAssert.assertReflectionEqua
  * Tests for {@link com.jaspersoft.jasperserver.war.cascade.GenericInputControlLogic}
  *
  * @author Sergey Prilukin
- * @version $Id: GenericInputControlLogicNewTest.java 35226 2013-08-09 07:08:53Z inesterenko $
+ * @version $Id: GenericInputControlLogicNewTest.java 48468 2014-08-21 07:47:20Z yuriy.plakosh $
  */
 
 public class GenericInputControlLogicNewTest extends UnitilsJUnit4 {
@@ -945,7 +945,7 @@ public class GenericInputControlLogicNewTest extends UnitilsJUnit4 {
         mockedServices.put("filterResolver", createFilterResolver());
         mockedServices.put("cachedEngineService", cachedEngineServiceMock.getMock());
         mockedServices.put("cachedEngine", createEngineService());
-        mockedServices.put("messagesCalendarFormatProvider", createCalendarFormatProvider());
+        mockedServices.put("isoCalendarFormatProvider", createCalendarFormatProvider());
         mockedServices.put("messageSource", createMessageSource());
 
         ApplicationContext context = setUpApplicationContext(mockedServices, "classpath:/com/jaspersoft/jasperserver/war/cascade/applicationContext-cascade-test.xml");

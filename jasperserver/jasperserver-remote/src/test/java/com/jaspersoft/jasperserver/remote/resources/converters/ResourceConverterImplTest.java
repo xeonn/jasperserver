@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005 - 2009 Jaspersoft Corporation. All rights  reserved.
+* Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
 * http://www.jaspersoft.com.
 *
 * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -42,7 +42,7 @@ import com.jaspersoft.jasperserver.war.cascade.handlers.GenericTypeProcessorRegi
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.security.Authentication;
+import org.springframework.security.core.Authentication;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -64,7 +64,7 @@ import static org.testng.Assert.*;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: ResourceConverterImplTest.java 42684 2014-03-06 14:26:22Z ykovalchyk $
+ * @version $Id: ResourceConverterImplTest.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
 public class ResourceConverterImplTest {
     private static final String TEST_CLIENT_OBJECT_NAME = "testClientObjectName";
@@ -84,12 +84,6 @@ public class ResourceConverterImplTest {
         permission.setPermissionMask(1);
         MockitoAnnotations.initMocks(this);
         when(permissionsService.getEffectivePermission(any(Resource.class), any(Authentication.class))).thenReturn(permission);
-    }
-
-    @Test(expectedExceptions = {MandatoryParameterNotFoundException.class})
-    public void toClient_EmptyLabel() throws Exception {
-        when(converter.genericFieldsToServer(any(ClientResource.class), any(Resource.class), eq(options))).thenCallRealMethod();
-        converter.genericFieldsToServer(new ClientAdhocDataView(), null, options);
     }
 
     @Test(expectedExceptions = JSValidationException.class)
@@ -115,6 +109,33 @@ public class ResourceConverterImplTest {
         when(converter.resourceSpecificFieldsToServer(clientObject, anotherServerObject, options)).thenReturn(anotherServerObject);
         converter.toServer(clientObject, serverObject, options);
         verify(converter).validateResource(anotherServerObject);
+    }
+
+    @Test
+    public void toServer_withValidation_optionsNull() throws MandatoryParameterNotFoundException, IllegalParameterValueException {
+        ResourceLookup serverObject = new ResourceLookupImpl();
+        ResourceLookup anotherServerObject = new ResourceLookupImpl();
+        final ClientFolder clientObject = new ClientFolder();
+        serverObject.setURIString("/test/uri");
+        when(converter.toServer(clientObject, serverObject, null)).thenCallRealMethod();
+        when(converter.genericFieldsToServer(clientObject, serverObject, null)).thenReturn(anotherServerObject);
+        when(converter.resourceSpecificFieldsToServer(clientObject, anotherServerObject, null)).thenReturn(anotherServerObject);
+        converter.toServer(clientObject, serverObject, null);
+        verify(converter).validateResource(anotherServerObject);
+    }
+
+    @Test
+    public void toServer_validationSuppressed() throws MandatoryParameterNotFoundException, IllegalParameterValueException {
+        ResourceLookup serverObject = new ResourceLookupImpl();
+        ResourceLookup anotherServerObject = new ResourceLookupImpl();
+        final ClientFolder clientObject = new ClientFolder();
+        ToServerConversionOptions toServerConversionOptions = ToServerConversionOptions.getDefault().setSuppressValidation(true);
+        serverObject.setURIString("/test/uri");
+        when(converter.toServer(clientObject, serverObject, toServerConversionOptions)).thenCallRealMethod();
+        when(converter.genericFieldsToServer(clientObject, serverObject, toServerConversionOptions)).thenReturn(anotherServerObject);
+        when(converter.resourceSpecificFieldsToServer(clientObject, anotherServerObject, toServerConversionOptions)).thenReturn(anotherServerObject);
+        converter.toServer(clientObject, serverObject, toServerConversionOptions);
+        verify(converter, never()).validateResource(any(Resource.class));
     }
 
     @Test

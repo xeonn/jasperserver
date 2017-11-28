@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2012 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -15,15 +15,17 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Affero  General Public License for more details.
  *
- *  You should have received a copy of the GNU Affero General Public  License
- *  along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public  License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 package com.jaspersoft.jasperserver.api.security.externalAuth.sso;
 
 import com.jaspersoft.jasperserver.api.JasperServerAPI;
-import org.springframework.security.GrantedAuthority;
-import org.springframework.security.providers.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+
+import java.util.Collection;
 
 /**
  * SSO authentication token constructed and validated by SSO framework.
@@ -55,7 +57,7 @@ public class SsoAuthenticationToken extends UsernamePasswordAuthenticationToken 
 	 * @param credentials
 	 * @param authorities
 	 */
-	public SsoAuthenticationToken(Object ticket, Object principal, Object credentials, GrantedAuthority[] authorities) {
+	public SsoAuthenticationToken(Object ticket, Object principal, Object credentials, Collection<? extends GrantedAuthority> authorities) {
 		super(principal, credentials, authorities);
 		this.ticket = ticket;
 	}

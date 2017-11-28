@@ -1,5 +1,5 @@
 <%--
-  ~ Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+  ~ Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
   ~ http://www.jaspersoft.com.
   ~
   ~ Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -73,7 +73,12 @@
         '<spring:message code="ADH_1214_ICHARTS_NO_DATA_MULTI_AXIS_COLUMN" javaScriptEscape="true"/>',
         '<spring:message code="ADH_1214_ICHARTS_NO_DATA_SCATTER" javaScriptEscape="true"/>',
         '<spring:message code="ADH_1214_ICHARTS_NO_DATA_BUBBLE" javaScriptEscape="true"/>',
-        '<spring:message code="ADH_1214_ICHARTS_NO_DATA_DUAL_LEVEL_PIE" javaScriptEscape="true"/>'
+        '<spring:message code="ADH_1214_ICHARTS_NO_DATA_DUAL_LEVEL_PIE" javaScriptEscape="true"/>',
+        '<spring:message code="ADH_1214_ICHARTS_NO_DATA_HEAT_MAP_NON_OLAP" javaScriptEscape="true"/>',
+        '<spring:message code="ADH_1214_ICHARTS_NO_DATA_HEAT_MAP_OLAP" javaScriptEscape="true"/>',
+        '<spring:message code="ADH_1214_ICHARTS_NO_DATA_TIME_SERIES_HEAT_MAP" javaScriptEscape="true"/>',
+        '<spring:message code="ADH_1214_ICHARTS_NO_DATA_SPEEDOMETER" javaScriptEscape="true"/>',
+        '<spring:message code="ADH_1214_ICHARTS_NO_DATA_GAUGE" javaScriptEscape="true"/>'
     ];
 
     Report.flowExecutionKey = '${flowExecutionKey}';

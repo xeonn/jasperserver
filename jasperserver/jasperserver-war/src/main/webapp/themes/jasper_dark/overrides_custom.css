@@ -125,7 +125,8 @@ a#about:active {
 .column.decorated.minimized .vtitle, 
 .tabSet.horizontal.buttons .selected > .button > .wrap,
 #filter-container .filterName,
-#expression-container .filterName {
+#expression-container .filterName,
+#scheduler_editor #stepDisplay > fieldset > legend {
 	color: #035b85;
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -26,7 +26,7 @@ import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceContainer;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: RepositoryContextManager.java 29216 2013-03-05 13:47:28Z lchirita $
+ * @version $Id: RepositoryContextManager.java 47331 2014-07-18 09:13:06Z kklein $
  */
 public interface RepositoryContextManager {
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -30,7 +30,7 @@ import java.util.*;
  * to bind a resource handler with resource types using the wsType.
  *
  * @author Giulio Toffoli (giulio@jaspersoft.com)
- * @version $Id: MapResourceHandlerRegistry.java 23353 2012-04-24 12:09:05Z ykovalchyk $
+ * @version $Id: MapResourceHandlerRegistry.java 47331 2014-07-18 09:13:06Z kklein $
  */
 public class MapResourceHandlerRegistry implements ResourceHandlerRegistry, InitializingBean{
 

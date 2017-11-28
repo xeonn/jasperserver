@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -41,8 +41,8 @@ import mondrian.xmla.XmlaHandler;
 import org.olap4j.OlapConnection;
 import org.olap4j.OlapException;
 import org.olap4j.impl.Olap4jUtil;
-import org.springframework.security.Authentication;
-import org.springframework.security.context.SecurityContextHolder;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.context.request.RequestContextHolder;
 
 import java.sql.SQLException;
@@ -57,7 +57,7 @@ import static org.apache.commons.lang.StringUtils.isNotEmpty;
  * Implementation of {@link mondrian.server.Repository} that reads from JRS databases.
  *
  * @author vsabadosh
- * @version $Id: XmlaRepositoryImpl.java 44312 2014-04-09 14:30:12Z vsabadosh $
+ * @version $Id: XmlaRepositoryImpl.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
 public class XmlaRepositoryImpl implements Repository, UpdatableXMLAContainer {
 

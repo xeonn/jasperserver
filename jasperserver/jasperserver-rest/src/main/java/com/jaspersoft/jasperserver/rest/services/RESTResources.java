@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -46,7 +46,7 @@ import java.util.List;
  * To the client is sent a flat list of ResourceDescriptors in the tag resourceDescriptors.
  *
  * @author gtoffoli
- * @version $Id: RESTResources.java 23246 2012-04-18 08:25:54Z ykovalchyk $
+ * @version $Id: RESTResources.java 47331 2014-07-18 09:13:06Z kklein $
  */
 @Component("restResourcesService")
 public class RESTResources extends RESTAbstractService {

@@ -17,7 +17,7 @@
         <property name="outputLocalFolder" column="output_local_folder" type="string" length="250" not-null="false"/>
         <component name="outputFTPInfo" class="com.jaspersoft.jasperserver.api.engine.scheduling.hibernate.PersistentFTPInfo">
             <property name="userName" column="user_name" not-null="false" type="string" length="50"/>
-            <property name="password" column="password" not-null="false" type="string" length="50"/>
+            <property name="password" column="password" not-null="false" type="string" length="250"/>
             <property name="serverName" column="server_name" not-null="false" type="string" length="150"/>
             <property name="folderPath" column="folder_path" not-null="false" type="string" length="250"/>
             <map name="propertiesMap" table="JIFTPInfoProperties">

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -29,7 +29,7 @@ import java.io.Serializable;
  * ResourceReference is the class which references any JasperServer resource
  *
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ResourceReference.java 35612 2013-08-16 23:20:54Z schubar $
+ * @version $Id: ResourceReference.java 50011 2014-10-09 16:57:26Z vzavadskii $
  */
 @JasperServerAPI
 @XmlRootElement(name = "resourceReference")
@@ -71,6 +71,10 @@ public class ResourceReference implements Serializable {
 	public ResourceReference(Resource localResource) {
 		setLocalResource(localResource);
 	}
+
+    public ResourceReference() {
+
+    }
 
     /**
      * Shows if ResourceReference contains its own local resource

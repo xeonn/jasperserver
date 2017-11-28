@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -57,7 +57,7 @@ import com.jaspersoft.jasperserver.api.metadata.view.domain.FilterCriteria;
  * @author Andrew Sokolnikov
  * @author Stas Chubar
  * @author Yuri Plakosh
- * @version $Id: RepositoryService.java 45213 2014-04-29 13:37:51Z vsabadosh $
+ * @version $Id: RepositoryService.java 51369 2014-11-12 13:59:41Z sergey.prilukin $
  * @since 1.0
  */
 @JasperServerAPI
@@ -192,19 +192,19 @@ public interface RepositoryService
 
     public int getFoldersCount(String parentURI);
 
-        /**
-         * Returns a list of all folders under a specific parent folders.
+	/**
+	 * Returns a list of all folders under a specific parent folders.
          *
-         * <p>
-         * The list returned by this method contains all visible folders
-         * that have the specified folder as ancestor, including the specified
-         * folder itself.
+	 * <p>
+	 * The list returned by this method contains all visible folders
+	 * that have the specified folder as ancestor, including the specified
+	 * folder itself.
          *
-         * @param context the execution context
-         * @param parentURI the URI of the parent folder
-         * @return a list of {@link Folder} instances sorted by repository paths
-         * @since 3.5.0
-         */
+	 * @param context the execution context
+	 * @param parentURI the URI of the parent folder
+	 * @return a list of {@link Folder} instances sorted by repository paths
+	 * @since 3.5.0
+	 */
 	public List getAllSubfolders(ExecutionContext context, String parentURI);
 
 	/**
@@ -725,4 +725,13 @@ public interface RepositoryService
      * @return  external path
      */
     String transformPathToExternal(String internalPath);
+
+    /**
+     * run an HQL query and return either resource objects or lookups
+     * @param context
+     * @param asLookups
+     * @param hqlQueryString
+     * @return
+     */
+	public abstract List<? extends Object> getResources(ExecutionContext context, boolean asLookups, String hqlQueryString);
 }

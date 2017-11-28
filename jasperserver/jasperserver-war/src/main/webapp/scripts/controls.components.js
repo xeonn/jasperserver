@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2014 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -22,10 +22,10 @@
 
 /**
  * @author: afomin, inesterenko
- * @version: $Id: controls.components.js 45458 2014-05-07 13:21:06Z sergey.prilukin $
+ * @version: $Id: controls.components.js 8032 2014-11-14 15:41:52Z psavushchik $
  */
 
-JRS.Controls = (function (jQuery, _, Controls /*, SingleSelect, MultiSelect, CacheableDataProvider*/) {
+JRS.Controls = (function (jQuery, _, Controls) {
 
 //module:
 //
@@ -47,6 +47,29 @@ JRS.Controls = (function (jQuery, _, Controls /*, SingleSelect, MultiSelect, Cac
 //  jQuery          - jquery v1.7.1
 //  _,         - underscore.js 1.3.1
 //  Controls   - controls.core module
+    var dateUtil;
+    require(["common/util/parse/date"],
+        function(dateUtilModule){
+            dateUtil =dateUtilModule;
+    });
+
+    var SingleSelect,
+        MultiSelect,
+        CacheableDataProvider;
+
+    require(["common/component/singleSelect/view/SingleSelect"],
+        function(SingleSelectModule){
+            SingleSelect = SingleSelectModule;
+        });
+    require(["common/component/multiSelect/view/MultiSelect"],
+        function(MultiSelectModule){
+            MultiSelect = MultiSelectModule;
+        });
+    require(["common/component/singleSelect/dataprovider/CacheableDataProvider"],
+        function(cacheableDataProviderModule){
+            CacheableDataProvider = cacheableDataProviderModule;
+        });
+
 
     function changeDateFunc(dateText) {
         this.set({selection:dateText});
@@ -151,6 +174,18 @@ JRS.Controls = (function (jQuery, _, Controls /*, SingleSelect, MultiSelect, Cac
                 args.visible && this.setupCalendar();
             },
 
+            get: function(attribute){
+                var localizedDate = Controls.BaseControl.prototype.get.call(this, attribute);
+                return dateUtil.localizedDateToIsoDate(localizedDate);
+            },
+
+            set: function(attributes, preventNotification){
+                if(attributes.values){
+                    attributes.values = dateUtil.isoDateToLocalizedDate(attributes.values);
+                }
+                Controls.BaseControl.prototype.set.call(this, attributes, preventNotification);
+            },
+
             setupCalendar:function () {
                 var input = this.getElem().find('input');
 
@@ -229,6 +264,18 @@ JRS.Controls = (function (jQuery, _, Controls /*, SingleSelect, MultiSelect, Cac
                 var button = this.getElem().find('button');
                 button.wrap(ControlsBase.CALENDAR_ICON_SPAN).empty();
             },
+
+            get: function(attribute){
+                var localizedDateTime = Controls.BaseControl.prototype.get.call(this, attribute);
+                return dateUtil.localizedTimestampToIsoTimestamp(localizedDateTime);
+            },
+
+            set: function(attributes, preventNotification){
+                if(attributes.values){
+                    attributes.values = dateUtil.isoTimestampToLocalizedTimestamp(attributes.values);
+                }
+                Controls.BaseControl.prototype.set.call(this, attributes, preventNotification);
+            },
             update:function (controlData) {
                 var container = this.getElem();
                 container.find('input').attr('value', controlData);
@@ -269,6 +316,18 @@ JRS.Controls = (function (jQuery, _, Controls /*, SingleSelect, MultiSelect, Cac
                 input.after('&nbsp;');
                 var button = this.getElem().find('button');
                 button.wrap(ControlsBase.CALENDAR_ICON_SPAN).empty();
+            },
+
+            get: function(attribute){
+                var localizedTime = Controls.BaseControl.prototype.get.call(this, attribute);
+                return dateUtil.localizedTimeToIsoTime(localizedTime);
+            },
+
+            set: function(attributes, preventNotification){
+                if(attributes.values){
+                    attributes.values = dateUtil.isoTimeToLocalizedTime(attributes.values);
+                }
+                Controls.BaseControl.prototype.set.call(this, attributes, preventNotification);
             },
             update:function (controlData) {
                 var container = this.getElem();
@@ -572,7 +631,4 @@ JRS.Controls = (function (jQuery, _, Controls /*, SingleSelect, MultiSelect, Cac
     jQuery,
     _,
     JRS.Controls
-    /*SingleSelect,
-    MultiSelect,
-    CacheableDataProvider*/
 );

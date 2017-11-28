@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -36,7 +36,7 @@ import static org.junit.Assert.assertEquals;
  * Tests for {@link LoggingContextImpl}
  *
  * @author Sergey Prilukin
- * @version $Id: LoggingContextImplTest.java 22756 2012-03-23 10:39:15Z sergey.prilukin $
+ * @version $Id: LoggingContextImplTest.java 47331 2014-07-18 09:13:06Z kklein $
  */
 public class LoggingContextImplTest extends UnitilsJUnit4 {
 

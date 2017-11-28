@@ -1,6 +1,7 @@
 /*
- * Copyright (C) 2005 - 2013 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
+ *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
  * the following license terms  apply:
  *
@@ -23,12 +24,11 @@ import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.ObjectPermission;
 import com.jaspersoft.jasperserver.api.metadata.user.service.ObjectPermissionService;
 import org.aopalliance.intercept.MethodInvocation;
-import org.springframework.security.AccessDeniedException;
-import org.springframework.security.Authentication;
-import org.springframework.security.ConfigAttribute;
-import org.springframework.security.ConfigAttributeDefinition;
-import org.springframework.security.afterinvocation.AfterInvocationProvider;
-import org.springframework.security.vote.AccessDecisionVoter;
+import org.springframework.security.access.AccessDecisionVoter;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.AfterInvocationProvider;
+import org.springframework.security.access.ConfigAttribute;
+import org.springframework.security.core.Authentication;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -39,9 +39,9 @@ import java.util.List;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: BasicObjectPermissionArgumentVoter.java 32262 2013-05-31 16:05:18Z inesterenko $
+ * @version $Id: BasicObjectPermissionArgumentVoter.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
-public abstract class BasicObjectPermissionArgumentVoter implements AccessDecisionVoter, AfterInvocationProvider {
+public abstract class BasicObjectPermissionArgumentVoter implements AccessDecisionVoter<Object>, AfterInvocationProvider {
 
     @Override
     public boolean supports(Class clazz) {
@@ -50,9 +50,9 @@ public abstract class BasicObjectPermissionArgumentVoter implements AccessDecisi
     }
 
     @Override
-    public int vote(Authentication authentication, Object object, ConfigAttributeDefinition config) {
+    public int vote(Authentication authentication, Object object, Collection<ConfigAttribute> attributes) {
         int result = ACCESS_ABSTAIN;
-        if (supports(object, config)) {
+        if (supports(object, attributes)) {
             if (isPrivileged(object)) {
                 result = ACCESS_GRANTED;
             } else {
@@ -72,8 +72,9 @@ public abstract class BasicObjectPermissionArgumentVoter implements AccessDecisi
     }
 
     @Override
-    public Object decide(Authentication authentication, Object object, ConfigAttributeDefinition config, Object returnedObject) throws AccessDeniedException {
-        if (supports(object, config)) {
+    public Object decide(Authentication authentication, Object object, Collection<ConfigAttribute> attributes,
+            Object returnedObject) throws AccessDeniedException {
+        if (supports(object, attributes)) {
             if (returnedObject instanceof Collection) {
                 Collection<ObjectPermission> returned = getObjectPermissions(returnedObject), res = new LinkedList<ObjectPermission>();
                 for (ObjectPermission permission : returned) {
@@ -89,13 +90,10 @@ public abstract class BasicObjectPermissionArgumentVoter implements AccessDecisi
         return returnedObject;
     }
 
-    protected boolean supports(Object object, ConfigAttributeDefinition config) {
+    protected boolean supports(Object object, Collection<ConfigAttribute> attributes) {
         boolean supports = false;
-        if (object != null && supports(object.getClass()) && config != null && config.getConfigAttributes() != null) {
-            // raw type is used by ConfigAttributeDefinition class. Cast is safe.
-            @SuppressWarnings("unchecked")
-            final Collection<ConfigAttribute> configAttributes = config.getConfigAttributes();
-            for (ConfigAttribute configAttribute : configAttributes) {
+        if (object != null && supports(object.getClass()) && attributes != null) {
+            for (ConfigAttribute configAttribute : attributes) {
                 if (supports(configAttribute)) {
                     supports = true;
                     break;

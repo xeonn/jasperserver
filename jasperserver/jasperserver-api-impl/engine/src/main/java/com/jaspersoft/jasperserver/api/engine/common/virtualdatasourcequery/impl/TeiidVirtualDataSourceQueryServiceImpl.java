@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2012 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -40,7 +40,9 @@ import com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl.AwsData
 import com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl.JdbcDataSourceService;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl.VirtualReportDataSourceServiceFactory;
 import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
+import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.AwsReportDataSource;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.service.ReportDataSourceService;
+import com.jaspersoft.jasperserver.api.metadata.jasperreports.service.ReportDataSourceServiceFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.teiid.adminapi.Model;
 import org.teiid.adminapi.impl.ModelMetaData;
@@ -63,7 +65,7 @@ import java.util.Set;
 
 /**
  * @author Ivan Chan (ichan@jaspersoft.com)
- * @version $Id: TeiidVirtualDataSourceQueryServiceImpl.java 45476 2014-05-07 22:01:04Z ichan $
+ * @version $Id: TeiidVirtualDataSourceQueryServiceImpl.java 50647 2014-10-24 18:22:53Z ichan $
  */
 public class TeiidVirtualDataSourceQueryServiceImpl extends AbstractVirtualDataSourceQueryServiceImpl implements CacheManager, InitializingBean {
 
@@ -74,7 +76,7 @@ public class TeiidVirtualDataSourceQueryServiceImpl extends AbstractVirtualDataS
     static List<LogConfig> logConfigList = new ArrayList<LogConfig>();
     static List<VirtualDataSourceConfig> virtualDataSourceConfigList =  new ArrayList<VirtualDataSourceConfig>();
     String driverPrefix = "jdbc:teiid:";
-    VirtualReportDataSourceServiceFactory virtualReportDataSourceServiceFactory;
+    ReportDataSourceServiceFactory virtualReportDataSourceServiceFactory;
     EngineService engineService;
     RepositoryService repositoryService;
     TeiidMemoryConfigImpl memoryConfig;
@@ -87,14 +89,14 @@ public class TeiidVirtualDataSourceQueryServiceImpl extends AbstractVirtualDataS
     private boolean printDDL = true;
     private Map<String, TeiidDataSource> dataSourceServiceToTeiidConnectorMap;
 
-    public VirtualReportDataSourceServiceFactory getVirtualReportDataSourceServiceFactory() {
+    public ReportDataSourceServiceFactory getReportDataSourceServiceFactory() {
         return virtualReportDataSourceServiceFactory;
     }
 
     /*
      * set virtual report data source service factory through spring injection
      */
-    public void setVirtualReportDataSourceServiceFactory(VirtualReportDataSourceServiceFactory virtualReportDataSourceServiceFactory) {
+    public void setVirtualReportDataSourceServiceFactory(ReportDataSourceServiceFactory virtualReportDataSourceServiceFactory) {
         this.virtualReportDataSourceServiceFactory = virtualReportDataSourceServiceFactory;
     }
 
@@ -545,6 +547,20 @@ public class TeiidVirtualDataSourceQueryServiceImpl extends AbstractVirtualDataS
         debug("Adding Model - SCHEMA = [" + schema + "], MODELNAME = [" + modelName + "], CONNECTORNAME = [" + connectionName + "], CONNECTIONNAME = [" + connectionName + "]");
         importProperties.setProperty("importer.useFullSchemaName", Boolean.FALSE.toString());
         debug("TEIID IMPORT PROPERTY [import.userFullSchemaName, " + Boolean.FALSE.toString() + "]");
+        importProperties.setProperty("importer.trimColumnNames", Boolean.TRUE.toString());
+        debug("TEIID IMPORT PROPERTY [import.trimColumnNames, " + Boolean.TRUE.toString() + "]");
+
+        // SET PROPERTIES FOR AWS DATA SOURCE
+        try {
+            if ((dataSource instanceof JdbcDataSourceImpl) && (((JdbcDataSourceImpl) dataSource).getReportDataSource() instanceof AwsReportDataSource)) {
+                importProperties.setProperty("importer.importKeys", Boolean.FALSE.toString());
+                debug("TEIID IMPORT PROPERTY [importer.importKeys, " + Boolean.FALSE.toString() + "]");
+                importProperties.setProperty("importer.importForeignKeys", Boolean.FALSE.toString());
+                debug("TEIID IMPORT PROPERTY [importer.importForeignKeys, " + Boolean.FALSE.toString() + "]");
+            }
+        } catch (Exception ex) {
+            debug("Fail to detect AWS Data source.");
+        }
         if (schema != null) {
             model.setName(modelName + VirtualDataSourceHandler.getDataSourceSchemaSeparator() + schema);
             importProperties.setProperty("importer.schemaPattern", schema);
@@ -573,7 +589,7 @@ public class TeiidVirtualDataSourceQueryServiceImpl extends AbstractVirtualDataS
                 schemaType = teiidDataSource.getSchemaSourceType();
             }
         } catch (Exception ex) {
-            log.debug("Fail to retrieve schema content: set schema source type to NATIVE");
+            debug("Fail to retrieve schema content: set schema source type to NATIVE");
         }
 
         model.setSchemaSourceType(schemaType);

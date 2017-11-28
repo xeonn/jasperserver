@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2014 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -27,6 +27,7 @@ define(function (require) {
         $ = require("jquery"),
         AjaxUploader = require("components.ajaxuploader"),
         dialogs = require("components.dialogs"),
+        request = require("common/transport/request"),
         i18n = require("bundle!jasperserver_messages"),
         uploadJdbcDriverDialogTemplate = require("text!dataSource/template/dialog/uploadJdbcDriverDialogTemplate.htm"),
         fileUploadTemplate = require("text!dataSource/template/dialog/fileUploadTemplate.htm");
@@ -62,8 +63,8 @@ define(function (require) {
 
                 // determine if we need to add one more input to select more files
                 var selectedFiles = 0, inputs = this.$("input[type='file']");
-                _.each(inputs, function (input) {
-                    selectedFiles += input.files.length;
+                _.each(inputs, function (input, index) {
+                    selectedFiles += index+1;
                 });
 
                 if (selectedFiles >= inputs.length) {
@@ -90,6 +91,27 @@ define(function (require) {
             return this;
         },
 
+        onSuccessCallback: function(response){
+            this.trigger("driverUpload", response);
+            this.hide();
+            dialogs.systemConfirm.show(i18n["resource.dataSource.jdbc.upload.driverUploadSuccess"]);
+            _.defer(_.bind(this.remove, this));
+        },
+
+        onErrorCallback: function(response){
+            var errorMessage;
+            var response = response.responseJSON ? response.responseJSON : response;
+
+            if ("illegal.parameter.value.error" === response.errorCode && response.parameters
+                && response.parameters.length && "className" === response.parameters[0]) {
+                errorMessage = i18n["resource.dataSource.jdbc.classNotFound"].replace("{0}", this.driverClass);
+            } else {
+                errorMessage = response.message;
+            }
+
+            this.$(".errorMessageContainer").addClass("error").find(".message").text(errorMessage);
+        },
+
         addFileInput: function () {
             this.$("ul").append(_.template(fileUploadTemplate, {fileIndex: this.fileIndex}));
             this.fileIndex++;
@@ -97,24 +119,36 @@ define(function (require) {
 
         primaryButtonOnClick: function () {
             this.$(".errorMessageContainer").removeClass("error").find(".message").text("");
-            var form = this.$("form")[0], self = this;
-            new AjaxUploader(form, function (response) {
-                if (response.errorCode) {
-                    var errorMessage;
-                    if ("illegal.parameter.value.error" === response.errorCode && response.parameters
-                        && response.parameters.length && "className" === response.parameters[0]) {
-                        errorMessage = i18n["resource.dataSource.jdbc.classNotFound"].replace("{0}", self.driverClass);
+            var form = this.$("form"), self = this;
+
+            if(window.FormData){
+                form.submit(function(e){
+                    var data = new FormData(form[0]);
+                    var type = form.attr("method");
+                    var url = form.attr("action");
+
+                    request({
+                        url : url,
+                        type: type,
+                        data : data,
+                        cache: false,
+                        contentType: false,
+                        processData: false,
+                        success: _.bind(self.onSuccessCallback, self),
+                        error: _.bind(self.onErrorCallback, self)
+                    });
+                    e.preventDefault();
+                    form.unbind("submit");
+                });
+            }else{
+                new AjaxUploader(form[0], function (response) {
+                    if (response.errorCode) {
+                       self.onErrorCallback(response);
                     } else {
-                        errorMessage = response.message;
+                        self.onSuccessCallback(response);
                     }
-                    self.$(".errorMessageContainer").addClass("error").find(".message").text(errorMessage);
-                } else {
-                    self.trigger("driverUpload", response);
-                    self.hide();
-                    dialogs.systemConfirm.show(i18n["resource.dataSource.jdbc.upload.driverUploadSuccess"]);
-                    _.defer(_.bind(self.remove, self));
-                }
-            }, 1200000);
+                }, 1200000);
+            }
             form.submit();
         },
 

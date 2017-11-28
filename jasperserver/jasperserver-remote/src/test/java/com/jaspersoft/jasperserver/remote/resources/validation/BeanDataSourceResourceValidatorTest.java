@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2013 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -23,9 +23,12 @@ package com.jaspersoft.jasperserver.remote.resources.validation;
 
 import com.jaspersoft.jasperserver.api.JSValidationException;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.BeanReportDataSource;
-import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.JndiJdbcReportDataSource;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.client.BeanReportDataSourceImpl;
-import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.client.JndiJdbcReportDataSourceImpl;
+import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributesResolver;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -36,8 +39,17 @@ import org.testng.annotations.Test;
  * @version $Id$
  */
 public class BeanDataSourceResourceValidatorTest {
+    @InjectMocks
     private final BeanDataSourceResourceValidator validator = new BeanDataSourceResourceValidator();
+    @Mock
+    private ProfileAttributesResolver profileAttributesResolver;
+
     private BeanReportDataSource dataSource;
+
+    @BeforeClass
+    public void init(){
+        MockitoAnnotations.initMocks(this);
+    }
 
     @BeforeMethod
     public void setUp() throws Exception {

@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005 - 2009 Jaspersoft Corporation. All rights  reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
 * http://www.jaspersoft.com.
 *
 * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -16,7 +16,7 @@
 * GNU Affero  General Public License for more details.
 *
 * You should have received a copy of the GNU Affero General Public  License
-* along with this program.&nbsp; If not, see <http://www.gnu.org/licenses/>.
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 package com.jaspersoft.jasperserver.remote.services;
 
@@ -30,7 +30,7 @@ import java.util.List;
  * Read only service for resources search.
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: ResourcesListRemoteService.java 23353 2012-04-24 12:09:05Z ykovalchyk $
+ * @version $Id: ResourcesListRemoteService.java 49286 2014-09-23 13:32:25Z ykovalchyk $
  */
 public interface ResourcesListRemoteService {
     /**

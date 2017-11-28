@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -31,7 +31,7 @@ import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.Re
 
 /**
  * @author Teodor Danciu (teodord@users.sourceforge.net)
- * @version $Id: RepoInputControl.java 19922 2010-12-11 14:59:51Z tmatyashovsky $
+ * @version $Id: RepoInputControl.java 51947 2014-12-11 14:38:38Z ogavavka $
  *
  * @hibernate.joined-subclass table="InputControl"
  * @hibernate.joined-subclass-key column="id"
@@ -247,7 +247,7 @@ public class RepoInputControl extends RepoResource
 
 		InputControl control = (InputControl) clientRes;
 		
-		control.setType(getType());
+		control.setInputControlType(getType());
 		control.setMandatory(isMandatory());
 		control.setReadOnly(isReadOnly());
 		control.setVisible(isVisible());
@@ -273,12 +273,12 @@ public class RepoInputControl extends RepoResource
 		
 		InputControl control = (InputControl) clientRes;
 		
-		setType(control.getType());
+		setType(control.getInputControlType());
 		setMandatory(control.isMandatory());
 		setReadOnly(control.isReadOnly());
 		setVisible(control.isVisible());
 
-		switch(control.getType()) {
+		switch(control.getInputControlType()) {
 			case InputControl.TYPE_BOOLEAN:
 				setDataType(null);
 				setListOfValues(null);

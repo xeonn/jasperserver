@@ -30,13 +30,41 @@
                 <entry key="nonSemanticDataSourceTreeDataProvider" value="dsTreeDataProvider"/>
                 <entry key="joinableDsTreeDataProvider" value="joinableDsTreeDataProvider"/>
                 <entry key="awsDataSourceTreeDataProvider" value="awsDataSourceTreeDataProvider"/>
+                <entry key="contentResourceTreeDataProvider" value="contentResourceTreeDataProvider"/>
             </map>
+        </property>
+    </bean>
+
+    <bean name="contentResourceTreeDataProvider" class="com.jaspersoft.jasperserver.war.model.impl.TypedTreeDataProvider">
+        <property name="repositoryService" ref="${bean.repositoryService}"/>
+        <property name="supportedClasses">
+            <list>
+                <value>com.jaspersoft.jasperserver.api.metadata.common.domain.ContentResource</value>
+            </list>
         </property>
     </bean>
 
     <bean id="repositoryTreeDavaProvider" class="com.jaspersoft.jasperserver.war.model.impl.RepositoryTreeDataProviderImpl">
         <property name="repositoryService" ref="${bean.repositoryService}"/>
         <property name="repositoryServiceSecurityChecker" ref="${bean.repositoryServiceSecurityChecker}"/>
+    </bean>
+
+    <bean id="repositoryTreeTempBlockFilter" class="com.jaspersoft.jasperserver.war.model.impl.RepositoryExplorerTreeDataFilterImpl">
+        <property name="uriList">
+            <list>
+                <value>/temp</value>
+                <value>/themes</value>
+            </list>
+        </property>
+        <property name="roleToShowTempFolder" value="ROLE_ADMINISTRATOR"/>
+    </bean>
+    <bean id="repositoryTreeFilter" class="com.jaspersoft.jasperserver.war.model.impl.ANDTreeDataFilterImpl">
+        <property name="filterList">
+            <list>
+                <ref bean="repositoryTreeFolderFilter"/>
+                <ref bean="repositoryTreeTempBlockFilter"/>
+            </list>
+        </property>
     </bean>
 
     <bean id="repositoryTreeFolderFilter" class="com.jaspersoft.jasperserver.war.model.impl.TypeInclusiveTreeDataFilterImpl">
@@ -50,7 +78,7 @@
     <bean id="repositoryTreeFoldersProvider" class="com.jaspersoft.jasperserver.war.model.impl.RepositoryTreeDataProviderImpl">
         <property name="repositoryService" ref="${bean.repositoryService}"/>
         <property name="repositoryServiceSecurityChecker" ref="${bean.repositoryServiceSecurityChecker}"/>
-        <property name="filter" ref="repositoryTreeFolderFilter"/>
+        <property name="filter" ref="repositoryTreeFilter"/>
     </bean>
 
     <bean id="tenantTreeFoldersProvider" class="com.jaspersoft.jasperserver.war.model.impl.TenantTreeDataProviderImpl">
@@ -64,7 +92,6 @@
         <property name="repositoryService" ref="${bean.repositoryService}"/>
         <property name="repositoryServiceSecurityChecker" ref="${bean.repositoryServiceSecurityChecker}"/>
         <!--<property name="filter" ref="adhocRepositorySaveAsFilter"/>-->
-        <property name="objectPermissionService" ref="objectPermissionService"/>
         <property name="themeService" ref="themeService"/>
     </bean>
 

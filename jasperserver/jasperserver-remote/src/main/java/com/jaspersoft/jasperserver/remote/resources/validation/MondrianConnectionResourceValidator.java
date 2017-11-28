@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2013 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -34,7 +34,7 @@ import static com.jaspersoft.jasperserver.remote.resources.validation.Validation
  * <p></p>
  *
  * @author Zakhar.Tomchenco
- * @version $Id: MondrianConnectionResourceValidator.java 34356 2013-07-24 14:23:29Z ykovalchyk $
+ * @version $Id: MondrianConnectionResourceValidator.java 47331 2014-07-18 09:13:06Z kklein $
  */
 @Component
 public class MondrianConnectionResourceValidator<ConnectionType extends MondrianConnection> extends GenericResourceValidator<ConnectionType> {

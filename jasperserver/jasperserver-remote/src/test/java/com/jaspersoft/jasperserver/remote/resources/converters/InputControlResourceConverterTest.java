@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2012 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -36,13 +36,14 @@ import com.jaspersoft.jasperserver.dto.resources.ClientInputControl;
 import com.jaspersoft.jasperserver.dto.resources.ClientListOfValues;
 import com.jaspersoft.jasperserver.dto.resources.ClientQuery;
 import com.jaspersoft.jasperserver.remote.resources.ClientTypeHelper;
+import com.jaspersoft.jasperserver.remote.resources.validation.BasicResourceValidator;
 import com.jaspersoft.jasperserver.remote.services.PermissionsService;
 import com.jaspersoft.jasperserver.war.cascade.handlers.GenericTypeProcessorRegistry;
 import com.jaspersoft.jasperserver.war.util.CalendarFormatProvider;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.security.Authentication;
+import org.springframework.security.core.Authentication;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -60,7 +61,7 @@ import static org.testng.Assert.assertEquals;
  * <p></p>
  *
  * @author Zakhar.Tomchenco
- * @version $Id: InputControlResourceConverterTest.java 42684 2014-03-06 14:26:22Z ykovalchyk $
+ * @version $Id: InputControlResourceConverterTest.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
 public class InputControlResourceConverterTest {
     @InjectMocks
@@ -70,9 +71,8 @@ public class InputControlResourceConverterTest {
     @Mock private ResourceReferenceConverter resourceReferenceConverter;
     @Mock private ResourceReferenceConverterProvider resourceReferenceConverterProvider;
     @Mock private PermissionsService permissionsService;
-    @Mock
-    private GenericTypeProcessorRegistry genericTypeProcessorRegistry;
-
+    @Mock private GenericTypeProcessorRegistry genericTypeProcessorRegistry;
+    @Mock private BasicResourceValidator resourceValidator;
 
     private final ClientInputControl client = new ClientInputControl();
     private final InputControlImpl server = new InputControlImpl();
@@ -110,7 +110,7 @@ public class InputControlResourceConverterTest {
         server.setMandatory(true);
         server.setReadOnly(true);
         server.setVisible(true);
-        server.setType(InputControl.TYPE_SINGLE_VALUE);
+        server.setInputControlType(InputControl.TYPE_SINGLE_VALUE);
         server.setQueryValueColumn("serverValueColumn");
         server.addQueryVisibleColumn("serverTest");
         server.setName("server");
@@ -134,7 +134,7 @@ public class InputControlResourceConverterTest {
 
         InputControl converted = converter.toServer(client, null);
 
-        assertEquals(converted.getType(), client.getType());
+        assertEquals(converted.getInputControlType(), client.getType());
         assertEquals(converted.isMandatory(), client.isMandatory());
         assertEquals(converted.isReadOnly(), client.isReadOnly());
         assertEquals(converted.isVisible(), client.isVisible());
@@ -158,7 +158,7 @@ public class InputControlResourceConverterTest {
 
         ClientInputControl converted = converter.toClient(server, options);
 
-        assertEquals(converted.getType(), server.getType());
+        assertEquals(converted.getType(), server.getInputControlType());
         assertEquals(converted.isMandatory(), server.isMandatory());
         assertEquals(converted.isReadOnly(), server.isReadOnly());
         assertEquals(converted.isVisible(), server.isVisible());

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -31,33 +31,51 @@ import com.jaspersoft.jasperserver.api.metadata.user.domain.ProfileAttribute;
 
 /**
  * Manage attributes for principals - Users, Roles
- * 
+ *
  * @author sbirney
- * @version $Id: ProfileAttributeService.java 41873 2014-02-13 22:33:01Z dlitvak $
+ * @version $Id: ProfileAttributeService.java 50011 2014-10-09 16:57:26Z vzavadskii $
  */
 @JasperServerAPI
 public interface ProfileAttributeService {
 
     /**
-     * Get an attribute with principal and attrName to find matching
+     * Gets an attribute with principal and attrName to find matching
      * persisted attribute
      *
      * @param context
      * @param attr with principal and name
-     * @return found ProfileAttribute or null
+     * @return Found ProfileAttribute or null
      */
-    public ProfileAttribute getProfileAttribute(ExecutionContext context, 
-						ProfileAttribute attr);
+    public ProfileAttribute getProfileAttribute(ExecutionContext context, ProfileAttribute attr);
+
+    /**
+     * Gets all profile attributes for current logged in user by specified category or all categories if
+     * category argument is null
+     *
+     * @param category The category to find attributes or null to move trough all categories
+     * @return The List of found profile attributes
+     */
+    public List<ProfileAttribute> getCurrentUserProfileAttributes(ProfileAttributeCategory category);
+
+    /**
+     * Find all matching attributes for the passed in principals
+     *
+     * @param context
+     * @param principal
+     * @return
+     */
+    public List getProfileAttributesForPrincipal(ExecutionContext context, Object principal);
 
     /**
      * Find all matching attributes for the passed in principal
      *
      * @param context
      * @param principal
-     * @return
+     * @param effectiveAttributes indicates if attributes should be resolved hierarchically, from principal up to system level
+     * @return List of found profile attributes
      */
-    public List getProfileAttributesForPrincipal(ExecutionContext context, 
-						 Object principal);
+    public List<ProfileAttribute> getProfileAttributesForPrincipal(ExecutionContext context, Object principal,
+                                                                   boolean effectiveAttributes);
 
     /**
      * Find all matching attributes for the principal extracted from
@@ -67,6 +85,7 @@ public interface ProfileAttributeService {
      * @param context
      * @return
      */
+
     public List getProfileAttributesForPrincipal(ExecutionContext context);
 
     /**
@@ -92,7 +111,7 @@ public interface ProfileAttributeService {
      * @param context
      * @param attr
      */
-    public void putProfileAttribute(ExecutionContext context, 
+    public void putProfileAttribute(ExecutionContext context,
 				    ProfileAttribute attr);
 
     /**

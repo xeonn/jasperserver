@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005 - 2009 Jaspersoft Corporation. All rights  reserved.
+* Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
 * http://www.jaspersoft.com.
 *
 * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -41,7 +41,7 @@ import static org.testng.Assert.assertEquals;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: DataTypeResourceConverterTest.java 42684 2014-03-06 14:26:22Z ykovalchyk $
+ * @version $Id: DataTypeResourceConverterTest.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
 public class DataTypeResourceConverterTest {
     @InjectMocks
@@ -181,27 +181,27 @@ public class DataTypeResourceConverterTest {
         // ignore by default
         clientObject.setType(null);
         DataType result = converter.resourceSpecificFieldsToServer(clientObject, expectedServerObject, null);
-        assertEquals(result.getType(), 0);
+        assertEquals(result.getDataTypeType(), 0);
         // number
         clientObject.setType(ClientDataType.TypeOfDataType.number);
         result = converter.resourceSpecificFieldsToServer(clientObject, expectedServerObject, null);
-        assertEquals(result.getType(), DataType.TYPE_NUMBER);
+        assertEquals(result.getDataTypeType(), DataType.TYPE_NUMBER);
         // text
         clientObject.setType(ClientDataType.TypeOfDataType.text);
         result = converter.resourceSpecificFieldsToServer(clientObject, expectedServerObject, null);
-        assertEquals(result.getType(), DataType.TYPE_TEXT);
+        assertEquals(result.getDataTypeType(), DataType.TYPE_TEXT);
         // date
         clientObject.setType(ClientDataType.TypeOfDataType.date);
         result = converter.resourceSpecificFieldsToServer(clientObject, expectedServerObject, null);
-        assertEquals(result.getType(), DataType.TYPE_DATE);
+        assertEquals(result.getDataTypeType(), DataType.TYPE_DATE);
         // datetime
         clientObject.setType(ClientDataType.TypeOfDataType.datetime);
         result = converter.resourceSpecificFieldsToServer(clientObject, expectedServerObject, null);
-        assertEquals(result.getType(), DataType.TYPE_DATE_TIME);
+        assertEquals(result.getDataTypeType(), DataType.TYPE_DATE_TIME);
         // time
         clientObject.setType(ClientDataType.TypeOfDataType.time);
         result = converter.resourceSpecificFieldsToServer(clientObject, expectedServerObject, null);
-        assertEquals(result.getType(), DataType.TYPE_TIME);
+        assertEquals(result.getDataTypeType(), DataType.TYPE_TIME);
     }
 
     @Test
@@ -281,28 +281,28 @@ public class DataTypeResourceConverterTest {
         ClientDataType clientObject = new ClientDataType();
         DataType serverObject = new DataTypeImpl();
         // number
-        serverObject.setType(DataType.TYPE_NUMBER);
+        serverObject.setDataTypeType(DataType.TYPE_NUMBER);
         ClientDataType result = converter.resourceSpecificFieldsToClient(clientObject, serverObject, null);
         assertEquals(result.getType(), ClientDataType.TypeOfDataType.number);
         // text
-        serverObject.setType(DataType.TYPE_TEXT);
+        serverObject.setDataTypeType(DataType.TYPE_TEXT);
         result = converter.resourceSpecificFieldsToClient(clientObject, serverObject, null);
         assertEquals(result.getType(), ClientDataType.TypeOfDataType.text);
         // date
-        serverObject.setType(DataType.TYPE_DATE);
+        serverObject.setDataTypeType(DataType.TYPE_DATE);
         result = converter.resourceSpecificFieldsToClient(clientObject, serverObject, null);
         assertEquals(result.getType(), ClientDataType.TypeOfDataType.date);
         // datetime
-        serverObject.setType(DataType.TYPE_DATE_TIME);
+        serverObject.setDataTypeType(DataType.TYPE_DATE_TIME);
         result = converter.resourceSpecificFieldsToClient(clientObject, serverObject, null);
         assertEquals(result.getType(), ClientDataType.TypeOfDataType.datetime);
         // time
-        serverObject.setType(DataType.TYPE_TIME);
+        serverObject.setDataTypeType(DataType.TYPE_TIME);
         result = converter.resourceSpecificFieldsToClient(clientObject, serverObject, null);
         assertEquals(result.getType(), ClientDataType.TypeOfDataType.time);
         // invalid type
         Exception exception = null;
-        serverObject.setType((byte)10);
+        serverObject.setDataTypeType((byte) 10);
         try{
             converter.resourceSpecificFieldsToClient(clientObject, serverObject, null);
         } catch (Exception e){

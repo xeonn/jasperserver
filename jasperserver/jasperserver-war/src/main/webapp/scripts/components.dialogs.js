@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2014 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -22,7 +22,7 @@
 
 /**
  * @author: Yuriy Plakosh
- * @version: $Id: components.dialogs.js 45131 2014-04-26 21:44:17Z agodovanets $
+ * @version: $Id: components.dialogs.js 8012 2014-11-09 16:08:03Z ktsaregradskyi $
  */
 
 /**
@@ -42,16 +42,23 @@ dialogs.systemConfirm = {
     container: null,
     message: null,
     show: function(message, duration) {
-        this.container = this.container || jQuery('#systemMessageConsole').on('mouseup touchend', function() {
-            dialogs.systemConfirm.container.slideUp();
-        });
-        this.message = this.message || document.getElementById('systemMessage');
-        if (!this.closeText){
-            this.closeText = this.message.innerHTML.toLowerCase();
+
+        if(window.isEmbeddedDesigner){
+            jQuery(document).trigger("adhocDesigner:notification", [message, duration]);
+        }else{
+            this.container = this.container || jQuery('#systemMessageConsole').on('mouseup touchend', function() {
+                dialogs.systemConfirm.container.slideUp();
+            });
+            this.message = this.message || document.getElementById('systemMessage');
+            if (!this.closeText){
+                this.closeText = this.message.innerHTML.toLowerCase();
+            }
+            this.message.innerHTML = message + ' <span>| <a href="#">'+ this.closeText +'</a></span>';
+            dialogs.systemConfirm.container.slideDown();
+            setTimeout('dialogs.systemConfirm.hide()', duration ? duration : 2000);
         }
-        this.message.innerHTML = message + ' <span>| <a href="#">'+ this.closeText +'</a></span>';
-        dialogs.systemConfirm.container.slideDown();
-        setTimeout('dialogs.systemConfirm.hide()', duration ? duration : 2000);
+
+
     },
 
     showWarning: function(message, duration) {
@@ -105,7 +112,9 @@ dialogs.errorPopup = {
      *
      * @param errorContent error content to be showed
      */
-    show: function(errorContent, isStackTraceContent) {
+    show: function(errorContent, isStackTraceContent, options) {
+        options || (options = {});
+
         var fromSource = Builder.node('DIV', {style:'display:none'});
         fromSource.innerHTML = errorContent;
         document.body.insertBefore(fromSource, document.body.firstChild);
@@ -134,7 +143,7 @@ dialogs.errorPopup = {
                 this._content.update(finalContent);
                 this._dom.observe('click', this.clickHandler);
 
-                this._dom.setStyle({height: this._DIALOG_HEIGHT, width: this._DIALOG_WIDTH});
+                this._dom.setStyle({height: options.height || this._DIALOG_HEIGHT, width: options.width || this._DIALOG_WIDTH});
                 isStackTraceContent && this._dom.addClassName(layoutModule.STACKTRACE_CLASS);
                 dialogs.popup.show(this._dom, isStackTraceContent);
 

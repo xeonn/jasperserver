@@ -1,5 +1,5 @@
 <%--
-  ~ Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+  ~ Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
   ~ http://www.jaspersoft.com.
   ~
   ~ Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -35,7 +35,7 @@
 <head>
     <title>Jaspersoft: <decorator:title/></title>
     <meta http-equiv="Content-Type" content="text/html; charset=${requestScope['com.jaspersoft.ji.characterEncoding']}">
-    <meta http-equiv="X-UA-Compatible" content="IE=8"/>
+    <%--<meta http-equiv="X-UA-Compatible" content="IE=8"/>--%>
     <link rel="shortcut icon" href="favicon.ico"/>
 
     <%@ include file="decoratorMinimalImports.jsp" %>
@@ -63,7 +63,6 @@
     <!-- START decorated page content-->
     <decorator:body/>
     <!-- END decorated page content -->
-
 </div>
 
 <div id="systemMessageConsole" style="display:none;">

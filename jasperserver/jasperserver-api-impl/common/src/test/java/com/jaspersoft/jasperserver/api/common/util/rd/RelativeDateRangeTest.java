@@ -14,7 +14,7 @@ import java.util.TimeZone;
 
 import static org.junit.Assert.assertEquals;
 
-//@Ignore //Uncomment if test is failed under some platforms
+@Ignore //Uncomment if test is failed under some platforms
 public class RelativeDateRangeTest extends BaseRelativeDateTest {
 
     @Test(expected = InvalidDateRangeExpressionException.class)

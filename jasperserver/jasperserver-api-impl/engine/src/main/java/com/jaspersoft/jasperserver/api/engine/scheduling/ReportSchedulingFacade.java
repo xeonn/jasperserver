@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -46,7 +46,7 @@ import java.util.*;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ReportSchedulingFacade.java 44312 2014-04-09 14:30:12Z vsabadosh $
+ * @version $Id: ReportSchedulingFacade.java 49286 2014-09-23 13:32:25Z ykovalchyk $
  */
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 public class ReportSchedulingFacade
@@ -861,13 +861,13 @@ public class ReportSchedulingFacade
         for (Iterator it = jobs.iterator(); it.hasNext();) {
             ReportJobSummary jobSummary = (ReportJobSummary) it.next();
             if (jobSummary.getId() != job.getId()) {
-                errors.add(new ValidationErrorImpl("error.duplicate.report.job.output.filename",
-                        new Object[]{job.getBaseOutputFilename(), job_FolderURI}, null, "baseOutputFilename"));
+                    errors.add(new ValidationErrorImpl("error.duplicate.report.job.output.filename",
+                            new Object[]{job.getBaseOutputFilename(), job_FolderURI}, null, "baseOutputFilename"));
                 return;
+                }
             }
-        }
 
-    }
+        }
 
 
     public ReportJobRuntimeInformation getJobRuntimeInformation(ExecutionContext context, long jobId){

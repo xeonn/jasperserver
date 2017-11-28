@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2013 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -25,6 +25,11 @@ import com.jaspersoft.jasperserver.api.JSValidationException;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ListOfValues;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.client.ListOfValuesImpl;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.client.ListOfValuesItemImpl;
+import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributesResolver;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -35,11 +40,20 @@ import org.testng.annotations.Test;
  * @version $Id$
  */
 public class ListOfValuesValidatorTest {
+    @InjectMocks
     final ListOfValuesValidator validator = new ListOfValuesValidator();
+    @Mock
+    private ProfileAttributesResolver profileAttributesResolver;
+
     ListOfValues lov;
 
+    @BeforeClass
+    public void init() {
+        MockitoAnnotations.initMocks(this);
+    }
+
     @BeforeMethod
-    public void setUp(){
+    public void setUp() {
         lov = new ListOfValuesImpl();
         lov.setLabel("aa");
     }

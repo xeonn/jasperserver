@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -41,7 +41,7 @@ import com.jaspersoft.jasperserver.api.JasperServerAPI;
  * 
  * @author Sherman Wood
  * @author Lucian Chirita
- * @version $Id: FilterCriteria.java 28947 2013-02-26 15:02:08Z vsabadosh $
+ * @version $Id: FilterCriteria.java 47331 2014-07-18 09:13:06Z kklein $
  * @since 1.0
  * @see com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService#findResource(com.jaspersoft.jasperserver.api.common.domain.ExecutionContext, FilterCriteria)
  * @see FilterElementCollection#addFilterElement(FilterElement)

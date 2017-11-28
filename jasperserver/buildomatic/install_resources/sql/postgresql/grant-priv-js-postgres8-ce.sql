@@ -37,6 +37,7 @@ GRANT ALL PRIVILEGES ON TABLE jireportjobparameter TO jasperdb;
 GRANT ALL PRIVILEGES ON TABLE jireportjobrepodest TO jasperdb;
 GRANT ALL PRIVILEGES ON TABLE jireportjobsimpletrigger TO jasperdb;
 GRANT ALL PRIVILEGES ON TABLE jireportjobtrigger TO jasperdb;
+GRANT ALL PRIVILEGES ON TABLE jireportthumbnail TO jasperdb;
 GRANT ALL PRIVILEGES ON TABLE jireportunit TO jasperdb;
 GRANT ALL PRIVILEGES ON TABLE jireportunitinputcontrol TO jasperdb;
 GRANT ALL PRIVILEGES ON TABLE jireportunitresource TO jasperdb;

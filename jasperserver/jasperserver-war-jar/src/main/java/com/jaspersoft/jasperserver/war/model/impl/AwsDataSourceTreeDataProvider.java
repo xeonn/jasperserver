@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2012 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -36,6 +36,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.Serializable;
 import java.util.*;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
@@ -43,7 +44,7 @@ import static org.apache.commons.lang.StringUtils.isBlank;
 /**
  * @author vsabadosh
  */
-public class AwsDataSourceTreeDataProvider implements TreeDataProvider {
+public class AwsDataSourceTreeDataProvider implements TreeDataProvider, Serializable {
 
     public static final String AWS_DB = "awsDb";
     public static final String ROOT_URI = "/";
@@ -52,6 +53,7 @@ public class AwsDataSourceTreeDataProvider implements TreeDataProvider {
     private RepositoryService repositoryService;
 
     private AwsDataSourceService awsDataSourceService;
+    private AwsCredentialUtil awsCredentialUtil;
 
     private List<String> amazonDBServices;
 
@@ -139,7 +141,7 @@ public class AwsDataSourceTreeDataProvider implements TreeDataProvider {
 
         arn = !isBlank(arn) ? arn : null;
 
-        return AwsCredentialUtil.getAWSCredentials(accessKey, secretKey, arn);
+        return awsCredentialUtil.getAWSCredentials(accessKey, secretKey, arn);
     }
 
     private String retrieveEndpointFromRequest() {
@@ -236,5 +238,9 @@ public class AwsDataSourceTreeDataProvider implements TreeDataProvider {
 
     public void setRepositoryService(RepositoryService repositoryService) {
         this.repositoryService = repositoryService;
+    }
+
+    public void setAwsCredentialUtil(AwsCredentialUtil awsCredentialUtil) {
+        this.awsCredentialUtil = awsCredentialUtil;
     }
 }

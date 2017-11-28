@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005 - 2013 Jaspersoft Corporation. All rights  reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
 * http://www.jaspersoft.com.
 *
 * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -16,7 +16,7 @@
 * GNU Affero  General Public License for more details.
 *
 * You should have received a copy of the GNU Affero General Public  License
-* along with this program.&nbsp; If not, see <http://www.gnu.org/licenses/>.
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 package com.jaspersoft.jasperserver.jaxrs.connection;
 
@@ -25,6 +25,7 @@ import com.jaspersoft.jasperserver.remote.connection.ConnectionsManager;
 import com.jaspersoft.jasperserver.remote.exception.IllegalParameterValueException;
 import com.jaspersoft.jasperserver.remote.exception.MandatoryParameterNotFoundException;
 import com.jaspersoft.jasperserver.remote.exception.ResourceNotFoundException;
+import com.jaspersoft.jasperserver.remote.resources.ClientTypeHelper;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -55,14 +56,14 @@ import java.util.regex.Pattern;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: ConnectionsJaxrsService.java 42684 2014-03-06 14:26:22Z ykovalchyk $
+ * @version $Id: ConnectionsJaxrsService.java 49286 2014-09-23 13:32:25Z ykovalchyk $
  */
 @Service
 @Path("/connections")
 public class ConnectionsJaxrsService {
     private static final Pattern EXTRACT_CONNECTION_TYPE_PATTERN = Pattern.compile("application/([^\\.]+)\\.([^(\\.|\\+)]+)",
             Pattern.CASE_INSENSITIVE);
-    private static final Pattern CONNECTION_METADATA_PATTERN = Pattern.compile("application/([^\\.]+)\\.[^.]+\\.metadata\\+.+",
+    private static final Pattern CONNECTION_METADATA_PATTERN = Pattern.compile("application/([^\\.]+)(\\.[^.]+)?\\.metadata\\+.+",
             Pattern.CASE_INSENSITIVE);
     @Context
     private Providers providers;
@@ -74,20 +75,20 @@ public class ConnectionsJaxrsService {
     private ConnectionsManager connectionsManager;
 
     @POST
-    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public Response createConnection(InputStream stream, @HeaderParam(HttpHeaders.CONTENT_TYPE) MediaType mediaType,
             @HeaderParam(HttpHeaders.ACCEPT) MediaType accept) throws URISyntaxException, IllegalParameterValueException, IOException {
         final Class<?> connectionClass = getConnectionClass(mediaType);
-        final boolean isMetadataRequested = accept != null && CONNECTION_METADATA_PATTERN.matcher(accept.toString()).matches();
-        if (isMetadataRequested && connectionClass != getConnectionClass(accept)) {
-            throw new WebApplicationException(Response.Status.UNSUPPORTED_MEDIA_TYPE);
-        }
+        final String acceptString = accept != null ? accept.toString() : "";
+        final boolean isMetadataRequested = CONNECTION_METADATA_PATTERN.matcher(acceptString).matches();
         final Object connectionDescription = parseEntity(connectionClass, stream, mediaType);
         final UUID connectionId = connectionsManager.createConnection(connectionDescription);
         final StringBuffer locationBuffer = request.getRequestURL().append("/").append(connectionId.toString());
         if (isMetadataRequested) {
-            return Response.ok(connectionsManager.getConnectionMetadata(connectionId))
-                    .location(new URI(locationBuffer.append("/metadata").toString())).build();
+            final Object connectionMetadata = connectionsManager.getConnectionMetadata(connectionId);
+            return Response.ok(connectionMetadata)
+                    .location(new URI(locationBuffer.append("/metadata").toString()))
+                    .header("Content-Type", "application/" + ClientTypeHelper.extractClientType(connectionMetadata.getClass())
+                            + ".metadata" + acceptString.substring(acceptString.lastIndexOf("+"))).build();
         } else {
             return Response.created(new URI(locationBuffer.toString()))
                     .entity(connectionDescription).build();

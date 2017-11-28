@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -25,7 +25,7 @@ import java.io.Serializable;
 
 /**
  * @author sanda zaharia
- * @version $Id: CsvExportParametersBean.java 44777 2014-04-18 15:39:15Z tdanciu $
+ * @version $Id: CsvExportParametersBean.java 47331 2014-07-18 09:13:06Z kklein $
  */
 public class CsvExportParametersBean extends AbstractExportParameters {
 	

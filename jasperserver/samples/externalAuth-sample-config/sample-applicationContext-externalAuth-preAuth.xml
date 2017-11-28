@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright (C) 2005 - 2012 Jaspersoft Corporation. All rights reserved.
+  ~ Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
   ~ http://www.jaspersoft.com.
   ~
   ~ Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -56,20 +56,21 @@
         </property>
 
         <property name="authenticationDetailsSource">
-            <bean class="org.springframework.security.ui.AuthenticationDetailsSourceImpl">
+            <bean class="com.jaspersoft.jasperserver.api.security.externalAuth.wrappers.spring.JSAuthenticationDetailsSourceImpl">
                 <property name="clazz">
                     <value>com.jaspersoft.jasperserver.api.security.externalAuth.preauth.BasePreAuthenticatedGrantesAuthorityDetails</value>
                 </property>
             </bean>
         </property>
+        <property name="jsonRedirectUrl" ref="authSuccessJsonRedirectUrl"/>
     </bean>
 
-    <bean id="preAuthenticatedManager" class="org.springframework.security.providers.ProviderManager">
+    <bean id="preAuthenticatedManager" class="com.jaspersoft.jasperserver.api.security.externalAuth.wrappers.spring.JSProviderManager">
         <property name="providers">
             <list>
                 <!-- This bean calls upon preAuthenticatedUserDetailsService to create user details based on
                  a token extracted from request by proxyPreAuthenticatedProcessingFilter -->
-                <bean class="org.springframework.security.providers.preauth.PreAuthenticatedAuthenticationProvider">
+                <bean class="com.jaspersoft.jasperserver.api.security.externalAuth.wrappers.spring.preauth.JSPreAuthenticatedAuthenticationProvider">
                     <property name="preAuthenticatedUserDetailsService">
                         <bean class="com.jaspersoft.jasperserver.api.security.externalAuth.preauth.JSPreAuthenticatedUserDetailsService">
                             <!-- Token format configuration example for token: u=obama|r=PRESIDENT,HUSBAND|pa1=USA,Kenya|pa2=Washington -->

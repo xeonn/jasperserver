@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2011 Jaspersoft Corporation. All rights reserved.
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com.
  *
  * Unless you have purchased  a commercial license agreement from Jaspersoft,
@@ -33,7 +33,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.security.AccessDeniedException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
 import javax.servlet.ServletException;
@@ -46,7 +46,7 @@ import java.io.PrintWriter;
  *
  *
  * @author gtoffoli
- * @version $Id: RESTServlet.java 41549 2014-02-06 22:17:13Z udavidovich $
+ * @version $Id: RESTServlet.java 51947 2014-12-11 14:38:38Z ogavavka $
  */
 public class RESTServlet extends HttpServlet {
 
