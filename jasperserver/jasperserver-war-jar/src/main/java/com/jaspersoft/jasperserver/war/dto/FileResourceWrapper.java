@@ -135,6 +135,10 @@ public class FileResourceWrapper extends BaseDTO implements Serializable {
                     JasperServerConst.TYPE_RSRC_CSS_FILE);
             allTypes.put(FileResource.TYPE_MONGODB_JDBC_CONFIG,
                     JasperServerConst.TYPE_RSRC_MONGODB_JDBC_CONFIG);
+            allTypes.put(FileResource.TYPE_AZURE_CERTIFICATE,
+                    JasperServerConst.TYPE_RSRC_AZURE_CERTIFICATE);
+            allTypes.put(FileResource.TYPE_SECURE_FILE,
+                    JasperServerConst.TYPE_SECURE_FILE);
 		}
 		return allTypes;
 	}

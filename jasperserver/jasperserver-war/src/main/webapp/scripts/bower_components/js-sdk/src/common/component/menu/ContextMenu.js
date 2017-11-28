@@ -24,7 +24,7 @@
  * Context menu.
  *
  * @author: Andriy Godovanets
- * @version: $Id: ContextMenu.js 1658 2015-10-05 16:13:24Z obobruyk $
+ * @version: $Id: ContextMenu.js 2690 2016-04-22 19:37:31Z inestere $
  */
 
 define(function (require) {
@@ -32,7 +32,6 @@ define(function (require) {
 
     var Menu = require("./Menu"),
         $ = require("jquery"),
-        json3 = require("json3"),
         _ = require("underscore");
 
     return Menu.extend(/** @lends ContextMenu.prototype */{
@@ -81,7 +80,7 @@ define(function (require) {
          */
         show: function(position, container) {
             if (!position || !_.isNumber(position.top) || !_.isNumber(position.left)) {
-                throw new Error("Required params (top, left) missing: " + json3.stringify(position));
+                throw new Error("Required params (top, left) missing: " + JSON.stringify(position));
             }
 
             $(document.body).on("click.contextMenu", this._tryHide);

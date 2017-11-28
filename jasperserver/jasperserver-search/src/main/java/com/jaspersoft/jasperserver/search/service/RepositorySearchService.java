@@ -34,7 +34,7 @@ import java.util.List;
  * Repository search service.
  *
  * @author Yuriy Plakosh
- * @version $Id: RepositorySearchService.java 61510 2016-03-03 09:36:22Z ykovalch $
+ * @version $Id: RepositorySearchService.java 62344 2016-04-05 21:19:17Z mchan $
  */
 public interface RepositorySearchService {
     public static final String PARAM_SORT_BY_POPULARITY = "popularity";

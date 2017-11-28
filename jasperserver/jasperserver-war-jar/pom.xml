@@ -9,7 +9,7 @@
     <parent>
         <groupId>com.jaspersoft.jasperserver</groupId>
         <artifactId>server</artifactId>
-        <version>6.2.1</version>
+        <version>6.3.0</version>
     </parent>
     <build>
         <plugins>
@@ -184,7 +184,7 @@
         <dependency>
             <groupId>opensymphony</groupId>
             <artifactId>sitemesh</artifactId>
-            <version>2.2.1-JasperSoft</version>
+            <version>2.2.1-Jaspersoft-1.0.2</version>
         </dependency>
         <dependency>
             <groupId>log4j</groupId>
@@ -257,7 +257,15 @@
                 </exclusion>
                 <exclusion>
                     <groupId>org.apache.xmlgraphics</groupId>
+                    <artifactId>batik-extension</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.xmlgraphics</groupId>
                     <artifactId>batik-js</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.xmlgraphics</groupId>
+                    <artifactId>batik-transcoder</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>

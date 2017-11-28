@@ -31,7 +31,7 @@ import java.io.InputStream;
  * It extends {@link Resource}
  *
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: FileResourceBase.java 53873 2015-04-07 18:59:44Z mchan $
+ * @version $Id: FileResourceBase.java 62483 2016-04-12 17:26:07Z akasych $
  */
 @JasperServerAPI
 public interface FileResourceBase
@@ -47,6 +47,8 @@ public interface FileResourceBase
     String TYPE_CSS = "css";
     String TYPE_ACCESS_GRANT_SCHEMA = "accessGrantSchema";
     String TYPE_MONGODB_JDBC_CONFIG = "config";
+    String TYPE_AZURE_CERTIFICATE = "cer";
+    String TYPE_SECURE_FILE = "secureFile";
     String TYPE_DASHBOARD_COMPONENTS_SCHEMA = "dashboardComponent";
 
 }

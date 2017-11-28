@@ -15,7 +15,7 @@
 
 	 -->
 
-<!--
+    <!--
     <bean id="themeResolver" class="org.springframework.web.servlet.theme.FixedThemeResolver">
         <property name="defaultThemeName" value="default"/>
     </bean>
@@ -23,9 +23,10 @@
     <bean id="themeSource" class="org.springframework.ui.context.support.ResourceBundleThemeSource">
         <property name="basenamePrefix" value="themes."/>
     </bean>
--->
+        -->
 
 	<!-- To run the themes from the repository, uncomment the three beans below and comment out the two beans above -->
+
 
     <bean id="themeResolver" class="com.jaspersoft.jasperserver.war.themes.JSThemeResolver">
         <property name="defaultThemeName">

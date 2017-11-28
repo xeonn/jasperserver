@@ -66,7 +66,7 @@ window.onload = externalLinks;
 <t:insertTemplate template="/WEB-INF/jsp/templates/page.jsp">
     <t:putAttribute name="pageTitle">JasperReports Server Instance Configuration</t:putAttribute>
     <t:putAttribute name="bodyID" value="awsConfiguration"/>
-    <t:putAttribute name="moduleName" value="admin.options.page"/>
+    <t:putAttribute name="moduleName" value="administer/administerAnalysisOptionsMain"/>
     <t:putAttribute name="headerContent">
         <script type="text/javascript" src="${pageContext.request.contextPath}/scripts/lib/require-jquery-2.1.10.js"></script>
         <script type="text/javascript" src="${pageContext.request.contextPath}/scripts/require.config.js"></script>

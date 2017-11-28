@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd">
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.1.xsd">
 
     <alias name="${bean.loggingContextProvider}" alias="concreteLoggingContextProvider"/>
 
@@ -37,8 +38,8 @@
     <bean id="accessService"
         class="com.jaspersoft.jasperserver.api.logging.access.service.impl.AccessServiceImpl">
         <property name="sessionFactory" ref="sessionFactory"/>
-        <property name="hibernateRepositoryService" ref="repositoryService"/>
-        <property name="persistentUserResolver" ref="${bean.userAuthorityService}"/>
+        <property name="hibernateRepositoryService" ref="unsecureRepositoryService"/>
+        <property name="persistentUserResolver" ref="${bean.internalUserAuthorityService}"/>
         <property name="persistentClassFactory" ref="persistentMappings"/>
         <property name="clientClassFactory" ref="mappingResourceFactory"/>
         <property name="maxAccessEventAge" value="60"/>
@@ -61,17 +62,19 @@
         </property>
         <property name="loggingService" ref="loggingEventsService"/>
     </bean>
-
-    <bean id="loggingEventsService"
-          class="com.jaspersoft.jasperserver.api.logging.service.impl.LoggingFacade">
-        <property name="routingMap">
-            <map>
+    <bean id="routingMapCe" class="java.util.HashMap">
+        <constructor-arg index="0" type="java.util.Map">
+            <map key-type="java.lang.Class">
                 <!--<entry key="com.jaspersoft.jasperserver.api.logging.monitor.domain.MonitorEvent"
-                       value-ref="ref to logging service">-->
+               value-ref="ref to logging service">-->
                 <entry key="com.jaspersoft.jasperserver.api.logging.access.domain.AccessEvent"
                        value-ref="accessService"/>
             </map>
-        </property>
+        </constructor-arg>
+    </bean>
+
+    <bean id="loggingEventsService"
+          class="com.jaspersoft.jasperserver.api.logging.service.impl.LoggingFacade">
     </bean>
 
     <bean id="accessContext"

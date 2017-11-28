@@ -2,6 +2,10 @@
     top: 29px;
 }
 
+.dashboardViewer .hyperlink {
+    cursor: pointer;
+}
+
 .dashboardContainer > .nothingToDisplay {
     position: absolute;
     top: 50%;

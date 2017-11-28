@@ -53,11 +53,11 @@ import java.util.regex.Pattern;
  *
  * @author Zakhar.Tomchenco
  * @author Volodya Sabadosh
- * @version $Id: UserAttributesConverter.java 58870 2015-10-27 22:30:55Z esytnik $
+ * @version $Id: UserAttributesConverter.java 62954 2016-05-01 09:49:23Z ykovalch $
  */
 @Service
-public class UserAttributesConverter implements ToServerConverter<ClientAttribute, ProfileAttribute>,
-        ToClientConverter<ProfileAttribute, ClientAttribute> {
+public class UserAttributesConverter implements ToServerConverter<ClientAttribute, ProfileAttribute, ToServerConversionOptions>,
+        ToClientConverter<ProfileAttribute, ClientAttribute, ToClientConversionOptions> {
     @Resource(name = "attributesPermissionService")
     private PermissionsService attributesPermissionService;
     @Resource(name="concreteAttributesRecipientIdentityResolver")

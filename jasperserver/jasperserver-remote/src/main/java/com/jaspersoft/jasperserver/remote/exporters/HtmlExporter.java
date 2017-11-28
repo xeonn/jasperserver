@@ -32,6 +32,14 @@ import java.util.Map;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Service;
+
+import com.jaspersoft.jasperserver.api.engine.jasperreports.util.ExportUtil;
+import com.jaspersoft.jasperserver.api.metadata.xml.domain.impl.Argument;
+import com.jaspersoft.jasperserver.war.util.JRHtmlExportUtils;
+
 import net.sf.jasperreports.engine.JRExporter;
 import net.sf.jasperreports.engine.JRExporterParameter;
 import net.sf.jasperreports.engine.JasperReportsContext;
@@ -42,14 +50,6 @@ import net.sf.jasperreports.engine.export.HtmlResourceHandler;
 import net.sf.jasperreports.engine.export.JRHtmlExporterParameter;
 import net.sf.jasperreports.engine.export.MapHtmlResourceHandler;
 import net.sf.jasperreports.web.util.WebHtmlResourceHandler;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Service;
-
-import com.jaspersoft.jasperserver.api.engine.jasperreports.util.ExportUtil;
-import com.jaspersoft.jasperserver.api.metadata.xml.domain.impl.Argument;
-import com.jaspersoft.jasperserver.war.util.JRHtmlExportUtils;
 
 /*  2012-09-13  thorick: restored 24858 to fix build   */
 /*  2012-09-13  thorick: backout 24858 to fix build
@@ -156,13 +156,18 @@ public class HtmlExporter extends AbstractExporter {
         		);
         htmlExporter.setImageHandler(resourceHandler);
         htmlExporter.setResourceHandler(resourceHandler);
-        htmlExporter.setReportContext((ReportContext) exportParameters.get(REPORT_CONTEXT_PARAM_NAME));
+        ReportContext reportContext = (ReportContext) exportParameters.get(REPORT_CONTEXT_PARAM_NAME);
+        if (reportContext != null) 
+        {
+            reportContext.setParameterValue("contextPath", contextPath);// context path to be used by the font handler in JSON exporter
+        }
+        htmlExporter.setReportContext(reportContext);
         final boolean allowInlineScripts = exportParameters.get(ALLOW_INLINE_SCRIPTS_PARAM_NAME) != null ? (Boolean)exportParameters.get(ALLOW_INLINE_SCRIPTS_PARAM_NAME) : false;
         final boolean interactive = exportParameters.get(INTERACTIVE_PARAM_NAME) != null ? (Boolean)exportParameters.get(INTERACTIVE_PARAM_NAME) : false;
         if(interactive && allowInlineScripts){
             htmlExporter.getJasperReportsContext().setProperty("com.jaspersoft.jasperreports.highcharts.html.export.type", "standalone");
         }
-        htmlExporter.setFontHandler(new WebHtmlResourceHandler(contextPath + "/reportresource?&font={0}"));
+        htmlExporter.setFontHandler(new WebHtmlResourceHandler(contextPath + "/reportresource?&font={0}"));// html exporter font handler no longer used in JR; consider removing
         exporter.setParameter(JRHtmlExporterParameter.IS_USING_IMAGES_TO_ALIGN, Boolean.TRUE);
     }
 

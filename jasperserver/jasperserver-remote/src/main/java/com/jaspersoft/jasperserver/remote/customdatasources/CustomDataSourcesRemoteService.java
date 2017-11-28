@@ -24,6 +24,7 @@ import com.jaspersoft.jasperserver.api.engine.jasperreports.util.CustomDataSourc
 import com.jaspersoft.jasperserver.dto.customdatasources.ClientCustomDataSourceDefinition;
 import com.jaspersoft.jasperserver.remote.exception.ResourceNotFoundException;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -37,11 +38,11 @@ import java.util.Set;
  * <p></p>
  *
  * @author yaroslav.kovalchyk
- * @version $Id: CustomDataSourcesRemoteService.java 53873 2015-04-07 18:59:44Z mchan $
+ * @version $Id: CustomDataSourcesRemoteService.java 62954 2016-05-01 09:49:23Z ykovalch $
  */
 @Service
 public class CustomDataSourcesRemoteService implements InitializingBean {
-    @Resource
+    @Autowired(required = false)
     private List<CustomDataSourceDefinition> definitions;
     @Resource
     private CustomDataSourceDefinitionToClientConverter converter;
@@ -62,10 +63,12 @@ public class CustomDataSourcesRemoteService implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        for (CustomDataSourceDefinition currentDefinition : definitions) {
-            final String name = currentDefinition.getName();
-            if (!customDataSourcesToHide.contains(name)) {
-                definitionMap.put(name, currentDefinition);
+        if(definitions != null) {
+            for (CustomDataSourceDefinition currentDefinition : definitions) {
+                final String name = currentDefinition.getName();
+                if (!customDataSourcesToHide.contains(name)) {
+                    definitionMap.put(name, currentDefinition);
+                }
             }
         }
     }

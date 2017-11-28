@@ -36,7 +36,7 @@
         </style>
     </t:putAttribute>
     <t:putAttribute name="bodyContent" >
-	
+
 		<t:insertTemplate template="/WEB-INF/jsp/templates/container.jsp">
 		    <t:putAttribute name="containerClass" value="column decorated primary"/>
 		    <t:putAttribute name="containerTitle"><spring:message code="JIF.titlepanels"/></t:putAttribute>
@@ -54,7 +54,7 @@
 		        			<th class="rowHeader">.panel</th>
 		        			<th colspan="2" class="example"><spring:message code="JIF.titlegeneralpaneltypes"/></th>
 		        		</tr>
-		        	
+
 	        		</thead>
 					<tbody>
 		        		<tr>
@@ -68,7 +68,7 @@
 		        		<tr>
 		        			<th class="rowHeader"></th>
 		        			<td class="example">
-		        				        					
+
 								<t:insertTemplate template="/WEB-INF/jsp/templates/container.jsp">
 								    <t:putAttribute name="containerClass" value="panel info tooltip"/>
 								    <t:putAttribute name="bodyContent">
@@ -78,9 +78,9 @@
 								</t:insertTemplate>
 
 		        			</td>
-		        			
+
 		        			<td class="example">
-		        				
+
 		        			</td>
 
 		        		</tr>
@@ -97,7 +97,7 @@
 		        		<tr>
 		        			<th class="rowHeader"></th>
 		        			<td class="example">
-		        				        					
+
 								<t:insertTemplate template="/WEB-INF/jsp/templates/container.jsp">
 									<t:putAttribute name="containerClass" value="panel info"/>
 								    <t:putAttribute name="bodyContent">
@@ -106,7 +106,7 @@
 								</t:insertTemplate>
 
 		        			</td>
-		        			
+
 		        			<td class="example">
 		        				<t:insertTemplate template="/WEB-INF/jsp/templates/container.jsp">
 									<t:putAttribute name="containerClass" value="panel info fillParent"/>
@@ -118,7 +118,7 @@
 
 		        		</tr>
 	        		</tbody>
-	        			        		
+
 	        		<tbody>
 		        		<tr>
 		        			<th class="rowHeader" rowspan="2">.pane</th>
@@ -132,7 +132,7 @@
 		        			<th class="rowHeader"></th>
 		        			<td class="example">
 	                            <t:insertTemplate template="/WEB-INF/jsp/templates/container.jsp">
-	                            	<t:putAttribute name="containerClass" value="panel pane"/>	                            	
+	                            	<t:putAttribute name="containerClass" value="panel pane"/>
 	                                <t:putAttribute name="containerTitle" value="Pane Title"/>
 	                                <t:putAttribute name="bodyContent">
 	                                    <div class="FPOonly c"></div>
@@ -155,7 +155,7 @@
 		        		</tr>
 	        		</tbody>
 
-	        		
+
 	        		<tbody>
 		        		<tr>
 		        			<th class="rowHeader" rowspan="2">.pane.filter</th>
@@ -174,7 +174,7 @@
                             		<div class="button disclosure noBubble"></div>
                             		<b class="mutton"></b>
                             	</t:putAttribute>
-						    	<t:putAttribute name="containerTitle" value="Country"/>  
+						    	<t:putAttribute name="containerTitle" value="Country"/>
 							    <t:putAttribute name="bodyContent">
 									 <fieldset class="options">
 							            <legend class="offLeft"><span>Condition</span></legend>
@@ -191,7 +191,7 @@
 							                    <option value="notendsWith">does not end with</option>
 							                </select>
 							        </fieldset>
-							
+
 							        <fieldset class="values">
 							            <input type="text" class="single-input">
 							        </fieldset>
@@ -200,7 +200,7 @@
 							            <input type="checkbox" checked="checked" class="options up" value="All" name="ShipCountryPodfilter_2_All">
 							            <label for="ShipCountryPodfilter_2_allLabel">
 							                All</label>
-							        </fieldset>	
+							        </fieldset>
 							    </t:putAttribute>
 							</t:insertTemplate>
 		        			</td>
@@ -212,7 +212,7 @@
                             		<div class="sizer vertical"></div>
                             		<b class="mutton"></b>
                             	</t:putAttribute>
-						    	<t:putAttribute name="containerTitle" value="Country"/> 
+						    	<t:putAttribute name="containerTitle" value="Country"/>
                                     <t:putAttribute name="bodyContent">
                                         <fieldset id="filter-container">
 								            <fieldset class="options">
@@ -230,7 +230,7 @@
 								                    <option value="notendsWith">does not end with</option>
 								                </select>
 								        </fieldset>
-								
+
 								        <fieldset class="values" id="ShipCountryPodfilter_2_filterInputContainer">
 								                <select multiple="multiple">
 								                    <option selected="selected" title="Argentina" value="Argentina">
@@ -342,7 +342,7 @@
 							<th class="rowHeader"></th>
 							<td class="example">
                                 <t:insertTemplate template="/WEB-INF/jsp/templates/container.jsp">
-												    <t:putAttribute name="containerID" value="[fieldName]_filter"/>											
+												    <t:putAttribute name="containerID" value="[fieldName]_filter"/>
 												    <t:putAttribute name="containerClass" value="panel dialog inlay filter noHeader"/>
 												    <t:putAttribute name="bodyContent">
 												    <t:putAttribute name="bodyClass" value=""/>
@@ -398,7 +398,7 @@
 																	<label class="control select multiple selectedValues" for="" title="Selected Values">
 																		<span class="wrap"><spring:message code="JIF.labelselectedvalues"/>:</span>
 																		<select multiple="multiple">
-																		    
+
 																		</select>
 																		<span class="message warning">error message here</span>
 																	</label>
@@ -426,8 +426,8 @@
                                 <t:insertTemplate template="/WEB-INF/jsp/templates/container.jsp">
      												<t:putAttribute name="containerClass" value="panel dialog inlay filter noHeader"/>
 												    <t:putAttribute name="containerID" value="[fieldName]_filter"/>
-												    
-												    
+
+
 												    <t:putAttribute name="bodyContent">
 												    <t:putAttribute name="bodyClass" value=""/>
 														    	<fieldset class="column one">
@@ -447,8 +447,8 @@
 																	<span class="fieldName">Shipped Date</span>
 																	<button id="swap" class="button options up"><span class="wrap">Swap</span><span class="icon"></span></button>
 																</fieldset>
-																
-																
+
+
 																</t:putAttribute>
 												    <t:putAttribute name="footerContent">
 														<button class="button action primary up">
@@ -493,9 +493,9 @@
 		        				</t:insertTemplate>
 
 		        			</td>
-		        			
+
 		        			<td class="example">
-		        				        					
+
                                 <t:insertTemplate template="/WEB-INF/jsp/templates/container.jsp">
                                 	<t:putAttribute name="containerClass" value="panel dialog overlay sizeable"/>
                                 	 <t:putAttribute name="containerElements">
@@ -508,7 +508,7 @@
                                 </t:insertTemplate>
 
 		        			</td>
-		        			
+
 		        		</tr>
 	        		</tbody>
 
@@ -537,9 +537,9 @@
                                         </t:insertTemplate>
                                     </t:putAttribute>
                                 </t:insertTemplate>
-                                
+
 		        			</td>
-		        			
+
 		        			<td class="example">
 
                                 <t:insertTemplate template="/WEB-INF/jsp/templates/container.jsp">
@@ -558,7 +558,7 @@
                                 </t:insertTemplate>
 		        			</td>
 
-		        			
+
 		        		</tr>
 	        		</tbody>
                     <tbody>
@@ -586,14 +586,14 @@
 		        		</tr>
 	        		</tbody>
 	        	 </table>
-	        
-	        
+
+
 				</t:putAttribute>
 		    <t:putAttribute name="footerContent">
 		    	<!-- custom content here; remove this comment -->
 		    </t:putAttribute>
-		</t:insertTemplate>		
-		
+		</t:insertTemplate>
+
 		<t:insertTemplate template="/WEB-INF/jsp/modules/sample/sampleIndex.jsp"/>
 
     </t:putAttribute>

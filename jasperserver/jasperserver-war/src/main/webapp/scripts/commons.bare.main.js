@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: commons.bare.main.js 7762 2014-09-19 10:16:02Z sergey.prilukin $
+ * @version: $Id: commons.bare.main.js 10130 2016-05-06 21:42:35Z dlitvak $
  */
 
 // The very bare commons module.
@@ -29,6 +29,7 @@
 define(function(require){
 	"use strict";
 
+    require("components.dialogs");
     require("prototype");
     require("!domReady");
 });

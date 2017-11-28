@@ -46,7 +46,7 @@ import java.util.Map;
  * @version $Id$
  */
 @Service
-public class TableMetadataConverter implements ToServerConverter<TableMetadata, CustomDomainMetaDataImpl>, ToClientConverter<CustomDomainMetaDataImpl, TableMetadata> {
+public class TableMetadataConverter implements ToServerConverter<TableMetadata, CustomDomainMetaDataImpl, ToServerConversionOptions>, ToClientConverter<CustomDomainMetaDataImpl, TableMetadata, ToClientConversionOptions> {
     @Override
     public TableMetadata toClient(CustomDomainMetaDataImpl serverObject, ToClientConversionOptions options) {
         final TableMetadata result = new TableMetadata();

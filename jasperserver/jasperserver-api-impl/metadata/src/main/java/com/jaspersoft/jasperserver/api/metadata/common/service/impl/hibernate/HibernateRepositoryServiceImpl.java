@@ -86,7 +86,7 @@ import java.util.*;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: HibernateRepositoryServiceImpl.java 61296 2016-02-25 21:53:37Z mchan $
+ * @version $Id: HibernateRepositoryServiceImpl.java 63380 2016-05-26 20:56:46Z mchan $
  */
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 public class HibernateRepositoryServiceImpl extends HibernateDaoImpl implements HibernateRepositoryService, ReferenceResolver, RepoManager, ApplicationContextAware {
@@ -463,7 +463,7 @@ public class HibernateRepositoryServiceImpl extends HibernateDaoImpl implements 
                         String quotedURI = "\"" + folder.getURIString() + "\"";
                         throw new JSException("jsexception.folder.not.found", new Object[] {quotedURI});
                     }
-                    repoFolder.setUpdateDate(new Date());
+                    repoFolder.setUpdateDate(getOperationTimestamp());
                 }
 
                 String parentURI = folder.getParentFolder();
@@ -1822,27 +1822,37 @@ public class HibernateRepositoryServiceImpl extends HibernateDaoImpl implements 
     @Transactional(propagation = Propagation.REQUIRED, readOnly = false, isolation = Isolation.READ_COMMITTED)
 	public Resource copyResource(ExecutionContext context,
 			final String sourceURI, final String destinationURI) {
-		initTempNameResources();
-		try {
-			Resource copy = (Resource) executeWriteCallback(new DaoCallback() {
-				public Object execute() {
-					RepoResource repoCopy = copyResource(sourceURI,
-							destinationURI);
-					return repoCopy.toClient(resourceFactory);
-				}
-			});
-			return copy;
-		} finally {
-			resetTempNameResources();
-		}
+		return internalCopyRenameResource(context, sourceURI, destinationURI, null);
 	}
 
-	protected RepoResource copyResource(final String sourceURI,
-			final String destinationURI) {
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED, readOnly = false, isolation = Isolation.READ_COMMITTED)
+    public Resource copyRenameResource(ExecutionContext context, final String sourceURI, final String destinationURI,
+            final String label) {
+        return internalCopyRenameResource(context, sourceURI, destinationURI, label);
+    }
+
+    protected Resource internalCopyRenameResource(ExecutionContext context, final String sourceURI, final String destinationURI,
+            final String label) {
+        initTempNameResources();
+        try {
+            RepoResource repoCopy = (RepoResource) executeWriteCallback(new DaoCallback() {
+                public Object execute() {
+                    return copyResource(sourceURI, destinationURI, label);
+                }
+            });
+            return (Resource) repoCopy.toClient(resourceFactory);
+        } finally {
+            resetTempNameResources();
+        }
+    }
+
+    protected RepoResource copyResource(final String sourceURI,
+			final String destinationURI, String label) {
 		RepoResource sourceRepoResource = findByURI(RepoResource.class, sourceURI, true);
         auditResourceCopyAndMove("copyResource", sourceURI, destinationURI, sourceRepoResource.getClientType().getName());        
 		String copyURI = getCopyURI(destinationURI, true);
-		RepoResource repoCopy = copyResource(sourceRepoResource, copyURI);
+		RepoResource repoCopy = copyResource(sourceRepoResource, copyURI, label);
         closeAuditEvent("copyResource");
 		return repoCopy;
 	}
@@ -1923,7 +1933,7 @@ public class HibernateRepositoryServiceImpl extends HibernateDaoImpl implements 
 		return copyURI;
 	}
 	
-	protected RepoResource copyResource(RepoResource resource, String copyURI) {
+	protected RepoResource copyResource(RepoResource resource, String copyURI, String label) {
 		Resource copy = getClientClone(resource);
 		copy.setURIString(copyURI);
 		resourceCopied(resource.getResourceURI(), copy);
@@ -1931,6 +1941,9 @@ public class HibernateRepositoryServiceImpl extends HibernateDaoImpl implements 
 		RepoResource repoCopy = getRepoResource(copy);
 		repoCopy.copyFromClient(copy, this);
         repoCopy.setUpdateDate(resource.getUpdateDate());
+        if(label != null){
+            repoCopy.setLabel(label);
+        }
     	getHibernateTemplate().save(repoCopy);
 		
 		return repoCopy;
@@ -1956,12 +1969,23 @@ public class HibernateRepositoryServiceImpl extends HibernateDaoImpl implements 
     @Transactional(propagation = Propagation.REQUIRED, readOnly = false, isolation = Isolation.READ_COMMITTED)
 	public Folder copyFolder(ExecutionContext context,
 			final String sourceURI, final String destinationURI) {
+		return internalCopyRenameFolder(context, sourceURI, destinationURI, null);
+	}
+
+    @Transactional(propagation = Propagation.REQUIRED, readOnly = false, isolation = Isolation.READ_COMMITTED)
+	public Folder copyRenameFolder(ExecutionContext context,
+			final String sourceURI, final String destinationURI, String label) {
+		return internalCopyRenameFolder(context, sourceURI, destinationURI, label);
+	}
+
+	protected Folder internalCopyRenameFolder(ExecutionContext context,
+			final String sourceURI, final String destinationURI, final String label) {
 		initTempNameResources();
         auditFolderCopyAndMove("copyFolder", sourceURI, destinationURI);
 		try {
 			Folder copy = (Folder) executeWriteCallback(new DaoCallback() {
 				public Object execute() {
-					RepoFolder folderCopy = copyFolder(sourceURI, destinationURI);
+					RepoFolder folderCopy = copyFolder(sourceURI, destinationURI, label);
 					return folderCopy.toClient();
 				}
 			});
@@ -1972,11 +1996,11 @@ public class HibernateRepositoryServiceImpl extends HibernateDaoImpl implements 
 		}
 	}
 	
-	protected RepoFolder copyFolder(String sourceURI, String destinationURI) {
+	protected RepoFolder copyFolder(String sourceURI, String destinationURI, String label) {
 		RepoFolder repoSource = getFolder(sourceURI, true);
 		
 		String copyURI = getCopyURI(destinationURI, false);
-		RecursiveCopier copier = new RecursiveCopier(repoSource, copyURI);
+		RecursiveCopier copier = new RecursiveCopier(repoSource, copyURI, label);
 		copier.copy();
 		return copier.getCopiedRootFolder();
 	}
@@ -2133,16 +2157,21 @@ public class HibernateRepositoryServiceImpl extends HibernateDaoImpl implements 
 		
 		private final RepoFolder sourceRoot;
 		private final String destinationRootURI;
-		
+		private final String destinationRootLabel;
+
 		private final LinkedHashMap copiedFolders = new LinkedHashMap();
 		
-		public RecursiveCopier(RepoFolder sourceRoot, String destinationRootURI) {
+		public RecursiveCopier(RepoFolder sourceRoot, String destinationRootURI, String destinationRootLabel) {
 			this.sourceRoot = sourceRoot;
 			this.destinationRootURI = destinationRootURI;
+            this.destinationRootLabel = destinationRootLabel;
 		}
 
 		public void copy() {
 			copyFolderRecursively(sourceRoot);
+            if(destinationRootLabel != null && copiedFolders.get(destinationRootURI) instanceof RepoFolder){
+                ((RepoFolder)copiedFolders.get(destinationRootURI)).setLabel(destinationRootLabel);
+            }
 			save();
 		}
 		

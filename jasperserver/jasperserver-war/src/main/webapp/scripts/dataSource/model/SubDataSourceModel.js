@@ -24,7 +24,7 @@ define(function (require) {
 
     var Backbone = require("backbone"),
         _ = require("underscore"),
-		ResourceModel = require("bi/repo/model/RepositoryResourceModel"),
+		ResourceModel = require("bi/repository/model/RepositoryResourceModel"),
         i18n = require("bundle!jasperserver_messages");
 
     return Backbone.Model.extend({

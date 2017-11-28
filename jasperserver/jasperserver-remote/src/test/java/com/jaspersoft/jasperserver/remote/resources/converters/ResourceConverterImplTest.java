@@ -30,11 +30,12 @@ import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConve
 import com.jaspersoft.jasperserver.api.metadata.common.service.ResourceFactory;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.ObjectPermission;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.client.ObjectPermissionImpl;
+import com.jaspersoft.jasperserver.dto.common.ErrorDescriptor;
 import com.jaspersoft.jasperserver.dto.resources.ClientFolder;
 import com.jaspersoft.jasperserver.dto.resources.ClientResource;
 import com.jaspersoft.jasperserver.remote.exception.IllegalParameterValueException;
 import com.jaspersoft.jasperserver.remote.exception.MandatoryParameterNotFoundException;
-import com.jaspersoft.jasperserver.dto.common.ErrorDescriptor;
+import com.jaspersoft.jasperserver.remote.resources.ClientTypeHelper;
 import com.jaspersoft.jasperserver.remote.resources.attachments.AttachmentsProcessor;
 import com.jaspersoft.jasperserver.remote.resources.validation.ResourceValidator;
 import com.jaspersoft.jasperserver.remote.services.PermissionsService;
@@ -46,8 +47,6 @@ import org.springframework.security.core.Authentication;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
 import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.FieldPosition;
@@ -57,14 +56,24 @@ import java.util.Date;
 import java.util.HashMap;
 
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.*;
-import static org.testng.Assert.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doCallRealMethod;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertSame;
+import static org.testng.Assert.assertTrue;
 
 /**
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: ResourceConverterImplTest.java 58870 2015-10-27 22:30:55Z esytnik $
+ * @version $Id: ResourceConverterImplTest.java 62954 2016-05-01 09:49:23Z ykovalch $
  */
 public class ResourceConverterImplTest {
     private static final String TEST_CLIENT_OBJECT_NAME = "testClientObjectName";
@@ -74,6 +83,8 @@ public class ResourceConverterImplTest {
     private PermissionsService permissionsService;
     @Mock
     private GenericTypeProcessorRegistry genericTypeProcessorRegistry;
+    @Mock
+    private ClientTypeHelper clientTypeHelper;
 
     private final ObjectPermission permission = new ObjectPermissionImpl();
     private ToServerConversionOptions options = ToServerConversionOptions.getDefault();
@@ -390,24 +401,8 @@ public class ResourceConverterImplTest {
     }
 
     @Test
-    public void getClientResourceType_defaultClassName() {
-        when(converter.getClientTypeClass()).thenReturn(TestClientObjectWithDefaultName.class);
-        when(converter.getClientResourceType()).thenCallRealMethod();
-        final String classSimpleName = TestClientObjectWithDefaultName.class.getSimpleName();
-        final String defaultClientType = classSimpleName.replaceFirst("^.", classSimpleName.substring(0, 1).toLowerCase());
-        assertEquals(converter.getClientResourceType(), defaultClientType);
-    }
-
-    @Test
-    public void getClientResourceType_specifiedName() {
-        when(converter.getClientTypeClass()).thenReturn(TestClientObjectWithSpecifiedName.class);
-        when(converter.getClientResourceType()).thenCallRealMethod();
-        assertEquals(converter.getClientResourceType(), TEST_CLIENT_OBJECT_NAME);
-    }
-
-    @Test
-    public void getClientResourceType_clientWithXmlTypeAnnotation() {
-        when(converter.getClientTypeClass()).thenReturn(TestClientObjectWithXmlTypeAnnotation.class);
+    public void getClientResourceType() {
+        when(clientTypeHelper.getClientResourceType()).thenReturn(TEST_CLIENT_OBJECT_NAME);
         when(converter.getClientResourceType()).thenCallRealMethod();
         assertEquals(converter.getClientResourceType(), TEST_CLIENT_OBJECT_NAME);
     }
@@ -510,18 +505,5 @@ public class ResourceConverterImplTest {
             exception = ex;
         }
         assertNotNull(exception);
-    }
-
-
-    @XmlRootElement(name = TEST_CLIENT_OBJECT_NAME)
-    private class TestClientObjectWithSpecifiedName extends ClientResource {
-    }
-
-    @XmlRootElement
-    private class TestClientObjectWithDefaultName extends ClientResource {
-    }
-
-    @XmlType(name = TEST_CLIENT_OBJECT_NAME)
-    private class TestClientObjectWithXmlTypeAnnotation extends ClientResource {
     }
 }

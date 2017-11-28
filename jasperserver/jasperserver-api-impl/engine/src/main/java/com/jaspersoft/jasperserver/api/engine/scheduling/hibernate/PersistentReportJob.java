@@ -25,8 +25,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.hibernate.criterion.DetachedCriteria;
-import org.hibernate.criterion.Restrictions;
 import org.springframework.orm.hibernate3.HibernateTemplate;
 
 import com.jaspersoft.jasperserver.api.JSException;
@@ -46,7 +44,6 @@ import com.jaspersoft.jasperserver.api.engine.scheduling.domain.reportjobmodel.R
 import com.jaspersoft.jasperserver.api.engine.scheduling.domain.reportjobmodel.ReportJobSimpleTriggerModel;
 import com.jaspersoft.jasperserver.api.engine.scheduling.domain.reportjobmodel.ReportJobSourceModel;
 import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.HibernateRepositoryService;
-import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.persistent.RepoFolder;
 import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.persistent.RepoResource;
 import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.persistent.RepoResourceLight;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.impl.hibernate.RepoUser;
@@ -54,7 +51,7 @@ import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributeSer
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: PersistentReportJob.java 58542 2015-10-13 16:16:55Z dgorbenk $
+ * @version $Id: PersistentReportJob.java 62483 2016-04-12 17:26:07Z akasych $
  */
 public class PersistentReportJob {
 
@@ -147,6 +144,7 @@ public class PersistentReportJob {
 		// on any select issued in the same session.
 		
         copyScheduledResource(referenceResolver, job);
+		copyContentRepositoryDestination(job, unusedEntities, profileAttributeService, context, referenceResolver);
 
 		
 		//////// @WARNING!!!!!!
@@ -176,7 +174,6 @@ public class PersistentReportJob {
 		setBaseOutputFilename(job.getBaseOutputFilename());
 		setOutputFormats(job.getOutputFormats() != null ? new HashSet(job.getOutputFormats()) : null);
 		setOutputLocale(job.getOutputLocale());
-		copyContentRepositoryDestination(job, unusedEntities, profileAttributeService, context);
 		copyMailNotification(job, unusedEntities);
         copyAlert(job, unusedEntities);
 	}
@@ -276,11 +273,11 @@ public class PersistentReportJob {
 	}
 
 	@SuppressWarnings("rawtypes")
-	protected void copyContentRepositoryDestination(ReportJob job, List unusedEntities, ProfileAttributeService profileAttributeService,  ExecutionContext context) {
+	protected void copyContentRepositoryDestination(ReportJob job, List unusedEntities, ProfileAttributeService profileAttributeService,  ExecutionContext context, HibernateRepositoryService referenceResolver) {
 		if (getContentRepositoryDestination() == null) {
 			setContentRepositoryDestination(new PersistentReportJobRepositoryDestination());
 		}
-		getContentRepositoryDestination().copyFrom(job.getContentRepositoryDestination(), unusedEntities, profileAttributeService, getOwner(), context);
+		getContentRepositoryDestination().copyFrom(job.getContentRepositoryDestination(), unusedEntities, profileAttributeService, getOwner(), context, referenceResolver);
 	}
 
     @SuppressWarnings("rawtypes")
@@ -290,7 +287,7 @@ public class PersistentReportJob {
             setContentRepositoryDestination(new PersistentReportJobRepositoryDestination());
             if (repositoryDestinationModel == null) return;
         }
-		if (repositoryDestinationModel != null) getContentRepositoryDestination().copyFrom(repositoryDestinationModel, unusedEntities, profileAttributeService, getOwner(), context);
+		if (repositoryDestinationModel != null) getContentRepositoryDestination().copyFrom(repositoryDestinationModel, unusedEntities, profileAttributeService, getOwner(), context, null);
         else setContentRepositoryDestination(new PersistentReportJobRepositoryDestination());
 	}
 

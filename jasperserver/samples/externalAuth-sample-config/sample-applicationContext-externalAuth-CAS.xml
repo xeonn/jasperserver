@@ -70,7 +70,7 @@
         </property>
     </bean>
     <bean id="casSessionAuthStrategy" class="com.jaspersoft.jasperserver.api.security.externalAuth.cas.CasSessionFixationProtectionStrategy">
-        <property name="migrateSessionAttributes" value="true" />
+        <property name="migrateSessionAttributes" value="false" />
         <property name="sessionMappingStorage">
             <ref local="casSessionMappingStorage"/>
         </property>

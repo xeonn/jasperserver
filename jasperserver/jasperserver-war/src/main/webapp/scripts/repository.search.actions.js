@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: repository.search.actions.js 9551 2015-10-13 14:09:03Z dgorbenk $
+ * @version: $Id: repository.search.actions.js 10166 2016-05-26 22:39:40Z gbacon $
  */
 
 /* global repositorySearch, SearchBox, toolbarButtonModule, toFunction, getAsFunction, localContext, isArray, JSCookie,
@@ -96,6 +96,9 @@ repositorySearch.folderActionFactory = {
         return new repositorySearch.Action(function() {
             var actionName;
             var toFolder = folder ? folder : repositorySearch.model.getContextFolder();
+            if(!toFolder) {
+                toFolder = repositorySearch.model.getSelectedFolder();
+            }
 
             var object = repositorySearch.CopyMoveController.object;
             var resources = (repositorySearch.CopyMoveController.isBulkAction()) ? [].concat(object) : [object];
@@ -1148,6 +1151,10 @@ repositorySearch.editActionFactory = {
         return repositorySearch.editActionFactory["JdbcReportDataSource"](resource, actionType);
     },
 
+    "AzureSqlReportDataSource": function(resource, actionType) {
+        return repositorySearch.editActionFactory["JdbcReportDataSource"](resource, actionType);
+    },
+
     "Query": function(resource, actionType) {
         return new repositorySearch.RedirectAction(actionType, {
             flowId: "queryFlow",
@@ -1364,6 +1371,7 @@ repositorySearch.RedirectAction.createRunInBackgroundResourceAction = function()
 
     if ( resource.resourceType.endsWith(".ReportUnit") ||
          resource.resourceType.endsWith(".AdhocReportUnit") ||
+         resource.resourceType.endsWith(".DashboardModelResource") ||
          resource.resourceType.endsWith(".ReportOptions") ) {
 
 		if (resource.parentResource) {
@@ -1376,7 +1384,8 @@ repositorySearch.RedirectAction.createRunInBackgroundResourceAction = function()
             //while hash is necessary for UI scheduler application
             paramsMap: {
                 'reportUnitURI': resource.URIString,
-                'parentReportUnitURI': resource.parentResource ? resource.parentResource.URIString : ""
+                'parentReportUnitURI': resource.parentResource ? resource.parentResource.URIString : "",
+                'resourceType': resource.resourceType.substring(resource.resourceType.lastIndexOf(".") + 1)
             },
             hash: "runInBackground@" + resource.URIString + reportUnitParentURI,
             encode: true
@@ -1395,6 +1404,7 @@ repositorySearch.RedirectAction.createScheduleAction = function() {
 
     if ( resource.resourceType.endsWith(".ReportUnit") ||
          resource.resourceType.endsWith(".AdhocReportUnit") ||
+         resource.resourceType.endsWith(".DashboardModelResource") ||
          resource.resourceType.endsWith(".ReportOptions") ) {
 
 		if (resource.parentResource) {
@@ -1407,6 +1417,7 @@ repositorySearch.RedirectAction.createScheduleAction = function() {
             //while hash is necessary for UI scheduler application
             paramsMap: {
                 'reportUnitURI': resource.URIString,
+                'resourceType': resource.resourceType.substring(1 + resource.resourceType.lastIndexOf(".")),
                 'parentReportUnitURI': resource.parentResource ? resource.parentResource.URIString : ""
             },
             hash: resource.URIString + reportUnitParentURI,

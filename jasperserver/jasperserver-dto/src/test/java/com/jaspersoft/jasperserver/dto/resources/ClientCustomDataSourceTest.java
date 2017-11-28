@@ -37,7 +37,7 @@ import static org.testng.Assert.assertTrue;
  * <p></p>
  *
  * @author Zakhar.Tomchenco
- * @version $Id$
+ * @version $Id: ClientCustomDataSourceTest.java 62954 2016-05-01 09:49:23Z ykovalch $
  */
 public class ClientCustomDataSourceTest {
     final ClientCustomDataSource dataSource1 = new ClientCustomDataSource(), dataSource2 = new ClientCustomDataSource();

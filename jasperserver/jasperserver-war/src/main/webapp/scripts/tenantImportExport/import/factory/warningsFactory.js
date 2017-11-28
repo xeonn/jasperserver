@@ -21,7 +21,7 @@
 
 /**
  * @author: Olesya Bobruyko
- * @version: $Id: warningsFactory.js 9909 2016-02-25 19:56:31Z dgorbenk $
+ * @version: $Id: warningsFactory.js 10166 2016-05-26 22:39:40Z gbacon $
  */
 
 define(function(require) {
@@ -99,6 +99,13 @@ define(function(require) {
         {
             msg: i18n["import.folder.attached.not.exist.org"],
             parameters: ["resourceURI"]
+        }
+    ];
+
+    errorCodeToMessageMap["import.multi.tenancy.not.supported"] = [
+        {
+            msg: i18n["import.multi.tenancy.not.supported"],
+            parameters: ["organizationId"]
         }
     ];
 

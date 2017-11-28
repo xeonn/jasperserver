@@ -269,20 +269,27 @@ public class RepositorySearchAction extends BaseSearchAction {
             resource = unsecuredRepository.getResource(executionContext, uri);
         }
 
-        String displayPath = Folder.SEPARATOR + resource.getLabel();
+        String displayPath = getDisplayPath(resource.getName(), "");
 
         String parentUri = resource.getParentFolder();
         while (parentUri != null) {
             Folder folder = unsecuredRepository.getFolder(executionContext, parentUri);
-
-            displayPath = Folder.SEPARATOR + folder.getLabel() + displayPath;
-
             parentUri = folder.getParentURI();
+            displayPath = getDisplayPath(folder.getName(), displayPath);
         }
 
         return displayPath;
     }
 
+    private String getDisplayPath(String name, String displayPath) {
+        if (Folder.SEPARATOR.equals(name) && displayPath.isEmpty()) {
+            return Folder.SEPARATOR;
+        } else if (Folder.SEPARATOR.equals(name)) {
+            return displayPath;
+        } else {
+            return Folder.SEPARATOR + name + displayPath;
+        }
+    }
 
     public Event search(RequestContext context) throws JSONException {
         String text = getParameter(context, PARAMETER_TEXT);

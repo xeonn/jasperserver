@@ -532,6 +532,11 @@
                         <value>com.jaspersoft.jasperserver.api.metadata.common.domain.FileResource</value>
                     </set>
                 </entry>
+                <entry key="secureFile">
+                    <set value-type="java.lang.Class">
+                        <value>com.jaspersoft.jasperserver.api.metadata.common.domain.FileResource</value>
+                    </set>
+                </entry>
                 <entry key="folder">
                     <set value-type="java.lang.Class">
                         <value>com.jaspersoft.jasperserver.api.metadata.common.domain.Folder</value>

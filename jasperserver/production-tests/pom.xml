@@ -10,7 +10,7 @@
     <parent>
         <groupId>com.jaspersoft.jasperserver</groupId>
         <artifactId>server</artifactId>
-        <version>6.2.1</version>
+        <version>6.3.0</version>
     </parent>
     <dependencies>
         <dependency>
@@ -220,7 +220,7 @@
         <dependency>
             <groupId>com.jaspersoft.jasperserver</groupId>
             <artifactId>jasperserver-war</artifactId>
-            <version>6.2.1</version>
+            <version>6.3.0</version>
             <type>war</type>
             <scope>test</scope>
         </dependency>

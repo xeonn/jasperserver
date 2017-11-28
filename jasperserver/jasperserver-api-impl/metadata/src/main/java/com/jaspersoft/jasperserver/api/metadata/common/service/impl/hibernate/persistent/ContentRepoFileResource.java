@@ -56,7 +56,7 @@ public class ContentRepoFileResource extends RepoResource
 {
 	private static final Log log = LogFactory.getLog(ContentRepoFileResource.class);
 
-		private String fileType;
+		private String contentFileType;
 
 		private ComparableBlob data;
 
@@ -72,16 +72,17 @@ public class ContentRepoFileResource extends RepoResource
 			this.data = data;
 		}
 
-		/**
-		 * @hibernate.property column="file_type" type="string" length="20"
-		 */
-		public String getFileType() {
-			return fileType;
-		}
+	/**
+	 * @hibernate.property column="file_type" type="string" length="20"
+	 */
 
-		public void setFileType(String type) {
-			this.fileType = type;
-		}
+	public String getContentFileType() {
+		return contentFileType;
+	}
+
+	public void setContentFileType(String contentFileType) {
+		this.contentFileType = contentFileType;
+	}
 
 
 	protected void copyDataFrom(ContentResource dataRes) {
@@ -132,7 +133,7 @@ public class ContentRepoFileResource extends RepoResource
 
 		ContentResource resource = (ContentResource) clientRes;
 
-		resource.setFileType(getFileType());
+		resource.setFileType(getContentFileType());
 		if (hasClientOption(CLIENT_OPTION_FULL_DATA)) {
 			copyDataTo(resource);
 		} else {
@@ -180,7 +181,7 @@ public class ContentRepoFileResource extends RepoResource
 		super.copyFrom(clientRes, referenceResolver);
 
 		ContentResource dataRes = (ContentResource) clientRes;
-		setFileType(dataRes.getFileType());
+		setContentFileType(dataRes.getFileType());
 		copyDataFrom(dataRes);
 		copyResources(referenceResolver, (ContentResource) clientRes);
 	}

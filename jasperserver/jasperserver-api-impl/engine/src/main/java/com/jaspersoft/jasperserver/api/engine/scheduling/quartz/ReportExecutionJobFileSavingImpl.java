@@ -22,6 +22,7 @@ package com.jaspersoft.jasperserver.api.engine.scheduling.quartz;
 
 import com.jaspersoft.jasperserver.api.JSException;
 import com.jaspersoft.jasperserver.api.JSExceptionWrapper;
+import com.jaspersoft.jasperserver.api.common.crypto.PasswordCipherer;
 import com.jaspersoft.jasperserver.api.common.util.FTPService;
 import com.jaspersoft.jasperserver.api.engine.common.util.impl.FTPUtil;
 import com.jaspersoft.jasperserver.api.engine.scheduling.domain.FTPInfo;
@@ -32,11 +33,13 @@ import com.jaspersoft.jasperserver.api.metadata.common.domain.DataContainer;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Folder;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.util.DataContainerStreamUtil;
+import com.jaspersoft.jasperserver.api.metadata.common.service.JSResourceNotFoundException;
 import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
 import com.jaspersoft.jasperserver.api.metadata.common.util.LockHandle;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.net.util.TrustManagerUtils;
+import org.springframework.dao.DataAccessResourceFailureException;
 
 import java.io.*;
 import java.util.*;
@@ -45,7 +48,7 @@ import java.util.zip.ZipOutputStream;
 
 /**
  * @author Ivan Chan (ichan@jaspersoft.com)
- * @version $Id: ReportExecutionJobFileSavingImpl.java 55164 2015-05-06 20:54:37Z mchan $
+ * @version $Id: ReportExecutionJobFileSavingImpl.java 62483 2016-04-12 17:26:07Z akasych $
  */
 public class ReportExecutionJobFileSavingImpl implements ReportExecutionJobFileSaving {
 
@@ -98,6 +101,26 @@ public class ReportExecutionJobFileSavingImpl implements ReportExecutionJobFileS
 
     }
 
+    private String getSSHKeyData(ReportExecutionJob job, String uri) {
+        String sshKeyData = null;
+        try {
+            // get file data
+            sshKeyData = new String(job.getRepository().getResourceData(job.executionContext, uri).getData());
+
+            // decode if encrypted
+            sshKeyData = PasswordCipherer.getInstance().decodePassword(sshKeyData);
+        } catch (JSResourceNotFoundException e) {
+            log.error("Failed to read the SSH Private Key from repository.");
+        } catch (DataAccessResourceFailureException e) {
+            log.warn("Failed to decrypt the SSH Private Key. Most likely reason is unencrypted data in db.");
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+
+        return sshKeyData;
+    }
+
+
     protected void saveToRepository(ReportExecutionJob job, ReportOutput output, ReportJob jobDetails) {
         RepositoryService repositoryService = job.getRepository();
 		ReportJobRepositoryDestination repositoryDestination = jobDetails.getContentRepositoryDestination();
@@ -141,11 +164,11 @@ public class ReportExecutionJobFileSavingImpl implements ReportExecutionJobFileS
 				contentRes = (ContentResource) repositoryService.newResource(job.executionContext, ContentResource.class);
 				contentRes.setName(output.getFilename());
 				contentRes.setLabel(output.getFilename());
-				contentRes.setDescription(jobDetails.getContentRepositoryDestination().getOutputDescription());
 				contentRes.setParentFolder(repositoryDestination.getFolderURI());
 			}
 
-			contentRes.setFileType(output.getFileType());
+            contentRes.setDescription(jobDetails.getContentRepositoryDestination().getOutputDescription());
+            contentRes.setFileType(output.getFileType());
 			contentRes.setDataContainer(output.getPersistenceData());
 			contentRes.setResources(childResources);
 
@@ -198,9 +221,19 @@ public class ReportExecutionJobFileSavingImpl implements ReportExecutionJobFileS
             FTPService.FTPServiceClient ftpServiceClient = null;
             if (ftpInfo.getType().equals(FTPInfo.TYPE_FTP))
                 ftpServiceClient = ftpService.connectFTP(ftpInfo.getServerName(), ftpInfo.getPort(), ftpInfo.getUserName(), ftpInfo.getPassword());
-            else
+            else if (ftpInfo.getType().equals(FTPInfo.TYPE_FTPS)) {
                 ftpServiceClient = ftpService.connectFTPS(ftpInfo.getServerName(), ftpInfo.getPort(), ftpInfo.getProtocol(), ftpInfo.isImplicit(), ftpInfo.getPbsz(), ftpInfo.getProt(), ftpInfo.getUserName(), ftpInfo.getPassword(),
                         false, TrustManagerUtils.getAcceptAllTrustManager());
+            } else if (ftpInfo.getType().equals(FTPInfo.TYPE_SFTP)) {
+
+                // Read SSH Private Key data from repo file resource
+                String sshKeyData = null;
+                if (ftpInfo.getSshKey() != null) {
+                    sshKeyData = getSSHKeyData(job, ftpInfo.getSshKey());
+                }
+
+                ftpServiceClient = ftpService.connectSFTP(ftpInfo.getServerName(), ftpInfo.getPort(), ftpInfo.getUserName(), ftpInfo.getPassword(), null, sshKeyData, ftpInfo.getSshPassphrase());
+            }
             ftpServiceClient.changeDirectory(ftpInfo.getFolderPath());
             if (!jobDetails.getContentRepositoryDestination().isOverwriteFiles() && ftpServiceClient.exists(fileName)) {
                throw new JSException("jsexception.report.resource.already.exists.no.overwrite", new Object[] {ftpInfo.getServerName() + ftpInfo.getFolderPath() + "/" + fileName});

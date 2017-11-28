@@ -28,7 +28,7 @@
     <t:putAttribute name="pageTitle"><spring:message code="export.export"/></t:putAttribute>
     <t:putAttribute name="bodyID" value="exportDataFile"/>
     <t:putAttribute name="bodyClass" value="twoColumn"/>
-    <t:putAttribute name="moduleName" value="admin.export.page"/>
+    <t:putAttribute name="moduleName" value="administer/administerExportMain"/>
 
     <t:putAttribute name="headerContent">
         <%@ include file="../common/jsEdition.jsp" %>

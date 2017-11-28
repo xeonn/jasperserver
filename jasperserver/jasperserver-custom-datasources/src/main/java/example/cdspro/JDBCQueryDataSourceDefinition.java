@@ -7,17 +7,15 @@
 package example.cdspro;
 
 import com.jaspersoft.jasperserver.api.JSException;
+import com.jaspersoft.jasperserver.api.engine.jasperreports.util.CustomDomainMetaDataImpl;
+import com.jaspersoft.jasperserver.api.engine.jasperreports.util.DataAdapterDefinition;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.CustomDomainMetaData;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.CustomReportDataSource;
-import com.jaspersoft.jasperserver.api.engine.jasperreports.util.DataAdapterDefinition;
-import com.jaspersoft.jasperserver.api.engine.jasperreports.util.DataAdapterDefinitionUtil;
-import com.jaspersoft.jasperserver.api.engine.jasperreports.util.CustomDomainMetaDataImpl;
 import net.sf.jasperreports.data.DataAdapter;
 import net.sf.jasperreports.data.DataAdapterService;
 import net.sf.jasperreports.data.jdbc.JdbcDataAdapter;
 import net.sf.jasperreports.data.jdbc.JdbcDataAdapterImpl;
 import net.sf.jasperreports.engine.JasperReportsContext;
-
 
 import java.lang.reflect.Field;
 import java.sql.Connection;
@@ -100,7 +98,7 @@ public class JDBCQueryDataSourceDefinition extends DataAdapterDefinition {
         if (getValidator() != null) getValidator().validatePropertyValues(customDataSource, null);
         String query = (String)propertyValueMap.get("query");
 
-        JDBCQueryDataSourceService jdbcDataAdapterService = new JDBCQueryDataSourceService(DataAdapterDefinitionUtil.getJasperReportsContext(), jdbcDataAdapter);
+        JDBCQueryDataSourceService jdbcDataAdapterService = new JDBCQueryDataSourceService(getJasperReportsContext(), jdbcDataAdapter);
         Connection connection = null;
         Statement statement = null;
         ResultSet resultSet = null;

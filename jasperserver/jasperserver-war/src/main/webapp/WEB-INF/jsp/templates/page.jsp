@@ -21,7 +21,7 @@
 
 <%--
 Overview:
-	This template used to enforce that each page must have a title, a body ID and a body class. 
+	This template used to enforce that each page must have a title, a body ID and a body class.
 
 Usage:
 	<tiles:insertTemplate template="/WEB-INF/jsp/templates/page.jsp">
@@ -50,6 +50,7 @@ Usage:
 <tiles:useAttribute id="pageClass" name="pageClass" classname="java.lang.String" ignore="true"/>
 <tiles:useAttribute id="bodyClass" name="bodyClass" classname="java.lang.String" ignore="false"/>
 <tiles:useAttribute id="moduleName" name="moduleName" classname="java.lang.String" ignore="true"/>
+<tiles:useAttribute id="decorate" name="decorate" classname="java.lang.String" ignore="true"/>
 
 <%
     if (pageTitle.length() == 0) { throw new JSException("Attribute \"pageTitle\" can't be empty."); }
@@ -63,25 +64,23 @@ Usage:
     <tiles:insertAttribute name="headerContent" ignore="true"/>
 
     <c:if test="${not empty moduleName}">
-
-        <jsp:include page="../modules/includeRequirejsScripts.jsp"/>
-        <%--
-            Performance optimization:
-            we do not wait until requirejs will load this module,
-            instead we load it by ourself (but only if optimization is turned on)
-            thus when requirejs will request it it already will be loaded.
-        --%>
-        <c:if test="${optimizeJavascript == true}">
-            <%-- temporarily commented out --%>
-            <%--<script type="text/javascript" src="${scriptsUri}/${moduleName}.js"></script>--%>
-        </c:if>
-
+        <jsp:include page="../modules/commonScripts.jsp"/>
         <script type="text/javascript">
-            require(["<tiles:insertAttribute name="moduleName"/>"]);
+            <c:choose>
+                <c:when test="${moduleName == 'common.main'}">
+                    requirejs(["commons.main"]);
+                </c:when>
+                <c:when test="${decorate == 'false'}">
+                    requirejs(["<tiles:insertAttribute name="moduleName"/>"]);
+                </c:when>
+                <c:otherwise>
+                    requirejs(["commons.main"], function(){
+                        requirejs(["<tiles:insertAttribute name="moduleName"/>"]);
+                    });
+                </c:otherwise>
+            </c:choose>
         </script>
-
     </c:if>
-
 
 </head>
 <body id="<tiles:getAsString name="bodyID"/>" class="<tiles:getAsString name="pageClass" ignore="true"/>">

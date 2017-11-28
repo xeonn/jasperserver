@@ -28,7 +28,7 @@
     <t:putAttribute name="pageTitle"><spring:message code="messages.messageDetail.page.title"/></t:putAttribute>
     <t:putAttribute name="bodyID" value="messageDetail"/>
     <t:putAttribute name="bodyClass" value="oneColumn"/>
-    <t:putAttribute name="moduleName" value="messages/details/messageDetails.page"/>
+    <t:putAttribute name="moduleName" value="messages/details/messageDetailsMain"/>
     <t:putAttribute name="headerContent" >
         <js:out javaScriptEscape="true">
         <script type="text/javascript">

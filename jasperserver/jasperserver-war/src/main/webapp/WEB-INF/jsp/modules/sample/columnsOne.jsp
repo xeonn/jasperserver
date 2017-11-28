@@ -28,9 +28,9 @@
     <t:putAttribute name="bodyID" value="columnsOne"/>
     <t:putAttribute name="bodyClass" value="oneColumn"/>
     <t:putAttribute name="moduleName" value="commons.main"/>
-	
+
 		<t:putAttribute name="bodyContent" >
-		
+
 			<t:insertTemplate template="/WEB-INF/jsp/templates/container.jsp">
 		    	<t:putAttribute name="containerClass" value="column decorated primary"/>
 			    <t:putAttribute name="containerTitle"><spring:message code="JIF.titleprimary"/></t:putAttribute>
@@ -40,7 +40,7 @@
 					[REQUIRED]
 			    </t:putAttribute>
 			</t:insertTemplate>
-			
+
 	    </t:putAttribute>
 
 </t:insertTemplate>

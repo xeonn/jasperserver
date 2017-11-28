@@ -32,6 +32,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashMap;
@@ -43,10 +44,14 @@ import java.util.UUID;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: ConnectionsManager.java 58870 2015-10-27 22:30:55Z esytnik $
+ * @version $Id: ConnectionsManager.java 62954 2016-05-01 09:49:23Z ykovalch $
  */
 @Service
 public class ConnectionsManager implements InitializingBean {
+    @Resource
+    private List<ConnectionQueryExecutor> queryExecutors;
+    private Map<String, Class<?>> queryTypeToClassMapping;
+    private Map<Class<?>, List<ConnectionQueryExecutor>> queryClassToQueryExecutorsMapping;
     @Resource
     private List<ConnectionManagementStrategy<?>> strategies;
     private Map<String, Class<?>> typeToClassMapping;
@@ -58,6 +63,10 @@ public class ConnectionsManager implements InitializingBean {
 
     public Class<?> getConnectionDescriptionClass(String connectionType) {
         return typeToClassMapping.get(connectionType != null ? connectionType.toLowerCase() : null);
+    }
+
+    public Class<?> getQueryClass(String queryType){
+        return queryTypeToClassMapping.get(queryType != null ? queryType.toLowerCase() : null);
     }
 
     public UUID createConnection(Object connectionDescription) throws IllegalParameterValueException {
@@ -105,13 +114,49 @@ public class ConnectionsManager implements InitializingBean {
 
     // generic processor registry assures safety of call
     @SuppressWarnings("unchecked")
-    public Object getConnectionMetadata(UUID uuid) throws ResourceNotFoundException, UnsupportedOperationRemoteException {
+    public Object getConnectionMetadata(UUID uuid, Map<String, String[]> options) throws ResourceNotFoundException, UnsupportedOperationRemoteException {
         final ConnectionDataPair pair = getItemFromCache(uuid);
         final ConnectionMetadataBuilder typeProcessor = genericTypeProcessorRegistry.getTypeProcessor(pair.connection.getClass(), ConnectionMetadataBuilder.class, false);
         if (typeProcessor == null) {
             throw new UnsupportedOperationRemoteException(ClientTypeHelper.extractClientType(pair.connection.getClass()) + "/metadata");
         }
-        return typeProcessor.build(pair.connection);
+        return typeProcessor.build(pair.connection, options);
+    }
+
+    public Object executeQuery(UUID uuid, Object query){
+        final Object connection = getItemFromCache(uuid).connection;
+        ConnectionQueryExecutor<Object,Object> queryExecutor = getQueryExecutor(query, connection);
+        return queryExecutor.executeQuery(query, connection);
+    }
+
+    public Object executeQueryForMetadata(UUID uuid, Object query){
+        final Object connection = getItemFromCache(uuid).connection;
+        ConnectionQueryExecutor<Object,Object> queryExecutor = getQueryExecutor(query, connection);
+        return queryExecutor.executeQueryForMetadata(query, connection);
+    }
+
+    protected ConnectionQueryExecutor<Object, Object> getQueryExecutor(Object query, Object connection) {
+        ConnectionQueryExecutor<Object, Object> queryExecutor = null;
+        final ConnectionManagementStrategy<Object> strategy = getStrategy(connection);
+        if(strategy instanceof ConnectionQueryExecutor){
+            queryExecutor = (ConnectionQueryExecutor<Object, Object>) strategy;
+        } else {
+            final List<ConnectionQueryExecutor> queryExecutorList = queryClassToQueryExecutorsMapping.get(query.getClass());
+            if (queryExecutorList != null) {
+                for (ConnectionQueryExecutor currentQueryExecutor : queryExecutorList) {
+                    final Class<?> connectionClass = GenericParametersHelper
+                            .getGenericTypeArgument(currentQueryExecutor.getClass(), ConnectionQueryExecutor.class, 1);
+                    if (connectionClass.isAssignableFrom(connection.getClass())) {
+                        queryExecutor = currentQueryExecutor;
+                        break;
+                    }
+                }
+            }
+        }
+        if (queryExecutor == null) {
+            throw new UnsupportedOperationRemoteException(ClientTypeHelper.extractClientType(connection.getClass()));
+        }
+        return queryExecutor;
     }
 
     // initialization code in afterPropertiesSet() ensures cast safety in this case.
@@ -160,6 +205,27 @@ public class ConnectionsManager implements InitializingBean {
         }
         typeToClassMapping = Collections.unmodifiableMap(typeToClassMap);
         classToStrategyMapping = Collections.unmodifiableMap(classToStrategyMap);
+        if(queryExecutors != null){
+            Map<String, Class<?>> queryTypeToClassMap = new HashMap<String, Class<?>>();
+            Map<Class<?>, List<ConnectionQueryExecutor>> queryClassToQueryExecutorMap = new HashMap<Class<?>, List<ConnectionQueryExecutor>>();
+            for(ConnectionQueryExecutor queryExecutor : queryExecutors){
+                final Class<?> queryClass = GenericParametersHelper.getGenericTypeArgument(queryExecutor.getClass(),
+                        ConnectionQueryExecutor.class, 0);
+                final String queryType = ClientTypeHelper.extractClientType(queryClass).toLowerCase();
+                queryTypeToClassMap.put(queryType, queryClass);
+                List<ConnectionQueryExecutor> executorsForClass = queryClassToQueryExecutorMap.get(queryClass);
+                if(executorsForClass == null){
+                    executorsForClass = new ArrayList<ConnectionQueryExecutor>();
+                    queryClassToQueryExecutorMap.put(queryClass, executorsForClass);
+                }
+                executorsForClass.add(queryExecutor);
+            }
+            queryTypeToClassMapping = Collections.unmodifiableMap(queryTypeToClassMap);
+            for(Class<?> clazz : queryClassToQueryExecutorMap.keySet()){
+                queryClassToQueryExecutorMap.put(clazz, Collections.unmodifiableList(queryClassToQueryExecutorMap.get(clazz)));
+            }
+            queryClassToQueryExecutorsMapping = Collections.unmodifiableMap(queryClassToQueryExecutorMap);
+        }
     }
 
     private static class ConnectionDataPair implements Serializable {

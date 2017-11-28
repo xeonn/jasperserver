@@ -21,6 +21,7 @@
 package com.jaspersoft.jasperserver.test;
 
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.ContentResource;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.FileResource;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Folder;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
@@ -95,6 +96,8 @@ public class FullDataCreateTestNG extends BaseServiceSetupTestNG {
         addUserAuthorityServiceTestResources();
         addOlapConnectionResources();
         addInteractiveReportResources();
+
+        addDefaultDomainWhitelist();
     }
 
 
@@ -1025,8 +1028,10 @@ public class FullDataCreateTestNG extends BaseServiceSetupTestNG {
     private void createCsvData(Folder folder) {
         m_logger.info("createCsvData() => creating /reports/interactive/CsvData");
 
-        FileResource csvData = (FileResource) getUnsecureRepositoryService().newResource(null, FileResource.class);
-        csvData.setFileType(FileResource.TYPE_XML);
+        //FileResource csvData = (FileResource) getUnsecureRepositoryService().newResource(null, FileResource.class);
+        //csvData.setFileType(FileResource.TYPE_XML);
+        ContentResource csvData = (ContentResource)  getUnsecureRepositoryService().newResource(null, ContentResource.class);
+        csvData.setFileType(ContentResource.TYPE_CSV);
         csvData.readData(getClass().getResourceAsStream("/reports/jasper/CsvData.csv"));
         csvData.setName("CsvData");
         csvData.setLabel("CSV Data");

@@ -22,7 +22,7 @@
 
 /**
  * @author: Zakhar Tomchenko
- * @version: $Id: Tree.js 2296 2016-02-25 19:03:43Z dgorbenk $
+ * @version: $Id: Tree.js 2605 2016-04-12 12:25:50Z akasych $
  */
 
 define(function(require){
@@ -32,7 +32,8 @@ define(function(require){
 
     require("css!lists");
 
-    var _ = require('underscore'),
+    var $ = require("jquery"),
+        _ = require('underscore'),
         Backbone = require('backbone'),
         TreeLevel = require("./TreeLevel"),
         TreeDataLayer = require("./TreeDataLayer"),
@@ -58,6 +59,13 @@ define(function(require){
 
             this.defaultDataLayer = new TreeDataLayer(options);
             this.customDataLayers = options.customDataLayers;
+
+            if (options.type) {
+                this._type = options.type;
+                options.type = undefined;
+            } else {
+                this._type = "tree";
+            }
 
             options.collapserSelector || (options.collapserSelector = "b.icon:eq(0)");
 
@@ -147,17 +155,86 @@ define(function(require){
             return this;
         },
 
-        select: function(nodeId) {
+        _getNodeById: function(nodeId) {
+
+            var listContainingLevel, itemOfLevel;
             var level = this.getLevel(nodeId);
 
-            if (level && level.parent) {
-                var list = level.parent.list,
-                    item = level.item;
+            if (level) {
 
-                list.model.clearSelection().addValueToSelection(item.value, item.index);
+                if (!level.parent) {
+                    return null;
+                }
 
-                this.trigger("selection:change", list.getValue());
+                listContainingLevel = level.parent.list;
+
+                return {
+                    node: level.item,
+                    nodeElement: level.$el,
+                    itsList: listContainingLevel
+                };
+
             }
+
+            // We failed to find the node from the first attempt.
+            // It's OK. There can be three reasons:
+            // 1) Node is absent or "nodeId" is wrong
+            // 2) The nodeId refers to a file instead of a folder
+            // 3) This tree is not a tree but a list (yeah, surprise from this tree developers!)
+            // So, we have to check if we are the list, then if nodeId is a file. Let's do it
+
+            var parentLevel = false;
+
+            if (this._type === "list") {
+
+                parentLevel = this.rootLevel;
+
+            } else if (this._type === "tree") {
+
+                // Seems like nodeId is a file and because of this we were not able to find it's level in previous call.
+                // So, let's try to get path of parent of nodeId so we can get access to nodeId
+                var parentPath = nodeId.split("/");
+                parentPath = parentPath.slice(0, parentPath.length - 1).join("/");
+                if (parentPath === "") {
+                    parentPath = "@fakeRoot";
+                }
+
+                // now, get parents level
+
+                parentLevel = this.getLevel(parentPath);
+                if (!parentLevel) {
+                    return null;
+                }
+            }
+
+            if (!parentLevel) {
+                return null;
+            }
+
+            listContainingLevel = parentLevel.list;
+            itemOfLevel = _.find(listContainingLevel.model.get("items"), function(item){ return item.id === nodeId; });
+
+            if (!itemOfLevel) {
+                return null;
+            }
+
+            return {
+                node: itemOfLevel,
+                nodeElement: listContainingLevel.$el.find("li.leaf.selected"),
+                itsList: listContainingLevel
+            };
+        },
+
+        select: function(nodeId) {
+
+            var nodeInfo = this._getNodeById(nodeId);
+
+            if (!nodeInfo) {
+                return;
+            }
+
+            nodeInfo.itsList.model.clearSelection().addValueToSelection(nodeInfo.node.value, nodeInfo.node.index);
+            this.trigger("selection:change", nodeInfo.itsList.getValue());
         },
 
         deselect: function(nodeId){
@@ -245,7 +322,150 @@ define(function(require){
 
             level.list.lazy = false;
             level.list.fetch();
+        },
+
+        // Adding some methods which allows us to open and select tree node after tree has been initialized
+        // This functionality is expected in the new version of Tree so until that awesome moment we'll keep these two methods
+        // to actually do this.
+
+        _selectTreeNode: function(pathToSelect, $scrollContainer) {
+
+            if (!_.isString(pathToSelect) || pathToSelect === "") {
+                return;
+            }
+
+            var onceRootNodeIsReady = _.bind(function () {
+
+                var afterFolderTreeIsOpened = _.bind(function () {
+
+                    var folderToSelect = pathToSelect;
+
+                    if (folderToSelect === "/") {
+                        folderToSelect = "@fakeRoot";
+                    }
+
+                    this.select(folderToSelect);
+
+                    // scroll to item
+
+                    if (this._type === "list") {
+
+                        this.rootLevel.on("ready", onceRootNodeIsReady);
+
+                    } else if (this._type === "tree" ) {
+                        if ($scrollContainer && $scrollContainer.length) {
+
+                            var $tree = this.$el,
+                                nodeInfo = this._getNodeById(folderToSelect);
+
+                            if (!nodeInfo) {
+                                return;
+                            }
+
+                            var $selectedItem = nodeInfo.nodeElement;
+                            if (!$selectedItem) {
+                                return;
+                            }
+
+                            var scrollTo = ($selectedItem.offset().top - $tree.offset().top) - $scrollContainer.height() / 2 + $selectedItem.height() / 2;
+
+                            $scrollContainer.scrollTop(scrollTo);
+                        }
+                    }
+
+                }, this);
+
+                ///////////////////////////////////////
+
+                // To highlight preSelectedItem on a tree we need to open all his parent folders.
+                // To open all his parent folders we need to build from these parents an array and then open them one by one
+                // So, if preSelectedItem looks like "/path/Samples/Reports", we need
+                // to open "/path" and then "/path/Samples"
+                // But in some cases (these cases are "/" and "/public" folders) there is no need to open any folders
+                // because they are located in the top level in our tree
+
+                if (pathToSelect === "/" || pathToSelect === "/public" || this._type === "list") {
+
+                    afterFolderTreeIsOpened();
+
+                } else {
+
+                    var tmp = pathToSelect.replace(/\/$/, "");
+                    var pathToOpen = tmp.substr(0, tmp.lastIndexOf("/"));
+
+                    // if pathToOpen is empty that means we need to open root folder
+                    pathToOpen = pathToOpen || "/";
+
+                    var dfd = new $.Deferred();
+                    this._openPath(pathToOpen, dfd, 0);
+                    dfd.done(afterFolderTreeIsOpened);
+                }
+
+            }, this);
+
+            if (this.rootLevel.isReady()) {
+                onceRootNodeIsReady();
+            } else {
+                this.rootLevel.on("ready", onceRootNodeIsReady);
+            }
+        },
+
+        _openPath: function(path, dfd, index) {
+
+            if (!path) {
+                return dfd.resolve();
+            }
+
+            var self = this,
+                pathFragmentToOpen,
+                splitPath,
+                level;
+
+            if (path === "/") {
+                splitPath = ["/"];
+            } else {
+                splitPath = path.split("/");
+                splitPath[0] = "/"; // simply because split always adds "" at the beginning
+            }
+
+            // Here comes the trick again: if path is like "/public/Samples then it will be split to
+            // ["/", "public", "Samples"]
+            // and that means that the first node to open would be "/" and then "/public", but this is wrong:
+            // in our tree node "/public" located on the top-level, not under "/" like in common file systems.
+            // so we have to modify array ["/", "public", "Samples"] into ["/public", "Samples"]
+            if (splitPath[0] === "/" && splitPath[1] === "public") {
+                splitPath = _.union(["/public"], _.rest(splitPath, 2));
+            }
+
+            index = index || 0;
+            // did we get to the end ?
+            if (index === splitPath.length) {
+                return dfd.resolve();
+            }
+
+            pathFragmentToOpen = _.first(splitPath, index + 1).join("/");
+
+            if (pathFragmentToOpen === "/") {
+                pathFragmentToOpen = "@fakeRoot";
+            }
+
+            pathFragmentToOpen = pathFragmentToOpen.replace(/\/\//g, "/");
+
+            level = this.getLevel(pathFragmentToOpen);
+
+            if (level) { // if level exists open it and go ahead
+                if (level.collapsed) { // open if collapsed
+                    level.once("ready", function() {
+                        self._openPath(path, dfd, index + 1); // open next level
+                    });
+
+                    level.open();
+                } else {
+                    this._openPath(path, dfd, index + 1);
+                }
+            }
         }
+
     },{
         instance: function(options){
             return new this(options);
@@ -310,4 +530,3 @@ define(function(require){
         }).length &&  parentLevel.$(".j-view-port-chunk").css({height: "auto"});
     }
 });
-

@@ -41,7 +41,7 @@ import com.jaspersoft.jasperserver.api.engine.jasperreports.common.RtfExportPara
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ReportRtfExporter.java 54728 2015-04-24 15:28:20Z tdanciu $
+ * @version $Id: ReportRtfExporter.java 63555 2016-06-10 16:59:01Z tdanciu $
  */
 public class ReportRtfExporter extends AbstractReportExporter 
 {
@@ -51,7 +51,7 @@ public class ReportRtfExporter extends AbstractReportExporter
 		JRRtfExporter exporter = new JRRtfExporter(getJasperReportsContext());
 		
 		exporter.setExporterInput(new SimpleExporterInput(jasperPrint));
-		exporter.setExporterOutput(new SimpleWriterExporterOutput(outputStream));
+		exporter.setExporterOutput(new SimpleWriterExporterOutput(outputStream));// no need for encoding param as rtf is ascii format
 
 		exporter.exportReport();
 	}

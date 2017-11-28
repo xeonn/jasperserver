@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: parametersTabView.js 9664 2015-11-23 14:56:31Z dgorbenk $
+ * @version: $Id: parametersTabView.js 10042 2016-04-12 14:01:27Z akasych $
  */
 
 /* global ControlsBase, JRS, OptionsDialog */
@@ -46,57 +46,22 @@ define(function(require){
     // return backbone view
     return Backbone.View.extend({
 
-	    events: {
-		    "click [name=saveCurrentValuesButton]": "saveCurrentValuesClick"
-	    },
-
         // initialize view
         initialize: function(options) {
 
 	        this.options = _.extend({}, options);
 
 	        this.listenTo(this.model, "change:source", this.sourceChange);
-	        this.listenTo(this.model, "change:source", this.sourceChange2);
 
             // handle values change
 	        $(document).on("viewmodel:values:changed", _.bind(this.viewModelValuesChange, this));
         },
 
-	    remove: function() {
-            if (this.reportOptionsDialog) {
-                this.reportOptionsDialog.remove();
-            }
-
-		    Backbone.View.prototype.remove.apply(this, arguments);
-	    },
-
 	    render: function() {
-
 		    this.setElement($(_.template(parametersTabTemplate, {
 			    i18n: i18n,
 			    config: config
 		    })));
-
-		    // pro version
-		    if (config.isProVersion) {
-
-			    // create report options instance
-			    this.reportOptions = new JRS.Controls.ReportOptions();
-
-			    // handle selection change
-			    $(document).on('viewmodel:selection:changed', _.bind(this.viewModelSelectionChange, this));
-
-			    // construct save values dialog
-			    // TODO: use a new dialog or create one
-			    this.reportOptionsDialog = new OptionsDialog({
-				    'button#saveAsBtnSave': _.bind(this.saveAsDialogButtonSaveClick, this),
-				    'button#saveAsBtnCancel': _.bind(this.saveAsDialogButtonCancelClick, this)
-			    });
-		    }
-	    },
-
-	    saveCurrentValuesClick: function() {
-		    this.reportOptionsDialog.show();
 	    },
 
 	    saveAsDialogButtonSaveClick: function() {
@@ -128,10 +93,6 @@ define(function(require){
 					    // console.error("Can't parse server response: %s", "controls.core", err.responseText);
 				    }
 			    });
-	    },
-
-	    saveAsDialogButtonCancelClick: function() {
-		    this.reportOptionsDialog.hide();
 	    },
 
 	    sourceChange: function(model, value) {
@@ -176,42 +137,6 @@ define(function(require){
 				self.trigger("failedToGet_IC");
 			});
 	    },
-
-	    sourceChange2: function(model, value) {
-
-		    var
-			    self = this,
-		        url = value && value.reportUnitURI;
-
-		    // if url changed, fetch new data
-		    if (this.reportOptions && url !== this.reportOptions.url) {
-
-			    // fetch new data
-			    this.reportOptions.optionsUrl = undefined;
-
-			    this.model.resource('reportOptions', function(err, data){
-				    if (err) { return; }
-				    self.reportOptions.optionsUrl = data.reportUri;
-				    $.when(self.reportOptions.fetch(data.reportUri || url, '')).done(function() {
-					    self.$el.find(".saveCurrentValuesContainer").prepend(self.reportOptions.getElem());
-					    $(document).trigger('viewmodel:selection:changed');
-				    });
-			    });
-
-			    var folderUri = this.model.get('repositoryDestination').folderURI;
-			    this.model.checkPermissionOnFolder(folderUri, function(err, permission) {
-				    var saveButtonEnabled = false;
-				    if (!err) {
-					    saveButtonEnabled = (permission === 1 || permission === 30);
-				    }
-				    self.$el.find("[name=saveCurrentValuesButton]").attr('disabled', saveButtonEnabled ? null: "disabled");
-			    });
-
-			    // save new url
-			    this.reportOptions.url = url;
-		    }
-        },
-
 	    viewModelValuesChange: function() {
 		    // update model
 		    this.model.set('source', {
@@ -220,12 +145,6 @@ define(function(require){
 				    parameterValues: this.model.controlsController.getViewModel().get('selection')
 			    }
 		    }, { validate: false, silent: true });
-	    },
-
-	    viewModelSelectionChange: function(){
-		    // update options
-		    var option = this.reportOptions.find({uri: this.reportOptions.url });
-		    this.reportOptions.set({selection:option}, true);
 	    }
 
     });

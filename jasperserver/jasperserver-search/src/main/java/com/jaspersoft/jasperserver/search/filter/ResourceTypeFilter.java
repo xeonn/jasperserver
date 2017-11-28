@@ -21,10 +21,12 @@
 package com.jaspersoft.jasperserver.search.filter;
 
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.FileResource;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Folder;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceLookup;
 import com.jaspersoft.jasperserver.api.metadata.common.service.ResourceFactory;
+import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.persistent.RepoFileResource;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportUnit;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.impl.RepoReportUnit;
 import com.jaspersoft.jasperserver.api.search.SearchCriteria;
@@ -40,17 +42,13 @@ import org.hibernate.criterion.Restrictions;
 import org.hibernate.criterion.Subqueries;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * <p>Filters resources by resourceType field.</p>
  *
  * @author Yuriy Plakosh
- * @version $Id: ResourceTypeFilter.java 56967 2015-08-20 23:20:53Z esytnik $
+ * @version $Id: ResourceTypeFilter.java 62483 2016-04-12 17:26:07Z akasych $
  */
 public class ResourceTypeFilter extends BaseSearchFilter implements Serializable {
     private Map<String, List<String>> filterOptionToResourceTypes;
@@ -84,12 +82,28 @@ public class ResourceTypeFilter extends BaseSearchFilter implements Serializable
         } else {
             final RepositorySearchCriteria repositorySearchCriteria = getTypedAttribute(context, RepositorySearchCriteria.class);
             if (repositorySearchCriteria != null) {
-                if (repositorySearchCriteria.getResourceTypes() != null && !repositorySearchCriteria.getResourceTypes().isEmpty()) {
+                if ((repositorySearchCriteria.getResourceTypes() != null && !repositorySearchCriteria.getResourceTypes().isEmpty())
+                        || (repositorySearchCriteria.getFileResourceTypes() != null && !repositorySearchCriteria.getFileResourceTypes().isEmpty())) {
                     List<String> types = new ArrayList<String>(repositorySearchCriteria.getResourceTypes());
                     boolean addFolders = types.remove(Folder.class.getName());
                     boolean extractTopics = types.remove("com.jaspersoft.commons.semantic.datasource.Topic");
+                    boolean filterSecureFileType = types.remove(FileResource.TYPE_SECURE_FILE);
 
                     Criterion criterion = types.isEmpty() ? null : Restrictions.in("resourceType", types);
+
+                    // TODO: implement generic solution handling any fileType of FileResource
+                    if (filterSecureFileType && types.contains(FileResource.class.getName())) {
+                        DetachedCriteria secureFileCriteria = DetachedCriteria.forClass(RepoFileResource.class, "U");
+
+                        Criterion isSecureFile = Restrictions.eq("U.fileType", FileResource.TYPE_SECURE_FILE);;
+
+                        secureFileCriteria
+                                .add(isSecureFile)
+                                .add(Property.forName("U.id").eqProperty(criteria.getAlias()+".id"))
+                                .setProjection(Projections.property("U.id"));
+
+                        criterion = Subqueries.exists(secureFileCriteria);
+                    }
 
                     if (addFolders && (ResourceLookup.class.getName().equals(type) || (types.isEmpty() && Resource.class.getName().equals(type)))) {
                         // folders only are requested
@@ -123,6 +137,14 @@ public class ResourceTypeFilter extends BaseSearchFilter implements Serializable
                         Criterion isTopic = Restrictions.and(isReportUnit, Subqueries.exists(notAdhocReportsCriteria));
 
                         criterion = criterion == null ? isTopic : Restrictions.or(criterion, isTopic);
+                    }
+
+                    if (repositorySearchCriteria.getFileResourceTypes() != null && !repositorySearchCriteria.getFileResourceTypes().isEmpty()){
+                        Criterion fileTypeCriterion = Restrictions.or(
+                                Restrictions.in("fileType", repositorySearchCriteria.getFileResourceTypes()),
+                                Restrictions.in("contentFileType", repositorySearchCriteria.getFileResourceTypes())
+                        );
+                        criterion = criterion == null ? fileTypeCriterion : Restrictions.or(criterion, fileTypeCriterion);
                     }
 
                     criteria.add(criterion);

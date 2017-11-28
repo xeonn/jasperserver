@@ -39,7 +39,6 @@ import com.jaspersoft.jasperserver.remote.resources.converters.ToServerConversio
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -49,7 +48,7 @@ import java.util.Set;
  * <p></p>
  *
  * @author yaroslav.kovalchyk
- * @version $Id: CustomDataSourceConnectionStrategy.java 58870 2015-10-27 22:30:55Z esytnik $
+ * @version $Id: CustomDataSourceConnectionStrategy.java 62954 2016-05-01 09:49:23Z ykovalch $
  */
 @Service
 public class CustomDataSourceConnectionStrategy implements ConnectionManagementStrategy<ClientCustomDataSource>, ConnectionMetadataBuilder<ClientCustomDataSource> {
@@ -138,7 +137,7 @@ public class CustomDataSourceConnectionStrategy implements ConnectionManagementS
     }
 
     @Override
-    public Object build(ClientCustomDataSource connection) {
+    public Object build(ClientCustomDataSource connection, Map<String, String[]> options) {
         try {
             return tableMetadataConverter.toClient((CustomDomainMetaDataImpl)engine.getMetaDataFromConnector(toServer(connection)), null);
         } catch (Exception e) {

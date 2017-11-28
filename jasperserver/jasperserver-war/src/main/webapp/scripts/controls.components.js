@@ -22,7 +22,7 @@
 
 /**
  * @author: afomin, inesterenko
- * @version: $Id: controls.components.js 8840 2015-04-28 13:57:03Z spriluki $
+ * @version: $Id: controls.components.js 10166 2016-05-26 22:39:40Z gbacon $
  */
 
 /* global JRS, require, updateYearMonth, ControlsBase, _ */
@@ -239,25 +239,41 @@ JRS.Controls = (function (jQuery, _, Controls) {
                 args.visible && this.setupCalendar();
             },
 
-            setupCalendar:function () {
-                var input = this.getElem().find('input');
+            getInput: function() {
+                var $el = this.getElem();
 
-                input.datetimepicker({
-                    showOn:"button",
-                    dateFormat:JRS.i18n["bundledCalendarFormat"],
-                    timeFormat:JRS.i18n["bundledCalendarTimeFormat"],
-                    showSecond:true,
-                    changeMonth:true,
-                    changeYear:true,
-                    showButtonPanel:true,
-                    disabled:input[0].disabled,
-                    onSelect:_.bind(changeDateFunc, this),
-                    onChangeMonthYear:null,
-                    beforeShow:jQuery.datepicker.movePickerRelativelyToTriggerIcon,
-                    constrainInput:false
+                return $el.find('input');
+            },
+
+            destroyCalendar: function() {
+                var $input = this.getInput();
+
+                $input.datetimepicker && $input.datetimepicker("destroy");
+                $input.off();
+            },
+
+            setupCalendar:function () {
+                var $el = this.getElem(),
+                    $input = this.getInput();
+
+                this.destroyCalendar();
+
+                $input.datetimepicker({
+                    showOn: "button",
+                    dateFormat: JRS.i18n["bundledCalendarFormat"],
+                    timeFormat: JRS.i18n["bundledCalendarTimeFormat"],
+                    showSecond: true,
+                    changeMonth: true,
+                    changeYear: true,
+                    showButtonPanel: true,
+                    disabled: $input[0].disabled,
+                    onSelect: _.bind(changeDateFunc, this),
+                    onChangeMonthYear: null,
+                    beforeShow: jQuery.datepicker.movePickerRelativelyToTriggerIcon,
+                    constrainInput: false
                 });
 
-                input.change(_.bind(function (evt) {
+                $input.change(_.bind(function (evt) {
                     //prevent triggering of global control change event
                     evt.stopPropagation();
 
@@ -267,8 +283,10 @@ JRS.Controls = (function (jQuery, _, Controls) {
                     changeDateFunc.call(this, jQuery(evt.target).val());
                 }, this));
 
-                input.after('&nbsp;');
-                var button = this.getElem().find('button');
+                $input.after('&nbsp;');
+
+                var button = $el.find('button');
+
                 button.wrap(ControlsBase.CALENDAR_ICON_SPAN).empty();
             },
 
@@ -277,10 +295,15 @@ JRS.Controls = (function (jQuery, _, Controls) {
                 return dateUtil.localizedTimestampToIsoTimestamp(localizedDateTime);
             },
 
-            set: function(attributes, preventNotification){
+            set: function(attributes, preventNotification) {
                 if(attributes.values){
                     attributes.values = dateUtil.isoTimestampToLocalizedTimestamp(attributes.values);
                 }
+
+                if (!attributes.values && !attributes.selection) {
+                    this.setupCalendar();
+                }
+
                 Controls.BaseControl.prototype.set.call(this, attributes, preventNotification);
             },
             update:function (controlData) {
@@ -297,20 +320,36 @@ JRS.Controls = (function (jQuery, _, Controls) {
                 args.visible && this.setupCalendar();
             },
 
-            setupCalendar:function () {
-                var input = this.getElem().find('input');
+            getInput: function() {
+                var $el = this.getElem();
 
-                input.timepicker({
-                    showOn:"button",
-                    timeFormat:JRS.i18n["bundledCalendarTimeFormat"],
-                    showSecond:true,
-                    disabled:input[0].disabled,
-                    onClose:_.bind(changeDateFunc, this),
-                    beforeShow:jQuery.datepicker.movePickerRelativelyToTriggerIcon,
-                    constrainInput:false
+                return $el.find('input');
+            },
+
+            destroyCalendar: function() {
+                var $input = this.getInput();
+
+                $input.timepicker && $input.timepicker("destroy");
+                $input.off();
+            },
+
+            setupCalendar:function () {
+                var $el = this.getElem(),
+                    $input = this.getInput();
+
+                this.destroyCalendar();
+
+                $input.timepicker({
+                    showOn: "button",
+                    timeFormat: JRS.i18n["bundledCalendarTimeFormat"],
+                    showSecond: true,
+                    disabled: $input[0].disabled,
+                    onClose: _.bind(changeDateFunc, this),
+                    beforeShow: jQuery.datepicker.movePickerRelativelyToTriggerIcon,
+                    constrainInput: false
                 });
 
-                input.change(_.bind(function (evt) {
+                $input.change(_.bind(function (evt) {
                     //prevent triggering of global control change event
                     evt.stopPropagation();
 
@@ -320,8 +359,8 @@ JRS.Controls = (function (jQuery, _, Controls) {
                     changeDateFunc.call(this, jQuery(evt.target).val());
                 }, this));
 
-                input.after('&nbsp;');
-                var button = this.getElem().find('button');
+                $input.after('&nbsp;');
+                var button = $el.find('button');
                 button.wrap(ControlsBase.CALENDAR_ICON_SPAN).empty();
             },
 
@@ -331,9 +370,14 @@ JRS.Controls = (function (jQuery, _, Controls) {
             },
 
             set: function(attributes, preventNotification){
-                if(attributes.values){
+                if (attributes.values) {
                     attributes.values = dateUtil.isoTimeToLocalizedTime(attributes.values);
                 }
+
+                if (!attributes.values && !attributes.selection) {
+                    this.setupCalendar();
+                }
+
                 Controls.BaseControl.prototype.set.call(this, attributes, preventNotification);
             },
             update:function (controlData) {

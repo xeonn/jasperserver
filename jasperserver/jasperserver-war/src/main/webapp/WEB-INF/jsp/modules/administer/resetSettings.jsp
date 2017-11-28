@@ -28,7 +28,7 @@
   <t:putAttribute name="pageTitle"><spring:message code="menu.edit.settings"/></t:putAttribute>
   <t:putAttribute name="bodyID" value="restoreDefaults"/>
   <t:putAttribute name="bodyClass" value="twoColumn"/>
-  <t:putAttribute name="moduleName" value="adminResetSettingsPage"/>
+  <t:putAttribute name="moduleName" value="administer/resetSettings/resetSettingsMain"/>
 
   <t:putAttribute name="headerContent">
     <%@ include file="../common/jsEdition.jsp" %>

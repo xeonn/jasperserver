@@ -137,16 +137,6 @@ public class ListOfValuesValidatorTest {
     }
 
     @Test(expectedExceptions = {JSValidationException.class})
-    public void testValidate_ItemValueTooLong() throws Exception {
-        ListOfValuesItemImpl item = new ListOfValuesItemImpl();
-        item.setValue("123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890");
-        item.setLabel("a");
-        lov.addValue(item);
-
-        validator.validate(lov);
-    }
-
-    @Test(expectedExceptions = {JSValidationException.class})
     public void testValidate_ItemLabelUnsupportedSymbols() throws Exception {
         ListOfValuesItemImpl item = new ListOfValuesItemImpl();
         item.setValue("1234567890");

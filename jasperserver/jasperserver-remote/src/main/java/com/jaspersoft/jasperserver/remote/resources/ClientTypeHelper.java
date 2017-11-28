@@ -20,6 +20,9 @@
 */
 package com.jaspersoft.jasperserver.remote.resources;
 
+import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConverter;
+import com.jaspersoft.jasperserver.war.helper.GenericParametersHelper;
+
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
@@ -27,9 +30,49 @@ import javax.xml.bind.annotation.XmlType;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: ClientTypeHelper.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: ClientTypeHelper.java 62954 2016-05-01 09:49:23Z ykovalch $
  */
-public class ClientTypeHelper {
+public class ClientTypeHelper<T> {
+
+    private final Class<? extends ToClientConverter<?, T, ?>> converterClass;
+
+    public ClientTypeHelper(Class<? extends ToClientConverter> converterClass){
+        this.converterClass = (Class)converterClass;
+    }
+
+    public ClientTypeHelper(ToClientConverter<?, T, ?> converter){
+        this.converterClass = (Class)converter.getClass();
+    }
+
+    private Class<?> clientClass;
+    private String clientResourceType;
+
+    public Class<T> getClientClass(){
+        if(clientClass == null){
+            clientClass = (Class) GenericParametersHelper.getGenericTypeArgument(converterClass, ToClientConverter.class, 1);
+            if (clientClass == null) {
+                throw new IllegalStateException("Unable to identify clientTypeClass. It can happen because " +
+                        converterClass.getName() + " is raw implementation of " + ToClientConverter.class.getName());
+            }
+        }
+        return (Class<T>) clientClass;
+    }
+
+    public T getNewClientObjectInstance() {
+        try {
+            return (T) getClientClass().newInstance();
+        } catch (Exception e) {
+            throw new IllegalStateException("Couldn't instantiate client object", e);
+        }
+    }
+
+    public String getClientResourceType() {
+        if (clientResourceType == null) {
+            clientResourceType = ClientTypeHelper.extractClientType(getClientClass());
+        }
+        return clientResourceType;
+    }
+
     public static String extractClientType(Class<?> clientObjectClass) {
         String clientResourceType = null;
         final XmlRootElement xmlRootElement = clientObjectClass.getAnnotation(XmlRootElement.class);

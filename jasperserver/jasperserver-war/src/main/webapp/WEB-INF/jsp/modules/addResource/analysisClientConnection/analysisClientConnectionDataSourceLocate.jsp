@@ -27,7 +27,7 @@
     <t:putAttribute name="bodyID" value="addResource_locateDataSource"/>
 
     <t:putAttribute name="bodyClass" value="oneColumn flow wizard"/>
-    <t:putAttribute name="moduleName" value="locateDataSource.page"/>
+    <t:putAttribute name="moduleName" value="addResource/analysisClientConnection/locateDataSourceMain"/>
     <t:putAttribute name="headerContent">
         <jsp:include page="analysisClientConnectionDataSourceLocateState.jsp"/>
     </t:putAttribute>
@@ -90,7 +90,7 @@
                     </fieldset><!--/.row.inputs-->
 				</div>
 			</t:putAttribute>
-                    
+
             <t:putAttribute name="footerContent">
                 <fieldset id="wizardNav">
                     <button id="previous" type="submit" class="button action up" name="_eventId_back"><span class="wrap"><spring:message

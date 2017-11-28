@@ -22,11 +22,9 @@ package com.jaspersoft.jasperserver.remote.resources.converters;
 
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceLookup;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConversionOptions;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConverter;
 import com.jaspersoft.jasperserver.dto.resources.ClientResourceLookup;
 import com.jaspersoft.jasperserver.remote.exception.IllegalParameterValueException;
 import com.jaspersoft.jasperserver.search.common.ResourceDetails;
-import com.jaspersoft.jasperserver.war.cascade.handlers.GenericTypeProcessorRegistry;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -35,13 +33,13 @@ import javax.annotation.Resource;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: LookupResourceConverter.java 58870 2015-10-27 22:30:55Z esytnik $
+ * @version $Id: LookupResourceConverter.java 63451 2016-06-01 15:33:32Z ykovalch $
  */
 @Service
 public class LookupResourceConverter extends ResourceConverterImpl<ResourceLookup, ClientResourceLookup> {
 
     @Resource
-    private GenericTypeProcessorRegistry genericTypeProcessorRegistry;
+    private ResourceConverterProvider resourceConverterProvider;
 
     @Override
     public ResourceDetails toServer(ClientResourceLookup clientObject, ResourceLookup resultToUpdate, ToServerConversionOptions options) {
@@ -65,7 +63,13 @@ public class LookupResourceConverter extends ResourceConverterImpl<ResourceLooku
     }
 
     protected String toClientResourceType(String serverResourceType){
-        final ToClientConverter typeProcessor = genericTypeProcessorRegistry.getTypeProcessor(serverResourceType, ToClientConverter.class, false);
-        return typeProcessor != null ? typeProcessor.getClientResourceType() : "unknown";
+        String clientType;
+        try {
+            clientType = resourceConverterProvider.getToClientConverter(serverResourceType).getClientResourceType();
+        } catch (IllegalParameterValueException e){
+            // no converter for this serverResourceType
+            clientType = "unknown";
+        }
+        return clientType;
     }
 }

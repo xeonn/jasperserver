@@ -15,6 +15,8 @@ import java.util.Map;
 public class DashboardExportExecution {
     private int width;
     private int height;
+    private int referenceWidth;
+    private int referenceHeight;
     private ExportFormat format;
     private String uri;
     private String id;
@@ -94,6 +96,24 @@ public class DashboardExportExecution {
         return this;
     }
 
+    public int getReferenceWidth() {
+        return referenceWidth;
+    }
+
+    public DashboardExportExecution setReferenceWidth(int referenceWidth) {
+        this.referenceWidth = referenceWidth;
+        return this;
+    }
+
+    public int getReferenceHeight() {
+        return referenceHeight;
+    }
+
+    public DashboardExportExecution setReferenceHeight(int referenceHeight) {
+        this.referenceHeight = referenceHeight;
+        return this;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -103,6 +123,8 @@ public class DashboardExportExecution {
 
         if (width != execution.width) return false;
         if (height != execution.height) return false;
+        if (referenceWidth != execution.referenceWidth) return false;
+        if (referenceHeight != execution.referenceHeight) return false;
         if (format != execution.format) return false;
         if (uri != null ? !uri.equals(execution.uri) : execution.uri != null) return false;
         if (id != null ? !id.equals(execution.id) : execution.id != null) return false;
@@ -116,6 +138,8 @@ public class DashboardExportExecution {
     public int hashCode() {
         int result = width;
         result = 31 * result + height;
+        result = 31 * result + referenceWidth;
+        result = 31 * result + referenceHeight;
         result = 31 * result + (format != null ? format.hashCode() : 0);
         result = 31 * result + (uri != null ? uri.hashCode() : 0);
         result = 31 * result + (id != null ? id.hashCode() : 0);
@@ -130,6 +154,8 @@ public class DashboardExportExecution {
         return "DashboardExportExecution{" +
                 "width=" + width +
                 ", height=" + height +
+                ", referenceWidth=" + referenceWidth +
+                ", referenceHeight=" + referenceHeight +
                 ", format=" + format +
                 ", uri='" + uri + '\'' +
                 ", id='" + id + '\'' +
@@ -139,6 +165,7 @@ public class DashboardExportExecution {
 
     public enum ExportFormat {
         png("image/png"),
+        pptx("application/vnd.openxmlformats-officedocument.presentationml.presentation"),
         docx("application/vnd.openxmlformats-officedocument.wordprocessingml.document"),
         odt("application/vnd.oasis.opendocument.text"),
         pdf("application/pdf");

@@ -20,6 +20,17 @@
         primary key (id)
     ) ENGINE=InnoDB;
 
+    create table JIAzureSqlDatasource (
+        id bigint not null,
+        keyStore_id bigint not null,
+        keyStorePassword varchar(100),
+        keyStoreType varchar(25),
+        subscriptionId varchar(100),
+        serverName varchar(100) not null,
+        dbName varchar(100) not null,
+        primary key (id)
+    ) ENGINE=InnoDB;
+
     create table JIBeanDatasource (
         id bigint not null,
         beanName varchar(100) not null,
@@ -321,6 +332,7 @@
         password varchar(250),
         server_name varchar(150),
         folder_path varchar(250),
+        ssh_private_key bigint,
         primary key (id)
     ) ENGINE=InnoDB;
 
@@ -513,6 +525,18 @@
     alter table JIAwsDatasource 
         add index FK6085542387E4472B (id), 
         add constraint FK6085542387E4472B 
+        foreign key (id) 
+        references JIJdbcDatasource (id);
+
+    alter table JIAzureSqlDatasource 
+        add index FKAFE22203C001BAEA (keyStore_id), 
+        add constraint FKAFE22203C001BAEA 
+        foreign key (keyStore_id) 
+        references JIResource (id);
+
+    alter table JIAzureSqlDatasource 
+        add index FKAFE2220387E4472B (id), 
+        add constraint FKAFE2220387E4472B 
         foreign key (id) 
         references JIJdbcDatasource (id);
 
@@ -768,6 +792,12 @@
         foreign key (job_id) 
         references JIReportJob (id);
 
+    alter table JIReportJobRepoDest 
+        add index FKEA477EBE3C5B87D0 (ssh_private_key), 
+        add constraint FKEA477EBE3C5B87D0 
+        foreign key (ssh_private_key) 
+        references JIResource (id);
+
     alter table JIReportJobSimpleTrigger 
         add index FKB9337C5CD2B2EB53 (id), 
         add constraint FKB9337C5CD2B2EB53 
@@ -978,16 +1008,6 @@
 
     create index idx33_resource_id_idx on JIReportUnitResource (resource_id);
 
-    create index idx20_mondrianConnection_idx on JIMondrianXMLADefinition (mondrianConnection);
-
-    create index JIFileResource_reference_index on JIFileResource (reference);
-
-    create index idx23_olapClientConnection_idx on JIOlapUnit (olapClientConnection);
-
-    create index idxA1_resource_id_idx on JICustomDatasourceResource (resource_id);
-
-    create index JIQuery_dataSource_index on JIQuery (dataSource);
-
     create index idx16_mondrianSchema_idx on JIMondrianConnection (mondrianSchema);
 
     create index idx17_reportDataSource_idx on JIMondrianConnection (reportDataSource);
@@ -999,3 +1019,13 @@
     create index JIInputControl_list_query_idx on JIInputControl (list_query);
 
     create index idx15_input_ctrl_id_idx on JIInputControlQueryColumn (input_control_id);
+
+    create index JIFileResource_reference_index on JIFileResource (reference);
+
+    create index idx23_olapClientConnection_idx on JIOlapUnit (olapClientConnection);
+
+    create index idx20_mondrianConnection_idx on JIMondrianXMLADefinition (mondrianConnection);
+
+    create index idxA1_resource_id_idx on JICustomDatasourceResource (resource_id);
+
+    create index JIQuery_dataSource_index on JIQuery (dataSource);

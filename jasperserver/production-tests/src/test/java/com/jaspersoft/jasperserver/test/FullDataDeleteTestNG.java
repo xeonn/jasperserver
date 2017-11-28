@@ -66,6 +66,7 @@ public class FullDataDeleteTestNG extends BaseServiceSetupTestNG {
         deleteSchedulerResources();
         deleteHibernateRepositoryReportResources();
         deleteHibernateRepositoryDataSourceResources();
+        deleteDefaultDomainWhitelist();
     }
 
     // move this to configuration file if people want to use

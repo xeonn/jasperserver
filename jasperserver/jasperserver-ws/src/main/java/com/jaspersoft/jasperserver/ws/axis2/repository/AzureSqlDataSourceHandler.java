@@ -1,0 +1,70 @@
+/*
+ * Copyright (C) 2005 - 2014 TIBCO Software Inc. All rights reserved.
+ * http://www.jaspersoft.com.
+ *
+ * Unless you have purchased  a commercial license agreement from Jaspersoft,
+ * the following license terms  apply:
+ *
+ * This program is free software: you can redistribute it and/or  modify
+ * it under the terms of the GNU Affero General Public License  as
+ * published by the Free Software Foundation, either version 3 of  the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero  General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public  License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package com.jaspersoft.jasperserver.ws.axis2.repository;
+
+import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceReference;
+import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.AzureSqlReportDataSource;
+import com.jaspersoft.jasperserver.api.metadata.xml.domain.impl.ResourceDescriptor;
+import com.jaspersoft.jasperserver.ws.axis2.RepositoryServiceContext;
+
+import java.util.Map;
+
+/**
+ * @author vsabadosh
+ */
+public class AzureSqlDataSourceHandler extends JdbcDataSourceHandler {
+
+    public Class getResourceType() {
+        return AzureSqlReportDataSource.class;
+    }
+
+    protected void doDescribe(Resource resource, ResourceDescriptor descriptor,
+                              Map arguments, RepositoryServiceContext serviceContext) {
+        super.doDescribe(resource, descriptor, arguments, serviceContext);
+
+        AzureSqlReportDataSource dsResource = (AzureSqlReportDataSource) resource;
+        descriptor.setAzureSqlSubscriptionId(dsResource.getSubscriptionId());
+        descriptor.setAzureSqlKeyStoreResource(dsResource.getKeyStoreResource().getReferenceURI());
+        descriptor.setAzureSqlKeyStorePassword(dsResource.getKeyStorePassword());
+        descriptor.setAzureSqlKeyStoreType(dsResource.getKeyStoreType());
+        descriptor.setAzureSqlServerName(dsResource.getServerName());
+        descriptor.setAzureSqlDbName(dsResource.getDbName());
+        descriptor.setWsType(ResourceDescriptor.TYPE_DATASOURCE_AZURE_SQL);
+    }
+
+    protected void updateResource(Resource resource,
+                                  ResourceDescriptor descriptor, RepositoryServiceContext serviceContext) {
+        super.updateResource(resource, descriptor, serviceContext);
+        AzureSqlReportDataSource azureSqlReportDataSource = (AzureSqlReportDataSource) resource;
+        azureSqlReportDataSource.setSubscriptionId(descriptor.getAzureSqlSubscriptionId());
+        ResourceReference resourceReference = new ResourceReference();
+        resourceReference.setReference(descriptor.getAzureSqlKeyStoreResource());
+        azureSqlReportDataSource.setKeyStoreResource(resourceReference);
+        azureSqlReportDataSource.setKeyStorePassword(descriptor.getAzureSqlKeyStorePassword());
+        azureSqlReportDataSource.setKeyStoreType(descriptor.getAzureSqlKeyStoreType());
+        azureSqlReportDataSource.setServerName(descriptor.getAzureSqlServerName());
+        azureSqlReportDataSource.setDbName(descriptor.getAzureSqlDbName());
+
+    }
+
+}

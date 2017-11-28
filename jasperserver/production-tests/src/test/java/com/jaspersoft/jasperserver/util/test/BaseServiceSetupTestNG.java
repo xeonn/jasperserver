@@ -46,8 +46,10 @@ import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.client.Virt
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.service.ReportDataSourceService;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.service.ReportDataSourceServiceFactory;
 import com.jaspersoft.jasperserver.api.metadata.olap.service.OlapConnectionService;
+import com.jaspersoft.jasperserver.api.metadata.security.JasperServerPermission;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.*;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.client.ObjectPermissionImpl;
+import com.jaspersoft.jasperserver.api.metadata.user.domain.client.ProfileAttributeImpl;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.client.TenantImpl;
 import com.jaspersoft.jasperserver.api.metadata.user.service.ObjectPermissionService;
 import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributeService;
@@ -62,6 +64,7 @@ import com.jaspersoft.jasperserver.export.ParametersImpl;
 import com.jaspersoft.jasperserver.remote.services.PermissionsService;
 import com.jaspersoft.jasperserver.war.common.JasperServerUtil;
 import net.sf.jasperreports.engine.JRParameter;
+import net.sf.jasperreports.engine.JasperReportsContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.context.MessageSource;
@@ -134,9 +137,13 @@ public class BaseServiceSetupTestNG extends AbstractTestNGSpringContextTests {
     protected static final String ROLE_PORTLET = "ROLE_PORTLET";
     protected static final String HOLIDAY_CALENDAR_NAME = "New Years Days";
 
+    private static final String XDM_WHITELIST_PROFILE_ATTRIB_NAME = "domainWhitelist";
+    private static final String XDM_WHITELIST_GROUP = "XDM_WHITELIST";
+
     protected ExecutionContext m_exContext = new ExecutionContextImpl();
 
     private Properties m_jdbcProps;
+    private JasperReportsContext m_jasperReportsContext;
     private ReportDataSourceServiceFactory m_jdbcDataSourceServiceFactory;
     private ReportDataSourceServiceFactory m_jndiJdbcDataSourceServiceFactory;
     private CustomReportDataSourceServiceFactory m_customReportDataSourceServiceFactory;
@@ -344,6 +351,16 @@ public class BaseServiceSetupTestNG extends AbstractTestNGSpringContextTests {
         this.m_jdbcProps = jdbcProps;
     }
 
+    public JasperReportsContext getJasperReportsContext() {
+        return m_jasperReportsContext;
+    }
+
+    @javax.annotation.Resource(name = "${bean.jasperReportsContext}")
+    public void setJasperReportsContext(JasperReportsContext m_jasperReportsContext) {
+        m_logger.info("setM_jasperReportsContext() called");
+        this.m_jasperReportsContext = m_jasperReportsContext;
+    }
+
     /**
      * Returns database product name to decide which schema should be used
      * (database specific schemas with upper case for Oracle and special date functions for SQLServer)
@@ -486,6 +503,8 @@ public class BaseServiceSetupTestNG extends AbstractTestNGSpringContextTests {
             HashMap<String, String> queryExecuterMap = new HashMap<String, String>();
             queryExecuterMap.put("csv", "net.sf.jasperreports.engine.query.JRCsvQueryExecuterFactory");
             textDataSourceDefinition.setQueryExecuterMap(queryExecuterMap);
+            textDataSourceDefinition.setJasperReportsContext(getJasperReportsContext());
+
             m_customReportDataSourceServiceFactory.addDefinition(textDataSourceDefinition);
         }
         cds.setDataSourceName(textDataSourceDefinition.getName());
@@ -576,6 +595,27 @@ public class BaseServiceSetupTestNG extends AbstractTestNGSpringContextTests {
         attr.setAttrValue(value);
         attr.setGroup(group);
         return attr;
+    }
+
+    protected ProfileAttribute createAndPutTestAttribute(String name, String value,
+                                                       Object principle, int permissionMask, String group) {
+        ProfileAttribute attribute = new ProfileAttributeImpl();
+        attribute.setAttrName(name);
+        attribute.setAttrValue(value);
+        attribute.setPrincipal(principle);
+        attribute.setGroup(group);
+        attribute.setUri(name, getProfileAttributeService().generateAttributeHolderUri(principle));
+
+        ObjectPermission permission = new ObjectPermissionImpl();
+        permission.setPermissionMask(permissionMask);
+        permission.setPermissionRecipient(getRole(ROLE_ADMINISTRATOR));
+        permission.setURI(attribute.getURI());
+
+        ExecutionContext context = getExecutionContext();
+        getProfileAttributeService().putProfileAttribute(context, attribute);
+        getObjectPermissionService().putObjectPermission(context, permission);
+
+        return attribute;
     }
 
     protected Authentication setAuthenticatedUser(String username) {
@@ -1075,5 +1115,25 @@ public class BaseServiceSetupTestNG extends AbstractTestNGSpringContextTests {
         }
 
         return changerObjects;
+    }
+
+
+    protected void addDefaultDomainWhitelist() {
+        m_logger.info("addDefaultDomainWhitelist() called");
+        final ExecutionContext executionContext = getExecutionContext();
+        Tenant server = getTenantService().getTenant(executionContext, TenantService.ORGANIZATIONS);
+
+        ProfileAttribute profileAttribute = createAndPutTestAttribute(XDM_WHITELIST_PROFILE_ATTRIB_NAME, "*", server, JasperServerPermission.ADMINISTRATION.getMask(), XDM_WHITELIST_GROUP);
+        if (getProfileAttributeService().getProfileAttribute(executionContext, profileAttribute) == null)
+            getProfileAttributeService().putProfileAttribute(executionContext, profileAttribute);
+    }
+
+    protected void deleteDefaultDomainWhitelist() {
+        m_logger.info("deleteDefaultDomainWhitelist() called");
+        ExecutionContext executionContext = getExecutionContext();
+        Tenant server = getTenantService().getTenant(executionContext, TenantService.ORGANIZATIONS);
+
+        getProfileAttributeService().deleteProfileAttribute(executionContext,
+                createTestAttr(server, XDM_WHITELIST_PROFILE_ATTRIB_NAME, "*", XDM_WHITELIST_GROUP));
     }
 }

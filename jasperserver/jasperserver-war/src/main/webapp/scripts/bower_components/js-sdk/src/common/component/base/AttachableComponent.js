@@ -54,7 +54,7 @@ define(function (require) {
          */
         show: function(){
             var attachOffset = this.$attachTo.offset(),
-                attachHeight = this.$attachTo.height(),
+                attachHeight = this.$attachTo[0].tagName && this.$attachTo[0].tagName.toLowerCase() === "input" ? this.$attachTo.outerHeight() : this.$attachTo.height(),
                 attachWidth  = this.$attachTo.width();
 
             var body = $("body"),
@@ -73,6 +73,12 @@ define(function (require) {
             }
             if(bodyWidth < colorPickerWidth+fitByWidth){
                 left = attachOffset.left - colorPickerWidth + attachWidth;
+            }
+            if(left < 0){
+                left = attachOffset.left + attachWidth/2  - colorPickerWidth/2;
+            }
+            if(left < 0){
+                left = 0;
             }
 
             _.extend(this, {top: top, left: left});

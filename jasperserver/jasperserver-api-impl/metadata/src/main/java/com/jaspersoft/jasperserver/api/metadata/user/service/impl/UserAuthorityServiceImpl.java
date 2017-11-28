@@ -86,12 +86,13 @@ import java.util.regex.Pattern;
 
 /**
  * @author swood
- * @version $Id: UserAuthorityServiceImpl.java 56839 2015-08-17 13:58:24Z esytnik $
+ * @version $Id: UserAuthorityServiceImpl.java 63380 2016-05-26 20:56:46Z mchan $
  */
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 public class UserAuthorityServiceImpl extends HibernateDaoImpl implements UserDetailsService, ExternalUserService,
         UserAuthorityPersistenceService, Diagnostic {
 
+    private static final String HIBERNATE_ESCAPE_CHAR = "\\";
     protected static final Log log = LogFactory.getLog(UserAuthorityServiceImpl.class);
     private ResourceFactory objectFactory;
     private ResourceFactory persistentClassFactory;
@@ -219,7 +220,8 @@ public class UserAuthorityServiceImpl extends HibernateDaoImpl implements UserDe
             boolean isCaseSensitive) {
         DetachedCriteria criteria = DetachedCriteria.forClass(getPersistentUserClass());
 
-        criteria.add(isCaseSensitive ? Restrictions.eq("username", username) : Restrictions.ilike("username", username));
+        criteria.add(isCaseSensitive ? Restrictions.eq("username", username)
+                : Restrictions.ilike("username", username));
         criteria.add(Restrictions.eq("tenant", tenant));
         criteria.getExecutableCriteria(getSession()).setCacheable(true);
 

@@ -54,9 +54,9 @@
     </style>
 
     <%-- requirejs module name --%>
-    <c:set var="moduleName" value="plain.report.viewer.page"/>
+    <c:set var="moduleName" value="report.viewer.main"/>
 
-    <jsp:include page="../includeRequirejsScripts.jsp"/>
+    <jsp:include page="../commonScripts.jsp"/>
     <jsp:include page="../common/jrsConfigs.jsp"/>
     <%@ include file="ViewReportState.jsp" %>
 
@@ -72,8 +72,8 @@
 
     <script type="text/javascript">
         <c:if test="${!pageContext.request.requestedSessionIdValid and pageContext.request.method == 'GET'}">
-            <%--[18280] HTTP redirect can't be applied here because it adds jsessionid parameter --%>
-            window.location.reload();
+        <%--[18280] HTTP redirect can't be applied here because it adds jsessionid parameter --%>
+        window.location.reload();
         </c:if>
 
         require.onError = function (err) {
@@ -89,34 +89,34 @@
 <%--required by JIVE--%>
 <div class="body">
 
-<%--note: not using class hidden because it creates a padding--%>
-<form style="display:none"  name="viewReportForm" action="<c:url value="flow.html"/>" method="post">
-    <input class="hidden" type="hidden" name="pageIndex" value="${pageIndex}"/>
-    <input class="hidden" type="hidden" name="_flowExecutionKey" value="${flowExecutionKey}"/>
-</form>
+    <%--note: not using class hidden because it creates a padding--%>
+    <form style="display:none"  name="viewReportForm" action="<c:url value="flow.html"/>" method="post">
+        <input class="hidden" type="hidden" name="pageIndex" value="${pageIndex}"/>
+        <input class="hidden" type="hidden" name="_flowExecutionKey" value="${flowExecutionKey}"/>
+    </form>
 
-<t:insertTemplate template="/WEB-INF/jsp/templates/nothingToDisplay.jsp">
-    <t:putAttribute name="containerID" value="emptyReportID" />
-    <t:putAttribute name="bodyContent">
-        <p class="message emphasis">${reportUnitObject.label}</p>
-        <p class="message">
-            <%-- currently empty report message is set on server side - see ViewReportAction.runReport --%>
-        </p>
-    </t:putAttribute>
-</t:insertTemplate>
+    <t:insertTemplate template="/WEB-INF/jsp/templates/nothingToDisplay.jsp">
+        <t:putAttribute name="containerID" value="emptyReportID" />
+        <t:putAttribute name="bodyContent">
+            <p class="message emphasis">${reportUnitObject.label}</p>
+            <p class="message">
+                    <%-- currently empty report message is set on server side - see ViewReportAction.runReport --%>
+            </p>
+        </t:putAttribute>
+    </t:insertTemplate>
 
-<c:choose>
-<c:when test="${false}">
-<div id="reportContainer" class="novis" style="position:relative;"></div>
-</c:when>
-<c:otherwise>
-<div id="reportContainer" class="" style="position:relative;">
-    <c:if test="${isAdhocReportUnit != null && isAdhocReportUnit == 'true'}">
-        <spring:message code="log.error.cannot.view.adhocReport"/>
-    </c:if>
-</div>
-</c:otherwise>
-</c:choose>
+    <c:choose>
+        <c:when test="${false}">
+            <div id="reportContainer" class="novis" style="position:relative;"></div>
+        </c:when>
+        <c:otherwise>
+            <div id="reportContainer" class="" style="position:relative;">
+                <c:if test="${isAdhocReportUnit != null && isAdhocReportUnit == 'true'}">
+                    <spring:message code="log.error.cannot.view.adhocReport"/>
+                </c:if>
+            </div>
+        </c:otherwise>
+    </c:choose>
 
 </div>
 </body>

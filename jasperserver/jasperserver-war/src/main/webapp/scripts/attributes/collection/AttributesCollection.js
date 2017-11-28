@@ -20,13 +20,12 @@
  */
 
 /**
- * @version: $Id: AttributesCollection.js 9939 2016-03-10 16:32:24Z dgorbenk $
+ * @version: $Id: AttributesCollection.js 10092 2016-04-22 21:17:02Z inestere $
  */
 
 define(function(require) {
     var _ = require("underscore"),
         $ = require("jquery"),
-        json3 = require("json3"),
         Backbone = require("backbone"),
         request = require("request"),
         TemplateEngine = require("components.templateengine"),
@@ -119,7 +118,7 @@ define(function(require) {
                 headers: {
                     Accept: contentType
                 },
-                data: json3.stringify({"attribute": updatedModelsJSON})
+                data: JSON.stringify({"attribute": updatedModelsJSON})
             });
         },
 

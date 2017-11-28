@@ -20,6 +20,7 @@
 */
 package com.jaspersoft.jasperserver.api.engine.scheduling.domain.jaxb;
 
+import com.jaspersoft.jasperserver.api.engine.scheduling.domain.ReportJobSource;
 import net.sf.jasperreports.engine.JRParameter;
 import net.sf.jasperreports.types.date.RelativeDateRange;
 
@@ -32,7 +33,7 @@ import java.util.TimeZone;
 
 /**
  * @author Yaroslav.Kovalchyk
- * @version $Id: ReportJobSourceParametersXmlAdapter.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: ReportJobSourceParametersXmlAdapter.java 61759 2016-03-14 15:48:27Z ztomchen $
  */
 public class ReportJobSourceParametersXmlAdapter extends XmlAdapter<ReportParametersMapWrapper, Map<String, Object>> {
     @Override
@@ -44,7 +45,9 @@ public class ReportJobSourceParametersXmlAdapter extends XmlAdapter<ReportParame
                 Object currentValue = v.get(currentKey);
                 if (JRParameter.REPORT_TIME_ZONE.equals(currentKey) && currentValue instanceof TimeZone) {
                     currentValue = ((TimeZone) currentValue).getID();
-                }else if(currentValue instanceof Collection){
+                }else if (ReportJobSource.REFERENCE_WIDTH_PARAMETER_NAME.equals(currentKey) || ReportJobSource.REFERENCE_HEIGHT_PARAMETER_NAME.equals(currentKey)){
+                    continue;
+                } else if(currentValue instanceof Collection){
                     final ValuesCollection collectionWrapper = new ValuesCollection();
                     collectionWrapper.setCollection((Collection<Object>) currentValue);
                     currentValue = collectionWrapper;
@@ -68,6 +71,8 @@ public class ReportJobSourceParametersXmlAdapter extends XmlAdapter<ReportParame
                     Object currentValue = parameterValues.get(currentKey);
                     if (JRParameter.REPORT_TIME_ZONE.equals(currentKey) && currentValue instanceof String){
                         currentValue = TimeZone.getTimeZone((String) currentValue);
+                    }else if (ReportJobSource.REFERENCE_WIDTH_PARAMETER_NAME.equals(currentKey) || ReportJobSource.REFERENCE_HEIGHT_PARAMETER_NAME.equals(currentKey)){
+                        continue;
                     }else if(currentValue instanceof ValuesCollection){
                         currentValue = ((ValuesCollection)currentValue).getCollection();
                     } else if(currentValue instanceof XMLGregorianCalendar){

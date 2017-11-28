@@ -40,7 +40,7 @@
     <t:putAttribute name="bodyID" value="reportViewer"/>
     <t:putAttribute name="bodyClass" value="${bodyClass}"/>
     <%--<t:putAttribute name="pageClass" value="${bodyClass}"/>--%>
-    <t:putAttribute name="moduleName" value="report.viewer.page"/>
+    <t:putAttribute name="moduleName" value="reportViewer/reportViewerMain"/>
     <t:putAttribute name="headerContent">
         <style>
             .novis {visibility:hidden}

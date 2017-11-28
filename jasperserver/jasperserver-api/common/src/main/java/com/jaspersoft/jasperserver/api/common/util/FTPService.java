@@ -27,7 +27,7 @@ import java.io.InputStream;
 
 /**
  * @author Ivan Chan (ichan@jaspersoft.com)
- * @version $Id: FTPService.java 55164 2015-05-06 20:54:37Z mchan $
+ * @version $Id: FTPService.java 62483 2016-04-12 17:26:07Z akasych $
  */
 public interface FTPService {
 
@@ -95,6 +95,18 @@ public interface FTPService {
      * @return FTPServiceClient interface to access ftp server
      */
     FTPServiceClient connectFTPS(String host, int port, String protocol, boolean isImplicit, long pbsz, String prot, String userName, String password, boolean useDefaultTrustManager, TrustManager trustManager) throws Exception;
+
+    /*
+    * Establishes a data connection with the SFTP server
+    *
+    * @param host ftp server host name
+    * @param port ftp server port number
+    * @param userName login user name
+    * @param password login user password
+    * @param sshKey login user SSH private key
+    * @param sshPassphrase login user SSH private key passphrase
+    */
+    FTPServiceClient connectSFTP(String host, int port, String userName, String password, String sshKeyPath, String sshKeyData, String sshPassphrase) throws Exception;
 
     public interface FTPServiceClient {
 

@@ -22,7 +22,7 @@
 
 /**
  * @author: Kostiantyn Tsaregradskyi
- * @version: $Id: WebPageView.js 2348 2016-03-02 19:24:51Z ztomchen $
+ * @version: $Id: WebPageView.js 2569 2016-04-05 12:34:47Z dgorbenk $
  */
 
 define(function (require) {
@@ -45,15 +45,11 @@ define(function (require) {
 
         this._iframeSrcSet = true;
 
-        this.$iframe.css({
-            "background-color": "transparent"
-        });
+        this.$el.addClass("loading");
 
         this._loadingTimeoutId && clearTimeout(this._loadingTimeoutId);
 
-        this._loadingTimeoutId = setTimeout(_.bind(function() {
-            this.$iframe.css("background-color", "#FFFFFF");
-        }, this), this.timeout);
+        this._loadingTimeoutId = setTimeout(_.bind(this.$el.removeClass, this.$el, "loading"), this.timeout);
     }
 
     var WebPageView = Backbone.View.extend(/** @lends WebPageView.prototype */{
@@ -124,6 +120,7 @@ define(function (require) {
             if (doc.document) {
                 doc = doc.document;
             }
+
             // Some browsers like Safari does not emit "load" event, se we need this as fallback.
             this._loadingTimerId = setInterval(function() {
                 if (doc.readyState == 'complete') {
@@ -131,6 +128,7 @@ define(function (require) {
 
                     self.$iframe.blur();
                     self.$iframe.parent().focus();
+                    self.$el.removeClass("loading");
                     self.trigger("load");
                 }
             }, 300);
@@ -267,7 +265,7 @@ define(function (require) {
             this._loadingTimeoutId && clearTimeout(this._loadingTimeoutId);
             this._loadingTimerId && clearTimeout(this._loadingTimerId);
             this.$iframe.off("load");
-
+            
             /**
              * @event WebPageView#remove
              */

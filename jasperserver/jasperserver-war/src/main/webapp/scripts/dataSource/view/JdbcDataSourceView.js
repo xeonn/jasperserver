@@ -159,6 +159,7 @@ define(function(require) {
         uploadDriver: function() {
             if (this.model.drivers.driverUploadEnabled && this.model.get("driverClass")) {
                 this.driverUploadDialog && this.stopListening(this.driverUploadDialog);
+
                 delete this.driverUploadDialog;
 
                 this.initDriverUploadDialog();
@@ -168,16 +169,26 @@ define(function(require) {
         },
 
         initDriverUploadDialog: function() {
-            var self = this;
             this.driverUploadDialog = new UploadJdbcDriverDialog({
                 driverAvailable: this.model.getCurrentDriver().get("available"),
-                driverClass: this.model.get("isOtherDriver") ? this.model.get("driverClass") : this.model.getCurrentDriver().get("jdbcDriverClass")
+                driverClass: this.model.get("isOtherDriver")
+                    ? this.model.get("driverClass")
+                    : this.model.getCurrentDriver().get("jdbcDriverClass")
             });
 
-            this.driverUploadDialog.on("driverUpload", function(driver) {
+            this.listenTo(this.driverUploadDialog, "driverUpload", this._onDriverUploadFinished);
+        },
+
+        _onDriverUploadFinished: function(driver) {
+            var self = this;
+
+            this.model.fetchDrivers().then(function() {
                 self.model.drivers.markDriverAsAvailable(driver.jdbcDriverClass);
 
-                _.defer(_.bind(self.model.validate, self.model));
+                _.defer(function() {
+                    self.model.validate();
+                    self.render();
+                });
             });
         },
 

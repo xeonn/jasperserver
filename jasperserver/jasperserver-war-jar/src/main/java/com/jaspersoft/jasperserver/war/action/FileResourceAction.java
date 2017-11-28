@@ -23,8 +23,10 @@ package com.jaspersoft.jasperserver.war.action;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.jaspersoft.jasperserver.api.common.crypto.PasswordCipherer;
 import com.jaspersoft.jasperserver.api.engine.common.service.SecurityContextProvider;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.*;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.client.ContentResourceImpl;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.client.FileResourceImpl;
 import com.jaspersoft.jasperserver.war.model.impl.TypedTreeDataProvider;
@@ -42,16 +44,12 @@ import org.springframework.webflow.execution.ScopeType;
 import com.jaspersoft.jasperserver.api.JSDuplicateResourceException;
 import com.jaspersoft.jasperserver.api.JSException;
 import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
-import com.jaspersoft.jasperserver.api.metadata.view.domain.FilterCriteria;
-import com.jaspersoft.jasperserver.api.metadata.view.domain.FilterElementDisjunction;
 import com.jaspersoft.jasperserver.api.metadata.xml.domain.impl.ResourceDescriptor;
 import com.jaspersoft.jasperserver.war.common.ConfigurationBean;
 import com.jaspersoft.jasperserver.war.common.JasperServerConst;
 import com.jaspersoft.jasperserver.war.common.JasperServerConstImpl;
-import com.jaspersoft.jasperserver.war.common.JasperServerUtil;
 import com.jaspersoft.jasperserver.war.dto.BaseDTO;
 import com.jaspersoft.jasperserver.war.dto.FileResourceWrapper;
-import com.jaspersoft.jasperserver.war.dto.OlapClientConnectionWrapper;
 
 public class FileResourceAction extends FormAction {
 
@@ -361,12 +359,17 @@ public class FileResourceAction extends FormAction {
 	public Event saveResource(RequestContext context) throws Exception {
 		log("In saveresource");
 		FileResourceWrapper wrapper = (FileResourceWrapper) getFormObject(context);
-		if (wrapper.getFileResource().getParentFolder() == null)
-			wrapper.getFileResource().setParentFolder("/");
+		FileResource fr = wrapper.getFileResource();
+		Resource toSave = fr;
 
-        Resource toSave = wrapper.getFileResource();
-        if (wrapper.getFileResource().getFileType().equals(ContentResource.TYPE_UNSPECIFIED)){
-            toSave = fileToContentResource(wrapper.getFileResource());
+		if (fr.getParentFolder() == null) {
+			fr.setParentFolder("/");
+		}
+		if (fr.getFileType().equals(ContentResource.TYPE_UNSPECIFIED)){
+            toSave = fileToContentResource(fr);
+        }
+        if (fr.getFileType().equals(FileResource.TYPE_SECURE_FILE) && fr.getData()!= null){
+			fr.setData(PasswordCipherer.getInstance().encodePassword(new String(fr.getData())).getBytes());
         }
 
 		if (wrapper.isStandAloneMode()) {

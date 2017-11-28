@@ -20,16 +20,20 @@
  */
 package com.jaspersoft.jasperserver.api.metadata.common.domain.util;
 
+import java.util.List;
+
 /**
  * <p>Options set for to client conversion.</p>
  * Currently it includes expanded option only, but it can be extended later.
  * For instance it can specify what exactly fields are required and what fields should be excluded.
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: ToClientConversionOptions.java 58870 2015-10-27 22:30:55Z esytnik $
+ * @version $Id: ToClientConversionOptions.java 62954 2016-05-01 09:49:23Z ykovalch $
  */
 public class ToClientConversionOptions {
     private boolean expanded;
+    private List<String> includes;
+
     public static ToClientConversionOptions getDefault(){
         return new ToClientConversionOptions();
     }
@@ -43,6 +47,15 @@ public class ToClientConversionOptions {
         return this;
     }
 
+    public List<String> getIncludes() {
+        return includes;
+    }
+
+    public ToClientConversionOptions setIncludes(List<String> includes) {
+        this.includes = includes;
+        return this;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -51,19 +64,22 @@ public class ToClientConversionOptions {
         ToClientConversionOptions options = (ToClientConversionOptions) o;
 
         if (expanded != options.expanded) return false;
+        return !(includes != null ? !includes.equals(options.includes) : options.includes != null);
 
-        return true;
     }
 
     @Override
     public int hashCode() {
-        return (expanded ? 1 : 0);
+        int result = (expanded ? 1 : 0);
+        result = 31 * result + (includes != null ? includes.hashCode() : 0);
+        return result;
     }
 
     @Override
     public String toString() {
         return "ToClientConversionOptions{" +
                 "expanded=" + expanded +
+                ", includes='" + includes + '\'' +
                 '}';
     }
 }

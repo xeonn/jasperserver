@@ -6,7 +6,7 @@
     <artifactId>server</artifactId>
     <packaging>pom</packaging>
     <name>Jasper Server</name>
-    <version>6.2.1</version>
+    <version>6.3.0</version>
     <url>http://www.jaspersoft.com</url>
     <profiles>
       <profile>
@@ -67,39 +67,39 @@
             <!-- license file -->
             -license ${docflex-home}/docflex-javadoc-full.license
             <!---license ${docflex-home}/docflex-javadoc-trial.license-->
-            
+
             <!-- The main template -->
             -template ${docflex-home}/templates/javadocPro/FramedDoc.tpl
-            
+
             <!-- template params start with "p:" -->
-            
+
             <!-- set titles -->
             -p:windowTitle "JasperServer API ${project.version}"
             -p:docTitle "JasperServer API ${project.version}"
-            
+
             <!--generate deprecated-list.html-->
             -p:gen.deprecatedList true
-            
+
             <!-- Only include classes annotated as api's -->
             -p:filter.byAnns.include.classes com.jaspersoft.jasperserver.api.JasperServerAPI
             <!---p:include.byAnns.classes com.jaspersoft.jasperserver.api.JasperServerAPI-->
-            
+
             <!-- leave out empty packages -->
             -p:include.emptyPackages false
             <!---p:exclude.package.empty true-->
-            
+
             <!-- Omit members inherited from java.lang classes -->
             -p:omit.inheritedMemberLists.for java.lang.
-            
+
             <!-- Set the output format -->
             -format HTML
-            
+
             <!-- Suppress showing up the doclet GUI -->
             -nodialog
-            
+
             <!-- Do not launch documentation viewer -->
             -launchviewer=false
-            
+
             <!-- Tell DocFlex the output directory -->
             -d ${project.build.directory}/site/public-api
           </additionalparam>
@@ -563,11 +563,19 @@
       <dependency>
         <groupId>net.sf.jasperreports</groupId>
         <artifactId>jasperreports</artifactId>
-        <version>6.2.1</version>
+        <version>6.3.0</version>
         <exclusions>
             <exclusion>
                 <groupId>xml-apis</groupId>
                 <artifactId>xml-apis</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>bouncycastle</groupId>
+                <artifactId>bcprov-jdk14</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcmail-jdk14</artifactId>
             </exclusion>
         </exclusions>
       </dependency>
@@ -656,12 +664,12 @@
       <dependency>
         <groupId>com.jaspersoft.connectors.mongodb</groupId>
         <artifactId>js-mongodb-datasource</artifactId>
-        <version>2.0.5</version>
+        <version>2.0.8</version>
       </dependency>
       <dependency>
           <groupId>org.mongodb</groupId>
           <artifactId>mongo-java-driver</artifactId>
-          <version>2.14.1</version>
+          <version>3.2.2</version>
       </dependency>
       <dependency>
           <groupId>org.jboss.teiid</groupId>
@@ -747,6 +755,11 @@
             <artifactId>jgroups</artifactId>
             <version>3.2.13.Final-redhat-1</version>
             <!--version>3.2.7.Final</version-->
+        </dependency>
+        <dependency>
+            <groupId>org.owasp</groupId>
+            <artifactId>csrfguard</artifactId>
+            <version>3.1.0</version>
         </dependency>
     </dependencies>
   </dependencyManagement>

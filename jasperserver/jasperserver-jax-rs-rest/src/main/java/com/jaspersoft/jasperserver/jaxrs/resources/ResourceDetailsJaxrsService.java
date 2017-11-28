@@ -26,6 +26,8 @@ import com.jaspersoft.jasperserver.api.metadata.common.domain.FileResourceData;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Folder;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.SelfCleaningFileResourceDataWrapper;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConversionOptions;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConverter;
 import com.jaspersoft.jasperserver.dto.common.PatchDescriptor;
 import com.jaspersoft.jasperserver.dto.common.PatchItem;
 import com.jaspersoft.jasperserver.dto.resources.ClientFile;
@@ -36,13 +38,12 @@ import com.jaspersoft.jasperserver.dto.resources.ResourceMultipartConstants;
 import com.jaspersoft.jasperserver.remote.exception.IllegalParameterValueException;
 import com.jaspersoft.jasperserver.remote.exception.MandatoryParameterNotFoundException;
 import com.jaspersoft.jasperserver.remote.exception.ModificationNotAllowedException;
+import com.jaspersoft.jasperserver.remote.exception.NotAcceptableException;
 import com.jaspersoft.jasperserver.remote.exception.PatchException;
 import com.jaspersoft.jasperserver.remote.exception.RemoteException;
 import com.jaspersoft.jasperserver.remote.exception.ResourceNotFoundException;
 import com.jaspersoft.jasperserver.remote.exception.VersionNotMatchException;
 import com.jaspersoft.jasperserver.remote.resources.converters.ResourceConverterProvider;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConversionOptions;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConverter;
 import com.jaspersoft.jasperserver.remote.resources.converters.ToServerConversionOptions;
 import com.jaspersoft.jasperserver.remote.resources.converters.ToServerConverter;
 import com.jaspersoft.jasperserver.remote.services.SingleRepositoryService;
@@ -64,15 +65,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: ResourceDetailsJaxrsService.java 58870 2015-10-27 22:30:55Z esytnik $
+ * @version $Id: ResourceDetailsJaxrsService.java 63380 2016-05-26 20:56:46Z mchan $
  */
 @Component
 public class ResourceDetailsJaxrsService {
@@ -84,7 +84,7 @@ public class ResourceDetailsJaxrsService {
     @javax.annotation.Resource
     private Map<String, String> contentTypeMapping;
 
-    public Response getResourceDetails(String uri, String accept, Boolean _expanded) throws RemoteException {
+    public Response getResourceDetails(String uri, String accept, Boolean _expanded, List<String> includes) throws RemoteException {
         final String firstMatch = accept != null ? accept.split(";")[0].split(",")[0] : null;
         boolean expanded = _expanded != null ? _expanded : false;
         Resource resource = singleRepositoryService.getResource(uri);
@@ -92,16 +92,24 @@ public class ResourceDetailsJaxrsService {
             throw new ResourceNotFoundException(uri);
         }
         Response response;
-
-        if ((resource instanceof FileResource || resource instanceof ContentResource) && !ResourceMediaType.FILE_XML.equals(firstMatch) && !ResourceMediaType.FILE_JSON.equals(firstMatch)) {
+        final String clientType = ClientTypeHelper.extractClientType(accept);
+        if (clientType == null && (resource instanceof FileResource || resource instanceof ContentResource) && !ResourceMediaType.FILE_XML.equals(firstMatch) && !ResourceMediaType.FILE_JSON.equals(firstMatch)) {
             FileResourceData data = singleRepositoryService.getFileResourceData(resource);
             FileResourceData wrapper = new SelfCleaningFileResourceDataWrapper(data);
             String type = resource instanceof FileResource ? ((FileResource) resource).getFileType() : ((ContentResource) resource).getFileType();
             response = toResponse(wrapper, resource.getName(), type);
         } else {
-            final ToClientConverter<? super Resource, ? extends ClientResource> toClientConverter =
-                    resourceConverterProvider.getToClientConverter(resource);
-            final ClientResource clientResource = toClientConverter.toClient(resource, ToClientConversionOptions.getDefault().setExpanded(expanded));
+            ToClientConverter<? super Resource, ? extends ClientResource, ToClientConversionOptions> toClientConverter = null;
+            if (clientType != null) {
+                // try to find converter for specific combination of client type and server type
+                toClientConverter = resourceConverterProvider.getToClientConverter(resource.getResourceType(), clientType);
+            }
+            if(toClientConverter == null){
+                // no client type or no converter for client/server type combination. Let's take server type converter then
+                toClientConverter = resourceConverterProvider.getToClientConverter(resource);
+            }
+            final ClientResource clientResource = toClientConverter.toClient(resource,
+                    ToClientConversionOptions.getDefault().setExpanded(expanded).setIncludes(includes));
             String contentTypeTemplate = firstMatch != null && firstMatch.endsWith("json") ? ResourceMediaType.RESOURCE_JSON_TEMPLATE : ResourceMediaType.RESOURCE_XML_TEMPLATE;
             response = Response.ok(clientResource)
                     .header(HttpHeaders.CONTENT_TYPE,
@@ -118,17 +126,16 @@ public class ResourceDetailsJaxrsService {
         return Response.noContent().build();
     }
 
-    public ClientResource createResourceViaForm(FormDataMultiPart multiPart, String parentUri, Boolean createFolders) throws RemoteException {
+    public ClientResource createResourceViaForm(FormDataMultiPart multiPart, String parentUri, Boolean createFolders, String accept) throws RemoteException {
         final FormDataBodyPart resourcePart = multiPart.getField(ResourceMultipartConstants.RESOURCE_PART_NAME);
         if (resourcePart != null) {
-            final String clientResourceType;
-            Matcher matcher = Pattern.compile(ResourceMediaType.RESOURCE_MEDIA_TYPE_PREFIX + "([^+]+)").matcher(resourcePart.getMediaType().toString());
-            if (matcher.find()) {
-                clientResourceType = matcher.group(1);
-            } else {
-                throw new IllegalParameterValueException("resource Media-Type", resourcePart.getMediaType().toString());
+            final MediaType mediaType = resourcePart.getMediaType();
+            final String clientType = ClientTypeHelper.extractClientType(mediaType);
+            if(clientType == null){
+                throw new IllegalParameterValueException("resource Media-Type", mediaType != null ? mediaType.toString() : "null");
             }
-            final Class<? extends ClientResource> clientTypeClass = resourceConverterProvider.getClientTypeClass(clientResourceType);
+            final Class<? extends ClientResource> clientTypeClass = resourceConverterProvider
+                    .getClientTypeClass(clientType);
             ClientResource clientObject = resourcePart.getEntityAs(clientTypeClass);
             Map<String, InputStream> partsMap = new HashMap<String, InputStream>();
             for (String currentPartName : multiPart.getFields().keySet()) {
@@ -138,7 +145,7 @@ public class ResourceDetailsJaxrsService {
                 partsMap.put(currentPartName, multiPart.getField(currentPartName).getEntityAs(InputStream.class));
             }
 
-            return createResource(clientObject, parentUri, createFolders, partsMap, false);
+            return createResource(clientObject, parentUri, createFolders, partsMap, false, accept);
         } else {
             ClientResource result = createFileViaForm(
                     multiPart.getField("data") != null ? multiPart.getField("data").getEntityAs(InputStream.class) : null, parentUri,
@@ -170,10 +177,11 @@ public class ResourceDetailsJaxrsService {
         return resourceConverterProvider.getToClientConverter(createdFile).toClient(createdFile, null);
     }
 
-    public Response defaultPostHandler(InputStream stream, String uri, String sourceUri, String disposition, String description, String rawMimeType, String accept, Boolean createFolders, Boolean overwrite) throws RemoteException, IOException {
+    public Response defaultPostHandler(InputStream stream, String uri, String sourceUri, String disposition,
+            String description, String rawMimeType, String accept, Boolean createFolders, Boolean overwrite, String renameTo) throws RemoteException, IOException {
         Response response;
         if (sourceUri != null) {
-            String newUri = singleRepositoryService.copyResource(sourceUri, uri, createFolders, overwrite);
+            String newUri = singleRepositoryService.copyResource(sourceUri, uri, createFolders, overwrite, renameTo);
             // if user copies file, we have to return descriptor, not its content
             // See ResourceDetailsJaxrsService#getResourceDetails
             if (MediaType.APPLICATION_JSON.equals(accept)) {
@@ -181,7 +189,7 @@ public class ResourceDetailsJaxrsService {
             } else {
                 accept = ResourceMediaType.FILE_XML;
             }
-            response = getResourceDetails(newUri, accept, false);
+            response = getResourceDetails(newUri, accept, false, null);
         } else {
             if (disposition == null || !disposition.contains("filename=") || disposition.endsWith("filename=")) {
                 throw new IllegalParameterValueException("Content-Disposition", disposition);
@@ -231,11 +239,13 @@ public class ResourceDetailsJaxrsService {
         return Response.status(status).entity(clientFile).build();
     }
 
-    public Response defaultPutHandler(InputStream stream, String uri, String sourceUri, String disposition, String description, String rawMimeType, String accept, Boolean createFolders, Boolean overwrite) throws RemoteException {
+    public Response defaultPutHandler(InputStream stream, String uri, String sourceUri, String disposition,
+            String description, String rawMimeType, String accept, Boolean createFolders, Boolean overwrite,
+            String renameTo) throws RemoteException {
         Response response;
         if (sourceUri != null) {
             // uri - parent folder uri
-            String newUri = singleRepositoryService.moveResource(sourceUri, uri, createFolders, overwrite);
+            String newUri = singleRepositoryService.moveResource(sourceUri, uri, createFolders, overwrite, renameTo);
             // if user copies file, we have to return descriptor, not its content
             // (matters only '+json' or '+xml' part, so file here works for all kinds of resources))
             if (MediaType.APPLICATION_JSON.equals(accept)) {
@@ -243,7 +253,7 @@ public class ResourceDetailsJaxrsService {
             } else {
                 accept = ResourceMediaType.FILE_XML;
             }
-            response = getResourceDetails(newUri, accept, false);
+            response = getResourceDetails(newUri, accept, false, null);
         } else {
             // uri - uri of resource
             if (uri == null || uri.endsWith(Folder.SEPARATOR)) {
@@ -304,18 +314,19 @@ public class ResourceDetailsJaxrsService {
         }
 
         clientResource.setUri(uri);
-        resource = ((ToServerConverter<ClientUriHolder, Resource>) resourceConverterProvider.getToServerConverter(clientResource))
+        resource = ((ToServerConverter<ClientUriHolder, Resource, ToServerConversionOptions>) resourceConverterProvider.getToServerConverter(clientResource))
                 .toServer(clientResource, resource, null);
         singleRepositoryService.updateResource(resource);
 
         return Response.ok(clientResource).build();
     }
 
-    public ClientResource createResource(ClientResource resourceLookup, String parentUri, boolean createFolders, boolean dryRun) throws RemoteException {
-        return createResource(resourceLookup, parentUri, createFolders, null, dryRun);
+    public ClientResource createResource(ClientResource resourceLookup, String parentUri, boolean createFolders, boolean dryRun, String accept) throws RemoteException {
+        return createResource(resourceLookup, parentUri, createFolders, null, dryRun, accept);
     }
 
-    public ClientResource createResource(ClientResource resourceLookup, String parentUri, boolean createFolders, Map<String, InputStream> attachments, boolean dryRun) throws RemoteException {
+    public ClientResource createResource(ClientResource resourceLookup, String parentUri, boolean createFolders,
+            Map<String, InputStream> attachments, boolean dryRun, String accept) throws RemoteException {
         String uniqueName = singleRepositoryService.getUniqueName(parentUri, resourceLookup.getLabel());
         String ownersUri = (Folder.SEPARATOR.equals(parentUri) ? parentUri : parentUri + Folder.SEPARATOR) + uniqueName;
         resourceLookup.setUri(ownersUri);
@@ -324,7 +335,15 @@ public class ResourceDetailsJaxrsService {
         if(!dryRun) {
             serverResource = singleRepositoryService.createResource(serverResource, parentUri, createFolders);
         }
-        return resourceConverterProvider.getToClientConverter(serverResource).toClient(serverResource, null);
+        ToClientConverter<? super Resource, ? extends ClientResource, ToClientConversionOptions> toClientConverter = resourceConverterProvider.getToClientConverter(serverResource);
+        if(accept != null && !accept.isEmpty() && ClientTypeHelper.extractClientType(accept) != null) {
+            toClientConverter = resourceConverterProvider.getToClientConverter(serverResource.getResourceType(),
+                    ClientTypeHelper.extractClientType(accept));
+            if (toClientConverter == null) {
+                throw new NotAcceptableException(accept);
+            }
+        }
+        return toClientConverter.toClient(serverResource, null);
     }
 
     public ClientResource updateResource(ClientResource resourceLookup, String uri) throws IllegalParameterValueException, MandatoryParameterNotFoundException, ResourceNotFoundException, ModificationNotAllowedException, VersionNotMatchException {
@@ -334,7 +353,7 @@ public class ResourceDetailsJaxrsService {
             throw new IllegalParameterValueException(PATH_PARAM_URI, uri);
         } else {
             resourceLookup.setVersion(resource.getVersion());
-            ToServerConverter<ClientResource, Resource> converter = (ToServerConverter<ClientResource, Resource>) resourceConverterProvider.getToServerConverter(resourceLookup);
+            ToServerConverter<ClientResource, Resource, ToServerConversionOptions> converter = (ToServerConverter<ClientResource, Resource, ToServerConversionOptions>) resourceConverterProvider.getToServerConverter(resourceLookup);
             resource = converter.toServer(resourceLookup, resource, ToServerConversionOptions.getDefault().setAllowReferencesOnly(true).setOwnersUri(uri));
         }
         resource.setURIString(uri);

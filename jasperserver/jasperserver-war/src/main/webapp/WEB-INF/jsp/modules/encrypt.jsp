@@ -25,7 +25,7 @@
 <%@ page import="com.jaspersoft.jasperserver.api.security.SecurityConfiguration" %>
 
 <t:insertTemplate template="/WEB-INF/jsp/templates/page.jsp">
-    <t:putAttribute name="moduleName" value="encrypt.page"/>
+    <t:putAttribute name="moduleName" value="encrypt/encryptMain"/>
     <t:putAttribute name="pageTitle" value="Jaspersoft Encryption Tool"/>
 	    <t:putAttribute name="headerContent">
 

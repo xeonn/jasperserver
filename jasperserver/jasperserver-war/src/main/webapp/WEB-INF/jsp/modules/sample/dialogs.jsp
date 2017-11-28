@@ -38,13 +38,13 @@
 		</style>
     </t:putAttribute>
     <t:putAttribute name="bodyContent" >
-	
+
 		<t:insertTemplate template="/WEB-INF/jsp/templates/container.jsp">
 		    <t:putAttribute name="containerClass" value="column decorated primary"/>
 		    <t:putAttribute name="containerTitle"><spring:message code="JIF.titledialogs"/></t:putAttribute>
 		    <t:putAttribute name="bodyClass" value="oneColumn"/>
 		    <t:putAttribute name="bodyContent" >
-	        
+
 	        	<table id="sampleGrid">
 	        		<thead>
 		        		<tr>
@@ -57,7 +57,7 @@
 		        		</tr>
 
 	        		</thead>
-					
+
 					<tbody>
 		        		<tr>
 		        			<th class="rowHeader" rowspan="2">#login</th>
@@ -114,14 +114,14 @@
 		        			<td class="example">
                                 <t:insertTemplate template="/WEB-INF/jsp/templates/sortDialog.jsp">
                                 	<t:putAttribute name="bodyContent">
-									
+
 									    <t:putAttribute name="availableFields">
 									     	<ul class="list responsive collapsible fields hideRoot">
 												<li class="leaf"><div class="wrap button"><b class="icon button noBubble"></b>Account Name</div></li>
 												<li class="leaf"><div class="wrap button"><b class="icon button noBubble"></b>Account City</div></li>
 											</ul>
 									    </t:putAttribute>
-									    
+
 									    <t:putAttribute name="selectedFields">
 										    <ul class="list responsive collapsible fields hideRoot column simple">
 												<li class="leaf ascending"><div class="wrap button"><b class="icon button noBubble"></b>Account State</div></li>
@@ -150,14 +150,14 @@
 		        			<td class="example">
                                 <t:insertTemplate template="/WEB-INF/jsp/templates/selectFields.jsp">
                                 	<t:putAttribute name="bodyContent">
-									
+
 									    <t:putAttribute name="availableFields">
 									     	<ul class="list responsive collapsible fields hideRoot">
 												<li class="leaf"><div class="wrap button"><b class="icon"></b>Account Name</div></li>
 												<li class="leaf"><div class="wrap button"><b class="icon"></b>Account City</div></li>
 											</ul>
 									    </t:putAttribute>
-									    
+
 									    <t:putAttribute name="selectedFields">
 										    <ul class="list responsive collapsible fields hideRoot">
 												<li class="leaf"><div class="wrap button"><b class="icon"></b>Account State</div></li>
@@ -255,7 +255,7 @@
 -->
 		        		<tr>
 		        			<td colspan="2" class="example">
-								
+
                                 <t:insertTemplate template="/WEB-INF/jsp/templates/customURL.jsp">
 									<t:putAttribute name="bodyContent">
 										<ul class="list setLeft tabular twoColumn">
@@ -278,7 +278,7 @@
 															<input id="paramCheckbox_Country" type="checkbox" value="">
 														</div>
 													</div>
-													
+
 													<div class="column two">
 														<label id="label_for_param_1_value" class="control input text" for="paramMapperInput_Country">
 															<input id="paramMapperInput_Country" type="text" value="Country">
@@ -295,7 +295,7 @@
 															<input id="paramCheckbox_Country" type="checkbox" value="">
 														</div>
 													</div>
-													
+
 													<div class="column two">
 														<label id="label_for_param_2_value" class="control input text" for="paramInput_Country">
 															<input id="paramInput_Country" type="text" value="City">
@@ -327,8 +327,8 @@
 		        				<t:insertTemplate template="/WEB-INF/jsp/templates/systemConfirm.jsp">
 								    <t:putAttribute name="messageContent">
 											<spring:message code="JIF.labelmessage"/>
-								    </t:putAttribute>								
-								</t:insertTemplate>		        			
+								    </t:putAttribute>
+								</t:insertTemplate>
 		        			</td>
 		        		</tr>
 	        		</tbody>
@@ -392,7 +392,7 @@
                                     <t:putAttribute name="containerID" value="testloading"/>
                                 </t:insertTemplate>
 		        			</td>
-		        			
+
 		        			<td colspan="2" class="example">
                                 <t:insertTemplate template="/WEB-INF/jsp/templates/loading.jsp">
                                     <t:putAttribute name="containerID" value="testLoadingCancellable"/>
@@ -415,7 +415,7 @@
                                     </t:putAttribute>
                                 </t:insertTemplate>
 		        			</td>
-		        			
+
 		        			<td colspan="2" class="example">
                                 <t:insertTemplate template="/WEB-INF/jsp/templates/detail.jsp">
                                 	<t:putAttribute name="containerClass" value="sizeable"/>
@@ -528,7 +528,7 @@
 																		</p>
 																	</li>
 																</ul>
-																
+
 															</li>
 															<li class="folders node closed">
 																<p class="wrap button draggable">
@@ -600,7 +600,7 @@
 							</td>
 		        		</tr>
 	        		</tbody>
-	        		<%-- 
+	        		<%--
 					<tbody>
 		        		<tr>
 		        			<th class="rowHeader" rowspan="2">#selectPalette</th>
@@ -937,13 +937,13 @@
 		        		</tr>
 	        		</tbody>
 				 </table>
-	        
+
 			</t:putAttribute>
 		    <t:putAttribute name="footerContent">
 		    	<!-- custom content here; remove this comment -->
 		    </t:putAttribute>
-		</t:insertTemplate>		
-		
+		</t:insertTemplate>
+
 		<t:insertTemplate template="/WEB-INF/jsp/modules/sample/sampleIndex.jsp"/>
 
     </t:putAttribute>

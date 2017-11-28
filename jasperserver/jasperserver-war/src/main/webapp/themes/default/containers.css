@@ -18,13 +18,18 @@
 .sectionLeft {
 	margin-left:8px;
 	margin-right:8px;
-	float:left; 
+	float:left;
 }
-	
+
 .sectionRight {
-	margin-left:0px;
-	margin-right:4px;
-	float:right; 
+	margin-right: 4px;
+	position: absolute;
+    right: 0;
+}
+
+.searchContainer {
+    position: absolute;
+    right: 0;
 }
 
 #frameFooter {
@@ -207,7 +212,7 @@
 .pane.expression .content > .header > .button.disclosure.closed {
     background-position: 2px -677px;
 }
-   
+
 
 .toolbar {
 	clear: both;
@@ -248,7 +253,7 @@
 	left:0;
 	right:0;
 	height:37px;
-	padding:0px 20px; 
+	padding:0px 20px;
 }
 
 /* .footer #wizardNav {
@@ -329,7 +334,7 @@ ______________________________________________________________
 	overflow: hidden;
 }
 
-/* 
+/*
 	Sizers: default positioning assumes left to right reading UI
 	------------------------------------------------------------
 */
@@ -418,7 +423,7 @@ ______________________________________________________________
 .sub.header .horizontal {
 	margin: 6px 1em 0 1em;
 }
-    
+
 /*
  * From: decorated_column.css
  */
@@ -434,8 +439,8 @@ ______________________________________________________________
 	overflow: visible;
 	margin: 0; /* default margin setting overridden as req'd in layout.css */ /* NEW */
 	min-width: 150px;
-	
-	/* margin:4px; */ 
+
+	/* margin:4px; */
 	/* border:1px solid #666666; */
 }
 
@@ -460,7 +465,7 @@ ______________________________________________________________
 }
 
 .column.decorated .column.decorated {
-	border: 1px solid #c5c5c5;	
+	border: 1px solid #c5c5c5;
 }
 
 .column.decorated > .content > .header {
@@ -468,7 +473,7 @@ ______________________________________________________________
 	position: relative;
 	white-space: nowrap;
 	z-index: 1;
-	
+
 	/* border-bottom:1px solid #c5c5c5; */ /* REMOVE */
 }
 
@@ -477,7 +482,7 @@ ______________________________________________________________
 	border-top: 1px solid #D4D5D5;
 	white-space:nowrap;
 	z-index: 100;
-	
+
 /* these may be redundant, delete if needed
 	padding:0px 20px;
 	height:37px;
@@ -512,7 +517,7 @@ ______________________________________________________________
 	font-size: 12px;
 	line-height: 20px;
 	position: absolute;
-	
+
 	-webkit-transform: rotate(270deg);
 	-webkit-transform-origin:left top;
 	-moz-transform: rotate(270deg);
@@ -534,13 +539,13 @@ ______________________________________________________________
 
 .column.decorated.minimized.secondary {
 	border-right :1px solid #e3e3e3;
-	
+
 	/* margin-left: 0; */ /* DELETE */
 }
 
 .column.decorated.minimized.tertiary {
 	border-left :1px solid #e3e3e3;
-	
+
 	/* right: 1px !important; */
 	/* margin-right: 0; */ /* DELETE */
 }
@@ -561,9 +566,9 @@ ______________________________________________________________
 	display: block;
 	height: 28px;
 	/* height: 27px; */ /* DELETE IF NO PROBLEMS, 2nd version */
-	
+
 	/* height: 32px; */ /* DELETE IF NO PROBLEMS, 1st version */
-	
+
 	/* background-color: #EEEEEE;
 	background-image: url("images/tabs_horizontal_buttons_bkgd.png");
 	background-repeat: repeat-x; */ /* DELETE */
@@ -713,7 +718,7 @@ There are 3 types:
 /* .panel.tooltip */
 
 .panel.tooltip {
-	border:1px solid #c0c0c0;
+	border: 1px solid #c0c0c0;
 	margin: 0;
 	float: left;
 	z-index: 1000;
@@ -722,7 +727,7 @@ There are 3 types:
 	background-image: -webkit-linear-gradient(top, #f9f9f9, #f1f0f2);
 	background-image:	-moz-linear-gradient(top, #f9f9f9, #f1f0f2);
 	background-image: 	-ms-linear-gradient(top, #f9f9f9, #f1f0f2);
-	background-image:  	-o-linear-gradient(top, #f9f9f9, #f1f0f2);	
+	background-image:  	-o-linear-gradient(top, #f9f9f9, #f1f0f2);
 	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#f9f9f9', endColorstr='#f1f0f2'); /* IE */
 }
 
@@ -731,13 +736,18 @@ There are 3 types:
 }
 
 .panel.tooltip > .content > .body {
-	line-height:2em;
+	line-height: 2em;
 	padding: 10px 10px 0;
 }
 
+.panel.tooltip .message {
+    line-height: 1.455;
+    overflow: visible;
+    white-space: normal;
+}
 
 .panel.tooltip .message.label {
-	color:#0480BA;
+	color: #0480BA;
 	margin-bottom: 0;
 }
 
@@ -809,6 +819,7 @@ There are 3 types:
 .panel.info.nothingToDisplay {
 	border:none;
 	background-color:transparent;
+	position: absolute !important;
 }
 
 /* .panel.info.noDataModeDisplay */
@@ -1310,7 +1321,7 @@ In particular, .sizeable requires that .dialog > .content be position:absolute.
     cursor:pointer;
 }
 
-/* 
+/*
 	Panel Dialog Inlay
  */
 .dialog.inlay {
@@ -1457,7 +1468,7 @@ In particular, .sizeable requires that .dialog > .content be position:absolute.
 		margin-top:2px;
 	} REMOVE IF NO PROBLEMS */
 }
-/* 
+/*
 	Dialog Overlay
 */
 
@@ -1643,7 +1654,7 @@ In particular, .sizeable requires that .dialog > .content be position:absolute.
 
 
 /* column decorated */
-.column.decorated > .content > .header, 
+.column.decorated > .content > .header,
 .column.decorated > .content > .header > .subheader {
 	background-color: #e3e3e3; /* OLD THEME - background color needs to be white so there are no problems with subheaders */
 	border-bottom: 1px solid #fff;

@@ -20,25 +20,29 @@
  */
 package com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.persistent;
 
-import java.sql.Blob;
-import java.sql.SQLException;
-
-import com.jaspersoft.jasperserver.api.metadata.common.domain.FileResourceBase;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.jaspersoft.jasperserver.api.JSException;
 import com.jaspersoft.jasperserver.api.JSExceptionWrapper;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.FileResource;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.FileResourceBase;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.FileResourceData;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ComparableBlob;
 import com.jaspersoft.jasperserver.api.metadata.common.service.ResourceFactory;
 import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.ReferenceResolver;
+import com.jaspersoft.jasperserver.core.util.XMLUtil;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.xml.sax.SAXParseException;
+
+import java.sql.Blob;
+import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: RepoFileResource.java 53873 2015-04-07 18:59:44Z mchan $
+ * @version $Id: RepoFileResource.java 63380 2016-05-26 20:56:46Z mchan $
  * 
  * @hibernate.joined-subclass table="file_resource"
  * @hibernate.joined-subclass-key column="id"
@@ -46,6 +50,14 @@ import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.Re
 public class RepoFileResource extends RepoResource implements FileResourceBase {
 
 	private static final Log log = LogFactory.getLog(RepoFileResource.class);
+	private static final Set<String> XML_BASED_FORMATS = new HashSet<String>(Arrays.asList(new String[] {
+			FileResourceBase.TYPE_XML,
+			FileResourceBase.TYPE_JRXML,
+			FileResourceBase.TYPE_STYLE_TEMPLATE,
+			"olapMondrianSchema",
+			FileResourceBase.TYPE_ACCESS_GRANT_SCHEMA
+	}));
+
 	
 	private String fileType;
 	private ComparableBlob data;
@@ -131,10 +143,19 @@ public class RepoFileResource extends RepoResource implements FileResourceBase {
 			fileRes.setData(null);
 		} else {
 			try {
-				fileRes.readData(blob.getBinaryStream());
+				// check for XXE vulnerability
+				if (XML_BASED_FORMATS.contains(fileRes.getFileType())) {
+					fileRes.readData(XMLUtil.checkForXXE(blob.getBinaryStream()));
+				} else {
+					fileRes.readData(blob.getBinaryStream());
+				}
 			} catch (SQLException e) {
 				log.error("Error while reading data blob of \"" + getResourceURI() + "\"", e);
 				throw new JSExceptionWrapper(e);
+			} catch (SAXParseException ex) {
+				log.error("Insecure XML resource!", ex);
+			} catch (Exception ex) {
+				log.error(ex);
 			}
 		}
 	}
@@ -169,6 +190,15 @@ public class RepoFileResource extends RepoResource implements FileResourceBase {
 			//only update when the client has set some data
 			if (dataRes.hasData()) {
 				byte[] clientData = dataRes.getData();
+				// check for XXE vulnerability
+				try {
+					if (XML_BASED_FORMATS.contains(dataRes.getFileType())) {
+                        XMLUtil.checkForXXE(clientData);
+                    }
+				} catch (Exception e) {
+					log.error(e);
+					throw new JSException(e);
+				}
 				ComparableBlob blob = new ComparableBlob(clientData);
 				setData(blob);
 			}

@@ -668,6 +668,7 @@ text-align:right;
     display:inline-block;
     margin-top:6px;
     margin-right:8px;
+    min-width: 435px;
     width:500px\9;
 }
 
@@ -3140,34 +3141,45 @@ li.dragging.measure {
 
 #designerCache .list.fiveColumn .wrap > .column.one {
     text-align: center;
-    width: 70px;
+    white-space: nowrap;
+    width: 11%;
+    min-width: 130px;
 }
 
 #designerCache .list.fiveColumn .wrap > .column.two {
     padding: 0 16px;
-    width: 62%;
+    width: 56%;
+}
+
+.list.fiveColumn.tabular .header .wrap .column.two {
+    margin-left: 8px;
 }
 
 #designerCache .list.fiveColumn .wrap > .column.three {
     padding: 0 8px;
     text-align: center;
-    width: 9%;
+    white-space: nowrap;
+    width: 11%;
 }
 
 #designerCache .list.fiveColumn .wrap > .column.four {
     text-align: center;
-    width: 9%;
+    white-space: nowrap;
+    width: 11%;
+    min-width: 120px;
 }
 
 #designerCache .list.fiveColumn .wrap > .column.five {
-    width: 8%;
+    width: auto;
 }
 
 #designerCache .list.fiveColumn.tabular > .list.header div.wrap {
     background-color: #edf2f8;
+    padding-left: 10px;
 }
 
 #designerCache .list.fiveColumn.tabular > .list div.wrap {
+    min-width: 1020px;
     padding-top: 3px;
     padding-bottom: 3px;
 }
@@ -4686,6 +4698,11 @@ and (max-device-width : 1024px) {
     left: 18px;
 }
 
+/* Top of page input controls */
+#reportViewFrame .topOfPage .warning {
+    float: left;
+}
+
 
 /* Inner pagination of report. Used always in dashboards and optional in view report */
 #innerPagination {
@@ -5023,16 +5040,16 @@ and (orientation:portrait) {
 /* Columns position */
 
 .schedulerApp .singleReportView .list .column.one { width: 6%; }
-.schedulerApp .singleReportView .list .column.two { width: 42%; }
+.schedulerApp .singleReportView .list .column.two { width:37%; }
 .schedulerApp .singleReportView .list .column.three { width: 10%; }
 .schedulerApp .singleReportView .list .column.four { width: 30%; }
-.schedulerApp .singleReportView .list .column.five { width: 11%; }
+.schedulerApp .singleReportView .list .column.five { width: 16%; }
 
 .schedulerApp .masterView .list .column.one { width: 23%; }
 .schedulerApp .masterView .list .column.two { width: 23%; }
-.schedulerApp .masterView .list .column.three { width: 24%; }
+.schedulerApp .masterView .list .column.three { width: 19%; }
 .schedulerApp .masterView .list .column.four { width: 18%; }
-.schedulerApp .masterView .list .column.five { width: 11%; }
+.schedulerApp .masterView .list .column.five { width: 16%; }
 
 
 .schedulerApp .list .column.one {
@@ -5046,29 +5063,64 @@ and (orientation:portrait) {
 	padding-left: 20px;
 }
 /* define vertical position of the icons */
-.schedulerApp .list .column.five {
-	padding-top: 5px;
-}
-.schedulerApp .singleReportView .list .column.five {
-	padding-top: 2px;
-}
+/*.schedulerApp .singleReportView .list .column.five {*/
+	/*padding-top: 2px;*/
+/*}*/
 .schedulerApp .list.header .column.five {
 	padding-top: 0;
 }
 /* adjust position of the icons inside container */
 .schedulerApp .list.jobs .jobEnabled {
 	display: inline-block;
-	margin-top: 2px;
 }
+
 .schedulerApp .list.jobs .jobEnabled,
 .schedulerApp .list.jobs .jobDelete,
 .schedulerApp .list.jobs .jobEdit {
 	float: right;
-	margin-left: 10px;
 	width: auto;
 }
-.schedulerApp .header.list.jobs .column.five .jobEnabled {
-	margin-right: 38px;
+
+.schedulerApp .list.jobs .jobEnabled {
+    width: 120px;
+    float: none;
+}
+
+.schedulerApp .list.jobs .jobDelete {
+    margin-left: 18px;
+}
+
+.schedulerApp .masterView .body .list.jobs .jobEnabled {
+    margin-top: 1px;
+}
+
+@media screen and (-webkit-min-device-pixel-ratio:0)
+{
+    .schedulerApp .list.jobs .jobDelete,
+    .schedulerApp .list.jobs .jobEdit {
+        margin-top: 3px;
+    }
+
+    .schedulerApp .body .list.jobs .jobEnabled {
+        margin-top: -1px;
+    }
+
+    .schedulerApp .masterView .body .list.jobs .jobEnabled {
+        margin-top: 0;
+    }
+}
+
+/* IE 9, 10 & 11 */
+@media screen and (min-width:0\0) {
+    .schedulerApp .masterView .body .list.jobs .jobEnabled,
+    .schedulerApp .body .list.jobs .jobDelete,
+    .schedulerApp .body .list.jobs .jobEdit {
+        margin-top: 4px;
+    }
+
+    .schedulerApp .singleReportView .body .list.jobs .jobEnabled {
+        margin-top: 3px;
+    }
 }
 
 
@@ -5390,6 +5442,10 @@ and (orientation:portrait) {
 	margin-top:20px;
 }
 
+.schedulerApp .outputTab #outputSize input[type="text"] {
+    width: 40px;
+}
+
 .schedulerApp .outputTab #outputFormat .list.inputSet {
 	overflow:hidden;
 }
@@ -5403,6 +5459,13 @@ and (orientation:portrait) {
 	float:left;
 	margin-right:15px;
 	width:30%;
+}
+
+.schedulerApp .outputTab #outputFormat.dashboard > .list.inputSet > .leaf {
+	clear:none;
+	float:left;
+	margin-right:15px;
+	width:45%;
 }
 
 .schedulerApp .outputTab .control .message.warning {
@@ -5422,27 +5485,69 @@ and (orientation:portrait) {
 	margin-left:6px;
 }
 
-.schedulerApp .outputTab .outputDestination .leaf > .control.text {
+.schedulerApp .outputTab #ftpServerOutput .list {
+    overflow:hidden;
+}
+
+.schedulerApp .outputTab #ftpServerOutput .leaf {
+    width:400px;
+    margin-right:24px;
+    clear: none;
+    float: left;
+}
+
+.schedulerApp .outputTab .outputDestination .leaf > .control {
 	margin-bottom: 10px;
 	margin-top: 8px;
 	margin-left:20px;
 }
 
-.schedulerApp .outputTab #repositoryOutput input[type=text],
-.schedulerApp .outputTab #fileSystemOutput input[type=text]  {
-	width:97%
+.schedulerApp .outputTab .outputDestination .leaf > .control.checkBox {
+    margin-left: 0;
 }
 
-.schedulerApp .outputTab #ftpServerOutput .list {
-	overflow:hidden;
+.schedulerApp .outputTab .control.browser input {
+    display: inline-block;
+    width: 285px;
 }
 
-.schedulerApp .outputTab #ftpServerOutput .leaf {
-	width:400px;
-	margin-right:24px;
-	clear: none;
-	float: left;
+body.locale-de .schedulerApp .outputTab .control.browser input,
+body.locale-es .schedulerApp .outputTab .control.browser input,
+body.locale-fr .schedulerApp .outputTab .control.browser input,
+body.locale-pt_BR .schedulerApp .outputTab .control.browser input {
+    width: 240px;
 }
+
+.schedulerApp .outputTab .control.browser .button.action {
+    margin-top: 3px;
+}
+
+.schedulerApp .outputTab .outputDestination .leaf > .control.inline.two {
+    float: right;
+    margin-left: 4px;
+}
+
+.schedulerApp .outputTab .outputDestination .control.select select {
+    height: 26px;
+}
+.schedulerApp .outputTab label[for=ftpPort] {
+    width: 85px;
+}
+.schedulerApp .outputTab label[for=scheduler_ftpProtocol] {
+    width: 280px;
+}
+.schedulerApp .outputTab label[for=ftpPassword],
+.schedulerApp .outputTab label[for=ftpUsername] {
+    width: 183px;
+}
+.schedulerApp .outputTab .control.checkBox[data-ftp-type=sftp] {
+    margin-top: 50px;
+}
+.schedulerApp .outputTab .control.text[data-ftp-type=sftp] {
+    margin-top: 13px;
+}
+
+
 
 .schedulerApp .outputTab #testConnection {
 	margin-left: 44px;
@@ -6518,6 +6623,11 @@ and (orientation:portrait) {
     width: 100%;
 }
 
+.msPlaceholder:disabled,
+.msPlaceholder[disabled] {
+    opacity: .4;
+}
+
 #dashboardDesigner .sSelect-sSearch .searchLockup,
 #dashboardViewer .sSelect-sSearch .searchLockup {
     min-width: 0 !important;
@@ -6550,7 +6660,6 @@ input[type="text"].mSelect-input {
     -webkit-box-sizing: border-box;
     -khtml-box-sizing: border-box;
     box-sizing: border-box;
-    /* height: 21px; */ /* DELETE IF NO PROBLEMS */
     margin: 4px 0 0 0;
     padding: 0 22px 0 3px;
     width: 100%;
@@ -6878,9 +6987,12 @@ input[type="text"].mSelect-input {
 }
 
 .sourceDialogNew .itemDescription {
-    height: 54px;
+    height: 60px;
     margin: 0;
     padding: 8px 22px;
+    padding-top: 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .sourceDialogNew > .sub.header.tabHeaderContainer {
@@ -7306,3 +7418,25 @@ input[type="text"].mSelect-input {
 
 }
 
+
+#aws_settings [name=keyStoreUri] {
+    display: inline;
+}
+.body.dataSourceBody[dstype=azuresqldatasource] legend {
+    margin-left: 0px;
+}
+
+/* Temporary set of rules to make File Chooser Dialog without list */
+.reportChooserDialog.sourceDialogNew.listDisabled > .sub.header.tabHeaderContainer {
+    display: none;
+}
+.reportChooserDialog.sourceDialogNew.listDisabled > .subcontainer > .tabContainer {
+    margin-top: 13px;
+    margin-right: 1px;
+}
+.reportChooserDialog.sourceDialogNew.listDisabled .itemDescription {
+    margin-top: 19px;
+}
+.reportChooserDialog.sourceDialogNew.listDisabled .u-height-300px.jrs {
+    height: 33.5em;
+}

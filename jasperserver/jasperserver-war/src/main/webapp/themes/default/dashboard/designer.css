@@ -18,6 +18,10 @@
 
 */
 
+.margin-bottom-0 {
+    margin-bottom: 0!important;
+}
+
 /*
 
  SAVE AS DIALOG CSS
@@ -79,7 +83,7 @@
 }
 
 .dashboardLevelPropertiesDialog {
-    width: 414px;
+    width: 485px;
 }
 
 .dashboardLevelPropertiesDialog .control label {
@@ -117,13 +121,27 @@ inputControlDialog .dashletNameProperty {
     margin-bottom: 0;
 }
 
-.dashboardLevelPropertiesDialog.textDialog .section { /* NEW */
-    margin-bottom: 0;
-}
-
 .dashboardLevelPropertiesDialog .subcontainer .title {
     margin-top: 6px;
     font-weight: bold;
+}
+
+.dashboardLevelPropertiesDialog .canvasColorControl,
+.dashboardLevelPropertiesDialog .titleBarColorControl,
+.dashboardLevelPropertiesDialog .titleTextColorControl {
+    margin-top: 8px;
+    margin-bottom: 0px;
+}
+.dashboardLevelPropertiesDialog .canvasColorControl > span,
+.dashboardLevelPropertiesDialog .titleBarColorControl > span,
+.dashboardLevelPropertiesDialog .titleTextColorControl > span {
+    position: relative;
+    bottom: 8px;
+}
+.dashboardLevelPropertiesDialog .canvasColorControl .buttonColorpicker,
+.dashboardLevelPropertiesDialog .titleBarColorControl .buttonColorpicker,
+.dashboardLevelPropertiesDialog .titleTextColorControl .buttonColorpicker {
+    display: inline-block;
 }
 
 .dashboardLevelPropertiesDialog .subcontainer .section .group {
@@ -144,12 +162,17 @@ inputControlDialog .dashletNameProperty {
 .dashboardLevelPropertiesDialog .control.dashletNameProperty > input[type=text],
 .dashboardLevelPropertiesDialog .control.url > input[type=text],
 .dashboardLevelPropertiesDialog .control.textProperty input[type=text] {
-    width: 355px;
+    width: 100%;
     display: block;
     margin-top: 5px;
 }
 .dashboardLevelPropertiesDialog .control input{
     background-image: none;
+}
+
+.dashboardLevelPropertiesDialog .control.url > button{
+    margin: 0 6px;
+    float: right;
 }
 
 .dashboardLevelPropertiesDialog .control.refreshIntervalProperty input[type=text]{
@@ -164,7 +187,7 @@ inputControlDialog .dashletNameProperty {
 
 .dashboardLevelPropertiesDialog .control.buttonsPositionProperty select,
 .dashboardLevelPropertiesDialog .control.scaleToFitProperty select,
-.dashboardLevelPropertiesDialog .control.chartHyperlinksAction select,
+.dashboardLevelPropertiesDialog .control.dashletHyperlinksAction select,
 .dashboardLevelPropertiesDialog .control.filtersPerRowProperty select{
     display: block;
     margin: 5px 0px 0px 0px;
@@ -172,7 +195,7 @@ inputControlDialog .dashletNameProperty {
     width: auto;
 }
 
-.dashboardLevelPropertiesDialog .control.chartHyperlinksAction select {
+.dashboardLevelPropertiesDialog .control.dashletHyperlinksAction select {
     width: 150px;
 }
 
@@ -180,7 +203,7 @@ inputControlDialog .dashletNameProperty {
     margin-top: 15px;
 }
 
-.dashboardLevelPropertiesDialog .control.chartHyperlinksAction{
+.dashboardLevelPropertiesDialog .control.dashletHyperlinksAction{
     margin-top: 5px;
     margin-left: 20px;
 }
@@ -216,15 +239,15 @@ inputControlDialog .dashletNameProperty {
 
 .dashboardLevelPropertiesDialog .text-visualization > .fontProperty > .control select {
     width: 193px;
-    height: 100px;
+    height: 169px;
 }
 
 .dashboardLevelPropertiesDialog .text-visualization > .sizeProperty > .control select {
     width: 48px;
-    height: 100px;
+    height: 169px;
 }
 
-.dashboardLevelPropertiesDialog .text-visualization > .styleProperties .buttons .textInputButton{
+.dashboardLevelPropertiesDialog .text-visualization > .styleProperties .buttons .textInputButton {
     background: url("../images/dialog_button_capsule_sprite.png") repeat scroll 0 0 transparent;
     cursor: pointer;
     float: left;
@@ -239,6 +262,7 @@ inputControlDialog .dashletNameProperty {
     background-position: 0 -50px;
 }
 
+.dashboardLevelPropertiesDialog .colorPickerIcon,
 .dashboardLevelPropertiesDialog .text-visualization > .styleProperties .buttons .textIcon{
     background: url("../images/button_formatting_sprite.png");
     display: inline-block;
@@ -261,6 +285,14 @@ inputControlDialog .dashletNameProperty {
 
 .dashboardLevelPropertiesDialog .text-visualization > .styleProperties .buttons .textItalic.checked{
     background-position: -30px -49px;
+}
+
+.dashboardLevelPropertiesDialog .text-visualization > .styleProperties .buttons .textUnderline {
+    background-position: 0 -95px;
+}
+
+.dashboardLevelPropertiesDialog .text-visualization > .styleProperties .buttons .textUnderline.checked {
+    background-position: -30px -95px;
 }
 
 .dashboardLevelPropertiesDialog .text-visualization > .styleProperties .buttons .textALeft{
@@ -287,6 +319,7 @@ inputControlDialog .dashletNameProperty {
     background-position: -30px -234px;
 }
 
+.dashboardLevelPropertiesDialog .colorPickerIcon,
 .dashboardLevelPropertiesDialog .text-visualization > .styleProperties .buttons .textBackgroundColor{
     background-position: 2px -551px;
     width: 34px;
@@ -295,20 +328,6 @@ inputControlDialog .dashletNameProperty {
 .dashboardLevelPropertiesDialog .text-visualization > .styleProperties .buttons .textColor{
     background-position: 3px -508px;
     width: 34px;
-}
-
-.dashboardLevelPropertiesDialog .text-visualization > .styleProperties .buttons .textColorButtons{
-    background-position: -58px 0;
-    width: 34px;
-}
-
-.dashboardLevelPropertiesDialog .text-visualization > .styleProperties .buttons .textColorButtons .colorIndicator{
-    cursor: pointer;
-    position: absolute;
-    top: 20px;
-    width: 16px;
-    margin-left: 6px;
-    height: 4px;
 }
 
 .dashboardLevelPropertiesDialog .text-visualization > .fontProperty select,
@@ -327,13 +346,11 @@ inputControlDialog .dashletNameProperty {
 
 .dashboardLevelPropertiesDialog .section > .control.scrollBarProperty{
     margin-bottom: 20px;
-    margin-top: -10px;
 }
 
 .dashboardLevelPropertiesDialog .text-visualization{
     width: 100%;
     padding: 2px 0px 5px 0px;
-    height: 166px;
     display: inline-block;
 }
 
@@ -350,7 +367,7 @@ inputControlDialog .dashletNameProperty {
     margin-top: 5px;
 }
 
-.dashboardLevelPropertiesDialog .chartHyperlinks > .control.checkBox {
+.dashboardLevelPropertiesDialog .dashletHyperlinks > .control.checkBox {
     margin-top: 5px;
 }
 
@@ -358,12 +375,8 @@ inputControlDialog .dashletNameProperty {
     width: auto !important;
     white-space: normal;
     position: relative;
-    top: 3px;
     margin-right: 3px;
 }
-
-
-
 
 .dashboardLevelPropertiesDialog .control input[type=text] {
     width: 40px;
@@ -383,7 +396,12 @@ inputControlDialog .dashletNameProperty {
 
 .dashboardLevelPropertiesDialog > .subcontainer > .tabbedPanel > .subcontainer.bordered {
     border: 1px solid #B5B5B5;
-    padding: 24px 16px 0 16px
+    padding: 24px 16px 0 16px;
+    position: relative;
+    top: -3px;
+    clear: both;
+    max-height: 460px;
+    overflow: auto;
 }
 
 .dashboardLevelPropertiesDialog > .content .tabbedPanel > .subcontainer.bordered .section:last-of-type {
@@ -400,6 +418,37 @@ inputControlDialog .dashletNameProperty {
     border-bottom: none;
     height: 22px;
     line-height: 22px;
+}
+
+/* redesigned color picker button */
+.buttonColorpicker {
+    border: 1px solid #aaa;
+    cursor: pointer;
+    height: 28px;
+    width: 100px;
+}
+
+.buttonColorpicker-swatch {
+    background-color: pink;
+    border: 2px solid #fff;
+    display: inline-block;
+    height: 100%;
+    width: 80px;
+}
+
+.buttonColorpicker-trigger {
+    background: url("../images/dialog_button_capsule_sprite.png") repeat scroll 0 -200px;
+    border-left: 1px solid #aaa;
+    float: right;
+    height: 100%;
+    width: 18px;
+}
+
+.buttonColorpicker-trigger-icon {
+    background: url("../images/disclosure_indicators_sprite.png") no-repeat scroll 3px -749px;
+    display:inline-block;
+    height: 100%;
+    width: 100%;
 }
 
 /* Chrome only css */
@@ -420,14 +469,16 @@ inputControlDialog .dashletNameProperty {
 .dashboardLevelPropertiesDialog.dashletLevelPropertiesDialog .control > .title,
 .dashboardLevelPropertiesDialog.dashletLevelPropertiesDialog .section > .refreshSettings > .title,
 .dashboardLevelPropertiesDialog.dashletLevelPropertiesDialog .section > .showTitleBarElements > .title,
-.dashboardLevelPropertiesDialog.dashletLevelPropertiesDialog .section > .chartHyperlinks > .title,
+.dashboardLevelPropertiesDialog.dashletLevelPropertiesDialog .section > .dashletHyperlinks > .title,
 .dashboardLevelPropertiesDialog.dashletLevelPropertiesDialog .section > .textProperty > .title,
 .dashboardLevelPropertiesDialog.dashletLevelPropertiesDialog .text-visualization .wrap.title {
 	color: #121212;
 	font-weight: normal;
 }
 
-.dashboardLevelPropertiesDialog.dashletLevelPropertiesDialog .section > .chartHyperlinks {
+.dashboardLevelPropertiesDialog.dashletLevelPropertiesDialog .section > .imageHyperlinks,
+.dashboardLevelPropertiesDialog.dashletLevelPropertiesDialog .section > .textHyperlinks,
+.dashboardLevelPropertiesDialog.dashletLevelPropertiesDialog .section > .dashletHyperlinks {
     margin-top: 5px;
     display: block;
 }
@@ -446,23 +497,53 @@ inputControlDialog .dashletNameProperty {
     display: inline-block;
 }
 
-.dashletLevelPropertiesDialog .section > .chartHyperlinks > .availableParametersList {
+.dashletLevelPropertiesDialog .section > .dashletHyperlinks > .availableParametersList {
     margin-left: 20px;
     margin-bottom: 20px;
     max-height: 207px;
     overflow: auto;
 }
 
-.dashletLevelPropertiesDialog .section > .chartHyperlinks > .availableParametersList > li {
+.dashletLevelPropertiesDialog .section > .dashletHyperlinks > .availableParametersList > li {
     padding-top: 8px;
     color: #666666;
     height: 25px;
 }
 
-.dashletLevelPropertiesDialog .section > .chartHyperlinks > .control.url > .hint {
+.dashletLevelPropertiesDialog .section > .dashletHyperlinks > .control.url > .hint {
     font-size: 80%;
     margin-top: 3px;
     display: block;
+}
+
+.addDashboardComponentDialog .browsableInput input {
+    margin-top: 0;
+}
+
+.dashboardLevelPropertiesDialog .control .browsableInput input,
+.browsableInput input {
+    width: 70%;
+    float: left;
+    box-sizing: border-box;
+}
+
+.dashboardLevelPropertiesDialog .control.url {
+    width: 100%;
+}
+.browsableInput {
+    margin-top: 5px;
+}
+.browsableInput:before,
+.browsableInput:after {
+    content: "";
+    display: table;
+}
+.browsableInput:after {
+    clear: both;
+}
+.browsableInput button {
+    float: right;
+    width: 25%;
 }
 
 .dashletLevelPropertiesDialog .section > .control {
@@ -536,6 +617,10 @@ inputControlDialog .dashletNameProperty {
     top: 29px;
 }
 
+.dashboardDesigner .previewMode .hyperlink {
+    cursor: pointer;
+}
+
 .dashboardDesigner .dashboardCanvas > .content > .body {
     top: 0;
 }
@@ -549,7 +634,7 @@ inputControlDialog .dashletNameProperty {
 /*
 	border-top: 1px solid #c8d1dc;
 	border-bottom: 1px solid #c8d1dc;
-	margin-bottom: 1px; 
+	margin-bottom: 1px;
 */
 }
 
@@ -583,7 +668,9 @@ inputControlDialog .dashletNameProperty {
 }
 
 
-
+/*
+    Tree icons
+*/
 .dashboardDesigner .dashboardSidebar .body > .panel > .subcontainer{
     min-height: 135px;
     width: 100%;
@@ -594,77 +681,86 @@ inputControlDialog .dashletNameProperty {
     cursor: row-resize;
 }
 
-.dashboardDesigner .dashboardSidebar .dashboard-existingContent-filter-invisible > p.wrap {
+#dashboard .dashboard-existingContent-filter-invisible > p.wrap {
     font-style: italic;
 }
 
-.dashboardDesigner .dashboardSidebar .dashboard-newContent-chart > p.wrap > .icon {
+#dashboard .dashboard-newContent-chart > p.wrap > .icon {
     background-position: 0 2px;
     background-image: url("../images/dashboard_designer_sprite.png");
 }
 
-.dashboardDesigner .dashboardSidebar .dashboard-newContent-crosstab > p.wrap > .icon {
+#dashboard .dashboard-newContent-crosstab > p.wrap > .icon {
     background-position: 0 -27px;
     background-image: url("../images/dashboard_designer_sprite.png");
 }
 
-.dashboardDesigner .dashboardSidebar .dashboard-newContent-table > p.wrap > .icon {
+#dashboard .dashboard-newContent-table > p.wrap > .icon {
     background-position: 0 -57px;
     background-image: url("../images/dashboard_designer_sprite.png");
 }
 
-.dashboardDesigner .dashboardSidebar .dashboard-newContent-text > p.wrap > .icon {
+#dashboard .dashboard-newContent-text > p.wrap > .icon {
     background-position: 0 -87px;
     background-image: url("../images/dashboard_designer_sprite.png");
 }
 
-.dashboardDesigner .dashboardSidebar .dashboard-newContent-webPageView > p.wrap > .icon {
+#dashboard .dashboard-newContent-webPageView > p.wrap > .icon {
     background-position: 0 -115px;
     background-image: url("../images/dashboard_designer_sprite.png");
 }
 
-.dashboardDesigner .dashboardSidebar .dashboard-newContent-image > p.wrap > .icon {
+#dashboard .dashboard-newContent-image > p.wrap > .icon {
     background-position: 0 -148px;
     background-image: url("../images/dashboard_designer_sprite.png");
 }
 
-
-.dashboardDesigner .dashboardSidebar .dashboard-existingContent-adhoc > p.wrap > .icon {
+#dashboard .dashboard-existingContent-adhoc > p.wrap > .icon {
     background-position: 0 -267px;
     background-image: url("../images/dashboard_designer_sprite.png");
 }
 
-.dashboardDesigner .dashboardSidebar .dashboard-existingContent-report > p.wrap > .icon {
+#dashboard .dashboard-existingContent-adhoc-wide > p.wrap > .icon {
+    background-position: -2px -508px;
+    background-image: url("../images/dashboard_designer_sprite.png");
+}
+
+#dashboard .dashboard-existingContent-report > p.wrap > .icon {
     background-position: 0 -298px;
     background-image: url("../images/dashboard_designer_sprite.png");
 }
 
-.dashboardDesigner .dashboardSidebar .dashboard-existingContent-filter > p.wrap > .icon {
+#dashboard .dashboard-existingContent-dashboard > p.wrap > .icon {
+    background-position: -2px -538px;
+    background-image: url("../images/dashboard_designer_sprite.png");
+}
+
+#dashboard .dashboard-existingContent-filter > p.wrap > .icon {
     background-position: 0 -447px;
     background-image: url("../images/dashboard_designer_sprite.png");
 }
 
-.dashboardDesigner .dashboardSidebar .dashboard-existingContent-filter-invisible > p.wrap > .icon {
+#dashboard .dashboard-existingContent-filter-invisible > p.wrap > .icon {
     background-position: 0 -477px;
     background-image: url("../images/dashboard_designer_sprite.png");
 }
 
-.dashboardDesigner .dashboardSidebar .dashboard-existingContent-report.open > p.wrap > .icon {
+#dashboard .dashboard-existingContent-report.open > p.wrap > .icon {
     background-position: 0 -418px;
     background-image: url("../images/dashboard_designer_sprite.png");
 }
 
-.dashboardDesigner .dashboardSidebar .dashboard-existingContent-report.closed > p.wrap > .icon {
+#dashboard .dashboard-existingContent-report.closed > p.wrap > .icon {
     background-position: 0 -388px;
     background-image: url("../images/dashboard_designer_sprite.png");
 }
 
-.dashboardDesigner .dashboardSidebar .dashboard-existingContent-adhoc.open > p.wrap > .icon {
+#dashboard .dashboard-existingContent-adhoc.open > p.wrap > .icon {
     background-position: 0 -358px;
     background-image: url("../images/dashboard_designer_sprite.png");
 }
 
-.dashboardDesigner .dashboardSidebar .dashboard-existingContent-adhoc.closed > p.wrap > .icon {
+#dashboard .dashboard-existingContent-adhoc.closed > p.wrap > .icon {
     background-position: 0 -328px;
     background-image: url("../images/dashboard_designer_sprite.png");
 }
@@ -1026,5 +1122,138 @@ inputControlDialog .dashletNameProperty {
 /*
 
  END OF DASHBOARD CANVAS CSS
+
+*/
+
+
+/*
+
+Dashlet Hyperlink Properties
+
+*/
+
+.hyperlinkParametersContainer {
+    position: relative;
+}
+
+.hyperlinkPropertiesSection {
+    background-color: #fafafa;
+    border: 1px solid #b5b5b5;
+    margin-bottom: 14px;
+    clear: both;
+}
+
+.hyperlinkPropertiesSection .table-container {
+    height: 150px;
+    overflow: auto;
+}
+
+.hyperlinkPropertiesSection .header-container {
+    line-height: 30px;
+    height: 30px;
+    border-bottom: 1px solid #b5b5b5;
+    background: #ecf1f7;
+}
+
+.hyperlinkPropertiesSection .name,
+.hyperlinkPropertiesSection .value,
+.hyperlinkPropertiesSection .actions {
+    float: left;
+}
+
+.hyperlinkPropertiesSection .name {
+    width: 40%;
+}
+
+.hyperlinkPropertiesSection .value {
+    width: 40%;
+}
+
+.hyperlinkPropertiesSection table {
+    background-color: #ffffff;
+    width: 100%;
+    margin-top: -29px;
+}
+
+.hyperlinkPropertiesSection thead th {
+    color: #333333;
+    font-weight: normal;
+    line-height: 28px;
+    padding-left: 10px;
+    text-align: left;
+}
+
+.hyperlinkPropertiesSection thead th > div {
+    position: absolute;
+    top: 0;
+}
+
+.hyperlinkPropertiesSection tbody td {
+    text-align: left;
+    color: #878787;
+    padding-left: 10px;
+    line-height: 28px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    height: 28px;
+}
+
+.hyperlinkPropertiesSection tbody .edit td {
+    height: auto;
+}
+
+.hyperlinkPropertiesSection tbody tr {
+    border-bottom: 1px solid #b5b5b5;
+}
+
+.hyperlinkPropertiesSection .actions {
+    line-height: 0;
+    width: 70px;
+}
+
+.hyperlinkPropertiesSection .action.simple.edit,
+.hyperlinkPropertiesSection .action.simple.delete,
+.hyperlinkPropertiesSection .action.simple.button.save,
+.hyperlinkPropertiesSection .action.simple.button.cancel {
+    background-color: white;
+    margin: 6px 3px 0 3px;
+}
+
+.hyperlinkPropertiesSection .action.simple.button.save {
+    background-position: 0px -239px;
+}
+
+.hyperlinkPropertiesSection .action.simple.button.cancel {
+    background-position: 0px -197px;
+}
+
+.hyperlinkPropertiesSection td input {
+    margin-top: 2px;
+    width: 100%;
+}
+
+.hyperlinkPropertiesSection a.addNewItem {
+    color: #1388d8;
+    border: 1px solid #1388d8;
+    float: right;
+    bottom: 0;
+    cursor: pointer;
+    margin: 12px 5px 5px 8px;
+    text-decoration: none;
+}
+
+.hyperlinkPropertiesSection .warning {
+    margin-bottom: 5px;
+}
+
+.hyperlinkPropertiesSection .button-container {
+    height: 40px;
+    position: relative;
+}
+
+/*
+
+End of Dashlet Hyperlink Properties
 
 */

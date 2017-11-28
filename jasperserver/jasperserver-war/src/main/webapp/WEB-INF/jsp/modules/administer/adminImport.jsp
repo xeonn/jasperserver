@@ -28,7 +28,7 @@
     <t:putAttribute name="pageTitle"><spring:message code="import.import"/></t:putAttribute>
     <t:putAttribute name="bodyID" value="importDataFile"/>
     <t:putAttribute name="bodyClass" value="twoColumn"/>
-    <t:putAttribute name="moduleName" value="admin.import.page"/>
+    <t:putAttribute name="moduleName" value="administer/administerImportMain"/>
 
     <t:putAttribute name="headerContent">
 

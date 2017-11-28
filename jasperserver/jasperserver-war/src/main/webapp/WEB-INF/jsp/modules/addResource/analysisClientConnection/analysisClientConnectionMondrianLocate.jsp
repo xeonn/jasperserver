@@ -28,7 +28,7 @@
     <t:putAttribute name="bodyID" value="addResource_locateDatatype"/>
 
     <t:putAttribute name="bodyClass" value="oneColumn flow wizard"/>
-    <t:putAttribute name="moduleName" value="locateMondrianConnectionSource.page"/>
+    <t:putAttribute name="moduleName" value="addResource/analysisClientConnection/locateMondrianConnectionSourceMain"/>
 
     <t:putAttribute name="bodyContent">
     	<form method="post" id="mon" >
@@ -43,7 +43,7 @@
             <t:putAttribute name="swipeScroll" value="${isIPad}"/>
 
             <t:putAttribute name="bodyContent">
-                
+
                 <div id="flowControls"></div>
                 <div id="stepDisplay">
                     <fieldset class="row instructions">

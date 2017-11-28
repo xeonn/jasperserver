@@ -35,13 +35,13 @@
 		</style>
     </t:putAttribute>
     <t:putAttribute name="bodyContent" >
-	
+
 		<t:insertTemplate template="/WEB-INF/jsp/templates/container.jsp">
 		    <t:putAttribute name="containerClass" value="column decorated primary"/>
 		    <t:putAttribute name="containerTitle"><spring:message code="JIF.titlelists"/></t:putAttribute>
 		    <t:putAttribute name="bodyClass" value="oneColumn"/>
 		    <t:putAttribute name="bodyContent" >
-	        
+
 				<table id="sampleGrid">
 	        		<thead>
 		        		<tr>
@@ -57,14 +57,14 @@
 		        		<tr>
 		        			<th class="rowHeader"></th>
 		        			<td class="example">
-	        		
+
 	        					<ul class="list horizontal">
 									<li>Item</li>
 									<li>Item</li>
 									<li>Item</li>
 									<li class="last">Last Item</li>
 								</ul>
-								
+
 	        				</td>
 		        		</tr>
 	        		</tbody>
@@ -76,14 +76,14 @@
 		        		<tr>
 		        			<th class="rowHeader"></th>
 		        			<td class="example">
-	        		
+
 	        					<ul class="list decorated">
 									<li>Download the <a class="emphasis" href="lists.jsp#">Evaluation Guide</a></li>
 									<li>Visit our Service and <a class="emphasis" href="lists.jsp#">Support Portal</a> (login required)</li>
 									<li>Browse our Online <a class="emphasis" href="lists.jsp#">Resource Center</a></li>
 									<li>Sign up for <a class="emphasis" href="lists.jsp#">Online and Onsite Training</a></li>
 								</ul>
-								
+
 	        				</td>
 		        		</tr>
 	        		</tbody>
@@ -95,7 +95,7 @@
 		        		<tr>
 		        			<th class="rowHeader"></th>
 		        			<td class="example">
-	        		
+
 	        					<ul class="list stepIndicator">
 									<li class="leaf"><p class="wrap button" href="#"><b class="icon"></b>Step 1</p></li>
 									<li class="leaf"><p class="wrap button" href="#"><b class="icon"></b>Step 2</p>
@@ -108,7 +108,7 @@
 									<li class="leaf"><p class="wrap button" href="#"><b class="icon"></b>Step 3</p></li>
 									<li class="leaf"><p class="wrap button" href="#"><b class="icon"></b>Step 4</p></li>
 								</ul>
-								
+
 	        				</td>
 		        		</tr>
 	        		</tbody>
@@ -208,7 +208,7 @@
 										</ul>
 									</li>
 								</ul>
-			        			
+
 		        			</td>
 		        		</tr>
 	        		</tbody>
@@ -299,7 +299,7 @@
 								</ul>
 							</li><!--/root-->
 						</ul>
-			        			
+
 		        			</td>
 		        		</tr>
 	        		</tbody>
@@ -329,16 +329,16 @@
 																	<li class="leaf item"><p class="wrap button"><b class="icon"></b>First Name</p></li>
 																	<li class="leaf item"><p class="wrap button"><b class="icon"></b>Last Name</p></li>
 																	<li class="leaf item"><p class="wrap button"><b class="icon"></b>Title</p></li>
-																</ul>	
+																</ul>
 															</li>
 															<li class="node closed set"><p class="wrap button"><b class="icon"></b>Eastern Sales</p>
 																<ul class="list collapsible">
 																	<li class="leaf item"><p class="wrap button"><b class="icon"></b>First Name</p></li>
 																	<li class="leaf item"><p class="wrap button"><b class="icon"></b>Last Name</p></li>
 																	<li class="leaf item"><p class="wrap button"><b class="icon"></b>Title</p></li>
-																</ul>	
+																</ul>
 															</li>
-														</ul>	
+														</ul>
 
 													</li>
 												</ul>
@@ -370,14 +370,14 @@
 													<li class="leaf"><div class="wrap button"><b class="icon"></b><p class="column one">Account State</p><p class="column two">Account Name</p></div></li>
 													<li class="leaf"><div class="wrap button"><b class="icon"></b><p class="column one">Account Zip</p><p class="column two">Account Name</p></div></li>
 													<li class="leaf"><div class="wrap button"><b class="icon"></b><p class="column one">Account Industry</p><p class="column two">Account Name</p></div></li>
-												</ul>	
+												</ul>
 											</li>
 											<li class="node closed"><div class="wrap button"><b class="icon"></b><p class="column one">Sales</p><p class="column two">Account Name</p></div>
 												<ul class="list collapsible fields">
 													<li class="leaf"><div class="wrap button"><b class="icon"></b><p class="column one">First Name</p><p class="column two">Account Name</p></div></li>
 													<li class="leaf"><div class="wrap button"><b class="icon"></b><p class="column one">Last Name</p><p class="column two">Account Name</p></div></li>
 													<li class="leaf"><div class="wrap button"><b class="icon"></b><p class="column one">Title</p><p class="column two">Account Name</p></div></li>
-												</ul>	
+												</ul>
 											</li>
 										</ul>
 									</li>
@@ -393,7 +393,7 @@
 		        		<tr>
 		        			<th class="rowHeader"></th>
 		        			<td class="example">
-						     	<ol class="list tabular">							
+						     	<ol class="list tabular">
 						<li class="leaf">
 							<div class="wrap header">
 								<div class="column one">
@@ -415,7 +415,7 @@
 									Next Run
 								</div>
 								<div class="column seven">
-									
+
 								</div>
 							</div>
 						</li>
@@ -529,26 +529,26 @@
 											</div>
 										</div>
 									</li>
-									
+
 									<li class="node open">
 										<div class="wrap button button">
 											<div class="column one">
 												<div class="scheduled icon button noBubble"></div>
-												<div class="disclosure icon button noBubble"></div>	
+												<div class="disclosure icon button noBubble"></div>
 											</div>
 											<div class="column two">
 												<h3 class="resourceName"><a>Cascading multi select example report</a></h3>
 												<p class="resourceDescription">Example report with Cascading multi select input controls</p>
 												<p class="resourcePath">/reports/samples</p>
 											</div>
-										
+
 											<div class="column three">
 												<spring:message code="Report"/>
 											</div>
 											<div class="column four">
 												<p class="modifiedDate" title="Last modified: 2/25/10 8:17AM">Today</p>
 											</div>
-										</div>	
+										</div>
 										<ol class="list tabular responsive resources twoColumn">
 											<li class="leaf scheduled">
 												<div class="wrap button button">
@@ -574,30 +574,30 @@
 											</li>
 										</ol>
 									</li>
-									
+
 									<li class="leaf">
 										<div class="wrap button button">
 											<div class="column one">
 												<div class="scheduled icon button noBubble"></div>
 												<div class="disclosure icon button noBubble"></div>
-											</div> 
+											</div>
 											<div class="column two">
 												<h3 class="resourceName"><a>Cascading multi select topic</a></h3>
 												<p class="resourceDescription">Shows cascading input controls. Multi-select and single select queries</p>
 												<p class="resourcePath">/adhoc/topics</p>
 											</div>
-											
+
 											<div class="column three">
 												<spring:message code="Report"/>
 											</div>
 											<div class="column four">
 												<p class="modifiedDate" title="Last modified: 2/25/10 8:17AM">Today</p>
 											</div>
-										</div>	
+										</div>
 									</li>
-									
-								</ol>						     	
-						     	
+
+								</ol>
+
 		        			</td>
 		        		</tr>
 	        		</tbody>
@@ -610,7 +610,7 @@
 		        			<th class="rowHeader"></th>
 		        			<td class="example">
 								<div class="wrap dragging"><spring:message code="JIF.labelobjectname"/></div>
-								
+
 	        				</td>
 		        		</tr>
 	        		</tbody>
@@ -622,24 +622,24 @@
 		        		<tr>
 		        			<th class="rowHeader"></th>
 		        			<td class="example">
-								<ul class="list dragMultiple dragging">		
+								<ul class="list dragMultiple dragging">
 									<li class="leaf"><div class="wrap"><spring:message code="JIF.labelobjectname"/></div></li>
 									<li class="leaf"><div class="wrap"><spring:message code="JIF.labelobjectname"/></div></li>
 									<li class="leaf"><div class="wrap"><spring:message code="JIF.labelobjectname"/></div></li>
-								</ul>			
+								</ul>
 							</div>
-								
+
 	        				</td>
 		        		</tr>
 	        		</tbody>
  			</table>
-	        
+
 			</t:putAttribute>
 		    <t:putAttribute name="footerContent">
 		    	<!-- custom content here; remove this comment -->
 		    </t:putAttribute>
-		</t:insertTemplate>		
-		
+		</t:insertTemplate>
+
 		<t:insertTemplate template="/WEB-INF/jsp/modules/sample/sampleIndex.jsp"/>
 
     </t:putAttribute>

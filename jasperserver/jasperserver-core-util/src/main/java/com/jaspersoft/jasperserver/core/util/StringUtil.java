@@ -216,8 +216,16 @@ public class StringUtil {
         int k = 0;
         byte[] results = new byte[data.length() / 2];
         for (int i = 0; i < data.length(); ) {
-            results[k] = (byte) (Character.digit(data.charAt(i++), 16) << 4);
-            results[k] += (byte) (Character.digit(data.charAt(i++), 16));
+            final int firstHalf = Character.digit(data.charAt(i++), 16);
+            final int secondHalf = Character.digit(data.charAt(i++), 16);
+
+            if (firstHalf == -1 || secondHalf == -1) {
+                // Not a hexadecimal string
+                throw new RuntimeException("The string passed for decryption was not hexadecimal.");
+            }
+
+            results[k] = (byte) (firstHalf << 4);
+            results[k] += (byte) (secondHalf);
             k++;
         }
         return results;

@@ -35,7 +35,7 @@ import java.util.List;
  *
  * @author Chaim Arbiv
  * @author Yuriy Plakosh
- * @version $Id: QueryModificationEvaluatorImpl.java 61510 2016-03-03 09:36:22Z ykovalch $
+ * @version $Id: QueryModificationEvaluatorImpl.java 62344 2016-04-05 21:19:17Z mchan $
  * @since 4.7
  *
  * @see com.jaspersoft.jasperserver.api.search.QueryModificationEvaluator;
@@ -66,8 +66,9 @@ public class QueryModificationEvaluatorImpl implements QueryModificationEvaluato
                         AccessTypeFilter.ACCESS_TYPE_FILTER_ALL_OPTION);
         }
 
+        RepositorySearchCriteria searchCriteria = getTypedAttribute(context, RepositorySearchCriteria.class);
+
         if (!use){
-            RepositorySearchCriteria searchCriteria = getTypedAttribute(context, RepositorySearchCriteria.class);
             if(searchCriteria != null){
                 final List<SearchFilter> customFilters = searchCriteria.getCustomFilters();
                 use = customFilters != null && (!customFilters.isEmpty()
@@ -78,6 +79,10 @@ public class QueryModificationEvaluatorImpl implements QueryModificationEvaluato
                     use = RepositorySearchService.PARAM_SORT_BY_POPULARITY.equals(searchCriteria.getSortBy());
                 }
             }
+        }
+
+        if (!use){
+            use = searchCriteria != null && (searchCriteria.getFileResourceTypes() != null && !searchCriteria.getFileResourceTypes().isEmpty());
         }
         return use;
     }

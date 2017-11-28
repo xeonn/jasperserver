@@ -20,6 +20,21 @@
  */
 package com.jaspersoft.jasperserver.api.engine.scheduling.domain;
 
+import com.jaspersoft.jasperserver.api.JSException;
+import com.jaspersoft.jasperserver.api.JasperServerAPI;
+import com.jaspersoft.jasperserver.api.engine.scheduling.domain.jaxb.OutputFormatXmlAdapter;
+import com.jaspersoft.jasperserver.api.engine.scheduling.domain.jaxb.TimestampToStringXmlAdapter;
+import com.jaspersoft.jasperserver.api.engine.scheduling.service.ReportSchedulingService;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.ContentResource;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceReference;
+import net.sf.jasperreports.engine.JRParameter;
+import org.apache.commons.lang.StringUtils;
+
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElements;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.GregorianCalendar;
@@ -28,24 +43,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
-
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElements;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-
-import net.sf.jasperreports.engine.JRParameter;
-
-import org.apache.commons.lang.StringUtils;
-
-import com.jaspersoft.jasperserver.api.JSException;
-import com.jaspersoft.jasperserver.api.JasperServerAPI;
-import com.jaspersoft.jasperserver.api.engine.scheduling.domain.jaxb.OutputFormatXmlAdapter;
-import com.jaspersoft.jasperserver.api.engine.scheduling.domain.jaxb.TimestampToStringXmlAdapter;
-import com.jaspersoft.jasperserver.api.engine.scheduling.service.ReportSchedulingService;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.ContentResource;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceReference;
 
 
 /**
@@ -57,7 +54,7 @@ import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceReference;
  * </p>
  * 
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ReportJob.java 58542 2015-10-13 16:16:55Z dgorbenk $
+ * @version $Id: ReportJob.java 63380 2016-05-26 20:56:46Z mchan $
  * @since 1.0
  * @see ReportSchedulingService#scheduleJob(com.jaspersoft.jasperserver.api.common.domain.ExecutionContext, ReportJob)
  */
@@ -169,9 +166,23 @@ public class ReportJob implements Serializable {
 	 * @see #getOutputFormats()
 	 */
 	public static final byte OUTPUT_FORMAT_PPTX = 14;
-	
+
+	/**
+	 * Non paginated PPTX output constant.
+	 *
+	 * @see #getOutputFormats()
+	 */
 	public static final byte OUTPUT_FORMAT_JSON = 15;
-	
+
+
+	/**
+	 * Non paginated PNG output constant.
+	 *
+	 * @see #getOutputFormats()
+	 */
+
+	public static final byte OUTPUT_FORMAT_PNG= 16;
+
 	/**
 	 * Report unit with data snapshot output format.
 	 * 
@@ -638,22 +649,7 @@ public class ReportJob implements Serializable {
 		this.outputLocale = outputLocale;
 	}
 
-    /**
-     * Compares two report jobs
-     *
-     *
-     * @param rj the ReportJob wich compares to this one
-     * @return <code>true</code> if both report jobs are equal
-     */
-    public boolean equals(ReportJob rj) {
-        return
-          this.label.equals(rj.getLabel()) &&
-          this.username.equals(rj.getUsername()) &&
-          this.baseOutputFilename.equals(rj.getBaseOutputFilename()) &&
-          this.trigger.equals(rj.getTrigger());
-    }
-
-    /**
+	/**
      * Looks for {@link  net.sf.jasperreports.engine.JRParameter#REPORT_TIME_ZONE REPORT_TIME_ZONE}
      * and returns ID of the {@link java.util.TimeZone Timezone}.
      * If Timezone parameters is not present, or it is null, return null.
@@ -714,7 +710,8 @@ public class ReportJob implements Serializable {
         }
     }
 
-  /**
+
+	/**
    * Convenience constructor that returns a distinct copy of the input ReportJob.
    * All of the copy's Object members are themselves copies as well.
    * 

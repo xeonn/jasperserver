@@ -23,30 +23,25 @@ package com.jaspersoft.jasperserver.api.engine.scheduling.quartz;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Locale;
-
-import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JRExporterParameter;
-import net.sf.jasperreports.engine.JRPropertiesHolder;
-import net.sf.jasperreports.engine.JasperPrint;
-import net.sf.jasperreports.engine.export.JRHyperlinkProducerFactory;
-import net.sf.jasperreports.engine.export.JsonMetadataExporter;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.quartz.JobExecutionException;
 
 import com.jaspersoft.jasperserver.api.JSExceptionWrapper;
-import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
-import com.jaspersoft.jasperserver.api.engine.common.service.EngineService;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ContentResource;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.DataContainer;
-import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
+
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JRExporterParameter;
+import net.sf.jasperreports.engine.JRPropertiesHolder;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.export.JsonMetadataExporter;
 
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: JsonReportOutput.java 54934 2015-04-30 19:56:16Z lchirita $
+ * @version $Id: JsonReportOutput.java 63380 2016-05-26 20:56:46Z mchan $
  */
 public class JsonReportOutput extends AbstractReportOutput
 {
@@ -61,25 +56,18 @@ public class JsonReportOutput extends AbstractReportOutput
 	 * @see com.jaspersoft.jasperserver.api.engine.scheduling.quartz.Output#getOutput()
 	 */
 	public ReportOutput getOutput(
-			EngineService engineService, 
-			ExecutionContext executionContext, 
-			String reportUnitURI, 
-			DataContainer dataContainer,
-			JRHyperlinkProducerFactory hyperlinkProducerFactory,
-			RepositoryService repositoryService,
-			JasperPrint jasperPrint, 
-			String baseFilename,
-			Locale locale,
-			String characterEncoding) throws JobExecutionException
+			ReportJobContext jobContext,
+			JasperPrint jasperPrint) throws JobExecutionException
 	{
 		try {
 			JsonMetadataExporter exporter = new JsonMetadataExporter(getJasperReportsContext());
 			exporter.setParameter(JRExporterParameter.JASPER_PRINT, jasperPrint);
 			
 			boolean close = false;
+			DataContainer dataContainer = jobContext.createDataContainer(this);
 			OutputStream dataOut = dataContainer.getOutputStream();
 			try {
-				exporter.setParameter(JRExporterParameter.CHARACTER_ENCODING, characterEncoding);
+				exporter.setParameter(JRExporterParameter.CHARACTER_ENCODING, jobContext.getCharacterEncoding());
 				exporter.setParameter(JRExporterParameter.OUTPUT_STREAM, dataOut);
 				
 				exporter.exportReport();
@@ -87,7 +75,7 @@ public class JsonReportOutput extends AbstractReportOutput
 				close = false;
 				dataOut.close();
 
-				String fileName = baseFilename + ".json";
+				String fileName = jobContext.getBaseFilename() + ".json";
 				return new ReportOutput(dataContainer, ContentResource.TYPE_JSON, fileName);
 			} catch (IOException e) {
 				throw new JSExceptionWrapper(e);

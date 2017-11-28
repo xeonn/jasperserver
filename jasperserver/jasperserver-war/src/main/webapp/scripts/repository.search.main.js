@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: repository.search.main.js 8915 2015-05-15 16:44:12Z spriluki $
+ * @version: $Id: repository.search.main.js 10166 2016-05-26 22:39:40Z gbacon $
  */
 
 /* global isIPad, layoutModule, webHelpModule, orgModule, buttonManager, alert, dialogs, JRS,
@@ -299,18 +299,15 @@ function canAllBeCopiedOrMovedToFolder(folder) {
        return resource.parentFolder;
     });
 
-    var allNotInThisFolder = !folderUris.uniq().include(folder.URI);
 
-    var allow = false;
+    var allow = true;
 
     if(folder.isThemeRootFolder() || folder.isThemeFolder()) {
         var allFiles = resources.detect(function(resource) {
            return !resource.resourceType.endsWith(".FileResource");
         }) == null;
 
-        allow = allNotInThisFolder && allFiles;
-    } else {
-        allow = allNotInThisFolder;
+        allow = allFiles;
     }
 
     return allow;
@@ -407,6 +404,7 @@ var repositorySearch = {
         ADHOC_REPORT_UNIT: "com.jaspersoft.ji.adhoc.AdhocReportUnit",
         OLAP_UNIT: "com.jaspersoft.jasperserver.api.metadata.olap.domain.OlapUnit",
         DASHBOARD_RESOURCE: "com.jaspersoft.ji.adhoc.DashboardResource",
+        DASHBOARD: "com.jaspersoft.ji.dashboard.DashboardModelResource",
         REPORT_OPTIONS: "com.jaspersoft.ji.report.options.metadata.ReportOptions",
         REPORT_DATA_SOURCE: "com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportDataSource",
         JDBC_REPORT_DATA_SOURCE: "com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.JdbcReportDataSource",

@@ -28,10 +28,11 @@ import javax.xml.bind.annotation.XmlRootElement;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: FtpConnection.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: FtpConnection.java 62483 2016-04-12 17:26:07Z akasych $
  */
 @XmlRootElement(name = "ftp")
 public class FtpConnection implements ResourceLocation {
+    private String holder;
     private String host;
     private String userName;
     private String password;
@@ -40,12 +41,15 @@ public class FtpConnection implements ResourceLocation {
     private String protocol;
     private Integer port;
     private Boolean implicit;
+    private String sshKey;
+    private String sshPassphrase;
     private String prot;
     private Long pbsz;
 
     public FtpConnection(){}
 
     public FtpConnection(FtpConnection other) {
+        this.holder = other.getHolder();
         this.host = other.getHost();
         this.userName = other.getUserName();
         this.password = other.getPassword();
@@ -56,6 +60,16 @@ public class FtpConnection implements ResourceLocation {
         this.implicit = other.getImplicit();
         this.prot = other.getProt();
         this.pbsz = other.getPbsz();
+        this.sshKey = other.getSshKey();
+        this.sshPassphrase = other.getSshPassphrase();
+    }
+
+    public String getHolder() {
+        return holder;
+    }
+
+    public void setHolder(String holder) {
+        this.holder = holder;
     }
 
     public String getFolderPath() {
@@ -150,6 +164,22 @@ public class FtpConnection implements ResourceLocation {
         return this;
     }
 
+    public String getSshKey() {
+        return sshKey;
+    }
+
+    public void setSshKey(String sshKey) {
+        this.sshKey = sshKey;
+    }
+
+    public String getSshPassphrase() {
+        return sshPassphrase;
+    }
+
+    public void setSshPassphrase(String sshPassphrase) {
+        this.sshPassphrase = sshPassphrase;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -157,6 +187,7 @@ public class FtpConnection implements ResourceLocation {
 
         FtpConnection that = (FtpConnection) o;
 
+        if (holder != null ? !holder.equals(that.holder) : that.holder != null) return false;
         if (folderPath != null ? !folderPath.equals(that.folderPath) : that.folderPath != null) return false;
         if (host != null ? !host.equals(that.host) : that.host != null) return false;
         if (implicit != null ? !implicit.equals(that.implicit) : that.implicit != null) return false;
@@ -167,6 +198,8 @@ public class FtpConnection implements ResourceLocation {
         if (protocol != null ? !protocol.equals(that.protocol) : that.protocol != null) return false;
         if (type != that.type) return false;
         if (userName != null ? !userName.equals(that.userName) : that.userName != null) return false;
+        if (sshKey != null ? !sshKey.equals(that.sshKey) : that.sshKey != null) return false;
+        if (sshPassphrase != null ? !sshPassphrase.equals(that.sshPassphrase) : that.sshPassphrase != null) return false;
 
         return true;
     }
@@ -174,6 +207,7 @@ public class FtpConnection implements ResourceLocation {
     @Override
     public int hashCode() {
         int result = host != null ? host.hashCode() : 0;
+        result = 31 * result + (holder != null ? holder.hashCode() : 0);
         result = 31 * result + (userName != null ? userName.hashCode() : 0);
         result = 31 * result + (password != null ? password.hashCode() : 0);
         result = 31 * result + (folderPath != null ? folderPath.hashCode() : 0);
@@ -183,13 +217,16 @@ public class FtpConnection implements ResourceLocation {
         result = 31 * result + (implicit != null ? implicit.hashCode() : 0);
         result = 31 * result + (prot != null ? prot.hashCode() : 0);
         result = 31 * result + (pbsz != null ? pbsz.hashCode() : 0);
+        result = 31 * result + (sshKey != null ? sshKey.hashCode() : 0);
+        result = 31 * result + (sshPassphrase != null ? sshPassphrase.hashCode() : 0);
         return result;
     }
 
     @Override
     public String toString() {
         return "FtpConnection{" +
-                "host='" + host + '\'' +
+                "holder='" + holder + '\'' +
+                ", host='" + host + '\'' +
                 ", userName='" + userName + '\'' +
                 ", password='" + password + '\'' +
                 ", folderPath='" + folderPath + '\'' +
@@ -199,10 +236,12 @@ public class FtpConnection implements ResourceLocation {
                 ", implicit=" + implicit +
                 ", prot='" + prot + '\'' +
                 ", pbsz=" + pbsz +
+                ", sshKey='" + sshKey + '\'' +
+                ", sshPassphrase='" + sshPassphrase + '\'' +
                 "} " + super.toString();
     }
 
     public enum FtpType{
-        ftp, ftps
+        ftp, ftps, sftp
     }
 }

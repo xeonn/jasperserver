@@ -57,7 +57,7 @@
 <t:putAttribute name="pageTitle"><spring:message code="jsp.viewOlap.title"/></t:putAttribute>
 <t:putAttribute name="bodyID" value="analysisView"/>
 <t:putAttribute name="bodyClass">oneColumn</t:putAttribute>
-<t:putAttribute name="moduleName" value="olap.view.page"/>
+<t:putAttribute name="moduleName" value="olapView/olapViewMain"/>
 <t:putAttribute name="headerContent">
     <meta http-equiv="Content-Type" content="text/html; charset=${requestScope['com.jaspersoft.ji.characterEncoding']}">
     <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/jpivot/table/mdxtable.css">

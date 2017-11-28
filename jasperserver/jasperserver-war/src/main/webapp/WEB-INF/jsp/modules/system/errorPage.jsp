@@ -26,7 +26,7 @@
 <t:insertTemplate template="/WEB-INF/jsp/templates/page.jsp">
     <t:putAttribute name="pageTitle"><spring:message code="jsp.JSErrorPage.title"/></t:putAttribute>
     <t:putAttribute name="bodyID" value="serverError"/>
-    <t:putAttribute name="moduleName" value="errorPage"/>
+    <t:putAttribute name="moduleName" value="system/errorMain"/>
     <t:putAttribute name="bodyClass" value="oneColumn flow"/>
     <t:putAttribute name="bodyContent">
         <t:insertTemplate template="/WEB-INF/jsp/templates/container.jsp">
@@ -78,4 +78,4 @@
     </t:putAttribute>
 </t:insertTemplate>
 
-		
+

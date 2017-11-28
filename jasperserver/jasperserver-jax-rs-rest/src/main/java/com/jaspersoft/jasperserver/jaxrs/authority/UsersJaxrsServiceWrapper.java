@@ -21,6 +21,8 @@
 package com.jaspersoft.jasperserver.jaxrs.authority;
 
 import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
+import com.jaspersoft.jasperserver.api.security.SecurityConfiguration;
+import com.jaspersoft.jasperserver.api.security.encryption.EncryptionManager;
 import com.jaspersoft.jasperserver.dto.authority.ClientAttribute;
 import com.jaspersoft.jasperserver.dto.authority.ClientUser;
 import com.jaspersoft.jasperserver.dto.authority.hypermedia.HypermediaAttributesListWrapper;
@@ -29,10 +31,14 @@ import com.jaspersoft.jasperserver.remote.exception.IllegalParameterValueExcepti
 import com.jaspersoft.jasperserver.remote.exception.RemoteException;
 import com.jaspersoft.jasperserver.remote.helpers.RecipientIdentity;
 import com.jaspersoft.jasperserver.remote.resources.converters.HypermediaOptions;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -48,6 +54,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Providers;
 import java.io.InputStream;
+import java.security.KeyPair;
 import java.util.List;
 import java.util.Set;
 
@@ -102,12 +109,29 @@ public class UsersJaxrsServiceWrapper {
     @Path("/{name}")
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public Response putUser(ClientUser clientUser,
-                            @PathParam("name") String name) throws RemoteException {
-        if (clientUser.getTenantId() != null && clientUser.getTenantId() != ""){
+                            @PathParam("name") String name, @Context HttpServletRequest request) throws RemoteException {
+        if (clientUser.getTenantId() != null && !clientUser.getTenantId().isEmpty()){
             throw new IllegalParameterValueException("tenantId", clientUser.getTenantId());
         }
 
+        clientUser.setPassword(tryDecryptPwdFromJCryption(request, clientUser.getPassword()));
         return service.putUser(clientUser, name, null);
+    }
+
+
+    private String tryDecryptPwdFromJCryption(HttpServletRequest request, String pwd) {
+        if (SecurityConfiguration.isEncryptionOn()) {
+            HttpSession sess = request.getSession();
+            KeyPair keyPair = (KeyPair) sess.getAttribute(EncryptionManager.KEYPAIR_SESSION_KEY);
+
+            if (keyPair != null) {
+                EncryptionManager encMngr = new EncryptionManager();
+                List<String> decList = encMngr.decrypt(keyPair.getPrivate(), pwd);
+                if (decList.size() == 1)
+                    pwd = decList.get(0);
+            }
+        }
+        return pwd;
     }
 
     @DELETE

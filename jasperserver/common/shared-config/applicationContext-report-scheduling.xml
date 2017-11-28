@@ -78,6 +78,8 @@
                 <entry key="engineService" value-ref="engineService"/>
                 <entry key="virtualizerFactory" value-ref="fileVirtualizerFactory"/>
                 <entry key="repositoryService" value-ref="${bean.repositoryService}"/>
+                <entry key="exportDashboardService" value="singletonExportDashboardService"/>
+                <entry key="configurationBeanName" value="configurationBean"/>
                 <entry key="mailSender" value-ref="reportSchedulerMailSender"/>
                 <entry key="mailFromAddress" value="${report.scheduler.mail.sender.from}"/>
                 <entry key="loggingService" value-ref="loggingService"/>
@@ -356,7 +358,7 @@
     -->
     </bean>
 
-    <util:map id="jobExportParametersMap">
+    <util:map id="jobExportParametersMap" key-type="java.lang.String">
         <entry key="pdf" value-ref="jobPdfExportParameters"/>
         <entry key="xls" value-ref="jobXlsExportParameters"/>
         <entry key="csv" value-ref="jobCsvExportParameters"/>
@@ -383,6 +385,13 @@
         <entry key="12" value="xlsxNoPag"/>
         <entry key="14" value="pptx"/>
         <entry key="15" value="json"/>
+        <entry key="16" value="png"/>
+    </util:map>
+
+    <!-- Job Editor default values. May be overridden with profile attributes -->
+    <util:map id="reportJobDefaults">
+        <!-- Uncomment next entry and set the required default output folder URI value -->
+        <!-- <entry key="scheduler.job.repositoryDestination.folderURI" value="/job_output" /> -->
     </util:map>
 
 	<bean id="baseReportJobExportOutput" class="com.jaspersoft.jasperserver.api.engine.scheduling.quartz.AbstractReportOutput" 
@@ -401,7 +410,7 @@
         <property name="exportParams" ref="jobXlsExportParameters"/>
     	<property name="compress" value="true"/>
     </bean>
-    <bean id="xlsNoPagOutput" class="com.jaspersoft.jasperserver.api.engine.scheduling.quartz.XlsNoPaginationReportOutput" parent="baseReportJobExportOutput">
+    <bean id="xlsNoPagOutput" class="com.jaspersoft.jasperserver.api.engine.scheduling.quartz.XlsReportOutput" parent="baseReportJobExportOutput">
         <property name="exportParams" ref="jobXlsExportParameters"/>
         <property name="ignorePagination" value="true"/>
     	<property name="compress" value="true"/>
@@ -420,7 +429,7 @@
     <bean id="xlsxOutput" class="com.jaspersoft.jasperserver.api.engine.scheduling.quartz.XlsxReportOutput" parent="baseReportJobExportOutput">
         <property name="exportParams" ref="jobXlsExportParameters"/>
     </bean>
-    <bean id="xlsxNoPagOutput" class="com.jaspersoft.jasperserver.api.engine.scheduling.quartz.XlsxNoPaginationReportOutput" parent="baseReportJobExportOutput">
+    <bean id="xlsxNoPagOutput" class="com.jaspersoft.jasperserver.api.engine.scheduling.quartz.XlsxReportOutput" parent="baseReportJobExportOutput">
         <property name="exportParams" ref="jobXlsExportParameters"/>
         <property name="ignorePagination" value="true"/>
     </bean>

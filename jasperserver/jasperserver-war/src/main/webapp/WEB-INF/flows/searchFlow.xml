@@ -14,6 +14,9 @@
         <transition on="success" to="searchResults"/>
     </action-state>
 
+    <!-- Transitions whose 'on' attributes check for externalContext.nativeRequest.method == 'POST' will happen
+    only if the reqest's http method is POST.  This was done to protect sensitive areas against CSRF attacks.
+    Currently, CSRFGuard only protects POST, PUT, DELETE; we want to avoid all server state changing requests via GET, etc.. -->
     <view-state id="searchResults" view="modules/search/results">
         <on-entry>
             <set name="flowScope.prevForm" value="'searchResults'"/>
@@ -35,17 +38,17 @@
         <transition on="redirect" to="redirect"/>
 
         <!-- Resource transitions. -->
-        <transition on="copyResources" to="copyResources"/>
-        <transition on="moveResources" to="moveResources"/>
-        <transition on="deleteResources" to="deleteResources"/>
-        <transition on="updateResource" to="updateResource"/>
+        <transition on="${currentEvent.id == 'copyResources' and externalContext.nativeRequest.method == 'POST'}" to="copyResources"/>
+        <transition on="${currentEvent.id == 'moveResources' and externalContext.nativeRequest.method == 'POST'}" to="moveResources"/>
+        <transition on="${currentEvent.id == 'deleteResources' and externalContext.nativeRequest.method == 'POST'}" to="deleteResources"/>
+        <transition on="${currentEvent.id == 'updateResource' and externalContext.nativeRequest.method == 'POST'}" to="updateResource"/>
 
         <!-- Folder transitions. -->
-        <transition on="createFolder" to="createFolder"/>
-        <transition on="updateFolder" to="updateFolder"/>
-        <transition on="deleteFolder" to="deleteFolder"/>
-        <transition on="copyFolder" to="copyFolder"/>
-        <transition on="moveFolder" to="moveFolder"/>
+        <transition on="${currentEvent.id == 'createFolder' and externalContext.nativeRequest.method == 'POST'}" to="createFolder"/>
+        <transition on="${currentEvent.id == 'updateFolder' and externalContext.nativeRequest.method == 'POST'}" to="updateFolder"/>
+        <transition on="${currentEvent.id == 'deleteFolder' and externalContext.nativeRequest.method == 'POST'}" to="deleteFolder"/>
+        <transition on="${currentEvent.id == 'copyFolder' and externalContext.nativeRequest.method == 'POST'}" to="copyFolder"/>
+        <transition on="${currentEvent.id == 'moveFolder' and externalContext.nativeRequest.method == 'POST'}" to="moveFolder"/>
 
         <!-- Theme transitions. -->
         <transition on="setActiveTheme" to="setActiveTheme"/>
@@ -64,7 +67,7 @@
         <transition on="permissionBrowse" to="permissionBrowse"/>
         <transition on="permissionSearch" to="permissionSearch"/>
         <transition on="permissionNext" to="permissionNext"/>
-        <transition on="permissionsUpdate" to="permissionsUpdate"/>
+        <transition on="${currentEvent.id == 'permissionsUpdate' and externalContext.nativeRequest.method == 'POST'}" to="permissionsUpdate"/>
     </view-state>
 
     <!-- Search actions. -->

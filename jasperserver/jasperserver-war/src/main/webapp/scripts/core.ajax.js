@@ -22,7 +22,7 @@
 
 /**
  *  @author: Angus Croll
- * @version: $Id: core.ajax.js 8685 2015-04-10 14:06:42Z bkolesni $
+ * @version: $Id: core.ajax.js 10130 2016-05-06 21:42:35Z dlitvak $
  */
 
 /* global Hash, errorHandler, dialogs, confirm, serverIsNotResponding, JRS, alert, Builder, copyTable, console,
@@ -41,17 +41,6 @@ var ajax = {};
 //cancel all requests sent before this date (in ms)
 ajax.cancelRequestsBefore;
 ajax.LOADING_ID = "loading";
-
-/* Headers needed by CSRF Guard */
-/* {"<headerName1>":"<headerValue1>", "<headerName2>":"<headerValue2>", ...} */
-ajax.csrfRequestHeaders = new Hash();
-
-/* Set CSRF headers to XmlHttpRequest object */
-ajax.setCsrfHeaders = function(xmlhttp) {
-    ajax.csrfRequestHeaders.each(function(pair) {
-        xmlhttp.setRequestHeader(pair.key, pair.value);
-    });
-};
 
 /**
  *  @class Manages incoming Ajax requests and processes corresponding Ajax responses
@@ -102,7 +91,7 @@ AjaxRequester
             this.xmlhttp.setRequestHeader('Content-Type','application/x-www-form-urlencoded');
             this.xmlhttp.setRequestHeader( "If-Modified-Since", "Sat, 1 Jan 2000 00:00:00 GMT" );
             this.xmlhttp.setRequestHeader("x-requested-with","AJAXRequest");
-            ajax.setCsrfHeaders(this.xmlhttp);
+
 			this.xmlhttp.send(null);
             return true;
         }
@@ -123,7 +112,7 @@ AjaxRequester
             this.xmlhttp.open("POST",this.url,this.async);
             this.xmlhttp.setRequestHeader('Content-Type','application/x-www-form-urlencoded');
             this.xmlhttp.setRequestHeader("x-requested-with","AJAXRequest");
-            ajax.setCsrfHeaders(this.xmlhttp);
+
             this.xmlhttp.send(this.postData);
             return true;
         }

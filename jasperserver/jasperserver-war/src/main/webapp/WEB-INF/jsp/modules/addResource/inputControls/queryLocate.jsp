@@ -27,7 +27,7 @@
     <t:putAttribute name="bodyID" value="addResource_locateQuery"/>
 
     <t:putAttribute name="bodyClass" value="oneColumn flow wizard"/>
-    <t:putAttribute name="moduleName" value="locateQuery.page"/>
+    <t:putAttribute name="moduleName" value="addResource/query/locateQueryMain"/>
 
     <t:putAttribute name="headerContent">
         <jsp:include page="queryLocateState.jsp"/>
@@ -64,7 +64,7 @@
                                                     <div class="control radio">
                                                         <label class="wrap" for="LOCAL" title="<spring:message code='addResources.analysisClient.defineDataSource'/>">
                                                             <spring:message code='addResources.queryLocate.defineQuery' javaScriptEscape='true'/>
-                                                        </label>                                                 
+                                                        </label>
                                                         <input class="" id="LOCAL" type="radio" name="${status.expression}"
                                                                value="LOCAL" <c:if test='${status.value=="LOCAL"}'>checked="true"</c:if>/>
                                                     </div>
@@ -73,7 +73,7 @@
                                                     <div class="control radio complex">
                                                         <label class="wrap" for="CONTENT_REPOSITORY" title="<spring:message code='resource.report.repository'/>">
                                                             <spring:message code='addResources.queryLocate.selectQuery' javaScriptEscape='true'/>
-                                                        </label>                                                   
+                                                        </label>
                                                         <input id="CONTENT_REPOSITORY" name="${status.expression}" type="radio" value="CONTENT_REPOSITORY"
                                                                 <c:if test='${status.value!="LOCAL"}'>checked="true"</c:if> />
                                                     </div>

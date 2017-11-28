@@ -14,9 +14,11 @@ import com.jaspersoft.jasperserver.remote.exception.ResourceNotFoundException;
  */
 public interface CopyMoveOperationStrategy {
 
-    String copyResource(Resource source, Resource destination, boolean overwrite) throws ResourceNotFoundException, AccessDeniedException, ResourceAlreadyExistsException, IllegalParameterValueException;
+    String copyResource(Resource source, Resource destination, boolean overwrite, String renameTo)
+            throws ResourceNotFoundException, AccessDeniedException, ResourceAlreadyExistsException, IllegalParameterValueException;
 
-    String moveResource(Resource source, Resource destination, boolean overwrite) throws ResourceNotFoundException, AccessDeniedException, ResourceAlreadyExistsException, IllegalParameterValueException;
+    String moveResource(Resource source, Resource destination, boolean overwrite, String renameTo)
+            throws ResourceNotFoundException, AccessDeniedException, ResourceAlreadyExistsException, IllegalParameterValueException;
 
 
 }

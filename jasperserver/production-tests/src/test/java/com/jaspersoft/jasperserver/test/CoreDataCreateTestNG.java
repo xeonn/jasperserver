@@ -128,6 +128,8 @@ public class CoreDataCreateTestNG extends BaseServiceSetupTestNG {
         createUsersAndRoles();
         addSchedulerResources();
         createDefaultTheme();
+
+        addDefaultDomainWhitelist();
 	}
     /*
      * create users and roles needed for the core ce data

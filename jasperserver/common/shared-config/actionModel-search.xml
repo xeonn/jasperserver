@@ -60,6 +60,10 @@
                                 className="up"/>
                         <option labelKey="resourceTypes.mongodb.jdbc.config" action="invokeCreate" actionArgs="FileResource@@config"
                                 className="up"/>
+                        <option labelKey="resourceTypes.azure.certificate.file" action="invokeCreate" actionArgs="FileResource@@cer"
+                                className="up"/>
+                        <option labelKey="resourceTypes.secure.file" action="invokeCreate" actionArgs="FileResource@@secureFile"
+                                className="up"/>
                     </selectAction>
 
                     <option labelKey="RM_NEW_RESOURCE_INPUT_CONTROL" action="invokeCreate" actionArgs="InputControl"

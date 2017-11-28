@@ -23,7 +23,6 @@ package com.jaspersoft.jasperserver.remote.connection;
 import com.jaspersoft.jasperserver.dto.common.ResourceLocation;
 import com.jaspersoft.jasperserver.dto.connection.AbstractFileConnection;
 import com.jaspersoft.jasperserver.dto.connection.FtpConnection;
-import com.jaspersoft.jasperserver.dto.connection.TxtFileConnection;
 import com.jaspersoft.jasperserver.remote.exception.IllegalParameterValueException;
 import com.jaspersoft.jasperserver.remote.exception.MandatoryParameterNotFoundException;
 import com.jaspersoft.jasperserver.remote.exception.RemoteException;
@@ -36,13 +35,12 @@ import javax.annotation.Resource;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
-import java.util.UUID;
 
 /**
  * <p></p>
  *
  * @author yaroslav.kovalchyk
- * @version $Id: AbstractFileConnectionStrategy.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: AbstractFileConnectionStrategy.java 62954 2016-05-01 09:49:23Z ykovalch $
  */
 public abstract class AbstractFileConnectionStrategy<FileTypeConnection extends AbstractFileConnection>
         implements ConnectionManagementStrategy<FileTypeConnection>, ConnectionMetadataBuilder<FileTypeConnection>, ConnectionValidator<FileTypeConnection> {
@@ -75,7 +73,7 @@ public abstract class AbstractFileConnectionStrategy<FileTypeConnection extends 
     }
 
     @Override
-    public Object build(FileTypeConnection connection) {
+    public Object build(FileTypeConnection connection, Map<String, String[]> options) {
         InputStream inputStream = null;
         Object metadata = null;
         try {

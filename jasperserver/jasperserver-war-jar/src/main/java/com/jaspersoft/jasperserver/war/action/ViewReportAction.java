@@ -21,52 +21,6 @@
 package com.jaspersoft.jasperserver.war.action;
 
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
-
-import net.sf.jasperreports.engine.JRParameter;
-import net.sf.jasperreports.engine.JRPrintAnchorIndex;
-import net.sf.jasperreports.engine.JRRuntimeException;
-import net.sf.jasperreports.engine.JasperPrint;
-import net.sf.jasperreports.engine.JasperReportsContext;
-import net.sf.jasperreports.engine.ReportContext;
-import net.sf.jasperreports.engine.fill.JRFillInterruptedException;
-import net.sf.jasperreports.web.JRInteractiveException;
-import net.sf.jasperreports.web.JRInteractiveRuntimeException;
-import net.sf.jasperreports.web.actions.AbstractAction;
-import net.sf.jasperreports.web.actions.Action;
-import net.sf.jasperreports.web.actions.MultiAction;
-import net.sf.jasperreports.web.commands.CommandStack;
-import net.sf.jasperreports.web.servlets.AsyncJasperPrintAccessor;
-import net.sf.jasperreports.web.servlets.JasperPrintAccessor;
-import net.sf.jasperreports.web.servlets.ReportExecutionStatus;
-import net.sf.jasperreports.web.servlets.ReportPageStatus;
-import net.sf.jasperreports.web.util.JacksonUtil;
-import net.sf.jasperreports.web.util.WebUtil;
-
-import org.apache.commons.lang.exception.ExceptionUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.json.JSONObject;
-import org.springframework.binding.convert.ConversionExecutionException;
-import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.validation.DataBinder;
-import org.springframework.web.multipart.support.ByteArrayMultipartFileEditor;
-import org.springframework.webflow.context.servlet.ServletExternalContext;
-import org.springframework.webflow.core.collection.MutableAttributeMap;
-import org.springframework.webflow.core.collection.SharedAttributeMap;
-import org.springframework.webflow.execution.Event;
-import org.springframework.webflow.execution.FlowExecutionKey;
-import org.springframework.webflow.execution.RequestContext;
-
 import com.jaspersoft.jasperserver.api.JSShowOnlyErrorMessage;
 import com.jaspersoft.jasperserver.api.JSValidationException;
 import com.jaspersoft.jasperserver.api.common.domain.ValidationErrors;
@@ -88,10 +42,53 @@ import com.jaspersoft.jasperserver.war.action.hyperlinks.HyperlinkProducerFactor
 import com.jaspersoft.jasperserver.war.cascade.InputControlValidationError;
 import com.jaspersoft.jasperserver.war.common.ConfigurationBean;
 import com.jaspersoft.jasperserver.war.util.SessionObjectSerieAccessor;
+import net.sf.jasperreports.engine.JRParameter;
+import net.sf.jasperreports.engine.JRPrintAnchorIndex;
+import net.sf.jasperreports.engine.JRRuntimeException;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReportsContext;
+import net.sf.jasperreports.engine.ReportContext;
+import net.sf.jasperreports.engine.fill.JRFillInterruptedException;
+import net.sf.jasperreports.web.JRInteractiveException;
+import net.sf.jasperreports.web.JRInteractiveRuntimeException;
+import net.sf.jasperreports.web.actions.AbstractAction;
+import net.sf.jasperreports.web.actions.Action;
+import net.sf.jasperreports.web.actions.MultiAction;
+import net.sf.jasperreports.web.commands.CommandStack;
+import net.sf.jasperreports.web.servlets.AsyncJasperPrintAccessor;
+import net.sf.jasperreports.web.servlets.JasperPrintAccessor;
+import net.sf.jasperreports.web.servlets.ReportExecutionStatus;
+import net.sf.jasperreports.web.servlets.ReportPageStatus;
+import net.sf.jasperreports.web.util.JacksonUtil;
+import net.sf.jasperreports.web.util.WebUtil;
+import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.json.JSONObject;
+import org.springframework.binding.convert.ConversionExecutionException;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.validation.DataBinder;
+import org.springframework.web.multipart.support.ByteArrayMultipartFileEditor;
+import org.springframework.webflow.context.servlet.ServletExternalContext;
+import org.springframework.webflow.core.collection.MutableAttributeMap;
+import org.springframework.webflow.core.collection.SharedAttributeMap;
+import org.springframework.webflow.execution.Event;
+import org.springframework.webflow.execution.FlowExecutionKey;
+import org.springframework.webflow.execution.RequestContext;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Ionut Nedelcu (ionutned@users.sourceforge.net)
- * @version $Id: ViewReportAction.java 54728 2015-04-24 15:28:20Z tdanciu $
+ * @version $Id: ViewReportAction.java 62954 2016-05-01 09:49:23Z ykovalch $
  */
 public class ViewReportAction extends ReportParametersAction
 {

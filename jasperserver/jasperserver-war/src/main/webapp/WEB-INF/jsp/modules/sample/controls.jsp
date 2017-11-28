@@ -35,13 +35,13 @@
 		</style>
     </t:putAttribute>
     <t:putAttribute name="bodyContent" >
-	
+
 		<t:insertTemplate template="/WEB-INF/jsp/templates/container.jsp">
 		    <t:putAttribute name="containerClass" value="column decorated primary"/>
 		    <t:putAttribute name="containerTitle"><spring:message code="JIF.titlecontrols"/></t:putAttribute>
 		    <t:putAttribute name="bodyClass" value="oneColumn"/>
 		    <t:putAttribute name="bodyContent" >
-	        
+
 			<table id="sampleGrid">
 				        		<thead>
 					        		<tr>
@@ -325,7 +325,7 @@
 												<label class="control select multiple selectedValues" for="" title="Selected Values">
 													<span class="wrap"><spring:message code="JIF.labelselectedvalues"/>:</span>
 													<select multiple="multiple">
-													    
+
 													</select>
 													<span class="message warning">error message here</span>
 												</label>
@@ -333,9 +333,9 @@
 				        				</td>
 					        		</tr>
 				        		</tbody>
-				        		
-				        		
-				        		
+
+
+
 				        		<tbody>
 					        		<tr>
 					        			<th class="rowHeader">.control.combo</th>
@@ -382,7 +382,7 @@
 					        		</tr>
 					        		<tr>
 					        			<th class="rowHeader"></th>
-					        			<td class="example">												
+					        			<td class="example">
 	                                            <ul class="tabSet control text horizontal responsive">
 													<li class="label"><p class="wrap">Sort by:</p></li>
 													<li class="tab selected"><p class="wrap button">Name</p></li>
@@ -402,7 +402,7 @@
 					        		<tr>
 					        			<th class="rowHeader"></th>
 					        			<td class="example">
-											
+
                                             <div class="tabs">
 											<t:insertTemplate template="/WEB-INF/jsp/templates/control_tabSet.jsp">
                                                 <t:putAttribute name="type" value="buttons"/>
@@ -502,7 +502,7 @@
 					        		</tr>
 					        		<tr>
 					        			<th class="rowHeader"></th>
-					        			<td class="example">        					
+					        			<td class="example">
                                             <t:insertTemplate template="/WEB-INF/jsp/templates/container.jsp">
 												<t:putAttribute name="containerClass" value="control groupBox"/>
                                                 <t:putAttribute name="bodyContent">
@@ -510,7 +510,7 @@
                                                 </t:putAttribute>
                                             </t:insertTemplate>
 					        			</td>
-					        			<td class="example">        					
+					        			<td class="example">
 
                                             <t:insertTemplate template="/WEB-INF/jsp/templates/container.jsp">
 												<t:putAttribute name="containerClass" value="control groupBox fillParent"/>
@@ -548,13 +548,13 @@
 				        		</tbody>
 
 			 			</table>
-	        
+
 			</t:putAttribute>
 		    <t:putAttribute name="footerContent">
 		    	<!-- custom content here; remove this comment -->
 		    </t:putAttribute>
-		</t:insertTemplate>		
-		
+		</t:insertTemplate>
+
 		<t:insertTemplate template="/WEB-INF/jsp/modules/sample/sampleIndex.jsp"/>
 
 <!--<script>-->
@@ -575,6 +575,6 @@
 
 </t:insertTemplate>
 
-	
-			  
+
+
 

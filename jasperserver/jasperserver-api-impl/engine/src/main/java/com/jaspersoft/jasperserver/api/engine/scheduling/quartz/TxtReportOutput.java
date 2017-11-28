@@ -23,34 +23,29 @@ package com.jaspersoft.jasperserver.api.engine.scheduling.quartz;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Locale;
-
-import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JRPropertiesHolder;
-import net.sf.jasperreports.engine.JRPropertiesUtil;
-import net.sf.jasperreports.engine.JasperPrint;
-import net.sf.jasperreports.engine.export.JRHyperlinkProducerFactory;
-import net.sf.jasperreports.engine.export.JRTextExporter;
-import net.sf.jasperreports.export.SimpleExporterInput;
-import net.sf.jasperreports.export.SimpleTextReportConfiguration;
-import net.sf.jasperreports.export.SimpleWriterExporterOutput;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.quartz.JobExecutionException;
 
 import com.jaspersoft.jasperserver.api.JSExceptionWrapper;
-import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
-import com.jaspersoft.jasperserver.api.engine.common.service.EngineService;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.common.TxtExportParametersBean;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ContentResource;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.DataContainer;
-import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
+
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JRPropertiesHolder;
+import net.sf.jasperreports.engine.JRPropertiesUtil;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.export.JRTextExporter;
+import net.sf.jasperreports.export.SimpleExporterInput;
+import net.sf.jasperreports.export.SimpleTextReportConfiguration;
+import net.sf.jasperreports.export.SimpleWriterExporterOutput;
 
 
 /**
  * @author sanda zaharia (shertage@users.sourceforge.net)
- * @version $Id: TxtReportOutput.java 54728 2015-04-24 15:28:20Z tdanciu $
+ * @version $Id: TxtReportOutput.java 63380 2016-05-26 20:56:46Z mchan $
  */
 public class TxtReportOutput extends AbstractReportOutput
 {
@@ -66,25 +61,18 @@ public class TxtReportOutput extends AbstractReportOutput
 	 * @see com.jaspersoft.jasperserver.api.engine.scheduling.quartz.Output#getOutput()
 	 */
 	public ReportOutput getOutput(
-			EngineService engineService, 
-			ExecutionContext executionContext, 
-			String reportUnitURI, 
-			DataContainer txtData,
-			JRHyperlinkProducerFactory hyperlinkProducerFactory,
-			RepositoryService repositoryService,
-			JasperPrint jasperPrint, 
-			String baseFilename,
-			Locale locale,
-			String characterEncoding) throws JobExecutionException
+			ReportJobContext jobContext,
+			JasperPrint jasperPrint) throws JobExecutionException
 	{
 		try {
 			JRTextExporter exporter = new JRTextExporter(getJasperReportsContext());
             exporter.setExporterInput(new SimpleExporterInput(jasperPrint));
 			
 			boolean close = false;
+			DataContainer txtData = jobContext.createDataContainer(this);
 			OutputStream txtDataOut = txtData.getOutputStream();
 			try {
-	            SimpleWriterExporterOutput exporterOutput = new SimpleWriterExporterOutput(txtDataOut, characterEncoding);
+	            SimpleWriterExporterOutput exporterOutput = new SimpleWriterExporterOutput(txtDataOut, jobContext.getCharacterEncoding());
 	            exporter.setExporterOutput(exporterOutput);
 				
 				if(exportParams != null)
@@ -101,7 +89,7 @@ public class TxtReportOutput extends AbstractReportOutput
 				close = false;
 				txtDataOut.close();
 
-				String fileName = baseFilename + ".txt";
+				String fileName = jobContext.getBaseFilename() + ".txt";
 				return new ReportOutput(txtData, ContentResource.TYPE_TXT, fileName);
 			} catch (IOException e) {
 				throw new JSExceptionWrapper(e);

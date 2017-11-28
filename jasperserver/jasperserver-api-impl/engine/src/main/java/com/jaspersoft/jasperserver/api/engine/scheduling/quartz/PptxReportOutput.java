@@ -23,34 +23,29 @@ package com.jaspersoft.jasperserver.api.engine.scheduling.quartz;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Locale;
-
-import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JRPropertiesHolder;
-import net.sf.jasperreports.engine.JRPropertiesUtil;
-import net.sf.jasperreports.engine.JasperPrint;
-import net.sf.jasperreports.engine.export.JRHyperlinkProducerFactory;
-import net.sf.jasperreports.engine.export.ooxml.JRPptxExporter;
-import net.sf.jasperreports.export.SimpleExporterInput;
-import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
-import net.sf.jasperreports.export.SimplePptxReportConfiguration;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.quartz.JobExecutionException;
 
 import com.jaspersoft.jasperserver.api.JSExceptionWrapper;
-import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
-import com.jaspersoft.jasperserver.api.engine.common.service.EngineService;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.common.PptxExportParametersBean;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ContentResource;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.DataContainer;
-import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
+
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JRPropertiesHolder;
+import net.sf.jasperreports.engine.JRPropertiesUtil;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.export.ooxml.JRPptxExporter;
+import net.sf.jasperreports.export.SimpleExporterInput;
+import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
+import net.sf.jasperreports.export.SimplePptxReportConfiguration;
 
 
 /**
  * @author sanda zaharia (shertage@users.sourceforge.net)
- * @version $Id: PptxReportOutput.java 51369 2014-11-12 13:59:41Z sergey.prilukin $
+ * @version $Id: PptxReportOutput.java 63380 2016-05-26 20:56:46Z mchan $
  */
 public class PptxReportOutput extends AbstractReportOutput
 {
@@ -66,16 +61,8 @@ public class PptxReportOutput extends AbstractReportOutput
 	 * @see com.jaspersoft.jasperserver.api.engine.scheduling.quartz.Output#getOutput()
 	 */
 	public ReportOutput getOutput(
-			EngineService engineService, 
-			ExecutionContext executionContext, 
-			String reportUnitURI, 
-			DataContainer pptxData,
-			JRHyperlinkProducerFactory hyperlinkProducerFactory,
-			RepositoryService repositoryService,
-			JasperPrint jasperPrint, 
-			String baseFilename,
-			Locale locale,
-			String characterEncoding) throws JobExecutionException
+			ReportJobContext jobContext,
+			JasperPrint jasperPrint) throws JobExecutionException
 	{
 		try {
 			JRPptxExporter exporter = new JRPptxExporter(getJasperReportsContext());
@@ -83,6 +70,7 @@ public class PptxReportOutput extends AbstractReportOutput
 			
 			
 			boolean close = false;
+			DataContainer pptxData = jobContext.createDataContainer(this);
 			OutputStream pptxDataOut = pptxData.getOutputStream();
 			try {
 				exporter.setExporterOutput(new SimpleOutputStreamExporterOutput(pptxDataOut));
@@ -100,7 +88,7 @@ public class PptxReportOutput extends AbstractReportOutput
 				close = false;
 				pptxDataOut.close();
 				
-				String filename = baseFilename + "." + getFileExtension();
+				String filename = jobContext.getBaseFilename() + "." + getFileExtension();
 				return new ReportOutput(pptxData, ContentResource.TYPE_PPTX, filename);
 			} catch (IOException e) {
 				throw new JSExceptionWrapper(e);

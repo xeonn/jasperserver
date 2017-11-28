@@ -12,11 +12,6 @@ requirejs.config(
     },
     stdnav: {
     
-    },
-    i18n: {
-      paths: {
-        'js-sdk': 'bower_components/js-sdk'
-      }
     }
   },
   paths: {
@@ -29,9 +24,9 @@ requirejs.config(
     'backbone.validation.original': 'bower_components/backbone-validation/dist/backbone-validation-amd',
     jquery: 'bower_components/jquery/dist/jquery',
     'lodash.custom': 'bower_components/lodash.custom/dist/lodash.custom',
-    json3: 'bower_components/json3/lib/json3',
     xregexp: 'bower_components/xregexp/xregexp-all',
     moment: 'bower_components/moment/moment',
+    momentTimezone: 'bower_components/moment-timezone/builds/moment-timezone-with-data',
     domReady: 'bower_components/requirejs-domready/domReady',
     xdm: 'bower_components/xdm/artifacts/v2.4.19/easyXDM.jasper',
     base64: 'bower_components/js-base64/base64',
@@ -64,12 +59,10 @@ requirejs.config(
     stdnavPluginList: 'bower_components/js-sdk/src/common/stdnav/plugins/stdnavPluginList',
     stdnavPluginTable: 'bower_components/js-sdk/src/common/stdnav/plugins/stdnavPluginTable',
     'jquery-ui-custom-css': 'bower_components/jquery-ui/themes/redmond/jquery-ui-1.10.4-custom.css',
-    common: 'bower_components/js-sdk/src/common',
     fakeXhrFactory: 'transport/fakeXhrFactory',
     'requirejs.plugin.text': 'bower_components/requirejs-text/text',
     mustache: 'bower_components/mustache/mustache',
     prototype: 'bower_components/prototype/dist/prototype',
-    json2: 'bower_components/json2/json2',
     builder: 'bower_components/scriptaculous/src/builder',
     effects: 'bower_components/scriptaculous/src/effects',
     dragdrop: 'bower_components/scriptaculous/src/dragdrop',
@@ -85,16 +78,15 @@ requirejs.config(
     stdnavPluginActionMenu: 'stdnav/plugins/stdnavPluginActionMenu',
     stdnavPluginDynamicList: 'stdnav/plugins/stdnavPluginDynamicList',
     'wcf.scroll': '../wcf/scroller',
-    'csrf.guard': '../JavaScriptServlet?noext',
     'report.global': '../reportresource?resource=net/sf/jasperreports/web/servlets/resources/jasperreports-global.js',
     ReportRequireJsConfig: '../getRequirejsConfig.html?noext',
     'jquery.timepicker.original': 'bower_components/jquery.timepicker.addon/dist/jquery-ui-timepicker-addon',
     async: 'bower_components/requirejs-plugins/src/async',
     settings: 'plugin/settings',
     restResource: 'plugin/restResource',
+    common: 'bower_components/js-sdk/src/common',
     'bi/report': 'bower_components/bi-report/src/bi/report',
-    'bi/repo': 'bower_components/bi-repo/src/bi/repo',
-    jasper: 'loader/jasper',
+    'bi/repository': 'bower_components/bi-repository/src/bi/repository',
     'adhoc/chart/highchartsDataMapper': 'bower_components/bi-report/src/adhoc/chart/highchartsDataMapper',
     'adhoc/chart/palette/defaultPalette': 'bower_components/bi-report/src/adhoc/chart/palette/defaultPalette',
     'adhoc/chart/adhocDataProcessor': 'bower_components/bi-report/src/adhoc/chart/adhocDataProcessor',
@@ -127,18 +119,18 @@ requirejs.config(
             }
     },
     'backbone.original': {
-      deps: ['underscore','json3','jquery'],
+      deps: ['underscore','jquery'],
       exports: 'Backbone',
       init: null
+    },
+    momentTimezone: {
+      deps: ['moment']
     },
     base64: {
       exports: 'Base64',
       init: function () {
                 return this.Base64.noConflict();
             }
-    },
-    json3: {
-      exports: 'JSON'
     },
     'jquery.selection': {
       deps: ['jquery'],
@@ -163,14 +155,8 @@ requirejs.config(
       deps: ['jquery','config/datepickerSettings'],
       exports: 'jQuery'
     },
-    jasper: {
-      exports: 'jasper'
-    },
     prototype: {
       exports: '__dollar_sign__'
-    },
-    json2: {
-      exports: 'JSON'
     },
     builder: {
       deps: ['prototype'],
@@ -196,10 +182,6 @@ requirejs.config(
     },
     'wcf.scroll': {
       exports: 'document'
-    },
-    'csrf.guard': {
-      deps: ['core.ajax'],
-      exports: 'window'
     },
     ReportRequireJsConfig: {
       exports: 'window'
@@ -351,7 +333,7 @@ requirejs.config(
       exports: 'JRS.Controls'
     },
     'controls.datatransfer': {
-      deps: ['json3','jquery','controls.core','backbone','controls.dataconverter'],
+      deps: ['jquery','controls.core','backbone','controls.dataconverter'],
       exports: 'JRS.Controls'
     },
     'controls.basecontrol': {
@@ -391,7 +373,7 @@ requirejs.config(
       exports: 'about'
     },
     'dynamicTree.tree': {
-      deps: ['prototype','dragdrop.extra','touchcontroller','utils.common','core.layout','json3'],
+      deps: ['prototype','dragdrop.extra','touchcontroller','utils.common','core.layout'],
       exports: 'dynamicTree'
     },
     'dynamicTree.treenode': {
@@ -475,7 +457,7 @@ requirejs.config(
       exports: 'Options'
     },
     'repository.search.components': {
-      deps: ['repository.search.main','prototype','underscore','utils.common','dynamicTree.utils','tools.infiniteScroll'],
+      deps: ['repository.search.main','prototype','underscore','utils.common','dynamicTree.utils','tools.infiniteScroll','tenantImportExport/export/view/ExportDialogView','tenantImportExport/export/enum/exportTypesEnum'],
       exports: 'GenerateResource'
     },
     'component.repository.search': {
@@ -626,7 +608,7 @@ requirejs.config(
       exports: 'ScheduleOutput'
     },
     'report.schedule.params': {
-      deps: ['prototype','controls.controller','json3'],
+      deps: ['prototype','controls.controller'],
       exports: 'ScheduleParams'
     },
     'datepicker.i18n.en': {
@@ -704,15 +686,15 @@ requirejs.config(
   },
   waitSeconds: 60,
   map: {
+    'scheduler/view/editor/parametersTabView': {
+      'controls.options': 'controls.base'
+    },
     '*': {
-      'settings/localeSettings': 'jrs.configs',
       'jquery.timepicker.addon': 'config/timepickerSettings',
       'jquery.timepicker': 'config/timepickerSettings',
       'settings/dateTimeSettings': 'settings!dateTimeSettings',
+      'settings/localeSettings': 'jrs.configs',
       'settings/generalSettings': 'jrs.configs'
-    },
-    'scheduler/view/editor/parametersTabView': {
-      'controls.options': 'controls.base'
     }
   }
 }

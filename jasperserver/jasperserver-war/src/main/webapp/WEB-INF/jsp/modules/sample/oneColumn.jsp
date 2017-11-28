@@ -43,7 +43,7 @@
 			    	<!-- custom content here; remove this comment -->
 			    </t:putAttribute>
 			</t:insertTemplate>
-		
+
 		</div>
 		<div class=" row">
 			<!-- <div class="sizer horizontal"></div> -->
@@ -58,10 +58,10 @@
 			    	<!-- custom content here; remove this comment -->
 			    </t:putAttribute>
 			</t:insertTemplate>
-		
+
 		</div>
 
-		
+
 	</t:putAttribute>
-		
+
 </t:insertTemplate>

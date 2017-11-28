@@ -20,14 +20,27 @@
  */
 package com.jaspersoft.jasperserver.war.control;
 
+import com.jaspersoft.jasperserver.api.common.domain.impl.ExecutionContextImpl;
 import com.jaspersoft.jasperserver.api.common.util.TimeZoneContextHolder;
 import com.jaspersoft.jasperserver.api.common.util.TimeZonesList;
 import com.jaspersoft.jasperserver.api.engine.scheduling.service.ReportSchedulingService;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportUnit;
+import com.jaspersoft.jasperserver.api.metadata.user.domain.ProfileAttribute;
+import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributeCategory;
+import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributeService;
 import com.jaspersoft.jasperserver.war.common.JasperServerUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.Arrays;
+import java.util.Map;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.multiaction.MultiActionController;
@@ -55,8 +68,10 @@ public class SchedulerController extends MultiActionController {
     private HttpServletRequest request;
 
     private RepositoryService repository;
+    private ProfileAttributeService profileAttributeService;
 
     private boolean enableSaveToHostFS;
+    private Map reportJobDefaults = new HashMap();
 
     private static final String LICENSE_MANAGER = "com.jaspersoft.ji.license.LicenseManager";
     private String enableDataSnapshot;
@@ -71,6 +86,7 @@ public class SchedulerController extends MultiActionController {
 
         mav.addObject("enableSaveToHostFS", getEnableSaveToHostFS());
         mav.addObject("enableDataSnapshot", getEnableDataSnapshot());
+        mav.addObject("reportJobDefaults", new JSONObject(getResolvedReportJobDefaults()));
         mav.addObject("controlsDisplayForm", getParametersForm(getReportUri(request)));
 
         return mav;
@@ -91,8 +107,13 @@ public class SchedulerController extends MultiActionController {
             return null;
         }
 
-        ReportUnit reportUnit = (ReportUnit) repository.getResource(JasperServerUtil.getExecutionContext(), reportUnitUri);
-        return reportUnit.getInputControlRenderingView();
+        Resource reportUnit = repository.getResource(JasperServerUtil.getExecutionContext(), reportUnitUri);
+
+        if (reportUnit instanceof ReportUnit){
+            return ((ReportUnit)reportUnit).getInputControlRenderingView();
+        }
+
+        return null;
     }
 
     public ReportSchedulingService getScheduler() {
@@ -121,6 +142,36 @@ public class SchedulerController extends MultiActionController {
         }
         return isPro;
     }
+
+    private Map getResolvedReportJobDefaults() {
+        Map<String, String> resolvedDefaults = new HashMap<String, String>();
+
+        // SUPPORTED_JOB_FIELDS: list of attribute names for supported of Report Job Model fields defaults.
+        final Set<String> SUPPORTED_JOB_FIELDS = new HashSet<String>(Arrays.asList(new String[]{
+                "scheduler.job.repositoryDestination.folderURI"
+        }));
+
+        // resolve from xml config first
+        if (reportJobDefaults != null && !reportJobDefaults.isEmpty()) {
+            for (String field : SUPPORTED_JOB_FIELDS) {
+                if (reportJobDefaults.containsKey(field)) {
+                    resolvedDefaults.put(field, (String) reportJobDefaults.get(field));
+                }
+            }
+        }
+
+        // Resolve from current user profile attributes
+        List<ProfileAttribute> allUserAttributes = profileAttributeService.
+                getCurrentUserProfileAttributes(ExecutionContextImpl.getRuntimeExecutionContext(), ProfileAttributeCategory.HIERARCHICAL);
+        for (ProfileAttribute attr : allUserAttributes) {
+            if (SUPPORTED_JOB_FIELDS.contains(attr.getAttrName())) {
+                resolvedDefaults.put(attr.getAttrName(), attr.getAttrValue());
+            }
+        }
+
+        return resolvedDefaults;
+    }
+
 
     public TimeZonesList getTimezones()
     {
@@ -152,7 +203,20 @@ public class SchedulerController extends MultiActionController {
         return enableDataSnapshot;
     }
 
+    public Map getReportJobDefaults() {
+        return reportJobDefaults;
+    }
+
+    public void setReportJobDefaults(Map reportJobDefaults) {
+        this.reportJobDefaults = reportJobDefaults;
+    }
+
     public void setRepository(RepositoryService repository) {
         this.repository = repository;
     }
+
+    public void setProfileAttributeService(ProfileAttributeService profileAttributeService) {
+        this.profileAttributeService = profileAttributeService;
+    }
+
 }

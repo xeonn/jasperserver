@@ -132,7 +132,7 @@ public class MongoDbDataSourceDefinition extends DataAdapterDefinition {
             jrquery.setText(query);
             jrquery.setLanguage("MongoDbQuery");
             designDataset.setQuery(jrquery);
-            return MongoDbFieldsProvider.getInstance().getFields(DataAdapterDefinitionUtil.getJasperReportsContext(), designDataset, fillParams, mongoDbConnection);
+            return MongoDbFieldsProvider.getInstance().getFields(getJasperReportsContext(), designDataset, fillParams, mongoDbConnection);
     }
 
     private static Set supportedTypeSet;

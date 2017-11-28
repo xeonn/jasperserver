@@ -22,7 +22,7 @@
 
 /**
  * @author: Kostiantyn Tsaregradskyi
- * @version: $Id: tenantTree.js 9602 2015-10-29 14:06:10Z ztomchen $
+ * @version: $Id: tenantTree.js 10092 2016-04-22 21:17:02Z inestere $
  */
 
 define(function(require) {
@@ -31,7 +31,6 @@ define(function(require) {
     var Tree = require('common/component/tree/Tree'),
         $ = require("jquery"),
         _ = require("underscore"),
-        json3 = require("json3"),
         TreeDataLayer = require('common/component/tree/TreeDataLayer'),
         TooltipTreePlugin = require('common/component/tree/plugin/TooltipPlugin'),
         ContextMenuTreePlugin = require("common/component/tree/plugin/ContextMenuTreePlugin"),
@@ -90,7 +89,7 @@ define(function(require) {
                         dataUriTemplate: jrsConfigs.contextPath + "/flow.html?_flowId=treeFlow&method=getNode&provider=tenantTreeFoldersProvider&uri=/&prefetch=%2F",
                         processors: [processors.tenantProcessor(options.tenantId)],
                         getDataArray: function(data) {
-                            data = json3.parse($(data).text());
+                            data = JSON.parse($(data).text());
 
                             return [
                                 { id: data.id, tenantName: data.label, tenantUri: "/", resourceType: "folder", _links: {content: "@fakeContentLink"} }

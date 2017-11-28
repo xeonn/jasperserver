@@ -27,6 +27,7 @@ import com.jaspersoft.jasperserver.api.engine.scheduling.domain.ReportJob;
 import com.jaspersoft.jasperserver.api.engine.scheduling.domain.ReportJobIdHolder;
 import com.jaspersoft.jasperserver.api.engine.scheduling.domain.ReportJobRuntimeInformation;
 import com.jaspersoft.jasperserver.api.engine.scheduling.domain.ReportJobSummary;
+import com.jaspersoft.jasperserver.api.engine.scheduling.domain.FTPInfo;
 import com.jaspersoft.jasperserver.api.engine.scheduling.domain.reportjobmodel.ReportJobModel;
 import com.jaspersoft.jasperserver.api.engine.scheduling.service.ReportJobNotFoundException;
 import com.jaspersoft.jasperserver.api.engine.scheduling.service.ReportJobsScheduler;
@@ -49,7 +50,7 @@ import java.util.*;
 
 /**
  * @author Yaroslav.Kovalchyk
- * @version $Id: JobsServiceImpl.java 61296 2016-02-25 21:53:37Z mchan $
+ * @version $Id: JobsServiceImpl.java 62483 2016-04-12 17:26:07Z akasych $
  */
 @Component("jobsService")
 public class JobsServiceImpl implements JobsService {
@@ -76,7 +77,15 @@ public class JobsServiceImpl implements JobsService {
 
 
     public ReportJob getJob(long id) throws RemoteException {
-        return scheduler.getScheduledJob(makeExecutionContext(), id);
+        ReportJob job = scheduler.getScheduledJob(makeExecutionContext(), id);
+
+        // Drop secure fields values and replace them with substitution for sending to client
+        if (job != null) {
+            job.getContentRepositoryDestination().getOutputFTPInfo().setPassword(null);
+            job.getContentRepositoryDestination().getOutputFTPInfo().setSshPassphrase(null);
+        }
+
+        return job;
     }
 
     public ReportJob scheduleJob(ReportJob reportJob) throws RemoteException {
@@ -93,9 +102,38 @@ public class JobsServiceImpl implements JobsService {
     public ReportJob updateJob(ReportJob reportJob) throws RemoteException {
         ExecutionContext executionContext = makeExecutionContext();
         auditHelper.createAuditEvent("updateReportScheduling");
+
+        // If we get the substitution in secure form fields from UI then restore values from the original object (if it exists)
+        if (reportJob.getContentRepositoryDestination() != null && reportJob.getContentRepositoryDestination().getOutputFTPInfo() != null) {
+            FTPInfo ftpInfo = reportJob.getContentRepositoryDestination().getOutputFTPInfo();
+            if (ftpInfo != null && (ftpInfo.getPassword() == null || ftpInfo.getSshPassphrase() == null)) {
+                ReportJob existingJob = scheduler.getScheduledJob(executionContext, reportJob.getId());
+                if (existingJob != null && existingJob.getContentRepositoryDestination() != null &&
+                        existingJob.getContentRepositoryDestination().getOutputFTPInfo() != null) {
+                    // restore password
+                    if (ftpInfo.getPassword() == null) {
+                        ftpInfo.setPassword(existingJob.getContentRepositoryDestination().getOutputFTPInfo().getPassword());
+                    }
+                    // restore passphrase
+                    if (ftpInfo.getSshKey() != null && ftpInfo.getSshPassphrase() == null) {
+                        ftpInfo.setSshPassphrase(existingJob.getContentRepositoryDestination().getOutputFTPInfo().getSshPassphrase());
+                    }
+                }
+            }
+        }
+
         scheduler.updateScheduledJob(executionContext, reportJob);
         auditHelper.closeAuditEvent("updateReportScheduling");
-        return scheduler.getScheduledJob(executionContext, reportJob.getId());
+
+        ReportJob job = scheduler.getScheduledJob(executionContext, reportJob.getId());
+
+        // Drop secure fields values and replace them with substitution for sending to client
+        if (job != null) {
+            job.getContentRepositoryDestination().getOutputFTPInfo().setPassword(null);
+            job.getContentRepositoryDestination().getOutputFTPInfo().setSshPassphrase(null);
+        }
+
+        return job;
     }
 
     public List<ReportJobSummary> getAllJobs() throws RemoteException {

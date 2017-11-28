@@ -32,7 +32,7 @@ define(function(require) {
         jrsConfigs = require("jrs.configs"),
         requestSettings = require("requestSettings"),
 		connectionTypes = require("dataSource/enum/connectionTypes"),
-        repositoryResourceTypes = require("bi/repo/enum/repositoryResourceTypes"),
+        repositoryResourceTypes = require("bi/repository/enum/repositoryResourceTypes"),
         dialogs = require("components.dialogs"),
 		i18n = require("bundle!all"),
         jasperserverConfig = require("bundle!jasperserver_config");

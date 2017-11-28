@@ -25,6 +25,7 @@ import com.jaspersoft.jasperserver.api.common.domain.impl.ExecutionContextImpl;
 import com.jaspersoft.jasperserver.api.engine.common.virtualdatasourcequery.VirtualDataSourceHandler;
 import com.jaspersoft.jasperserver.api.metadata.common.service.JSResourceAcessDeniedException;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.AwsReportDataSource;
+import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.AzureSqlReportDataSource;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.VirtualReportDataSource;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportDataSource;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.service.ReportDataSourceService;
@@ -37,13 +38,15 @@ import java.util.TimeZone;
 
 /**
  * @author Ivan Chan (ichan@jaspersoft.com)
- * @version $Id: VirtualReportDataSourceServiceFactory.java 60730 2016-02-09 19:02:32Z mchan $
+ * @version $Id: VirtualReportDataSourceServiceFactory.java 61605 2016-03-09 07:49:29Z rzhilkib $
  */
 public class VirtualReportDataSourceServiceFactory extends JdbcReportDataSourceServiceFactory {
 
 	private static final Log log = LogFactory.getLog(VirtualReportDataSourceServiceFactory.class);
     VirtualDataSourceHandler virtualDataSourceHandler;
     ReportDataSourceServiceFactory awsDataSourceServiceFactory;
+    ReportDataSourceServiceFactory azureSqlDataSourceServiceFactory;
+
 	public VirtualReportDataSourceServiceFactory() {
 	}
 
@@ -53,6 +56,10 @@ public class VirtualReportDataSourceServiceFactory extends JdbcReportDataSourceS
 
     public void setAwsDataSourceServiceFactory(ReportDataSourceServiceFactory awsDataSourceServiceFactory) {
         this.awsDataSourceServiceFactory = awsDataSourceServiceFactory;
+    }
+
+    public void setAzureSqlDataSourceServiceFactory(ReportDataSourceServiceFactory azureSqlDataSourceServiceFactory) {
+        this.azureSqlDataSourceServiceFactory = azureSqlDataSourceServiceFactory;
     }
 
     public void setVirtualDataSourceHandler(VirtualDataSourceHandler virtualDataSourceHandler) {
@@ -82,6 +89,8 @@ public class VirtualReportDataSourceServiceFactory extends JdbcReportDataSourceS
             // DO NOT use the JDBC data source pooling in JdbcReportDataSourceServiceFactory for JDBC sub data source
             if (dataSource instanceof AwsReportDataSource) {
                 return awsDataSourceServiceFactory.createService(dataSource);
+            } else if (dataSource instanceof AzureSqlReportDataSource) {
+                return azureSqlDataSourceServiceFactory.createService(dataSource);
             } else {
                 return super.createService(dataSource);
             }

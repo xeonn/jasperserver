@@ -27,6 +27,7 @@ import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.JdbcReportD
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.JndiJdbcReportDataSource;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.VirtualReportDataSource;
 import com.jaspersoft.jasperserver.api.metadata.xml.domain.impl.ResourceDescriptor;
+import com.jaspersoft.jasperserver.core.util.XMLUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.MessageSource;
@@ -115,7 +116,13 @@ public class ConfigurationBean
     private boolean defaultDomainDependentsBlockAndUpdate;
     private boolean defaultDontUpdateDomainDependents;
 
+    private String contextPath = null;
+    private Integer localPort = null;
+    
+
     private Long maxFileSize;
+
+    private boolean skipXXECheck;
 
     /**
 	 * @return Returns the reportLevelConfigurable.
@@ -141,6 +148,10 @@ public class ConfigurationBean
                     messages.getMessage(JasperServerConst.TYPE_RSRC_CSS_FILE, null, "CSS File", LocaleContextHolder.getLocale()));
         allTypes.put(FileResource.TYPE_MONGODB_JDBC_CONFIG,
                     messages.getMessage(JasperServerConst.TYPE_RSRC_MONGODB_JDBC_CONFIG, null, "MongoDB JDBC Schema", LocaleContextHolder.getLocale()));
+        allTypes.put(FileResource.TYPE_AZURE_CERTIFICATE,
+                messages.getMessage(JasperServerConst.TYPE_RSRC_AZURE_CERTIFICATE, null, "Azure Certificate", LocaleContextHolder.getLocale()));
+        allTypes.put(FileResource.TYPE_SECURE_FILE,
+                    messages.getMessage(JasperServerConst.TYPE_SECURE_FILE, null, "Secure File", LocaleContextHolder.getLocale()));
         allTypes.put(FileResource.TYPE_FONT,
 					messages.getMessage(JasperServerConst.TYPE_RSRC_FONT, null, "Font", LocaleContextHolder.getLocale()));
         allTypes.put(FileResource.TYPE_IMAGE,
@@ -539,11 +550,35 @@ public class ConfigurationBean
         this.defaultDontUpdateDomainDependents = defaultDontUpdateDomainDependents;
     }
 
+    public String getContextPath() {
+        return contextPath;
+    }
+
+    public void setContextPath(String contextPath) {
+        this.contextPath = contextPath;
+    }
+
+    public Integer getLocalPort() {
+        return localPort;
+    }
+
+    public void setLocalPort(Integer localPort) {
+        this.localPort = localPort;
+    }
     public Long getMaxFileSize() {
         return maxFileSize;
     }
 
     public void setMaxFileSize(Long maxFileSize) {
         this.maxFileSize = maxFileSize;
+    }
+
+    public boolean isSkipXXECheck() {
+        return skipXXECheck;
+    }
+
+    public void setSkipXXECheck(boolean skipXXECheck) {
+        this.skipXXECheck = skipXXECheck;
+        XMLUtil.setSkipXXECheck(skipXXECheck);
     }
 }

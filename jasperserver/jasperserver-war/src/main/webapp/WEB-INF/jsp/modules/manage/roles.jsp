@@ -39,7 +39,7 @@
     </t:putAttribute>
     <t:putAttribute name="bodyID" value="manage_roles"/>
     <t:putAttribute name="bodyClass">${bodyColumnClass} manager</t:putAttribute>
-    <t:putAttribute name="moduleName" value="admin.roles.page"/>
+    <t:putAttribute name="moduleName" value="manage/manageRolesMain"/>
     <t:putAttribute name="headerContent" >
         <jsp:include page="rolesState.jsp"/>
     </t:putAttribute>
@@ -55,7 +55,7 @@
                     <t:putAttribute name="containerID" value="secondarySearchBox"/>
                     <t:putAttribute name="inputID" value="secondarySearchInput"/>
                 </t:insertTemplate>
-                <div class="toolbar"> 
+                <div class="toolbar">
                     <ul class="list buttonSet">
                         <li class="node open">
                             <ul class="list buttonSet">
@@ -78,7 +78,7 @@
             <t:putAttribute name="footerContent">
             </t:putAttribute>
         </t:insertTemplate>
-        
+
 
         <t:insertTemplate template="/WEB-INF/jsp/templates/container.jsp">
             <t:putAttribute name="containerID" value="folders"/>
@@ -105,7 +105,7 @@
                 <button class="button minimize"></button>
             </t:putAttribute>
             <t:putAttribute name="containerTitle"><spring:message code="jsp.userAndRoleManager.properties" javaScriptEscape="true"/></t:putAttribute>
-            <t:putAttribute name="bodyClass" value=""/>   
+            <t:putAttribute name="bodyClass" value=""/>
 
             <t:putAttribute name="bodyContent">
                 <t:insertTemplate template="/WEB-INF/jsp/templates/nothingToDisplay.jsp">
@@ -153,7 +153,7 @@
                             <button id="addToAssigned" class="button action square move right up"><span class="wrap"><b class="icon"></b></span></button>
                             <button id="removeFromAssigned" class="button action square move left up"><span class="wrap"><b class="icon"></b></span></button>
                         </div>
-                            
+
                         <t:insertTemplate template="/WEB-INF/jsp/templates/container.jsp">
                             <t:putAttribute name="containerClass" value="column decorated primary showingSubHeader"/>
                             <t:putAttribute name="containerTitle"><spring:message code="jsp.roleManager.roleEditor.userEditor.assigned" javaScriptEscape="true"/></t:putAttribute>
@@ -167,12 +167,12 @@
                             </t:putAttribute>
 
 
-                            <t:putAttribute name="bodyContent">    
+                            <t:putAttribute name="bodyContent">
                                 <ul id="assignedList"></ul>
                             </t:putAttribute>
-                            
+
                         </t:insertTemplate>
-                        
+
                         <t:insertTemplate template="/WEB-INF/jsp/templates/container.jsp">
                             <t:putAttribute name="containerClass" value="column decorated secondary sizeable showingSubHeader"/>
                             <t:putAttribute name="containerElements">
@@ -186,13 +186,13 @@
                                     <t:insertTemplate template="/WEB-INF/jsp/templates/control_searchLockup.jsp">
 							        	<t:putAttribute name="inputID" value="availableSearchInput"/>
 							        </t:insertTemplate>
-                                </div> 
+                                </div>
                             </t:putAttribute>
 
                             <t:putAttribute name="bodyContent">
                                 <ul id="availableList"></ul>
                             </t:putAttribute>
-                            
+
                         </t:insertTemplate>
                     <!-- end two columns -->
                 </fieldset>
@@ -205,12 +205,12 @@
                 <button id="cancel" type="submit" class="button action up"><span class="wrap"><spring:message code="form.edit.cancel" javaScriptEscape="true"/></span><span class="icon"></span></button>
             </t:putAttribute>
         </t:insertTemplate>
-        
+
         <t:insertTemplate template="/WEB-INF/jsp/templates/addRole.jsp">
             <t:putAttribute name="containerClass" value="hidden"/>
         </t:insertTemplate>
 
 
     </t:putAttribute>
-        
+
 </t:insertTemplate>

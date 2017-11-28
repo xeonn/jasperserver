@@ -60,7 +60,7 @@ FINALLY
 
     -->
     <t:putAttribute name="bodyClass" value="oneColumn flow"/>
-    <t:putAttribute name="moduleName" value="locateQuery.page"/>
+    <t:putAttribute name="moduleName" value="addResource/query/locateQueryMain"/>
 
     <t:putAttribute name="headerContent">
         <jsp:include page="reportStep5State.jsp"/>

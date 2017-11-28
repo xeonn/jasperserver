@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: mng.main.js 9909 2016-02-25 19:56:31Z dgorbenk $
+ * @version: $Id: mng.main.js 10172 2016-05-30 13:16:17Z tbidyuk $
  */
 
 /* global orgModule, isProVersion, alert, _  */
@@ -128,13 +128,11 @@ orgModule.manager = {
         }.bindAsEventListener(this));
 
         orgModule.observe("entity:selectAndGetDetails", function(event) {
-            // Due to complexity of code in mng.common (event flow) there is need to handle some cases in such inappropriate manner
-            // This need to by refactored once mng.common will be refactored in new AMD way + new tree.
             var entityEvent = event.memo.entityEvent,
                 isCtrlHeld = event.memo.isCtrlHeld,
                 cancelIfEdit = event.memo.cancelIfEdit,
                 entities = orgModule.entityList.getSelectedEntities(),
-                refreshAttributes = event.memo.refreshAttributes;
+                refreshAttributes = Boolean(event.memo.refreshAttributes);
 
             if (entities.length > 1) {
                 orgModule.properties.hide();

@@ -32,7 +32,7 @@
      </t:putAttribute>
     <t:putAttribute name="bodyID" value="addResource_AnalysisViewNaming"/>
     <t:putAttribute name="bodyClass" value="oneColumn flow wizard firstStep"/>
-    <t:putAttribute name="moduleName" value="addOLAPView.page"/>
+    <t:putAttribute name="moduleName" value="addResource/analysisView/addOLAPViewMain"/>
 
     <t:putAttribute name="headerContent">
          <jsp:include page="analysisViewNamingState.jsp"/>

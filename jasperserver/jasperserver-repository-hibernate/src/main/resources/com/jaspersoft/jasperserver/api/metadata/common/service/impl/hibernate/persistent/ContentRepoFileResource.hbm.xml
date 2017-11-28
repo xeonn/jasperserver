@@ -9,6 +9,6 @@
 		<key column="id"/>
 		<property name="data" type="com.jaspersoft.hibernate.ByteWrappingBlobType" length="20971520" column="data"
 			lazy="true"/>
-		<property name="fileType" length="20" type="string" column="file_type"/>
+		<property name="contentFileType" length="20" type="string" column="file_type"/>
 	</joined-subclass>
 </hibernate-mapping>

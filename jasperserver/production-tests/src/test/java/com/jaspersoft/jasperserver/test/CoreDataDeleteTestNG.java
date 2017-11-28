@@ -119,6 +119,7 @@ public class CoreDataDeleteTestNG extends BaseServiceSetupTestNG {
 
         deleteDefaultTheme();
         deleteUsersAndRoles();
+        deleteDefaultDomainWhitelist();
         deleteTenantForRoot();
         deleteRootFolder();
 	}

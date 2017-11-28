@@ -20,6 +20,7 @@
  */
 package com.jaspersoft.jasperserver.war.control;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.util.Arrays;
 import java.util.Map;
@@ -27,19 +28,6 @@ import java.util.Map;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JRPrintImage;
-import net.sf.jasperreports.engine.JRWrappingSvgRenderer;
-import net.sf.jasperreports.engine.JasperPrint;
-import net.sf.jasperreports.engine.JasperReportsContext;
-import net.sf.jasperreports.engine.Renderable;
-import net.sf.jasperreports.engine.RenderableUtil;
-import net.sf.jasperreports.engine.export.HtmlExporter;
-import net.sf.jasperreports.engine.type.ImageTypeEnum;
-import net.sf.jasperreports.engine.type.ModeEnum;
-import net.sf.jasperreports.engine.type.OnErrorTypeEnum;
-import net.sf.jasperreports.engine.type.RenderableTypeEnum;
 
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
@@ -50,11 +38,27 @@ import com.jaspersoft.jasperserver.api.JSException;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.domain.impl.ReportUnitResult;
 import com.jaspersoft.jasperserver.war.util.SessionObjectSerieAccessor;
 
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JRPrintImage;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReportsContext;
+import net.sf.jasperreports.engine.export.HtmlExporter;
+import net.sf.jasperreports.engine.type.ImageTypeEnum;
+import net.sf.jasperreports.engine.type.ModeEnum;
+import net.sf.jasperreports.engine.type.OnErrorTypeEnum;
+import net.sf.jasperreports.engine.util.JRImageLoader;
+import net.sf.jasperreports.engine.util.JRTypeSniffer;
+import net.sf.jasperreports.renderers.DataRenderable;
+import net.sf.jasperreports.renderers.Renderable;
+import net.sf.jasperreports.renderers.ResourceRenderer;
+import net.sf.jasperreports.renderers.util.RendererUtil;
+import net.sf.jasperreports.repo.RepositoryUtil;
+
 /**
  * Controller for JasperServer report images.
  * 
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ReportImageController.java 54728 2015-04-24 15:28:20Z tdanciu $
+ * @version $Id: ReportImageController.java 63510 2016-06-06 16:02:13Z tdanciu $
  */
 public class ReportImageController  implements Controller
 {
@@ -106,35 +110,75 @@ public class ReportImageController  implements Controller
 		String imageName = request.getParameter(getImageNameParameter());
 		if ("px".equals(imageName))
 		{
-			Renderable pxRenderer = 
-				RenderableUtil.getInstance(getJasperReportsContext()).getRenderable(
-					"net/sf/jasperreports/engine/images/pixel.GIF",
-					OnErrorTypeEnum.ERROR
-					);
+			imageData = RepositoryUtil.getInstance(getJasperReportsContext()).getBytesFromLocation(JRImageLoader.PIXEL_IMAGE_RESOURCE);
 			imageMimeType = ImageTypeEnum.GIF.getMimeType();
-			imageData = pxRenderer.getImageData(getJasperReportsContext());
 		}
 		else
 		{
 			JRPrintImage image = HtmlExporter.getImage(Arrays.asList(new JasperPrint[]{jasperPrint}), imageName);
 			
-			Renderable renderer = image.getRenderable();
-			if (renderer.getTypeValue() == RenderableTypeEnum.SVG)
+			Renderable renderer = image.getRenderer();
+			
+			Dimension dimension = new Dimension(image.getWidth(), image.getHeight());
+			Color backcolor = ModeEnum.OPAQUE == image.getModeValue() ? image.getBackcolor() : null;
+			
+			RendererUtil rendererUtil = RendererUtil.getInstance(getJasperReportsContext());
+			
+			try
 			{
-				renderer = 
-					new JRWrappingSvgRenderer(
-						renderer, 
-						new Dimension(image.getWidth(), image.getHeight()),
-						ModeEnum.OPAQUE == image.getModeValue() ? image.getBackcolor() : null
-						);
+				imageData = process(renderer, dimension, backcolor);
 			}
-
-			imageMimeType = renderer.getImageTypeValue() == null ? null : renderer.getImageTypeValue().getMimeType();
-			imageData = renderer.getImageData(getJasperReportsContext());
+			catch (Exception e)
+			{
+				try
+				{
+					Renderable onErrorRenderer = rendererUtil.handleImageError(e, image.getOnErrorTypeValue());
+					if (onErrorRenderer != null)
+					{
+						imageData = process(onErrorRenderer, dimension, backcolor);
+					}
+				}
+				catch (Exception ex)
+				{
+					throw new JSException(ex);
+				}
+			}
+			
+			imageMimeType = 
+				rendererUtil.isSvgData(imageData)
+				? RendererUtil.SVG_MIME_TYPE
+				: JRTypeSniffer.getImageTypeValue(imageData).getMimeType();
 		}
 
 		View view = new ImageView(imageMimeType, imageData);
 		return new ModelAndView(view);
+	}
+
+	protected byte[] process(
+		Renderable renderer,
+		Dimension dimension,
+		Color backcolor
+		) throws JRException
+	{
+		RendererUtil rendererUtil = RendererUtil.getInstance(getJasperReportsContext());
+		
+		if (renderer instanceof ResourceRenderer)
+		{
+			renderer = //hard to use a cache here and it would be just for some icon type of images, if any 
+					rendererUtil.getNonLazyRenderable(
+					((ResourceRenderer)renderer).getResourceLocation(), 
+					OnErrorTypeEnum.ERROR
+					);
+		}
+
+		DataRenderable dataRenderer = 
+				rendererUtil.getDataRenderable(
+				renderer,
+				dimension,
+				backcolor
+				);
+		
+		return dataRenderer.getData(getJasperReportsContext());
 	}
 
 	public SessionObjectSerieAccessor getJasperPrintAccessor() {

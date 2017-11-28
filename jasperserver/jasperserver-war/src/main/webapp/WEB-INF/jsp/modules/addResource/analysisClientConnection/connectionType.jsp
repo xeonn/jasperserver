@@ -27,7 +27,7 @@
     <t:putAttribute name="pageTitle">
         <c:set var="editMode" value='${param.isEdit}'/>
         <c:if test="${editMode==null}"><spring:message code='resource.analysisConnection.title'/></c:if>
-        <c:if test="${editMode!=null}"><spring:message code='resource.analysisConnection.edit.title'/></c:if>    
+        <c:if test="${editMode!=null}"><spring:message code='resource.analysisConnection.edit.title'/></c:if>
     </t:putAttribute>
     <t:putAttribute name="bodyID" value="addResource_analysisConnection"/>
     <c:if test="${connectionWrapper.type=='olapMondrianCon'}">
@@ -46,7 +46,7 @@
         <t:putAttribute name="bodyClass" value="oneColumn mondrian flow wizard oneStep"/>
         </c:if>
     </c:if>
-    <t:putAttribute name="moduleName" value="connectionType.page"/>
+    <t:putAttribute name="moduleName" value="addResource/analysisClientConnection/addAnalysisClientConnectionMain"/>
 
     <t:putAttribute name="headerContent">
         <jsp:include page="connectionTypeState.jsp"/>
@@ -169,7 +169,7 @@
                                             </spring:bind>
 
                                             <spring:bind path="connectionWrapper.xmlaConnectionUri">
-												<div class="control input text <c:if test="${status.error}">error</c:if>"> 
+												<div class="control input text <c:if test="${status.error}">error</c:if>">
 													<label class="wrap" class="required" for="${status.expression}" title="<spring:message code="resource.analysisConnection.uri"/>">
 														<spring:message code="resource.analysisConnection.uri"/> (<spring:message code='required.field'/>):
 													</label>

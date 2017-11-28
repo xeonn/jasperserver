@@ -22,6 +22,7 @@
 define({
     JDBC: "jdbcDataSource",
     AWS: "awsDataSource",
+    AZURE_SQL: "azureSqlDataSource",
     JNDI: "jndiJdbcDataSource",
     VIRTUAL: "virtualDataSource",
     CUSTOM: "customDataSource",

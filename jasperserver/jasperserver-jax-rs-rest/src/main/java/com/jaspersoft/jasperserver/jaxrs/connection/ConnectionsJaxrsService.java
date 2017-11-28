@@ -25,7 +25,6 @@ import com.jaspersoft.jasperserver.remote.connection.ConnectionsManager;
 import com.jaspersoft.jasperserver.remote.exception.IllegalParameterValueException;
 import com.jaspersoft.jasperserver.remote.exception.MandatoryParameterNotFoundException;
 import com.jaspersoft.jasperserver.remote.exception.ResourceNotFoundException;
-import com.jaspersoft.jasperserver.remote.resources.ClientTypeHelper;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -56,7 +55,7 @@ import java.util.regex.Pattern;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: ConnectionsJaxrsService.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: ConnectionsJaxrsService.java 62954 2016-05-01 09:49:23Z ykovalch $
  */
 @Service
 @Path("/connections")
@@ -84,11 +83,9 @@ public class ConnectionsJaxrsService {
         final UUID connectionId = connectionsManager.createConnection(connectionDescription);
         final StringBuffer locationBuffer = request.getRequestURL().append("/").append(connectionId.toString());
         if (isMetadataRequested) {
-            final Object connectionMetadata = connectionsManager.getConnectionMetadata(connectionId);
+            final Object connectionMetadata = connectionsManager.getConnectionMetadata(connectionId, request.getParameterMap());
             return Response.ok(connectionMetadata)
-                    .location(new URI(locationBuffer.append("/metadata").toString()))
-                    .header("Content-Type", "application/" + ClientTypeHelper.extractClientType(connectionMetadata.getClass())
-                            + ".metadata" + acceptString.substring(acceptString.lastIndexOf("+"))).build();
+                    .location(new URI(locationBuffer.append("/metadata").toString())).build();
         } else {
             return Response.created(new URI(locationBuffer.toString()))
                     .entity(connectionDescription).build();
@@ -126,23 +123,45 @@ public class ConnectionsJaxrsService {
     @GET
     @Path("/{uuid}/metadata")
     public Response getConnectionMetadata(@PathParam("uuid") UUID uuid) {
-        return Response.ok(connectionsManager.getConnectionMetadata(uuid)).build();
+        final Object connectionMetadata = connectionsManager.getConnectionMetadata(uuid, request.getParameterMap());
+        return Response.ok(connectionMetadata).build();
     }
 
-    protected Class<?> getConnectionClass(MediaType mediaType) {
+    @POST
+    @Path("/{uuid}/data")
+    public Response executeQuery(@PathParam("uuid") UUID uuid, InputStream stream,
+            @HeaderParam(HttpHeaders.CONTENT_TYPE) MediaType mediaType,
+            @HeaderParam(HttpHeaders.ACCEPT) MediaType accept) throws IOException {
+        final Class<?> queryClass = getQueryClass(mediaType);
+        final Object query = parseEntity(queryClass, stream, mediaType);
+        final boolean isMetadataRequested = accept != null && accept.toString().contains("metadata");
+        return Response.ok(isMetadataRequested ? connectionsManager.executeQueryForMetadata(uuid, query)
+                : connectionsManager.executeQuery(uuid, query)).build();
+    }
+
+    protected String getType(MediaType mediaType){
         if(mediaType ==  null){
             throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST)
                     .entity(new MandatoryParameterNotFoundException("Content-Type").getErrorDescriptor()).build());
         }
-        Class<?> connectionClass = null;
         Matcher matcher = EXTRACT_CONNECTION_TYPE_PATTERN.matcher(mediaType.toString());
-        if (matcher.find()) {
-            String connectionType = matcher.group(2);
-            connectionClass = connectionsManager.getConnectionDescriptionClass(connectionType);
-        }
+        return matcher.find() ? matcher.group(2) : null;
+    }
+
+    protected Class<?> getConnectionClass(MediaType mediaType) {
+        Class<?> connectionClass = connectionsManager.getConnectionDescriptionClass(getType(mediaType));
         if (connectionClass == null) {
             throw new WebApplicationException(Response.Status.UNSUPPORTED_MEDIA_TYPE);
         }
         return connectionClass;
+    }
+
+    protected Class<?> getQueryClass(MediaType mediaType){
+        Class<?> queryClass = String.class;
+        final String type = getType(mediaType);
+        if(type != null) {
+            queryClass = connectionsManager.getQueryClass(type);
+        }
+        return queryClass;
     }
 }

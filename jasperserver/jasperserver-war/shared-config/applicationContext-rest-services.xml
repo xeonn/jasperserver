@@ -79,48 +79,6 @@
         <property name="service" ref="${bean.userAndRoleService}" />
     </bean>
 
-    <bean id="attributesConfig" class="com.jaspersoft.jasperserver.remote.helpers.AttributesConfig">
-        <property name="maxLengthAttrName" value="255"/>
-        <property name="maxLengthAttrValue" value="2000"/>
-    </bean>
-
-    <alias name="${bean.permissionsRecipientIdentityResolver}" alias="concretePermissionsRecipientIdentityResolver"/>
-    <alias name="${bean.attributesRecipientIdentityResolver}" alias="concreteAttributesRecipientIdentityResolver"/>
-
-    <util:map id="protocolMapping">
-        <entry key="user">
-            <value type="java.lang.Class">com.jaspersoft.jasperserver.api.metadata.user.domain.User</value>
-        </entry>
-        <entry key="role">
-            <value type="java.lang.Class">com.jaspersoft.jasperserver.api.metadata.user.domain.Role</value>
-        </entry>
-        <entry key="tenant">
-            <value type="java.lang.Class">com.jaspersoft.jasperserver.api.metadata.user.domain.Tenant</value>
-        </entry>
-    </util:map>
-
-    <bean id="permissionsRecipientIdentityResolver" class="com.jaspersoft.jasperserver.remote.helpers.RecipientIdentityResolver">
-        <property name="map" ref="protocolMapping"/>
-        <property name="identifierLabel" value="recipientUri"/>
-        <property name="requiredProtocols">
-            <set>
-                <value>user</value>
-                <value>role</value>
-            </set>
-        </property>
-    </bean>
-
-    <bean id="attributesRecipientIdentityResolver" class="com.jaspersoft.jasperserver.remote.helpers.RecipientIdentityResolver">
-        <property name="map" ref="protocolMapping"/>
-        <property name="identifierLabel" value="holder"/>
-        <property name="requiredProtocols">
-            <set>
-                <value>user</value>
-                <value>tenant</value>
-            </set>
-        </property>
-    </bean>
-
     <util:map id="contentTypeMapping">
         <entry key="pdf" value="application/pdf"/>
         <entry key="html" value="text/html"/>
@@ -147,31 +105,10 @@
         <entry key="dashboardComponent" value="application/dashboardComponentsSchema+json"/>
     </util:map>
 
-    <util:list id="queryLanguagesCe">
-        <value>sql</value>
-        <value>hql</value>
-        <value>domain</value>
-        <value>HiveQL</value>
-        <value>MongoDbQuery</value>
-        <value>cql</value>
-    </util:list>
-
-    <alias name="${bean.queryLanguages}" alias="queryLanguages"/>
-
-    <util:set id="cdsPropertiesToIgnore">
-        <value>password</value>
-        <value>_cds_name</value>
-    </util:set>
-
     <bean id="exposedMessageSource" parent="messageSource" class="com.jaspersoft.jasperserver.jaxrs.bundle.ExposedResourceBundleMessageSource"  >
         <property name="defaultEncoding" value="UTF-8"/>
         <property name="basenamePrefix" value="WEB-INF/bundles/"/>
     </bean>
-
-    <alias name="${bean.copyMoveStrategies}" alias="copyMoveStrategies"/>
-
-    <util:map id="copyMoveStrategiesCe">
-    </util:map>
 
     <!-- REST v.1-->
     <alias name="${bean.restUtils}" alias="concreteRestUtils"/>
@@ -207,33 +144,6 @@
     <util:list id="rolesToDisablePermissionEditForNonSuperuser">
         <value>ROLE_ADMINISTRATOR</value>
     </util:list>
-
-    <alias name="${bean.foldersOnly}" alias="foldersOnly"/>
-    <alias name="${bean.modifyProtected}" alias="modifyProtected"/>
-
-    <bean id="modifyProtectedCe" class="java.util.HashSet">
-        <!-- this set contains URI or regular expressions of delete protected resources.
-        Currently there are technical JRS specific folders -->
-        <constructor-arg index="0" type="java.util.Collection">
-            <set>
-                <value>/</value>
-                <value>/temp</value>
-                <value>/themes</value>
-                <value>/themes/default</value>
-                <value>/themes/default/.+</value>
-            </set>
-        </constructor-arg>
-    </bean>
-
-    <bean id="foldersOnlyCe" class="java.util.HashSet">
-        <!-- this set contains URI or regular expressions of delete protected resources.
-        Currently there are technical JRS specific folders -->
-        <constructor-arg index="0" type="java.util.Collection">
-            <set>
-                <value>/</value>
-            </set>
-        </constructor-arg>
-    </bean>
 
     <!--Hypermedia-->
 
@@ -637,44 +547,6 @@
 
     </util:map>
 
-    <!-- Repository search configurations. -->
-    <bean id="defaultRestSearchConfiguration" class="com.jaspersoft.jasperserver.search.common.RepositorySearchConfiguration">
-        <property name="customSorters" ref="customSorters"/>
-        <property name="customFilters" ref="customFilters"/>
-        <property name="itemsPerPage" value="100"/>
-        <property name="maxItemsPerQuery" value="1000"/>
-        <property name="searchSecurityResolver" ref="${bean.searchSecurityResolver}"/>
-        <property name="systemFilters" ref="systemFilters"/>
-        <property name="resourceLabelMaxLength" value="100"/>
-        <property name="resourceNameMaxLength" value="100"/>
-        <property name="resourceDescriptionMaxLength" value="250"/>
-        <property name="customFiltersMap" ref="defaultCustomFiltersMap"/>
-    </bean>
 
-    <!-- NOTE: create a separate bean instead of alias if mode specific configuration is required. -->
-    <alias name="defaultRestSearchConfiguration" alias="restSearchModeRepositorySearchConfiguration"/>
-    <alias name="defaultRestSearchConfiguration" alias="restBrowseModeRepositorySearchConfiguration"/>
-
-    <!-- Search mode settings. -->
-    <bean id="restSearchSearchModeSettings" class="com.jaspersoft.jasperserver.search.mode.SearchModeSettings">
-        <property name="initialStateResolver" ref="searchInitialStateResolver"/>
-        <property name="jsonConverter" ref="searchModeJsonConverter"/>
-        <property name="repositorySearchConfiguration" ref="restSearchModeRepositorySearchConfiguration"/>
-    </bean>
-
-    <bean id="restBrowseSearchModeSettings" class="com.jaspersoft.jasperserver.search.mode.SearchModeSettings">
-        <property name="initialStateResolver" ref="browseInitialStateResolver"/>
-        <property name="jsonConverter" ref="browseModeJsonConverter"/>
-        <property name="repositorySearchConfiguration" ref="restBrowseModeRepositorySearchConfiguration"/>
-    </bean>
-
-    <bean id="restSearchModeSettingsResolver" class="com.jaspersoft.jasperserver.search.mode.impl.SearchModeSettingsResolverImpl">
-        <property name="settingsMap">
-            <map>
-                <entry key="SEARCH" value-ref="restSearchSearchModeSettings"/>
-                <entry key="BROWSE" value-ref="restBrowseSearchModeSettings"/>
-            </map>
-        </property>
-    </bean>
 
 </beans>

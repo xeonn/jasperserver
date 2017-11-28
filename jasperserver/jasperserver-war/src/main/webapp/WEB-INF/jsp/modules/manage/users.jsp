@@ -41,7 +41,7 @@
     </t:putAttribute>
     <t:putAttribute name="bodyID" value="manage_users"/>
     <t:putAttribute name="bodyClass">${bodyColumnClass} manager</t:putAttribute>
-    <t:putAttribute name="moduleName" value="admin.users.page"/>
+    <t:putAttribute name="moduleName" value="manage/manageUsersMain"/>
     <t:putAttribute name="headerContent" >
         <jsp:include page="usersState.jsp"/>
     </t:putAttribute>
@@ -79,7 +79,7 @@
             <t:putAttribute name="footerContent">
             </t:putAttribute>
         </t:insertTemplate>
-        
+
 
         <t:insertTemplate template="/WEB-INF/jsp/templates/container.jsp">
             <t:putAttribute name="containerID" value="folders"/>
@@ -148,7 +148,7 @@
                         <input class="" id="propUserID" type="text" maxlength="100" value="" readonly="readonly"/>
                         <span class="hint"><spring:message code="jsp.userManager.userEditor.userId.hint" javaScriptEscape="true"/></span>
                         <span class="message warning"></span>
-                    </label>                  
+                    </label>
                     <label class="control input text" class="required" for="email" title="<spring:message code="jsp.userManager.userCreator.emailAddress.title" javaScriptEscape="true"/>">
                         <span class="wrap"><spring:message code="jsp.userManager.userCreator.emailAddress" javaScriptEscape="true"/>:</span>
                         <input class="" id="email" type="text" maxlength="100" value="" readonly="readonly"/>
@@ -183,7 +183,7 @@
                 <fieldset id="userExternal" class="group hidden">
                     <div class="control checkBox">
                         <label class="wrap" for="externalUser" title="<spring:message code="jsp.userManager.userEditor.externallyDefined" javaScriptEscape="true"/>">
-                            <spring:message code="jsp.userManager.userEditor.externallyDefined" javaScriptEscape="true"/>     
+                            <spring:message code="jsp.userManager.userEditor.externallyDefined" javaScriptEscape="true"/>
                         </label>
                         <input id="externalUser" type="checkbox" checked="checked" disabled="disabled"/>
                         <span class="hint"><spring:message code="jsp.userManager.userEditor.externallyDefined.hint" javaScriptEscape="true"/></span>
@@ -205,7 +205,7 @@
                             <button id="addToAssigned" class="button action square move right up"><span class="wrap"><b class="icon"></b></span></button>
                             <button id="removeFromAssigned" class="button action square move left up"><span class="wrap"><b class="icon"></b></span></button>
                         </div>
-                            
+
                     <t:insertTemplate template="/WEB-INF/jsp/templates/container.jsp">
                         <t:putAttribute name="containerClass" value="column decorated primary showingSubHeader"/>
                             <t:putAttribute name="containerTitle"><spring:message code="jsp.userManager.assignedRoles" javaScriptEscape="true"/></t:putAttribute>
@@ -218,11 +218,11 @@
                                 </div>
                             </t:putAttribute>
 
-                            <t:putAttribute name="bodyContent">    
+                            <t:putAttribute name="bodyContent">
                                 <ul id="assignedList"></ul>
                             </t:putAttribute>
                         </t:insertTemplate>
-                        
+
                         <t:insertTemplate template="/WEB-INF/jsp/templates/container.jsp">
                             <t:putAttribute name="containerClass" value="column decorated secondary sizeable showingSubHeader"/>
                             <t:putAttribute name="containerElements">
@@ -236,13 +236,13 @@
                                 	<t:insertTemplate template="/WEB-INF/jsp/templates/control_searchLockup.jsp">
 								        <t:putAttribute name="inputID" value="availableSearchInput"/>
 								    </t:insertTemplate>
-                                </div> 
+                                </div>
                             </t:putAttribute>
 
                             <t:putAttribute name="bodyContent">
                                 <ul id="availableList"></ul>
                             </t:putAttribute>
-                            
+
                         </t:insertTemplate>
                     <!-- end two columns -->
                 </fieldset>
@@ -261,7 +261,7 @@
                 <button id="cancel" type="submit" class="button action up"><span class="wrap"><spring:message code="form.edit.cancel" javaScriptEscape="true"/></span><span class="icon"></span></button>
             </t:putAttribute>
         </t:insertTemplate>
-        
+
         <t:insertTemplate template="/WEB-INF/jsp/templates/addUser.jsp">
             <t:putAttribute name="containerClass" value="hidden"/>
         </t:insertTemplate>
@@ -270,5 +270,5 @@
             <input id="j_username"  name="j_username" type="hidden" />
         </form>
     </t:putAttribute>
-        
+
 </t:insertTemplate>

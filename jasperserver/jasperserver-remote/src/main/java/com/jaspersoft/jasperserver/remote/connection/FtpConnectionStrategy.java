@@ -20,14 +20,19 @@
 */
 package com.jaspersoft.jasperserver.remote.connection;
 
+import com.jaspersoft.jasperserver.api.JSException;
+import com.jaspersoft.jasperserver.api.common.crypto.PasswordCipherer;
 import com.jaspersoft.jasperserver.api.common.error.handling.SecureExceptionHandler;
 import com.jaspersoft.jasperserver.api.common.util.FTPService;
 import com.jaspersoft.jasperserver.api.engine.common.util.impl.FTPUtil;
+import com.jaspersoft.jasperserver.api.metadata.common.service.JSResourceNotFoundException;
+import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
 import com.jaspersoft.jasperserver.dto.connection.FtpConnection;
 import com.jaspersoft.jasperserver.remote.exception.IllegalParameterValueException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.net.util.TrustManagerUtils;
+import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -38,7 +43,7 @@ import java.util.Map;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: FtpConnectionStrategy.java 57603 2015-09-15 17:20:48Z psavushc $
+ * @version $Id: FtpConnectionStrategy.java 62483 2016-04-12 17:26:07Z akasych $
  */
 @Service
 public class FtpConnectionStrategy implements ConnectionManagementStrategy<FtpConnection> {
@@ -47,19 +52,82 @@ public class FtpConnectionStrategy implements ConnectionManagementStrategy<FtpCo
 
     @Resource
     private SecureExceptionHandler secureExceptionHandler;
+    @Resource(name = "concreteRepository")
+    private RepositoryService repository;
+    @Resource
+    private Map<String, FtpConnectionDescriptionProvider> connectionDescriptionProviders;
 
     @Override
     public FtpConnection createConnection(FtpConnection connectionDescription, Map<String, Object> data) throws IllegalParameterValueException {
         FTPService.FTPServiceClient client = null;
         try {
+
+            // Check secure fields for null values and update them if necessary:
+
+            // resolve the original values
+            FtpConnection storedFtpConnection = null;
+            String holder = connectionDescription.getHolder();
+            FtpConnectionDescriptionProvider provider = null;
+            if (holder != null) {
+                String[] holderParts = holder.split(":");
+
+                if (holderParts.length != 2)
+                    throw new IllegalParameterValueException("holder", holder);
+
+                provider = connectionDescriptionProviders.get(holderParts[0]);
+                if (provider != null) {
+                    storedFtpConnection = provider.getFtpConnectionDescription(holderParts[1]);
+                } else {
+                    throw new IllegalParameterValueException("holder", holder);
+                }
+            }
+            // restore password
+            if (connectionDescription.getPassword() == null) {
+                connectionDescription.setPassword(storedFtpConnection != null ? storedFtpConnection.getPassword() : null);
+            }
+            // restore sshPassphrase
+            if (connectionDescription.getSshPassphrase() == null) {
+                connectionDescription.setSshPassphrase(storedFtpConnection != null ? storedFtpConnection.getSshPassphrase() : null);
+            }
+
+
             if (connectionDescription.getType() == FtpConnection.FtpType.ftp) {
                 client = ftpService.connectFTP(connectionDescription.getHost(), connectionDescription.getPort(),
                         connectionDescription.getUserName(), connectionDescription.getPassword());
-            } else {
+            } else if (connectionDescription.getType() == FtpConnection.FtpType.ftps) {
                 client = ftpService.connectFTPS(connectionDescription.getHost(), connectionDescription.getPort(),
                         connectionDescription.getProtocol(), connectionDescription.getImplicit(),
                         connectionDescription.getPbsz(), connectionDescription.getProt(),
                         connectionDescription.getUserName(), connectionDescription.getPassword(), false, TrustManagerUtils.getAcceptAllTrustManager());
+            } else if (connectionDescription.getType() == FtpConnection.FtpType.sftp) {
+
+                // Read SSH Private key data from repo file resource
+                String sshKeyPath = connectionDescription.getSshKey();
+                String sshKeyData = null;
+                if (sshKeyPath != null) {
+                    try {
+                        // get file data
+                        sshKeyData = new String(repository.getResourceData(null, sshKeyPath).getData());
+
+                        // decode if encrypted
+                        sshKeyData = PasswordCipherer.getInstance().decodePassword(sshKeyData);
+                    } catch (JSResourceNotFoundException e) {
+                        log.error("Failed to read the SSH Private Key from repository.");
+                    } catch (DataAccessResourceFailureException e) {
+                        log.warn("Failed to decrypt the SSH Private Key. Most likely reason is unencrypted data in db.");
+                        // If not encrypted resources need to be supported then keep the resolved sshKeyData value
+                    } catch (Exception e) {
+                        log.error(e.getMessage());
+                    }
+                }
+
+                client = ftpService.connectSFTP(connectionDescription.getHost(), connectionDescription.getPort(),
+                        connectionDescription.getUserName(), connectionDescription.getPassword(), null,
+                        sshKeyData, connectionDescription.getSshPassphrase());
+            } else {
+                String message = "FtpConnection error: unknown FTP service type: " + connectionDescription.getType();
+                log.error(message);
+                throw new JSException(message);
             }
             client.changeDirectory(connectionDescription.getFolderPath());
         } catch (UnknownHostException e) {

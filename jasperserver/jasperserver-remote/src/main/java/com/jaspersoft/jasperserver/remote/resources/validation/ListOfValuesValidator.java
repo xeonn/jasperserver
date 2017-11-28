@@ -67,11 +67,10 @@ public class ListOfValuesValidator extends GenericResourceValidator<ListOfValues
             } else {
                 if (item.getValue() instanceof String){
                     String value = (String)item.getValue();
-                    if (value.length() > 30){
-                        addIllegalParameterValueError(errors, "listOfValuesItem.value", value, "The value " + value + " is longer than 30 characters");
-                    }
+
                     if (forbiddenCharacters.matcher(value).matches()){
-                        addIllegalParameterValueError(errors, "listOfValuesItem.value", value, "The value " + value + " should not contain symbols \"<>");
+                        addIllegalParameterValueError(errors, "listOfValuesItem.value", value, "The value " + value
+                                + " should not contain symbols \"<>");
                     }
                 }
             }

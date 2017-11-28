@@ -22,7 +22,7 @@
 
 /**
  * @author: Zakhar Tomchenko
- * @version: $Id: SearchPlugin.js 1137 2015-04-22 17:31:34Z obobruyk $
+ * @version: $Id: SearchPlugin.js 2605 2016-04-12 12:25:50Z akasych $
  */
 
 define(function(require){
@@ -42,7 +42,7 @@ define(function(require){
             return this.template();
         },
 
-        events:{
+        events: {
             "click .button.search":"clickHandler",
             "click .button.searchClear":"clear",
             "keydown input[type=text]" : "keyHandler"
@@ -53,7 +53,7 @@ define(function(require){
             this.$searchInput = this.$el.find("input[type=text]");
         },
 
-        search:function (options) {
+        search: function (options) {
             var searchString = this.$searchInput.val();
             this.owner.refresh(_.extend({searchString:searchString}, options));
             if (searchString) {
@@ -63,10 +63,25 @@ define(function(require){
             }
         },
 
-        clear:function () {
-            this.$el.find("input[type=text]").val("");
+        clearInput: function () {
+            this.$searchInput.val("");
+        },
+
+        clear: function () {
+            this.clearInput();
             this.clickHandler();
             this.trigger("clear", this);
+        },
+
+        // differs from the clear() method by not triggering any events (like 'select' and 'clear') at all
+        clearSilently: function () {
+            this.clearInput();
+
+            delete this.owner.context.searchString;
+
+            this.owner.refresh(_.extend({searchString: ""}, this.owner.context));
+
+            this.$el.find(".button.searchClear").removeClass("up");
         },
 
         clickHandler: function(){

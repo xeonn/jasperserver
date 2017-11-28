@@ -33,7 +33,7 @@ import java.util.Map;
  * <p></p>
  *
  * @author yaroslav.kovalchyk
- * @version $Id: GenericParametersHelper.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: GenericParametersHelper.java 62954 2016-05-01 09:49:23Z ykovalch $
  */
 public class GenericParametersHelper {
     protected final static Log log = LogFactory.getLog(GenericParametersHelper.class);
@@ -65,6 +65,9 @@ public class GenericParametersHelper {
             result = (Class<?>) actualTypeArguments[argumentIndex];
         } else if (actualTypeArguments[argumentIndex] instanceof TypeVariable) {
             result = currentParameterValues.get(((TypeVariable<?>) actualTypeArguments[argumentIndex]).getName());
+        } else if(actualTypeArguments[argumentIndex] instanceof ParameterizedType
+                && ((ParameterizedType)actualTypeArguments[argumentIndex]).getRawType() instanceof Class){
+            result = (Class<?>) ((ParameterizedType)actualTypeArguments[argumentIndex]).getRawType();
         }
         if (result == null) {
             log.debug("Class " + classToParse.getName() + " has unsupported inheritance structure");

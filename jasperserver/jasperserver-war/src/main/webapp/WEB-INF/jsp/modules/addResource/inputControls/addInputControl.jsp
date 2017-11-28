@@ -38,7 +38,7 @@
 
     <t:putAttribute name="bodyID" value="addResource_inputControl"/>
     <t:putAttribute name="bodyClass" value="oneColumn flow wizard firstStep"/>
-    <t:putAttribute name="moduleName" value="addInputControl.page"/>
+    <t:putAttribute name="moduleName" value="addResource/inputControls/addInputControlMain"/>
 
     <t:putAttribute name="headerContent">
         <jsp:include page="addInputControlState.jsp"/>
@@ -71,12 +71,12 @@
                             <c:when test="${isEdit}">
                                 <h2 class="textAccent02">
                                     <spring:message code="editResources.editInputControle.createInputControl" javaScriptEscape="true"/></h2>
-                                <h4><spring:message code="editResources.editInputControle.textaccent2" javaScriptEscape="true"/>.</h4>
+                                <h4><spring:message code="editResources.editInputControle.textaccent2" javaScriptEscape="true"/></h4>
                             </c:when>
                             <c:otherwise>
                                 <h2 class="textAccent02">
                                     <spring:message code="addResources.addInputControle.createInputControl" javaScriptEscape="true"/></h2>
-                                <h4><spring:message code="addResources.addInputControle.textaccent2" javaScriptEscape="true"/>.</h4>
+                                <h4><spring:message code="addResources.addInputControle.textaccent2" javaScriptEscape="true"/></h4>
                             </c:otherwise>
                         </c:choose>
                     </fieldset>

@@ -34,7 +34,7 @@ import static com.jaspersoft.jasperserver.export.modules.repository.beans.Resour
 
 /**
  * @author ichan
- * @version $Id: FTPInfoBean.java 51858 2014-12-06 20:46:19Z vsabadosh $
+ * @version $Id: FTPInfoBean.java 62483 2016-04-12 17:26:07Z akasych $
  */
 public class FTPInfoBean {
 	private static final Logger logger = LogManager.getLogger(FTPInfoBean.class);
@@ -69,7 +69,10 @@ public class FTPInfoBean {
 			int i = 0;
 			for (Map.Entry<String, String> entry : src.getPropertiesMap().entrySet()) {
 				propertiesMapKeys[i] = entry.getKey();
-				propertiesMapValues[i++] = entry.getValue();
+				//encrypt SSH Private Key passphrase for export
+				propertiesMapValues[i++] = entry.getKey().equals(FTPInfo.SSH_PASSPHRASE_PROPERTY) ?
+						ENCRYPTION_PREFIX + importExportCipher.encode(entry.getValue()) + ENCRYPTION_SUFFIX :
+						entry.getValue();
 			}
 		}
 	}
@@ -85,6 +88,14 @@ public class FTPInfoBean {
 			}
 		}
 		dest.setPropertiesMap(map);
+
+		// decrypt SSH Private Key passphrase for import
+		if (map.containsKey(FTPInfo.SSH_PASSPHRASE_PROPERTY)) {
+			String val = map.get(FTPInfo.SSH_PASSPHRASE_PROPERTY);
+			if (val.startsWith(ENCRYPTION_PREFIX) && val.endsWith(ENCRYPTION_SUFFIX)) {
+				map.put(FTPInfo.SSH_PASSPHRASE_PROPERTY, importExportCipher.decode(val.replaceFirst(ENCRYPTION_PREFIX, "").replaceAll(ENCRYPTION_SUFFIX + "$", "")));
+			}
+		}
 
 		//decrypt pwd for import. if decryption fails, set password as is; this is probably due to legacy import
 		//TODO: in the future, decryption should be done with an asymmetric private key from THIS server

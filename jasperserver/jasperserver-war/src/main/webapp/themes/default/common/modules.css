@@ -305,6 +305,11 @@
     height: 100%;
 }
 
+.m-Multiselect-listContainer.disabled.jrs,
+.m-Multiselect-listContainer .disabled.jrs{
+    opacity: 1;
+}
+
 .m-Multiselect-listContainer-message.jrs {
     /* display:none; */
     font-style: italic;

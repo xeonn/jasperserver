@@ -24,6 +24,12 @@ import java.io.OutputStream;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.webflow.execution.RequestContext;
+
+import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
+import com.jaspersoft.jasperserver.api.engine.jasperreports.common.ExportParameters;
+import com.jaspersoft.jasperserver.api.engine.jasperreports.common.TxtExportParametersBean;
+
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRPropertiesHolder;
 import net.sf.jasperreports.engine.JRPropertiesUtil;
@@ -32,17 +38,12 @@ import net.sf.jasperreports.engine.export.JRTextExporter;
 import net.sf.jasperreports.export.SimpleExporterInput;
 import net.sf.jasperreports.export.SimpleTextReportConfiguration;
 import net.sf.jasperreports.export.SimpleWriterExporterOutput;
-
-import org.springframework.webflow.execution.RequestContext;
-
-import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
-import com.jaspersoft.jasperserver.api.engine.jasperreports.common.ExportParameters;
-import com.jaspersoft.jasperserver.api.engine.jasperreports.common.TxtExportParametersBean;
+import net.sf.jasperreports.export.WriterExporterOutput;
 
 
 /**
  * @author sanda zaharia (shertage@users.sourceforge.net)
- * @version $Id: ReportTextExporter.java 54728 2015-04-24 15:28:20Z tdanciu $
+ * @version $Id: ReportTextExporter.java 63555 2016-06-10 16:59:01Z tdanciu $
  */
 public class ReportTextExporter extends AbstractReportExporter
 {
@@ -77,7 +78,9 @@ public class ReportTextExporter extends AbstractReportExporter
 		JRTextExporter exporter = new JRTextExporter(getJasperReportsContext());
 		
 		exporter.setExporterInput(new SimpleExporterInput(jasperPrint));
-		exporter.setExporterOutput(new SimpleWriterExporterOutput(outputStream));
+		String encoding = JRPropertiesUtil.getInstance(getJasperReportsContext()).getProperty(jasperPrint, WriterExporterOutput.PROPERTY_CHARACTER_ENCODING);
+		SimpleWriterExporterOutput exporterOutput = new SimpleWriterExporterOutput(outputStream, encoding);
+		exporter.setExporterOutput(exporterOutput);
 
 		TxtExportParametersBean exportParams = (TxtExportParametersBean)getExportParameters(context);
 		

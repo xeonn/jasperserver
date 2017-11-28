@@ -35,13 +35,13 @@
 		</style>
     </t:putAttribute>
     <t:putAttribute name="bodyContent" >
-	
+
 		<t:insertTemplate template="/WEB-INF/jsp/templates/container.jsp">
 		    <t:putAttribute name="containerClass" value="column decorated primary"/>
 		    <t:putAttribute name="containerTitle"><spring:message code="JIF.titlemenus"/></t:putAttribute>
 		    <t:putAttribute name="bodyClass" value="oneColumn"/>
 		    <t:putAttribute name="bodyContent" >
-	        
+
 			<table id="sampleGrid">
         		<thead>
 	        		<tr>
@@ -83,19 +83,19 @@
 																		<li class="leaf separator"></li>
 																		<li class="leaf"><p class="wrap button"><span class="icon"></span>Item</p></li>
 																		<li class="leaf"><p class="wrap button"><span class="icon"></span>Item</p></li>
-																	</ul><!-- /content -->	   	 
+																	</ul><!-- /content -->
 																</div><!-- /menu -->
 															</li>
 															<li class="leaf separator"></li>
 															<li class="leaf"><p class="wrap button"><span class="icon"></span>Item</p></li>
 															<li class="leaf"><p class="wrap button"><span class="icon"></span>Item</p></li>
-														</ul><!-- /content -->	   	 
+														</ul><!-- /content -->
 													</div><!-- /menu -->
 												</li>
 												<li class="leaf separator"></li>
 												<li class="leaf"><p class="wrap button"><span class="icon"></span>Item</p></li>
 												<li class="leaf"><p class="wrap button"><span class="icon"></span>Item</p></li>
-											</ul><!-- /content -->	   	 
+											</ul><!-- /content -->
 										</div><!-- /menu -->
 									</li>
 									<li class="node closed">
@@ -108,7 +108,7 @@
 												<li class="leaf separator"></li>
 												<li class="leaf"><p class="wrap button"><span class="icon"></span>Item</p></li>
 												<li class="leaf"><p class="wrap button"><span class="icon"></span>Item</p></li>
-											</ul><!-- /content -->	   	 
+											</ul><!-- /content -->
 										</div><!-- /menu -->
 									</li>
 									<li class="leaf separator"></li>
@@ -118,8 +118,8 @@
 									<li class="leaf separator"></li>
 									<li class="leaf requiresInput up"><p class="wrap button"><span class="icon"></span>Properties&#8230;</p></li>
 									<li class="leaf requiresInput up"><p class="wrap button"><span class="icon"></span>Permissions&#8230;</p></li>
-								</ul><!-- /content -->	   	 
-							</div><!-- /menu -->			        			
+								</ul><!-- /content -->
+							</div><!-- /menu -->
 	        			</td>
 	        		</tr>
         		</tbody>
@@ -144,8 +144,8 @@
 									<li class="leaf"><p class="wrap button toggle down"><span class="icon"></span>Letter Size</p></li>
 									<li class="leaf"><p class="wrap button toggle"><span class="icon"></span>A4 Size</p></li>
 									<li class="leaf"><p class="wrap button toggle"><span class="icon"></span>Actual Size</p></li>
-								</ul><!-- /content -->	   	 
-							</div><!-- /menu -->			        			
+								</ul><!-- /content -->
+							</div><!-- /menu -->
 	        			</td>
 	        		</tr>
         		</tbody>
@@ -157,7 +157,7 @@
 	        		</tr>
 	        		<tr>
 	        			<th class="rowHeader"></th>
-	        			<td class="example horizontalNav">	
+	        			<td class="example horizontalNav">
 							<div class="header">
 								<div class="menu horizontal primaryNav">
 									<ul>
@@ -168,18 +168,18 @@
 										<li id="main_create" class="node"><p class="wrap button"><span class="icon"></span>Create</p></li>
 									</ul>
 								</div>
-							</div>			        			
+							</div>
 	        			</td>
 	        		</tr>
         		</tbody>
 			 </table>
-        
+
 			</t:putAttribute>
 		    <t:putAttribute name="footerContent">
 		    	<!-- custom content here; remove this comment -->
 		    </t:putAttribute>
-		</t:insertTemplate>		
-		
+		</t:insertTemplate>
+
 		<t:insertTemplate template="/WEB-INF/jsp/modules/sample/sampleIndex.jsp"/>
 
     </t:putAttribute>

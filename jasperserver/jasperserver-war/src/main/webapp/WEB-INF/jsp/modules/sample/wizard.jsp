@@ -27,7 +27,7 @@
     <t:putAttribute name="bodyID" value="wizard"/>
     <t:putAttribute name="bodyClass" value="flow wizard oneColumn oneStep"/>
     <t:putAttribute name="moduleName" value="commons.main"/>
-    
+
     <t:putAttribute name="bodyContent" >
 		<t:insertTemplate template="/WEB-INF/jsp/templates/container.jsp">
 			<t:putAttribute name="containerClass" value="column decorated primary"/>
@@ -35,9 +35,9 @@
             <t:putAttribute name="headerContent">
             </t:putAttribute>
 		    <t:putAttribute name="bodyClass" value="flow wizard"/>
-		    <!-- NOTE: four possible cases for bodyClass that control #wizardNav buttons: 
-		         - .flow.wizard.firstStep; 
-		         - .flow.wizard.lastStep; 
+		    <!-- NOTE: four possible cases for bodyClass that control #wizardNav buttons:
+		         - .flow.wizard.firstStep;
+		         - .flow.wizard.lastStep;
 		         - .flow.wizard.oneStep;
 		         - .flow.wizard [the general case]
 			-->
@@ -55,17 +55,17 @@
 					<li class="leaf"><p class="wrap" href="#"><b class="icon"></b>Step 3</p></li>
 					<li class="leaf"><p class="wrap" href="#"><b class="icon"></b>Step 4</p></li>
 				</ul>
-			</div>						
+			</div>
 				<div id="stepDisplay">
 					<fieldset class="row instructions">
 						<legend class="offLeft"><span>Instructions</span></legend>
 						<h2 class="textAccent02"><spring:message code="JIF.labelcalltoaction"/></h2>
 						<h4><spring:message code="JIF.labelcallexplanation"/></h4>
 					</fieldset>
-				
+
 					<fieldset class="row inputs oneColumn">
 						<legend class="offLeft"><span>User Inputs</span></legend>
-						
+
 							<t:insertTemplate template="/WEB-INF/jsp/templates/container.jsp">
 							    <t:putAttribute name="containerClass" value="column primary noHeader"/>
 							    <t:putAttribute name="containerTitle"> </t:putAttribute>
@@ -76,9 +76,9 @@
 							    </t:putAttribute>
 
 							</t:insertTemplate>
-					
+
 					</fieldset><!--/.row.inputs-->
-					
+
 				</div><!--/#stepDisplay-->
 
 				<t:putAttribute name="footerContent">
@@ -86,10 +86,10 @@
 						<button id="previous" class="button action up"><span class="wrap"><spring:message code='button.previous'/></span><span class="icon"></span></button>
 						<button id="next" class="button action up"><span class="wrap"><spring:message code='button.next'/></span><span class="icon"></span></button>
 						<button id="done" class="button primary action up"><span class="wrap"><spring:message code='button.submit'/></span><span class="icon"></span></button>
-						<button id="cancel" class="button action up"><span class="wrap"><spring:message code='button.cancel'/></span><span class="icon"></span></button>						
-				    </fieldset>				
+						<button id="cancel" class="button action up"><span class="wrap"><spring:message code='button.cancel'/></span><span class="icon"></span></button>
+				    </fieldset>
 				</t:putAttribute>
-			</t:putAttribute>	    
+			</t:putAttribute>
 		</t:insertTemplate>
 
     </t:putAttribute>

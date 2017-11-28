@@ -24,6 +24,7 @@ package com.jaspersoft.jasperserver.search.service.impl;
 import com.jaspersoft.jasperserver.api.JSException;
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
 import com.jaspersoft.jasperserver.api.common.domain.impl.ExecutionContextImpl;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.Folder;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceLookup;
 import com.jaspersoft.jasperserver.api.metadata.common.service.impl.RepositorySecurityChecker;
@@ -41,7 +42,17 @@ import org.hibernate.SessionFactory;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Resources management service.
@@ -51,6 +62,8 @@ import java.util.*;
  */
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 public class ResourceServiceImpl extends BaseService implements ResourceService {
+    private static final Pattern INDEXED_LABEL_PATTERN = Pattern.compile("(.*)\\((\\d+)\\)");
+    private static final Pattern INDEXED_NAME_PATTERN = Pattern.compile("(.*)_(\\d+)$");
 
     private static final Log log = LogFactory.getLog(ResourceServiceImpl.class);
 
@@ -178,25 +191,96 @@ public class ResourceServiceImpl extends BaseService implements ResourceService 
         return result;
     }
 
-    @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+    protected Map<String, String> getExistingNamesAndLabels(String parentFolderUri) {
+        Map<String, String> result = new HashMap<String, String>();
+        try {
+            List<Folder> repoFolderList = repositoryService.getSubFolders(null, parentFolderUri);
+            for (Folder folder : repoFolderList) {
+                result.put(folder.getName(), folder.getLabel());
+            }
+            FilterCriteria criteria = FilterCriteria.createFilter();
+            criteria.addFilterElement(FilterCriteria.createParentFolderFilter(parentFolderUri));
+
+            List<Resource> resources = repositoryService.loadResourcesList(null, criteria);
+            for (Resource resource : resources) {
+                result.put(resource.getName(), resource.getLabel());
+            }
+        } catch (Exception e) {
+            log.error("", e);
+        }
+        return result;
+
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED)
     public void copy(Set<String> resourceUris, String destinationFolderUri) {
         Map<String, Resource> resourceMap = getResourceMap(resourceUris);
-
         if (!isLabelsUnique(resourceMap)) {
             throw new JSException("jsexception.search.duplicate.label", new Object[]{"", destinationFolderUri});
         }
+        // here are all names and labels, that exist in target folder
+        final Map<String, String> existingNamesAndLabels = getExistingNamesAndLabels(destinationFolderUri);
+        Set<String> resourceUrisToCopy = new HashSet<String>();
+        // now we are able to paste resources to the same folder, where they are placed. To process this situation correctly
+        // we have to change names/labels of resources. So, let's go over resources to copy list and process all resources
+        // with already existing labels/name in a separate way.
+        for (Resource resource : resourceMap.values()) {
+            String label = resource.getLabel();
+            String name = resource.getName();
+            final Collection<String> labels = existingNamesAndLabels.values();
+            if (labels.contains(label) || existingNamesAndLabels.containsKey(name)) {
+                // such label or name already exist in target folder. We have to make it's indexed copy.
+                // For instance if original resource label is "Some Resource", then indexed copy will have label "Some Resource (1)"
+                int index = 1;
+                String labelPrefix = label;
+                final Matcher initialLabelIndexMatcher = INDEXED_LABEL_PATTERN.matcher(label);
+                if (initialLabelIndexMatcher.find()) {
+                    // current label already indexed. Let's extract it's index and prefix to generate next index label
+                    labelPrefix = initialLabelIndexMatcher.group(1).trim();
+                    index = Integer.valueOf(initialLabelIndexMatcher.group(2));
+                }
+                // let's find index, that doesn't exist yet
+                label = buildIndexedLabel(labelPrefix, index);
+                while (labels.contains(label)) {
+                    index++;
+                    label = buildIndexedLabel(labelPrefix, index);
+                }
+                //let's process name in this indexed manner
+                final Matcher initialNameIndex = INDEXED_NAME_PATTERN.matcher(name);
+                if (initialNameIndex.find()) {
+                    // this name is indexed. Let's try to change index keeping the same prefix.
+                    final String updatedIndexName = buildIndexedName(initialNameIndex.group(1), index);
+                    if (!existingNamesAndLabels.containsKey(updatedIndexName)) {
+                        // no name with such index. Let's use indexed
+                        name = updatedIndexName;
+                    } else {
+                        // name with such index already exist. Let's use original indexed name as prefix
+                        do {
+                            // keep appending index till such name doesn't exist
+                            name = buildIndexedName(name, index);
+                        } while (existingNamesAndLabels.containsKey(name));
+                    }
 
-        ensureObjectLabelsNew(destinationFolderUri, getLabels(resourceMap));
+                }
+                final Resource copied = repositoryService.copyRenameResource(null, resource.getURIString(),
+                        destinationFolderUri + "/" + name, label);
+                // add copied resource name and label to existing names and labels map
+                existingNamesAndLabels.put(copied.getName(), copied.getLabel());
 
-        while (getResourcesWithUniqueName(resourceMap).size() > 0) {
-            Map<String, Resource> resources = getResourcesWithUniqueName(resourceMap);
-            Set<String> uris = resources.keySet();
-            repositoryService.copyResources(null, uris.toArray(new String[uris.size()]), destinationFolderUri);
-
-            for (String key : resources.keySet()) {
-                resourceMap.remove(key);
+            } else {
+                resourceUrisToCopy.add(resource.getURIString());
             }
         }
+        repositoryService.copyResources(null, resourceUrisToCopy.toArray(new String[resourceUrisToCopy.size()]),
+                destinationFolderUri);
+    }
+
+    protected String buildIndexedLabel(String labelPrefix, int index) {
+        return labelPrefix + " (" + index + ")";
+    }
+
+    protected String buildIndexedName(String namePrefix, int index) {
+        return namePrefix + "_" + index;
     }
 
     private Set<String> getLabels(Map<String, Resource> resourceMap) {

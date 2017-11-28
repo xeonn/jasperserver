@@ -26,6 +26,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.jaspersoft.jasperserver.core.util.XMLUtil;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRExpression;
 import net.sf.jasperreports.engine.JRExpressionChunk;
@@ -73,9 +74,10 @@ public class ResourceCollector extends JRVisitorSupport
 
 		try
 		{
-			jasperDesign = JRXmlLoader.load(jrxmlStream);
+			// check for XXE vulnerability first and then load
+			jasperDesign = JRXmlLoader.load(XMLUtil.checkForXXE(jrxmlStream));
 		}
-		catch (JRException e)
+		catch (Exception e)
 		{
 			throw new JSExceptionWrapper(e);
 		}

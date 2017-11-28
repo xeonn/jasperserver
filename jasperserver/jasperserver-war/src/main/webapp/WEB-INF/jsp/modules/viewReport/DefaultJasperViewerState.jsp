@@ -26,6 +26,7 @@
 
 <%@ taglib prefix="c" uri="http://java.sun.com/jstl/core_rt" %>
 <%@ taglib prefix="js" uri="/WEB-INF/jasperserver.tld" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
 <%@ page import="net.sf.jasperreports.engine.export.*" %>
 <%@ page import="net.sf.jasperreports.engine.*" %>
@@ -40,6 +41,12 @@
 <%@ page import="org.springframework.context.i18n.LocaleContextHolder" %>
 
 <textarea class="hidden" style="display:none" name="_evalScript">
+    <%-- formatting report refresh time --%>
+    <spring:message code="date.format" var="dateFormat"/>
+    <spring:message code="time.format" var="timeFormat"/>
+    <fmt:formatDate type="both" value="${dataTimestamp}" timeZone="${sessionScope.userTimezone}" pattern="${dateFormat}" var="reportRefreshDate"/>
+    <fmt:formatDate type="both" value="${dataTimestamp}" timeZone="${sessionScope.userTimezone}" pattern="${timeFormat}" var="reportRefreshTime"/>
+
     <js:out javaScriptEscape="true">
     Report.jasperPrintName = '${jasperPrintName}';
     Report.pageIndex = ${empty pageIndex ? 0 : pageIndex};
@@ -51,7 +58,8 @@
     Report.emptyReport = ${emptyReport};
     Report.hasInputControls = ${hasInputControls};
 
-    Report.dataTimestampMessage = '<spring:message code="jasper.report.view.data.snapshot.message" arguments="${dataTimestamp}" javaScriptEscape="true"/>';
+    Report.dataTimestampMessage = '<spring:message code="jasper.report.view.data.snapshot.message" arguments="${reportRefreshDate},${reportRefreshTime}" javaScriptEscape="true"/>';
+
     </js:out>
 </textarea>
 

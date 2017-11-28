@@ -31,26 +31,26 @@
     <t:putAttribute name="bodyID" value="accessDenied"/>
     <t:putAttribute name="moduleName" value="commons.main"/>
     <t:putAttribute name="bodyClass" value="oneColumn"/>
-	
+
 		<t:putAttribute name="bodyContent" >
-		
+
 			<t:insertTemplate template="/WEB-INF/jsp/templates/container.jsp">
 		    	<t:putAttribute name="containerClass" value="column decorated primary"/>
 			    <t:putAttribute name="containerTitle">
                     <spring:message code='jsp.accessDenied.title'/>
 			    </t:putAttribute>
 			    <t:putAttribute name="bodyContent">
-					
+
 					<t:insertTemplate template="/WEB-INF/jsp/templates/container.jsp">
 						<t:putAttribute name="containerClass" value="panel info nothingToDisplay centered_vert centered_horz"/>
 					    <t:putAttribute name="bodyContent">
                             <p class="message"><spring:message code="jsexception.unable.to.complete.request"/></p>
 					    </t:putAttribute>
 					</t:insertTemplate>
-					
+
 			    </t:putAttribute>
 			</t:insertTemplate>
-			
+
 	    </t:putAttribute>
 
 </t:insertTemplate>

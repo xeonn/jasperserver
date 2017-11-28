@@ -221,7 +221,7 @@ fieldset .sectionHeader {
 
 .group.inputRow > .group {
 	float:left;
-}		
+}
 
 .group.inputRow .control {
 	margin-bottom:0px;
@@ -401,6 +401,13 @@ textarea,
 	-webkit-box-sizing: border-box;	/* NEW */
 	box-sizing: border-box;			/* NEW */
 	height: 26px;					/* NEW */
+}
+
+input[type="text"]:disabled,
+input[type="password"]:disabled,
+textarea:disabled {
+    background-image: none;
+    background-color: #e3e3e3;
 }
 
 .control.select.multiple > select {
@@ -597,7 +604,7 @@ and (max-device-width : 1024px) {
 /*
 .section > .group .group {
 	margin-top:0;
-} TEST SCHEDULE UI FOR USE OF THIS STYLE RULE 
+} TEST SCHEDULE UI FOR USE OF THIS STYLE RULE
 */
 
 .section > .group.noIndent {
@@ -704,7 +711,15 @@ input[type="text"].date {
     border:none;
     cursor: pointer;
     height: 27px;
+	padding-inline-end: 0;
+	padding-inline-start: 0;
     width: 17px;
+}
+
+.calTriggerWrapper.button button.superfocus {
+	border-style: dotted;
+	border-color: #999;
+	border-width: 1px;
 }
 
 /*
@@ -1295,7 +1310,7 @@ http://www.dynarch.com/projects/calendar/old/
  */
 .pickList {
 	width: 185px;
-} 
+}
 
 .control.pickList > .availableValues > .pickList {
 	height:193px;
@@ -1304,8 +1319,8 @@ http://www.dynarch.com/projects/calendar/old/
 	border-width:1px;
 	border-style:solid;
 	border-color:#8e8e8e #bebebe #bebebe #bebebe;
-	-moz-box-sizing:border-box; 
-	-webkit-box-sizing:border-box; 
+	-moz-box-sizing:border-box;
+	-webkit-box-sizing:border-box;
 	box-sizing:border-box;
 }
 
@@ -1640,9 +1655,9 @@ input.booleanComboInput{
     padding-right: 20px;
     position: relative;
     z-index: 10;
-    
+
     /* padding: 5px 20px 2px; */ /* DELETE IF NO PROBLEMS */
-    
+
     /* background-color: #EEEEEE;
     background-image: url("images/tabs_horizontal_buttons_bkgd.png");
     background-repeat: repeat-x;
@@ -1657,7 +1672,7 @@ input.booleanComboInput{
 
 .tabs > .tabSet.horizontal.buttons {
     float: right;
-}  
+}
 
 .tabSet.horizontal.buttons li {
 	border: none;
@@ -1691,9 +1706,9 @@ input.booleanComboInput{
 
 /*
 .tabSet.anchor {
-	height:4px; 
-	background-color:#DEDEDC; 
-	border-top:1px solid #b5b5b5; 
+	height:4px;
+	background-color:#DEDEDC;
+	border-top:1px solid #b5b5b5;
 	border-bottom:1px solid #b5b5b5
 }
 */
@@ -1905,7 +1920,7 @@ div.olap_level_label {
     width:32px;
     height:23px;
     left:10px;
-    top:10px;
+    top:10px !important;
     cursor:pointer;
     z-index:3;
     display:none;

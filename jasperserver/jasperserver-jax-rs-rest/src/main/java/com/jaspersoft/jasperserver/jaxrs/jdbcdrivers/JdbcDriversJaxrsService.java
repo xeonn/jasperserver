@@ -55,7 +55,7 @@ import java.util.Set;
  * <p></p>
  *
  * @author yaroslav.kovalchyk
- * @version $Id: JdbcDriversJaxrsService.java 51947 2014-12-11 14:38:38Z ogavavka $
+ * @version $Id: JdbcDriversJaxrsService.java 63380 2016-05-26 20:56:46Z mchan $
  */
 @Service
 @Path("/jdbcDrivers")
@@ -68,7 +68,7 @@ public class JdbcDriversJaxrsService {
     protected List<String> configurationAllowedRoles;
 
     @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public List<JdbcDriverInfo> getJdbcDrivers() {
         List<JdbcDriverInfo> jdbcDriverInfos = new ArrayList<JdbcDriverInfo>(jdbcConnectionMap.size());
         final Set<String> registeredDriverClassNames = new HashSet<String>(jdbcDriverService.getRegisteredDriverClassNames());
@@ -82,7 +82,8 @@ public class JdbcDriversJaxrsService {
             info.setAvailable(jdbcDriverService.isRegistered(jdbcDriverClass))
                     .setJdbcDriverClass(jdbcDriverClass)
                     .setDefault(isDefault != null ? Boolean.valueOf(isDefault) : null)
-                    .setJdbcUrl((String) value.get("jdbcUrl")).setLabel((String) value.get("label"));
+                    .setJdbcUrl((String) value.get("jdbcUrl")).setLabel((String) value.get("label"))
+                    .setAllowSpacesInDbName("true".equals(value.get("allowSpacesInDbName")));
             // XML configuration assures cast safety
             @SuppressWarnings("unchecked")
             final Map<String, String> defaultValues = (Map<String, String>) value.get("defaultValues");
@@ -129,7 +130,7 @@ public class JdbcDriversJaxrsService {
 
     @POST
     @Consumes(MediaType.MULTIPART_FORM_DATA)
-    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public JdbcDriverInfo uploadDriver(@FormDataParam("className") String className, FormDataMultiPart multiPart) {
         Map<String, byte[]> driverFilesData = new HashMap<String, byte[]>();
         for (String currentKey : multiPart.getFields().keySet()) {

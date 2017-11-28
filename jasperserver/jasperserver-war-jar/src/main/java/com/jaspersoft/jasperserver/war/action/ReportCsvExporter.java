@@ -24,6 +24,12 @@ import java.io.OutputStream;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.webflow.execution.RequestContext;
+
+import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
+import com.jaspersoft.jasperserver.api.engine.jasperreports.common.CsvExportParametersBean;
+import com.jaspersoft.jasperserver.api.engine.jasperreports.common.ExportParameters;
+
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRPropertiesHolder;
 import net.sf.jasperreports.engine.JRPropertiesUtil;
@@ -33,17 +39,12 @@ import net.sf.jasperreports.export.SimpleCsvExporterConfiguration;
 import net.sf.jasperreports.export.SimpleCsvReportConfiguration;
 import net.sf.jasperreports.export.SimpleExporterInput;
 import net.sf.jasperreports.export.SimpleWriterExporterOutput;
-
-import org.springframework.webflow.execution.RequestContext;
-
-import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
-import com.jaspersoft.jasperserver.api.engine.jasperreports.common.CsvExportParametersBean;
-import com.jaspersoft.jasperserver.api.engine.jasperreports.common.ExportParameters;
+import net.sf.jasperreports.export.WriterExporterOutput;
 
 
 /**
  * @author sanda zaharia (szaharia@users.sourceforge.net)
- * @version $Id: ReportCsvExporter.java 54728 2015-04-24 15:28:20Z tdanciu $
+ * @version $Id: ReportCsvExporter.java 63555 2016-06-10 16:59:01Z tdanciu $
  */
 public class ReportCsvExporter extends AbstractReportExporter 
 {
@@ -59,7 +60,9 @@ public class ReportCsvExporter extends AbstractReportExporter
 		JRCsvExporter exporter = new JRCsvExporter(getJasperReportsContext());
 
 		exporter.setExporterInput(new SimpleExporterInput(jasperPrint));
-		exporter.setExporterOutput(new SimpleWriterExporterOutput(outputStream));
+		String encoding = JRPropertiesUtil.getInstance(getJasperReportsContext()).getProperty(jasperPrint, WriterExporterOutput.PROPERTY_CHARACTER_ENCODING);
+		SimpleWriterExporterOutput exporterOutput = new SimpleWriterExporterOutput(outputStream, encoding);
+		exporter.setExporterOutput(exporterOutput);
 		
 		CsvExportParametersBean exportParams = (CsvExportParametersBean)getExportParameters(context);
 		

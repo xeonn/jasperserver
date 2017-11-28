@@ -22,7 +22,7 @@
 
 /**
  * @author: Igor Nesterenko
- * @version: $Id: BaseModel.js 270 2014-10-13 19:58:03Z agodovanets $
+ * @version: $Id: BaseModel.js 2690 2016-04-22 19:37:31Z inestere $
  *
  * Generic functionality for our models
  */
@@ -33,8 +33,7 @@ define(function (require) {
     var _ = require("underscore"),
         Backbone = require("backbone"),
         httpStatusCodes = require("common/enum/httpStatusCodes"),
-        errors = require("common/enum/errorCodes"),
-        JSON = require("json3");
+        errors = require("common/enum/errorCodes");
 
 
     var BaseModel =  Backbone.Model.extend({

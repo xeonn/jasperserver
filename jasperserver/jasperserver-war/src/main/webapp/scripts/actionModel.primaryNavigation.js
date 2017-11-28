@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: actionModel.primaryNavigation.js 9551 2015-10-13 14:09:03Z dgorbenk $
+ * @version: $Id: actionModel.primaryNavigation.js 10166 2016-05-26 22:39:40Z gbacon $
  */
 
 /* global isNotNullORUndefined, actionModel, __jrsConfigs__, getAsFunction */
@@ -104,7 +104,12 @@ var primaryNavModule = {
         var navKey;
         var navId;
         var navObject;
-        this.JSON =  !!$("navigationActionModel").text ? ($("navigationActionModel").text.evalJSON()) : {};
+
+        if ($(this.ACTION_MODEL_TAG) === null) {
+            return;
+        }
+
+        this.JSON =  !!$(this.ACTION_MODEL_TAG).text ? ($(this.ACTION_MODEL_TAG).text.evalJSON()) : {};
         var re = /[A-Za-z]+[_]{1}[A-Za-z]+/;
         //go through json and get keys. Keys == action model context == nav menu muttons
         for(navKey in this.JSON){

@@ -53,10 +53,10 @@ FINALLY
     <t:putAttribute name="pageTitle"><c:choose><c:when test="${masterFlow=='olapClientConnection' and editMode=='edit'}"><spring:message code="addResources.schemaResource.edit"/></c:when><c:when test="${masterFlow=='olapClientConnection'}"><spring:message code="addResources.schemaResource.add"/></c:when><c:when test="${masterFlow!='reportUnit'}"><spring:message code="addResources.accessGrantResource.add"/></c:when><c:when test="${masterFlow!='reportUnit' and editMode=='edit'}"><spring:message code="addResources.schemaResource.edit"/></c:when><c:when test="${masterFlow=='reportUnit' and fileResource.parentFlowObject.editMode}"><spring:message code="resource.report.titleEdit"/></c:when><c:otherwise><spring:message code="resource.report.title"/></c:otherwise></c:choose></t:putAttribute>
     <t:putAttribute name="bodyID" value="addResource_locateResource"/>
     <!-- NOTE:
-         
+
     -->
     <t:putAttribute name="bodyClass" value="oneColumn flow wizard"/>
-    <t:putAttribute name="moduleName" value="addJasperReport.page"/>
+    <t:putAttribute name="moduleName" value="addResource/jasperReport/addJasperReportMain"/>
 
     <t:putAttribute name="headerContent">
         <jsp:include page="reportStep3ResourceState.jsp"/>
@@ -153,7 +153,7 @@ FINALLY
                                                             <spring:bind path="fileResource.source">
                                                                 <div class="control radio complex <c:if test="${status.error}">error</c:if>">
                                                                     <label class="wrap" for="CONTENT_REPOSITORY" title="<spring:message code="resource.report.repository"/>">
-                                                                        <spring:message code="resource.report.selectResource"/>    
+                                                                        <spring:message code="resource.report.selectResource"/>
                                                                     </label>
                                                                     <input class="" id="CONTENT_REPOSITORY" type="radio" name="${status.expression}" value="CONTENT_REPOSITORY" <c:if test="${status.value=='CONTENT_REPOSITORY'}">checked="checked"</c:if>/>
                                                                     <c:if test="${status.error}">
@@ -190,7 +190,7 @@ FINALLY
                             <button id="next" type="submit" name="_eventId_Next" class="button action up"><span class="wrap"><spring:message code='button.next'/></span><span class="icon"></span></button>
                             <button id="done" type="submit" class="button primary action up"><span class="wrap"><spring:message code='button.submit'/></span><span class="icon"></span></button>
                             <button id="cancel" type="submit" name="_eventId_cancel" class="button action up"><span class="wrap"><spring:message code='button.cancel'/></span><span class="icon"></span></button>
-                        </fieldset>                        
+                        </fieldset>
                     </t:putAttribute>
                 </t:putAttribute>
             </t:insertTemplate>

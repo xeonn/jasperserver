@@ -28,7 +28,7 @@
         <c:choose>
             <c:when test="${wrapper.editMode}"><spring:message code="resource.report.titleEdit"/></c:when>
             <c:otherwise><spring:message code="resource.report.title"/></c:otherwise>
-        </c:choose>        
+        </c:choose>
     </t:putAttribute>
     <t:putAttribute name="moduleName" value="commons.main"/>
     <t:putAttribute name="bodyID" value="addReport_Naming"/>

@@ -30,8 +30,8 @@
 				   value="com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.client.BeanReportDataSourceImpl"/>
 			   <entry key="Custom Data Source"
 				   value="com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.client.CustomReportDataSourceImpl"/>
-               <entry key="AWS Data Source"
-                   value="com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.client.AwsReportDataSourceImpl"/>
+               <entry key="Azure Data Source"
+                   value="com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.client.AzureSqlReportDataSourceImpl"/>
 			 </map>
 		   </property>
 		 </bean>
@@ -70,6 +70,8 @@
 				   value="com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.client.VirtualReportDataSourceImpl"/>
                <entry key="AWS Data Source"
 				   value="com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.client.AwsReportDataSourceImpl"/>
+                 <entry key="Azure Data Source"
+                        value="com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.client.AzureSqlReportDataSourceImpl"/>
 			   <entry key="Bean Data Source"
 				   value="com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.client.BeanReportDataSourceImpl"/>
                <entry key="Custom Data Source"

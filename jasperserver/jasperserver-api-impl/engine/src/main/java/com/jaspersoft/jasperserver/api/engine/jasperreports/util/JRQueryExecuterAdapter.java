@@ -20,10 +20,43 @@
  */
 package com.jaspersoft.jasperserver.api.engine.jasperreports.util;
 
+import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+
+import org.apache.commons.collections.OrderedMap;
+import org.apache.commons.collections.map.LinkedMap;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.jaspersoft.jasperserver.api.JSException;
 import com.jaspersoft.jasperserver.api.JSExceptionWrapper;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Query;
-import net.sf.jasperreports.engine.*;
+
+import net.sf.jasperreports.engine.DefaultJasperReportsContext;
+import net.sf.jasperreports.engine.JRDataSource;
+import net.sf.jasperreports.engine.JRDataset;
+import net.sf.jasperreports.engine.JRDefaultStyleProvider;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JRExpression;
+import net.sf.jasperreports.engine.JRField;
+import net.sf.jasperreports.engine.JRGroup;
+import net.sf.jasperreports.engine.JRParameter;
+import net.sf.jasperreports.engine.JRPropertiesHolder;
+import net.sf.jasperreports.engine.JRPropertiesMap;
+import net.sf.jasperreports.engine.JRQuery;
+import net.sf.jasperreports.engine.JRScriptlet;
+import net.sf.jasperreports.engine.JRSortField;
+import net.sf.jasperreports.engine.JRValueParameter;
+import net.sf.jasperreports.engine.JRVariable;
+import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.base.JRBaseDataset;
 import net.sf.jasperreports.engine.base.JRBaseField;
 import net.sf.jasperreports.engine.base.JRBaseObjectFactory;
@@ -32,20 +65,14 @@ import net.sf.jasperreports.engine.design.JRDesignParameter;
 import net.sf.jasperreports.engine.design.JRDesignQuery;
 import net.sf.jasperreports.engine.query.JRQueryExecuter;
 import net.sf.jasperreports.engine.query.JRQueryExecuterFactory;
+import net.sf.jasperreports.engine.query.QueryExecuterFactory;
 import net.sf.jasperreports.engine.type.WhenResourceMissingTypeEnum;
 import net.sf.jasperreports.engine.util.JRClassLoader;
 import net.sf.jasperreports.engine.util.JRQueryExecuterUtils;
-import org.apache.commons.collections.OrderedMap;
-import org.apache.commons.collections.map.LinkedMap;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import java.sql.Connection;
-import java.util.*;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: JRQueryExecuterAdapter.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: JRQueryExecuterAdapter.java 63380 2016-05-26 20:56:46Z mchan $
  */
 public class JRQueryExecuterAdapter {
 	
@@ -89,7 +116,7 @@ public class JRQueryExecuterAdapter {
 
 
 		try {
-			JRQueryExecuterFactory queryExecuterFactory = JRQueryExecuterUtils.getQueryExecuterFactory(query.getLanguage());
+			QueryExecuterFactory queryExecuterFactory = JRQueryExecuterUtils.getInstance(DefaultJasperReportsContext.getInstance()).getExecuterFactory(query.getLanguage());
 			
 			JRParameter[] dsParameters = getDatasetParameters(queryExecuterFactory, 
 					parameterValues, parameterTypes, additionalParameters);
@@ -250,7 +277,7 @@ public class JRQueryExecuterAdapter {
 	
 	public static JRQueryExecuter createQueryExecuter(JasperReport report, Map parameterValues, Query query) {
 		try {
-			JRQueryExecuterFactory queryExecuterFactory = JRQueryExecuterUtils.getQueryExecuterFactory(query.getLanguage());
+			QueryExecuterFactory queryExecuterFactory = JRQueryExecuterUtils.getInstance(DefaultJasperReportsContext.getInstance()).getExecuterFactory(query.getLanguage());
 
 			ReportQueryDataset dataset = new ReportQueryDataset(report, query, queryExecuterFactory);
 

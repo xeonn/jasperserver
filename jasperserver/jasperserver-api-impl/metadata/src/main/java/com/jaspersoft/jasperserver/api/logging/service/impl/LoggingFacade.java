@@ -23,6 +23,7 @@ package com.jaspersoft.jasperserver.api.logging.service.impl;
 import com.jaspersoft.jasperserver.api.logging.context.LoggableEvent;
 import com.jaspersoft.jasperserver.api.logging.service.LoggingService;
 
+import javax.annotation.Resource;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
@@ -30,15 +31,12 @@ import java.util.ArrayList;
 
 /**
  * @author Sergey Prilukin
- * @version $Id$
+ * @version $Id: LoggingFacade.java 62954 2016-05-01 09:49:23Z ykovalch $
  */
 public class LoggingFacade implements LoggingService {
 
+    @Resource(name="${bean.routingMap}")
     private Map<Class<? extends LoggableEvent>, LoggingService> routingMap;
-
-    public void setRoutingMap(Map<Class<? extends LoggableEvent>, LoggingService> routingMap) {
-        this.routingMap = routingMap;
-    }
 
     public void saveEvent(LoggableEvent loggableEvent) {
         for (Class<? extends LoggableEvent> clazz: routingMap.keySet()) {

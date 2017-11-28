@@ -20,6 +20,9 @@
  */
 package com.jaspersoft.jasperserver.war.validation;
 
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
@@ -29,9 +32,11 @@ import com.jaspersoft.jasperserver.war.common.JasperServerConst;
 import com.jaspersoft.jasperserver.war.common.JasperServerUtil;
 import com.jaspersoft.jasperserver.war.dto.ListOfValuesDTO;
 
+import java.util.Iterator;
+
 /**
  * @author Ionut Nedelcu (ionutned@users.sourceforge.net)
- * @version $Id: ListOfValuesValidator.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: ListOfValuesValidator.java 63380 2016-05-26 20:56:46Z mchan $
  */
 public class ListOfValuesValidator implements Validator
 {
@@ -127,11 +132,6 @@ public class ListOfValuesValidator implements Validator
 			
 		if(listOfValuesDTO.getNewValue() == null || size(listOfValuesDTO.getNewValue()) == 0){
 			errors.rejectValue("newValue", "ListOfValuesValidator.error.not.empty");
-		}else{
-			if(listOfValuesDTO.getNewValue().length()>JasperServerConst.MAX_LENGTH_LABEL){
-				errors.rejectValue("newValue", "ListOfValuesValidator.error.too.long",
-								   new Object[]{JasperServerConst.MAX_LENGTH_LABEL_W}, null);
-			}
 		}
 			
 	}

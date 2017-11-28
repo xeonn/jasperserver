@@ -57,12 +57,12 @@
             </if>
         </else>
     </if>
-    
+   
     <!-- to cope with windows based builds
-	<property name="OFFLINE_ARG" value="" />
-	<property name="THREAD_ARG" value="" />
-	-->
-	
+        <property name="OFFLINE_ARG" value="" />
+        <property name="THREAD_ARG" value="" />
+        -->
+       
     <macrodef name="oldrunmaven">
         <attribute name="dir" default="${buildBase}"/>
         <element name="args" implicit="yes"/>
@@ -94,10 +94,10 @@
                     <fail unless="maven">"maven" or "maven.home" property needs to be set</fail>
                     <!-- convert to fwd slashes -->
                     <propertyregex property="maven.home"
-                                   input="${maven}"
-                                   regexp="(.*)[\\/]bin"
-                                   select="\1"
-                                   casesensitive="false"/>
+                                  input="${maven}"
+                                  regexp="(.*)[\\/]bin"
+                                  select="\1"
+                                  casesensitive="false"/>
                     <echo message="maven.home = ${maven.home}"/>
                     <fail message="maven.home dir ${maven.home} not found">
                         <condition>
@@ -115,7 +115,7 @@
                 <isset property="remote.debug"/>
                 <then>
                     <var name="remoteDebugArg"
-                         value="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=8000 -Xnoagent -Djava.compiler=NONE"/>
+                        value="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=8000 -Xnoagent -Djava.compiler=NONE"/>
                 </then>
             </if>
             <echo>remoteDebugArg: ${remoteDebugArg}</echo>
@@ -152,10 +152,10 @@
             <echo>MAVEN LOGGING: ${maven.logging.level}</echo>
 
             <java classname="org.codehaus.classworlds.Launcher"
-                  fork="true"
-                  failonerror="true"
-                  dir="@{dir}"
-                  resultproperty="maven.result">
+                 fork="true"
+                 failonerror="true"
+                 dir="@{dir}"
+                 resultproperty="maven.result">
                 <jvmarg value="-Xms128m"/>
                 <jvmarg value="-Xmx1024m"/>
                 <jvmarg value="-XX:PermSize=32m"/>
@@ -201,8 +201,8 @@
     <!-- ======================================================================= -->
 
     <target name="add-jdbc-driver"
-            depends="init-source-paths"
-            description="install jdbc driver to mvn local repository">
+           depends="init-source-paths"
+           description="install jdbc driver to mvn local repository">
         <if>
             <equals arg1="${maven.jdbc.groupId}" arg2="tibcosoftwareinc.jdbc" />
             <then>
@@ -232,7 +232,7 @@
 
 
     <target name="init-source-paths"
-            description="init svn and build paths">
+           description="init svn and build paths">
 
         <chkForSpace propName="js-path" propValue="${js-path}"/>
 
@@ -281,8 +281,6 @@
         <property name="js-pro-path" value="${js-pro-base-path}"/>
         <!-- backwards compatability -->
 
-        <property name="js-sample-ws-app-path" value="${js-path}/samples/java-webapp-sample"/>
-        <property name="js-sample-ws-app-pro-path" value="${js-pro-path}/samples/java-webapp-sample-pro"/>
 
         <echo></echo>
         <echo>Property values (dev.xml:init-source-paths):</echo>
@@ -296,21 +294,21 @@
     </target>
 
     <target name="test-svn"
-            depends="init-source-paths"
-            description="test svn">
+           depends="init-source-paths"
+           description="test svn">
         <echo>Testing svn...</echo>
         <runsvn>
             <arg value="list"/>
             <arg value="${js-url}"/>
         </runsvn>
         <!-- echo>open source working directory: ${js-path}</echo>
-        <echo>pro working directory: ${js-path}</echo>
-        -->
+       <echo>pro working directory: ${js-path}</echo>
+       -->
     </target>
 
     <target name="checkout-ce"
-            depends="init-source-paths"
-            description="svn checkout os">
+           depends="init-source-paths"
+           description="svn checkout os">
         <runsvn>
             <arg value="co"/>
             <arg value="${js-url}"/>
@@ -319,8 +317,8 @@
     </target>
 
     <target name="checkout-ce-anon"
-            depends="init-source-paths"
-            description="svn checkout os">
+           depends="init-source-paths"
+           description="svn checkout os">
         <runsvn>
             <arg value="co"/>
             <arg line="--username anonsvn --password anonsvn"/>
@@ -330,8 +328,8 @@
     </target>
 
     <target name="checkout-pro"
-            depends="init-source-paths"
-            description="svn checkout pro">
+           depends="init-source-paths"
+           description="svn checkout pro">
         <runsvn>
             <arg value="co"/>
             <arg value="${js-pro-url}"/>
@@ -340,34 +338,34 @@
     </target>
 
     <target name="update-all"
-            depends="update-ce,update-pro"
-            description="svn update of ce src and pro src">
+           depends="update-ce,update-pro"
+           description="svn update of ce src and pro src">
     </target>
 
     <target name="update-ce"
-            depends="init-source-paths"
-            description="svn update os">
+           depends="init-source-paths"
+           description="svn update os">
         <runsvn dir="${js-path}">
             <arg value="update"/>
         </runsvn>
     </target>
 
     <target name="update-pro"
-            depends="init-source-paths"
-            description="svn update pro">
+           depends="init-source-paths"
+           description="svn update pro">
         <runsvn dir="${js-pro-path}">
             <arg value="update"/>
         </runsvn>
     </target>
 
     <target name="build-src-all"
-            depends="build-ce, build-pro"
-            description="Builds JasperServer CE/Pro and copies WAR files to install resources">
+           depends="build-ce, build-pro"
+           description="Builds JasperServer CE/Pro and copies WAR files to install resources">
     </target>
 
     <target name="build-ce"
-            depends="init-source-paths, set-ce-webapp-name, install-jdbc-dep"
-            description="Builds JasperServer CE and copies WAR to install resources">
+           depends="init-source-paths, set-ce-webapp-name, install-jdbc-dep"
+           description="Builds JasperServer CE and copies WAR to install resources">
 
         <!-- set these values to package avoid runtime error on windows. these two     -->
         <!-- can't be set with java properties. And causes invalid goal error on linux -->
@@ -411,12 +409,12 @@
         <!-- (jasperserver/WEB-INF/js.quartz.properties)                  -->
         <!--                                                              -->
         <replace file="${js-path}/jasperserver-war/target/jasperserver/WEB-INF/js.quartz.properties"
-                 token="${webAppNameSrcPro}"
-                 value="${webAppName}"/>
+                token="${webAppNameSrcPro}"
+                value="${webAppName}"/>
 
         <replace file="${warSourceDir}/WEB-INF/js.quartz.properties"
-                 token="${webAppNameSrcPro}"
-                 value="${webAppName}"/>
+                token="${webAppNameSrcPro}"
+                value="${webAppName}"/>
 
         <!-- check if we can skip the assembly of export files -->
         <if>
@@ -430,8 +428,8 @@
     </target>
 
     <target name="build-pro"
-            depends="init-source-paths, set-pro-webapp-name, install-jdbc-dep"
-            description="Builds JasperServer Pro and copies WAR to install resources">
+           depends="init-source-paths, set-pro-webapp-name, install-jdbc-dep"
+           description="Builds JasperServer Pro and copies WAR to install resources">
 
         <if>
             <isset property="js.enable.unit.tests"/>
@@ -454,7 +452,7 @@
                     <!-- skip execution of integration-tests in production-tests folder -->
                     <arg value="-D${SKIP_TEST_ARG}"/>
                     <!--<arg value="${OFFLINE_ARG}"/>
-                    <arg value="${THREAD_ARG}"/>-->
+                   <arg value="${THREAD_ARG}"/>-->
                 </runmaven>
             </else>
         </if>
@@ -476,27 +474,9 @@
         <property name="js.enable.unit.tests" value="true"/>
     </target>
 
-    <target name="build-sample-ws-app-ce"
-            depends="init-source-paths"
-            description="build sample web services CE application WAR">
-        <runmaven dir="${js-sample-ws-app-path}">
-            <arg value="clean"/>
-            <arg value="install"/>
-        </runmaven>
-    </target>
-
-    <target name="build-sample-ws-app-pro"
-            depends="init-source-paths"
-            description="build sample web services Pro application WAR">
-        <runmaven dir="${js-sample-ws-app-pro-path}">
-            <arg value="clean"/>
-            <arg value="install"/>
-        </runmaven>
-    </target>
-
     <target name="copy-ce-war"
-            depends="init-source-paths, set-ce-webapp-name"
-            description="copy ce war directory to warDir">
+           depends="init-source-paths, set-ce-webapp-name"
+           description="copy ce war directory to warDir">
 
         <delete dir="${warSourceDir}"/>
         <copy toDir="${warSourceDir}">
@@ -505,8 +485,8 @@
     </target>
 
     <target name="copy-pro-war"
-            depends="init-source-paths, set-pro-webapp-name"
-            description="Copy pro war directory to warDir">
+           depends="init-source-paths, set-pro-webapp-name"
+           description="Copy pro war directory to warDir">
         <delete dir="${warSourceDir}"/>
         <copy toDir="${warSourceDir}">
             <fileset dir="${js-pro-path}/jasperserver-war/target/jasperserver-pro"/>
@@ -514,36 +494,36 @@
     </target>
 
     <target name="copy-pro-buildomatic"
-            depends="init-source-paths"
-            description="copy pro buildomatic files to here">
+           depends="init-source-paths"
+           description="copy pro buildomatic files to here">
         <copy toDir="${basedir}" verbose="true">
             <fileset dir="${js-pro-path}/buildomatic"/>
         </copy>
     </target>
 
     <target name="build-init-js-db-ce"
-            depends="add-jdbc-driver,drop-js-db,create-js-db,build-js-ddl-ce,init-js-db-ce"
-            description="drop js db, create js db, build js ddl ce, initialize the js db ce">
+           depends="add-jdbc-driver,drop-js-db,create-js-db,build-js-ddl-ce,init-js-db-ce"
+           description="drop js db, create js db, build js ddl ce, initialize the js db ce">
     </target>
 
     <target name="build-init-js-db-pro"
-            depends="add-jdbc-driver,drop-js-db,create-js-db,build-js-ddl-pro,init-js-db-pro"
-            description="drop js db, create js db, build js ddl pro, initialize the js db pro">
+           depends="add-jdbc-driver,drop-js-db,create-js-db,build-js-ddl-pro,init-js-db-pro"
+           description="drop js db, create js db, build js ddl pro, initialize the js db pro">
     </target>
 
     <target name="re-init-js-db-ce"
-            depends="drop-js-db,create-js-db,init-js-db-ce"
-            description="drop js db, create js db, init js db for CE (handy for dev work)">
+           depends="drop-js-db,create-js-db,init-js-db-ce"
+           description="drop js db, create js db, init js db for CE (handy for dev work)">
     </target>
 
     <target name="re-init-js-db-pro"
-            depends="drop-js-db,create-js-db,init-js-db-pro"
-            description="drop js db, create js db, init js db for Pro (handy for dev work)">
+           depends="drop-js-db,create-js-db,init-js-db-pro"
+           description="drop js db, create js db, init js db for Pro (handy for dev work)">
     </target>
 
     <target name="run-production-data-ce"
-            depends="init-source-paths,install-jdbc-dep"
-            description="build and run the ce production data creation">
+           depends="init-source-paths,install-jdbc-dep"
+           description="build and run the ce production data creation">
         <runmaven dir="${js-path}/production-tests">
             <arg value="clean"/>
             <arg value="install"/>
@@ -552,8 +532,8 @@
     </target>
 
     <target name="run-integration-tests-ce"
-            depends="init-source-paths,install-jdbc-dep"
-            description="build and run the ce integration tests">
+           depends="init-source-paths,install-jdbc-dep"
+           description="build and run the ce integration tests">
 
         <!-- to use your own xml file from the command line:              -->
         <!--   run-integration-tests-pro -DtestXmlFile=myTestngFile.xml   -->
@@ -586,8 +566,8 @@
 
 
     <target name="run-production-data-pro"
-            depends="init-source-paths,install-jdbc-dep"
-            description="build and run the pro production data creation">
+           depends="init-source-paths,install-jdbc-dep"
+           description="build and run the pro production data creation">
         <runmaven dir="${js-pro-path}/production-tests">
             <arg value="clean"/>
             <arg value="install"/>
@@ -596,8 +576,8 @@
     </target>
 
     <target name="run-integration-tests-pro"
-            depends="init-source-paths, install-jdbc-dep"
-            description="build and run the pro integration tests">
+           depends="init-source-paths, install-jdbc-dep"
+           description="build and run the pro integration tests">
 
         <property name="OFFLINE_ARG" value="-V"/>
 
@@ -657,8 +637,8 @@
     </target>
 
     <target name="install-jdbc-dep"
-            depends="init-source-paths"
-            description="copies a generated POM for the JDBC dependency, then calls Maven to install that project">
+           depends="init-source-paths"
+           description="copies a generated POM for the JDBC dependency, then calls Maven to install that project">
         <mkdir dir="${buildBase}/jdbc-dep"/>
         <copy file="${currentConf}/jdbc-dep-pom.xml" tofile="${buildBase}/jdbc-dep/pom.xml" overwrite="true"/>
 
@@ -669,31 +649,31 @@
 
     <!-- 2012-02-09: COMMENT OUT UNIT-TEST. WILL BE DELETING -->
     <!-- <target name="run-unit-test-ce"
-            depends="init-source-paths, install-jdbc-dep"
-            description="build and run just the unit test dir">
-        <runmaven dir="${js-path}/jasperserver-unit-test">
-            <arg value="clean"/>
-            <arg value="install"/>
-        </runmaven> -->
+           depends="init-source-paths, install-jdbc-dep"
+           description="build and run just the unit test dir">
+       <runmaven dir="${js-path}/jasperserver-unit-test">
+           <arg value="clean"/>
+           <arg value="install"/>
+       </runmaven> -->
     <!-- additional testing for import-export -->
     <!-- <run-export-test edition="ce"/>
-   </target> -->
+  </target> -->
 
     <!-- 2012-02-09: COMMENT OUT UNIT-TEST. WILL BE DELETING -->
     <!-- <target name="run-unit-test-pro"
-            depends="init-source-paths, install-jdbc-dep"
-            description="runs the pro unit tests">
-        <runmaven dir="${js-pro-path}/unit-tests">
-            <arg value="clean"/>
-            <arg value="install"/>
-        </runmaven> -->
+           depends="init-source-paths, install-jdbc-dep"
+           description="runs the pro unit tests">
+       <runmaven dir="${js-pro-path}/unit-tests">
+           <arg value="clean"/>
+           <arg value="install"/>
+       </runmaven> -->
     <!-- additional testing for import-export -->
     <!-- <run-export-test edition="pro"/>
-   </target> -->
+  </target> -->
 
     <target name="run-remote-test-ce"
-            depends="init-source-paths"
-            description="builds and runs the OS remote tests">
+           depends="init-source-paths"
+           description="builds and runs the OS remote tests">
         <runmaven dir="${js-path}/jasperserver-remote-tests">
             <arg value="-Dremote.test.host=${remote.test.host}"/>
             <arg value="-Dremote.test.port=${remote.test.port}"/>
@@ -704,8 +684,8 @@
     </target>
 
     <target name="run-remote-test-pro"
-            depends="init-source-paths"
-            description="runs the pro remote tests">
+           depends="init-source-paths"
+           description="runs the pro remote tests">
         <runmaven dir="${js-pro-path}/remote-tests">
             <arg value="-Dremote.test.host=${remote.test.host}"/>
             <arg value="-Dremote.test.port=${remote.test.port}"/>
@@ -719,38 +699,38 @@
     <!-- NOTE: the "*-all" targets are oriented toward executing -pro targets -->
 
     <target name="build-all"
-            depends="build-src-all,build-init-js-db-pro,run-integration-tests-pro,run-production-data-pro"
-            description="(do not do svn update), clean build all src, drop-recreate db, 
-                         build ddl pro, init js db pro, run integration tests pro, run production data pro">
+           depends="build-src-all,build-init-js-db-pro,run-integration-tests-pro,run-production-data-pro"
+           description="(do not do svn update), clean build all src, drop-recreate db,
+                        build ddl pro, init js db pro, run integration tests pro, run production data pro">
     </target>
 
     <target name="build-all-svn-update"
-            depends="update-all,build-src-all,build-init-js-db-pro,run-integration-tests-pro,run-production-data-pro"
-            description="(do not do svn update), clean build all src, drop-recreate db, 
-                         build ddl pro, init js db pro, run integration tests pro, run production data pro">
+           depends="update-all,build-src-all,build-init-js-db-pro,run-integration-tests-pro,run-production-data-pro"
+           description="(do not do svn update), clean build all src, drop-recreate db,
+                        build ddl pro, init js db pro, run integration tests pro, run production data pro">
     </target>
 
     <target name="build-all-deploy"
-            depends="build-all, deploy-webapp-pro"
-            description="call build-all target, deploy webapp pro">
+           depends="build-all, deploy-webapp-pro"
+           description="call build-all target, deploy webapp pro">
     </target>
 
     <target name="build-all-ce"
-            depends="build-ce,build-init-js-db-ce,run-integration-tests-ce,run-production-data-ce"
-            description="(do not do svn update), clean build ce src, drop-recreate db, 
-                         build ddl ce, init js db ce, run integration tests ce, run production data ce">
+           depends="build-ce,build-init-js-db-ce,run-integration-tests-ce,run-production-data-ce"
+           description="(do not do svn update), clean build ce src, drop-recreate db,
+                        build ddl ce, init js db ce, run integration tests ce, run production data ce">
     </target>
 
     <target name="update-webapp-ce"
-            depends="init-source-paths, set-ce-webapp-name, echo-values, 
-            update-webapp-src-ce, update-webapp-config-ce, refresh-webapp"
-            description="copy updated files to webapp"/>
+           depends="init-source-paths, set-ce-webapp-name, echo-values,
+           update-webapp-src-ce, update-webapp-config-ce, refresh-webapp"
+           description="copy updated files to webapp"/>
 
     <target name="update-webapp-pro"
-            depends="init-source-paths, set-pro-webapp-name, echo-values, 
-            update-webapp-src-ce, update-webapp-src-pro, update-webapp-config-pro,
-            refresh-webapp"
-            description="copy updated files to webapp"/>
+           depends="init-source-paths, set-pro-webapp-name, echo-values,
+           update-webapp-src-ce, update-webapp-src-pro, update-webapp-config-pro,
+           refresh-webapp"
+           description="copy updated files to webapp"/>
 
     <target name="echo-values">
         <!-- echo some of the values for info -->
@@ -761,11 +741,11 @@
         <echo>warTargetDir = ${warTargetDir}</echo>
         <echo>webAppName = ${webAppName}</echo>
         <!--
-        <echo> webAppNameCE = ${webAppNameCE}</echo>
-        <echo> webAppNamePro = ${webAppNamePro}</echo>
-        <echo> webAppNameDel = ${webAppNameDel}</echo>        
-        <echo> warTargetDirDel = ${warTargetDirDel}</echo>
-        -->
+       <echo> webAppNameCE = ${webAppNameCE}</echo>
+       <echo> webAppNamePro = ${webAppNamePro}</echo>
+       <echo> webAppNameDel = ${webAppNameDel}</echo>        
+       <echo> warTargetDirDel = ${warTargetDirDel}</echo>
+       -->
         <echo></echo>
     </target>
 
@@ -777,8 +757,8 @@
     </target>
 
     <target name="update-webapp-src-pro"
-            depends="init-source-paths, set-pro-webapp-name"
-            description="copy updated files to webapp">
+           depends="init-source-paths, set-pro-webapp-name"
+           description="copy updated files to webapp">
 
         <!-- copy webapp from source, then drop in files created from templates -->
         <!-- copy jar files -->
@@ -801,7 +781,7 @@
     </target>
 
     <target name="update-webapp-src-ce"
-            description="copy updated files to webapp">
+           description="copy updated files to webapp">
 
         <!-- copy jars from target dir -->
         <copy toDir="${warLibDir}" flatten="true" verbose="true">
@@ -826,7 +806,7 @@
     </target>
 
     <target name="update-webapp-config-ce"
-            description="run config collector for ce webapp">
+           description="run config collector for ce webapp">
         <ant antfile="${js-path}/build-config.xml" inheritall="true" inheritrefs="true" target="copy-config">
             <property name="module" value="ce.webapp"/>
             <property name="target" value="${warSourceDir}/WEB-INF"/>
@@ -835,7 +815,7 @@
     </target>
 
     <target name="update-webapp-config-pro"
-            description="run config collector for pro webapp">
+           description="run config collector for pro webapp">
         <ant antfile="${js-pro-path}/build-config.xml" inheritall="true" inheritrefs="true" target="copy-config">
             <property name="module" value="pro.webapp"/>
             <property name="target" value="${warSourceDir}/WEB-INF"/>
@@ -848,8 +828,8 @@
     <!-- usage: ant build-dir-ce -DdirName=dir-name   -->
     <!--                                              -->
     <target name="build-dir-ce"
-            depends="init-source-paths, set-ce-webapp-name"
-            description="build a directory. usage: ant build-dir-ce -DdirName=dir-name">
+           depends="init-source-paths, set-ce-webapp-name"
+           description="build a directory. usage: ant build-dir-ce -DdirName=dir-name">
 
         <!-- set these values to package avoid runtime error on windows. these two     -->
         <!-- can't be set with java properties. And causes invalid goal error on linux -->
@@ -876,8 +856,8 @@
     <!-- usage: ant build-dir-pro -DdirName=dir-name  -->
     <!--                                              -->
     <target name="build-dir-pro"
-            depends="init-source-paths, set-pro-webapp-name"
-            description="build a directory. usage: ant build-dir-pro -DdirName=dir-name">
+           depends="init-source-paths, set-pro-webapp-name"
+           description="build a directory. usage: ant build-dir-pro -DdirName=dir-name">
 
         <runmaven dir="${js-pro-path}/${dirName}">
             <arg value="clean"/>
@@ -898,8 +878,8 @@
     <!-- build the custom source code that we use to load the foodmart sample database -->
     <!-- todo: rename the output jar to something like jsFoodmartLoader.jar            -->
     <target name="build-util"
-            depends="init-source-paths"
-            description="build buildomatic-specific stuff">
+           depends="init-source-paths"
+           description="build buildomatic-specific stuff">
         <property name="util-target" value="${basedir}/target/classes"/>
         <delete dir="${util-target}"/>
         <mkdir dir="${util-target}"/>
@@ -926,8 +906,8 @@
     <!-- targets for checking maven and java setup -->
 
     <target name="maven-version"
-            depends="init-source-paths"
-            description="Display the maven -version information">
+           depends="init-source-paths"
+           description="Display the maven -version information">
         <exec executable="${maven}" failonerror="true">
             <arg value="-version"/>
             <!-- <arg value="-s ${maven.settings.file}"/> -->
@@ -935,8 +915,8 @@
     </target>
 
     <target name="java-version"
-            depends="init-source-paths"
-            description="Display the java -version information">
+           depends="init-source-paths"
+           description="Display the java -version information">
         <exec executable="java" failonerror="true">
             <arg value="-version"/>
         </exec>
@@ -951,8 +931,8 @@
     <!-- docflex jars.                                                 -->
 
     <target name="gen-public-api-ce"
-            depends="init-source-paths"
-            description="generate CE Public API using DocFlex">
+           depends="init-source-paths"
+           description="generate CE Public API using DocFlex">
         <runmaven dir="${js-path}">
             <arg value="-Djavadoc-type=public-api"/>
             <arg value="-Ddocflex-home=${docFlexDir}"/>
@@ -962,8 +942,8 @@
     </target>
 
     <target name="gen-public-api-pro"
-            depends="init-source-paths"
-            description="generate Pro Public API using DocFlex">
+           depends="init-source-paths"
+           description="generate Pro Public API using DocFlex">
         <runmaven dir="${js-pro-path}">
             <arg value="-Djavadoc-type=public-api"/>
             <arg value="-Ddocflex-home=${docFlexDir}"/>
@@ -974,7 +954,7 @@
 
     <!-- Special target for code signing on the Windows JS CE Installer binary. -->
     <target name="run-code-signing-on-win-ce-installer"
-            description="Run the code signing on the Windows CE Installer">
+           description="Run the code signing on the Windows CE Installer">
         <property name="installerDir" value=""/>
         <property name="installerName" value=""/>
 
@@ -992,8 +972,8 @@
                             <available file="${installerName}" filepath="${installerDir}"/>
                             <then>
                                 <exec dir="${installerDir}"
-                                      executable="${basedir}\target\signtool.exe"
-                                      failonerror="yes">
+                                     executable="${basedir}\target\signtool.exe"
+                                     failonerror="yes">
                                     <arg line=" sign /f ${basedir}\target\my_creds.pfx /p JSitMLiOSBIatmwdBIpitw. /v /d 'JasperServer CE Windows Installer' /du 'www.jaspersoft.com' ${installerName}"/>
                                 </exec>
                             </then>
@@ -1014,8 +994,8 @@
     </target>
 
     <target name="run-standalone-test-ce"
-            depends="init-source-paths,install-jdbc-dep"
-            description="build and run the ce production data creation">
+           depends="init-source-paths,install-jdbc-dep"
+           description="build and run the ce production data creation">
         <property name="OFFLINE_ARG" value="-V"/>
         <property name="THREAD_ARG" value="-V"/>
 
@@ -1029,8 +1009,8 @@
     </target>
 
     <target name="run-standalone-test-pro"
-            depends="init-source-paths,install-jdbc-dep"
-            description="build and run the pro production data creation">
+           depends="init-source-paths,install-jdbc-dep"
+           description="build and run the pro production data creation">
         <property name="OFFLINE_ARG" value="-V"/>
         <property name="THREAD_ARG" value="-V"/>
 
@@ -1045,7 +1025,7 @@
     </target>
 
     <target name="drop-js-db-it"
-            description="drop jasperserver repository db for IT">
+           description="drop jasperserver repository db for IT">
         <echo message="Dropping database. js.it.dbName = ${js.it.dbName}"/>
         <runSQL jdbcUrl="${admin.jdbcUrl}" print="true" onerror="continue">
             ${js.it.drop}
@@ -1053,7 +1033,7 @@
     </target>
 
     <target name="create-js-db-it"
-            description="create jasperserver repository db for IT">
+           description="create jasperserver repository db for IT">
         <echo message="Creating database, js.it.dbName = ${js.it.dbName}, ${js.it.create}"/>
         <runSQL jdbcUrl="${admin.jdbcUrl}" print="true" onerror="abort">
             ${js.it.create}
@@ -1061,7 +1041,7 @@
     </target>
 
     <target name="init-js-db-it-pro"
-            description="run ddl on pro jasperserver db for integration testing">
+           description="run ddl on pro jasperserver db for integration testing">
         <if>
             <isset property="stopIfError" />
             <then>
@@ -1082,13 +1062,13 @@
     </target>
 
     <target name="re-create-js-db-it-pro"
-            depends="drop-js-db-it,create-js-db-it"
-            description="Prepares IT database">
+           depends="drop-js-db-it,create-js-db-it"
+           description="Prepares IT database">
     </target>
 
     <target name="re-init-js-db-it-pro"
-            depends="re-create-js-db-it-pro,init-js-db-it-pro"
-            description="Prepares IT database">
+           depends="re-create-js-db-it-pro,init-js-db-it-pro"
+           description="Prepares IT database">
     </target>
 
 </project>

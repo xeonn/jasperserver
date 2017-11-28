@@ -1,12 +1,16 @@
 .webPageView {
-    background-image: url("images/wait_animation_large.gif");
-    background-position: center center;
-    background-repeat: no-repeat;
     display: block;
     height: 100%;
     width: 100%;
     overflow: hidden;
     background-color: #FFFFFF;
+}
+
+.webPageView.loading {
+    background-image: url("images/wait_animation_large.gif");
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-color: transparent;
 }
 
 .webPageView > .externalUrlIframe {

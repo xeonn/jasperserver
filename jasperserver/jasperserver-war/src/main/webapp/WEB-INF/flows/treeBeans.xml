@@ -30,6 +30,7 @@
                 <entry key="nonSemanticDataSourceTreeDataProvider" value="dsTreeDataProvider"/>
                 <entry key="joinableDsTreeDataProvider" value="joinableDsTreeDataProvider"/>
                 <entry key="awsDataSourceTreeDataProvider" value="awsDataSourceTreeDataProvider"/>
+                <entry key="azureSqlDataSourceTreeDataProvider" value="azureSqlDataSourceTreeDataProvider"/>
                 <entry key="contentResourceTreeDataProvider" value="contentResourceTreeDataProvider"/>
                 <entry key="fileResourceBaseTreeDataProvider" value="fileResourceBaseTreeDataProvider"/>
             </map>

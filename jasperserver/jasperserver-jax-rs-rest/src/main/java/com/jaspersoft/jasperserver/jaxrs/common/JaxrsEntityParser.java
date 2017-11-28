@@ -20,10 +20,13 @@
 */
 package com.jaspersoft.jasperserver.jaxrs.common;
 
+import com.jaspersoft.jasperserver.remote.exception.MandatoryParameterNotFoundException;
+
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.Providers;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
@@ -32,7 +35,7 @@ import java.lang.annotation.Annotation;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: JaxrsEntityParser.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: JaxrsEntityParser.java 62954 2016-05-01 09:49:23Z ykovalch $
  */
 public class JaxrsEntityParser {
     private final Providers providers;
@@ -59,6 +62,10 @@ public class JaxrsEntityParser {
             throw new IllegalArgumentException("No available MessageBodyReader for class " + clazz.getName()
                     + " and media type " + mediaType);
         }
-        return reader.readFrom(clazz, clazz, annotations, mediaType, httpHeaders.getRequestHeaders(), entityStream);
+        try {
+            return reader.readFrom(clazz, clazz, annotations, mediaType, httpHeaders.getRequestHeaders(), entityStream);
+        } catch (EOFException e) {
+            throw new MandatoryParameterNotFoundException("request body");
+        }
     }
 }

@@ -16,7 +16,6 @@ import net.sf.jasperreports.data.jdbc.JdbcDataAdapter;
 import net.sf.jasperreports.data.jdbc.JdbcDataAdapterImpl;
 import net.sf.jasperreports.engine.JasperReportsContext;
 
-
 import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -98,7 +97,7 @@ public class JDBCQueryDataSourceDefinition extends DataAdapterDefinition {
         if (getValidator() != null) getValidator().validatePropertyValues(customDataSource, null);
         String query = (String)propertyValueMap.get("query");
 
-        JDBCQueryDataSourceService jdbcDataAdapterService = new JDBCQueryDataSourceService(DataAdapterDefinitionUtil.getJasperReportsContext(), jdbcDataAdapter);
+        JDBCQueryDataSourceService jdbcDataAdapterService = new JDBCQueryDataSourceService(getJasperReportsContext(), jdbcDataAdapter);
         Connection connection = null;
         Statement statement = null;
         ResultSet resultSet = null;

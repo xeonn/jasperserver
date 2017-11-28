@@ -46,24 +46,6 @@ import java.util.TimeZone;
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
 
-import net.sf.jasperreports.engine.JRExporter;
-import net.sf.jasperreports.engine.JRExporterParameter;
-import net.sf.jasperreports.engine.JRParameter;
-import net.sf.jasperreports.engine.JRReport;
-import net.sf.jasperreports.engine.JRRuntimeException;
-import net.sf.jasperreports.engine.JasperPrint;
-import net.sf.jasperreports.engine.JasperReportsContext;
-import net.sf.jasperreports.engine.ReportContext;
-import net.sf.jasperreports.engine.SimpleReportContext;
-import net.sf.jasperreports.engine.export.GenericElementReportTransformer;
-import net.sf.jasperreports.engine.export.JRCsvExporter;
-import net.sf.jasperreports.engine.export.JRHtmlExporterParameter;
-import net.sf.jasperreports.engine.export.JRRtfExporter;
-import net.sf.jasperreports.engine.export.JRXlsAbstractExporterParameter;
-import net.sf.jasperreports.engine.export.JRXmlExporter;
-import net.sf.jasperreports.engine.util.JRSaver;
-import net.sf.jasperreports.engine.util.JRTypeSniffer;
-
 import org.apache.axis.AxisFault;
 import org.apache.axis.Message;
 import org.apache.axis.MessageContext;
@@ -118,6 +100,25 @@ import com.jaspersoft.jasperserver.ws.axis2.repository.SubResourceHandler;
 import com.jaspersoft.jasperserver.ws.xml.ByteArrayDataSource;
 import com.jaspersoft.jasperserver.ws.xml.Marshaller;
 import com.jaspersoft.jasperserver.ws.xml.Unmarshaller;
+
+import net.sf.jasperreports.engine.JRExporter;
+import net.sf.jasperreports.engine.JRExporterParameter;
+import net.sf.jasperreports.engine.JRParameter;
+import net.sf.jasperreports.engine.JRReport;
+import net.sf.jasperreports.engine.JRRuntimeException;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReportsContext;
+import net.sf.jasperreports.engine.ReportContext;
+import net.sf.jasperreports.engine.SimpleReportContext;
+import net.sf.jasperreports.engine.export.GenericElementReportTransformer;
+import net.sf.jasperreports.engine.export.JRCsvExporter;
+import net.sf.jasperreports.engine.export.JRHtmlExporterParameter;
+import net.sf.jasperreports.engine.export.JRRtfExporter;
+import net.sf.jasperreports.engine.export.JRXlsAbstractExporterParameter;
+import net.sf.jasperreports.engine.export.JRXmlExporter;
+import net.sf.jasperreports.engine.type.ImageTypeEnum;
+import net.sf.jasperreports.engine.util.JRSaver;
+import net.sf.jasperreports.engine.util.JRTypeSniffer;
 
 
 public class ManagementServiceImpl implements RepositoryServiceContext, BeanFactoryAware {
@@ -1579,8 +1580,8 @@ public class ManagementServiceImpl implements RepositoryServiceContext, BeanFact
 				Map.Entry entry = (Map.Entry) it.next();
 				String name = (String) entry.getKey();
 				byte[] data = (byte[]) entry.getValue();
-				byte imageType = JRTypeSniffer.getImageType(data);
-				String mimeType = JRTypeSniffer.getImageMimeType(imageType);
+				ImageTypeEnum imageType = JRTypeSniffer.getImageTypeValue(data);
+				String mimeType = imageType.getMimeType();
 
 				if (log.isDebugEnabled()) {
 					log.debug("Adding image for HTML: " + name

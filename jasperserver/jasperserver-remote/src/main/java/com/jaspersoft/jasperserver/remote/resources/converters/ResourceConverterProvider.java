@@ -21,6 +21,7 @@
 package com.jaspersoft.jasperserver.remote.resources.converters;
 
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConversionOptions;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConverter;
 import com.jaspersoft.jasperserver.dto.resources.ClientResource;
 import com.jaspersoft.jasperserver.remote.exception.IllegalParameterValueException;
@@ -29,16 +30,20 @@ import com.jaspersoft.jasperserver.remote.exception.IllegalParameterValueExcepti
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: ResourceConverterProvider.java 58870 2015-10-27 22:30:55Z esytnik $
+ * @version $Id: ResourceConverterProvider.java 62954 2016-05-01 09:49:23Z ykovalch $
  */
 public interface ResourceConverterProvider {
-    ToClientConverter<? super Resource, ? extends ClientResource> getToClientConverter(String serverType) throws IllegalParameterValueException;
+    ToClientConverter<? super Resource, ? extends ClientResource, ToClientConversionOptions> getToClientConverter(String serverType) throws IllegalParameterValueException;
 
-    ToClientConverter<? super Resource, ? extends ClientResource> getToClientConverter(Resource serverObject);
+    ToClientConverter<? super Resource, ? extends ClientResource, ToClientConversionOptions> getToClientConverter(Resource serverObject);
 
-    ToServerConverter<? super ClientResource, ? extends Resource> getToServerConverter(ClientResource clientObject) throws IllegalParameterValueException;
+    ToServerConverter<? super ClientResource, ? extends Resource, ToServerConversionOptions> getToServerConverter(ClientResource clientObject) throws IllegalParameterValueException;
 
-    ToServerConverter<? super ClientResource, ? extends Resource> getToServerConverter(String clientType) throws IllegalParameterValueException;
+    ToServerConverter<? super ClientResource, ? extends Resource, ToServerConversionOptions> getToServerConverter(String clientType) throws IllegalParameterValueException;
+
+    ToClientConverter<? super Resource, ? extends ClientResource, ToClientConversionOptions> getToClientConverter(String serverType, String clientType);
+
+    ToServerConverter<? super ClientResource, ? extends Resource, ToServerConversionOptions> getToServerConverter(String serverType, String clientType);
 
     Class<? extends ClientResource> getClientTypeClass(String clientType) throws IllegalParameterValueException;
 }

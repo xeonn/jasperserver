@@ -28,6 +28,7 @@ import com.jaspersoft.jasperserver.api.metadata.common.domain.*;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.client.ContentResourceImpl;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.client.FileResourceImpl;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.client.FolderImpl;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConverter;
 import com.jaspersoft.jasperserver.api.metadata.common.service.JSResourceVersionNotMatchException;
 import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
 import com.jaspersoft.jasperserver.api.search.SearchCriteriaFactory;
@@ -170,7 +171,7 @@ public class SingleRepositoryServiceImpl implements SingleRepositoryService {
         return getResource(serverResource.getURIString());
     }
 
-    public ClientResource saveOrUpdate(ClientResource clientResource, boolean overwrite, boolean createFolders) throws RemoteException {
+    public ClientResource saveOrUpdate(ClientResource clientResource, boolean overwrite, boolean createFolders, String clientType) throws RemoteException {
         final String uri = clientResource.getUri();
         Resource resource = getResource(uri);
 
@@ -178,8 +179,7 @@ public class SingleRepositoryServiceImpl implements SingleRepositoryService {
         // because BinaryDataResourceConverter returns null as serverResourceType
         if (resource != null) {
             // is it different type of resource?
-            if (!resourceConverterProvider.getToClientConverter(resource).getClientResourceType()
-                    .equals(ClientTypeHelper.extractClientType(clientResource.getClass()))) {
+            if (resourceConverterProvider.getToClientConverter(resource.getResourceType(), ClientTypeHelper.extractClientType(clientResource.getClass())) == null) {
                 if (overwrite) {
                     deleteResource(uri);
                     resource = null;
@@ -197,14 +197,22 @@ public class SingleRepositoryServiceImpl implements SingleRepositoryService {
                 }
             }
         }
-        resource = ((ToServerConverter<ClientResource, Resource>)resourceConverterProvider.getToServerConverter(clientResource))
+        resource = ((ToServerConverter<ClientResource, Resource, ToServerConversionOptions>)resourceConverterProvider.getToServerConverter(clientResource))
                 .toServer(clientResource, resource, ToServerConversionOptions.getDefault().setOwnersUri(uri));
         if(resource.isNew()){
             resource = createResource(resource, resource.getParentPath(), createFolders);
         } else {
             resource = updateResource(resource);
         }
-        return resourceConverterProvider.getToClientConverter(resource).toClient(resource, ToClientConversionOptions.getDefault());
+        ToClientConverter<? super Resource, ? extends ClientResource, ToClientConversionOptions> toClientConverter = resourceConverterProvider.getToClientConverter(resource);
+        if(clientType != null && !clientType.isEmpty()) {
+            toClientConverter = resourceConverterProvider.getToClientConverter(resource.getResourceType(),
+                    clientType);
+            if (toClientConverter == null) {
+                throw new NotAcceptableException(clientType);
+            }
+        }
+        return toClientConverter.toClient(resource, ToClientConversionOptions.getDefault());
     }
 
     @Override
@@ -224,25 +232,27 @@ public class SingleRepositoryServiceImpl implements SingleRepositoryService {
     }
 
     @Override
-    public String copyResource(String sourceUri, String destinationUri, boolean createFolders, boolean overwrite) throws ResourceNotFoundException, AccessDeniedException, ResourceAlreadyExistsException, IllegalParameterValueException {
+    public String copyResource(String sourceUri, String destinationUri, boolean createFolders, boolean overwrite, String renameTo) throws ResourceNotFoundException, AccessDeniedException, ResourceAlreadyExistsException, IllegalParameterValueException {
         Resource resource = prepareSource(sourceUri);
         Resource destination = prepareDestination(resource, destinationUri, createFolders);
 
         return prepareStrategy(destination)
-                .copyResource(resource, destination, overwrite);
+                .copyResource(resource, destination, overwrite, renameTo);
     }
 
     @Override
-    public String moveResource(String sourceUri, String destinationUri, boolean createFolders, boolean overwrite) throws ResourceNotFoundException, AccessDeniedException, ResourceAlreadyExistsException, IllegalParameterValueException {
+    public String moveResource(String sourceUri, String destinationUri, boolean createFolders, boolean overwrite,
+            String renameTo) throws ResourceNotFoundException, AccessDeniedException, ResourceAlreadyExistsException,
+            IllegalParameterValueException {
         Resource resource = prepareSource(sourceUri);
         Resource destination = prepareDestination(resource, destinationUri, createFolders);
 
-        return prepareStrategy(destination)
-                .moveResource(resource, destination, overwrite);
+        return prepareStrategy(destination).moveResource(resource, destination, overwrite, renameTo);
     }
 
     @Override
-    public Resource createFileResource(InputStream stream, String parentFolderUri, String name, String label, String description, String type, boolean createFolders) throws RemoteException {
+    public Resource createFileResource(InputStream stream, String parentFolderUri, String name, String label,
+            String description, String type, boolean createFolders) throws RemoteException {
         Resource file = fileResourceTypes.contains(type) ? new FileResourceImpl() : new ContentResourceImpl();
         file.setLabel(label);
         file.setName(name);
@@ -307,7 +317,6 @@ public class SingleRepositoryServiceImpl implements SingleRepositoryService {
         if (resource == null) {
             throw new ResourceNotFoundException(sourceUri);
         }
-
         return resource;
     }
 
@@ -378,7 +387,7 @@ public class SingleRepositoryServiceImpl implements SingleRepositoryService {
         }
         if (resource != null){
             if (nameWithNumber.matcher(name).matches()){
-                int divider = label.lastIndexOf("_");
+                int divider = name.lastIndexOf("_");
                 Integer number = Integer.parseInt(name.substring(divider + 1)) + 1;
                 name = name.substring(0, divider + 1) + number.toString();
             }
@@ -408,8 +417,10 @@ public class SingleRepositoryServiceImpl implements SingleRepositoryService {
     private class DefaultCopyMoveStrategy implements CopyMoveOperationStrategy {
 
         @Override
-        public String copyResource(Resource resource, Resource destination, boolean overwrite) throws ResourceNotFoundException, AccessDeniedException, ResourceAlreadyExistsException, IllegalParameterValueException {
-            String newUri = handleOverwrite(resource, destination, overwrite);
+        public String copyResource(Resource resource, Resource destination, boolean overwrite, String renameTo)
+                throws ResourceNotFoundException, AccessDeniedException, ResourceAlreadyExistsException, IllegalParameterValueException {
+            String newName = renameTo == null ? resource.getName() : transformLabelToName(renameTo);
+            String newUri = handleOverwrite(newName, destination, overwrite);
             // underlying service requires full uri, not just parent uri
             // after setting new parent uri we obtain the new uri of resource
 
@@ -417,17 +428,18 @@ public class SingleRepositoryServiceImpl implements SingleRepositoryService {
                 if (destination.getURIString().startsWith(resource.getURIString() + Folder.SEPARATOR)){
                     throw new IllegalParameterValueException("sourceUri", resource.getURIString());
                 }
-                repositoryService.copyFolder(null, resource.getURIString(), newUri);
+                repositoryService.copyRenameFolder(null, resource.getURIString(), newUri, renameTo);
             } else {
-                repositoryService.copyResource(null, resource.getURIString(), newUri);
+                repositoryService.copyRenameResource(null, resource.getURIString(), newUri, renameTo);
             }
 
             return newUri;
         }
 
         @Override
-        public String moveResource(Resource resource, Resource destination, boolean overwrite) throws ResourceNotFoundException, AccessDeniedException, ResourceAlreadyExistsException, IllegalParameterValueException {
-            String newUri = handleOverwrite(resource, destination, overwrite);
+        public String moveResource(Resource resource, Resource destination, boolean overwrite, String renameTo) throws ResourceNotFoundException, AccessDeniedException, ResourceAlreadyExistsException, IllegalParameterValueException {
+            String newName = renameTo == null ? resource.getName() : transformLabelToName(renameTo);
+            String newUri = handleOverwrite(newName, destination, overwrite);
 
             if (resource instanceof Folder) {
                 if (destination.getURIString().startsWith(resource.getURIString() + Folder.SEPARATOR)){
@@ -441,8 +453,9 @@ public class SingleRepositoryServiceImpl implements SingleRepositoryService {
             return newUri;
         }
 
-        private String handleOverwrite(Resource resource, Resource destination, boolean overwrite){
-            String newUri = (destination.getURIString().endsWith(Folder.SEPARATOR) ? destination.getURIString() : destination.getURIString() + Folder.SEPARATOR) + resource.getName();
+        private String handleOverwrite(String name, Resource destination, boolean overwrite){
+            String newUri = (destination.getURIString().endsWith(Folder.SEPARATOR) ? destination.getURIString() :
+                    destination.getURIString() + Folder.SEPARATOR) + name;
             Resource existing = getResource(newUri);
 
             if (existing != null) {

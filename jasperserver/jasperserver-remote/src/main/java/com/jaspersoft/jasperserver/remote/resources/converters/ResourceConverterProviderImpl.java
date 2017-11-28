@@ -22,6 +22,7 @@ package com.jaspersoft.jasperserver.remote.resources.converters;
 
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceLookup;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConversionOptions;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConverter;
 import com.jaspersoft.jasperserver.dto.resources.ClientResource;
 import com.jaspersoft.jasperserver.remote.exception.IllegalParameterValueException;
@@ -30,6 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -39,7 +41,7 @@ import java.util.Map;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: ResourceConverterProviderImpl.java 58870 2015-10-27 22:30:55Z esytnik $
+ * @version $Id: ResourceConverterProviderImpl.java 62954 2016-05-01 09:49:23Z ykovalch $
  */
 @Service("resourceConverterProvider")
 public class ResourceConverterProviderImpl implements ResourceConverterProvider {
@@ -47,21 +49,35 @@ public class ResourceConverterProviderImpl implements ResourceConverterProvider 
     private ApplicationContext context;
     @Autowired
     private BinaryDataResourceConverter binaryDataResourceConverter;
-    private Map<String, ToClientConverter<? super Resource, ? extends ClientResource>> toClientConverters;
-    private Map<String, ToServerConverter<? super ClientResource, ? extends Resource>> toServerConverters;
+    @javax.annotation.Resource
+    private List<Class<?>> disabledResourceTypes;
+    private List<String> disabledResourceClientTypes = new ArrayList<String>();
+    private Map<String, ToClientConverter<? super Resource, ? extends ClientResource, ToClientConversionOptions>> toClientConverters;
+    private Map<String, ToServerConverter<? super ClientResource, ? extends Resource, ToServerConversionOptions>> toServerConverters;
+    private Map<String, ResourceConverter<? extends Resource, ? extends ClientResource>> resourceConverters;
     private volatile boolean initialized = false;
 
-    public ToClientConverter<? super Resource, ? extends ClientResource> getToClientConverter(String serverType) throws IllegalParameterValueException {
+    public ToClientConverter<? super Resource, ? extends ClientResource, ToClientConversionOptions> getToClientConverter(String serverType) throws IllegalParameterValueException {
         prepareConverters();
-        final ToClientConverter<? super Resource, ? extends ClientResource> toClientConverter = toClientConverters.get(serverType);
+        final ToClientConverter<? super Resource, ? extends ClientResource, ToClientConversionOptions> toClientConverter = toClientConverters.get(serverType);
         if(toClientConverter == null){
             throw new IllegalParameterValueException("type", serverType);
         }
         return toClientConverter;
     }
 
+    public ToClientConverter<? super Resource, ? extends ClientResource, ToClientConversionOptions> getToClientConverter(String serverType, String clientType){
+        prepareConverters();
+        return (ToClientConverter<? super Resource, ? extends ClientResource, ToClientConversionOptions>) resourceConverters.get(getCombinedConverterKey(serverType, clientType));
+    }
+
+    public ToServerConverter<? super ClientResource, ? extends Resource, ToServerConversionOptions> getToServerConverter(String serverType, String clientType){
+        prepareConverters();
+        return (ToServerConverter<? super ClientResource, ? extends Resource, ToServerConversionOptions>) resourceConverters.get(getCombinedConverterKey(serverType, clientType));
+    }
+
     @Override
-    public ToClientConverter<? super Resource, ? extends ClientResource> getToClientConverter(Resource serverObject) {
+    public ToClientConverter<? super Resource, ? extends ClientResource, ToClientConversionOptions> getToClientConverter(Resource serverObject) {
         try {
             return getToClientConverter(serverObject instanceof ResourceLookup ? ResourceLookup.class.getName() : serverObject.getResourceType());
         } catch (IllegalParameterValueException e) {
@@ -70,13 +86,13 @@ public class ResourceConverterProviderImpl implements ResourceConverterProvider 
     }
 
     @Override
-    public ToServerConverter<? super ClientResource, ? extends Resource> getToServerConverter(ClientResource clientObject) throws IllegalParameterValueException {
+    public ToServerConverter<? super ClientResource, ? extends Resource, ToServerConversionOptions> getToServerConverter(ClientResource clientObject) throws IllegalParameterValueException {
         return getToServerConverter(ClientTypeHelper.extractClientType(clientObject.getClass()));
     }
 
-    public ToServerConverter<? super ClientResource, ? extends Resource> getToServerConverter(String clientType) throws IllegalParameterValueException {
+    public ToServerConverter<? super ClientResource, ? extends Resource, ToServerConversionOptions> getToServerConverter(String clientType) throws IllegalParameterValueException {
         prepareConverters();
-        final ToServerConverter<? super ClientResource, ? extends Resource> toServerConverter = toServerConverters.get(clientType != null ? clientType.toLowerCase() : null);
+        final ToServerConverter<? super ClientResource, ? extends Resource, ToServerConversionOptions> toServerConverter = toServerConverters.get(clientType != null ? clientType.toLowerCase() : null);
         if(toServerConverter == null){
             throw new IllegalParameterValueException("type", clientType);
         }
@@ -96,13 +112,20 @@ public class ResourceConverterProviderImpl implements ResourceConverterProvider 
         if (!initialized) {
             synchronized (this) {
                 if (!initialized) {
-                    toClientConverters = new HashMap<String, ToClientConverter<? super Resource, ? extends ClientResource>>();
-                    toServerConverters = new HashMap<String, ToServerConverter<? super ClientResource, ? extends Resource>>();
+                    toClientConverters = new HashMap<String, ToClientConverter<? super Resource, ? extends ClientResource, ToClientConversionOptions>>();
+                    toServerConverters = new HashMap<String, ToServerConverter<? super ClientResource,
+                            ? extends Resource, ToServerConversionOptions>>();
+                    resourceConverters = new HashMap<String, ResourceConverter<? extends Resource, ? extends ClientResource>>();
                     final List<ResourceConverter<? super Resource, ? extends ClientResource>> converters = getConverters();
                     if (getConverters() != null) {
                         for (ResourceConverter currentConverter : converters) {
-                            toClientConverters.put(currentConverter.getServerResourceType(), currentConverter);
-                            toServerConverters.put(currentConverter.getClientResourceType().toLowerCase(), currentConverter);
+                            final String serverResourceType = currentConverter.getServerResourceType();
+                            final String clientResourceType = currentConverter.getClientResourceType().toLowerCase();
+                            if(!disabledResourceClientTypes.contains(clientResourceType)) {
+                                toClientConverters.put(serverResourceType, currentConverter);
+                                toServerConverters.put(clientResourceType, currentConverter);
+                                resourceConverters.put(getCombinedConverterKey(serverResourceType, clientResourceType), currentConverter);
+                            }
                         }
                     }
                     toServerConverters.put(binaryDataResourceConverter.getClientResourceType(), (ToServerConverter)binaryDataResourceConverter);
@@ -112,10 +135,21 @@ public class ResourceConverterProviderImpl implements ResourceConverterProvider 
         }
     }
 
+    protected String getCombinedConverterKey(String serverResourceType, String clientResourceType){
+        return serverResourceType + "<=>" + clientResourceType.toLowerCase();
+    }
+
     // cast is safe, spring application context assure safety
     @SuppressWarnings("unchecked")
     protected List<ResourceConverter<? super Resource, ? extends ClientResource>> getConverters() {
         final Map<String, ResourceConverter> convertersMap = context.getBeansOfType(ResourceConverter.class);
         return (List) new ArrayList<ResourceConverter>(convertersMap.values());
+    }
+
+    @PostConstruct
+    public void initialize(){
+        for (Class<?> disabledResourceType : disabledResourceTypes) {
+            disabledResourceClientTypes.add(ClientTypeHelper.extractClientType(disabledResourceType).toLowerCase());
+        }
     }
 }

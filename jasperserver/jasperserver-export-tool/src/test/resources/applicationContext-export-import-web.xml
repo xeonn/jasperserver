@@ -332,6 +332,7 @@
         <property name="configuration" ref="reportJobsConfiguration"/>
         <property name="reportJobsArg" value="report-jobs"/>
         <property name="urisArg" value="uris"/>
+        <property name="resourceExporterId"><util:property-path path="resourceExporterModule.id"/></property>
     </bean>
 
     <bean id="reportJobsImporterModule" class="com.jaspersoft.jasperserver.export.modules.scheduling.ReportJobsImporter" scope="prototype">

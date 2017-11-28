@@ -29,7 +29,7 @@
             code='resource.file.pageTitleEdit'/></c:if></t:putAttribute>
     <t:putAttribute name="bodyID" value="addResourceFile"/>
     <t:putAttribute name="bodyClass" value="oneColumn flow wizard oneStep"/>
-    <t:putAttribute name="moduleName" value="addFileResource.page"/>
+    <t:putAttribute name="moduleName" value="addResource/fileResource/addFileResourceMain"/>
     <t:putAttribute name="headerContent">
         <jsp:include page="addFileResourceState.jsp"/>
     </t:putAttribute>

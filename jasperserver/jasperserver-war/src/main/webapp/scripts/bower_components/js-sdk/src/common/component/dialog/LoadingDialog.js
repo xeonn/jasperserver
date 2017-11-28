@@ -7,7 +7,7 @@
 
 /**
  * @author: Zahar Tomchenko
- * @version: $Id: LoadingDialog.js 1618 2015-09-29 12:06:41Z ztomchen $
+ * @version: $Id: LoadingDialog.js 2402 2016-03-14 12:38:21Z ztomchen $
  */
 
 define(function (require) {
@@ -33,16 +33,16 @@ define(function (require) {
         },
 
         constructor: function (options) {
-            options || (options = {});
+            this.options = options || {};
 
             Dialog.prototype.constructor.call(this, {
                 modal: true,
-                additionalCssClasses: options.cancellable ? "cancellable" : "",
+                additionalCssClasses: this.options.additionalCssClasses,
                 template: confirmDialogTemplate,
-                title: options.title || i18n["dialog.overlay.title"]
+                title: this.options.title || i18n["dialog.overlay.title"]
             });
 
-            if (options.showProgress){
+            if (this.options.showProgress){
                 this.progress = _.bind(function(progress){
                     if (arguments.length === 0){
                         return +this.$(".percents").text();
@@ -59,9 +59,11 @@ define(function (require) {
         initialize: function () {
             Dialog.prototype.initialize.apply(this, arguments);
 
-            this.on("button:cancel", this.close);
-
-
+            if (this.options.cancellable){
+                this.on("button:cancel", this.close);
+            } else {
+                this.$("button").hide();
+            }
         },
 
         cancel: function(){

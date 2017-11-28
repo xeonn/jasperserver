@@ -1,1 +1,0 @@
-define(["require","!domReady","messages/details/messageDetails","jrs.configs"],function(s){"use strict";var e=s("!domReady"),i=s("messages/details/messageDetails"),a=s("jrs.configs");e(function(){i.initialize(a.messageDetailsInitOptions)})});

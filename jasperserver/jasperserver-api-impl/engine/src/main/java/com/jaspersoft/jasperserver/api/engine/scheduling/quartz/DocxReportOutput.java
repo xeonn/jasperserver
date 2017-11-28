@@ -23,33 +23,28 @@ package com.jaspersoft.jasperserver.api.engine.scheduling.quartz;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Locale;
-
-import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JRPropertiesHolder;
-import net.sf.jasperreports.engine.JRPropertiesUtil;
-import net.sf.jasperreports.engine.JasperPrint;
-import net.sf.jasperreports.engine.export.JRHyperlinkProducerFactory;
-import net.sf.jasperreports.engine.export.ooxml.JRDocxExporter;
-import net.sf.jasperreports.export.SimpleExporterInput;
-import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.quartz.JobExecutionException;
 
 import com.jaspersoft.jasperserver.api.JSExceptionWrapper;
-import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
-import com.jaspersoft.jasperserver.api.engine.common.service.EngineService;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.common.DocxExportParametersBean;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ContentResource;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.DataContainer;
-import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
+
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JRPropertiesHolder;
+import net.sf.jasperreports.engine.JRPropertiesUtil;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.export.ooxml.JRDocxExporter;
+import net.sf.jasperreports.export.SimpleExporterInput;
+import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
 
 
 /**
  * @author sanda zaharia (shertage@users.sourceforge.net)
- * @version $Id: DocxReportOutput.java 54728 2015-04-24 15:28:20Z tdanciu $
+ * @version $Id: DocxReportOutput.java 63380 2016-05-26 20:56:46Z mchan $
  */
 public class DocxReportOutput extends AbstractReportOutput 
 {
@@ -63,22 +58,15 @@ public class DocxReportOutput extends AbstractReportOutput
 	 * @see com.jaspersoft.jasperserver.api.engine.scheduling.quartz.Output#getOutput()
 	 */
 	public ReportOutput getOutput(
-			EngineService engineService, 
-			ExecutionContext executionContext, 
-			String reportUnitURI, 
-			DataContainer docData,
-			JRHyperlinkProducerFactory hyperlinkProducerFactory,
-			RepositoryService repositoryService,
-			JasperPrint jasperPrint, 
-			String baseFilename,
-			Locale locale,
-			String characterEncoding) throws JobExecutionException
+			ReportJobContext jobContext, 
+			JasperPrint jasperPrint) throws JobExecutionException
 	{
 		try {
 			JRDocxExporter exporter = new JRDocxExporter(getJasperReportsContext());
             exporter.setExporterInput(new SimpleExporterInput(jasperPrint));
 			
 			boolean close = false;
+			DataContainer docData = jobContext.createDataContainer(this);
 			OutputStream docDataOut = docData.getOutputStream();
 			try {
 	            SimpleOutputStreamExporterOutput exporterOutput = new SimpleOutputStreamExporterOutput(docDataOut);
@@ -89,7 +77,7 @@ public class DocxReportOutput extends AbstractReportOutput
 				close = false;
 				docDataOut.close();
 
-				String fileName = baseFilename + ".docx";
+				String fileName = jobContext.getBaseFilename() + ".docx";
 				return new ReportOutput(docData, ContentResource.TYPE_DOCX, fileName);
 			} catch (IOException e) {
 				throw new JSExceptionWrapper(e);

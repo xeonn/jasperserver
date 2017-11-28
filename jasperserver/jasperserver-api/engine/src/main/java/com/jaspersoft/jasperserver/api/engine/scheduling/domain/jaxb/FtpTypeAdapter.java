@@ -28,18 +28,19 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: FtpTypeAdapter.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: FtpTypeAdapter.java 62483 2016-04-12 17:26:07Z akasych $
  */
 public class FtpTypeAdapter extends XmlAdapter<String, String> {
     private static final String CLIENT_TYPE_FTP = "ftp";
     private static final String CLIENT_TYPE_FTPS = "ftps";
+    private static final String CLIENT_TYPE_SFTP = "sftp";
     @Override
     public String unmarshal(String v) throws Exception {
-        return CLIENT_TYPE_FTPS.equals(v) ? FTPInfo.TYPE_FTPS : FTPInfo.TYPE_FTP;
+        return CLIENT_TYPE_FTPS.equals(v) ? FTPInfo.TYPE_FTPS : CLIENT_TYPE_SFTP.equals(v) ? FTPInfo.TYPE_SFTP : FTPInfo.TYPE_FTP;
     }
 
     @Override
     public String marshal(String v) throws Exception {
-        return FTPInfo.TYPE_FTPS.equals(v) ? CLIENT_TYPE_FTPS : CLIENT_TYPE_FTP;
+        return FTPInfo.TYPE_FTPS.equals(v) ? CLIENT_TYPE_FTPS : FTPInfo.TYPE_SFTP.equals(v) ? CLIENT_TYPE_SFTP  : CLIENT_TYPE_FTP;
     }
 }

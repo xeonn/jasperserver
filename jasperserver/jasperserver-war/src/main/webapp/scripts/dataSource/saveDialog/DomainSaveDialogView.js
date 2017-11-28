@@ -22,7 +22,7 @@
 
 /**
  * @author: Dima Gorbenko
- * @version: $Id: DomainSaveDialogView.js 9400 2015-09-23 21:10:46Z inestere $
+ * @version: $Id: DomainSaveDialogView.js 10092 2016-04-22 21:17:02Z inestere $
  */
 
 /* global dialogs */
@@ -35,7 +35,7 @@ define(function (require){
         $ = require("jquery"),
         i18n = require('bundle!all'),
         request = require("request"),
-        ResourceModel = require("bi/repo/model/RepositoryResourceModel"),
+        ResourceModel = require("bi/repository/model/RepositoryResourceModel"),
         BaseSaveDialogView = require("dataSource/saveDialog/BaseSaveDialogView"),
         standardConfirmTemplate = require("text!common/templates/standardConfirm.htm"),
         domainSaveDialogTemplate = require('text!dataSource/saveDialog/template/domainSaveDialogTemplate.htm');

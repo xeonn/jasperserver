@@ -147,16 +147,36 @@
         <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
         <init-param>
             <param-name>targetBeanName</param-name>
-            <param-value>filterChainProxy</param-value>
+            <param-value>authenticationAuthoirizationFilterChainProxy</param-value>
         </init-param>
     </filter>
     
     <!-- Start of SiteMesh filter config -->
     <filter>
-    <filter-name>sitemesh</filter-name>
+        <filter-name>sitemesh</filter-name>
         <filter-class>com.opensymphony.module.sitemesh.filter.PageFilter</filter-class>
     </filter>
-    
+
+    <!-- This filter must come AFTER securityFilter as it relies on SecurityContext set there. -->
+    <filter>
+        <filter-name>CrossDomainFilter</filter-name>
+        <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+        <init-param>
+            <param-name>targetBeanName</param-name>
+            <param-value>crossDomainFilter</param-value>
+        </init-param>
+    </filter>
+
+    <!-- This filter must come AFTER securityFilter to prevent CSRF protection on the login page -->
+    <filter>
+        <filter-name>CsrfGuardFilter</filter-name>
+        <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+        <init-param>
+            <param-name>targetBeanName</param-name>
+            <param-value>csrfGuardFilter</param-value>
+        </init-param>
+    </filter>
+
    	<!--  UNCOMMENT FOR SESSION REPLICATION -->
     <!--filter-mapping>
         <filter-name>ClusterFilter</filter-name>
@@ -195,6 +215,18 @@
       <url-pattern>/*</url-pattern>
       <dispatcher>ERROR</dispatcher>
       <dispatcher>REQUEST</dispatcher>
+  </filter-mapping>
+
+    <!-- This filter must come AFTER securityFilter as it relies on SecurityContext set there. -->
+  <filter-mapping>
+      <filter-name>CrossDomainFilter</filter-name>
+      <url-pattern>/*</url-pattern>
+  </filter-mapping>
+
+    <!-- This filter must come AFTER securityFilter to prevent CSRF protection on the login page -->
+  <filter-mapping>
+      <filter-name>CsrfGuardFilter</filter-name>
+      <url-pattern>/*</url-pattern>
   </filter-mapping>
 
   <filter-mapping>
@@ -591,10 +623,13 @@
 	</security-constraint>
 -->
 
+    <!-- #### CSRFGuard Configuration #### -->
    <context-param>
         <param-name>Owasp.CsrfGuard.Config</param-name>
-         <param-value>/WEB-INF/esapi/Owasp.CsrfGuard.properties</param-value>
+         <param-value>/WEB-INF/csrf/jrs.csrfguard.properties</param-value>
     </context-param>
+
+    <!-- Print CSRFGuard config in logs -->
     <context-param>
         <param-name>Owasp.CsrfGuard.Config.Print</param-name>
         <param-value>true</param-value>
@@ -606,49 +641,28 @@
         <listener-class>org.owasp.csrfguard.CsrfGuardServletContextListener</listener-class>
     </listener>
 
+    <!-- JavaScriptServlet is further configured in jrs.csrfguard.properties -->
     <servlet>
-        <servlet-name>GetEncryptionKey</servlet-name>
+        <servlet-name>CSRFGuard.JavaScriptServlet</servlet-name>
+        <servlet-class>org.owasp.csrfguard.servlet.JavaScriptServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>CSRFGuard.JavaScriptServlet</servlet-name>
+        <url-pattern>/JavaScriptServlet</url-pattern>
+    </servlet-mapping>
+    <!-- #### CSRFGuard Configuration END #### -->
+
+
+    <servlet>
+        <servlet-name>JavascriptEncryptionKey</servlet-name>
         <servlet-class>com.jaspersoft.jasperserver.api.security.encryption.GetEncryptionKey</servlet-class>
     </servlet>
 
-    <servlet>
-        <servlet-name>JavaScriptServlet</servlet-name>
-        <servlet-class>org.owasp.csrfguard.servlet.JavaScriptServlet</servlet-class>
-        <init-param>
-            <param-name>source-file</param-name>
-            <param-value>/WEB-INF/esapi/Owasp.CsrfGuard.js</param-value>
-        </init-param>
-        <init-param>
-            <param-name>inject-into-forms</param-name>
-            <param-value>true</param-value>
-        </init-param>
-        <init-param>
-            <param-name>inject-into-attributes</param-name>
-            <param-value>true</param-value>
-        </init-param>
-        <init-param>
-            <param-name>domain-strict</param-name>
-            <param-value>false</param-value>
-        </init-param>
-        <init-param>
-            <param-name>referer-pattern</param-name>
-            <param-value>.*</param-value>
-        </init-param>
-        <init-param>
-            <param-name>x-requested-with</param-name>
-            <param-value>AJAXRequest</param-value>
-        </init-param>
-    </servlet>
-
     <servlet-mapping>
-        <servlet-name>GetEncryptionKey</servlet-name>
+        <servlet-name>JavascriptEncryptionKey</servlet-name>
         <url-pattern>/GetEncryptionKey</url-pattern>
     </servlet-mapping>
-
-    <servlet-mapping>
-       <servlet-name>JavaScriptServlet</servlet-name>
-       <url-pattern>/JavaScriptServlet</url-pattern>
-	</servlet-mapping>
 
     <error-page>
       <error-code>404</error-code>

@@ -32,8 +32,8 @@ import java.util.List;
 
 /**
  * @author Yaroslav.Kovalchyk
- * @version $Id: RepositorySearchCriteriaImpl.java 55164 2015-05-06 20:54:37Z mchan $
- * @version $Id: RepositorySearchCriteriaImpl.java 55164 2015-05-06 20:54:37Z mchan $
+ * @version $Id: RepositorySearchCriteriaImpl.java 61759 2016-03-14 15:48:27Z ztomchen $
+ * @version $Id: RepositorySearchCriteriaImpl.java 61759 2016-03-14 15:48:27Z ztomchen $
  */
 public class RepositorySearchCriteriaImpl implements RepositorySearchCriteria {
 
@@ -46,6 +46,7 @@ public class RepositorySearchCriteriaImpl implements RepositorySearchCriteria {
     private String folderUri;
     private List<String> resourceTypes;
     private List<String> containerResourceTypes;
+    private List<String> fileResourceTypes;
     private List<SearchFilter> customFilters;
     private boolean showHidden = false;
     private boolean excludeFolders = false;
@@ -138,6 +139,14 @@ public class RepositorySearchCriteriaImpl implements RepositorySearchCriteria {
 
     public void setContainerResourceTypes(List<String> containerResourceTypes) {
         this.containerResourceTypes = containerResourceTypes;
+    }
+
+    public List<String> getFileResourceTypes() {
+        return fileResourceTypes;
+    }
+
+    public void setFileResourceTypes(List<String> fileResourceTypes) {
+        this.fileResourceTypes = fileResourceTypes;
     }
 
     public boolean isShowHidden() {

@@ -31,6 +31,7 @@ import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceLookup;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportUnit;
 import com.jaspersoft.jasperserver.api.metadata.view.domain.FilterCriteria;
 import com.jaspersoft.jasperserver.export.modules.BaseExporterModule;
+import com.jaspersoft.jasperserver.export.modules.repository.ResourceExporter;
 import com.jaspersoft.jasperserver.export.modules.scheduling.beans.ReportJobBean;
 import com.jaspersoft.jasperserver.export.modules.scheduling.beans.ReportUnitJobsIndexBean;
 import org.dom4j.Element;
@@ -42,7 +43,7 @@ import java.util.Set;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ReportJobsExporter.java 58265 2015-10-05 16:13:56Z vzavadsk $
+ * @version $Id: ReportJobsExporter.java 63380 2016-05-26 20:56:46Z mchan $
  */
 public class ReportJobsExporter extends BaseExporterModule {
 
@@ -53,6 +54,8 @@ public class ReportJobsExporter extends BaseExporterModule {
     protected String urisArg;
 
 	protected Set exportedURIs;
+
+	private String resourceExporterId;
 
 	protected boolean isToProcess() {
 		return hasParameter(reportJobsArg);
@@ -149,6 +152,7 @@ public class ReportJobsExporter extends BaseExporterModule {
 		String ruPath = mkdir(configuration.getReportJobsDir(), uri);
 		
 		long[] jobIds = new long[jobs.size()];
+		Set<String> sshKeysQueue = new HashSet<String>();
 		int c = 0;
 		for (Iterator iter = jobs.iterator(); iter.hasNext(); ++c) {
 			ReportJobSummary jobSummary = (ReportJobSummary) iter.next();
@@ -156,8 +160,18 @@ public class ReportJobsExporter extends BaseExporterModule {
 			jobIds[c] = jobId;
 			ReportJob job = configuration.getReportScheduler().getScheduledJob(executionContext, jobId);
 			exportJob(ruPath, job, jobSummary.getRuntimeInformation());
+
+			//  Add SSH Key file resource to the export queue
+			if (job.getContentRepositoryDestination() != null
+					&& job.getContentRepositoryDestination().getOutputFTPInfo() != null
+					&& job.getContentRepositoryDestination().getOutputFTPInfo().getSshKey() != null) {
+				sshKeysQueue.add(job.getContentRepositoryDestination().getOutputFTPInfo().getSshKey());
+			}
 		}
-		
+
+		// Export dependent resources
+		exportResources(sshKeysQueue);
+
 		ReportUnitJobsIndexBean indexBean = new ReportUnitJobsIndexBean();
 		indexBean.setJobIds(jobIds);
 		serialize(indexBean, ruPath, configuration.getReportUnitIndexFilename(), configuration.getSerializer());
@@ -168,6 +182,35 @@ public class ReportJobsExporter extends BaseExporterModule {
 		jobBean.copyFrom(job, getConfiguration());
         jobBean.setPaused(runtimeInformation.getStateCode().byteValue() == ReportJobRuntimeInformation.STATE_PAUSED);
 		serialize(jobBean, folderPath, getJobFilename(job), configuration.getSerializer());
+	}
+
+	protected void exportResources(Set<String> resources) {
+
+		// Export SSH key file resources
+		ResourceExporter resourceExporter = (ResourceExporter) exportContext.getModuleRegister().getExporterModule(resourceExporterId);
+		if (!resources.isEmpty() && resourceExporter != null) {
+
+			// Create the Resource Module index element when exporting only jobs
+			if (resourceExporter.getIndexElement() == null) {
+				Element reportJobsModuleIndexElement = getIndexElement();
+				Element rootIndexElement = reportJobsModuleIndexElement.getParent();
+				String indexModuleElementName = "module"; // TODO: resolve this value from baseExporterImporter bean
+				String indexModuleIdAttributeName = "id"; // TODO: resolve this value from baseExporterImporter bean
+				// The Resource module element should be placed before the ReportJobs element. Thus we remove the
+				// reportJobsModuleIndexElement from root before adding resourceModuleIndexElement and then put it back:
+				rootIndexElement.remove(reportJobsModuleIndexElement);
+				Element resourceModuleIndexElement = rootIndexElement.addElement(indexModuleElementName);
+				resourceModuleIndexElement.addAttribute(indexModuleIdAttributeName, resourceExporterId);
+				rootIndexElement.add(reportJobsModuleIndexElement);
+			}
+
+			// Perform export
+			for (String resourceURI : resources) {
+				if (!resourceExporter.alreadyExported(resourceURI)) {
+					resourceExporter.processUri(resourceURI, true, false);
+				}
+			}
+		}
 	}
 
 	protected String getJobFilename(ReportJob job) {
@@ -202,4 +245,8 @@ public class ReportJobsExporter extends BaseExporterModule {
     public void setUrisArg(String urisArg) {
         this.urisArg = urisArg;
     }
+
+	public void setResourceExporterId(String resourceExporterId) {
+		this.resourceExporterId = resourceExporterId;
+	}
 }

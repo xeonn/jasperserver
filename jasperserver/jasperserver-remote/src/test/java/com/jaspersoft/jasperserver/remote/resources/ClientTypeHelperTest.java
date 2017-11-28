@@ -20,6 +20,7 @@
 */
 package com.jaspersoft.jasperserver.remote.resources;
 
+import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConverter;
 import org.testng.annotations.Test;
 
 import javax.xml.bind.annotation.XmlRootElement;
@@ -31,7 +32,7 @@ import static org.testng.Assert.*;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: ClientTypeHelperTest.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: ClientTypeHelperTest.java 62954 2016-05-01 09:49:23Z ykovalch $
  */
 public class ClientTypeHelperTest {
 
@@ -50,19 +51,53 @@ public class ClientTypeHelperTest {
 
     @Test
     public void extractClientType_NoAnnotation() {
-        String simpleName = TestClientObjectWithoutAnnotation.class.getSimpleName();
-        final String expectedClientType = simpleName.replaceFirst("^.", simpleName.substring(0, 1).toLowerCase());
-        assertEquals(expectedClientType, ClientTypeHelper.extractClientType(TestClientObjectWithoutAnnotation.class));
+        assertEquals("testClientObjectWithoutAnnotation", ClientTypeHelper.extractClientType(TestClientObjectWithoutAnnotation.class));
+    }
+
+    @Test
+    public void getClientClass_clientTypeFromXmlRootAnnotation(){
+        final ClientTypeHelper<TestClientObjectWithXmlRootAnnotation> clientTypeHelper =
+                new ClientTypeHelper<TestClientObjectWithXmlRootAnnotation>(
+                        new TestToClientConverterExtension<TestClientObjectWithXmlRootAnnotation>() {});
+        assertEquals(clientTypeHelper.getClientResourceType(), NAME_FROM_XML_ROOT_ELEMENT_ANNOTATION);
+    }
+
+    @Test
+    public void getClientClass_clientTypeFromXmlTypeAnnotation(){
+        final ClientTypeHelper<TestClientObjectWithXmlTypeAnnotation> clientTypeHelper =
+                new ClientTypeHelper<TestClientObjectWithXmlTypeAnnotation>(
+                        new TestToClientConverterExtension<TestClientObjectWithXmlTypeAnnotation>() {});
+        assertEquals(clientTypeHelper.getClientResourceType(), NAME_FROM_XML_TYPE_ANNOTATION);
+    }
+
+    @Test
+    public void getClientClass_clientTypeFromClassName(){
+        final ClientTypeHelper<TestClientObjectWithoutAnnotation> clientTypeHelper =
+                new ClientTypeHelper<TestClientObjectWithoutAnnotation>(
+                        new TestToClientConverterExtension<TestClientObjectWithoutAnnotation>() {});
+        assertEquals(clientTypeHelper.getClientResourceType(), "testClientObjectWithoutAnnotation");
     }
 
     @XmlRootElement(name = NAME_FROM_XML_ROOT_ELEMENT_ANNOTATION)
-    private class TestClientObjectWithXmlRootAnnotation {
+    private static class TestClientObjectWithXmlRootAnnotation {
     }
 
     @XmlType(name = NAME_FROM_XML_TYPE_ANNOTATION)
-    private class TestClientObjectWithXmlTypeAnnotation {
+    private static class TestClientObjectWithXmlTypeAnnotation {
     }
 
-    private class TestClientObjectWithoutAnnotation {
+    private static class TestClientObjectWithoutAnnotation {
+    }
+
+    private static class TestToClientConverterExtension<T> implements ToClientConverter<Object, T, Object>{
+        @Override
+        public T toClient(Object serverObject, Object options) {
+            return null;
+        }
+
+        @Override
+        public String getClientResourceType() {
+            return null;
+        }
     }
 }

@@ -28,7 +28,7 @@
     <t:putAttribute name="pageTitle"><c:choose><c:when test="${masterFlow=='olapClientConnection'}"><spring:message code="addResources.schemaDetails"/></c:when><c:when test="${masterFlow!='reportUnit'}"><spring:message code="addResources.accessGrantDefinition.details"/></c:when><c:when test="${masterFlow=='reportUnit' and fileResource.parentFlowObject.editMode}"><spring:message code="resource.report.titleEdit"/></c:when><c:otherwise><spring:message code="resource.report.title"/></c:otherwise></c:choose></t:putAttribute>
     <t:putAttribute name="bodyID" value="addResourceFile"/>
     <t:putAttribute name="bodyClass" value="oneColumn flow wizard ${lastSubflow?'lastStep':''}"/>
-    <t:putAttribute name="moduleName" value="addJasperReportResourceNaming.page"/>
+    <t:putAttribute name="moduleName" value="addResource/jasperReport/addJasperReportResourceNamingMain"/>
     <t:putAttribute name="headerContent">
         <jsp:include page="reportStep3ResourceNamingState.jsp"/>
     </t:putAttribute>

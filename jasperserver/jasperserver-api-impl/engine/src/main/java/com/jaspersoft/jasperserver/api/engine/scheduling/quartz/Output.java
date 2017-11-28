@@ -22,22 +22,15 @@
 package com.jaspersoft.jasperserver.api.engine.scheduling.quartz;
 
 import java.io.Serializable;
-import java.util.Locale;
-
-import net.sf.jasperreports.engine.JRPropertiesHolder;
-import net.sf.jasperreports.engine.JasperPrint;
-import net.sf.jasperreports.engine.export.JRHyperlinkProducerFactory;
 
 import org.quartz.JobExecutionException;
 
-import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
-import com.jaspersoft.jasperserver.api.engine.common.service.EngineService;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.DataContainer;
-import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
+import net.sf.jasperreports.engine.JRPropertiesHolder;
+import net.sf.jasperreports.engine.JasperPrint;
 
 /**
  * @author sanda zaharia (shertage@users.sourceforge.net)
- * @version $Id: Output.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: Output.java 63380 2016-05-26 20:56:46Z mchan $
  */
 public interface Output extends Serializable 
 {
@@ -46,16 +39,8 @@ public interface Output extends Serializable
 	public boolean isCompress();
 
 	public ReportOutput getOutput(
-			EngineService engineService, 
-			ExecutionContext executionContext, 
-			String reportUnitURI, 
-			DataContainer dataContainer,
-			JRHyperlinkProducerFactory hyperlinkProducerFactory,
-			RepositoryService repositoryService,
-			JasperPrint jasperPrint, 
-			String baseFilename,
-			Locale locale,
-			String characterEncoding) throws JobExecutionException;
+			ReportJobContext jobContext,
+			JasperPrint jasperPrint) throws JobExecutionException;
 
 	public Boolean isPaginationPreferred(JRPropertiesHolder propertiesHolder);
 }

@@ -101,7 +101,7 @@ import java.util.regex.Pattern;
  * Run a report unit using the passing in parameters and options
  *
  * @author ykovalchyk
- * @version $Id: RunReportServiceImpl.java 61296 2016-02-25 21:53:37Z mchan $
+ * @version $Id: RunReportServiceImpl.java 63380 2016-05-26 20:56:46Z mchan $
  */
 @Service("runReportService")
 @Scope(value = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)
@@ -624,6 +624,7 @@ public class RunReportServiceImpl implements RunReportService, Serializable, Dis
         final boolean cancelled = engine.cancelExecution(requestId);
         final ReportExecution reportExecution = executions.get(requestId);
         if(cancelled && reportExecution != null){
+            // update report execution status
             reportExecution.setStatus(ExecutionStatus.cancelled);
         }
         return cancelled;

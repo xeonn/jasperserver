@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: jobModel.js 9551 2015-10-13 14:09:03Z dgorbenk $
+ * @version: $Id: jobModel.js 10166 2016-05-26 22:39:40Z gbacon $
  */
 
 /* global getTZOffset, isIE8 */
@@ -34,11 +34,17 @@ define(function (require) {
     var SERVICE_DATE_PATTERN_MOMENTJS_FORMAT = "YYYY-MM-DD HH:mm";
     var ftpIsProcessings = false;
 
+    // This allows us to simply check the failed folder URI on sequent validation calls and avoid the extra requests to server.
+    var validatedFolderURIsCache = {};
+    var validatedSshKeysCache = {};
+
     var $ = require('jquery'),
         _ = require("underscore"),
         Backbone = require('backbone'),
 	    Encoding = require("encoding"),
         config = require('jrs.configs'),
+        globalConfig = require("settings!globalConfiguration"),
+        XRegExp = require("xregexp"),
         moment = require("moment");
 
 	require('config/timepickerSettings');
@@ -111,9 +117,44 @@ define(function (require) {
 
 
     return Backbone.Model.extend({
+        ftpPortDefaults: {
+            ftp: "21",
+            ftps: "990",
+            sftp: "22"
+        },
 
         // url for fetching collection
         urlRoot: config.contextPath + '/rest_v2/jobs',
+
+
+        // Complex validation method - allows to collect the errors of both UI and server validators.
+        // It runs the server validation requests first. When got the response - proceeds with standard model validation.
+        validateAll: function (editMode) {
+            var self = this,
+                dfr = $.Deferred();
+
+            // 1) run server requests validators first
+            this.runServerValidationRequests().always(function (result) {
+
+                // 2) run standard validation
+                var isValid = self.isValid(editMode);
+
+                // trigger error event after self.isValid() because standard model validation clears all errors.
+                if (result && result.errorCode) {
+                    isValid = false;
+                    self.trigger('invalid', [result], {switchToErrors: false});
+                }
+
+                if (isValid) {
+                    dfr.resolve();
+                } else {
+                    dfr.reject();
+                }
+
+            });
+
+            return dfr;
+        },
 
         isValid: function (editMode) {
             return !this.validate(this.attributes, {validate: true, editMode: editMode}).length;
@@ -143,7 +184,7 @@ define(function (require) {
                                 errorCode: 'error.invalid.date'
                             });
                         // check if date is in the past
-                        } else if (this.ifPastDate(model.trigger.startDate, model.trigger.timezone)) {
+                        } else if (!options.editMode && this.ifPastDate(model.trigger.startDate, model.trigger.timezone)) {
                             results.push({
                                 field: 'startDate',
                                 errorCode: 'error.before.current.date.trigger.startDate'
@@ -345,10 +386,17 @@ define(function (require) {
                 });
             }
 
+            if (output.saveToRepository && output.folderURI && !this.isValidUri(output.folderURI)) {
+                results.push({
+                    field: 'outputRepository',
+                    errorCode: 'error.report.job.invalid.chars.folderURI'
+                });
+            }
+
             if (!_.isUndefined(output.outputLocalFolder) && output.outputLocalFolder === '') {
                 results.push({
                     field: 'outputHostFileSystem',
-                    errorCode: 'error.not.empty.folderURI'
+                    errorCode: 'error.not.empty.folder'
                 });
             }
 
@@ -389,6 +437,21 @@ define(function (require) {
                         }
                     }
                 }
+
+                if (output.outputFTPInfo.type === "sftp" && output.outputFTPInfo.sshKeyEnabled) {
+                    if (!output.outputFTPInfo.sshKey || output.outputFTPInfo.sshKey === '') {
+                        results.push({
+                            field: 'sshKey',
+                            errorCode: 'error.not.empty.sshKey'
+                        });
+                    } else if (!this.isValidUri(output.outputFTPInfo.sshKey)) {
+                        results.push({
+                            field: 'sshKey',
+                            errorCode: 'error.report.job.invalid.chars.sshKey'
+                        });
+                    }
+                }
+
             }
 
             // tab #4
@@ -569,6 +632,8 @@ define(function (require) {
                 request.setRequestHeader('Accept', 'application/job+json');
             };
 
+            options.cache = false;
+
             return Backbone.sync(method, model, options);
         },
 
@@ -739,12 +804,18 @@ define(function (require) {
             else {
                 if (typeof data.repositoryDestination.outputFTPInfo === "undefined" || data.repositoryDestination.outputFTPInfo === null) {
                     data.repositoryDestination.outputFTPInfo = {};
-                }
-                else {
-
+                } else {
                     var ftp = data.repositoryDestination.outputFTPInfo;
-                    data.repositoryDestination.outputFTPInfo.type = data.repositoryDestination.outputFTPInfo.type == "ftp" ? "TYPE_FTP" : "TYPE_FTPS";
+
                     ftp.enabled = !!ftp.serverName && !!ftp.userName;
+                    ftp.sshKeyEnabled = !!ftp.sshKey;
+
+                    if (ftp.enabled) {
+                        data.repositoryDestination.outputFTPInfo.password = config.VALUE_SUBSTITUTION;
+                    }
+                    if (ftp.sshKeyEnabled) {
+                        data.repositoryDestination.outputFTPInfo.sshPassphrase = config.VALUE_SUBSTITUTION;
+                    }
                 }
 
                 if (!data.repositoryDestination.timestampPattern)
@@ -752,7 +823,7 @@ define(function (require) {
             }
 
             if (typeof data.repositoryDestination.outputFTPInfo.port === "undefined" || data.repositoryDestination.outputFTPInfo.port === null) {
-                data.repositoryDestination.outputFTPInfo.port = "21";
+                data.repositoryDestination.outputFTPInfo.port = this.ftpPortDefaults[data.repositoryDestination.outputFTPInfo.type];
             }
 
             // ==============================
@@ -974,21 +1045,36 @@ define(function (require) {
                 if (data.repositoryDestination.outputFTPInfo){
                     if (!data.repositoryDestination.outputFTPInfo.enabled){
                         data.repositoryDestination.outputFTPInfo = {
-                            type: "TYPE_FTP",
+                            type: "ftp",
                             port: 21,
                             folderPath: null,
                             password: null,
                             propertiesMap: {},
                             serverName: null,
-                            userName: null
+                            userName: null,
+                            sshKey: null,
+                            sshPassphrase: null
                         }
                     }
 
-                    if (data.repositoryDestination.outputFTPInfo.type)
-                        data.repositoryDestination.outputFTPInfo.type = data.repositoryDestination.outputFTPInfo.type == "TYPE_FTP" ? "ftp" : "ftps";
+                    if (data.repositoryDestination.outputFTPInfo.password === config.VALUE_SUBSTITUTION) {
+                        delete data.repositoryDestination.outputFTPInfo.password;
+                    }
+
+                    if (data.repositoryDestination.outputFTPInfo.type === "sftp" && data.repositoryDestination.outputFTPInfo.sshKeyEnabled) {
+                        if (data.repositoryDestination.outputFTPInfo.sshPassphrase === config.VALUE_SUBSTITUTION) {
+                            delete data.repositoryDestination.outputFTPInfo.sshPassphrase;
+                        }
+                    } else {
+                        delete data.repositoryDestination.outputFTPInfo.sshKey;
+                        delete data.repositoryDestination.outputFTPInfo.sshPassphrase;
+                    }
 
                     if ('enabled' in data.repositoryDestination.outputFTPInfo)
                         delete data.repositoryDestination.outputFTPInfo.enabled;
+
+                    if ('sshKeyEnabled' in data.repositoryDestination.outputFTPInfo)
+                        delete data.repositoryDestination.outputFTPInfo.sshKeyEnabled;
                 }
 
                 if (!data.repositoryDestination.sequentialFilenames) {
@@ -1105,7 +1191,8 @@ define(function (require) {
             });
         },
 
-	    checkSaveValidation: function() {
+	    checkSaveValidation: function(options) {
+            options = options || {};
 
 		    var dfr = $.Deferred();
 
@@ -1123,12 +1210,49 @@ define(function (require) {
 			    dfr.reject();
 		    };
 
+		    this.testDates(options.editMode).done(onTestPassing).fail(onTestFailure);
 		    this.validateParametersIC().done(onTestPassing).fail(onTestFailure);
-		    this.testOutputRepositoryFolder().done(onTestPassing).fail(onTestFailure);
 		    this.testOutputHostFileSystemFolder().done(onTestPassing).fail(onTestFailure);
 
 		    return dfr;
 	    },
+
+
+        // test if start or end dates are in the past
+        testDates: function(editMode){
+            var results = [],
+                dfr = $.Deferred();
+
+            var trigger = this.attributes.trigger;
+
+            if (!editMode && trigger.startType == 2 && trigger.startDate && this.ifPastDate(trigger.startDate, trigger.timezone)) {
+                results.push({
+                    field: 'startDate',
+                    errorCode: 'error.before.current.date.trigger.startDate'
+                });
+            }
+
+            if (trigger.type === "simple" && trigger.radioEndDate === "specificDate" && trigger.endDate && this.ifPastDate(trigger.endDate, trigger.timezone)) {
+                results.push({
+                    field: 'simpleEndDate',
+                    errorCode: 'error.before.current.date.trigger.endDate'
+                });
+            } else if (trigger.type === "calendar" &&  trigger.endDate && this.ifPastDate(trigger.endDate, trigger.timezone)) {
+                results.push({
+                    field: 'calendarEndDate',
+                    errorCode: 'error.before.current.date.trigger.endDate'
+                });
+            }
+
+            if (results.length) {
+                this.trigger('invalid', results, {switchToErrors: true});
+                return dfr.reject();
+            } else {
+                return dfr.resolve();
+            }
+
+        },
+
 
         // test model's ftp attributes
         testFTPConnection: function(callback){
@@ -1154,9 +1278,8 @@ define(function (require) {
                 data = {
                     host: ftpInfo.serverName,
                     userName: ftpInfo.userName,
-                    password: ftpInfo.password,
                     folderPath: ftpInfo.folderPath,
-                    type: ftpInfo.type == "TYPE_FTP" ? "ftp" : "ftps",
+                    type: ftpInfo.type,
                     protocol: ftpInfo.protocol,
                     port: ftpInfo.port,
                     implicit: ftpInfo.implicit,
@@ -1168,6 +1291,22 @@ define(function (require) {
 					// trick to make a fake model for backbone.js
 					trigger: function(){ return this; }
                 };
+
+            // Secure fields (password, passPhrase) are not available on UI.
+            // Server should try to restore the values from original job. Sending the job ID in 'holder' parameter:
+            if (this.get('id')) {
+                data.holder = "job:" + this.get('id');
+            }
+
+            if (ftpInfo.password !== config.VALUE_SUBSTITUTION) {
+                data.password = ftpInfo.password;
+            }
+            if (ftpInfo.type === "sftp" && ftpInfo.sshKeyEnabled) {
+                data.sshKey = ftpInfo.sshKey;
+                if (ftpInfo.sshPassphrase !== config.VALUE_SUBSTITUTION) {
+                    data.sshPassphrase = ftpInfo.sshPassphrase;
+                }
+            }
 
             ftpIsProcessings = true;
             // disable FTP button
@@ -1243,54 +1382,146 @@ define(function (require) {
 		    return dfr;
 	    },
 
-	    // check write permissions for output folder
-	    testOutputRepositoryFolder: function() {
+        runServerValidationRequests: function () {
+            var dfr = $.Deferred();
+            var testsPassed = 0;
+            var onTestPassing = function() {
+                testsPassed++;
+                if (testsPassed === 2) {
+                    dfr.resolve();
+                }
+            };
+            var onTestFailure = function(result) {
+                dfr.reject(result);
+            };
 
-		    var self = this,
-			    dfr = $.Deferred();
+            this.testOutputRepositoryFolder().done(onTestPassing).fail(onTestFailure);
+            this.testSshKey().done(onTestPassing).fail(onTestFailure);
 
-		    if (!this.get('repositoryDestination')) {
-			    // weird, the object is absent, but, OK, skip it.
-			    return dfr.resolve();
-		    }
-		    if (!this.get('repositoryDestination').saveToRepository) {
-			    // nothing to check, this ability is disabled
-			    return dfr.resolve();
-		    }
-
-		    var folder = this.get('repositoryDestination').folderURI;
-		    this.checkPermissionOnFolder(folder, function (err, permission) {
-			    if (err || !(permission === 1 || permission === 30 || permission === 6)) {
-
-				    try {
-					    err = JSON.parse(err.responseText);
-				    } catch (e) {
-					    err = {
-						    errorCode: ""
-					    };
-				    }
-
-				    // by default, we think what we can't write to the destination folder
-				    var ourErrorCode = 'error.report.job.output.folder.notwriteable';
-				    if (err.errorCode === "resource.not.found") {
-					    ourErrorCode = 'error.report.job.report.inexistent.output';
-				    }
-
-				    self.trigger('invalid', [{
-					    field: 'outputRepository',
-					    errorCode: ourErrorCode,
-					    errorArguments: [self.get('repositoryDestination').folderURI]
-				    }], {switchToErrors: true});
-
-				    dfr.reject();
-			    }
-			    else {
-				    dfr.resolve();
-			    }
-		    });
-
-		    return dfr;
+            return dfr;
 	    },
+
+
+        // Check SSH Key resource if it exists. Resolves the error details object if test failed.
+        testSshKey: function () {
+            var dfr = $.Deferred();
+
+            var ftpInfo = this.get('repositoryDestination') ? this.get('repositoryDestination').outputFTPInfo : null;
+
+            if (!ftpInfo || !ftpInfo.enabled || !ftpInfo.sshKeyEnabled) {
+                return dfr.resolve();
+            }
+
+            var sshKey = ftpInfo.sshKey;
+
+            // skip server requests if sshKey value is empty or incorrect
+            if (!sshKey || sshKey === "" || !this.isValidUri(sshKey)) {
+                return dfr.resolve();
+            }
+
+            // check the cache if the uri was already tested
+            if (_.isUndefined(validatedSshKeysCache[sshKey])) {
+                this.resource("file", sshKey, function (err, data){
+                    if (err) {
+                        // add the failed folder result to cache
+                        validatedSshKeysCache[sshKey] = {
+                            field: 'sshKey',
+                            errorCode: "error.report.job.report.inexistent.sshKey",
+                            errorArguments: [sshKey]
+                        };
+                        dfr.reject(validatedSshKeysCache[sshKey]);
+                    } else {
+                        // add uri to cache as accessible
+                        validatedSshKeysCache[sshKey] = {};
+                        dfr.resolve();
+                    }
+                });
+            } else {
+                // We've already checked this uri. Resolve using the cache entry
+                if (validatedSshKeysCache[sshKey].errorCode) {
+                    return dfr.reject(validatedSshKeysCache[sshKey]);
+                } else {
+                    return dfr.resolve();
+                }
+            }
+
+            return dfr;
+        },
+
+
+        // Check folder for empty URI, existence and write access. Resolves the error details object if test failed.
+        testOutputRepositoryFolder: function () {
+
+            var dfr = $.Deferred();
+
+            if (!this.get('repositoryDestination')) {
+                // weird, the object is absent, but, OK, skip it.
+                return dfr.resolve();
+            }
+            if (!this.get('repositoryDestination').saveToRepository) {
+                // nothing to check, this ability is disabled
+                return dfr.resolve();
+            }
+
+            var folder = this.get('repositoryDestination').folderURI;
+
+            // check for empty
+            if (!folder || folder === "") {
+                return dfr.reject({
+                    field: 'outputRepository',
+                    errorCode: 'error.not.empty.folder'
+                });
+            }
+
+            // check for invalid characters
+            if (!this.isValidUri(folder)) {
+                return dfr.reject({
+                    field: 'outputRepository',
+                    errorCode: 'error.report.job.invalid.chars.folderURI'
+                });
+            }
+
+            // check the cache if the folder was already tested
+            if (_.isUndefined(validatedFolderURIsCache[folder])) {
+
+                // request folder permission from the server
+                this.checkPermissionOnFolder(folder, function (err, permission) {
+
+                    var errorCode = null;
+                    if (err) {
+                        errorCode = "error.report.job.report.inexistent.output";
+                    } else if (!(permission === 1 || permission === 30 || permission === 6)) {
+                        errorCode = "error.report.job.output.folder.notwriteable";
+                    }
+
+                    if (errorCode) {
+                        // add the failed folder result to cache
+                        validatedFolderURIsCache[folder] = {
+                            field: 'outputRepository',
+                            errorCode: errorCode,
+                            errorArguments: [folder]
+                        };
+                        dfr.reject(validatedFolderURIsCache[folder]);
+                    } else {
+                        // add folder to cache as accessible
+                        validatedFolderURIsCache[folder] = {};
+                        dfr.resolve();
+                    }
+
+                });
+
+            } else {
+                // We've already checked this folder. Resolve using the cache entry
+                if (validatedFolderURIsCache[folder].errorCode) {
+                    return dfr.reject(validatedFolderURIsCache[folder]);
+                } else {
+                    return dfr.resolve();
+                }
+            }
+
+            return dfr;
+        },
+
 
         // test model's outputLocalFolder
         testOutputHostFileSystemFolder: function() {
@@ -1375,6 +1606,7 @@ define(function (require) {
                         callback(undefined, data.permissionMask);
                 },
                 error: function(err) {
+                    try { err = JSON.parse(err.responseText); } catch(e) {}
                     if ('function' === typeof callback)
                         callback(err);
                 }
@@ -1382,10 +1614,10 @@ define(function (require) {
         },
 
         // 
-        resource: function(type, callback){
+        resource: function(type, uri, callback){
             // call backbone sync method manually
             return Backbone.sync.call(this, 'read', new Backbone.Model(), {
-                url: config.contextPath + '/rest_v2/resources' + this.get('source').reportUnitURI,
+                url: config.contextPath + '/rest_v2/resources' + uri,
                 headers:{ 'Accept': 'application/repository.' + type + '+json' },
                 type: 'GET',
                 success: function(data, xhr){
@@ -1433,6 +1665,9 @@ define(function (require) {
             // parse uri components
             uri = this.parseUri(uri);
 
+            // load defaults from jrsConfigs.jsp
+            var jrsConfigDefaults = _.extend({}, config.reportJobEditorDefaults);
+
             // set new model attributes
             this.set(this.parse({
                 baseOutputFilename: uri.file,
@@ -1448,7 +1683,8 @@ define(function (require) {
                 repositoryDestination: {
                     overwriteFiles: true,
                     sequentialFilenames: false,
-                    folderURI: uri.folder,
+                    folderURI: (typeof jrsConfigDefaults['scheduler.job.repositoryDestination.folderURI'] === "undefined") ?
+                        uri.folder : jrsConfigDefaults['scheduler.job.repositoryDestination.folderURI'],
                     saveToRepository: true,
                     timestampPattern: "yyyyMMddHHmm",
                     outputFTPInfo: {
@@ -1530,11 +1766,11 @@ define(function (require) {
             var target_tz, my_tz, tz_diff, currentTime, selectedTime;
 
             target_tz = getTZOffset(date_tz);
-            my_tz = -1 * moment().zone() / 60;
+            my_tz = moment().utcOffset() / 60;
             tz_diff = my_tz - target_tz;
 
             currentTime = +moment().format("X");
-            selectedTime = +moment(date, MOMENTJS_PARSE_UI_DATE_PATTERN, true).add("minute", 1).format("X") + 3600 * (tz_diff);
+            selectedTime = +moment(date, MOMENTJS_PARSE_UI_DATE_PATTERN, true).add(1, "minute").format("X") + 3600 * (tz_diff);
 
             return selectedTime < currentTime;
         },
@@ -1547,21 +1783,25 @@ define(function (require) {
 
         isEmail: function(email) {
             if (!email) return false;
-            var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+            var re = new XRegExp(globalConfig.emailRegExpPattern, "g");
             return re.test(email);
         },
 
-        // makes sure it contains only valid chars - moved from DefaultReportJobValidator#validateJobOutput
         isValidFileName: function(fileName) {
             if (!fileName) return false;
-            var re = /^(\w|\d|\_|\.|\-|[;@]|[^\x00-\x80])+$/;
-            return re.test(fileName);
+            var re = new RegExp(globalConfig.resourceIdNotSupportedSymbols, "g");
+            return !re.test(fileName);
+        },
+
+        isValidUri: function(uri) {
+            if (!uri) return false;
+            var re = new RegExp(globalConfig.resourceIdNotSupportedSymbols, "g");
+            return !re.test(uri.replace(/\//g,"")); // exclude / from testing value
         },
 
         validateEmails: function(emails) {
             if (!emails) return false;
-            emails = emails.replace(/ /g, "");
-            emails = emails.split(EMAIL_SEPARATOR);
+            emails = emails.split(new RegExp(" *" + EMAIL_SEPARATOR + " *"));
             for (var i = 0; i < emails.length; i++) {
                 if (!this.isEmail(emails[i]))
                     return false;

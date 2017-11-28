@@ -32,7 +32,7 @@
     </t:putAttribute>
     <t:putAttribute name="bodyID" value="addResource_listOfValues"/>
     <t:putAttribute name="bodyClass" value="oneColumn flow wizard oneStep"/>
-    <t:putAttribute name="moduleName" value="addListOfValues.page"/>
+    <t:putAttribute name="moduleName" value="addResource/listOfValues/addListOfValuesMain"/>
 
 
     <t:putAttribute name="headerContent">

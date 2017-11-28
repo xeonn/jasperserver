@@ -72,6 +72,12 @@
         <property name="cipherTransformation"><value>AES/CBC/PKCS5Padding</value></property>
     </bean>
 
+    <bean id="diagnosticDataCipherer" class="com.jaspersoft.jasperserver.api.common.crypto.DiagnosticDataCipherer" parent="importExportCipher">
+        <property name="keyInPlainText" value="false"/>
+        <property name="encryptedFileExtension" value="jsEncrypted"/>
+        <property name="allowEncryption" value="true"/>
+    </bean>
+
     <!--
     <bean id="jaasAuthenticationProvider" class="org.springframework.security.providers.jaas.JaasAuthenticationProvider">
         <property name="loginConfig">
@@ -414,8 +420,10 @@
         <security:protect method="com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService.moveFolder" access="ACL_USER_MOVE"/>
         <security:protect method="com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService.moveResource" access="ACL_USER_MOVE"/>
         <security:protect method="com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService.copyResource" access="ACL_USER_COPY"/>
+        <security:protect method="com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService.copyRenameResource" access="ACL_USER_COPY"/>
         <security:protect method="com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService.copyResources" access="ACL_USER_MULTI_COPY"/>
         <security:protect method="com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService.copyFolder" access="ACL_USER_COPY"/>
+        <security:protect method="com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService.copyRenameFolder" access="ACL_USER_COPY"/>
         <!--
                    For comparison, this is the analogous configuration defined inline under aclUpdateMethodSecurityInterceptor
 

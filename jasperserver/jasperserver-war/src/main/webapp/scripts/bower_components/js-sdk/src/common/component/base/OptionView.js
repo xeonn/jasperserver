@@ -24,7 +24,7 @@
  * Basic option view for buttons, menu options etc.
  *
  * @author: Kostiantyn Tsaregradskyi, Zakhar Tomchenko
- * @version: $Id: OptionView.js 1605 2015-09-23 17:55:32Z inestere $
+ * @version: $Id: OptionView.js 2402 2016-03-14 12:38:21Z ztomchen $
  */
 
 define(function (require) {
@@ -33,9 +33,7 @@ define(function (require) {
     var Backbone = require("backbone"),
         _ = require("underscore");
 
-    return Backbone.View.extend(
-        /** @lends OptionView.prototype */
-        {
+    return Backbone.View.extend({
         events: {
             "click": "select",
             "mouseover": "mouseover",
@@ -48,11 +46,12 @@ define(function (require) {
          * @param {object} options
          * @param {string} options.template - HTML template for option.
          * @param {Backbone.Model} options.model - model representing option.
-         * @param {string} [options.disabledClass] - CSS class to add to disabled option.
-         * @param {string} [options.hiddenClass] - CSS class to add to hidden option.
-         * @param {string} [options.toggleClass] - CSS class to add to toggle option state.
+         * @param {string} [options.disabledClass=[]] - CSS class to add to disabled option.
+         * @param {string} [options.hiddenClass=[]] - CSS class to add to hidden option.
          * @throws "Option should have defined template" exception if options.template is not defined.
          * @throws "Option should have associated Backbone.Model" exception if options.model is not defined or is not a Backbone.Model instance.
+         * @fires OptionView#mouseover
+         * @fires OptionView#mouseout
          */
         constructor: function(options) {
             if (!options || !options.template) {
@@ -68,12 +67,15 @@ define(function (require) {
             this.disabledClass = options.disabledClass;
             this.hiddenClass = options.hiddenClass;
             this.toggleClass = options.toggleClass;
+            this.overClass = options.overClass || "over";
 
             Backbone.View.apply(this, arguments);
         },
 
         initialize: function() {
             Backbone.View.prototype.initialize.apply(this, arguments);
+
+            var self = this;
 
             if (this.model.get("disabled") === true) {
                 this.disable();
@@ -82,6 +84,15 @@ define(function (require) {
             if (this.model.get("hidden") === true) {
                 this.hide();
             }
+
+            this.listenTo(this.model, "change:over", function(model, value){
+                if (value){
+                    self.$("> p").addClass(self.overClass);
+                } else {
+                    self.$("> p").removeClass(self.overClass);
+                }
+            });
+
         },
 
         el: function() {
@@ -102,7 +113,24 @@ define(function (require) {
             this.$el.attr("disabled", "disabled").addClass(this.disabledClass);
         },
 
-        /**
+        /*
+         * @method over
+         * @description adds over class option.
+         */
+        over: function() {
+            this.model.set({over: true});
+        },
+
+        /*
+         * @method leave
+         * @description removes over class
+         */
+        leave: function() {
+            this.model.set({over: false});
+        },
+
+        /*
+         * @method show
          * @description Shows option.
          */
         show: function() {

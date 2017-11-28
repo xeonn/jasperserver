@@ -404,10 +404,11 @@
         <property name="timezones">
             <ref bean="userTimeZonesList"/>
         </property>
-
         <property name="enableSaveToHostFS" value="#{configurationBean.enableSaveToHostFS}"/>
         <property name="enableDataSnapshot" value="#{dataSnapshotService.snapshotPersistenceEnabled}"/>
+        <property name="reportJobDefaults" ref="reportJobDefaults"/>
         <property name="repository" ref="${bean.repositoryService}"/>
+        <property name="profileAttributeService" ref="profileAttributeService"/>
     </bean>
     
     <bean id="xmlExportController" class="com.jaspersoft.jasperserver.war.control.XmlExportController">

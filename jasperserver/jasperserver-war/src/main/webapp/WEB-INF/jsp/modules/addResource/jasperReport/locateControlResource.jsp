@@ -32,10 +32,10 @@
 	 - OLAP Schema
 	 - Access Grant
 	In this mock, the token [resourceType] is used to represent the specific type in the page title, page ID and some of the visible strings.
-	
+
 	The developer should replace this token with the appropriate string when implementing the page,
-	or, if this page used as a basis for creating a template, when calling the template. 
-	
+	or, if this page used as a basis for creating a template, when calling the template.
+
 	The pageID value is used in pageSpecific.css to control display and position of location options, so it must be assigned correctly.
 
 2. Depending upon what flow this step is inserted into the developer must insert the correct flow navigation or step indicator into #flowControls.
@@ -44,17 +44,17 @@ PROVIDING FEEDBACK TO THE USER
 
 The interactive elements associated with #fromLocal and #fromRepo should be set to disabled="disabled" until their associated radio button is selected.  If the radio button is again toggled off, then the element should be reset to disabled.
 
-   
+
 FINALLY
  Do not include these notes, or any HTML comment below that begins 'NOTE: ...' in the production page
 -->
 <t:insertTemplate template="/WEB-INF/jsp/templates/page.jsp">
     <t:putAttribute name="pageTitle">
-        <spring:message code="jsp.inputControlSource.header"/>    
+        <spring:message code="jsp.inputControlSource.header"/>
     </t:putAttribute>
     <t:putAttribute name="bodyID" value="addResource_locateInputControl"/>
     <t:putAttribute name="bodyClass" value="oneColumn flow wizard"/>
-    <t:putAttribute name="moduleName" value="addJasperReportLocateControl.page"/>
+    <t:putAttribute name="moduleName" value="addResource/jasperReport/addJasperReportLocateControlMain"/>
 
     <t:putAttribute name="headerContent">
         <jsp:include page="locateControlResourceState.jsp"/>
@@ -76,10 +76,10 @@ FINALLY
 						<h2 class="textAccent02"><spring:message code="jsp.inputControlSource.header"/></h2>
 						<h4><!--NOTE: keep h4 markup, but leave empty --></h4>
 					</fieldset>
-				
+
 					<fieldset class="row inputs oneColumn">
 						<legend class="offLeft"><span><spring:message code='addResources.locateControlResource.userInputs' javaScriptEscape='true'/></span></legend>
-						
+
 							<t:insertTemplate template="/WEB-INF/jsp/templates/container.jsp">
 							    <t:putAttribute name="containerClass" value="column noHeader primary"/>
 
@@ -140,7 +140,7 @@ FINALLY
 				    </fieldset>
 				</t:putAttribute>
 
-			</t:putAttribute>	    
+			</t:putAttribute>
 		</t:insertTemplate>
         <input type="hidden" name="_flowExecutionKey" value="${flowExecutionKey}"/>
     </form>

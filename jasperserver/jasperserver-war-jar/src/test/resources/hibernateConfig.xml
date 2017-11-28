@@ -47,7 +47,8 @@
                                <value>/com/jaspersoft/jasperserver/api/metadata/common/service/impl/hibernate/persistent/RepoJndiJdbcDataSource.hbm.xml</value>
                                <value>/com/jaspersoft/jasperserver/api/metadata/common/service/impl/hibernate/persistent/RepoVirtualDataSource.hbm.xml</value>
                                <value>/com/jaspersoft/jasperserver/api/metadata/common/service/impl/hibernate/persistent/RepoAwsDataSource.hbm.xml</value>
-                               <value>/com/jaspersoft/jasperserver/api/metadata/common/service/impl/hibernate/persistent/RepoListOfValues.hbm.xml</value>
+                <value>/com/jaspersoft/jasperserver/api/metadata/common/service/impl/hibernate/persistent/RepoAzureSqlDataSource.hbm.xml</value>
+                <value>/com/jaspersoft/jasperserver/api/metadata/common/service/impl/hibernate/persistent/RepoListOfValues.hbm.xml</value>
 			       <value>/security/SecureMondrianConnection.hbm.xml</value>
 			       <value>/security/RepoMondrianXMLADefinition.hbm.xml</value>
 <!-- RepoMondrianConnection is in the process of being deprecated, 

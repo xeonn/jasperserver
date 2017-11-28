@@ -104,10 +104,13 @@ define(function (require) {
         // Evaluate regexp on urlTemplate and return all found groups.
         _getRegExpFieldGroupsFromConnectionUrlTemplate: function() {
             var groups = [], group;
-
+            var groupSet = [];
             while (!_.isNull(group = JdbcDriverModel.FIELD_TEMPLATE_REGEXP.exec(this.get("jdbcUrl")))) {
                 if (_.isArray(group) && group.length === 2) {
-                    groups.push(group);
+                    if (groupSet.indexOf(group[0]) === -1) {
+                        groups.push(group);
+                        groupSet.push(group[0]);
+                    }
                 }
             }
 

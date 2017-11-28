@@ -129,6 +129,15 @@
         </property>
     </bean>
 
+    <bean name="azureSqlDataSourceTreeDataProvider" class="com.jaspersoft.jasperserver.war.model.impl.AzureSqlDataSourceTreeDataProvider" scope="session">
+        <property name="messageSource" ref="messageSource"/>
+        <property name="repositoryService" ref="${bean.repositoryService}" />
+        <property name="azureSqlManagementService" ref="azureSqlManagementService"/>
+        <property name="defaultJdbcDriverClassName" ref="defaultAzureJdbcDriverClassName"/>
+        <property name="defaultKeyStoreType" ref="defaultAzureKeyStoreType"/>
+    </bean>
+
+
     <bean name="joinableDsTreeDataProvider" class="com.jaspersoft.jasperserver.war.model.impl.TypedTreeDataProvider">
         <property name="repositoryService" ref="${bean.repositoryService}" />
         <property name="engineService" ref="engineService"/>

@@ -121,7 +121,7 @@ public class HypermediaRepositoryJaxrsService {
 
                     int resourcesCount = batchRepositoryService.getResourcesCount(
                     		q, resourceLookup.getUri(), 
-                    		type,
+                            new ArrayList<String>(type),
                             excludeWithPublic? excludeFoldersWithPublic:excludeFolders, 
                             true,
                             showHiddenItems, 
@@ -232,7 +232,7 @@ public class HypermediaRepositoryJaxrsService {
             String type = resource instanceof FileResource ? ((FileResource) resource).getFileType() : ((ContentResource) resource).getFileType();
             response = toResponse(wrapper, resource.getName(), type);
         } else {
-            final ToClientConverter<? super com.jaspersoft.jasperserver.api.metadata.common.domain.Resource, ? extends ClientResource> toClientConverter =
+            final ToClientConverter<? super com.jaspersoft.jasperserver.api.metadata.common.domain.Resource, ? extends ClientResource, ToClientConversionOptions> toClientConverter =
                     resourceConverterProvider.getToClientConverter(resource);
             final ClientResource clientResource = toClientConverter.toClient(resource, ToClientConversionOptions.getDefault().setExpanded(expanded));
 

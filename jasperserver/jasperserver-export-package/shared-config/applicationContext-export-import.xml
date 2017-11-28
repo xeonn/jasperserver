@@ -351,6 +351,7 @@
         <property name="configuration" ref="reportJobsConfiguration"/>
         <property name="reportJobsArg" value="report-jobs"/>
         <property name="urisArg" value="uris"/>
+        <property name="resourceExporterId"><util:property-path path="resourceExporter.id"/></property>
     </bean>
 
     <!-- calendars -->

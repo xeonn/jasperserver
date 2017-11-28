@@ -46,7 +46,7 @@
 
 <t:insertTemplate template="/WEB-INF/jsp/templates/page.jsp">
     <t:putAttribute name="pageTitle"><spring:message code='jsp.Login.title'/></t:putAttribute>
-    <t:putAttribute name="moduleName" value="login.page"/>
+    <t:putAttribute name="moduleName" value="login/loginMain"/>
     <t:putAttribute name="headerContent">
 
         <meta name="noMenu" content="true">

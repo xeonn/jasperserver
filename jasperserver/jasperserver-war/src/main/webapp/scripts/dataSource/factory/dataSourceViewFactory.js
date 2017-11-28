@@ -28,6 +28,7 @@ define(function(require) {
         JdbcDataSourceView = require("dataSource/view/JdbcDataSourceView"),
         JndiDataSourceView = require("dataSource/view/JndiDataSourceView"),
         AwsDataSourceView = require("dataSource/view/AwsDataSourceView"),
+        AzureSqlDataSourceView = require("dataSource/view/AzureSqlDataSourceView"),
         VirtualDataSourceView = require("dataSource/view/VirtualDataSourceView"),
         BeanDataSourceView = require("dataSource/view/BeanDataSourceView"),
         MongoDbDataSourceView = require("dataSource/view/MongoDbDataSourceView"),
@@ -40,6 +41,7 @@ define(function(require) {
     registeredViews[dataSourceResourceTypes.JDBC.toLowerCase()] = JdbcDataSourceView;
     registeredViews[dataSourceResourceTypes.JNDI.toLowerCase()] = JndiDataSourceView;
     registeredViews[dataSourceResourceTypes.AWS.toLowerCase()] = AwsDataSourceView;
+    registeredViews[dataSourceResourceTypes.AZURE_SQL.toLowerCase()] = AzureSqlDataSourceView;
     registeredViews[dataSourceResourceTypes.VIRTUAL.toLowerCase()] = VirtualDataSourceView;
     registeredViews[dataSourceResourceTypes.BEAN.toLowerCase()] = BeanDataSourceView;
     registeredViews[dataSourceResourceTypes.MONGODB] = MongoDbDataSourceView;

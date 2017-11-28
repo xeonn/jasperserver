@@ -44,7 +44,7 @@ import java.util.regex.Pattern;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: DefaultReportJobValidator.java 51947 2014-12-11 14:38:38Z ogavavka $
+ * @version $Id: DefaultReportJobValidator.java 62483 2016-04-12 17:26:07Z akasych $
  */
 public class DefaultReportJobValidator implements ReportJobValidator, ApplicationContextAware {
 
@@ -148,27 +148,32 @@ public class DefaultReportJobValidator implements ReportJobValidator, Applicatio
             //now = TriggerUtils.translateTime(now, tz, TimeZone.getDefault());
 		}
 
-		if (trigger.getStartType() == ReportJobTrigger.START_TYPE_SCHEDULE) {
-			Date startDate = trigger.getStartDate();
-			if (startDate == null) {
-				addNotEmpty(errors, "trigger.startDate");
-			} else if (job.getVersion() == ReportJob.VERSION_NEW && startDate.before(now)) {
-				errors.add(new ValidationErrorImpl("error.before.current.date", null, "Start date cannot be in the past.", "trigger.startDate"));
-			}
-		}else if(trigger.getStartType() == ReportJobTrigger.START_TYPE_NOW && trigger.getStartDate() != null)
-            errors.add(new ValidationErrorImpl("error.invalid.value.for.start_type_now", null, "Start date cannot be specified if start type is START_TYPE_NOW.", "trigger.startDate"));
-		if (trigger.getEndDate() != null) {
-			switch (trigger.getStartType()) {
-			case ReportJobTrigger.START_TYPE_NOW:
-				if (trigger.getEndDate().before(now)) {
-					errors.add(new ValidationErrorImpl("error.before.current.date", null, "End date cannot be in the past.", "trigger.endDate"));
+		if (trigger.getStartType() != ReportJobTrigger.START_TYPE_NOW && trigger.getStartType() != ReportJobTrigger.START_TYPE_SCHEDULE) {
+			errors.add(new ValidationErrorImpl("error.invalid.report.job.trigger.startType", null, "Specify a valid start type.", "trigger.startType"));
+		} else {
+			if (trigger.getStartType() == ReportJobTrigger.START_TYPE_SCHEDULE) {
+				Date startDate = trigger.getStartDate();
+				if (startDate == null) {
+					addNotEmpty(errors, "trigger.startDate");
+				} else if (job.getVersion() == ReportJob.VERSION_NEW && startDate.before(now)) {
+					errors.add(new ValidationErrorImpl("error.before.current.date", null, "Start date cannot be in the past.", "trigger.startDate"));
 				}
-				break;
-			case ReportJobTrigger.START_TYPE_SCHEDULE:
-				if (trigger.getStartDate() != null && trigger.getEndDate().before(trigger.getStartDate())) {
-					errors.add(new ValidationErrorImpl("error.before.start.date", null, "End date cannot be before start date", "trigger.endDate"));
+			} else if(trigger.getStartType() == ReportJobTrigger.START_TYPE_NOW && trigger.getStartDate() != null)
+				errors.add(new ValidationErrorImpl("error.invalid.value.for.start_type_now", null, "Start date cannot be specified if start type is START_TYPE_NOW.", "trigger.startDate"));
+
+			if (trigger.getEndDate() != null) {
+				switch (trigger.getStartType()) {
+					case ReportJobTrigger.START_TYPE_NOW:
+						if (trigger.getEndDate().before(now)) {
+							errors.add(new ValidationErrorImpl("error.before.current.date", null, "End date cannot be in the past.", "trigger.endDate"));
+						}
+						break;
+					case ReportJobTrigger.START_TYPE_SCHEDULE:
+						if (trigger.getStartDate() != null && trigger.getEndDate().before(trigger.getStartDate())) {
+							errors.add(new ValidationErrorImpl("error.before.start.date", null, "End date cannot be before start date", "trigger.endDate"));
+						}
+						break;
 				}
-				break;
 			}
 		}
 

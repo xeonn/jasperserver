@@ -37,7 +37,7 @@
 
 <html>
     <head>
-        <title>TIBCO Jaspersoft: <decorator:title /></title>
+        <title><spring:message code="company.name"/>: <decorator:title /></title>
         <meta http-equiv="Content-Type" content="text/html; charset=${requestScope['com.jaspersoft.ji.characterEncoding']}">
 
         <!--

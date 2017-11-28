@@ -33,7 +33,6 @@ import com.jaspersoft.jasperserver.remote.resources.attachments.AttachmentsProce
 import com.jaspersoft.jasperserver.remote.resources.validation.ResourceValidator;
 import com.jaspersoft.jasperserver.remote.services.PermissionsService;
 import com.jaspersoft.jasperserver.war.cascade.handlers.GenericTypeProcessorRegistry;
-import com.jaspersoft.jasperserver.war.helper.GenericParametersHelper;
 import com.jaspersoft.jasperserver.war.util.CalendarFormatProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -46,7 +45,7 @@ import java.util.List;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: ResourceConverterImpl.java 58870 2015-10-27 22:30:55Z esytnik $
+ * @version $Id: ResourceConverterImpl.java 62954 2016-05-01 09:49:23Z ykovalch $
  */
 public abstract class ResourceConverterImpl<ResourceType extends Resource, ClientType extends ClientResource<ClientType>> implements ResourceConverter<ResourceType, ClientType> {
     @javax.annotation.Resource(name = "mappingResourceFactory")
@@ -61,14 +60,17 @@ public abstract class ResourceConverterImpl<ResourceType extends Resource, Clien
     @javax.annotation.Resource
     private GenericTypeProcessorRegistry genericTypeProcessorRegistry;
 
-    private Class<ClientType> clientTypeClass;
+    private ServerResourceTypeExtractor serverResourceTypeExtractor;
 
-    private String serverResourceType;
-
-    private String clientResourceType;
+    private ClientTypeHelper<ClientType> clientTypeHelper;
 
     @javax.annotation.Resource(name = "basicResourceValidator")
     private ResourceValidator defaultValidator;
+
+    public ResourceConverterImpl(){
+        clientTypeHelper = new ClientTypeHelper(this.getClass());
+        serverResourceTypeExtractor = new ServerResourceTypeExtractor(this.getClass());
+    }
 
     // object factory returns correct type of resource. So, cast below is safe
     @SuppressWarnings("unchecked")
@@ -81,17 +83,7 @@ public abstract class ResourceConverterImpl<ResourceType extends Resource, Clien
     }
 
     public String getServerResourceType() {
-        if (serverResourceType == null) {
-            final Class<?> serverResourceTypeClass = GenericParametersHelper.getGenericTypeArgument(this.getClass(), ResourceConverter.class, 0);
-            if (serverResourceTypeClass != null) {
-                serverResourceType = serverResourceTypeClass.getName();
-            } else {
-                throw new IllegalStateException("Unable to identify serverResourceType. It can happen because " +
-                        getClass().getName() + " is raw implementation of " + ResourceConverter.class.getName());
-            }
-
-        }
-        return serverResourceType;
+        return serverResourceTypeExtractor.getServerResourceType();
     }
 
     @Override
@@ -181,24 +173,13 @@ public abstract class ResourceConverterImpl<ResourceType extends Resource, Clien
     protected abstract ClientType resourceSpecificFieldsToClient(ClientType client, ResourceType serverObject, ToClientConversionOptions options);
 
     protected ClientType getNewClientObjectInstance() {
-        try {
-            return getClientTypeClass().newInstance();
-        } catch (Exception e) {
-            throw new IllegalStateException("Couldn't instantiate client object", e);
-        }
+        return clientTypeHelper.getNewClientObjectInstance();
     }
 
     // Client object class is extracted from real implementation class by reflection. So, cast is safe.
     @SuppressWarnings("unchecked")
     public Class<ClientType> getClientTypeClass() {
-        if (clientTypeClass == null) {
-            clientTypeClass = (Class) GenericParametersHelper.getGenericTypeArgument(this.getClass(), ResourceConverter.class, 1);
-            if (clientTypeClass == null) {
-                throw new IllegalStateException("Unable to identify clientTypeClass. It can happen because " +
-                        getClass().getName() + " is raw implementation of " + ResourceConverter.class.getName());
-            }
-        }
-        return clientTypeClass;
+        return clientTypeHelper.getClientClass();
     }
 
     protected final ResourceReference findReference(List<ResourceReference> references, String uri) {
@@ -214,9 +195,6 @@ public abstract class ResourceConverterImpl<ResourceType extends Resource, Clien
     }
 
     public String getClientResourceType() {
-        if (clientResourceType == null) {
-            clientResourceType = ClientTypeHelper.extractClientType(getClientTypeClass());
-        }
-        return clientResourceType;
+        return clientTypeHelper.getClientResourceType();
     }
 }

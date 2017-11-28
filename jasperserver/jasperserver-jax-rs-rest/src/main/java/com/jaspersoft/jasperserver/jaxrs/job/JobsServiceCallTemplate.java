@@ -37,7 +37,7 @@ import javax.ws.rs.core.Response;
 
 /**
  * @author Yaroslav.Kovalchyk
- * @version $Id: JobsServiceCallTemplate.java 57603 2015-09-15 17:20:48Z psavushc $
+ * @version $Id: JobsServiceCallTemplate.java 63380 2016-05-26 20:56:46Z mchan $
  */
 public class JobsServiceCallTemplate implements RemoteServiceCallTemplate<JobsService> {
     private static final Log log = LogFactory.getLog(JobsServiceCallTemplate.class);
@@ -53,7 +53,11 @@ public class JobsServiceCallTemplate implements RemoteServiceCallTemplate<JobsSe
             response = (Response) caller.call(service);
         } catch (ReportJobNotFoundException e) {
             status = Response.Status.NOT_FOUND;
-            entity = new ResourceNotFoundException("" + e.getJobId()).getErrorDescriptor();
+            final long jobId = e.getJobId();
+            entity = new ErrorDescriptor()
+                    .setErrorCode(ResourceNotFoundException.ERROR_CODE_RESOURCE_NOT_FOUND)
+                    .setMessage("Requested job " + jobId + " doesn't exist or has finished execution and now is removed")
+                    .setParameters(jobId);
         } catch (AccessDeniedException e) {
             status = Response.Status.FORBIDDEN;
             entity = new ErrorDescriptor().setErrorCode("access.denied").setMessage(e.getMessage());

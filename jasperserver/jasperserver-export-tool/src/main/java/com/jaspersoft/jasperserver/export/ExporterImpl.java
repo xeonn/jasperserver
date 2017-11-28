@@ -26,6 +26,7 @@ import com.jaspersoft.jasperserver.dto.common.WarningDescriptor;
 import com.jaspersoft.jasperserver.export.io.ExportOutput;
 import com.jaspersoft.jasperserver.export.modules.ExporterModule;
 import com.jaspersoft.jasperserver.export.modules.ExporterModuleContext;
+import com.jaspersoft.jasperserver.export.modules.ModuleRegister;
 import com.jaspersoft.jasperserver.export.modules.common.ExportImportWarningCode;
 import com.jaspersoft.jasperserver.export.service.ImportExportService;
 import com.jaspersoft.jasperserver.export.service.impl.ImportExportServiceImpl;
@@ -49,7 +50,7 @@ import java.util.Properties;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ExporterImpl.java 58265 2015-10-05 16:13:56Z vzavadsk $
+ * @version $Id: ExporterImpl.java 63380 2016-05-26 20:56:46Z mchan $
  */
 
 public class ExporterImpl extends BaseExporterImporter implements Exporter {
@@ -75,7 +76,10 @@ public class ExporterImpl extends BaseExporterImporter implements Exporter {
 		public Element getModuleIndexElement() {
 			return getIndexModuleElement(moduleId);
 		}
-		
+
+		public ModuleRegister getModuleRegister() {
+			return ExporterImpl.this.getModuleRegister();
+		}
 	}
 	
 	private String xmlVersion;

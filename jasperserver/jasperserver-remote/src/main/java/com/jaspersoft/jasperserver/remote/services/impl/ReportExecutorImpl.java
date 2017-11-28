@@ -23,6 +23,7 @@ package com.jaspersoft.jasperserver.remote.services.impl;
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
 import com.jaspersoft.jasperserver.api.common.domain.impl.ExecutionContextImpl;
 import com.jaspersoft.jasperserver.api.common.util.TimeZoneContextHolder;
+import com.jaspersoft.jasperserver.api.engine.common.domain.Request;
 import com.jaspersoft.jasperserver.api.engine.common.service.EngineService;
 import com.jaspersoft.jasperserver.api.engine.common.service.VirtualizerFactory;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.domain.impl.ReportUnitRequest;
@@ -296,7 +297,9 @@ public class ReportExecutorImpl implements ReportExecutor {
                 executionOptions.setJasperReportsContext(context);
             }
             requestParams.put(JRParameter.REPORT_CONTEXT, executionOptions.getReportContext());
-
+            if(options.isFreshData()){
+                requestParams.put(Request.PARAM_NAME_FRESH_DATA, "true");
+            }
             ReportUnitRequest request = new ReportUnitRequest(getConcreteReportURI(reportResource), requestParams);
             if(options.getRequestId() != null){
                 // request ID is defined in report execution options. Let's use it.

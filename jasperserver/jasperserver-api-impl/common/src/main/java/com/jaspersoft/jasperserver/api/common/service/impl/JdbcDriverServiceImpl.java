@@ -74,7 +74,7 @@ import java.util.regex.Pattern;
  * so they will not be registered twice.
  *
  * @author Sergey Prilukin (sprilukin@jaspersoft.com)
- * @version $Id: JdbcDriverServiceImpl.java 61296 2016-02-25 21:53:37Z mchan $
+ * @version $Id: JdbcDriverServiceImpl.java 63380 2016-05-26 20:56:46Z mchan $
  */
 public class JdbcDriverServiceImpl implements JdbcDriverService, ApplicationContextAware {
     protected final Log logger = LogFactory.getLog(getClass());
@@ -752,7 +752,10 @@ public class JdbcDriverServiceImpl implements JdbcDriverService, ApplicationCont
     }
 
     protected void unRegisterDriverFromJVM(Driver driver) throws SQLException {
-        DriverManager.deregisterDriver(driver);
+        String url = driverClassToUrlMap.get(driver.getClass().getName());
+        if (!SYSTEM_CLASSLOADER_PATH.equals(url)) {
+            DriverManager.deregisterDriver(driver);
+        }
     }
 
     protected Enumeration<Driver> getDriversRegisteredInJVM() throws SQLException {

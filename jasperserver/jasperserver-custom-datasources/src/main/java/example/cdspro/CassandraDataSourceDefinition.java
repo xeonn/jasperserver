@@ -132,7 +132,7 @@ public class CassandraDataSourceDefinition extends DataAdapterDefinition {
             jrquery.setText(query);
             jrquery.setLanguage("cql");
             designDataset.setQuery(jrquery);
-            return CassandraFieldsProvider.getInstance().getFields(DataAdapterDefinitionUtil.getJasperReportsContext(), cassandraConnection, designDataset, fillParams);
+            return CassandraFieldsProvider.getInstance().getFields(getJasperReportsContext(), cassandraConnection, designDataset, fillParams);
     }
 
     private static Set supportedTypeSet;

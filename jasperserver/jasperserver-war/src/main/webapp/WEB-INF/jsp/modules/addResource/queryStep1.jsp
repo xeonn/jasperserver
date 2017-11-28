@@ -48,7 +48,7 @@ FINALLY
     <t:putAttribute name="pageTitle"><c:choose><c:when test="${query.editMode=='true'}"><spring:message code="resource.query.titleEdit"/></c:when><c:otherwise><spring:message code="resource.query.title"/></c:otherwise></c:choose></t:putAttribute>
     <t:putAttribute name="bodyID" value="addResource_query_step1"/>
     <t:putAttribute name="bodyClass" value="oneColumn flow wizard firstStep"/>
-    <t:putAttribute name="moduleName" value="addQuery.page"/>
+    <t:putAttribute name="moduleName" value="addResource/query/addQueryMain"/>
 
     <t:putAttribute name="headerContent">
         <jsp:include page="queryStep1State.jsp"/>

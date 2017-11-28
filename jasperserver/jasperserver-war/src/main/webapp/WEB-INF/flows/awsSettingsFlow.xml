@@ -3,11 +3,14 @@
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:schemaLocation="http://www.springframework.org/schema/webflow http://www.springframework.org/schema/webflow/spring-webflow-2.0.xsd">
 
+    <!-- Transitions whose 'on' attributes check for externalContext.nativeRequest.method == 'POST' will happen
+        only if the reqest's http method is POST.  This was done to protect sensitive areas against CSRF attacks.
+        Currently, CSRFGuard only protects POST, PUT, DELETE; we want to avoid all server state changing requests via GET, etc.. -->
     <view-state id="editAwsSettingsForm" view="modules/administer/awsSettings">
         <on-entry>
             <evaluate expression="awsSettingsAction.init"/>
         </on-entry>
-        <transition on="saveSingleProperty" to="saveSingleProperty"/>
+        <transition on="${currentEvent.id == 'saveSingleProperty' and externalContext.nativeRequest.method == 'POST'}" to="saveSingleProperty"/>
     </view-state>
 
     <action-state id="saveSingleProperty">

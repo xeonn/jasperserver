@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: jobsView.js 9551 2015-10-13 14:09:03Z dgorbenk $
+ * @version: $Id: jobsView.js 10042 2016-04-12 14:01:27Z akasych $
  */
 
 /* global define, isSupportsTouch, isIPad */
@@ -63,8 +63,9 @@ define(function (require) {
 
         // initialize view
         initialize: function(options) {
+            this.options = _.extend({}, options);
 
-	        this.options = _.extend({}, options);
+            this.options = _.omit(this.options, "model");
 
             // create collection
             this.jobsViewCollection = new jobsCollection(null, this.options);

@@ -29,6 +29,7 @@ import com.jaspersoft.jasperserver.api.metadata.user.domain.impl.client.Metadata
 import com.jaspersoft.jasperserver.api.metadata.user.service.UserAuthorityService;
 import com.jaspersoft.jasperserver.api.metadata.user.service.impl.HttpOnlyResponseWrapper;
 import com.jaspersoft.jasperserver.api.security.encryption.EncryptionRequestUtils;
+import com.jaspersoft.jasperserver.war.common.ConfigurationBean;
 import com.jaspersoft.jasperserver.war.common.JasperServerConstImpl;
 import com.jaspersoft.jasperserver.war.common.JasperServerHttpConstants;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -53,7 +54,7 @@ import java.util.TimeZone;
 
 /**
  * @author Ionut Nedelcu (ionutned@users.sourceforge.net)
- * @version $Id: UserPreferencesFilter.java 55164 2015-05-06 20:54:37Z mchan $
+ * @version $Id: UserPreferencesFilter.java 63410 2016-05-30 11:37:52Z ykovalch $
  */
 public class UserPreferencesFilter implements Filter
 {
@@ -61,6 +62,8 @@ public class UserPreferencesFilter implements Filter
 	private static String USER_TIMEZONE_PARAM = "userTimezone";
 	private static String USER_NAME = "j_username";
 	private static String USER_PASSWORD = "j_newpassword1";
+
+	protected ConfigurationBean configuration;
 
     private int cookieAge;
 	UserAuthorityService userService;
@@ -116,7 +119,9 @@ public class UserPreferencesFilter implements Filter
 				session.setAttribute(JasperServerConstImpl.getUserLocaleSessionAttr(), locale);
 				Cookie cookie = new Cookie(JasperServerConstImpl.getUserLocaleSessionAttr(), userLocale);
 				cookie.setMaxAge(cookieAge);
+                cookie.setPath(((HttpServletRequest) request).getContextPath() + "/");
                 httpOnlyResponseWrapper.addCookie(cookie);
+				sessionLocale = locale;
 			}
 		}
 
@@ -214,6 +219,19 @@ public class UserPreferencesFilter implements Filter
 		   session.removeAttribute("passwordExpiredDays");
 
 		}
+
+		if (configuration != null && (configuration.getLocalPort() == null || configuration.getContextPath() == null)){
+			synchronized (configuration){
+				if (configuration.getLocalPort() == null){
+					configuration.setLocalPort(request.getLocalPort());
+				}
+
+				if (configuration.getContextPath() == null){
+					configuration.setContextPath(((HttpServletRequest) request).getContextPath());
+				}
+			}
+		}
+
 		chain.doFilter(request, response);
 	}
 
@@ -244,5 +262,13 @@ public class UserPreferencesFilter implements Filter
 	public void setCookieAge(int cookieAge)
 	{
 		this.cookieAge = cookieAge;
+	}
+
+	public ConfigurationBean getConfiguration() {
+		return configuration;
+	}
+
+	public void setConfiguration(ConfigurationBean configuration) {
+		this.configuration = configuration;
 	}
 }

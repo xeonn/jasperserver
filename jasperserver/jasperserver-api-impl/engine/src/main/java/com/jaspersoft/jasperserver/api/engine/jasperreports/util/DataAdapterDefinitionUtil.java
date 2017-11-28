@@ -21,18 +21,15 @@
 
 package com.jaspersoft.jasperserver.api.engine.jasperreports.util;
 
-import com.jaspersoft.jasperserver.api.engine.jasperreports.util.repo.RepositoryURLHandlerFactory;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.CustomReportDataSource;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.Tenant;
 import com.jaspersoft.jasperserver.api.metadata.user.service.TenantService;
-import net.sf.jasperreports.engine.DefaultJasperReportsContext;
 import net.sf.jasperreports.engine.JRParameter;
 import net.sf.jasperreports.engine.JRValueParameter;
 import net.sf.jasperreports.engine.design.JRDesignParameter;
 import net.sf.jasperreports.engine.fill.JRBaseFiller;
 import net.sf.jasperreports.engine.fill.JRFillObjectFactory;
 import net.sf.jasperreports.engine.fill.JRFillParameter;
-import net.sf.jasperreports.engine.util.LocalJasperReportsContext;
 
 import java.beans.PropertyDescriptor;
 import java.util.ArrayList;
@@ -190,12 +187,5 @@ public class DataAdapterDefinitionUtil {
         }
 
         return customDataSource.getURIString();
-    }
-
-
-    public static LocalJasperReportsContext getJasperReportsContext() {
-        LocalJasperReportsContext jasperReportsContext = new LocalJasperReportsContext(DefaultJasperReportsContext.getInstance());
-        jasperReportsContext.setURLStreamHandlerFactory(RepositoryURLHandlerFactory.getInstance());
-		return jasperReportsContext;
     }
 }

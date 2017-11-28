@@ -22,19 +22,17 @@ package com.jaspersoft.jasperserver.war.util;
 
 import java.text.DateFormat;
 
+import com.jaspersoft.jasperserver.api.engine.jasperreports.util.DateFormatProvider;
+
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: CalendarFormatProvider.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: CalendarFormatProvider.java 63380 2016-05-26 20:56:46Z mchan $
  */
-public interface CalendarFormatProvider {
-
-    DateFormat getDateFormat();
+public interface CalendarFormatProvider extends DateFormatProvider {
 
     String getDatePattern();
 
     String getCalendarDatePattern();
-
-    DateFormat getDatetimeFormat();
 
     String getDatetimePattern();
 

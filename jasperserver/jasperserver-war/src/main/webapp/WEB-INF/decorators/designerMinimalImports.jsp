@@ -136,8 +136,8 @@ linkurls = [
 ];
 var n = document.createStyleSheet();
 for (var i=0;i<linkurls.length;i++) {
-    n.addImport(linkurls[i]);
-    if (i % MAX_STYLESHEETS == 0) n = document.createStyleSheet();
+n.addImport(linkurls[i]);
+if (i % MAX_STYLESHEETS == 0) n = document.createStyleSheet();
 }
 </script>
 <![endif]-->
@@ -242,4 +242,3 @@ Page Specific
 <link rel="stylesheet" href="${pageContext.request.contextPath}/themes/dev/containers/bg.css" type="text/css" media="screen,print"/>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/themes/dev/lists/bg.css" type="text/css" media="screen,print"/>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/themes/dev/buttons/bg.css" type="text/css" media="screen,print"/>
-

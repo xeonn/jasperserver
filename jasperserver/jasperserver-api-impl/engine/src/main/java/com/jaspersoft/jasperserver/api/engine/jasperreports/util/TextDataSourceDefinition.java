@@ -21,10 +21,12 @@
 
 package com.jaspersoft.jasperserver.api.engine.jasperreports.util;
 
+import com.jaspersoft.jasperserver.api.JSException;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.CustomDomainMetaData;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.CustomReportDataSource;
 import net.sf.jasperreports.data.csv.CsvDataAdapter;
 import net.sf.jasperreports.data.csv.CsvDataAdapterImpl;
+import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.data.JRCsvDataSource;
 
 import java.util.ArrayList;
@@ -99,6 +101,9 @@ public class TextDataSourceDefinition  extends AbstractTextDataSourceDefinition 
             csvDataSource = (JRCsvDataSource)getJRDataSource(csvDataAdapter);
             // get default JRField names
             fieldNames = getDefaultFieldNames(csvDataSource);
+            if(fieldNames == null || fieldNames.isEmpty()){
+                throw new JSException("Invalid field or column delimiter specified");
+            }
             // create default name mapping <JRField Name, Display Name in Domain>
             fieldMapping = AbstractTextDataSourceDefinition.getDefaultFieldMapping(fieldNames);
             propertyValueMap.put("columnNames", fieldNames);
@@ -113,6 +118,9 @@ public class TextDataSourceDefinition  extends AbstractTextDataSourceDefinition 
             csvDataSource = (JRCsvDataSource)getJRDataSource(csvDataAdapter);
             // get default JRField names
             fieldNames = getFieldNames(csvDataSource);
+            if(fieldNames == null || fieldNames.isEmpty()){
+                throw new JSException("Invalid field or column delimiter specified");
+            }
             // create default name mapping <JRField Name, Display Name in Domain>
             fieldMapping = AbstractTextDataSourceDefinition.getFieldMapping(fieldNames);
         }
@@ -140,7 +148,7 @@ public class TextDataSourceDefinition  extends AbstractTextDataSourceDefinition 
         }
         if(customReportDataSource.getResources() != null && customReportDataSource.getResources().get(DATA_FILE_RESOURCE_ALIAS) != null){
             // if data source has a data file as a sub resource, then take it's URI as file name property
-            propertyValueMap.put(FILE_NAME_PROP, "repo:" + customReportDataSource.getResources()
+            propertyValueMap.put(FILE_NAME_PROP, customReportDataSource.getResources()
                     .get(DATA_FILE_RESOURCE_ALIAS).getTargetURI());
         }
         return propertyValueMap;
@@ -149,8 +157,15 @@ public class TextDataSourceDefinition  extends AbstractTextDataSourceDefinition 
     // get JRField names from JRDataSource
     private List<String> getFieldNames(JRCsvDataSource csvDataSource) throws Exception {
         // SET COLUMN NAMES
-        if (!csvDataSource.next()) return null;
-        Map<String, Integer> columnNames = csvDataSource.getColumnNames();
+        Map<String, Integer> columnNames;
+        try {
+            csvDataSource.next();
+            columnNames = csvDataSource.getColumnNames();
+        } catch (JRException e){
+            throw new JSException("Unable to get field names. Please check if field/column delimiter is correct. "
+                    + e.getMessage(), e);
+        }
+        if(columnNames == null || columnNames.isEmpty())return null;
         String columnNameArray[] = new String[columnNames.size()];
         for (Map.Entry<String, Integer> entry : columnNames.entrySet()) {
             log.debug("KEY = " + entry.getKey() + ", VAL = " + entry.getValue());

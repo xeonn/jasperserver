@@ -28,7 +28,7 @@
     <t:putAttribute name="pageTitle"><spring:message code="menu.log.Settings"/></t:putAttribute>
     <t:putAttribute name="bodyID" value="logSettings"/>
     <t:putAttribute name="bodyClass" value="twoColumn"/>
-    <t:putAttribute name="moduleName" value="admin.logging.page"/>
+    <t:putAttribute name="moduleName" value="administer/administerLoggingMain"/>
 
     <t:putAttribute name="headerContent">
         <%@ include file="../common/jsEdition.jsp" %>

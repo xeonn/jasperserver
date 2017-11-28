@@ -23,7 +23,7 @@ define(function (require) {
     "use strict";
 
     var BaseDataSourceModel = require("dataSource/model/BaseDataSourceModel"),
-        repositoryResourceTypes = require("bi/repo/enum/repositoryResourceTypes"),
+        repositoryResourceTypes = require("bi/repository/enum/repositoryResourceTypes"),
         connectionTypes = require("dataSource/enum/connectionTypes"),
         _ = require("underscore"),
         i18n = require("bundle!jasperserver_messages");

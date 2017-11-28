@@ -65,7 +65,7 @@ import static org.testng.Assert.*;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class SSOIntegrationTest extends BaseTransactionalTestNGSpringContextTests {
 
-	@Resource(name = "filterChainProxy")
+	@Resource(name = "authenticationAuthoirizationFilterChainProxy")
 	private FilterChainProxy filterChainProxy;
 
 	@Resource(name = "proxyExceptionTranslationFilter")

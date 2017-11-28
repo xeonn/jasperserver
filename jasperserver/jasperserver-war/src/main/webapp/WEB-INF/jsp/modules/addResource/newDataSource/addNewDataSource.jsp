@@ -45,7 +45,7 @@
     <t:putAttribute name="pageTitle"><spring:message code="resource.datasource.jdbc.page.title.new"/></t:putAttribute>
     <t:putAttribute name="bodyClass" value="oneColumn flow wizard oneStep"/>
     <t:putAttribute name="bodyID" value="addNewDataSource"/>
-    <t:putAttribute name="moduleName" value="dataSource/addDataSourcePage"/>
+    <t:putAttribute name="moduleName" value="dataSource/dataSourceMain"/>
     <t:putAttribute name="headerContent">
         <jsp:include page="addNewDataSourceState.jsp"/>
     </t:putAttribute>

@@ -23,16 +23,12 @@ package com.jaspersoft.jasperserver.api.engine.jasperreports.util;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.sql.Timestamp;
+import java.text.DateFormat;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
-
-import net.sf.jasperreports.engine.JRPrintHyperlink;
-import net.sf.jasperreports.engine.JRPrintHyperlinkParameter;
-import net.sf.jasperreports.engine.JRPrintHyperlinkParameters;
-import net.sf.jasperreports.engine.export.JRHyperlinkProducer;
-import net.sf.jasperreports.engine.util.Pair;
 
 import org.apache.commons.collections.iterators.ArrayIterator;
 import org.apache.commons.logging.Log;
@@ -40,10 +36,20 @@ import org.apache.commons.logging.LogFactory;
 
 import com.jaspersoft.jasperserver.api.JSExceptionWrapper;
 import com.jaspersoft.jasperserver.api.common.util.CharacterEncodingProvider;
+import com.jaspersoft.jasperserver.api.common.util.TimeZoneContextHolder;
+
+import net.sf.jasperreports.engine.JRPrintHyperlink;
+import net.sf.jasperreports.engine.JRPrintHyperlinkParameter;
+import net.sf.jasperreports.engine.JRPrintHyperlinkParameters;
+import net.sf.jasperreports.engine.export.JRHyperlinkProducer;
+import net.sf.jasperreports.engine.util.Pair;
+import net.sf.jasperreports.types.date.DateRange;
+import net.sf.jasperreports.types.date.DateRangeExpression;
+import net.sf.jasperreports.types.date.TimestampRange;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: BaseReportExecutionHyperlinkProducerFactory.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: BaseReportExecutionHyperlinkProducerFactory.java 63380 2016-05-26 20:56:46Z mchan $
  */
 public abstract class BaseReportExecutionHyperlinkProducerFactory implements Serializable {
 
@@ -51,6 +57,7 @@ public abstract class BaseReportExecutionHyperlinkProducerFactory implements Ser
 
 	private HyperlinkParameterFormatter dateFormatter;
 	private CharacterEncodingProvider encodingProvider;
+    private DateFormatProvider dateFormatProvider;
 	private String flowControllerMapping;
 	private String reportExecutionFlowId;
 	private String hyperlinkParameterReportUnit;
@@ -171,6 +178,28 @@ public abstract class BaseReportExecutionHyperlinkProducerFactory implements Ser
             } else if (Date.class.isAssignableFrom(valueClass)) {
                 if (value != null) {
                     String formattedValue = getDateFormatter().format(value);
+                    params.appendParameter(paramName, formattedValue);
+                }
+            } else if (DateRangeExpression.class.isAssignableFrom(valueClass)) {
+                if (value != null) {
+                    String expression = ((DateRangeExpression) value).getExpression();
+                    params.appendParameter(paramName, expression);
+                }
+            } else if (TimestampRange.class.isAssignableFrom(valueClass)) {
+                if (value != null) {
+                    //copied from TimestampRangeDataConverter
+                    DateFormat datetimeFormat = dateFormatProvider.getDatetimeFormat();
+                    datetimeFormat.setTimeZone(TimeZoneContextHolder.getTimeZone());
+                    
+                    Timestamp startDate = ((TimestampRange) value).getStart();
+                    String formattedValue = datetimeFormat.format(startDate);
+                    params.appendParameter(paramName, formattedValue);
+                }
+            } else if (DateRange.class.isAssignableFrom(valueClass)) {
+                if (value != null) {
+                    //copied from DateRangeDataConverter
+                    Date startDate = ((DateRange) value).getStart();
+                    String formattedValue = dateFormatProvider.getDateFormat().format(startDate);
                     params.appendParameter(paramName, formattedValue);
                 }
             } else {
@@ -311,6 +340,14 @@ public abstract class BaseReportExecutionHyperlinkProducerFactory implements Ser
     public String getHyperlinkParameterPageIndex() {
         return hyperlinkParameterPageIndex;
     }
+
+	public DateFormatProvider getDateFormatProvider() {
+		return dateFormatProvider;
+	}
+
+	public void setDateFormatProvider(DateFormatProvider dateFormatProvider) {
+		this.dateFormatProvider = dateFormatProvider;
+	}
 
     public void setHyperlinkParameterPageIndex(String hyperlinkParameterPageIndex) {
         this.hyperlinkParameterPageIndex = hyperlinkParameterPageIndex;

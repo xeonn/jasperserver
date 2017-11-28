@@ -20,14 +20,10 @@
 */
 package com.jaspersoft.jasperserver.jaxrs.settings;
 
-import com.jaspersoft.jasperserver.jaxrs.common.JacksonMapperProvider;
+import com.jaspersoft.jasperserver.jaxrs.common.JacksonMapperContextResolver;
 import com.jaspersoft.jasperserver.jaxrs.poc.hypermedia.common.cache.CacheControlHelper;
 import com.jaspersoft.jasperserver.remote.exception.ResourceNotFoundException;
 import com.jaspersoft.jasperserver.remote.settings.SettingsProvider;
-import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jettison.json.JSONArray;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -37,14 +33,13 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.Map;
 
 /**
  * <p></p>
  *
  * @author yaroslav.kovalchyk
- * @version $Id: SettingsJaxrsService.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: SettingsJaxrsService.java 62954 2016-05-01 09:49:23Z ykovalch $
  */
 @Component
 @Path("/settings")
@@ -52,7 +47,7 @@ public class SettingsJaxrsService {
     @Resource
     private Map<String, Object> settingsGroups;
     @Resource
-    private JacksonMapperProvider jacksonMapperProvider;
+    private JacksonMapperContextResolver jacksonMapperContextResolver;
 
     @GET
     @Path("/{groupId}")
@@ -66,7 +61,7 @@ public class SettingsJaxrsService {
             throw new ResourceNotFoundException(groupId);
         }
         return CacheControlHelper.enableLocaleAwareStaticCache(Response.ok(
-                jacksonMapperProvider.getContext(settingsGroup.getClass()).writer().writeValueAsString(settingsGroup))
+                jacksonMapperContextResolver.getContext(settingsGroup.getClass()).writer().writeValueAsString(settingsGroup))
         ).build();
     }
 

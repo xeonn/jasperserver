@@ -47,7 +47,7 @@ import javax.annotation.Resource;
  * @version $Id$
  */
 @Component
-public class PermissionConverter implements ToClientConverter<ObjectPermission, RepositoryPermission>, ToServerConverter<RepositoryPermission, ObjectPermission> {
+public class PermissionConverter implements ToClientConverter<ObjectPermission, RepositoryPermission, ToClientConversionOptions>, ToServerConverter<RepositoryPermission, ObjectPermission, ToServerConversionOptions> {
     @Resource(name = "concretePermissionsRecipientIdentityResolver")
     private RecipientIdentityResolver resolver;
 

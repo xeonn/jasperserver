@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: outputTabView.js 9909 2016-02-25 19:56:31Z dgorbenk $
+ * @version: $Id: outputTabView.js 10166 2016-05-26 22:39:40Z gbacon $
  */
 
 /* global outputRepository */
@@ -38,17 +38,122 @@ define(function (require) {
 		picker = require('components.pickers'),
 		resource = require('resource.base'),
 		outputTabTemplate = require("text!scheduler/template/editor/outputTabTemplate.htm"),
-		RepositoryChooserDialogFactory = require("bi/repo/dialog/RepositoryChooserDialog/RepositoryChooserDialogFactory");
+		RepositoryChooserDialogFactory = require("bi/repository/dialog/resourceChooser/RepositoryChooserDialogFactory"),
+		repositoryResourceTypes = require("bi/repository/enum/repositoryResourceTypes");
 
 	return Backbone.View.extend({
 
 		events: {
 			"click .ftp-test": "testFTPConnection",
-			"click [name=outputRepositoryButton]": "outputRepositoryButtonClick"
+			"click [name=outputRepositoryButton]": "outputRepositoryButtonClick",
+			"click [name=sshKeyPathButton]": "sshKeyPathButtonClick",
+			"change [name=outputRepository]": "fixUriInput",
+			"change [name=sshKeyPath]": "fixUriInput"
 		},
 
+		binding: [
+			{attr: 'baseOutputFilename', control: 'baseOutputFilename'},
+			{attr: 'outputTimeZone', control: 'timeZone'},
+			{attr: 'outputLocale', control: 'outputLocale'},
+			{attr: 'outputFormats/outputFormat', control: 'outputFormats'},
+
+			{attr: 'repositoryDestination/outputDescription', control: 'outputDescription'},
+			{attr: 'repositoryDestination/overwriteFiles', control: 'overwriteFiles'},
+			{attr: 'repositoryDestination/sequentialFilenames', control: 'sequentialFilenames'},
+
+			{attr: 'repositoryDestination/timestampPattern', control: 'timestampPattern'},
+			{
+				attr: 'repositoryDestination', control: 'timestampPattern',
+				depends: 'repositoryDestination/sequentialFilenames'
+			},
+
+			{attr: 'repositoryDestination/saveToRepository', control: 'outputToRepository'},
+			{
+				attr: 'repositoryDestination', control: 'outputRepository, outputRepositoryButton',
+				depends: 'repositoryDestination/saveToRepository'
+			},
+
+			{attr: 'repositoryDestination/folderURI', control: 'outputRepository'},
+			{
+				attr: 'repositoryDestination', control: 'outputHostFileSystem',
+				depends: 'repositoryDestination/outputLocalFolder', disabled: !(config.enableSaveToHostFS === "true" || config.enableSaveToHostFS === true)
+			},
+			{
+				attr: 'repositoryDestination/outputLocalFolder', control: 'outputToHostFileSystem',
+				getter: function (value) {
+					if (false === value) return null;
+					return '';
+				},
+				setter: function (value) {
+					return value === '' || !!value;
+				}
+			},
+			{attr: 'repositoryDestination/outputLocalFolder', control: 'outputHostFileSystem'},
+
+			{
+				attr: 'repositoryDestination/outputFTPInfo/enabled', control: 'outputToFTPServer',
+				getter: function (value) {
+					if (value === false) {
+						// clear the errors in this block in case when this block has some errors and user decided to disable it
+						this.$el.find("#ftpServerOutput").find('.error').removeClass('error');
+					}
+					return value;
+				}
+			},
+			{
+				attr: 'repositoryDestination/outputFTPInfo',
+				control: 'ftpAddress, ftpDirectory, ftpUsername, ftpPassword, ftpTestButton, ftpPort, ftpProtocol, sshKeyEnabled, sshKeyPath, sshKeyPathButton, sshPassphrase',
+				depends: 'repositoryDestination/outputFTPInfo/enabled'
+			},
+			{attr: 'repositoryDestination/outputFTPInfo/serverName', control: 'ftpAddress'},
+			{attr: 'repositoryDestination/outputFTPInfo/folderPath', control: 'ftpDirectory'},
+			{
+				attr: 'repositoryDestination/outputFTPInfo/userName', control: 'ftpUsername',
+				setter: function (value) {
+					if (value == "anonymous")
+						return null;
+					return value;
+				}
+			},
+			{attr: 'repositoryDestination/outputFTPInfo/password', control: 'ftpPassword'},
+			{attr: 'repositoryDestination/outputFTPInfo/port', control: 'ftpPort'},
+
+			{
+				attr: 'repositoryDestination/outputFTPInfo/type',
+				control: 'ftpProtocol',
+				setter: function (value) {
+					this.$el.find('.control[data-ftp-type]').addClass('hidden');
+					if (value && value === "sftp") {
+						this.$el.find('.control[data-ftp-type=sftp]').removeClass('hidden');
+					}
+					return value;
+				}
+			},
+
+			{attr: 'repositoryDestination/outputFTPInfo/sshKeyEnabled', control: 'sshKeyEnabled'},
+			{attr: 'repositoryDestination/outputFTPInfo/sshKey', control: 'sshKeyPath'},
+			{attr: 'repositoryDestination/outputFTPInfo/sshPassphrase', control: 'sshPassphrase'},
+			{
+				attr: 'repositoryDestination/outputFTPInfo',
+				control: 'sshKeyPath, sshKeyPathButton, sshPassphrase',
+				depends: 'repositoryDestination/outputFTPInfo/sshKeyEnabled',
+				setter: function (value) {
+					return value && !!this.$el.find('[name=outputToFTPServer]').filter(':checked').map(function () {
+							return $(this).val()
+						}).get()[0];
+				}
+			}
+
+		],
+
+		availableFormats: [{ name: 'csv', num: 5}, {name: 'html', num: 2}, {name: 'rtf', num: 4}, {name: 'docx', num: 8},
+			{name: 'ods', num: 9}, {name: 'xlsx.nopag', num: 12}, {name:'xls', num:3}, {name: 'odt', num: 6}, {name: 'xlsx', num: 10},
+			{name: 'xls.nopag', num: 11}, {name: 'pdf', num: 1}, {name: 'pptx', num: 14}
+		],
+
 		// initialize view
-		initialize: function () {
+		initialize: function (options) {
+			this.options = _.extend({}, options);
 
 			// save link to context
 			var self = this;
@@ -56,11 +161,15 @@ define(function (require) {
 			this.model.on('change:repositoryDestination', function (model, value) {
 				var rp = model.get('repositoryDestination');
 				self.$el.find("[name=ftpPort]").val(rp.outputFTPInfo.port);
-				self.$el.find("[name=useFTPS]").prop("checked", rp.outputFTPInfo.type === "TYPE_FTPS");
+				// self.$el.find("[name=ftpProtocol]").val(rp.outputFTPInfo.type);
 			});
 		},
 
-		getFolderChooserDialog: function() {
+		isFormatAvailable: function (formatName) {
+			return _.contains(this.availableFormats, formatName);
+		},
+
+		getFolderChooserDialog: function () {
 			if (this.folderChooserDialog) {
 				return this.folderChooserDialog;
 			}
@@ -69,7 +178,7 @@ define(function (require) {
 			var Dialog = RepositoryChooserDialogFactory.getDialog("folder");
 			this.folderChooserDialog = new Dialog();
 
-			this.listenTo(this.folderChooserDialog, "close", function() {
+			this.listenTo(this.folderChooserDialog, "close", function () {
 				var resourceUri;
 
 				if (!this.folderChooserDialog.selectedResource) {
@@ -84,97 +193,100 @@ define(function (require) {
 				self.$el.find('[name=outputRepository]').val(resourceUri).trigger('change');
 			});
 
+            this.folderChooserDialog.setDefaultSelectedItem(this.model.get("repositoryDestination").folderURI);
+
 			return this.folderChooserDialog;
 		},
 
 		outputRepositoryButtonClick: function() {
-
-			var dialog = this.getFolderChooserDialog();
-
-			dialog.open();
-
-			var $scrollContainer = dialog.foldersTree.$el.parent();
-			dialog.foldersTree._selectTreeNode(this.model.get("repositoryDestination").folderURI, $scrollContainer);
+			this.getFolderChooserDialog().open();
 		},
 
-		render: function() {
+		getSshKeyChooserDialog: function() {
+			if (this.sshKeyChooserDialog) {
+				return this.sshKeyChooserDialog;
+			}
 
+			var self = this;
+			var Dialog = RepositoryChooserDialogFactory.getDialog("item");
+			this.sshKeyChooserDialog = new Dialog({
+                disableListTab: true,
+				resourcesTypeToSelect: [repositoryResourceTypes.SECURE_FILE]
+			});
+
+			this.listenTo(this.sshKeyChooserDialog, "close", function() {
+				var resourceUri;
+
+				if (!this.sshKeyChooserDialog.selectedResource) {
+					return;
+				}
+				if (!this.sshKeyChooserDialog.selectedResource.resourceUri) {
+					return;
+				}
+
+				resourceUri = this.sshKeyChooserDialog.selectedResource.resourceUri;
+
+				self.$el.find('[name=sshKeyPath]').val(resourceUri).trigger('change');
+			});
+
+			var ftpInfo = this.model.get("repositoryDestination").outputFTPInfo,
+				sshKeyPath = (ftpInfo || {}).sshKey;
+
+			this.sshKeyChooserDialog.setDefaultSelectedItem(sshKeyPath);
+
+			return this.sshKeyChooserDialog;
+		},
+
+		sshKeyPathButtonClick: function () {
+			this.getSshKeyChooserDialog().open();
+		},
+
+		// This is workaround of missing validation criteria on incorrect URI format.
+		fixUriInput: function (event) {
+			var input = $(event.currentTarget), value = input.val();
+
+			if (!this.model.isValidUri(value)) return;
+
+			// Add "/" prefix if missing and trigger change again
+			if (!(value === "" || _.startsWith(value, "/"))) {
+				input.val("/" + value).trigger('change');
+				return;
+			}
+			// Remove "//" in beginning
+			if (_.startsWith(value, "//")) {
+				input.val(value.substring(1, value.length)).trigger('change');
+				return;
+			}
+			// Remove "/" in the end
+			if (value.length > 1 && _.endsWith(value, "/")) {
+				input.val(value.substring(0, value.length - 1)).trigger('change');
+				return;
+			}
+		},
+
+		render: function () {
+			this._renderTemplate();
+			this._initializeBinding();
+		},
+
+		_renderTemplate: function () {
 			var templateData = _.extend({}, {
 				_: _,
 				i18n: i18n,
+				availableFormats: this.availableFormats,
 				timeZones: config.timeZones
 			}, this.model.attributes);
 
 			this.setElement($(_.template(outputTabTemplate, templateData)));
+		},
 
+		_initializeBinding: function() {
 			var self = this;
 
 			// adjust this checkbox into proper state depending on the server-side variable
 			this.$el.find("[name=outputToHostFileSystem]").attr("disabled", (config.enableSaveToHostFS === "true" || config.enableSaveToHostFS === true) ? false : "disabled");
 
-			this.map = [
-				{attr: 'baseOutputFilename', control: 'baseOutputFilename'},
-				{attr: 'repositoryDestination/outputDescription', control: 'outputDescription'},
-				{attr: 'outputTimeZone', control: 'timeZone'},
-				{attr: 'outputLocale', control: 'outputLocale'},
-				{attr: 'outputFormats/outputFormat', control: 'outputFormats'},
-				{attr: 'repositoryDestination/overwriteFiles', control: 'overwriteFiles'},
-				{attr: 'repositoryDestination/sequentialFilenames', control: 'sequentialFilenames'},
-				{attr: 'repositoryDestination/timestampPattern', control: 'timestampPattern'},
-				{
-					attr: 'repositoryDestination', control: 'timestampPattern',
-					depends: 'repositoryDestination/sequentialFilenames'
-				},
-				{attr: 'repositoryDestination/saveToRepository', control: 'outputToRepository'},
-				{
-					attr: 'repositoryDestination', control: 'outputRepository, outputRepositoryButton',
-					depends: 'repositoryDestination/saveToRepository'
-				},
-
-				{attr: 'repositoryDestination/folderURI', control: 'outputRepository'},
-				{
-					attr: 'repositoryDestination', control: 'outputHostFileSystem',
-					depends: 'repositoryDestination/outputLocalFolder', disabled: !(config.enableSaveToHostFS === "true" || config.enableSaveToHostFS === true)
-				},
-				{
-					attr: 'repositoryDestination/outputLocalFolder', control: 'outputToHostFileSystem',
-					getter: function (value) {
-						if (false === value) return null;
-						return '';
-					},
-					setter: function (value) {
-						return value === '' || !!value;
-					}
-				},
-				{attr: 'repositoryDestination/outputLocalFolder', control: 'outputHostFileSystem'},
-				{
-					attr: 'repositoryDestination/outputFTPInfo/enabled', control: 'outputToFTPServer',
-					getter: function (value) {
-						if (value === false) {
-							// clear the errors in this block in case when this block has some errors and user decided to disable it
-							self.$el.find("#ftpServerOutput").find('.error').removeClass('error');
-						}
-						return value;
-					}
-				},
-				{
-					attr: 'repositoryDestination/outputFTPInfo',
-					control: 'ftpAddress, ftpDirectory, ftpUsername, ftpPassword, ftpTestButton, ftpPort, useFTPS',
-					depends: 'repositoryDestination/outputFTPInfo/enabled'
-				},
-				{attr: 'repositoryDestination/outputFTPInfo/serverName', control: 'ftpAddress'},
-				{attr: 'repositoryDestination/outputFTPInfo/folderPath', control: 'ftpDirectory'},
-				{
-					attr: 'repositoryDestination/outputFTPInfo/userName', control: 'ftpUsername',
-					setter: function (value) {
-						if (value == "anonymous")
-							return null;
-						return value;
-					}
-				},
-				{attr: 'repositoryDestination/outputFTPInfo/password', control: 'ftpPassword'},
-				{attr: 'repositoryDestination/outputFTPInfo/port', control: 'ftpPort'}
-			];
+			this.map = _.map(this.binding, _.clone);
 
 			_.each(this.map, function (data) {
 				// get control by name
@@ -198,10 +310,11 @@ define(function (require) {
 
 					var change = function () {
 						var val = data.setter
-							? data.setter(data.depends)
+							? data.setter.call(self, data.depends)
 							: data.depends.val();
 
-						data.control.attr('disabled', data.disabled ? "disabled" : (data.invert ? !!val : !val));
+						var isDisabled = data.disabled || (data.invert ? !!val : !val);
+						data.control.attr('disabled', isDisabled ? "disabled" : false);
 					};
 
 					data.depends.on('change', change);
@@ -214,16 +327,17 @@ define(function (require) {
 					value = model.value(data.attr.join('/'));
 
 					if (data.setter)
-						value = data.setter(value);
+						value = data.setter.call(self, value);
 
 					if (data.depends) {
 						var val = model.value(data.depends);
 
 						if (data.setter)
-							val = data.setter(val);
+							val = data.setter.call(self, val);
 						else if (val === '') val = true;
 
-						return data.control.attr('disabled', data.disabled ? "disabled" : (data.invert ? !!val : !val));
+						var isDisabled = data.disabled || (data.invert ? !!val : !val);
+						return data.control.attr('disabled', isDisabled ? "disabled" : false);
 					}
 
 					if (data.control.is('[type=checkbox]') && data.control.length === 1)
@@ -252,7 +366,7 @@ define(function (require) {
 							value = data.control.filter(':checked').val();
 
 						if (data.getter)
-							value = data.getter(value, _.clone(self.model.value(data.attr.join('/'))));
+							value = data.getter.call(self, value, _.clone(self.model.value(data.attr.join('/'))));
 
 						if (data.attr.length > 1) {
 							target = update = _.clone(self.model.get(data.attr[0]));
@@ -266,6 +380,11 @@ define(function (require) {
 							}
 
 							target[data.attr[data.attr.length - 1]] = value;
+
+							// TODO: move this from here
+							if (data.attr.join("/") === "repositoryDestination/outputFTPInfo/type") {
+								target["port"] = self.model.ftpPortDefaults[value];
+							}
 						}
 
 						self.model.update(data.attr[0], update || value);
@@ -273,28 +392,18 @@ define(function (require) {
 				}
 			});
 
-			this.$el.find("[name=useFTPS]").on("click", function () {
-				var type = "TYPE_FTP", port = "21";
-				if ($(this).is(":checked")) {
-					type = "TYPE_FTPS";
-					port = "990";
-				}
-
-				var m = $.extend(true, {}, self.model.get("repositoryDestination"));
-				m = m || {};
-				m.outputFTPInfo = m.outputFTPInfo || {};
-				m.outputFTPInfo.type = type;
-				m.outputFTPInfo.port = port;
-
-				self.model.update('repositoryDestination', m);
-			});
 		},
 
 		testFTPConnection: function () {
 			$("#ftpTestButton").addClass('disabled');
+
+			// clear errors in FTP output section
+			this.$el.find('#ftpServerOutput').find('.error').removeClass('error');
+
 			this.model.testFTPConnection(function () {
 				$("#ftpTestButton").removeClass('disabled');
 			});
 		}
 	});
+
 });

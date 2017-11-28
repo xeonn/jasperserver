@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: resource.add.files.js 8653 2015-04-07 17:01:16Z dgorbenk $
+ * @version: $Id: resource.add.files.js 10042 2016-04-12 14:01:27Z akasych $
  */
 
 /* global resource, Form, ValidationModule, localContext, buttonManager, matchAny, resourceLocator */
@@ -48,7 +48,9 @@ var addFileResource = {
         "jrtx": ["jrtx"],
         "xml": ["xml", "agxml"],
 	    "config": ["config"],
-        "contentResource": ["docx", "doc", "ppt", "pptx", "xls", "xlsx", "ods", "odt", "odp", "pdf", "rtf", "html", "txt", "csv"]
+		"cer": ["p12", "pfx"],
+        "contentResource": ["docx", "doc", "ppt", "pptx", "xls", "xlsx", "ods", "odt", "odp", "pdf", "rtf", "html", "txt", "csv"],
+        "secureFile": ["*"]
     },
 
     _canGenerateId: true,
@@ -174,7 +176,9 @@ var addFileResource = {
 	    if (extension.blank()) {
 		    return result;
 	    }
-	    
+	    if (this.typeToExtMap[value] && this.typeToExtMap[value].include("*")) {
+            return result;
+	    }
 	    var types = this._getTypesForExtension(extension);
 
         if (!types.include(value)) {
@@ -203,11 +207,10 @@ var addFileResource = {
     _getTypesForExtension: function (extension) {
         var types = [];
         for (var type in this.typeToExtMap) {
-            if (this.typeToExtMap[type].include(extension.toLowerCase())) {
+            if (this.typeToExtMap[type] && this.typeToExtMap[type].include(extension.toLowerCase())) {
                 types.push(type);
             }
         }
-
         return types;
     },
 

@@ -59,6 +59,7 @@ public class ResourceDescriptor {
     public static final String TYPE_DATASOURCE_VIRTUAL = "virtual";
     public static final String TYPE_DATASOURCE_CUSTOM = "custom";
     public static final String TYPE_DATASOURCE_AWS = "aws";
+    public static final String TYPE_DATASOURCE_AZURE_SQL = "azuresql";
 
     public static final String TYPE_IMAGE = FileResource.TYPE_IMAGE;
     public static final String TYPE_FONT = FileResource.TYPE_FONT;
@@ -71,8 +72,10 @@ public class ResourceDescriptor {
     public static final String TYPE_OLAP_MONDRIAN_CONNECTION = "olapMondrianCon";
     public static final String TYPE_OLAP_XMLA_CONNECTION = "olapXmlaCon";
     public static final String TYPE_MONDRIAN_SCHEMA = "olapMondrianSchema";
-  	public static final String TYPE_MONGODB_JDBC_CONFIG = FileResource.TYPE_MONGODB_JDBC_CONFIG;
+    public static final String TYPE_MONGODB_JDBC_CONFIG = FileResource.TYPE_MONGODB_JDBC_CONFIG;
+  	public static final String TYPE_AZURE_CERTIFICATE = FileResource.TYPE_AZURE_CERTIFICATE;
 	public static final String TYPE_ACCESS_GRANT_SCHEMA = FileResource.TYPE_ACCESS_GRANT_SCHEMA; // Pro-only
+	public static final String TYPE_SECURE_FILE = FileResource.TYPE_SECURE_FILE;
     public static final String TYPE_UNKNOW = "unknow";
     public static final String TYPE_LOV = "lov"; // List of values...
     public static final String TYPE_QUERY = "query"; // List of values...
@@ -144,6 +147,15 @@ public class ResourceDescriptor {
     public static final String PROP_DATASOURCE_AWS_DB_NAME = "PROP_DATASOURCE_AWS_DB_NAME";
     public static final String PROP_DATASOURCE_AWS_DB_INSTANCE_IDENTIFIER = "PROP_DATASOURCE_AWS_DB_INSTANCE_IDENTIFIER";
     public static final String PROP_DATASOURCE_AWS_DB_SERVICE = "PROP_DATASOURCE_AWS_DB_SERVICE";
+
+    //AZURE datasource specific properties
+    public static final String PROP_DATASOURCE_AZURE_SQL_SUBSCRIPTION_ID = "PROP_DATASOURCE_AZURE_SQL_SUBSCRIPTION_ID";
+    public static final String PROP_DATASOURCE_AZURE_SQL_KEY_STORE_RESOURCE = "PROP_DATASOURCE_AZURE_SQL_KEY_STORE_RESOURCE";
+    public static final String PROP_DATASOURCE_AZURE_SQL_KEY_STORE_PASSWORD = "PROP_DATASOURCE_AZURE_SQL_KEY_STORE_PASSWORD";
+    public static final String PROP_DATASOURCE_AZURE_SQL_KEY_STORE_TYPE = "PROP_DATASOURCE_AZURE_SQL_KEY_STORE_TYPE";
+    public static final String PROP_DATASOURCE_AZURE_SQL_SERVER_NAME = "PROP_DATASOURCE_AZURE_SQL_SERVER_NAME";
+    public static final String PROP_DATASOURCE_AZURE_SQL_DB_NAME = "PROP_DATASOURCE_AZURE_SQL_DB_NAME";
+    public static final String PROP_DATASOURCE_AZURE_SQL_DB_SERVICE = "PROP_DATASOURCE_AZURE_SQL_DB_SERVICE";
 
     // ReportUnit resource properties
     public static final String PROP_RU_DATASOURCE_TYPE = "PROP_RU_DATASOURCE_TYPE";
@@ -483,6 +495,38 @@ public class ResourceDescriptor {
         return getResourcePropertyValue( PROP_DATASOURCE_AWS_DB_SERVICE);
     }
 
+    public String getAzureSqlSubscriptionId() { return getResourcePropertyValue(PROP_DATASOURCE_AZURE_SQL_SUBSCRIPTION_ID); }
+
+    public void setAzureSqlSubscriptionId(String subscriptionId) { setResourceProperty(PROP_DATASOURCE_AZURE_SQL_SUBSCRIPTION_ID, subscriptionId); }
+
+    public String getAzureSqlKeyStoreResource() { return getResourcePropertyValue(PROP_DATASOURCE_AZURE_SQL_KEY_STORE_RESOURCE); }
+
+    public void setAzureSqlKeyStoreResource(String keyStoreResource) { setResourceProperty(PROP_DATASOURCE_AZURE_SQL_KEY_STORE_RESOURCE, keyStoreResource); }
+
+    public String getAzureSqlKeyStorePassword() { return getResourcePropertyValue(PROP_DATASOURCE_AZURE_SQL_KEY_STORE_PASSWORD); }
+
+    public void setAzureSqlKeyStorePassword(String keyStorePassword) { setResourceProperty(PROP_DATASOURCE_AZURE_SQL_KEY_STORE_PASSWORD, keyStorePassword); }
+
+    public String getAzureSqlKeyStoreType() { return getResourcePropertyValue(PROP_DATASOURCE_AZURE_SQL_KEY_STORE_TYPE); }
+
+    public void setAzureSqlKeyStoreType(String keyStoreType) { setResourceProperty(PROP_DATASOURCE_AZURE_SQL_KEY_STORE_TYPE, keyStoreType); }
+
+    public String getAzureSqlServerName() { return getResourcePropertyValue(PROP_DATASOURCE_AZURE_SQL_SERVER_NAME); }
+
+    public void setAzureSqlServerName(String serverName) { setResourceProperty(PROP_DATASOURCE_AZURE_SQL_SERVER_NAME, serverName); }
+
+    public String getAzureSqlDbName() { return getResourcePropertyValue(PROP_DATASOURCE_AZURE_SQL_DB_NAME); }
+
+    public void setAzureSqlDbName(String dbName) { setResourceProperty(PROP_DATASOURCE_AZURE_SQL_DB_NAME, dbName); }
+
+    public void setAzureSqlDbService(String azureSqlDbService) {
+        setResourceProperty(PROP_DATASOURCE_AZURE_SQL_DB_SERVICE, azureSqlDbService);
+    }
+
+    public String getAzureSqlDbService() {
+        return getResourcePropertyValue( PROP_DATASOURCE_AZURE_SQL_DB_SERVICE);
+    }
+
     /* DOMAIN HANDLER FEATURES */
     public void setSchema(String schema){
 
@@ -583,7 +627,8 @@ public class ResourceDescriptor {
     public static boolean isFileType(String fileType){
         return CONTENT_TYPE_PDF.equals(fileType) || CONTENT_TYPE_HTML.equals(fileType) || CONTENT_TYPE_XLS.equals(fileType) || CONTENT_TYPE_RTF.equals(fileType) ||
                CONTENT_TYPE_CSV.equals(fileType) || CONTENT_TYPE_IMAGE.equals(fileType) || TYPE_RESOURCE_BUNDLE.equals(fileType) || TYPE_FONT.equals(fileType) ||
-               TYPE_CLASS_JAR.equals(fileType) || TYPE_JRXML.equals(fileType) || TYPE_STYLE_TEMPLATE.equals(fileType) || TYPE_XML_FILE.equals(fileType) || TYPE_MONGODB_JDBC_CONFIG.equals(fileType);
+               TYPE_CLASS_JAR.equals(fileType) || TYPE_JRXML.equals(fileType) || TYPE_STYLE_TEMPLATE.equals(fileType) || TYPE_XML_FILE.equals(fileType) || TYPE_MONGODB_JDBC_CONFIG.equals(fileType) ||
+               TYPE_AZURE_CERTIFICATE.equals(fileType) || TYPE_SECURE_FILE.equals(fileType);
     }
 
     public void setStrictMin(boolean strictMin) {

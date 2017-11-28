@@ -21,13 +21,12 @@
 
 /**
  * @author yaroslav.kovalchyk
- * @version $Id: ComponentEngine.js 352 2014-10-28 17:26:27Z inesterenko $
+ * @version $Id: ComponentEngine.js 2690 2016-04-22 19:37:31Z inestere $
  */
 define(function (require) {
     "use strict";
     var  _ = require("underscore"),
         $ = require("jquery"),
-        json3 = require("json3"),
 	    Backbone = require("backbone"),
         biComponentErrorFactory = require("../error/biComponentErrorFactory"),
         biComponentUtil = require("./util/biComponentUtil");
@@ -36,7 +35,7 @@ define(function (require) {
             properties: _.extend({}, properties),
             data: null
         };
-        this.schema = json3.parse(schemaString);
+        this.schema = JSON.parse(schemaString);
 
     };
     function createRunAction(decorable, instanceData, runCallable) {

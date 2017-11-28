@@ -28,19 +28,19 @@
     <t:putAttribute name="bodyID" value="columnsTwo"/>
     <t:putAttribute name="bodyClass" value="twoColumn"/>
     <t:putAttribute name="moduleName" value="commons.main"/>
-	
+
 		<t:putAttribute name="bodyContent" >
-		
+
 			<t:insertTemplate template="/WEB-INF/jsp/templates/container.jsp">
 			    <t:putAttribute name="containerClass" value="column decorated primary"/>
 			    <t:putAttribute name="containerTitle"><spring:message code="JIF.titleprimary"/></t:putAttribute>
                 <t:putAttribute name="headerContent">
                 </t:putAttribute>
 			    <t:putAttribute name="bodyContent">
-					
+
 			    </t:putAttribute>
 			</t:insertTemplate>
-			
+
 			<t:insertTemplate template="/WEB-INF/jsp/templates/container.jsp">
 			    <t:putAttribute name="containerClass" value="column decorated secondary sizeable"/>
 		    	<t:putAttribute name="containerElements">
@@ -56,11 +56,11 @@
 						    <t:putAttribute name="containerClass" value="primary panel pane"/>
 
 						    <t:putAttribute name="bodyContent">
-								
+
 						    </t:putAttribute>
-						   
+
 						</t:insertTemplate>
-						
+
 						<t:insertTemplate template="/WEB-INF/jsp/templates/container.jsp">
 						    <t:putAttribute name="containerTitle" value="Sizeable Pane"/>
 							<t:putAttribute name="containerElements">
@@ -68,14 +68,14 @@
 							</t:putAttribute>
 						    <t:putAttribute name="containerClass" value="panel pane secondary sizeable"/>
 						    <t:putAttribute name="bodyContent">
-								
+
 						    </t:putAttribute>
-						   
+
 						</t:insertTemplate>
 
 			    </t:putAttribute>
 			</t:insertTemplate>
-			
+
 	    </t:putAttribute>
 
 </t:insertTemplate>

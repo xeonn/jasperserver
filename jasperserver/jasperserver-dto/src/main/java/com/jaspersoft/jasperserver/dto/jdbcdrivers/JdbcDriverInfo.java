@@ -31,7 +31,7 @@ import java.util.List;
  * <p></p>
  *
  * @author yaroslav.kovalchyk
- * @version $Id: JdbcDriverInfo.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: JdbcDriverInfo.java 63380 2016-05-26 20:56:46Z mchan $
  */
 @XmlRootElement
 public class JdbcDriverInfo {
@@ -41,6 +41,7 @@ public class JdbcDriverInfo {
     private String jdbcUrl;
     private Boolean isDefault;
     private String jdbcDriverClass;
+    private Boolean allowSpacesInDbName;
     private List<ClientProperty> defaultValues;
 
     public JdbcDriverInfo(){
@@ -53,6 +54,7 @@ public class JdbcDriverInfo {
         jdbcUrl = source.getJdbcUrl();
         isDefault = source.isDefault();
         jdbcDriverClass = source.getJdbcDriverClass();
+        allowSpacesInDbName = source.getAllowSpacesInDbName();
         final List<ClientProperty> sourceDefaultValues = source.getDefaultValues();
         if(sourceDefaultValues != null){
             defaultValues = new ArrayList<ClientProperty>(sourceDefaultValues.size());
@@ -60,6 +62,15 @@ public class JdbcDriverInfo {
                 defaultValues.add(new ClientProperty(property));
             }
         }
+    }
+
+    public Boolean getAllowSpacesInDbName() {
+        return allowSpacesInDbName;
+    }
+
+    public JdbcDriverInfo setAllowSpacesInDbName(Boolean allowSpacesInDbName) {
+        this.allowSpacesInDbName = allowSpacesInDbName;
+        return this;
     }
 
     public String getName() {
@@ -129,21 +140,21 @@ public class JdbcDriverInfo {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof JdbcDriverInfo)) return false;
 
-        JdbcDriverInfo info = (JdbcDriverInfo) o;
+        JdbcDriverInfo that = (JdbcDriverInfo) o;
 
-        if (available != null ? !available.equals(info.available) : info.available != null) return false;
-        if (defaultValues != null ? !defaultValues.equals(info.defaultValues) : info.defaultValues != null)
+        if (name != null ? !name.equals(that.name) : that.name != null) return false;
+        if (label != null ? !label.equals(that.label) : that.label != null) return false;
+        if (available != null ? !available.equals(that.available) : that.available != null) return false;
+        if (jdbcUrl != null ? !jdbcUrl.equals(that.jdbcUrl) : that.jdbcUrl != null) return false;
+        if (isDefault != null ? !isDefault.equals(that.isDefault) : that.isDefault != null) return false;
+        if (jdbcDriverClass != null ? !jdbcDriverClass.equals(that.jdbcDriverClass) : that.jdbcDriverClass != null)
             return false;
-        if (isDefault != null ? !isDefault.equals(info.isDefault) : info.isDefault != null) return false;
-        if (jdbcDriverClass != null ? !jdbcDriverClass.equals(info.jdbcDriverClass) : info.jdbcDriverClass != null)
+        if (allowSpacesInDbName != null ? !allowSpacesInDbName.equals(that.allowSpacesInDbName) : that.allowSpacesInDbName != null)
             return false;
-        if (jdbcUrl != null ? !jdbcUrl.equals(info.jdbcUrl) : info.jdbcUrl != null) return false;
-        if (label != null ? !label.equals(info.label) : info.label != null) return false;
-        if (name != null ? !name.equals(info.name) : info.name != null) return false;
+        return defaultValues != null ? defaultValues.equals(that.defaultValues) : that.defaultValues == null;
 
-        return true;
     }
 
     @Override
@@ -154,6 +165,7 @@ public class JdbcDriverInfo {
         result = 31 * result + (jdbcUrl != null ? jdbcUrl.hashCode() : 0);
         result = 31 * result + (isDefault != null ? isDefault.hashCode() : 0);
         result = 31 * result + (jdbcDriverClass != null ? jdbcDriverClass.hashCode() : 0);
+        result = 31 * result + (allowSpacesInDbName != null ? allowSpacesInDbName.hashCode() : 0);
         result = 31 * result + (defaultValues != null ? defaultValues.hashCode() : 0);
         return result;
     }
@@ -167,6 +179,7 @@ public class JdbcDriverInfo {
                 ", jdbcUrl='" + jdbcUrl + '\'' +
                 ", isDefault=" + isDefault +
                 ", jdbcDriverClass='" + jdbcDriverClass + '\'' +
+                ", allowSpacesInDbName=" + allowSpacesInDbName +
                 ", defaultValues=" + defaultValues +
                 '}';
     }

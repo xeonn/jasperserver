@@ -21,31 +21,29 @@
 
 package com.jaspersoft.jasperserver.api.engine.scheduling.quartz;
 
-import com.jaspersoft.jasperserver.api.JSExceptionWrapper;
-import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
-import com.jaspersoft.jasperserver.api.engine.common.service.EngineService;
-import com.jaspersoft.jasperserver.api.engine.jasperreports.common.PdfExportParametersBean;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.ContentResource;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.DataContainer;
-import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
-import net.sf.jasperreports.engine.JRExporterParameter;
-import net.sf.jasperreports.engine.JRPropertiesHolder;
-import net.sf.jasperreports.engine.JRPropertiesUtil;
-import net.sf.jasperreports.engine.JasperPrint;
-import net.sf.jasperreports.engine.export.JRHyperlinkProducerFactory;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.quartz.JobExecutionException;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
+import com.jaspersoft.jasperserver.api.JSExceptionWrapper;
+import com.jaspersoft.jasperserver.api.engine.common.service.EngineService;
+import com.jaspersoft.jasperserver.api.engine.jasperreports.common.PdfExportParametersBean;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.ContentResource;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.DataContainer;
+
+import net.sf.jasperreports.engine.JRExporterParameter;
+import net.sf.jasperreports.engine.JRPropertiesHolder;
+import net.sf.jasperreports.engine.JRPropertiesUtil;
+import net.sf.jasperreports.engine.JasperPrint;
 
 /**
  * @author sanda zaharia (shertage@users.sourceforge.net)
- * @version $Id: PdfReportOutput.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: PdfReportOutput.java 63380 2016-05-26 20:56:46Z mchan $
  */
 public class PdfReportOutput extends AbstractReportOutput 
 {
@@ -62,27 +60,21 @@ public class PdfReportOutput extends AbstractReportOutput
 	 * @see com.jaspersoft.jasperserver.api.engine.scheduling.quartz.Output#getOutput()
 	 */
 	public ReportOutput getOutput(
-			EngineService engineService, 
-			ExecutionContext executionContext, 
-			String reportUnitURI, 
-			DataContainer pdfData,
-			JRHyperlinkProducerFactory hyperlinkProducerFactory,
-			RepositoryService repositoryService,
-			JasperPrint jasperPrint, 
-			String baseFilename,
-			Locale locale,
-			String characterEncoding) throws JobExecutionException
+			ReportJobContext jobContext,
+			JasperPrint jasperPrint) throws JobExecutionException
 	{
 		Map params = new HashMap();
 		params.put(JRExporterParameter.JASPER_PRINT, jasperPrint);
 		
 		boolean close = true;
+		DataContainer pdfData = jobContext.createDataContainer(this);
 		OutputStream pdfDataOut = pdfData.getOutputStream();
 		
 		try {
 			params.put(JRExporterParameter.OUTPUT_STREAM, pdfDataOut);
 			
-			engineService.exportToPdf(executionContext, reportUnitURI, params);
+			EngineService engineService = jobContext.getEngineService();
+			engineService.exportToPdf(jobContext.getExecutionContext(), jobContext.getReportUnitURI(), params);
 			
 			close = false;
 			pdfDataOut.close();
@@ -98,7 +90,7 @@ public class PdfReportOutput extends AbstractReportOutput
 			}
 		}
 		
-		String filename = baseFilename + ".pdf";
+		String filename = jobContext.getBaseFilename() + ".pdf";
 		return new ReportOutput(pdfData, ContentResource.TYPE_PDF, filename);
 	}
 

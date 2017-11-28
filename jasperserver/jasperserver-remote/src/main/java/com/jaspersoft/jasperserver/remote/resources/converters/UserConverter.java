@@ -43,7 +43,7 @@ import java.util.Set;
  * @version $Id$
  */
 @Service
-public class UserConverter implements ToServerConverter<ClientUser, User>, ToClientConverter<User, ClientUser> {
+public class UserConverter implements ToServerConverter<ClientUser, User, ToServerConversionOptions>, ToClientConverter<User, ClientUser, ToClientConversionOptions> {
 
     @Resource
     private RoleConverter roleConverter;

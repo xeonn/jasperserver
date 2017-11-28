@@ -27,7 +27,7 @@ import com.jaspersoft.jasperserver.export.ExportTask;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ExporterModuleContext.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: ExporterModuleContext.java 63380 2016-05-26 20:56:46Z mchan $
  */
 public interface ExporterModuleContext {
 
@@ -36,5 +36,6 @@ public interface ExporterModuleContext {
 	String getCharacterEncoding();
 
 	Element getModuleIndexElement();
-	
+
+	ModuleRegister getModuleRegister();
 }

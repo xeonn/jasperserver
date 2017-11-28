@@ -39,7 +39,7 @@ import static com.jaspersoft.jasperserver.war.cascade.handlers.converters.InputC
 
 /**
  * @author Sergey Prilukin
- * @version $Id: DataConverterServiceImpl.java 58870 2015-10-27 22:30:55Z esytnik $
+ * @version $Id: DataConverterServiceImpl.java 62954 2016-05-01 09:49:23Z ykovalch $
  */
 @Service("dataConverterService")
 public class DataConverterServiceImpl implements DataConverterService {
@@ -80,6 +80,11 @@ public class DataConverterServiceImpl implements DataConverterService {
             throw new JSException(e);
         }
         return nullSubstitutionLessValue != null ? convertSingleValue(nullSubstitutionLessValue, dataType) : null;
+    }
+
+    @Override
+    public String formatSingleValue(Object typedValue) {
+        return formatSingleValue(typedValue, (DataType)null, null);
     }
 
     @Override

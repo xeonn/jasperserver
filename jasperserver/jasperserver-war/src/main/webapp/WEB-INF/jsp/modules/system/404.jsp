@@ -35,7 +35,7 @@
 <t:insertTemplate template="/WEB-INF/jsp/templates/page.jsp">
     <t:putAttribute name="pageTitle"><spring:message code="error.404.title"/></t:putAttribute>
     <t:putAttribute name="pageClass">${anonymousClass}</t:putAttribute>
-    <t:putAttribute name="moduleName" value="error.system"/>
+    <t:putAttribute name="moduleName" value="system/systemErrorMain"/>
 
     <t:putAttribute name="headerContent">
         <c:if test="${isAuthorized == false}">

@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: jobsCollection.js 9551 2015-10-13 14:09:03Z dgorbenk $
+ * @version: $Id: jobsCollection.js 10166 2016-05-26 22:39:40Z gbacon $
  */
 
 define(function(require){
@@ -30,7 +30,6 @@ define(function(require){
 
     var $ = require("jquery"),
 	    _ = require('underscore'),
-	    json = require("json3"),
         Backbone = require('backbone'),
         config = require('jrs.configs'),
         jobModel = require('scheduler/model/jobModel');
@@ -220,6 +219,8 @@ define(function(require){
 	    },
 
 	    request: function(options) {
+		    options = options || {};
+		    options.cache = false;
 		    return Backbone.sync.call(this, 'read', new Backbone.Model(), options);
 	    },
 
@@ -227,6 +228,7 @@ define(function(require){
             // call backbone sync method manually
             return Backbone.sync.call(this, 'read', new Backbone.Model(), {
                 url: config.contextPath + '/rest_v2/resources/' + url.replace(/\/[^\/]+$/, ''),
+                cache: false,
                 headers:{ 'Accept': 'application/repository.folder+json' },
                 type: 'GET',
                 success: function(data, xhr){

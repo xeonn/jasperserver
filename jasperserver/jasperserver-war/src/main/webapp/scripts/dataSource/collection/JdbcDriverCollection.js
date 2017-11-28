@@ -60,6 +60,10 @@ define(function (require) {
             return driver ? driver : this.findWhere({ jdbcDriverClass: JdbcDriverModel.OTHER_DRIVER });
         },
 
+        getDriverByName: function(name) {
+            return this.findWhere({ name: name });
+        },
+
         getAllPossibleCustomAttributes: function() {
             return _.keys(JdbcDriverModel.VALIDATION_PATTERNS);
         },

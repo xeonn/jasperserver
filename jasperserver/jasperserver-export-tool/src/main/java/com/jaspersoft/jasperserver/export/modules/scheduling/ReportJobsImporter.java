@@ -53,7 +53,7 @@ import java.util.Map;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ReportJobsImporter.java 58265 2015-10-05 16:13:56Z vzavadsk $
+ * @version $Id: ReportJobsImporter.java 63380 2016-05-26 20:56:46Z mchan $
  */
 public class ReportJobsImporter extends BaseImporterModule {
 
@@ -127,10 +127,17 @@ public class ReportJobsImporter extends BaseImporterModule {
 				commandOut.info("Created " + imported + " job(s) for report " + newUri);
                 commandOut.info("Updated " + updated + " job(s) for report " + newUri);
 			} else {
+                Map<String, ReportJob> existingJobs = new HashMap<String, ReportJob>();
+                List<ReportJobSummary> jobs
+                        = configuration.getReportScheduler().getScheduledJobSummaries(executionContext, newUri);
+                for (ReportJobSummary job : jobs) {
+                    ReportJob reportJob = configuration.getReportScheduler().getScheduledJob(executionContext, job.getId());
+                    existingJobs.put(reportJob.getLabel(), reportJob);
+                }
                 int imported = 0;
 				for (int i = 0; i < jobIds.length; i++) {
 					long jobId = jobIds[i];
-					if (importReportJob(newUri, ruPath, jobId)) {
+					if (importReportJob(newUri, ruPath, jobId, existingJobs)) {
 						++imported;
 					}
 				}
@@ -176,14 +183,14 @@ public class ReportJobsImporter extends BaseImporterModule {
 		return updateResources != null && updateResources.contains(resourceUri);
 	}
 
-	protected boolean importReportJob(String reportUri, String jobsPath, long jobId) {
+	protected boolean importReportJob(String reportUri, String jobsPath, long jobId, Map<String, ReportJob> existingJobs) {
 		boolean imported;
 		String jobFilename = getJobFilename(jobId);
 		ReportJobBean jobBean = (ReportJobBean) deserialize(jobsPath, jobFilename, configuration.getSerializer());
         ReportJob job = new ReportJob();
         jobBean.copyTo(job, reportUri, getConfiguration(), executionContext, importContext);
 		if (userExists(job.getUsername())) {
-			imported = importJob(reportUri, job, jobBean.isPaused());
+			imported = importJob(reportUri, job, jobBean.isPaused(), existingJobs);
 		} else {
 			commandOut.warn("User " + job.getUsername() + " does not exist, skipping job " + job.getId() + " of report " + reportUri);
 			imported = false;
@@ -210,45 +217,54 @@ public class ReportJobsImporter extends BaseImporterModule {
 		return indicator.booleanValue();
 	}
 
-	protected boolean importJob(String newUri, ReportJob job, boolean paused) {
-
-        List existingJobs = configuration.getReportScheduler().getScheduledJobSummaries(executionContext, newUri);
-        boolean exist = false;
-        for (int i = 0; i < existingJobs.size(); i++) {
-            ReportJobSummary rjs = (ReportJobSummary) existingJobs.get(i);
-            long rjId = rjs.getId();
-            ReportJob rj = configuration.getReportScheduler().getScheduledJob(executionContext, rjId);
-            if (rj.equals(job)) {
-                exist = true;
-                break;
-            }
+    public boolean shouldReimport(ReportJob existingJob, ReportJob newJob) {
+        if (existingJob == null) {
+            return true;
+        }
+        if (newJob == null) {
+            return false;
         }
 
-        if (!exist) {
+        if (existingJob.getLabel() != null
+                ? !existingJob.getLabel().equals(newJob.getLabel()) : newJob.getLabel() != null) return true;
+        if (existingJob.getUsername() != null
+                ? !existingJob.getUsername().equals(newJob.getUsername()) : newJob.getUsername() != null) return true;
+        if (existingJob.getBaseOutputFilename() != null
+                ? !existingJob.getBaseOutputFilename().equals(newJob.getBaseOutputFilename())
+                : newJob.getBaseOutputFilename() != null) return true;
+        if (existingJob.getTrigger() != null
+                ? !existingJob.getTrigger().equals(newJob.getTrigger()) : newJob.getTrigger() != null) return true;
+
+        return false;
+    }
+
+    protected boolean importJob(String newUri, ReportJob job, boolean paused, Map<String, ReportJob> existingJobs) {
+        boolean result = false;
+        if (!existingJobs.containsValue(job)
+                || (existingJobs.containsValue(job) && shouldReimport(existingJobs.get(job.getLabel()), job))) {
             ReportJob savedJob;
             try {
                 savedJob = configuration.getInternalReportScheduler().saveJob(executionContext, job);
-                if (paused){
+                if (paused) {
                     configuration.getReportScheduler().pause(Arrays.asList(savedJob), false);
                 }
                 if (log.isDebugEnabled()) {
                     log.debug("Created job " + savedJob.getId() + " for report " + newUri + " (old id " + job.getId() + ")");
                 }
-                return true;
+                existingJobs.put(savedJob.getLabel(), savedJob);
+                result = true;
             } catch (JSValidationException e) {
                 if (log.isDebugEnabled()) {
                     log.debug("Skipped job for report " + newUri + " (old id " + job.getId() + "). " + e.getErrors().toString());
                 }
-                return false;
             }
         } else {
             if (log.isDebugEnabled()) {
                 log.debug("Skipped existing job for report " + newUri + " (old id " + job.getId() + ")");
             }
-            return false;
         }
-
-	}
+        return result;
+    }
 
 	protected ImportStatus updateJob(String newUri, ReportJobBean jobBean, ImportStatus status) {
         ReportJobModel reportJobModel = new ReportJobModel();

@@ -20,14 +20,7 @@
  */
 package com.jaspersoft.jasperserver.api.metadata.common.service;
 
-import java.util.List;
-import java.util.Map;
-
 import com.jaspersoft.jasperserver.api.JasperServerAPI;
-import com.jaspersoft.jasperserver.api.search.SearchCriteriaFactory;
-import com.jaspersoft.jasperserver.api.search.SearchFilter;
-import com.jaspersoft.jasperserver.api.search.SearchSorter;
-import com.jaspersoft.jasperserver.api.search.TransformerFactory;
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
 import com.jaspersoft.jasperserver.api.common.domain.ValidationErrorFilter;
 import com.jaspersoft.jasperserver.api.common.domain.ValidationErrors;
@@ -38,6 +31,13 @@ import com.jaspersoft.jasperserver.api.metadata.common.domain.Folder;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceLookup;
 import com.jaspersoft.jasperserver.api.metadata.view.domain.FilterCriteria;
+import com.jaspersoft.jasperserver.api.search.SearchCriteriaFactory;
+import com.jaspersoft.jasperserver.api.search.SearchFilter;
+import com.jaspersoft.jasperserver.api.search.SearchSorter;
+import com.jaspersoft.jasperserver.api.search.TransformerFactory;
+
+import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -57,7 +57,7 @@ import com.jaspersoft.jasperserver.api.metadata.view.domain.FilterCriteria;
  * @author Andrew Sokolnikov
  * @author Stas Chubar
  * @author Yuri Plakosh
- * @version $Id: RepositoryService.java 51369 2014-11-12 13:59:41Z sergey.prilukin $
+ * @version $Id: RepositoryService.java 63380 2016-05-26 20:56:46Z mchan $
  * @since 1.0
  */
 @JasperServerAPI
@@ -648,6 +648,19 @@ public interface RepositoryService
 	Resource copyResource(ExecutionContext context, String sourceURI, String destinationURI);
 
 	/**
+	 * Copies a resource to a new location and change it's label.
+	 *
+     * @param context the caller execution context
+	 * @param sourceURI the path of the resource to copy
+	 * @param destinationURI the path at which to create the copy in the
+	 * repository, including the resource copy name
+	 * @param label the new label for copy. Nullable, no renaming happens if null.
+	 * @return the copied resource
+	 * @since 6.3.0
+	 */
+	Resource copyRenameResource(ExecutionContext context, String sourceURI, String destinationURI, String label);
+
+	/**
 	 * Copies a repository folder to a new location.
 	 * 
 	 * <p>
@@ -670,6 +683,26 @@ public interface RepositoryService
 	 * @since 3.0.0
 	 */
 	Folder copyFolder(ExecutionContext context, String sourceURI, String destinationURI);
+
+	/**
+	 * Copies a repository folder to a new location and change it's label..
+	 *
+	 * <p>
+	 * The subfolders and resources under the copied folder are copied recursively.
+	 * References between resources in the source folder are translated to the
+	 * resources in the new folder; references to resources outside the source
+	 * folder are preserved unchanged.
+	 * </p>
+	 *
+     * @param context the caller execution context
+	 * @param sourceURI the path of the folder to copy
+	 * @param destinationURI the path at which to create the copy in the
+	 * repository, including the folder copy name 	 *
+	 * @param label the new label for copy. Nullable, no renaming happens if null.
+	 * @return the details of the folder copy
+	 * @since 6.3.0
+	 */
+	Folder copyRenameFolder(ExecutionContext context, String sourceURI, String destinationURI, String label);
 	
 	/**
 	 * Copies several resources into a destination folder.

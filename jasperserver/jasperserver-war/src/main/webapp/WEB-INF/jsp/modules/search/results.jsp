@@ -65,7 +65,7 @@
     <t:putAttribute name="pageTitle" value="${pageTitle}"/>
     <t:putAttribute name="bodyID" value="${bodyId}"/>
     <t:putAttribute name="bodyClass" value="${pageClass}"/>
-    <t:putAttribute name="moduleName" value="results.page"/>
+    <t:putAttribute name="moduleName" value="repository/repositoryMain"/>
     <t:putAttribute name="headerContent" >
 
         <jsp:include page="resultsState.jsp"/>
@@ -192,7 +192,7 @@
                 </t:putAttribute>
             <t:putAttribute name="containerTitle"><spring:message code="SEARCH_FOLDERS" javaScriptEscape="true"/></t:putAttribute>
             <t:putAttribute name="swipeScroll" value="${isIPad}"/>
-            <t:putAttribute name="bodyID">foldersPodContent</t:putAttribute>       
+            <t:putAttribute name="bodyID">foldersPodContent</t:putAttribute>
             <t:putAttribute name="bodyContent">
                 <ul id="foldersTree" style="position:absolute;" class="list responsive collapsible folders" ${mode == "browse" ? "data-tab-index='3' data-component-type='tree'" : ""}></ul>
                 <div id="ajaxbuffer" style="display:none"></div>

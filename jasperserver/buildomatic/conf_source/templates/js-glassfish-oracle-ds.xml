@@ -27,7 +27,8 @@
     <jdbc-connection-pool 
         name="jasperserver_pool" 
         datasource-classname="${jdbcDataSourceClass}"
-        res-type="javax.sql.ConnectionPoolDataSource">
+        res-type="javax.sql.ConnectionPoolDataSource"
+        max-pool-size="50">
         <property name="serverName" value="${dbHost}"/>
         <property name="user" value="${js.dbUsername}"/>
         <property name="password" value="${escapeXML:js.dbPassword}"/>
@@ -43,7 +44,8 @@
     <jdbc-connection-pool 
         name="sugarcrm_pool" 
         datasource-classname="${jdbcDataSourceClass}"
-        res-type="javax.sql.ConnectionPoolDataSource">
+        res-type="javax.sql.ConnectionPoolDataSource"
+        max-pool-size="50">
         <property name="serverName" value="${dbHost}"/>
         <property name="user" value="${sugarcrm.dbUsername}"/>
         <property name="password" value="${escapeXML:sugarcrm.dbPassword}"/>
@@ -59,7 +61,8 @@
     <jdbc-connection-pool 
         name="foodmart_pool" 
         datasource-classname="${jdbcDataSourceClass}"
-        res-type="javax.sql.ConnectionPoolDataSource">
+        res-type="javax.sql.ConnectionPoolDataSource"
+        max-pool-size="50">
         <property name="serverName" value="${dbHost}"/>
         <property name="user" value="${foodmart.dbUsername}"/>
         <property name="password" value="${escapeXML:foodmart.dbPassword}"/>

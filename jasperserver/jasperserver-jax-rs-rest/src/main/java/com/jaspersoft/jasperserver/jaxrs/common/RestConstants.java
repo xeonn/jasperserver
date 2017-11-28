@@ -27,7 +27,7 @@ import com.jaspersoft.jasperserver.war.common.JasperServerHttpConstants;
  * <p></p>
  *
  * @author Zakhar.Tomchenco
- * @version $Id: RestConstants.java 55164 2015-05-06 20:54:37Z mchan $
+ * @version $Id: RestConstants.java 62954 2016-05-01 09:49:23Z ykovalch $
  */
 public interface RestConstants {
     String HEADER_START_INDEX = "Start-Index";
@@ -43,6 +43,7 @@ public interface RestConstants {
     String QUERY_PARAM_SORT_BY = "sortBy";
     String QUERY_PARAM_EXPANDED = "expanded";
     String QUERY_PARAM_DRY_RUN = "dry-run";
+    String QUERY_PARAM_INCLUDE = "include";
 
     String QUERY_PARAM_CREATE_FOLDERS = "createFolders";
 }

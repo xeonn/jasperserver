@@ -81,6 +81,8 @@ public abstract class DataAdapterDefinition extends CustomDataSourceDefinition i
     private TenantService tenantService;
     @Resource(name = "concreteRepositoryContextManager")
     private RepositoryContextManager repositoryContextManager;
+    @Resource(name = "${bean.jasperReportsContext}")
+    private JasperReportsContext jasperReportsContext;
 
 
     protected static final Log log = LogFactory.getLog(DataAdapterDefinition.class);
@@ -89,6 +91,14 @@ public abstract class DataAdapterDefinition extends CustomDataSourceDefinition i
     public DataAdapterDefinition() {
         // set default data service for data adapter
         setServiceClassName(DATA_ADAPTER_SERVICE_CLASS);
+    }
+
+    public void setJasperReportsContext(JasperReportsContext jasperReportsContext) {
+        this.jasperReportsContext = jasperReportsContext;
+    }
+
+    protected JasperReportsContext getJasperReportsContext() {
+        return jasperReportsContext;
     }
 
     // set custom data source property definitions from data adapter custom report data source object
@@ -132,7 +142,7 @@ public abstract class DataAdapterDefinition extends CustomDataSourceDefinition i
         if ((dataAdapterUri != null) && !dataAdapterUri.equals("")) {
             try {
                 log.debug("DATA ADAPTER URI = " + dataAdapterUri);
-                DataAdapterResource dataAdapterResource = net.sf.jasperreports.repo.RepositoryUtil.getInstance(DataAdapterDefinitionUtil.getJasperReportsContext()).getResourceFromLocation(dataAdapterUri, DataAdapterResource.class);
+                DataAdapterResource dataAdapterResource = net.sf.jasperreports.repo.RepositoryUtil.getInstance(jasperReportsContext).getResourceFromLocation(dataAdapterUri, DataAdapterResource.class);
                 DataAdapter dataAdapter = dataAdapterResource.getDataAdapter();
                 setPropertyDefinitions(dataAdapter);
             } catch (Exception ex) {
@@ -195,9 +205,7 @@ public abstract class DataAdapterDefinition extends CustomDataSourceDefinition i
             if (service != null) {
                 // set data adapter to the service
                 ((ReportDataAdapterService) service).setDataAdapter(dataAdapter);
-                // setup thread repository context for looking up data source file from repo
-                if (repositoryContextManager != null) repositoryContextManager.setRepositoryContext(ExecutionContextImpl.getRuntimeExecutionContext(), "/ignore", null);
-                ((ReportDataAdapterService) service).setDataAdapterService(getDataAdapterService(DataAdapterDefinitionUtil.getJasperReportsContext(), dataAdapter));
+                ((ReportDataAdapterService) service).setDataAdapterService(getDataAdapterService(jasperReportsContext, dataAdapter));
                 // repository URI of data file is tenant dependent. E.g. for root organization is /organizations/organization_1/someFolder/dataFile.csv
                 // and for jasperadmin on organization_1 it's /someFolder/dataFile.csv
                 // let's find user's tenant to allow service to find a data file correctly
@@ -300,7 +308,7 @@ public abstract class DataAdapterDefinition extends CustomDataSourceDefinition i
     public QueryExecuterFactory getQueryExecuterFactory() throws JRException {
         if (getQueryExecuterMap() != null) {
             for (Map.Entry<String, String> queryExecuterEntry : getQueryExecuterMap().entrySet()) {
-                return JRQueryExecuterUtils.getInstance(DataAdapterDefinitionUtil.getJasperReportsContext()).getExecuterFactory(queryExecuterEntry.getKey());
+                return JRQueryExecuterUtils.getInstance(jasperReportsContext).getExecuterFactory(queryExecuterEntry.getKey());
             }
         }
         return null;
@@ -313,7 +321,7 @@ public abstract class DataAdapterDefinition extends CustomDataSourceDefinition i
         try {
             // setup thread repository context for looking up data source file from repo
             repositoryContextManager.setRepositoryContext(ExecutionContextImpl.getRuntimeExecutionContext(), "/ignore", null);
-            DataAdapterService dataAdapterService = getDataAdapterService(DataAdapterDefinitionUtil.getJasperReportsContext(), dataAdapter);
+            DataAdapterService dataAdapterService = getDataAdapterService(jasperReportsContext, dataAdapter);
             Map<String,Object> parameterValues = new HashMap<String, Object>();
             dataAdapterService.contributeParameters(parameterValues);
             JRDataSource dataSource = (JRDataSource) parameterValues.get(JRParameter.REPORT_DATA_SOURCE);
@@ -322,7 +330,7 @@ public abstract class DataAdapterDefinition extends CustomDataSourceDefinition i
                 // convert your param map to fill params...
                 Map<String, ? extends JRValueParameter>  fillParams = DataAdapterDefinitionUtil.convertToFillParameters(parameterValues, queryExecuterFactory.getBuiltinParameters());
                 // and pass it all to the factory to get the queryExecuter
-                JRQueryExecuter queryExecuter = queryExecuterFactory.createQueryExecuter(DataAdapterDefinitionUtil.getJasperReportsContext(), new JRDesignDataset(false), fillParams);
+                JRQueryExecuter queryExecuter = queryExecuterFactory.createQueryExecuter(jasperReportsContext, new JRDesignDataset(false), fillParams);
                 // ok, now we're in the innermost Russian doll...let's get our JRDatasource!
                 dataSource = queryExecuter.createDatasource();
             }

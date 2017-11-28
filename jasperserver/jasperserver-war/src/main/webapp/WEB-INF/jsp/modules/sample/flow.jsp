@@ -26,7 +26,7 @@
     <t:putAttribute name="pageTitle" value="Flow Layout: Multi-Step"/>
     <t:putAttribute name="bodyID" value="flow"/>
     <t:putAttribute name="bodyClass" value="flow wizard oneColumn"/>
-    
+
     <t:putAttribute name="bodyContent" >
 		<t:insertTemplate template="/WEB-INF/jsp/templates/container.jsp">
 			<t:putAttribute name="containerClass" value="column decorated primary"/>
@@ -56,17 +56,17 @@
                         </t:addListAttribute>
                     </t:putListAttribute>
                 </t:insertTemplate>
-			</div>						
+			</div>
 				<div id="stepDisplay">
 					<fieldset class="row instructions">
 						<legend class="offLeft"><span>Instructions</span></legend>
 						<h2 class="textAccent02"><spring:message code="JIF.titlecalltoaction"/></h2>
 						<h4><spring:message code="JIF.labelcallexplanation"/></h4>
 					</fieldset>
-				
+
 					<fieldset class="row inputs oneColumn">
 						<legend class="offLeft"><span>User Inputs</span></legend>
-						
+
 							<t:insertTemplate template="/WEB-INF/jsp/templates/container.jsp">
 							    <t:putAttribute name="containerClass" value="column primary"/>
 							    <t:putAttribute name="containerTitle"><spring:message code="JIF.labelsteptitle"/></t:putAttribute>
@@ -76,20 +76,20 @@
 							    </t:putAttribute>
 
 							</t:insertTemplate>
-												
+
 					</fieldset><!--/.row.inputs-->
-					
+
 					</div><!--/#stepDisplay-->
 				</t:putAttribute>
 					<t:putAttribute name="footerContent">
 						<fieldset dos"wizardNav" >
 							<button id="done" class="button primary action up"><span class="wrap"><spring:message code='button.submit'/></span><span class="icon"></span></button>
-							<button id="cancel" class="button action up"><span class="wrap"><spring:message code='button.cancel'/></span><span class="icon"></span></button>						
-					    </fieldset>				
-					</t:putAttribute>	    
+							<button id="cancel" class="button action up"><span class="wrap"><spring:message code='button.cancel'/></span><span class="icon"></span></button>
+					    </fieldset>
+					</t:putAttribute>
 		</t:insertTemplate>
-		
-    
+
+
     </t:putAttribute>
 
 </t:insertTemplate>

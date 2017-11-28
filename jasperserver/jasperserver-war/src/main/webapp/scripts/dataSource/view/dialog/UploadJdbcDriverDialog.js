@@ -109,8 +109,19 @@ define(function (require) {
             if ("illegal.parameter.value.error" === response.errorCode && response.parameters
                 && response.parameters.length && "className" === response.parameters[0]) {
                 errorMessage = i18n["resource.dataSource.jdbc.classNotFound"].replace("{0}", this.driverClass);
-            } else {
+            } else if (response.message) {
                 errorMessage = response.message;
+            } else {
+                errorMessage = response.errorCode;
+
+                // see some notes in JRS-8435
+                // backend responses with 400 error code and http header "Content-Type: application/errorDescriptor+xml"
+                // this makes all browsers crazy.
+                // Shortly, browsers don't have access to http response body...
+                // Server is considering this issue, but for now we may close the issue by adding next lines on code
+                if (errorMessage === "error.invalid.response") {
+                    errorMessage = "The required driver class (" + this.driverClass + ") is not found in uploaded files";
+                }
             }
 
             this.$(".errorMessageContainer").addClass("error").find(".message").text(errorMessage);

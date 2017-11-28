@@ -29,6 +29,7 @@ import com.jaspersoft.jasperserver.api.metadata.user.domain.client.ProfileAttrib
 import com.jaspersoft.jasperserver.api.metadata.user.service.AttributesSearchCriteria;
 import com.jaspersoft.jasperserver.api.metadata.user.service.AttributesSearchResult;
 import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributeCategory;
+import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributeGroup;
 import com.jaspersoft.jasperserver.api.metadata.user.service.TenantService;
 import com.jaspersoft.jasperserver.util.test.BaseServiceSetupTestNG;
 import org.apache.commons.collections.CollectionUtils;
@@ -60,7 +61,7 @@ import static org.testng.AssertJUnit.assertTrue;
  *
  * @author sbirney
  * @author Vlad Zavadskii
- * @version $Id: ProfileAttributeServiceTestTestNG.java 56967 2015-08-20 23:20:53Z esytnik $
+ * @version $Id: ProfileAttributeServiceTestTestNG.java 63046 2016-05-07 00:16:08Z dlitvak $
  */
 public class ProfileAttributeServiceTestTestNG extends BaseServiceSetupTestNG {
     protected static final String USERNAME = "testuser";
@@ -92,6 +93,19 @@ public class ProfileAttributeServiceTestTestNG extends BaseServiceSetupTestNG {
         log.debug(CLASS_NAME + " => " + method.getName() + "() called");
     }
 
+    protected void deleteCustomProfileAttributesIfExist() {
+        AttributesSearchResult<ProfileAttribute> searchResult = getProfileAttributeService()
+                .getProfileAttributesForPrincipal(null, server,
+                        new AttributesSearchCriteria.Builder()
+                                .setGroups(Collections.singleton(ProfileAttributeGroup.CUSTOM.toString()))
+                                .build());
+        if (searchResult.getTotalCount() > 0) {
+            for (ProfileAttribute attribute : searchResult.getList()) {
+                getProfileAttributeService().deleteProfileAttribute(null, attribute);
+            }
+        }
+    }
+
     @BeforeClass
     public void onSetup() {
         log.info("Creating test user");
@@ -111,6 +125,7 @@ public class ProfileAttributeServiceTestTestNG extends BaseServiceSetupTestNG {
         createTenantForRootIfMissing();
 
         server = getTenantService().getTenant(context, TenantService.ORGANIZATIONS);
+        deleteCustomProfileAttributesIfExist();
         serverProfileAttributesCustom.add(createTestAttr(server, "customGroup:customProperty", "[SYSTEM]", CUSTOM_GROUP));
 
         allProfileAttributesWithoutServerSettings.addAll(userProfileAttributes);

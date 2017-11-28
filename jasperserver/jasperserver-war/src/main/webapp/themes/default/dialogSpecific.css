@@ -1104,14 +1104,6 @@ and (max-device-width : 1024px) {
 	*width: auto !important; /* IE7 */
 }
 
-
-/* iPads (portrait and landscape) */
-@media only screen and (min-device-width : 768px) and (max-device-width : 1024px) {
-    #chartFormatDialog {
-        height: 316px;
-    }
-}
-
 #chartFormatDialog .formattingSection {
     margin: 10px 0 10px 0;
 }

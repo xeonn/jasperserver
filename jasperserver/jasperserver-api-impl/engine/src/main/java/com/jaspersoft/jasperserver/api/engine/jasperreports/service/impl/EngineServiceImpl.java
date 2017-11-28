@@ -146,6 +146,7 @@ import net.sf.jasperreports.engine.xml.JRXmlLoader;
 import net.sf.jasperreports.engine.xml.JRXmlTemplateLoader;
 import net.sf.jasperreports.engine.xml.JRXmlWriter;
 import net.sf.jasperreports.repo.JasperDesignCache;
+import net.sf.jasperreports.repo.ReportCompiler;
 import net.sf.jasperreports.web.servlets.AsyncJasperPrintAccessor;
 import net.sf.jasperreports.web.servlets.JasperPrintAccessor;
 import net.sf.jasperreports.web.servlets.SimpleJasperPrintAccessor;
@@ -198,7 +199,7 @@ import java.util.jar.JarFile;
 /**
  *
  * @author Teodor Danciu (teodord@users.sourceforge.net)
- * @version $Id: EngineServiceImpl.java 61296 2016-02-25 21:53:37Z mchan $
+ * @version $Id: EngineServiceImpl.java 63380 2016-05-26 20:56:46Z mchan $
  */
 public class EngineServiceImpl implements EngineService, ReportExecuter,
 		CompiledReportProvider, InternalReportCompiler, InitializingBean, Diagnostic
@@ -242,7 +243,7 @@ public class EngineServiceImpl implements EngineService, ReportExecuter,
     private Executor syncReportExecutorService =
 			SynchronousExecutor.INSTANCE;//default value
 
-	private Executor asyncReportExecutorService = new DiagnosticLoggingContextCompatibleExecutorService(Executors.newCachedThreadPool());
+	private Executor asyncReportExecutorService = Executors.newCachedThreadPool();
 	
 	private List<ReportExecutionListenerFactory> reportExecutionListenerFactories;
 
@@ -1010,7 +1011,9 @@ public class EngineServiceImpl implements EngineService, ReportExecuter,
 				OrigContextClassLoader origContext = setContextClassLoader(runtimeContext, unitResources, inMemoryUnit,
 						repositoryContextHandle);
 				try {
-					JasperReport report = getJasperReport(runtimeContext, request, reportUnit, inMemoryUnit);
+			        JasperDesignCache cache = JasperDesignCache.getInstance(DefaultJasperReportsContext.getInstance(), request.getReportContext());
+			        setReportCompiler(cache, repositoryContextHandle, origContext, unitResources);
+					JasperReport report = getJasperReport(runtimeContext, cache, reportUnit, inMemoryUnit);
 					
 					// check if the report inhibits async viewing
 					boolean reportAsyncable = JRPropertiesUtil.getInstance(
@@ -1054,6 +1057,53 @@ public class EngineServiceImpl implements EngineService, ReportExecuter,
                 TimeZoneContextHolder.setTimeZone(null);
 				resetThreadRepositoryContext(repositoryContextHandle);
 			}
+		}
+
+		private void setReportCompiler(JasperDesignCache cache, 
+				final RepositoryContextHandle initialContextHandle, 
+				final OrigContextClassLoader initialContextClassLoader, 
+				final Map unitResources) {
+			
+			if (cache == null)
+				return;
+			
+			cache.setReportCompiler(new ReportCompiler() {
+				@Override
+				public JasperReport compile(JasperDesign design) throws JRException {
+					RepositoryContext initialContext = initialContextHandle.getRepositoryContext();
+					RepositoryContext currentContext = RepositoryUtil.getThreadRepositoryContext();
+					
+					RepositoryContextHandle newContextHandle = null;
+					if (currentContext == null || !currentContext.equals(initialContext)) {
+						newContextHandle = setThreadRepositoryContext(
+								initialContext.getExecutionContext(), 
+								reportUnit, reportUnit.getURIString());
+					}
+					
+					try {
+						OrigContextClassLoader newContextClassLoader = null;
+						ClassLoader currentClassLoader = Thread.currentThread().getContextClassLoader();
+						if (initialContextClassLoader.set && (currentClassLoader == null
+								|| !currentClassLoader.equals(initialContextClassLoader.newClassLoader))) {
+							newContextClassLoader = setContextClassLoader(
+									initialContext.getExecutionContext(), unitResources, inMemoryUnit, 
+									newContextHandle == null ? initialContextHandle : newContextHandle);
+						}
+							
+						try {
+							return compileReport(design);
+						} finally {
+							if (newContextClassLoader != null) {
+								revert(newContextClassLoader);
+							}
+						}
+					} finally {
+						if (newContextHandle != null) {
+							resetThreadRepositoryContext(newContextHandle);
+						}
+					}
+				}
+			});
 		}
 
 		protected void runWithCachedData(ExecutionContext runtimeContext, JasperReport report, 
@@ -1433,6 +1483,7 @@ public class EngineServiceImpl implements EngineService, ReportExecuter,
 	protected static class OrigContextClassLoader {
 		public final boolean set;
 		public final ClassLoader origClassLoader;
+		public final ClassLoader newClassLoader;
 		public final List jars;
 
 		public static final OrigContextClassLoader NOT_SET = new OrigContextClassLoader(false);
@@ -1440,12 +1491,15 @@ public class EngineServiceImpl implements EngineService, ReportExecuter,
 		private OrigContextClassLoader(boolean set) {
 			this.set = set;
 			this.origClassLoader = null;
+			this.newClassLoader = null;
 			this.jars = null;
 		}
 
-		public OrigContextClassLoader(ClassLoader origClassLoader, List jars) {
+		public OrigContextClassLoader(ClassLoader origClassLoader, ClassLoader newClassLoader, 
+				List jars) {
 			this.set = true;
 			this.origClassLoader = origClassLoader;
+			this.newClassLoader = newClassLoader;
 			this.jars = jars;
 		}
 	}
@@ -1500,7 +1554,7 @@ public class EngineServiceImpl implements EngineService, ReportExecuter,
 		if (newClassLoader == null) {
 			origContext = OrigContextClassLoader.NOT_SET;
 		} else {
-			origContext = new OrigContextClassLoader(origClassLoader, jarFiles);
+			origContext = new OrigContextClassLoader(origClassLoader, newClassLoader, jarFiles);
 			thread.setContextClassLoader(newClassLoader);
 		}
 

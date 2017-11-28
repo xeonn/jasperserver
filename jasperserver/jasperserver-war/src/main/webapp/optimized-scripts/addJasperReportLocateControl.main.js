@@ -1,1 +1,0 @@
-define(["require","!domReady","resource.inputControl.locate","underscore","jrs.configs","resource.base"],function(e){"use strict";var r=e("!domReady"),o=e("resource.inputControl.locate"),s=e("underscore"),i=e("jrs.configs"),n=e("resource.base");r(function(){s.extend(o.messages,i.addJasperReport.inputControl.messages),o.initialize(),isIPad()&&n.initSwipeScroll()})});

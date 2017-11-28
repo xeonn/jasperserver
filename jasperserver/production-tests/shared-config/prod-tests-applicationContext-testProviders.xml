@@ -18,7 +18,7 @@
        
     <!-- ======================== FILTER CHAIN =======================  -->
 
-    <bean id="filterChainProxy" class="org.springframework.security.web.FilterChainProxy">
+    <bean id="authenticationAuthoirizationFilterChainProxy" class="org.springframework.security.web.FilterChainProxy">
         <security:filter-chain-map path-type="ant">
             <security:filter-chain pattern="/**" filters="authenticationProcessingFilter,JSAuthenticationSynchronizer"/>
         </security:filter-chain-map>
@@ -41,7 +41,7 @@
         <property name="defaultFailureUrl" value="/login.html?error=1" />
     </bean>
     <bean id="sas" class="org.springframework.security.web.authentication.session.SessionFixationProtectionStrategy">
-        <property name="migrateSessionAttributes" value="true" />
+        <property name="migrateSessionAttributes" value="false" />
     </bean>
     
     <!--TODO class=com.jaspersoft.jasperserver.api.security.externalAuth.BaseAuthenticationProcessingFilter-->

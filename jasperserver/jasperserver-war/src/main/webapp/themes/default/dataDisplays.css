@@ -11,11 +11,11 @@ UNDERSTANDING THE CLASS ATTRIBUTES FOR DATA TABLES
 	  - only can be used on TH cells
 	- group
 	  - cell contains string that identifies a group
-	  - always occurs with 'label' 
+	  - always occurs with 'label'
 	  - can NEVER occur with 'member'
 	- member
 	  - cell contains string that identifies a group member
-	  - always occurs with 'label'	
+	  - always occurs with 'label'
 	  - can NEVER occur with 'group'
 	- measure
 	  - cell contains string that identifies table values
@@ -23,7 +23,7 @@ UNDERSTANDING THE CLASS ATTRIBUTES FOR DATA TABLES
 	- value
 	  - cell contains data
 	  - can NEVER occur with 'group' || 'label' || 'member'
-	- numeric 
+	- numeric
 	  - modifies 'value'
 	  - indicates a cell with numeric, as opposed to string, values
 	- detail
@@ -47,8 +47,8 @@ UNDERSTANDING THE CLASS ATTRIBUTES FOR DATA TABLES
 	  - cell contains a label or data that applies to the entire table
 	- columnSummaries
 	  - only used on tr elements
-	  - identifies a row that contains some columnSummary cells 
-	  
+	  - identifies a row that contains some columnSummary cells
+
 2). Hierarchical Selectors: identify a cell's coordinates within the table's row and column axis
 	- rowCondition_[1,2,3]
 	  - indicates that a cell's position within the crosstab's row hierarchy
@@ -68,7 +68,7 @@ UNDERSTANDING THE CLASS ATTRIBUTES FOR DATA TABLES
 	- outer
 	  - identifies all label cells, regardless of sub-type, that occupy boundary between labels and the visual edge of the table
 	  - NEVER occurs with 'value'
-	  
+
 3). Interactive Selectors: identify the display state of a member and its children
 	- open
 	  - the member's children are visible
@@ -78,7 +78,7 @@ UNDERSTANDING THE CLASS ATTRIBUTES FOR DATA TABLES
 	  - the member's children are NOT visible
 	  - ALWAYS occurs with 'label' && 'member'
 	  - NEVER occurs with 'inner'
-	  	  
+
 4). Notes and Rules of Thumb for table construction
 	- The first cell in the column containing .measure.label cells has the additional selector .first
 	- EVERY cell in the row defined in the tfoot section has the selector 'grand' assigned as well as its logical and hierarchical selector
@@ -100,6 +100,7 @@ UNDERSTANDING THE CLASS ATTRIBUTES FOR DATA TABLES
 }
 
 .data.table .wrap {
+    color: #555;
 	display: block;
 }
 
@@ -223,7 +224,7 @@ UNDERSTANDING THE CLASS ATTRIBUTES FOR DATA TABLES
 }
 
 .label,
-.label.member, 
+.label.member,
 .label.measure,
 .label.rowCondition_1,
 .label.rowCondition_2,
@@ -303,7 +304,7 @@ tfoot .measure.label {
 }
 
 .data.table .label {
-	color: #262626;
+	color: #555555;
 }
 
 .data.table .labels .label,
@@ -352,7 +353,7 @@ tfoot .measure.label {
 .memberSummaries .value {
 	background-color: #fff;
 	border-color:transparent;
-} 	
+}
 
 .memberSummaries .label,
 .record .label,
@@ -385,8 +386,8 @@ tfoot .measure.label {
 }
 
 
-.data.table .labels .group, 
-.data.table .labels .member, 
+.data.table .labels .group,
+.data.table .labels .member,
 .data.table .labels .rowSummary,
 .data.table.crosstab .memberSummaries .value,
 .label.member.inner.rowOrder_last {
@@ -469,6 +470,7 @@ tfoot .measure.label {
 	border-color:#d4d4d4;
 	background-color:#f2f2f2;
 	border-top: 1px solid #d4d4d4;
+    color: #555555;
 }
 
 .default .data.table th.label,
@@ -489,7 +491,8 @@ tfoot .measure.label {
 .default .grand.columnSummaries .value {
 	background-color: #d9e4f1;
 	border-color:#d4d4d4;
-	border-bottom: 1px solid #d4d4d4
+	border-bottom: 1px solid #d4d4d4;
+    color: #555;
 }
 
 .default .data.table .odd .value {
@@ -544,17 +547,17 @@ and (max-device-width : 1024px) {
 	}
 }
 
-th.column-heading-even, 
-th.column-heading-odd, 
-th.column-heading-span, 
-th.corner-heading, 
-th.corner-heading-right, 
-th.row-heading-even, 
-th.row-heading-span, 
-th.column-heading-even-right, 
-th.row-heading-even-right, 
-th.column-heading-span-right, 
-th.row-heading-span-right, 
+th.column-heading-even,
+th.column-heading-odd,
+th.column-heading-span,
+th.corner-heading,
+th.corner-heading-right,
+th.row-heading-even,
+th.row-heading-span,
+th.column-heading-even-right,
+th.row-heading-even-right,
+th.column-heading-span-right,
+th.row-heading-span-right,
 th.property-heading {
 	background-color:#ccc;
 }
@@ -600,27 +603,27 @@ input.corner {
 	width:14px;
 }
 
-th.heading-heading, 
-th.column-heading-selected, 
-th.column-heading-even, 
-th.column-heading-odd, 
-th.column-heading-span, 
-th.column-heading-red, 
-th.column-heading-green, 
-th.column-heading-yellow, 
-th.row-heading-red, 
-th.row-heading-green, 
-th.row-heading-yellow, 
-th.column-heading-rot, 
-th.column-heading-gruen, 
-th.column-heading-gelb, 
-th.row-heading-rot, 
-th.row-heading-gruen, 
-th.row-heading-gelb, 
-th.row-heading-selected, 
-th.row-heading-even, 
-th.row-heading-odd, 
-th.row-heading-span, 
+th.heading-heading,
+th.column-heading-selected,
+th.column-heading-even,
+th.column-heading-odd,
+th.column-heading-span,
+th.column-heading-red,
+th.column-heading-green,
+th.column-heading-yellow,
+th.row-heading-red,
+th.row-heading-green,
+th.row-heading-yellow,
+th.column-heading-rot,
+th.column-heading-gruen,
+th.column-heading-gelb,
+th.row-heading-rot,
+th.row-heading-gruen,
+th.row-heading-gelb,
+th.row-heading-selected,
+th.row-heading-even,
+th.row-heading-odd,
+th.row-heading-span,
 th.row-heading-span {
 	color:#033669;
 	text-align:left;
@@ -710,7 +713,7 @@ and (max-device-width : 1024px) {
 .olap th.measure.level.column,
 .olap .total {
 	font-weight: bold;
-	color: #262626;
+	color: #555555;
 }
 
 .olap th.measure.column {
@@ -735,7 +738,7 @@ and (max-device-width : 1024px) {
 
 .OLAP .olap .level,
 .OLAP .olap .member.total {
-	color: #262626;
+	color: #555555;
 }
 
 .OLAP .olap .member.column,
@@ -746,7 +749,7 @@ and (max-device-width : 1024px) {
 
 .OLAP .olap .member.all {
 	font-weight: bold;
-	color: #262626;
+	color: #555555;
 }
 
 .OLAP .data.table .empty {

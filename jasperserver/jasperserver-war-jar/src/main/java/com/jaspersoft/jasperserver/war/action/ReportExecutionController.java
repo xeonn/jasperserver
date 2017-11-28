@@ -33,28 +33,6 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import net.sf.jasperreports.engine.DefaultJasperReportsContext;
-import net.sf.jasperreports.engine.JRPropertiesUtil;
-import net.sf.jasperreports.engine.JRRuntimeException;
-import net.sf.jasperreports.engine.JasperReportsContext;
-import net.sf.jasperreports.engine.ReportContext;
-import net.sf.jasperreports.engine.export.JRHyperlinkProducerFactory;
-import net.sf.jasperreports.engine.export.JsonExporter;
-import net.sf.jasperreports.export.SimpleExporterInput;
-import net.sf.jasperreports.export.SimpleJsonExporterConfiguration;
-import net.sf.jasperreports.export.SimpleJsonReportConfiguration;
-import net.sf.jasperreports.export.SimpleWriterExporterOutput;
-import net.sf.jasperreports.web.JRInteractiveException;
-import net.sf.jasperreports.web.actions.AbstractAction;
-import net.sf.jasperreports.web.actions.Action;
-import net.sf.jasperreports.web.actions.MultiAction;
-import net.sf.jasperreports.web.servlets.JasperPrintAccessor;
-import net.sf.jasperreports.web.servlets.ReportExecutionStatus;
-import net.sf.jasperreports.web.servlets.ReportPageStatus;
-import net.sf.jasperreports.web.util.JacksonUtil;
-import net.sf.jasperreports.web.util.RequirejsModuleMapping;
-import net.sf.jasperreports.web.util.WebUtil;
-
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -70,18 +48,41 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.jaspersoft.jasperserver.api.JSException;
 import com.jaspersoft.jasperserver.api.JSShowOnlyErrorMessage;
 import com.jaspersoft.jasperserver.api.engine.common.service.EngineService;
-import com.jaspersoft.jasperserver.api.engine.jasperreports.util.ExportUtil;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.domain.impl.ReportUnitResult;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.service.DataCacheProvider;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl.CopyDestinationExistsException;
+import com.jaspersoft.jasperserver.api.engine.jasperreports.util.ExportUtil;
 import com.jaspersoft.jasperserver.api.metadata.common.service.JSResourceNotFoundException;
 import com.jaspersoft.jasperserver.war.action.hyperlinks.HyperlinkProducerFactoryFlowFactory;
 import com.jaspersoft.jasperserver.war.action.hyperlinks.ReportContextFactory;
 import com.jaspersoft.jasperserver.war.util.SessionObjectSerieAccessor;
 
+import net.sf.jasperreports.engine.DefaultJasperReportsContext;
+import net.sf.jasperreports.engine.JRPropertiesUtil;
+import net.sf.jasperreports.engine.JRRuntimeException;
+import net.sf.jasperreports.engine.JasperReportsContext;
+import net.sf.jasperreports.engine.ReportContext;
+import net.sf.jasperreports.engine.export.JRHyperlinkProducerFactory;
+import net.sf.jasperreports.engine.export.JsonExporter;
+import net.sf.jasperreports.export.SimpleExporterInput;
+import net.sf.jasperreports.export.SimpleJsonExporterConfiguration;
+import net.sf.jasperreports.export.SimpleJsonExporterOutput;
+import net.sf.jasperreports.export.SimpleJsonReportConfiguration;
+import net.sf.jasperreports.web.JRInteractiveException;
+import net.sf.jasperreports.web.actions.AbstractAction;
+import net.sf.jasperreports.web.actions.Action;
+import net.sf.jasperreports.web.actions.MultiAction;
+import net.sf.jasperreports.web.servlets.JasperPrintAccessor;
+import net.sf.jasperreports.web.servlets.ReportExecutionStatus;
+import net.sf.jasperreports.web.servlets.ReportPageStatus;
+import net.sf.jasperreports.web.util.JacksonUtil;
+import net.sf.jasperreports.web.util.RequirejsModuleMapping;
+import net.sf.jasperreports.web.util.WebHtmlResourceHandler;
+import net.sf.jasperreports.web.util.WebUtil;
+
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ReportExecutionController.java 58611 2015-10-15 15:01:08Z psavushc $
+ * @version $Id: ReportExecutionController.java 63484 2016-06-03 12:09:00Z tdanciu $
  */
 public class ReportExecutionController extends MultiActionController {
 
@@ -100,6 +101,7 @@ public class ReportExecutionController extends MultiActionController {
 	public static final String REPORT_CONTEXT_HTML_FLOW_KEY = "htmlReportFlowExecutionKey";
 
     public static final String JASPER_PRINT_PARAM_NAME = "jasperPrintName";
+    public static final String JASPER_PRINT_ATTRIBUTE_NAME = "jasperPrintName";//same as MTReportExecutionHyperlinkProducerFactory.reportResultRequestName 
 
     private static final String LICENSE_MANAGER = "com.jaspersoft.ji.license.LicenseManager";
 
@@ -370,7 +372,10 @@ public class ReportExecutionController extends MultiActionController {
                 if (jasperPrintAccessor == null) {
                     return;
                 }
+                
+                request.setAttribute(JASPER_PRINT_ATTRIBUTE_NAME, reportName);//MTReportExecutionHyperlinkProducerFactory needs this
                 request.setAttribute("reportResult", reportResult);
+                
                 ReportExecutionStatus reportStatus = jasperPrintAccessor.getReportStatus();
                 if (reportStatus.getStatus() == ReportExecutionStatus.Status.ERROR)
                 {
@@ -416,7 +421,14 @@ public class ReportExecutionController extends MultiActionController {
 
 				exporter.setReportContext(reportContext);
                 exporter.setExporterInput(new SimpleExporterInput(jasperPrintAccessor.getJasperPrint()));
-                exporter.setExporterOutput(new SimpleWriterExporterOutput(response.getWriter()));
+				SimpleJsonExporterOutput jsonExporterOutput = new SimpleJsonExporterOutput(response.getWriter());
+				String contextPath = (String)reportContext.getParameterValue("contextPath");// contextPath prepare by the html exporter in advance
+				if (contextPath  == null)
+				{
+					contextPath = request.getContextPath();
+				}
+				jsonExporterOutput.setFontHandler(new WebHtmlResourceHandler(response.encodeURL(contextPath + "/reportresource?&font={0}")));
+                exporter.setExporterOutput(jsonExporterOutput);
 				exporter.getExporterContext().setValue(ExportUtil.HTTP_SERVLET_REQUEST, request);//key does not really matter here, as first value of type request is taken, regardless of key
 				jsonExporterConfig.setReportComponentsExportOnly(isReportComponentsExportOnly);
 

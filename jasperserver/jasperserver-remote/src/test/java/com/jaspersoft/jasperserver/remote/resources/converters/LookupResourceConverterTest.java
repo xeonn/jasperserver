@@ -20,11 +20,13 @@
 */
 package com.jaspersoft.jasperserver.remote.resources.converters;
 
+import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.client.ResourceLookupImpl;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConversionOptions;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.util.ToClientConverter;
+import com.jaspersoft.jasperserver.dto.resources.ClientResource;
 import com.jaspersoft.jasperserver.dto.resources.ClientResourceLookup;
-import com.jaspersoft.jasperserver.war.cascade.handlers.GenericTypeProcessorRegistry;
+import com.jaspersoft.jasperserver.remote.exception.IllegalParameterValueException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -32,20 +34,24 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import static org.mockito.Mockito.*;
-import static org.testng.Assert.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertSame;
 
 /**
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: LookupResourceConverterTest.java 58870 2015-10-27 22:30:55Z esytnik $
+ * @version $Id: LookupResourceConverterTest.java 63451 2016-06-01 15:33:32Z ykovalch $
  */
 public class LookupResourceConverterTest {
     @InjectMocks
     private LookupResourceConverter converter = new LookupResourceConverter();
     @Mock
-    private GenericTypeProcessorRegistry genericTypeProcessorRegistry;
+    private ResourceConverterProvider resourceConverterProvider;
 
     private LookupResourceConverter converterMock;
 
@@ -97,9 +103,9 @@ public class LookupResourceConverterTest {
     public void toClientResourceType() {
         final String serverResourceType = "serverResourceType";
         final String clientResourceType = "clientResourceType";
-        when(genericTypeProcessorRegistry.getTypeProcessor(serverResourceType, ToClientConverter.class, false)).thenReturn(new ToClientConverter() {
+        final ToClientConverter<Resource, ClientResource, ToClientConversionOptions> toClientConverter = new ToClientConverter<Resource, ClientResource, ToClientConversionOptions>() {
             @Override
-            public Object toClient(Object serverObject, ToClientConversionOptions options) {
+            public ClientResource toClient(Resource serverObject, ToClientConversionOptions options) {
                 return null;
             }
 
@@ -107,7 +113,8 @@ public class LookupResourceConverterTest {
             public String getClientResourceType() {
                 return clientResourceType;
             }
-        });
+        };
+        when(resourceConverterProvider.getToClientConverter(serverResourceType)).thenReturn((ToClientConverter) toClientConverter);
         assertEquals(converter.toClientResourceType(serverResourceType), clientResourceType);
     }
 
@@ -115,7 +122,8 @@ public class LookupResourceConverterTest {
     public void toClientResourceType_unknownType() {
         final String serverResourceType = "serverResourceType";
         final String clientResourceType = "unknown";
-        reset(genericTypeProcessorRegistry);
+        reset(resourceConverterProvider);
+        when(resourceConverterProvider.getToClientConverter(serverResourceType)).thenThrow(IllegalParameterValueException.class);
         assertEquals(converter.toClientResourceType(serverResourceType), clientResourceType);
     }
 

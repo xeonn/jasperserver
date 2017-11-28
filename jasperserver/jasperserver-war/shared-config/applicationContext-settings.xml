@@ -20,7 +20,6 @@
                 <entry key="auth" value-ref="authSettingsProvider"/>
                 <entry key="request" value-ref="requestSettingsProvider"/>
                 <entry key="inputControls" value-ref="inputControls"/>
-                <entry key="scheduler" value-ref="schedulerSettingsProvider"/>
                 <entry key="exportResourceOptions" value-ref="${bean.exportResourceOptions}"/>
             </map>
         </constructor-arg>
@@ -75,17 +74,6 @@
             <value><![CDATA[((?:#{ attributePlaceholderPatternUI }|[\p{L}\p{M}\p{N}\s\_.,\-}{])+)]]></value>
         </constructor-arg>
     </bean>
-
-    <util:map id="schedulerSettingsProvider">
-        <entry key="defaultOutputLocation" value="/public/jobOutputs"/>
-        <entry key="defaultOutputFormats">
-            <list>
-                <value>pdf</value>
-                <value>doc</value>
-            </list>
-        </entry>
-    </util:map>
-
 
     <util:map id="clientLogging">
         <entry key="enabled" value="true"/>

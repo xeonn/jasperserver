@@ -28,7 +28,7 @@
     <t:putAttribute name="bodyID" value="addResource_locateDatatype"/>
 
     <t:putAttribute name="bodyClass" value="oneColumn flow wizard"/>
-    <t:putAttribute name="moduleName" value="locateXmlConnectionSource.page"/>
+    <t:putAttribute name="moduleName" value="addResource/analysisClientConnection/locateXmlConnectionSourceMain"/>
 
     <t:putAttribute name="bodyContent">
         <form method="post" id="xml" >
@@ -133,7 +133,7 @@
                     </fieldset>
                     <!--/.row.inputs-->
                 </div>
-                
+
             </t:putAttribute>
             <t:putAttribute name="footerContent">
                     <fieldset id="wizardNav">

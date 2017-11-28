@@ -27,7 +27,7 @@ import java.util.List;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: ResourceMediaType.java 55164 2015-05-06 20:54:37Z mchan $
+ * @version $Id: ResourceMediaType.java 62954 2016-05-01 09:49:23Z ykovalch $
  */
 public interface ResourceMediaType {
     public static final String RESOURCE_MEDIA_TYPE_PREFIX = "application/repository.";
@@ -41,6 +41,10 @@ public interface ResourceMediaType {
     public static final String AWS_DATA_SOURCE_CLIENT_TYPE = "awsDataSource";
     public static final String AWS_DATA_SOURCE_JSON = RESOURCE_MEDIA_TYPE_PREFIX + AWS_DATA_SOURCE_CLIENT_TYPE + RESOURCE_JSON_TYPE;
     public static final String AWS_DATA_SOURCE_XML = RESOURCE_MEDIA_TYPE_PREFIX + AWS_DATA_SOURCE_CLIENT_TYPE + RESOURCE_XML_TYPE;
+    // AzureSqlReportDataSource
+    public static final String AZURE_SQL_DATA_SOURCE_CLIENT_TYPE = "azureSqlDataSource";
+    public static final String AZURE_SQL_DATA_SOURCE_JSON = RESOURCE_MEDIA_TYPE_PREFIX + AZURE_SQL_DATA_SOURCE_CLIENT_TYPE + RESOURCE_JSON_TYPE;
+    public static final String AZURE_SQL_DATA_SOURCE_XML = RESOURCE_MEDIA_TYPE_PREFIX + AZURE_SQL_DATA_SOURCE_CLIENT_TYPE + RESOURCE_XML_TYPE;
     // BeanReportDataSource
     public static final String BEAN_DATA_SOURCE_CLIENT_TYPE = "beanDataSource";
     public static final String BEAN_DATA_SOURCE_JSON = RESOURCE_MEDIA_TYPE_PREFIX + BEAN_DATA_SOURCE_CLIENT_TYPE + RESOURCE_JSON_TYPE;
@@ -121,6 +125,10 @@ public interface ResourceMediaType {
     public static final String SEMANTIC_LAYER_DATA_SOURCE_CLIENT_TYPE = "semanticLayerDataSource";
     public static final String SEMANTIC_LAYER_DATA_SOURCE_JSON = RESOURCE_MEDIA_TYPE_PREFIX + SEMANTIC_LAYER_DATA_SOURCE_CLIENT_TYPE + RESOURCE_JSON_TYPE;
     public static final String SEMANTIC_LAYER_DATA_SOURCE_XML = RESOURCE_MEDIA_TYPE_PREFIX + SEMANTIC_LAYER_DATA_SOURCE_CLIENT_TYPE + RESOURCE_XML_TYPE;
+    // domain
+    public static final String DOMAIN_CLIENT_TYPE = "domain";
+    public static final String DOMAIN_JSON = RESOURCE_MEDIA_TYPE_PREFIX + DOMAIN_CLIENT_TYPE + RESOURCE_JSON_TYPE;
+    public static final String DOMAIN_XML = RESOURCE_MEDIA_TYPE_PREFIX + DOMAIN_CLIENT_TYPE + RESOURCE_XML_TYPE;
     // Dashboard
     public static final String DASHBOARD_CLIENT_TYPE = "dashboard";
     public static final String DASHBOARD_JSON = RESOURCE_MEDIA_TYPE_PREFIX + DASHBOARD_CLIENT_TYPE + RESOURCE_JSON_TYPE;

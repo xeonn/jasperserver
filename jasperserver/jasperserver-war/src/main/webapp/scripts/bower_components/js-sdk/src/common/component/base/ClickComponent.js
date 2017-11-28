@@ -52,6 +52,8 @@ define(function (require) {
          * @access protected
          */
         _onElementClick: function() {
+            if (this.$attachTo.attr('disabled')) return;
+
             this.show();
         },
 

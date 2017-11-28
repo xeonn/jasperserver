@@ -141,12 +141,14 @@ public class CustomDomainMetaDataImpl implements CustomDomainMetaData {
     public List<JRField> getJRFieldList() {
         if (baseFieldList != null) return baseFieldList;
         baseFieldList = new ArrayList<JRField>();
-        for (int i = 0; i < fieldNames.size(); i++) {
-            JRDesignField jrf = new JRDesignField();
-            jrf.setName(fieldNames.get(i));
-            jrf.setValueClassName((String) getItem(fieldTypes, i, "java.lang.String"));
-            jrf.setDescription((String) getItem(fieldDescriptions, i, null));
-            baseFieldList.add(jrf);
+        if(fieldNames != null) {
+            for (int i = 0; i < fieldNames.size(); i++) {
+                JRDesignField jrf = new JRDesignField();
+                jrf.setName(fieldNames.get(i));
+                jrf.setValueClassName((String) getItem(fieldTypes, i, "java.lang.String"));
+                jrf.setDescription((String) getItem(fieldDescriptions, i, null));
+                baseFieldList.add(jrf);
+            }
         }
         return baseFieldList;
     }

@@ -25,15 +25,15 @@ package com.jaspersoft.jasperserver.api.metadata.common.domain.util;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: ToClientConverter.java 58870 2015-10-27 22:30:55Z esytnik $
+ * @version $Id: ToClientConverter.java 62954 2016-05-01 09:49:23Z ykovalch $
  */
-public interface ToClientConverter<T, Result> {
+public interface ToClientConverter<T, ResultType, OptionsType> {
     /**
      * Conversion of server object to client representation.
      * @param serverObject - the server object ot convert
      * @param options - conversion options. Use null for default
      * @return the client representation of a server object
      */
-    Result toClient(T serverObject, ToClientConversionOptions options);
+    ResultType toClient(T serverObject, OptionsType options);
     String getClientResourceType();
 }

@@ -21,12 +21,16 @@
 package com.jaspersoft.jasperserver.jaxrs.job;
 
 import com.jaspersoft.jasperserver.api.JSValidationException;
+import com.jaspersoft.jasperserver.api.common.domain.impl.ExecutionContextImpl;
 import com.jaspersoft.jasperserver.api.engine.scheduling.domain.ReportJob;
 import com.jaspersoft.jasperserver.api.engine.scheduling.domain.ReportJobRuntimeInformation;
+import com.jaspersoft.jasperserver.api.engine.scheduling.domain.ReportJobSource;
 import com.jaspersoft.jasperserver.api.engine.scheduling.domain.ReportJobSummary;
 import com.jaspersoft.jasperserver.api.engine.scheduling.domain.jaxb.JobSummariesListWrapper;
 import com.jaspersoft.jasperserver.api.engine.scheduling.domain.reportjobmodel.ReportJobModel;
 import com.jaspersoft.jasperserver.api.engine.scheduling.domain.reportjobmodel.ReportJobSourceModel;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.InputControlsContainer;
+import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
 import com.jaspersoft.jasperserver.dto.job.JobClientConstants;
 import com.jaspersoft.jasperserver.remote.common.CallTemplate;
 import com.jaspersoft.jasperserver.remote.common.RemoteServiceWrapper;
@@ -72,7 +76,7 @@ import java.util.TimeZone;
  * JAX-RS service "jobs" implementation
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: JobsJaxrsService.java 61296 2016-02-25 21:53:37Z mchan $
+ * @version $Id: JobsJaxrsService.java 63380 2016-05-26 20:56:46Z mchan $
  */
 @Component
 @Scope("prototype")
@@ -84,6 +88,10 @@ public class JobsJaxrsService extends RemoteServiceWrapper<JobsService> {
     private InputControlsLogicService inputControlsLogicService;
     @Context
     private HttpHeaders httpHeaders;
+
+    @javax.annotation.Resource(name = "concreteRepository")
+    private RepositoryService repositoryService;
+
 
     @Resource(name = "jobsService")
     public void setRemoteService(JobsService remoteService) {
@@ -122,11 +130,7 @@ public class JobsJaxrsService extends RemoteServiceWrapper<JobsService> {
     public Response getJob(@PathParam("id") final long id) {
         return callRemoteService(new ConcreteCaller<Response>() {
             public Response call(JobsService service) throws RemoteException {
-                ReportJob job = service.getJob(id);
-                if (job != null)
-                    return Response.ok(job).build();
-                else
-                    return Response.status(Response.Status.NOT_FOUND).build();
+                return Response.ok(service.getJob(id)).build();
             }
         });
     }
@@ -137,12 +141,7 @@ public class JobsJaxrsService extends RemoteServiceWrapper<JobsService> {
     public Response getJobWithProcessedParameters(@PathParam("id") final long id) {
         return callRemoteService(new ConcreteCaller<Response>() {
             public Response call(JobsService service) throws RemoteException {
-                ReportJob job = service.getJob(id);
-                if (job != null) {
-                    return Response.ok(toClient(job)).build();
-                } else {
-                    return Response.status(Response.Status.NOT_FOUND).build();
-                }
+                return Response.ok(toClient(service.getJob(id))).build();
             }
         });
     }
@@ -151,8 +150,7 @@ public class JobsJaxrsService extends RemoteServiceWrapper<JobsService> {
         String timeZone = job.getOutputTimeZone();
         if (job.getSource() != null && job.getSource().getParameters() != null && !job.getSource().getParameters().isEmpty()) {
             try {
-                final Map<String, String[]> rawParameters = inputControlsLogicService
-                        .formatTypedParameters(job.getSource().getReportUnitURI(), job.getSource().getParameters());
+                final Map<String, String[]> rawParameters = extractRawParameters(job);
                 // String[] is also Object. So, cast is safe.
                 @SuppressWarnings("unchecked")
                 Map<String, Object> castParameters = (Map) rawParameters;
@@ -180,6 +178,34 @@ public class JobsJaxrsService extends RemoteServiceWrapper<JobsService> {
         return new ReportJobClientExtension(job);
     }
 
+    private Map<String, String[]> extractRawParameters(ReportJob job) throws CascadeResourceNotFoundException, InputControlsValidationException {
+        Map<String, String[]> rawParams;
+
+        if (repositoryService.getResource(ExecutionContextImpl.getRuntimeExecutionContext(), job.getSource().getReportUnitURI())
+                instanceof InputControlsContainer) {
+            rawParams = inputControlsLogicService
+                    .formatTypedParameters(job.getSource().getReportUnitURI(), job.getSource().getParameters());
+        } else {
+            rawParams = new HashMap<String, String[]>();
+
+            for (String key : job.getSource().getParameters().keySet()) {
+                if (JRParameter.REPORT_LOCALE.equals(key) || JRParameter.REPORT_TIME_ZONE.equals(key) ||
+                        ReportJobSource.REFERENCE_HEIGHT_PARAMETER_NAME.equals(key) || ReportJobSource.REFERENCE_WIDTH_PARAMETER_NAME.equals(key)) {
+                    //skip
+                } else {
+                    try {
+                        List<String> params = (List<String>) job.getSource().getParameters().get(key);
+                        rawParams.put(key, params.toArray(new String[params.size()]));
+                    } catch (ClassCastException e){
+                        log.error("Error interpreting parameter " + key + " of job " + job.getLabel() + " of " + job.getSource().getReportUnitURI(), e);
+                    }
+                }
+            }
+        }
+
+        return rawParams;
+    }
+
     protected ReportJob toServer(ReportJob job) throws IllegalParameterValueException, ResourceNotFoundException {
         if (job.getSource() != null) {
             if (job.getSource().getParameters() == null) {
@@ -188,30 +214,36 @@ public class JobsJaxrsService extends RemoteServiceWrapper<JobsService> {
             final Map<String, Object> parameters = job.getSource().getParameters();
             // safe output time zone before input controls logic run
             final String outputTimeZone = job.getOutputTimeZone();
-            try {
-                // Parameters comes as Collection<String> but we need to have String[]. Convert them
-                final Map<String, String[]> adoptedParameters = new HashMap<String, String[]>();
-                for (String currentParameter : parameters.keySet()) {
-                    if (parameters.get(currentParameter) instanceof Collection) {
-                        // ClassCastException is properly processed below. If happens, then input format is incorrect
-                        @SuppressWarnings("unchecked")
-                        final Collection<String> collection = (Collection) parameters.get(currentParameter);
-                        adoptedParameters.put(currentParameter, collection.toArray(new String[collection.size()]));
+
+            Map<String, Object> typedParameters;
+            if (repositoryService.getResource(ExecutionContextImpl.getRuntimeExecutionContext(), job.getSource().getReportUnitURI())
+                    instanceof InputControlsContainer) {
+                try {
+                    // Parameters comes as Collection<String> but we need to have String[]. Convert them
+                    final Map<String, String[]> adoptedParameters = new HashMap<String, String[]>();
+                    for (String currentParameter : parameters.keySet()) {
+                        if (parameters.get(currentParameter) instanceof Collection) {
+                            // ClassCastException is properly processed below. If happens, then input format is incorrect
+                            @SuppressWarnings("unchecked")
+                            final Collection<String> collection = (Collection) parameters.get(currentParameter);
+                            adoptedParameters.put(currentParameter, collection.toArray(new String[collection.size()]));
+                        }
                     }
+                    typedParameters = inputControlsLogicService.getTypedParameters(job.getSource().getReportUnitURI(), adoptedParameters);
+                    job.getSource().setParameters(typedParameters);
+                } catch (ClassCastException e) {
+                    log.error(e);
+                    throw new IllegalParameterValueException("job.source.parameters", "Map with content of wrong type");
+                } catch (InputControlsValidationException e) {
+                    throw new JSValidationException(e.getErrors());
+                } catch (CascadeResourceNotFoundException e) {
+                    throw new ResourceNotFoundException("URI:" + e.getResourceUri() + " Type:" + e.getResourceType());
                 }
-                final Map<String, Object> typedParameters = inputControlsLogicService.getTypedParameters(job.getSource().getReportUnitURI(), adoptedParameters);
-                if (outputTimeZone != null) {
-                    // restore output time zone
-                    typedParameters.put(JRParameter.REPORT_TIME_ZONE, TimeZone.getTimeZone(outputTimeZone));
-                }
-                job.getSource().setParameters(typedParameters);
-            } catch (ClassCastException e) {
-                log.error(e);
-                throw new IllegalParameterValueException("job.source.parameters", "Map with content of wrong type");
-            } catch (InputControlsValidationException e) {
-                throw new JSValidationException(e.getErrors());
-            } catch (CascadeResourceNotFoundException e) {
-                throw new ResourceNotFoundException("URI:" + e.getResourceUri() + " Type:" + e.getResourceType());
+            }
+
+            if (outputTimeZone != null) {
+                // restore output time zone
+                job.getSource().getParameters().put(JRParameter.REPORT_TIME_ZONE, TimeZone.getTimeZone(outputTimeZone));
             }
         }
         return job;
@@ -279,7 +311,7 @@ public class JobsJaxrsService extends RemoteServiceWrapper<JobsService> {
     @Produces(JobClientConstants.JOB_V_1_1_JSON_MEDIA_TYPE)
     @Consumes(JobClientConstants.JOB_V_1_1_JSON_MEDIA_TYPE)
     public Response updateJobsWithProcessedParameters(@QueryParam("id") final List<Long> jobIds, final ReportJobModel jobModel,
-            @QueryParam("replaceTriggerIgnoreType") @DefaultValue("false") final Boolean replaceTriggerIgnoreType) {
+                                                      @QueryParam("replaceTriggerIgnoreType") @DefaultValue("false") final Boolean replaceTriggerIgnoreType) {
         return callRemoteService(new ConcreteCaller<Response>() {
             public Response call(JobsService remoteService) throws RemoteException {
                 remoteService.updateReportJobs(jobIds, (ReportJobModel) toServer(jobModel), replaceTriggerIgnoreType);
@@ -300,7 +332,7 @@ public class JobsJaxrsService extends RemoteServiceWrapper<JobsService> {
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public Response updateJobs(@QueryParam("id") final List<Long> jobIds, final ReportJobModel jobModel,
-            @QueryParam("replaceTriggerIgnoreType") @DefaultValue("false") final Boolean replaceTriggerIgnoreType) {
+                               @QueryParam("replaceTriggerIgnoreType") @DefaultValue("false") final Boolean replaceTriggerIgnoreType) {
         return callRemoteService(new ConcreteCaller<Response>() {
             public Response call(JobsService remoteService) throws RemoteException {
                 remoteService.updateReportJobs(jobIds, jobModel, replaceTriggerIgnoreType);
@@ -511,8 +543,7 @@ public class JobsJaxrsService extends RemoteServiceWrapper<JobsService> {
                 if (calendar != null) {
                     remoteService.deleteCalendar(calendarName);
                     return Response.ok(calendarName).build();
-                }
-                else {
+                } else {
                     return Response.status(Response.Status.NOT_FOUND).build();
                 }
 

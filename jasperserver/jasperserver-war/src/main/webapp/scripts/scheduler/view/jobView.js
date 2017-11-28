@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: jobView.js 9551 2015-10-13 14:09:03Z dgorbenk $
+ * @version: $Id: jobView.js 10042 2016-04-12 14:01:27Z akasych $
  */
 
 /* global getTZOffset */
@@ -73,7 +73,7 @@ define(function(require){
                 model: this.model.toJSON(),
                 i18n: i18n,
                 timeZoneOffsetFunction: function(dateString){
-                    return -1 * getTZOffset(config.usersTimeZone, dateString) * 60;
+                    return getTZOffset(config.usersTimeZone, dateString) * 60;
                 }
             }));
             return this;

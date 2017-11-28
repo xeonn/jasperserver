@@ -24,7 +24,7 @@
  * Basic Menu component.
  *
  * @author: Kostiantyn Tsaregradskyi
- * @version: $Id: Menu.js 1721 2015-10-15 11:56:43Z psavushc $
+ * @version: $Id: Menu.js 2402 2016-03-14 12:38:21Z ztomchen $
  */
 
 define(function (require) {
@@ -72,6 +72,8 @@ define(function (require) {
                 toggleClass: additionalSettings.toggleClass
             });
 
+            this.maxSize = additionalSettings.maxSize;
+
             // extension point for traits
             this._onConstructor && this._onConstructor(options, additionalSettings);
         },
@@ -83,6 +85,24 @@ define(function (require) {
 
             // extension point for traits
             this._onInitialize && this._onInitialize();
-        }
+        },
+
+            show: function(){
+                var res = OptionContainer.prototype.show.apply(this, arguments);
+                this.applyMaxSize();
+                return res;
+
+            },
+            /**
+             * @description Applies max size according to property if set. Menu gets trincated ns scrollbar appears.
+             */
+            applyMaxSize: function () {
+                if (this.maxSize && this.options.length > this.maxSize) {
+                    this.$el.css({
+                        "overflow-y": "auto",
+                        "max-height": this.maxSize * this.options[0].$el.height() + "px"
+                    });
+                }
+            }
     });
 });

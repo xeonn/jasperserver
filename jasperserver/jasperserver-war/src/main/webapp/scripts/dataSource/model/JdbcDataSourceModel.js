@@ -30,8 +30,9 @@ define(function (require) {
         _ = require("underscore"),
         $ = require("jquery"),
         XRegExp = require("xregexp"),
+        forbidWhitespacesPattern = XRegExp(dataSourcePatterns.forbidWhitespacesPattern),
         i18n = require("bundle!jasperserver_messages"),
-        repositoryResourceTypes = require("bi/repo/enum/repositoryResourceTypes"),
+        repositoryResourceTypes = require("bi/repository/enum/repositoryResourceTypes"),
         jasperserverConfig = require("bundle!jasperserver_config");
 
     var BASE_VALIDATION_OBJECT = (function() {
@@ -44,8 +45,12 @@ define(function (require) {
                     msg: i18n["ReportDataSourceValidator.error.not.empty.reportDataSource.connectionUrl"]
                 },
                 {
-                    xRegExpPattern: XRegExp(dataSourcePatterns.forbidWhitespacesPattern),
-                    msg: i18n["ReportDataSourceValidator.error.invalid.chars.reportDataSource.connectionUrl"]
+                    fn: function(value, attr, state){
+                        var allowSpaces = this.drivers.getDriverByClass(state.selectedDriverClass).get("allowSpacesInDbName");
+                        if(!allowSpaces && !forbidWhitespacesPattern.test(value)){
+                            return i18n["ReportDataSourceValidator.error.invalid.chars.reportDataSource.connectionUrl"];
+                        }
+                    }
                 }
             ]
         });
@@ -81,13 +86,71 @@ define(function (require) {
         })(),
 
         initialize: function(attributes, options) {
+
             BaseDataSourceModel.prototype.initialize.apply(this, arguments);
+
             this.initialization = $.Deferred();
             this.drivers = new JdbcDriverCollection([], this.options);
-            var self = this;
-            this.drivers.fetch({reset: true}).done(function(){
-                // set default driver for new model
 
+            var self = this;
+
+            this.fetchDrivers().then(function() {
+                if (self.isNew()) {
+                    self.setCustomAttributesDefaultValues(self.drivers.getDefaultDriver());
+                } else {
+                    self.set("selectedDriverClass", self.get("driverClass"));
+                    self.set(self.getCustomAttributeValuesFromConnectionUrl());
+                    // use password substitution
+                    self.set("password", jasperserverConfig["input.password.substitution"]);
+                    self.extendValidation();
+                }
+
+                var customAttributesChangeEventString = _.map(self.drivers.getAllPossibleCustomAttributes(),
+                    function(attr) { return "change:" + attr; }).join(" ");
+
+                self.on(customAttributesChangeEventString, self.setConnectionUrlFromCustomAttributes);
+                self.on("change:connectionUrl", self.setCustomAttributesFromConnectionUrl);
+                self.on("change:selectedDriverClass", self.changeSelectedDriver);
+
+                self.initialization.resolve();
+            });
+        },
+
+        fetchDrivers: function() {
+            var self = this;
+
+            return this.drivers.fetch({reset: true}).done(function() {
+                // set default driver
+
+                // implementing issue JRS-9120: sorting of Driver List:
+                // let's group drivers by their "installed" state and then sort them by alphabet
+                var driversModels = _.groupBy(self.drivers.models, function(model) {
+                    return model.attributes.available;
+                });
+
+                // from now the 'driversModels' is grouped like this:
+                //      {true: Array[16], false: Array[4]}
+                // Let's sort these two groups
+                _.each(driversModels, function(groupSet, index) {
+                    driversModels[index] = _.sortBy(groupSet, function(model) {
+                        return model.attributes.label;
+                    });
+                });
+
+                var finalModelsSet = [];
+                // first, add installed drivers
+                if (driversModels["true"]) {
+                    finalModelsSet = finalModelsSet.concat(driversModels["true"]);
+                }
+                // then add not installed
+                if (driversModels["false"]) {
+                    finalModelsSet = finalModelsSet.concat(driversModels["false"]);
+                }
+
+                // store it back to original variable
+                self.drivers.models = finalModelsSet;
+
+                // not, let's add "other" and item if we need it
                 if (self.drivers.driverUploadEnabled && self.otherDriverIsPresent) {
                     self.drivers.add({
                         defaultValues: {},
@@ -99,23 +162,6 @@ define(function (require) {
                         uploaded: false
                     });
                 }
-
-                if (self.isNew()) {
-                    self.setCustomAttributesDefaultValues(self.drivers.getDefaultDriver());
-                } else {
-                    self.set("selectedDriverClass", self.get("driverClass"));
-                    self.set(self.getCustomAttributeValuesFromConnectionUrl());
-                    // use password substitution
-                    self.set("password", jasperserverConfig["input.password.substitution"]);
-	                self.extendValidation();
-                }
-
-                var customAttributesChangeEventString = _.map(self.drivers.getAllPossibleCustomAttributes(),
-                    function(attr) { return "change:" + attr; }).join(" ");
-                self.on(customAttributesChangeEventString, self.setConnectionUrlFromCustomAttributes);
-                self.on("change:connectionUrl", self.setCustomAttributesFromConnectionUrl);
-                self.on("change:selectedDriverClass", self.changeSelectedDriver);
-                self.initialization.resolve();
             });
         },
 

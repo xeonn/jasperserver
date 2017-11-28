@@ -21,7 +21,24 @@
 package com.jaspersoft.jasperserver.remote.reports;
 
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Value;
+
 import com.jaspersoft.jasperserver.api.common.error.handling.SecureExceptionHandler;
+import com.jaspersoft.jasperserver.api.common.util.CharacterEncodingProvider;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.util.ExportUtil;
 import com.jaspersoft.jasperserver.dto.common.ErrorDescriptor;
 import com.jaspersoft.jasperserver.remote.exception.RemoteException;
@@ -34,39 +51,28 @@ import com.jaspersoft.jasperserver.remote.services.ReportOutputResource;
 import com.jaspersoft.jasperserver.remote.services.RunReportService;
 import com.jaspersoft.jasperserver.remote.utils.AuditHelper;
 import com.jaspersoft.jasperserver.war.util.JRHtmlExportUtils;
+
 import net.sf.jasperreports.engine.JRAbstractExporter;
 import net.sf.jasperreports.engine.JRExporterParameter;
 import net.sf.jasperreports.engine.JRRuntimeException;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReportsContext;
+import net.sf.jasperreports.engine.ReportContext;
 import net.sf.jasperreports.engine.SimpleJasperReportsContext;
 import net.sf.jasperreports.engine.export.AbstractHtmlExporter;
 import net.sf.jasperreports.engine.export.HtmlResourceHandler;
 import net.sf.jasperreports.engine.export.JRHtmlExporterParameter;
 import net.sf.jasperreports.engine.export.MapHtmlResourceHandler;
+import net.sf.jasperreports.engine.type.ImageTypeEnum;
 import net.sf.jasperreports.engine.util.JRTypeSniffer;
+import net.sf.jasperreports.renderers.util.RendererUtil;
 import net.sf.jasperreports.web.util.WebHtmlResourceHandler;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Value;
-
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 /**
  * <p></p>
  *
  * @author yaroslav.kovalchyk
- * @version $Id: AbstractHtmlExportStrategy.java 61296 2016-02-25 21:53:37Z mchan $
+ * @version $Id: AbstractHtmlExportStrategy.java 63555 2016-06-10 16:59:01Z tdanciu $
  */
 public abstract class AbstractHtmlExportStrategy implements HtmlExportStrategy {
     private final static Log log = LogFactory.getLog(FullHtmlExportStrategy.class);
@@ -78,6 +84,8 @@ public abstract class AbstractHtmlExportStrategy implements HtmlExportStrategy {
     private String deployBaseUrl;
     @Resource
     private SecureExceptionHandler secureExceptionHandler;
+    @Resource
+    private CharacterEncodingProvider encodingProvider;
 
     @Override
     public void export(ReportExecution reportExecution, ExportExecution exportExecution, JasperPrint jasperPrint) {
@@ -99,6 +107,7 @@ public abstract class AbstractHtmlExportStrategy implements HtmlExportStrategy {
         final AbstractHtmlExporter exporter = prepareExporter(reportExecution, exportExecution, contextPath);
         exporter.setParameter(JRExporterParameter.JASPER_PRINT, jasperPrint);
         exporter.setParameter(JRExporterParameter.OUTPUT_STREAM, outputStream);
+        exporter.setParameter(JRExporterParameter.CHARACTER_ENCODING, encodingProvider.getCharacterEncoding());
         // collecting the images into a map
         Map<String, byte[]> imagesMap = new LinkedHashMap<String, byte[]>();
         exporter.setParameter(JRHtmlExporterParameter.IMAGES_MAP, imagesMap);
@@ -190,8 +199,15 @@ public abstract class AbstractHtmlExportStrategy implements HtmlExportStrategy {
                     }
                 });
         exporter.setParameter(JRHtmlExportUtils.PARAMETER_HTTP_REQUEST, proxy);
-        exporter.setFontHandler(new WebHtmlResourceHandler(contextPath + "/reportresource?&font={0}"));
+        exporter.setFontHandler(new WebHtmlResourceHandler(contextPath + "/reportresource?&font={0}"));// html exporter font handler no longer used in JR; consider removing
         exporter.setParameter(JRHtmlExporterParameter.IS_USING_IMAGES_TO_ALIGN, Boolean.TRUE);
+
+        ReportContext reportContext = reportExecution.getFinalReportUnitResult().getReportContext();
+        if (reportContext != null) 
+        {
+            reportContext.setParameterValue("contextPath", contextPath);// context path to be used by the font handler in JSON exporter
+        }
+        
         return exporter;
     }
 
@@ -217,8 +233,8 @@ public abstract class AbstractHtmlExportStrategy implements HtmlExportStrategy {
                     if (log.isDebugEnabled()) {
                         log.debug("Adding image for HTML: " + name);
                     }
-                    outputContainer.put(name, new ReportOutputResource()
-                            .setContentType(JRTypeSniffer.getImageTypeValue(data).getMimeType()).setData(data).setFileName(name));
+					outputContainer.put(name, new ReportOutputResource()
+                            .setContentType(imageMimeType(data)).setData(data).setFileName(name));
                 }
             }
         } catch (Throwable e) {
@@ -228,4 +244,15 @@ public abstract class AbstractHtmlExportStrategy implements HtmlExportStrategy {
             throw new RemoteException(ed, e);
         }
     }
+
+	protected String imageMimeType(byte[] data) {
+		String mimeType = null;
+		ImageTypeEnum imageType = JRTypeSniffer.getImageTypeValue(data);
+		if (imageType != ImageTypeEnum.UNKNOWN) {
+			mimeType = imageType.getMimeType();
+		} else if (RendererUtil.getInstance(jasperReportsContext).isSvgData(data)) {
+			mimeType = RendererUtil.SVG_MIME_TYPE;
+		}
+		return mimeType;
+	}
 }

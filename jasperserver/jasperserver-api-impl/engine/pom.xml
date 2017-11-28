@@ -10,9 +10,14 @@
     <parent>
         <groupId>com.jaspersoft.jasperserver</groupId>
         <artifactId>jasperserver-api-impl</artifactId>
-        <version>6.2.1</version>
+        <version>6.3.0</version>
     </parent>
     <dependencies>
+        <dependency>
+            <groupId>com.microsoft.azure</groupId>
+            <artifactId>azure-management-sql</artifactId>
+            <version>0.7.0</version>
+        </dependency>
         <dependency>
             <groupId>org.codehaus.btm</groupId>
             <artifactId>btm</artifactId>
@@ -339,6 +344,12 @@
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-redshift</artifactId>
             <version>${aws-java-sdk.version}</version>
+        </dependency>
+        <!-- SFTP CONNECTOR  -->
+        <dependency>
+            <groupId>com.jcraft</groupId>
+            <artifactId>jsch</artifactId>
+            <version>0.1.53</version>
         </dependency>
     </dependencies>
     <build>

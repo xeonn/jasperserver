@@ -53,7 +53,7 @@
         </c:choose>
     </t:putAttribute>
 
-    <t:putAttribute name="moduleName" value="addQueryWithResourceLocator.page"/>
+    <t:putAttribute name="moduleName" value="addResource/query/addQueryWithResourceLocatorMain"/>
     <t:putAttribute name="headerContent">
         <jsp:include page="queryStep2State.jsp"/>
     </t:putAttribute>

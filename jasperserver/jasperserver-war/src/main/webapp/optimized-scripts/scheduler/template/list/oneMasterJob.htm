@@ -20,7 +20,7 @@
         <p class="lastRanDate">
             {{ if (model.state.previousFireTime) { }}
                 {{-
-                    moment(model.state.previousFireTime).zone(timeZoneOffsetFunction(model.state.previousFireTime)).format("M/D/YYYY hh:mm:ss A")
+                    moment(model.state.previousFireTime).utcOffset(timeZoneOffsetFunction(model.state.previousFireTime)).format("M/D/YYYY hh:mm:ss A")
                 }}
             {{ } else { }}
                 &nbsp;
@@ -31,7 +31,7 @@
                 {{- i18n['report.scheduling.list.label.disabled'] }}
             {{ } else if (model.state.nextFireTime) { }}
                 {{-
-                    moment(model.state.nextFireTime).zone(timeZoneOffsetFunction(model.state.nextFireTime)).format("M/D/YYYY hh:mm:ss A")
+                    moment(model.state.nextFireTime).utcOffset(timeZoneOffsetFunction(model.state.nextFireTime)).format("M/D/YYYY hh:mm:ss A")
                 }}
             {{ } else { }}
                 &nbsp;

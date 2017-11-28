@@ -43,7 +43,7 @@ import static com.jaspersoft.jasperserver.war.cascade.handlers.NumberUtils.toBig
 
 /**
  * @author Yaroslav.Kovalchyk
- * @version $Id: SingleSelectListInputControlHandler.java 61296 2016-02-25 21:53:37Z mchan $
+ * @version $Id: SingleSelectListInputControlHandler.java 63380 2016-05-26 20:56:46Z mchan $
  */
 public class SingleSelectListInputControlHandler extends BasicInputControlHandler {
 
@@ -117,7 +117,7 @@ public class SingleSelectListInputControlHandler extends BasicInputControlHandle
         if (DiagnosticSnapshotPropertyHelper.isDiagSnapshotSet(parameters)) {
             //  If datasnapshot is available then default values for IC
             // will be loaded from datasnapshot parameters, this logic is counting on that.
-            values = generateValuesFromDefaultValues(info);
+            values = generateValuesFromDefaultValues(inputControl, info);
             inputControl.setReadOnly(true);
         } else {
             values = loader.loadValues(inputControl, dataSource, parameters, parameterTypes, info);
@@ -207,20 +207,28 @@ public class SingleSelectListInputControlHandler extends BasicInputControlHandle
         }
     }
 
-    private List<ListOfValuesItem> generateValuesFromDefaultValues(ReportInputControlInformation info) {
+    private List<ListOfValuesItem> generateValuesFromDefaultValues(
+            InputControl inputControl, ReportInputControlInformation info) {
         List<ListOfValuesItem> result = new ArrayList<ListOfValuesItem>();
-        List<String> mid;
+        List<Object> mid;
         if (info.getDefaultValue() instanceof Collection<?>) {
             mid =  ((ListOrderedSet)info.getDefaultValue()).asList();
         } else {
-            mid = Arrays.asList(new String[] {(String)info.getDefaultValue()});
+            mid = Arrays.asList(new Object[] {info.getDefaultValue()});
         }
-        String value;
+        Object value;
+        String formattedValue;
         for (int i = 0; i < mid.size(); i++) {
             value = mid.get(i);
+            if (null != value) {
+                formattedValue=value.toString();
+            } else {
+                // just for tolerance ...
+                formattedValue="Null";
+            }
             ListOfValuesItem item = new ListOfValuesItemImpl();
-            item.setLabel(value);
-            item.setValue(value);
+            item.setLabel(formattedValue);
+            item.setValue(formattedValue);
             result.add(item);
         }
         return result;

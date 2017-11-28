@@ -587,6 +587,10 @@ and (max-device-width : 1024px) {
     background-position: 0px -1065px;
 }
 
+.folders .leaf.report > .wrap > .icon {
+    background-position: 0px -1460px;
+}
+
 #node1.folders.node {
     line-height:2em;
 }

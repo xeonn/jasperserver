@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: repository.search.components.js 9949 2016-03-12 00:56:58Z kpenn $
+ * @version: $Id: repository.search.components.js 10180 2016-06-02 07:20:47Z spriluki $
  */
 
 /* global repositorySearch, SearchBox, toolbarButtonModule, toFunction, getAsFunction, localContext, isArray, JSCookie,
@@ -474,10 +474,28 @@ repositorySearch.resultsPanel =  {
                 loadTextCallback: function(tooltip) {
                     var folderPath = that.getValue().parentFolder;
                     var folderDisplayPath = repositorySearch.resultsPanel._folderDisplayPathCache[folderPath];
+                    var label,
+                        uri;
 
-                    if (repositorySearch.resultsPanel._folderDisplayPathCache[folderPath]) {
-                        tooltip.updateText([xssUtil.escape(that.getValue().label),
-                            xssUtil.escape(folderDisplayPath + repositorySearch.model.getFolderSeparator() + that.getValue().label)]);
+                    function getUri(parentUri, name) {
+                        var separator = repositorySearch.model.getFolderSeparator();
+
+                        if (parentUri === separator) {
+                            return parentUri + name;
+                        } else {
+                            return parentUri + separator + name;
+                        }
+                    }
+
+                    function updateTooltip(parentUri, label, name) {
+                        label = xssUtil.escape(label);
+                        uri = xssUtil.escape(getUri(parentUri, name));
+
+                        tooltip.updateText([label, uri]);
+                    }
+
+                    if (folderDisplayPath) {
+                        updateTooltip(folderDisplayPath, that.getValue().label, that.getValue().name);
                     } else {
                         var action = new repositorySearch.ServerAction(repositorySearch.InfoAction.GET_DISPLAY_PATH, {
                             data: {
@@ -490,8 +508,7 @@ repositorySearch.resultsPanel =  {
                             // Cache the display path of the folder.
                             repositorySearch.resultsPanel._folderDisplayPathCache[folderPath] = data;
 
-                            tooltip.updateText([xssUtil.escape(that.getValue().label),
-                                xssUtil.escape(data + repositorySearch.model.getFolderSeparator() + that.getValue().label)]);
+                            updateTooltip(data, that.getValue().label, that.getValue().name);
                         };
                         action.onError = repositorySearch.defaultErrorHandler;
 

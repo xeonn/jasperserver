@@ -51,7 +51,7 @@ import java.util.*;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ResourceExporter.java 61296 2016-02-25 21:53:37Z mchan $
+ * @version $Id: ResourceExporter.java 63380 2016-05-26 20:56:46Z mchan $
  */
 public class ResourceExporter extends BaseExporterModule implements ResourceExportHandler {
 	public static final String DIAGNOSTIC = "diagnostic";
@@ -198,11 +198,11 @@ public class ResourceExporter extends BaseExporterModule implements ResourceExpo
 		exportedURIs.add(uri);
 	}
 
-	protected boolean alreadyExported(String uri) {
+	public boolean alreadyExported(String uri) {
 		return exportedURIs.contains(uri);
 	}
 
-	protected void processUri(String uri, boolean entry, boolean ignoreMissing) {
+	public void processUri(String uri, boolean entry, boolean ignoreMissing) {
 		if (alreadyExported(uri) || exportFilter.excludeFolder(uri, exportParams)) {
 			return;
 		}

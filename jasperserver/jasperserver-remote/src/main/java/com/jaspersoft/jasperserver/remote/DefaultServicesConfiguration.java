@@ -36,20 +36,20 @@ import java.util.Map;
 @Service("remoteServiceConfiguration")
 public class DefaultServicesConfiguration implements ServicesConfiguration {
     @Resource
-    private Map exportParametersMap = new HashMap();
+    private Map<String, Object> exportParametersMap = new HashMap<String, Object>();
     @Resource
     private String tempFolder;
     @Resource
     private String roleToAccessTempFolder;
     @Resource(name = "remoteExportersMap")
-    private Map exportersMap = new HashMap();
+    private Map<String, Object> exportersMap = new HashMap<String, Object>();
 
     /**
      * Returns the map of export parameters beans indexed by output format.
      *
      * @return the map of export parameters beans
      */
-    public Map getExportParametersMap() {
+    public Map<String, Object> getExportParametersMap() {
         return exportParametersMap;
     }
 
@@ -59,7 +59,7 @@ public class DefaultServicesConfiguration implements ServicesConfiguration {
      * @param exportParametersMap the export parameters beans map
      * @see #getExportParameters(String)
      */
-    public void setExportParametersMap(Map exportParametersMap) {
+    public void setExportParametersMap(Map<String, Object> exportParametersMap) {
         this.exportParametersMap = exportParametersMap;
     }
 
@@ -74,7 +74,7 @@ public class DefaultServicesConfiguration implements ServicesConfiguration {
      * Returns the map of exporter beans indexed by output format.
      * @return Returns the map of exporter beans.
      */
-    public Map getExportersMap() {
+    public Map<String, Object> getExportersMap() {
         return exportersMap;
     }
 
@@ -82,7 +82,7 @@ public class DefaultServicesConfiguration implements ServicesConfiguration {
      * Sets a map of exporter beans indexed by output format.
      * @param exportersMap The map of exporter beans to set.
      */
-    public void setExportersMap(Map exportersMap) {
+    public void setExportersMap(Map<String, Object> exportersMap) {
         this.exportersMap = exportersMap;
     }
 

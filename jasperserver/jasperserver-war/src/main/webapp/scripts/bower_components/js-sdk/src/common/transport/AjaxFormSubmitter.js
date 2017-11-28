@@ -159,8 +159,8 @@ define(function (require) {
         this.form = $(uploadForm);
 
         url && this.form.attr("action", url);
-        url && this.form.attr("method", method);
-        url && this.form.attr("enctype", enctype);
+        method && this.form.attr("method", method);
+        enctype && this.form.attr("enctype", enctype);
 
         this.parceXmlDocToObject = parseResponse;
     };
@@ -171,7 +171,7 @@ define(function (require) {
         }
 
         return iframeUpload(this.form, this.name);
-    }
+    };
 
     return AjaxUploader;
 });

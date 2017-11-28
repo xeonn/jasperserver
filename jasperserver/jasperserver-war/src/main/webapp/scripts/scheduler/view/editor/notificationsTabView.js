@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: notificationsTabView.js 9551 2015-10-13 14:09:03Z dgorbenk $
+ * @version: $Id: notificationsTabView.js 9951 2016-03-14 13:35:58Z ztomchen $
  */
 
 define(function(require){
@@ -56,8 +56,10 @@ define(function(require){
             "change [name=include_stack_trace]" : "include_stack_trace_Change"
         },
 
-        initialize: function(){
+        initialize: function(options){
             var self = this;
+
+            this.options = options;
 
             this.model.on("change:mailNotification", function(model) {
                 var mn = model.get('mailNotification');

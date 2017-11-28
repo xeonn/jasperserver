@@ -56,7 +56,7 @@ import java.util.Set;
 
 /**
  * @author Yaroslav.Kovalchyk
- * @version $Id: BasicInputControlHandler.java 58870 2015-10-27 22:30:55Z esytnik $
+ * @version $Id: BasicInputControlHandler.java 62954 2016-05-01 09:49:23Z ykovalch $
  */
 @Service
 public class BasicInputControlHandler implements InputControlHandler {
@@ -80,7 +80,7 @@ public class BasicInputControlHandler implements InputControlHandler {
     @Resource(name = "isoCalendarFormatProvider")
     protected CalendarFormatProvider calendarFormatProvider;
 
-    protected ToClientConverter<DataType, ClientDataType> dataTypeResourceConverter;
+    protected ToClientConverter<DataType, ClientDataType, ToClientConversionOptions> dataTypeResourceConverter;
 
     @PostConstruct
     public void init(){

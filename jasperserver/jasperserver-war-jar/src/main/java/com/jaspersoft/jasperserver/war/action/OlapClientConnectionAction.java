@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.jaspersoft.jasperserver.api.metadata.olap.domain.client.XMLAConnectionImpl;
+import com.jaspersoft.jasperserver.core.util.XMLUtil;
 import com.jaspersoft.jasperserver.war.common.ConfigurationBean;
 import com.jaspersoft.jasperserver.war.model.impl.BaseTreeDataProvider;
 import com.jaspersoft.jasperserver.war.model.impl.TypedTreeDataProvider;
@@ -689,6 +690,10 @@ public class OlapClientConnectionAction extends FormAction {
 			// save schema resource
 			if (wrapper.isSchemaLoaded()) {
 				FileResource schema = wrapper.getOlapClientSchema();
+
+				// check for XXE vulnerability
+				XMLUtil.checkForXXE(schema.getData());
+
 				if (!wrapper.isSubflowMode()) {
 					schema.setURIString(wrapper.getSchemaUri());
 					getRepository().saveResource(null, schema);

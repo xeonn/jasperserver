@@ -22,7 +22,7 @@
 
 /**
  * @author: Dima Gorbenko
- * @version: $Id: SaveDialogView.js 9519 2015-10-08 13:01:06Z dgorbenk $
+ * @version: $Id: SaveDialogView.js 10092 2016-04-22 21:17:02Z inestere $
  */
 
 /* global dialogs */
@@ -33,7 +33,7 @@ define(function (require){
 
     var _ = require('underscore'),
         i18n = require('bundle!all'),
-        ResourceModel = require('bi/repo/model/RepositoryResourceModel'),
+        ResourceModel = require('bi/repository/model/RepositoryResourceModel'),
 
         // TODO: replace this dialog with newer version (details see in 'DialogWithModelInputValidation' file)
 	    DialogWithModelInputValidation = require("common/component/dialog/DialogWithModelInputValidation"),
@@ -186,7 +186,7 @@ define(function (require){
 
 			var self = this;
 
-			this.model.checkSaveValidation().done(function(){
+			this.model.checkSaveValidation({editMode: _savedOptions.isEditMode}).done(function(){
 
 				self.model.save({}, {
 					success: _.bind(self._saveSuccessCallback, self),

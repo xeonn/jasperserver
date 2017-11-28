@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: SchedulerApp.js 9551 2015-10-13 14:09:03Z dgorbenk $
+ * @version: $Id: SchedulerApp.js 10042 2016-04-12 14:01:27Z akasych $
  */
 
 /* global ControlsBase, JSCookie, dialogs */
@@ -38,6 +38,7 @@ define(function(require) {
         jrsConfigs = require('jrs.configs'),
 	    schedulerUtils = require('scheduler/util/schedulerUtils'),
 
+		jobModel = require('scheduler/model/jobModel'),
 	    jobsView = require('scheduler/view/jobsView'),
         jobEditorView = require('scheduler/view/jobEditorView');
 
@@ -73,6 +74,7 @@ define(function(require) {
 	        // we have two child views: job editor and list of jobs views.
 	        // let's prepare the object to initialize them later
 	        this.childViewInitParams = {
+				model: new jobModel(),
 		        runInBackgroundMode: this.runInBackgroundMode,
 		        masterViewMode: this.masterViewMode,
 		        reportUri: this.schedulerStartupParams["reportUnitURI"],
@@ -139,6 +141,8 @@ define(function(require) {
 	        this.$el.append(this.jobsView.$el);
 
 		    this.jobsView.refresh();
+
+            document.title = i18n["company.name"] + ": " + i18n["report.scheduling.list.title"];
 	    },
 
 	    createNewJobRequest: function() {
@@ -173,6 +177,8 @@ define(function(require) {
 
 	        // now, prepare the model to represent the new job interface
 	        this.jobEditorView.prepareModelForCreatingNewJob();
+
+            document.title = i18n["company.name"] + ": " + i18n["report.scheduling.job.edit.title"];
         },
 
         openEditJobInterface: function(jobId) {
@@ -188,6 +194,8 @@ define(function(require) {
 
 	        // append view into application container
             this.$el.append(this.jobEditorView.$el);
+
+            document.title = i18n["company.name"] + ": " + i18n["report.scheduling.job.edit.title"];
         },
 
 	    backButtonPressed: function() {

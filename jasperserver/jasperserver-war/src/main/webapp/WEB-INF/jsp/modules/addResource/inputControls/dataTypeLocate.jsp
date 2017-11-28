@@ -25,7 +25,7 @@
 <t:insertTemplate template="/WEB-INF/jsp/templates/page.jsp">
     <t:putAttribute name="pageTitle"><spring:message code="resource.dataType.locate.page.title"/></t:putAttribute>
     <t:putAttribute name="bodyID" value="addResource_locateDatatype"/>
-    <t:putAttribute name="moduleName" value="dataTypeLocate.page"/>
+    <t:putAttribute name="moduleName" value="addResource/inputControls/dataTypeLocateMain"/>
     <t:putAttribute name="bodyClass" value="oneColumn flow wizard"/>
 
     <t:putAttribute name="bodyContent">
@@ -65,7 +65,7 @@
                                                 <li id="create" class="leaf">
                                                     <div class="control radio">
                                                         <label class="wrap" for="LOCAL" title="<spring:message code='addResources.analysisClient.defineDataSource'/>">
-                                                            <spring:message code='addResources.dataTypeLocate.defineDataType' javaScriptEscape='true'/>    
+                                                            <spring:message code='addResources.dataTypeLocate.defineDataType' javaScriptEscape='true'/>
                                                         </label>
                                                         <input class="" id="LOCAL" type="radio"
                                                                name="${status.expression}"

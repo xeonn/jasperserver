@@ -26,6 +26,7 @@
 				<entry key="datasource" value="com.jaspersoft.jasperserver.ws.axis2.repository.DataSourceHandler"/>
 				<entry key="jdbc" value="com.jaspersoft.jasperserver.ws.axis2.repository.JdbcDataSourceHandler"/>
 				<entry key="aws" value="com.jaspersoft.jasperserver.ws.axis2.repository.AwsDataSourceHandler"/>
+                <entry key="azuresql" value="com.jaspersoft.jasperserver.ws.axis2.repository.AzureSqlDataSourceHandler"/>
 				<entry key="jndi" value="com.jaspersoft.jasperserver.ws.axis2.repository.JndiJdbcDataSourceHandler"/>
 				<entry key="bean" value="com.jaspersoft.jasperserver.ws.axis2.repository.BeanDataSourceHandler"/>
                 <entry key="virtual" value="com.jaspersoft.jasperserver.ws.axis2.repository.VirtualDataSourceHandler"/>
@@ -199,7 +200,7 @@
         <entry key="pptx" value-ref="pptxExporter"/-->
     </util:map> 
 
-    <util:map id="exportParametersMap">
+    <util:map id="exportParametersMap" key-type="java.lang.String">
         <entry key="pdf" value-ref="pdfExportParameters"/>
         <entry key="xls" value-ref="xlsExportParameters"/>
         <entry key="csv" value-ref="csvExportParameters"/>

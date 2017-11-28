@@ -61,6 +61,8 @@ public interface JasperServerConst {
     String TYPE_RSRC_CSS_FILE=	"resourceTypes.css.file";
     String TYPE_RSRC_CONTENT_RESOURCE=	"resource.com.jaspersoft.jasperserver.api.metadata.common.domain.ContentResource.label";
     String TYPE_RSRC_MONGODB_JDBC_CONFIG= "resourceTypes.mongodb.jdbc.config";
+    String TYPE_RSRC_AZURE_CERTIFICATE= "resourceTypes.azure.certificate.file";
+    String TYPE_SECURE_FILE = "resourceTypes.secure.file";
     String TYPE_RSRC_ACCESS_GRANT_SCHEMA=	"resourceTypes.access.grant.schema"; // pro-only
     String TYPE_RSRC_STYLE_TEMPLATE	=	"resourceTypes.style.template";
     String TYPE_RSRC_QUERY 		=	"resourceTypes.query";

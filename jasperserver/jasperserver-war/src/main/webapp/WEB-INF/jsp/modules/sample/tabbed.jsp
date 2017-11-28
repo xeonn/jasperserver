@@ -27,14 +27,14 @@
     <t:putAttribute name="bodyID" value="tabbed"/>
     <t:putAttribute name="bodyClass" value="oneColumn"/>
 
-    
+
     <t:putAttribute name="bodyContent" >
 		<t:insertTemplate template="/WEB-INF/jsp/templates/container.jsp">
 			<t:putAttribute name="containerClass" value="column decorated primary tabbed showingToolBar"/>
 		    <t:putAttribute name="containerTitle">Primary</t:putAttribute>
             <t:putAttribute name="moduleName" value="commons.main"/>
 		    <t:putAttribute name="headerContent">
-    	
+
 		    	<div class="tabs">
 					<t:insertTemplate template="/WEB-INF/jsp/templates/control_tabSet.jsp">
 		                <t:putAttribute name="type" value="buttons"/>
@@ -55,29 +55,29 @@
 		                    </t:addListAttribute>
 		                </t:putListAttribute>
 		            </t:insertTemplate>
-				</div>	
-				
-				<div class="toolbar">		        					
+				</div>
+
+				<div class="toolbar">
 					<ul class="list buttonSet">
-						<li class="leaf"><button class="button capsule text up"><span class="wrap">Sample<span class="icon"></span></span></button></li>		
+						<li class="leaf"><button class="button capsule text up"><span class="wrap">Sample<span class="icon"></span></span></button></li>
 					</ul>
 				</div>
 		    </t:putAttribute>
-		    
+
 		    <t:putAttribute name="bodyContent">
 
 					content here
 
 
-			</t:putAttribute>	    
+			</t:putAttribute>
 			<t:putAttribute name="footerContent">
 				<fieldset id="wizardNav">
 					<button class="button action primary up"><span class="wrap"><spring:message code="button.ok" javaScriptEscape="true"/></span><span class="icon"></span></button>
-					<button class="button action up"><span class="wrap"><spring:message code="button.cancel" javaScriptEscape="true"/></span><span class="icon"></span></button	
+					<button class="button action up"><span class="wrap"><spring:message code="button.cancel" javaScriptEscape="true"/></span><span class="icon"></span></button
 				</fieldset>
     		</t:putAttribute>
 		</t:insertTemplate>
-			
+
     </t:putAttribute>
 
 </t:insertTemplate>

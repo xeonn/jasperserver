@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: commons.main.js 9192 2015-08-12 19:52:08Z yplakosh $
+ * @version: $Id: commons.main.js 10042 2016-04-12 14:01:27Z akasych $
  */
 
 define(function(require){
@@ -40,8 +40,13 @@ define(function(require){
     var globalSearch = require("repository.search.globalSearchBoxInit");
     var layoutModule = require("core.layout");
     var jrsConfigs = require("jrs.configs");
+    var $ = require("jquery");
 
     domReady(function(){
+
+        // add information about locale into body's class
+        $("body").addClass("locale-" + jrsConfigs.userLocale);
+
         layoutModule.initialize();
         primaryNavigation.initializeNavigation(); //navigation setup
         actionModel.initializeOneTimeMenuHandlers(); //menu setup

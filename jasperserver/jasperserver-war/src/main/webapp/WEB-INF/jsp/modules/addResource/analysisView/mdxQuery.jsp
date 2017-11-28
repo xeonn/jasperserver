@@ -37,7 +37,7 @@
             <t:putAttribute name="swipeScroll" value="${isIPad}"/>
 
 		    <t:putAttribute name="bodyContent">
-				<div id="flowControls"></div>				
+				<div id="flowControls"></div>
 				<div id="stepDisplay">
 					<fieldset class="row instructions">
 						<legend class="offLeft"><span><spring:message code="resource.query.instructions"/></span></legend>

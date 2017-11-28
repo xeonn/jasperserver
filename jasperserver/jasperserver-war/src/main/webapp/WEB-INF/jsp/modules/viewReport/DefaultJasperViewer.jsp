@@ -37,7 +37,7 @@ Default rendering HTML fragment for a JR report called from the JasperViewerTag.
 
 <%@ page import="net.sf.jasperreports.engine.export.JsonExporter" %>
 <%@ page import="net.sf.jasperreports.export.SimpleHtmlExporterOutput" %>
-<%@ page import="net.sf.jasperreports.export.SimpleWriterExporterOutput" %>
+<%@ page import="net.sf.jasperreports.export.SimpleJsonExporterOutput" %>
 <%@ page import="net.sf.jasperreports.export.* " %>
 <%@ page import="java.io.StringWriter" %>
 <%@ page errorPage="/WEB-INF/jsp/modules/system/prepErrorPage.jsp" %>
@@ -75,7 +75,6 @@ Default rendering HTML fragment for a JR report called from the JasperViewerTag.
           SimpleHtmlExporterOutput htmlExporterOutput = new SimpleHtmlExporterOutput(out);
           htmlExporterOutput.setImageHandler(exporterOutput.getImageHandler());
           htmlExporterOutput.setResourceHandler(exporterOutput.getResourceHandler());
-          htmlExporterOutput.setFontHandler(exporterOutput.getFontHandler());
           exporter.setExporterOutput(htmlExporterOutput);
 
           exporter.exportReport();
@@ -84,7 +83,9 @@ Default rendering HTML fragment for a JR report called from the JasperViewerTag.
           if (jsonExporter != null)
           {
               StringWriter sw = new StringWriter();
-              jsonExporter.setExporterOutput(new SimpleWriterExporterOutput(sw));
+              SimpleJsonExporterOutput jsonExporterOutput = new SimpleJsonExporterOutput(sw);
+              htmlExporterOutput.setFontHandler(exporterOutput.getFontHandler());
+              jsonExporter.setExporterOutput(jsonExporterOutput);
               jsonExporter.exportReport();
 
               String serializedJson = sw.getBuffer().toString();

@@ -32,7 +32,7 @@
     </t:putAttribute><!-- NOTE: If this page reached by selecting to edit an existing domain, this value should be 'Edit JasperReport' -->
     <t:putAttribute name="bodyID" value="addReport_SetUp"/><!-- NOTE: If this page reached by selecting to edit an existing domain, this value should be 'editJasperReport' -->
     <t:putAttribute name="bodyClass" value="oneColumn flow oneStep"/>
-    <t:putAttribute name="moduleName" value="addJasperReport.page"/>
+    <t:putAttribute name="moduleName" value="addResource/jasperReport/addJasperReportMain"/>
 
     <t:putAttribute name="headerContent">
         <jsp:include page="reportStep2State.jsp"/>
@@ -142,7 +142,7 @@
                                                         <span class="message warning"><c:if test="${status.error}">${status.errorMessage}</c:if></span>
                                                     </div>
                                                 </spring:bind>
-                                                
+
                                                 <spring:bind path="wrapper.jrxmlData">
                                                 <div class="browser">
                                                     <label id="fileUpload" for="fileName" class="control browser <c:if test="${status.error || jrxmlUnparsable != null}">error</c:if> fakeFileUpload" for="filePath" title="<spring:message code="resource.report.locateFile"/>">
@@ -151,7 +151,7 @@
                                                         <span class="message warning"><c:if test="${status.error}">${status.errorMessage}</c:if></span>
                                                         <c:if test="${wrapper.source!='CONTENT_REPOSITORY'}">
                                                             <span class="message warning"><spring:message code="${jrxmlUnparsable}"/></span>
-                                                        </c:if>  
+                                                        </c:if>
                                                         <button id="fake_upload_button" class="button action">
                                                             <span class="wrap"><spring:message code="button.browse"/>
                                                                 <span class="icon">
@@ -161,7 +161,7 @@
                                                         <input class="" id="filePath" name="${status.expression}" type="file" value="" tabindex="-1"/>
                                                       </label>
                                                 </div>
-                                                     
+
                                                 </spring:bind>
                                             </li>
                                             <spring:bind path="wrapper.source">

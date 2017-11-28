@@ -23,35 +23,31 @@ package com.jaspersoft.jasperserver.api.engine.scheduling.quartz;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Locale;
-
-import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JRPropertiesHolder;
-import net.sf.jasperreports.engine.JRPropertiesUtil;
-import net.sf.jasperreports.engine.JasperPrint;
-import net.sf.jasperreports.engine.export.JRHyperlinkProducerFactory;
-import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
-import net.sf.jasperreports.export.SimpleExporterInput;
-import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
-import net.sf.jasperreports.export.SimpleXlsxExporterConfiguration;
-import net.sf.jasperreports.export.SimpleXlsxReportConfiguration;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.quartz.JobExecutionException;
 
 import com.jaspersoft.jasperserver.api.JSExceptionWrapper;
-import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
-import com.jaspersoft.jasperserver.api.engine.common.service.EngineService;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.common.XlsExportParametersBean;
+import com.jaspersoft.jasperserver.api.engine.scheduling.domain.ReportJob;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ContentResource;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.DataContainer;
-import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
+
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JRPropertiesHolder;
+import net.sf.jasperreports.engine.JRPropertiesUtil;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
+import net.sf.jasperreports.export.SimpleExporterInput;
+import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
+import net.sf.jasperreports.export.SimpleXlsxExporterConfiguration;
+import net.sf.jasperreports.export.SimpleXlsxReportConfiguration;
 
 
 /**
  * @author sanda zaharia (shertage@users.sourceforge.net)
- * @version $Id: XlsxReportOutput.java 54728 2015-04-24 15:28:20Z tdanciu $
+ * @version $Id: XlsxReportOutput.java 63380 2016-05-26 20:56:46Z mchan $
  */
 public class XlsxReportOutput extends AbstractReportOutput
 {
@@ -68,22 +64,15 @@ public class XlsxReportOutput extends AbstractReportOutput
 	 * @see com.jaspersoft.jasperserver.api.engine.scheduling.quartz.Output#getOutput()
 	 */
 	public ReportOutput getOutput(
-			EngineService engineService, 
-			ExecutionContext executionContext, 
-			String reportUnitURI, 
-			DataContainer xlsxData,
-			JRHyperlinkProducerFactory hyperlinkProducerFactory,
-			RepositoryService repositoryService,
-			JasperPrint jasperPrint, 
-			String baseFilename,
-			Locale locale,
-			String characterEncoding) throws JobExecutionException
+			ReportJobContext jobContext,
+			JasperPrint jasperPrint) throws JobExecutionException
 	{
 		try {
 			JRXlsxExporter exporter = new JRXlsxExporter(getJasperReportsContext());
             exporter.setExporterInput(new SimpleExporterInput(jasperPrint));
 			
 			boolean close = false;
+			DataContainer xlsxData = jobContext.createDataContainer(this);
 			OutputStream xlsxDataOut = xlsxData.getOutputStream();
 			try {
 	            SimpleOutputStreamExporterOutput exporterOutput = new SimpleOutputStreamExporterOutput(xlsxDataOut);
@@ -116,7 +105,14 @@ public class XlsxReportOutput extends AbstractReportOutput
 				close = false;
 				xlsxDataOut.close();
 				
-				String filename = baseFilename + "." + getFileExtension();
+				String baseFilename = jobContext.getBaseFilename();
+				if (isIgnorePagination() != null && isIgnorePagination()
+						&& jobContext.hasOutput(ReportJob.OUTPUT_FORMAT_XLSX))
+				{
+					//we have both paginated and unpaginated XLSX outputs, we need a different name
+					baseFilename += "_nopag";
+				}
+				String filename = baseFilename + ".xlsx";
 				return new ReportOutput(xlsxData, ContentResource.TYPE_XLSX, filename);
 			} catch (IOException e) {
 				throw new JSExceptionWrapper(e);
@@ -146,11 +142,6 @@ public class XlsxReportOutput extends AbstractReportOutput
 	 */
 	public void setExportParams(XlsExportParametersBean exportParams) {
 		this.exportParams = exportParams;
-	}
-
-	protected String getFileExtension()
-	{
-		return "xlsx";
 	}
 	
 	@Override

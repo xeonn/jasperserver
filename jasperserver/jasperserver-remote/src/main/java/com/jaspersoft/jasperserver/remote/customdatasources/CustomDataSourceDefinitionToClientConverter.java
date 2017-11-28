@@ -38,10 +38,10 @@ import java.util.Map;
  * <p></p>
  *
  * @author yaroslav.kovalchyk
- * @version $Id: CustomDataSourceDefinitionToClientConverter.java 58870 2015-10-27 22:30:55Z esytnik $
+ * @version $Id: CustomDataSourceDefinitionToClientConverter.java 62954 2016-05-01 09:49:23Z ykovalch $
  */
 @Service
-public class CustomDataSourceDefinitionToClientConverter implements ToClientConverter<CustomDataSourceDefinition, ClientCustomDataSourceDefinition> {
+public class CustomDataSourceDefinitionToClientConverter implements ToClientConverter<CustomDataSourceDefinition, ClientCustomDataSourceDefinition, ToClientConversionOptions> {
     @Override
     public ClientCustomDataSourceDefinition toClient(CustomDataSourceDefinition serverObject, ToClientConversionOptions options) {
         final ClientCustomDataSourceDefinition clientDefinition = new ClientCustomDataSourceDefinition().setName(serverObject.getName());

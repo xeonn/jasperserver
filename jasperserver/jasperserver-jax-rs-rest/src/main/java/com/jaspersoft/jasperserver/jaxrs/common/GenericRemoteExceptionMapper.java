@@ -33,6 +33,7 @@ import javax.ws.rs.ext.Provider;
 
 /**
  * @author: Zakhar.Tomchenco
+ * @version $Id: GenericRemoteExceptionMapper.java 62954 2016-05-01 09:49:23Z ykovalch $
  */
 
 @Provider

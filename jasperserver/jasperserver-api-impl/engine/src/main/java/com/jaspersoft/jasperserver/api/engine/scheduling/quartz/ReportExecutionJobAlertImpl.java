@@ -40,7 +40,7 @@ import java.util.List;
 
 /**
  * @author Ivan Chan (ichan@jaspersoft.com)
- * @version $Id: ReportExecutionJobAlertImpl.java 57603 2015-09-15 17:20:48Z psavushc $
+ * @version $Id: ReportExecutionJobAlertImpl.java 61759 2016-03-14 15:48:27Z ztomchen $
  */
 public class ReportExecutionJobAlertImpl implements ReportExecutionJobAlert {
 
@@ -79,7 +79,7 @@ public class ReportExecutionJobAlertImpl implements ReportExecutionJobAlert {
 
             if (alert.isIncludingReportJobInfo()) {
                 messageText.append("\n");
-                messageText.append("ReportJob Info:").append("\n");
+                messageText.append("Scheduled Job Info:").append("\n");
                 messageText.append("Label = ").append(jobDetails.getLabel()).append("\n");
                 messageText.append("ID = ").append(jobDetails.getId()).append("\n");
                 messageText.append("Description = ").append(jobDetails.getDescription()).append("\n");

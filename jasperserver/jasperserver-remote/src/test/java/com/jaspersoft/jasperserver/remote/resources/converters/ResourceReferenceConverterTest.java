@@ -56,7 +56,7 @@ import static org.testng.Assert.*;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id: ResourceReferenceConverterTest.java 58870 2015-10-27 22:30:55Z esytnik $
+ * @version $Id: ResourceReferenceConverterTest.java 62954 2016-05-01 09:49:23Z ykovalch $
  */
 public class ResourceReferenceConverterTest {
     private ResourceReferenceConverter converter;
@@ -89,7 +89,7 @@ public class ResourceReferenceConverterTest {
         expectedClientObject.setUri(testUri);
         when(resourceConverterProvider.getToClientConverter(localResource)).thenReturn(new ToClientConverter() {
             @Override
-            public Object toClient(Object serverObject, ToClientConversionOptions options) {
+            public Object toClient(Object serverObject, Object options) {
                 assertSame(serverObject, localResource);
                 return expectedClientObject;
             }
@@ -114,7 +114,7 @@ public class ResourceReferenceConverterTest {
         expectedClientObject.setUri(testUri);
         when(resourceConverterProvider.getToClientConverter(localResource)).thenReturn(new ToClientConverter() {
             @Override
-            public Object toClient(Object serverObject, ToClientConversionOptions options) {
+            public Object toClient(Object serverObject, Object options) {
                 assertSame(serverObject, localResource);
                 return expectedClientObject;
             }
@@ -181,7 +181,7 @@ public class ResourceReferenceConverterTest {
         when(repositoryService.getResource(any(ExecutionContext.class), eq(referenceUri))).thenReturn(resource);
         when(resourceConverterProvider.getToClientConverter(resource)).thenReturn(new ToClientConverter() {
             @Override
-            public Object toClient(Object serverObject, ToClientConversionOptions options) {
+            public Object toClient(Object serverObject, Object options) {
                 return clientTargetResource;
             }
 

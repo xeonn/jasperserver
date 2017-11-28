@@ -24,7 +24,7 @@ define(function (require) {
 
     var BaseDataSourceModel = require("dataSource/model/BaseDataSourceModel"),
         SubDataSourceCollection = require("dataSource/collection/SubDataSourceCollection"),
-        repositoryResourceTypes = require("bi/repo/enum/repositoryResourceTypes"),
+        repositoryResourceTypes = require("bi/repository/enum/repositoryResourceTypes"),
         _ = require("underscore"),
         i18n = require("bundle!jasperserver_messages");
 

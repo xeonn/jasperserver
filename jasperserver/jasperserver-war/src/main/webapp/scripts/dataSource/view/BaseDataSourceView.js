@@ -24,7 +24,7 @@ define(function(require) {
 
     var $ = require("jquery"),
         _ = require("underscore"),
-		ResourceModel = require("bi/repo/model/RepositoryResourceModel"),
+		ResourceModel = require("bi/repository/model/RepositoryResourceModel"),
         BaseDataSourceModel = require("dataSource/model/BaseDataSourceModel"),
         i18n = require("bundle!jasperserver_messages"),
         timezones = require("settings!userTimeZones"),

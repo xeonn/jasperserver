@@ -158,7 +158,7 @@ public class SingleRepositoryServiceImplTest {
         reset(service);
         final DataTypeImpl serverObject = new DataTypeImpl();
         doReturn(serverObject).when(service).getResource(uri);
-        service.saveOrUpdate(clientObject, false, true);
+        service.saveOrUpdate(clientObject, false, true, null);
     }
 
     @Test(groups = "SAVE_OR_UPDATE", expectedExceptions = VersionNotMatchException.class)
@@ -169,10 +169,10 @@ public class SingleRepositoryServiceImplTest {
         serverObject.setVersion(5);
 
         doReturn(serverObject).when(service).getResource(uri);
-        doReturn(toClientConverter).when(resourceConverterProvider).getToClientConverter(any(Resource.class));
-        doReturn(ClientTypeHelper.extractClientType(clientObject.getClass())).when(toClientConverter).getClientResourceType();
+        doReturn(toClientConverter).when(resourceConverterProvider).getToClientConverter(serverObject.getResourceType(),
+                ClientTypeHelper.extractClientType(clientObject.getClass()));
 
-        service.saveOrUpdate(clientObject, false, true);
+        service.saveOrUpdate(clientObject, false, true, null);
     }
 
     @Test(groups = "SAVE_OR_UPDATE")
@@ -189,7 +189,7 @@ public class SingleRepositoryServiceImplTest {
         when(toClientConverter.getClientResourceType()).thenReturn(ResourceMediaType.DATA_TYPE_CLIENT_TYPE);
         when(resourceConverterProvider.getToClientConverter(serverObject)).thenReturn(toClientConverter);
         when(toClientConverter.toClient(same(serverObject), any(ToClientConversionOptions.class))).thenReturn(clientObject);
-        final ClientResource result = service.saveOrUpdate(clientObject, true, true);
+        final ClientResource result = service.saveOrUpdate(clientObject, true, true, null);
         verify(service).deleteResource(uri);
         assertSame(result, clientObject);
         final ToServerConversionOptions usedOptions = optionsArgumentCaptor.getValue();
@@ -212,7 +212,7 @@ public class SingleRepositoryServiceImplTest {
         when(resourceConverterProvider.getToClientConverter(serverObject)).thenReturn(toClientConverter);
         when(toClientConverter.toClient(same(serverObject), any(ToClientConversionOptions.class))).thenReturn(clientObject);
         when(toClientConverter.getClientResourceType()).thenReturn(ResourceMediaType.INPUT_CONTROL_CLIENT_TYPE);
-        final ClientResource result = service.saveOrUpdate(clientObject, true, true);
+        final ClientResource result = service.saveOrUpdate(clientObject, true, true, null);
         verify(service, never()).deleteResource(any(String.class));
         assertSame(result, clientObject);
         final ToServerConversionOptions usedOptions = optionsArgumentCaptor.getValue();
@@ -232,7 +232,7 @@ public class SingleRepositoryServiceImplTest {
         final ToClientConverter toClientConverter = mock(ToClientConverter.class);
         when(resourceConverterProvider.getToClientConverter(serverObject)).thenReturn(toClientConverter);
         when(toClientConverter.toClient(same(serverObject), any(ToClientConversionOptions.class))).thenReturn(clientObject);
-        final ClientResource result = service.saveOrUpdate(clientObject, true, true);
+        final ClientResource result = service.saveOrUpdate(clientObject, true, true, null);
         verify(service, never()).deleteResource(any(String.class));
         verify(service, never()).updateResource(any(Resource.class));
         assertSame(result, clientObject);
@@ -493,9 +493,21 @@ public class SingleRepositoryServiceImplTest {
         Mockito.when(repositoryService.getResource(any(ExecutionContext.class), eq(resource.getURIString()))).thenReturn(resource);
         Mockito.when(repositoryService.getFolder(any(ExecutionContext.class), eq(folder.getURIString()))).thenReturn(folder);
 
-        service.copyResource(resource.getURIString(), folder.getURIString(), false, false);
+        service.copyResource(resource.getURIString(), folder.getURIString(), false, false, null);
 
-        verify(repositoryService).copyResource(any(ExecutionContext.class), eq(resource.getURIString()), eq(folder.getURIString() + Folder.SEPARATOR + resource.getName()));
+        verify(repositoryService).copyRenameResource(any(ExecutionContext.class), eq(resource.getURIString()),
+                eq(folder.getURIString() + Folder.SEPARATOR + resource.getName()), isNull(String.class));
+    }
+
+    @Test(groups = "COPY")
+    public void testCopyResource_copy_rename() throws Exception{
+        Mockito.when(repositoryService.getResource(any(ExecutionContext.class), eq(resource.getURIString()))).thenReturn(resource);
+        Mockito.when(repositoryService.getFolder(any(ExecutionContext.class), eq(folder.getURIString()))).thenReturn(folder);
+        final String newName = "newName";
+        service.copyResource(resource.getURIString(), folder.getURIString(), false, false, newName);
+
+        verify(repositoryService).copyRenameResource(any(ExecutionContext.class), eq(resource.getURIString()),
+                eq(folder.getURIString() + Folder.SEPARATOR + newName), eq(newName));
     }
 
     @Test(groups = "COPY", expectedExceptions = {IllegalParameterValueException.class})
@@ -504,7 +516,7 @@ public class SingleRepositoryServiceImplTest {
         Mockito.when(repositoryService.getResource(any(ExecutionContext.class), eq(uri2))).thenReturn(null);
         Mockito.when(repositoryService.getFolder(any(ExecutionContext.class), anyString())).thenReturn(folder);
 
-        service.copyResource(null, uri2, false, false);
+        service.copyResource(null, uri2, false, false, null);
     }
 
     @Test(groups = "COPY", expectedExceptions = {ResourceNotFoundException.class})
@@ -513,7 +525,7 @@ public class SingleRepositoryServiceImplTest {
         Mockito.when(repositoryService.getResource(any(ExecutionContext.class), eq(uri2))).thenReturn(null);
         Mockito.when(repositoryService.getFolder(any(ExecutionContext.class), anyString())).thenReturn(null);
 
-        service.copyResource(uri, uri2, false, false);
+        service.copyResource(uri, uri2, false, false, null);
     }
 
     @Test(groups = "COPY", expectedExceptions = {ResourceAlreadyExistsException.class})
@@ -522,7 +534,7 @@ public class SingleRepositoryServiceImplTest {
         Mockito.when(repositoryService.getResource(any(ExecutionContext.class), eq(folder.getURIString() + Folder.SEPARATOR + resource.getName()))).thenReturn(resource2);
         Mockito.when(repositoryService.getFolder(any(ExecutionContext.class), eq(folder.getURIString()))).thenReturn(folder);
 
-        service.copyResource(resource.getURIString(), folder.getURIString(), false, false);
+        service.copyResource(resource.getURIString(), folder.getURIString(), false, false, null);
     }
 
     @Test(groups = "COPY")
@@ -531,7 +543,7 @@ public class SingleRepositoryServiceImplTest {
         Mockito.when(repositoryService.getResource(any(ExecutionContext.class), eq(folder.getURIString() + Folder.SEPARATOR + resource.getName()))).thenReturn(resource2);
         Mockito.when(repositoryService.getFolder(any(ExecutionContext.class), eq(folder.getURIString()))).thenReturn(folder);
 
-        service.copyResource(resource.getURIString(), folder.getURIString(), false, true);
+        service.copyResource(resource.getURIString(), folder.getURIString(), false, true, null);
 
         verify(repositoryService).deleteResource(any(ExecutionContext.class), eq(folder.getURIString() + Folder.SEPARATOR + resource.getName()));
     }
@@ -542,9 +554,11 @@ public class SingleRepositoryServiceImplTest {
         Mockito.when(repositoryService.getResource(any(ExecutionContext.class), eq(uri))).thenReturn(null);
         Mockito.when(repositoryService.getFolder(any(ExecutionContext.class), eq(uri))).thenReturn(folder);
 
-        service.copyResource(folder.getURIString(), uri, false, false);
+        final String newName = "newName";
+        service.copyResource(folder.getURIString(), uri, false, false, newName);
 
-        Mockito.verify(repositoryService).copyFolder(any(ExecutionContext.class), eq(folder.getURIString()), eq(folder.getURIString() + Folder.SEPARATOR + folder.getName()));
+        Mockito.verify(repositoryService).copyRenameFolder(any(ExecutionContext.class), eq(folder.getURIString()),
+                eq(folder.getURIString() + Folder.SEPARATOR + newName), eq(newName));
     }
 
     @Test(groups = "COPY", expectedExceptions = {AccessDeniedException.class})
@@ -554,7 +568,7 @@ public class SingleRepositoryServiceImplTest {
         Mockito.when(repositoryService.getFolder(any(ExecutionContext.class), anyString())).thenReturn(folder);
         Mockito.when(uriHardModifyProtectionChecker.isHardModifyProtected(uri2)).thenReturn(true);
 
-        service.copyResource(uri2, uri, false, false);
+        service.copyResource(uri2, uri, false, false, null);
     }
 
     @Test(groups = "MOVE", dependsOnGroups = {"COPY"})
@@ -562,7 +576,7 @@ public class SingleRepositoryServiceImplTest {
         Mockito.when(repositoryService.getResource(any(ExecutionContext.class), eq(resource.getURIString()))).thenReturn(resource);
         Mockito.when(repositoryService.getFolder(any(ExecutionContext.class), eq(folder.getURIString()))).thenReturn(folder);
 
-        service.moveResource(resource.getURIString(), folder.getURIString(), false, false);
+        service.moveResource(resource.getURIString(), folder.getURIString(), false, false, null);
 
         verify(repositoryService).moveResource(any(ExecutionContext.class), eq(resource.getURIString()), eq(folder.getURIString()));
     }
@@ -573,7 +587,7 @@ public class SingleRepositoryServiceImplTest {
         Mockito.when(repositoryService.getResource(any(ExecutionContext.class), eq(uri))).thenReturn(null);
         Mockito.when(repositoryService.getFolder(any(ExecutionContext.class), eq(uri))).thenReturn(folder);
 
-        service.moveResource(folder.getURIString(), uri, false, false);
+        service.moveResource(folder.getURIString(), uri, false, false, null);
 
         Mockito.verify(repositoryService).moveFolder(any(ExecutionContext.class), eq(folder.getURIString()), eq(folder.getURIString()));
     }

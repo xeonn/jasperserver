@@ -23,34 +23,29 @@ package com.jaspersoft.jasperserver.api.engine.scheduling.quartz;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Locale;
-
-import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JRPropertiesHolder;
-import net.sf.jasperreports.engine.JRPropertiesUtil;
-import net.sf.jasperreports.engine.JasperPrint;
-import net.sf.jasperreports.engine.export.JRHyperlinkProducerFactory;
-import net.sf.jasperreports.engine.export.oasis.JROdsExporter;
-import net.sf.jasperreports.export.SimpleExporterInput;
-import net.sf.jasperreports.export.SimpleOdsReportConfiguration;
-import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.quartz.JobExecutionException;
 
 import com.jaspersoft.jasperserver.api.JSExceptionWrapper;
-import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
-import com.jaspersoft.jasperserver.api.engine.common.service.EngineService;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.common.OdsExportParametersBean;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ContentResource;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.DataContainer;
-import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
+
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JRPropertiesHolder;
+import net.sf.jasperreports.engine.JRPropertiesUtil;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.export.oasis.JROdsExporter;
+import net.sf.jasperreports.export.SimpleExporterInput;
+import net.sf.jasperreports.export.SimpleOdsReportConfiguration;
+import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
 
 
 /**
  * @author sanda zaharia (shertage@users.sourceforge.net)
- * @version $Id: OdsReportOutput.java 54728 2015-04-24 15:28:20Z tdanciu $
+ * @version $Id: OdsReportOutput.java 63380 2016-05-26 20:56:46Z mchan $
  */
 public class OdsReportOutput extends AbstractReportOutput 
 {
@@ -67,22 +62,15 @@ public class OdsReportOutput extends AbstractReportOutput
 	 * @see com.jaspersoft.jasperserver.api.engine.scheduling.quartz.Output#getOutput()
 	 */
 	public ReportOutput getOutput(
-			EngineService engineService, 
-			ExecutionContext executionContext, 
-			String reportUnitURI, 
-			DataContainer odsData,
-			JRHyperlinkProducerFactory hyperlinkProducerFactory,
-			RepositoryService repositoryService,
-			JasperPrint jasperPrint, 
-			String baseFilename,
-			Locale locale,
-			String characterEncoding) throws JobExecutionException
+			ReportJobContext jobContext,
+			JasperPrint jasperPrint) throws JobExecutionException
 	{
 		try {
 			JROdsExporter exporter = new JROdsExporter(getJasperReportsContext());
             exporter.setExporterInput(new SimpleExporterInput(jasperPrint));
 			
 			boolean close = false;
+			DataContainer odsData = jobContext.createDataContainer(this);
 			OutputStream odsDataOut = odsData.getOutputStream();
 			try {
 	            SimpleOutputStreamExporterOutput exporterOutput = new SimpleOutputStreamExporterOutput(odsDataOut);
@@ -109,7 +97,7 @@ public class OdsReportOutput extends AbstractReportOutput
 				close = false;
 				odsDataOut.close();
 				
-				String filename = baseFilename + ".ods";
+				String filename = jobContext.getBaseFilename() + ".ods";
 				return new ReportOutput(odsData, ContentResource.TYPE_ODS, filename);
 			} catch (IOException e) {
 				throw new JSExceptionWrapper(e);

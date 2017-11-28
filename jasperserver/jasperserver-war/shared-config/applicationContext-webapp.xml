@@ -69,7 +69,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
       <entry key="mysql">
         <util:map>
             <entry key="label" value="MySQL"/>
-            <entry key="jdbcUrl" value="jdbc:mysql://$[dbHost]:$[dbPort]/$[dbName]"/>
+            <entry key="jdbcUrl" value="jdbc:mysql://$[dbHost]:$[dbPort]/$[dbName]?tinyInt1isBit=false"/>
             <entry key="jdbcDriverClass" value="org.mariadb.jdbc.Driver"/>
             <entry key="defaultValues">
                 <util:map>
@@ -83,7 +83,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
       <entry key="mysql_oracle">
         <util:map>
             <entry key="label" value="MySQL"/>
-            <entry key="jdbcUrl" value="jdbc:mysql://$[dbHost]:$[dbPort]/$[dbName]"/>
+            <entry key="jdbcUrl" value="jdbc:mysql://$[dbHost]:$[dbPort]/$[dbName]?tinyInt1isBit=false"/>
             <entry key="jdbcDriverClass" value="com.mysql.jdbc.Driver"/>
             <entry key="defaultValues">
                 <util:map>
@@ -157,6 +157,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
               <entry key="label" value="MS SQL Server 2005"/>
               <entry key="jdbcUrl" value="jdbc:sqlserver://$[dbHost]:$[dbPort];databaseName=$[dbName]"/>
               <entry key="jdbcDriverClass" value="com.microsoft.sqlserver.jdbc.SQLServerDriver"/>
+              <entry key="allowSpacesInDbName" value="true"/>
               <entry key="defaultValues">
                   <util:map>
                       <entry key="dbHost" value="localhost"/>
@@ -171,6 +172,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
               <entry key="label" value="MS SQL Server 2000"/>
               <entry key="jdbcUrl" value="jdbc:microsoft:sqlserver://$[dbHost]:$[dbPort];DatabaseName=$[dbName]"/>
               <entry key="jdbcDriverClass" value="com.microsoft.jdbc.sqlserver.SQLServerDriver"/>
+              <entry key="allowSpacesInDbName" value="true"/>
               <entry key="defaultValues">
                   <util:map>
                       <entry key="dbHost" value="localhost"/>
@@ -245,7 +247,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
       <entry key="mysql">
         <util:map>
             <entry key="label" value="MySQL"/>
-            <entry key="jdbcUrl" value="jdbc:mysql://$[dbHost]:$[dbPort]/$[dbName]"/>
+            <entry key="jdbcUrl" value="jdbc:mysql://$[dbHost]:$[dbPort]/$[dbName]?tinyInt1isBit=false"/>
             <entry key="jdbcDriverClass" value="org.mariadb.jdbc.Driver"/>
             <entry key="defaultValues">
                 <util:map>
@@ -319,6 +321,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
               <entry key="label" value="MS SQL Server"/>
               <entry key="jdbcUrl" value="jdbc:tibcosoftware:sqlserver://$[dbHost]:$[dbPort];databaseName=$[dbName]"/>
               <entry key="jdbcDriverClass" value="tibcosoftware.jdbc.sqlserver.SQLServerDriver"/>
+              <entry key="allowSpacesInDbName" value="true"/>
               <entry key="defaultValues">
                   <util:map>
                       <entry key="dbHost" value="localhost"/>
@@ -414,7 +417,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
         <entry key="salesforce">
             <util:map>
                 <entry key="label" value="Salesforce"/>
-                <entry key="jdbcUrl" value="jdbc:tibcosoftware:sforce://$[dbHost];SecurityToken=$[securityToken];TransactionMode=ignore;StmtCallLimit=$[stmtCallLimit];databaseName=#{ systemProperties['java.io.tmpdir'] }#{ systemProperties['file.separator'] }Salesforce"/>
+                <entry key="jdbcUrl" value="jdbc:tibcosoftware:sforce://$[dbHost];SecurityToken=$[securityToken];TransactionMode=ignore;StmtCallLimit=$[stmtCallLimit];databaseName=[TMPDIR/]Salesforce"/>
                 <entry key="jdbcDriverClass" value="tibcosoftware.jdbc.sforce.SForceDriver"/>
                 <entry key="defaultValues">
                     <util:map>
@@ -425,6 +428,21 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
                 </entry>
             </util:map>
         </entry>
+        <entry key="cassandra">
+            <util:map>
+                <entry key="label" value="Cassandra"/>
+                <entry key="jdbcUrl" value="jdbc:tibcosoftware:cassandra://$[dbHost]:$[dbPort];TransactionMode=ignore;KeyspaceName=$[defaultKeySpace];SchemaMap=[TMPDIR/]cass_$[dbHost]_$[dbPort]_$[defaultKeySpace].config"/>
+                <entry key="jdbcDriverClass" value="tibcosoftware.jdbc.cassandra.CassandraDriver"/>
+                <entry key="defaultValues">
+                    <util:map>
+                        <entry key="dbHost" value="localhost"/>
+                        <entry key="dbPort" value="9042"/>
+                        <entry key="defaultKeySpace" value=""/>
+                    </util:map>
+                </entry>
+            </util:map>
+        </entry>
+
       <entry key="redshift">
           <util:map>
               <entry key="label" value="Redshift"/>
@@ -442,7 +460,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
       <entry key="mysql_oracle">
         <util:map>
             <entry key="label" value="MySQL"/>
-            <entry key="jdbcUrl" value="jdbc:mysql://$[dbHost]:$[dbPort]/$[dbName]"/>
+            <entry key="jdbcUrl" value="jdbc:mysql://$[dbHost]:$[dbPort]/$[dbName]?tinyInt1isBit=false"/>
             <entry key="jdbcDriverClass" value="com.mysql.jdbc.Driver"/>
             <entry key="defaultValues">
                 <util:map>
@@ -472,6 +490,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
               <entry key="label" value="MS SQL Server 2005"/>
               <entry key="jdbcUrl" value="jdbc:sqlserver://$[dbHost]:$[dbPort];databaseName=$[dbName]"/>
               <entry key="jdbcDriverClass" value="com.microsoft.sqlserver.jdbc.SQLServerDriver"/>
+              <entry key="allowSpacesInDbName" value="true"/>
               <entry key="defaultValues">
                   <util:map>
                       <entry key="dbHost" value="localhost"/>
@@ -486,6 +505,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
               <entry key="label" value="MS SQL Server 2000"/>
               <entry key="jdbcUrl" value="jdbc:microsoft:sqlserver://$[dbHost]:$[dbPort];DatabaseName=$[dbName]"/>
               <entry key="jdbcDriverClass" value="com.microsoft.jdbc.sqlserver.SQLServerDriver"/>
+              <entry key="allowSpacesInDbName" value="true"/>
               <entry key="defaultValues">
                   <util:map>
                       <entry key="dbHost" value="localhost"/>

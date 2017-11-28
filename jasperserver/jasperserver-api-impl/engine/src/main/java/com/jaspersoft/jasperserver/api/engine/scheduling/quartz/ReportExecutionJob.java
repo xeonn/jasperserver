@@ -20,6 +20,33 @@
  */
 package com.jaspersoft.jasperserver.api.engine.scheduling.quartz;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.TimeZone;
+import java.util.WeakHashMap;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.quartz.Job;
+import org.quartz.JobDataMap;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
+import org.quartz.SchedulerContext;
+import org.quartz.SchedulerException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.mail.javamail.JavaMailSender;
+
 import com.jaspersoft.jasperserver.api.JSException;
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
 import com.jaspersoft.jasperserver.api.common.domain.LogEvent;
@@ -57,6 +84,7 @@ import com.jaspersoft.jasperserver.api.metadata.data.cache.DataCacheSnapshot;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.ReportUnit;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
 import com.jaspersoft.jasperserver.dto.common.ErrorDescriptor;
+
 import net.sf.jasperreports.engine.JRParameter;
 import net.sf.jasperreports.engine.JRPrintPage;
 import net.sf.jasperreports.engine.JasperPrint;
@@ -65,36 +93,10 @@ import net.sf.jasperreports.engine.JasperReportsContext;
 import net.sf.jasperreports.engine.ReportContext;
 import net.sf.jasperreports.engine.SimpleReportContext;
 import net.sf.jasperreports.engine.export.JRHyperlinkProducerFactory;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.quartz.Job;
-import org.quartz.JobDataMap;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
-import org.quartz.SchedulerContext;
-import org.quartz.SchedulerException;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.mail.javamail.JavaMailSender;
-
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.TimeZone;
-import java.util.WeakHashMap;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ReportExecutionJob.java 57603 2015-09-15 17:20:48Z psavushc $
+ * @version $Id: ReportExecutionJob.java 63530 2016-06-09 13:59:59Z tdanciu $
  */
 public class ReportExecutionJob implements Job {
 
@@ -248,11 +250,14 @@ public class ReportExecutionJob implements Job {
         } catch (RuntimeException e) {
             log.error("*** ReportExecutionJob.execute EXCEPTION *** for \n" + logId, e);
         } finally {
-            if (securityContextProvider != null) {
-                securityContextProvider.revertAuthenticatedUser();
+            try {
+                closeAuditEvent();
+                clear();
+            } finally {
+                if (securityContextProvider != null) {
+                    securityContextProvider.revertAuthenticatedUser();
+                }
             }
-            closeAuditEvent();
-            clear();
         }
     }
 
@@ -500,6 +505,8 @@ public class ReportExecutionJob implements Job {
                             useFolderHierarchy = false;
                         }
 
+                        ReportJobContext reportJobContext = getReportJobContext(baseFileName, useFolderHierarchy);
+                        
                         for (Output output : outputs) {
                             ReportOutput reportOutput = null;
                             ReportUnitResult resultToExport = getReportResultForOutput(output, jasperReport);
@@ -514,16 +521,8 @@ public class ReportExecutionJob implements Job {
                                 isCancelRequested();
                                 try {
                                     reportOutput = output.getOutput(
-                                            getEngineService(),
-                                            executionContext,
-                                            getReportUnitURI(),
-                                            createDataContainer(output),
-                                            getHyperlinkProducerFactory(),
-                                            (useFolderHierarchy ? getRepository() : null),
-                                            resultToExport.getJasperPrint(),
-                                            baseFileName,
-                                            getLocale(),
-                                            getCharacterEncoding()
+                                    		reportJobContext,
+                                            resultToExport.getJasperPrint()
                                     );
                                 } catch (Exception e) {
                                     String fileExtension = null;
@@ -549,10 +548,10 @@ public class ReportExecutionJob implements Job {
                             if ((!useFolderHierarchy) && (jobDetails.getContentRepositoryDestination() != null) &&
                                     (jobDetails.getContentRepositoryDestination().isSaveToRepository()) && (!reportOutput.getChildren().isEmpty())) {
                                 // if not using hierarchy, but contains children and requires to save to repository.  regenerate the output with folder hierarchy
-                                ReportOutput reportOutputForRepository = output.getOutput(getEngineService(), executionContext, getReportUnitURI(),
-                                        createDataContainer(output), getHyperlinkProducerFactory(), getRepository(),
-                                        resultToExport.getJasperPrint(),
-                                        baseFileName, getLocale(), getCharacterEncoding());
+                                ReportJobContext reportRepositoryJobContext = getReportJobContext(baseFileName, true);
+                                ReportOutput reportOutputForRepository = output.getOutput(
+                                		reportRepositoryJobContext,
+                                        resultToExport.getJasperPrint());
                                 isCancelRequested();
                                 if (reportOutputForRepository != null)
                                     getReportExecutionJobFileSaving().save(this, reportOutputForRepository, true, jobDetails);
@@ -602,6 +601,66 @@ public class ReportExecutionJob implements Job {
         } finally {
             checkExceptions();
         }
+    }
+    
+    protected ReportJobContext getReportJobContext(final String baseFilename, final boolean useRepository) {
+    	return new ReportJobContext() {
+			@Override
+			public DataContainer createDataContainer(Output output) {
+				return ReportExecutionJob.this.createDataContainer(output);
+			}
+
+			@Override
+			public String getCharacterEncoding() {
+				return ReportExecutionJob.this.getCharacterEncoding();
+			}
+
+			@Override
+			public String getBaseFilename() {
+				return baseFilename;
+			}
+
+			@Override
+			public RepositoryService getRepositoryService() {
+				return useRepository ? ReportExecutionJob.this.getRepository() : null;
+			}
+
+			@Override
+			public JRHyperlinkProducerFactory getHyperlinkProducerFactory() {
+				return ReportExecutionJob.this.getHyperlinkProducerFactory();
+			}
+
+			@Override
+			public EngineService getEngineService() {
+				return ReportExecutionJob.this.getEngineService();
+			}
+
+			@Override
+			public String getReportUnitURI() {
+				return ReportExecutionJob.this.getReportUnitURI();
+			}
+
+			@Override
+			public ExecutionContext getExecutionContext() {
+				return executionContext;
+			}
+
+			@Override
+			public Locale getLocale() {
+				return ReportExecutionJob.this.getLocale();
+			}
+
+			@Override
+			public boolean hasOutput(byte outputFormat) {
+				return jobDetails.getOutputFormatsSet().contains(outputFormat);
+			}
+			
+			@Override
+			public ReportJob getReportJob()
+			{
+				return jobDetails;
+			}
+		};
     }
 
     protected void executeReport(List<Output> outputs, JasperReport jasperReport) {

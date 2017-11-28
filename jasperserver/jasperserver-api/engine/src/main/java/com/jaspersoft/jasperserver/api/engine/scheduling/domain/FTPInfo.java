@@ -34,7 +34,7 @@ import java.util.Map;
  * Holder for FTP information
  *
  * @author Ivan Chan (ichan@jaspersoft.com)
- * @version $Id: FTPInfo.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: FTPInfo.java 62483 2016-04-12 17:26:07Z akasych $
  * @since 1.0
  */
 @JasperServerAPI
@@ -53,9 +53,12 @@ public class FTPInfo implements Serializable {
     private static String IS_IMPLICIT_PROPERTY = "IS_IMPLICIT_PROPERTY";
     private static String PHSZ_PROPERTY = "PHSZ_PROPERTY";
     private static String PROT_PROPERTY = "PROT_PROPERTY";
+    public static String SSH_KEY_PROPERTY = "SSH_KEY_PROPERTY";
+    public static String SSH_PASSPHRASE_PROPERTY = "SSH_PASSPHRASE_PROPERTY";
 
     public static String TYPE_FTP = "TYPE_FTP";
     public static String TYPE_FTPS = "TYPE_FTPS";
+    public static String TYPE_SFTP = "TYPE_SFTP";
 
     /**
      * Creates an empty FTP information holder.
@@ -149,7 +152,7 @@ public class FTPInfo implements Serializable {
 
 
     /**
-     * Returns FTP type: TYPE_FTP / TYPE_FTPS
+     * Returns FTP type: TYPE_FTP / TYPE_FTPS / TYPE_SFTP
      *
      * @return the ftp type
      */
@@ -157,7 +160,7 @@ public class FTPInfo implements Serializable {
     public String getType() {
         String prop = null;
         if (propertiesMap != null) prop = propertiesMap.get(FTP_TYPE_PROPERTY);
-        if (prop == null) return TYPE_FTPS;
+        if (prop == null) return TYPE_FTP;
         else return prop;
     }
 
@@ -181,6 +184,7 @@ public class FTPInfo implements Serializable {
         if (propertiesMap != null) prop = propertiesMap.get(PORT_PROPERTY);
         if (prop != null) return Integer.parseInt(prop);
         if (getType().equals(TYPE_FTPS)) return 990;
+        if (getType().equals(TYPE_SFTP)) return 22;
         else return 21;
     }
 
@@ -191,6 +195,44 @@ public class FTPInfo implements Serializable {
      */
     public void setPort(int port) {
         setProperty(PORT_PROPERTY, port + "");
+    }
+
+    /**
+     * Returns the user SSH Private Key URI
+     *
+     * @return the SSH Key URI
+     */
+    public String getSshKey() {
+        if (propertiesMap == null) return null;
+        return propertiesMap.get(SSH_KEY_PROPERTY);
+    }
+
+    /**
+     * Specifies the user SSH Private Key URI in JRS repository
+     *
+     * @param sshKeyUri the SSH Key URI
+     */
+    public void setSshKey(String sshKeyUri) {
+        setProperty(SSH_KEY_PROPERTY, sshKeyUri);
+    }
+
+    /**
+     * Returns the user SSH Key Passphrase
+     *
+     * @return the SSH Key Passphrase
+     */
+    public String getSshPassphrase() {
+        if (propertiesMap == null) return null;
+        return propertiesMap.get(SSH_PASSPHRASE_PROPERTY);
+    }
+
+    /**
+     * Specifies the user SSH Key Passphrase
+     *
+     * @param sshPassphrase the the SSH Key Passphrase
+     */
+    public void setSshPassphrase(String sshPassphrase) {
+        setProperty(SSH_PASSPHRASE_PROPERTY, sshPassphrase);
     }
 
     /**

@@ -22,11 +22,11 @@
 
 /**
  * @author Savushchik P
- * @version: $Id: repositorySettings.js 9067 2015-07-10 16:35:42Z psavushc $
+ * @version: $Id: repositorySettings.js 10092 2016-04-22 21:17:02Z inestere $
  */
 
 define(function(require) {
-    var RepositoryResourceModel = require("bi/repo/model/RepositoryResourceModel"),
+    var RepositoryResourceModel = require("bi/repository/model/RepositoryResourceModel"),
         globalConfiguration = require("settings!globalConfiguration");
 
     RepositoryResourceModel.settings.NAME_NOT_SUPPORTED_SYMBOLS = globalConfiguration.resourceIdNotSupportedSymbols.slice(1, globalConfiguration.resourceIdNotSupportedSymbols.length-1);

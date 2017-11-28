@@ -34,6 +34,11 @@ import com.jaspersoft.jasperserver.api.metadata.common.domain.FileResourceData;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.util.DataContainerStreamUtil;
 import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
 
+import net.sf.jasperreports.engine.DefaultJasperReportsContext;
+import net.sf.jasperreports.engine.type.ImageTypeEnum;
+import net.sf.jasperreports.engine.util.JRTypeSniffer;
+import net.sf.jasperreports.renderers.util.RendererUtil;
+
 public class ContentRepositoryFileView extends AbstractView
 {
 	public static final String REPOSITORY_PATH = "repositoryPath";
@@ -82,6 +87,7 @@ public class ContentRepositoryFileView extends AbstractView
 	        response.setHeader("Pragma", "");
 	        response.setHeader("Cache-Control", "no-store");
 
+	        byte[] readData = null;
 			if (fileType.equals(ContentResource.TYPE_PDF)) {
 				response.setContentType("application/pdf");
 			} else if (fileType.equals(ContentResource.TYPE_XLS)) {
@@ -103,11 +109,21 @@ public class ContentRepositoryFileView extends AbstractView
 				response.setContentType("application/vnd.oasis.opendocument.spreadsheet");
 	        } else if (fileType.equals(ContentResource.TYPE_PPTX)) {
 				response.setContentType("application/vnd.openxmlformats-officedocument.presentationml.presentation");
+	        } else if (fileType.equals(ContentResource.TYPE_IMAGE) && fileData.hasData()) {
+	        	readData = DataContainerStreamUtil.readDataAndClose(fileData.getDataStream());
+	        	if (JRTypeSniffer.getImageTypeValue(readData) == ImageTypeEnum.UNKNOWN
+	        			&& RendererUtil.getInstance(DefaultJasperReportsContext.getInstance()).isSvgData(readData)) {
+					response.setContentType(RendererUtil.SVG_MIME_TYPE);
+	        	}
 			}
 
 			if (fileData.hasData()) {
 				response.setContentLength(fileData.dataSize());
-				DataContainerStreamUtil.pipeDataAndCloseInput(fileData.getDataStream(), out);
+				if (readData == null) {
+					DataContainerStreamUtil.pipeDataAndCloseInput(fileData.getDataStream(), out);
+				} else {
+					out.write(readData);
+				}
 			} else {
 				response.setContentLength(0);
 			}		

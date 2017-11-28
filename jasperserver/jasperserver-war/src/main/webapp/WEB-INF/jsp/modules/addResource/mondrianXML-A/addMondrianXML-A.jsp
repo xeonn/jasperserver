@@ -32,7 +32,7 @@
     </t:putAttribute>
     <t:putAttribute name="bodyID" value="addResource_mondrianSource"/>
     <t:putAttribute name="bodyClass" value="oneColumn mondrian flow wizard oneStep"/>
-    <t:putAttribute name="moduleName" value="addMondrianXML.page"/>
+    <t:putAttribute name="moduleName" value="addResource/mondrianXml/addMondrianXmlMain"/>
 
     <t:putAttribute name="headerContent">
         <jsp:include page="addMondrianXML-AState.jsp"/>

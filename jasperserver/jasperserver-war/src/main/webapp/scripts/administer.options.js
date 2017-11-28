@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: administer.options.js 8900 2015-05-06 20:57:14Z yplakosh $
+ * @version: $Id: administer.options.js 10130 2016-05-06 21:42:35Z dlitvak $
  */
 
 /* global layoutModule, webHelpModule, Administer, matchAny, matchMeOrUp, buttonManager, dialogs,
@@ -113,7 +113,7 @@ var Options = {
         }
 
         var url = 'flow.html?' + Object.toQueryString(params);
-        Administer._sendRequest(url,null,Options._updateCallback);
+        Administer._sendRequest(url,params,Options._updateCallback);
     },
 
     resetValue: function(nm,vl) {

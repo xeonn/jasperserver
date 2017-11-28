@@ -35,6 +35,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Providers;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.UUID;
 
 import static org.mockito.Mockito.doReturn;
@@ -49,7 +50,7 @@ import static org.testng.Assert.assertSame;
  * <p></p>
  *
  * @author yaroslav.kovalchyk
- * @version $Id: ConnectionsJaxrsServiceTest.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: ConnectionsJaxrsServiceTest.java 62954 2016-05-01 09:49:23Z ykovalch $
  */
 public class ConnectionsJaxrsServiceTest {
     @InjectMocks
@@ -122,7 +123,7 @@ public class ConnectionsJaxrsServiceTest {
         doReturn(expectedConnectionObject).when(spyService).parseEntity(connectionClass, streamMock, connectionType);
         final UUID expectedUuid = UUID.randomUUID();
         when(connectionsManager.createConnection(expectedConnectionObject)).thenReturn(expectedUuid);
-        when(connectionsManager.getConnectionMetadata(expectedUuid)).thenReturn(expectedConnectionObject);
+        when(connectionsManager.getConnectionMetadata(expectedUuid, new HashMap<String, String[]>())).thenReturn(expectedConnectionObject);
         final String someRequestUrl = "someRequestUrl";
         when(request.getRequestURL()).thenReturn(new StringBuffer(someRequestUrl));
         final Response response = spyService.createConnection(streamMock, connectionType, metadataType);

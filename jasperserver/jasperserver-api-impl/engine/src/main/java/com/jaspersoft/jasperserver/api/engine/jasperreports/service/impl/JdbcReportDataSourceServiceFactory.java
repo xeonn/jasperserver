@@ -20,6 +20,7 @@
  */
 package com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl;
 
+import java.io.File;
 import java.util.*;
 import javax.sql.DataSource;
 
@@ -36,7 +37,7 @@ import com.jaspersoft.jasperserver.api.metadata.jasperreports.service.ReportData
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: JdbcReportDataSourceServiceFactory.java 60730 2016-02-09 19:02:32Z mchan $
+ * @version $Id: JdbcReportDataSourceServiceFactory.java 62903 2016-04-28 00:55:50Z mchan $
  */
 public class JdbcReportDataSourceServiceFactory implements ReportDataSourceServiceFactory {
 
@@ -137,9 +138,8 @@ public class JdbcReportDataSourceServiceFactory implements ReportDataSourceServi
                         (( (userName != null) && (!userName.isEmpty())) ? driverAuthMethMap.get(driverClass) : "0");
             }
         }
+        connectionUrl = getRuntimeConnectionURL(connectionUrl);
         DataSource dataSource = getPoolDataSource(driverClass, connectionUrl, userName, password);
-
-
 		return new JdbcDataSourceService(dataSource, getTimeZoneByDataSourceTimeZone(jdbcDataSource.getTimezone()));
 	}
 
@@ -303,5 +303,14 @@ public class JdbcReportDataSourceServiceFactory implements ReportDataSourceServi
 
     public void setDriverAuthMethMap(Map<String, String> driverAuthMethMap) {
         this.driverAuthMethMap = driverAuthMethMap;
+    }
+
+    private String getRuntimeConnectionURL(String connectionUrl) {
+        // return relative temp folder to full path
+        int index = connectionUrl.indexOf("=[TMPDIR/]");
+        if (index > 0) {
+            return connectionUrl.substring(0, index) + "=" + System.getProperty("java.io.tmpdir") + File.separator + connectionUrl.substring(index + 10);
+        }
+        return connectionUrl;
     }
 }

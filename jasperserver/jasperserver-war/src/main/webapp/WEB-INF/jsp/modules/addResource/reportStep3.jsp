@@ -59,7 +59,7 @@ FINALLY
     </t:putAttribute>
     <t:putAttribute name="bodyID" value="addReport_Controls"/>
     <t:putAttribute name="bodyClass" value="oneColumn flow"/>
-    <t:putAttribute name="moduleName" value="addJasperReportResourcesAndControls.page"/>
+    <t:putAttribute name="moduleName" value="addResource/jasperReport/addJasperReportResourcesAndControlsMain"/>
 
     <t:putAttribute name="headerContent">
 

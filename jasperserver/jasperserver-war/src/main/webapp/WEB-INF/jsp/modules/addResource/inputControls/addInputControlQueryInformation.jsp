@@ -27,7 +27,7 @@
      <t:putAttribute name="pageTitle"><spring:message code="addinputcontrol.queryextra.page.title"/></t:putAttribute>
     <t:putAttribute name="bodyID" value="addResource_inputControl_information"/>
     <t:putAttribute name="bodyClass" value="oneColumn flow wizard lastStep"/>
-    <t:putAttribute name="moduleName" value="addInputControlQueryInformation.page"/>
+    <t:putAttribute name="moduleName" value="addResource/inputControls/addInputControlQueryInformationMain"/>
 
     <t:putAttribute name="bodyContent" >
     	<form method="post" id="extra">
@@ -117,8 +117,8 @@
 		</t:insertTemplate>
         <input type="hidden" name="_flowExecutionKey" value="${flowExecutionKey}"/>
         <input type="hidden" id="ar"/>
-        <input type="hidden" id="itemToDelete" name="itemToDelete" value=""/>    
-    
+        <input type="hidden" id="itemToDelete" name="itemToDelete" value=""/>
+
     </t:putAttribute>
 
 </t:insertTemplate>

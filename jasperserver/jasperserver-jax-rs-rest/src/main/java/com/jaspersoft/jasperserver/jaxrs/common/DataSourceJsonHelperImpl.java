@@ -34,12 +34,12 @@ import javax.annotation.Resource;
  * <p></p>
  *
  * @author yaroslav.kovalchyk
- * @version $Id: DataSourceJsonHelperImpl.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: DataSourceJsonHelperImpl.java 62954 2016-05-01 09:49:23Z ykovalch $
  */
 @Service
 public class DataSourceJsonHelperImpl implements DataSourceJsonHelper {
     @Resource
-    private JacksonMapperProvider jacksonMapperProvider;
+    private JacksonMapperContextResolver jacksonMapperContextResolver;
     @Resource
     private ResourceConverterProvider resourceConverterProvider;
 
@@ -48,7 +48,7 @@ public class DataSourceJsonHelperImpl implements DataSourceJsonHelper {
         try {
             final Class<? extends ClientResource> clientTypeClass = resourceConverterProvider
                     .getClientTypeClass(clientType);
-            final ClientResource clientResource = jacksonMapperProvider.getContext(clientTypeClass)
+            final ClientResource clientResource = jacksonMapperContextResolver.getContext(clientTypeClass)
                     .reader(clientTypeClass).readValue(dataSourceJson);
             return (ReportDataSource) resourceConverterProvider.getToServerConverter(clientResource)
                     .toServer(clientResource, ToServerConversionOptions.getDefault());

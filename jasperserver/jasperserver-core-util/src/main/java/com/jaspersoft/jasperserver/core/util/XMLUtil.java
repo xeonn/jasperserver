@@ -22,9 +22,13 @@
 package com.jaspersoft.jasperserver.core.util;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.Date;
 
+import com.jaspersoft.jasperserver.api.JSException;
+import org.apache.commons.io.IOUtils;
 import org.jdom.Document;
 import org.jdom.input.SAXBuilder;
 
@@ -37,6 +41,8 @@ import javax.xml.xpath.XPathFactory;
 public class XMLUtil {
     private static DocumentBuilderFactory domFactory;
     private static XPathFactory xPathFactory;
+
+    private static Boolean skipXXECheck;
 
 
     static{
@@ -85,6 +91,55 @@ public class XMLUtil {
 
     public static XPath getNewXPath(){
         return xPathFactory.newXPath();
+    }
+
+    /**
+     * Sets the skipXXECheck. The method allows to set it only once, to prevent
+     * disabling the check by static call from a client code
+     * @param bSkipXXECheck true to disable XXE check
+     */
+    public static void setSkipXXECheck(boolean bSkipXXECheck) {
+        if (skipXXECheck == null) {
+            skipXXECheck = bSkipXXECheck;
+        } else {
+            throw new JSException("XMLUtils.skipXXEChek is set already, rewrites are not allowed!");
+        }
+    }
+
+    public static void checkForXXE(byte[] xmlData) throws Exception {
+        checkForXXE(new String(xmlData, Charset.forName("UTF-8")));
+    }
+
+    public static void checkForXXE(String xmlString) throws Exception {
+        if (skipXXECheck == null || !skipXXECheck) {
+            InputStream is = new ByteArrayInputStream(xmlString.getBytes(Charset.forName("UTF-8")));
+            SAXBuilder builder = new SAXBuilder();
+            builder.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            builder.build(is);
+        }
+    }
+
+    /**
+     * Checks for XML XXE exploit. Throws exception if DOCTYPE declaration is found.
+     * Returns a new InputStream ready to read the content by a subsequent code fragment.
+     * @param xmlStream
+     * @return resets the input stream
+     * @throws Exception if XML has DOCTYPE declaration
+     */
+    public static InputStream checkForXXE(InputStream xmlStream) throws Exception {
+        if (skipXXECheck == null || !skipXXECheck) {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            org.apache.commons.io.IOUtils.copy(xmlStream, baos);
+            byte[] bytes = baos.toByteArray();
+            ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+
+            SAXBuilder builder = new SAXBuilder();
+            builder.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            builder.build(bais);
+            bais.reset();
+            return bais;
+        }
+        return xmlStream;
     }
 
 

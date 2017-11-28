@@ -27,9 +27,20 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.text.MessageFormat;
-import java.util.Locale;
 
 import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.quartz.JobExecutionException;
+
+import com.jaspersoft.jasperserver.api.JSExceptionWrapper;
+import com.jaspersoft.jasperserver.api.engine.common.service.impl.WebDeploymentInformation;
+import com.jaspersoft.jasperserver.api.engine.jasperreports.util.ExportUtil;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.ContentResource;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.DataContainer;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.MemoryDataContainer;
+import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
 
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperPrint;
@@ -43,23 +54,9 @@ import net.sf.jasperreports.export.SimpleExporterInput;
 import net.sf.jasperreports.export.SimpleHtmlExporterOutput;
 import net.sf.jasperreports.export.SimpleHtmlReportConfiguration;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.quartz.JobExecutionException;
-
-import com.jaspersoft.jasperserver.api.JSExceptionWrapper;
-import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
-import com.jaspersoft.jasperserver.api.engine.common.service.EngineService;
-import com.jaspersoft.jasperserver.api.engine.common.service.impl.WebDeploymentInformation;
-import com.jaspersoft.jasperserver.api.engine.jasperreports.util.ExportUtil;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.ContentResource;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.DataContainer;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.MemoryDataContainer;
-import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
-
 /**
  * @author sanda zaharia (shertage@users.sourceforge.net)
- * @version $Id: HtmlReportOutput.java 54728 2015-04-24 15:28:20Z tdanciu $
+ * @version $Id: HtmlReportOutput.java 63530 2016-06-09 13:59:59Z tdanciu $
  */
 public class HtmlReportOutput extends AbstractReportOutput 
 {
@@ -93,21 +90,14 @@ public class HtmlReportOutput extends AbstractReportOutput
 	 * @see com.jaspersoft.jasperserver.api.engine.scheduling.quartz.Output#getOutput()
 	 */
 	public ReportOutput getOutput(
-			EngineService engineService, 
-			ExecutionContext executionContext, 
-			String reportUnitURI, 
-			DataContainer htmlData,
-			JRHyperlinkProducerFactory hyperlinkProducerFactory,
-			RepositoryService repositoryService,
-			JasperPrint jasperPrint, 
-			String baseFilename,
-			Locale locale,
-			String characterEncoding) throws JobExecutionException
+			ReportJobContext jobContext,
+			JasperPrint jasperPrint) throws JobExecutionException
 	{
 		try {
-			String filename = baseFilename + ".html";
+			String filename = jobContext.getBaseFilename() + ".html";
 			String childrenFolderName = null;
 
+			RepositoryService repositoryService = jobContext.getRepositoryService();
             if (repositoryService != null) childrenFolderName = repositoryService.getChildrenFolderName(filename);
 			else childrenFolderName = "";
             AbstractHtmlExporter<HtmlReportConfiguration, HtmlExporterConfiguration> exporter = null;
@@ -134,32 +124,38 @@ public class HtmlReportOutput extends AbstractReportOutput
 			exporter.getExporterContext().setValue(ExportUtil.HTTP_SERVLET_REQUEST, proxy);//key does not really matter here, as first value of type request is taken, regardless of key
 
 			boolean close = true;
+			DataContainer htmlData = jobContext.createDataContainer(this);
 			OutputStream htmlDataOut = htmlData.getOutputStream();
 
 			try {
-				SimpleHtmlExporterOutput exporterOutput = new SimpleHtmlExporterOutput(htmlDataOut, characterEncoding);
+				SimpleHtmlExporterOutput exporterOutput = new SimpleHtmlExporterOutput(htmlDataOut, jobContext.getCharacterEncoding());
 
 				ReportOutput htmlOutput = new ReportOutput(htmlData,
 						ContentResource.TYPE_HTML, filename);
 
 				if (!childrenFolderName.equals("")) {
                     exporterOutput.setImageHandler(new RepoHtmlResourceHandler(htmlOutput, childrenFolderName + "/{0}"));
-                    exporterOutput.setResourceHandler(new RepoHtmlResourceHandler(htmlOutput, null));
-                    exporterOutput.setFontHandler(new RepoHtmlResourceHandler(htmlOutput, childrenFolderName + "/{0}"));
+                    exporterOutput.setResourceHandler(new RepoHtmlResourceHandler(htmlOutput, childrenFolderName + "/{0}"));
+                    exporterOutput.setFontHandler(new RepoHtmlResourceHandler(htmlOutput, childrenFolderName + "/{0}"));// html exporter font handler no longer used in JR; consider removing
                 } else {
                 	exporterOutput.setImageHandler(new RepoHtmlResourceHandler(htmlOutput, childrenFolderName + "{0}"));
-                	exporterOutput.setResourceHandler(new RepoHtmlResourceHandler(htmlOutput, null));
-                	exporterOutput.setFontHandler(new RepoHtmlResourceHandler(htmlOutput, childrenFolderName + "{0}"));
+                	exporterOutput.setResourceHandler(new RepoHtmlResourceHandler(htmlOutput, childrenFolderName + "{0}"));
+                	exporterOutput.setFontHandler(new RepoHtmlResourceHandler(htmlOutput, childrenFolderName + "{0}"));// html exporter font handler no longer used in JR; consider removing
                 }
 				
 				exporter.setExporterOutput(exporterOutput);
 
+				SimpleHtmlReportConfiguration htmlReportConfig = new SimpleHtmlReportConfiguration();
+				boolean sendMail = jobContext.getReportJob().getMailNotification() != null; 
+				htmlReportConfig.setOverrideHints(true);
+				htmlReportConfig.setConvertSvgToImage(sendMail);
+				htmlReportConfig.setEmbedImage(!sendMail);
+				JRHyperlinkProducerFactory hyperlinkProducerFactory = jobContext.getHyperlinkProducerFactory();
 				if (hyperlinkProducerFactory != null) 
 				{
-					SimpleHtmlReportConfiguration htmlReportConfig = new SimpleHtmlReportConfiguration();
 					htmlReportConfig.setHyperlinkProducerFactory(hyperlinkProducerFactory);
-					exporter.setConfiguration(htmlReportConfig);
 				}
+				exporter.setConfiguration(htmlReportConfig);
 
 				exporter.exportReport();
 

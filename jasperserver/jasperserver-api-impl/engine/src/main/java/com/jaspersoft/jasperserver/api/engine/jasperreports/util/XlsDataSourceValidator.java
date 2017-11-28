@@ -5,7 +5,10 @@ import com.jaspersoft.jasperserver.api.common.domain.impl.ExecutionContextImpl;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceReference;
 import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.CustomReportDataSource;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.validation.Errors;
+
 import javax.annotation.Resource;
 import java.io.File;
 import java.util.Map;
@@ -17,7 +20,9 @@ import java.util.Map;
  * Time: 2:00 PM
  * To change this template use File | Settings | File Templates.
  */
+
 public class XlsDataSourceValidator implements CustomDataSourceValidator {
+    private final static Log log = LogFactory.getLog(XlsDataSourceValidator.class);
 
     @Resource(name = "concreteRepository")
     private RepositoryService repositoryService;
@@ -45,7 +50,7 @@ public class XlsDataSourceValidator implements CustomDataSourceValidator {
             // file path can be null if data file resources is linked to the data source
             if(dataFileReference == null) reject(errors, "fileName", "Please enter file path");
 		} else {
-            if (filePath.toLowerCase().startsWith("ftp://")) {
+            if (filePath.toLowerCase().startsWith("ftp://") || filePath.toLowerCase().startsWith("ftps://")) {
                 int idx1 = filePath.indexOf(":", 6);
                 int idx2 = filePath.indexOf("@", 6);
                 int idx3 = filePath.indexOf("/", idx1);
@@ -78,7 +83,7 @@ public class XlsDataSourceValidator implements CustomDataSourceValidator {
 	// for custom DS's this will always be in the form "reportDataSource.propertyMap[yourPropName]"
 	protected void reject(Errors errors, String name, String reason) {
 		if (errors != null) errors.rejectValue("textDataSource.propertyMap[" + name + "]",  reason);
-        else System.out.println("textDataSource.propertyMap[" + name + "] - " + reason);
+        else log.debug("textDataSource.propertyMap[" + name + "] - " + reason);
 	}
 
 

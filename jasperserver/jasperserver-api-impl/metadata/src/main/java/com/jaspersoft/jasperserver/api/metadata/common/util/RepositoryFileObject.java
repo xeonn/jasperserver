@@ -38,6 +38,7 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Properties;
 
+import com.jaspersoft.jasperserver.core.util.XMLUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.vfs.FileName;
@@ -161,6 +162,8 @@ public class RepositoryFileObject extends AbstractFileObject implements FileObje
         }
 
         InputStream data = resourceData != null ? resourceData.getDataStream(): fileResource.getDataStream();
+        // check for XXE vulnerability
+        data = XMLUtil.checkForXXE(data);
 
         // TODO: Should this be cached?
 

@@ -32,6 +32,12 @@ import org.apache.commons.net.ftp.FTPReply;
 import org.apache.commons.net.ftp.FTPSClient;
 import javax.net.ssl.TrustManager;
 import java.io.InputStream;
+import com.jcraft.jsch.Channel;
+import com.jcraft.jsch.ChannelSftp;
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.SftpException;
+import com.jcraft.jsch.Session;
 
 
 public class FTPUtil implements FTPService {
@@ -57,6 +63,10 @@ public class FTPUtil implements FTPService {
 
     public FTPServiceClient connectFTPS(String host, int port, String protocol, boolean isImplicit, long pbsz, String prot, String userName, String password, boolean useDefaultTrustManager, TrustManager trustManager) throws Exception {
         return new FTPSServiceClientImpl(host, port, protocol, isImplicit, pbsz, prot, userName, password, useDefaultTrustManager, trustManager);
+    }
+
+    public FTPServiceClient connectSFTP(String host, int port, String userName, String password, String sshKeyPath, String sshKeyData, String sshPassphrase) throws Exception {
+        return new SFTPServiceClientImpl(host, port, userName, password, sshKeyPath, sshKeyData, sshPassphrase);
     }
 
     public class FTPSServiceClientImpl implements FTPServiceClient {
@@ -125,6 +135,80 @@ public class FTPUtil implements FTPService {
 
         public boolean exists(String fileName) throws Exception {
             return FTPUtil.exists(ftpClient, fileName);
+        }
+
+    }
+
+    public class SFTPServiceClientImpl implements FTPServiceClient {
+
+        private Session session = null;
+        private ChannelSftp sftpChannel = null;
+
+        /*
+        * Establishes a data connection with the SFTP server
+        *
+        * @param host ftp server host name
+        * @param port ftp server port number
+        * @param userName login user name
+        * @param password login user password
+        * @param sshKey login user SSH private key
+        * @param sshPassphrase login user SSH private key passphrase
+        */
+        public SFTPServiceClientImpl(String host, int port, String userName, String password, String sshKeyPath, String sshKeyData, String sshPassphrase) throws JSchException {
+            JSch jsch = new JSch();
+
+            // TODO: review the security attributes priority
+            if (sshKeyData != null) {
+                jsch.addIdentity(null, sshKeyData.getBytes(), null, sshPassphrase != null ? sshPassphrase.getBytes() : null);
+            } else if (sshKeyPath != null) {
+                jsch.addIdentity(sshKeyPath, sshPassphrase != null ? sshPassphrase.getBytes() : null);
+            }
+
+            session = jsch.getSession(userName, host, port);
+
+            if (password != null) {
+                session.setPassword(password);
+            }
+            session.setConfig("StrictHostKeyChecking", "no");
+            session.connect();
+
+            Channel channel = session.openChannel("sftp");
+            channel.connect();
+            sftpChannel = (ChannelSftp) channel;
+        }
+
+        public void disconnect() throws Exception {
+            sftpChannel.exit();
+            session.disconnect();
+        }
+
+        public void changeDirectory(String directoryPath) throws Exception {
+            if (sftpChannel == null) throw new JSException("Please connect to FTP server first before changing directory!");
+            if (log.isDebugEnabled()) log.debug("Original Working directory = " + sftpChannel.pwd());
+            if (directoryPath == null || directoryPath.equals("")) {
+                return;
+            }
+            sftpChannel.cd(directoryPath);
+            if (log.isDebugEnabled()) log.debug("NEW Working directory = " + sftpChannel.pwd());
+        }
+
+        public InputStream getFile(String fileName) throws Exception {
+            if (sftpChannel == null) throw new JSException("Please connect to FTP server first!");
+            return sftpChannel.get(fileName);
+        }
+
+        public void putFile(String fileName, InputStream inputData) throws Exception {
+            if (sftpChannel == null) throw new JSException("Please connect to FTP server first!");
+            sftpChannel.put(inputData, sftpChannel.pwd() + "/" + fileName);
+        }
+
+        public boolean exists(String fileName) throws Exception {
+            try {
+                getFile(fileName);
+            } catch (SftpException e) {
+                return false;
+            }
+            return true;
         }
 
     }

@@ -22,41 +22,38 @@
 
 /**
  * @author: Dima Gorbenko
- * @version: $Id: BaseSaveDialogView.js 9909 2016-02-25 19:56:31Z dgorbenk $
+ * @version: $Id: BaseSaveDialogView.js 10166 2016-05-26 22:39:40Z gbacon $
  */
 
 /* global dialogs */
 
-define(function (require){
+define(function (require) {
 
     "use strict";
 
-    var $ = require("jquery"),
-        _ = require('underscore'),
+    var _ = require('underscore'),
         i18n = require('bundle!all'),
-	    browserDetection = require("common/util/browserDetection"),
-        ResourceModel = require("bi/repo/model/RepositoryResourceModel"),
+        browserDetection = require("common/util/browserDetection"),
+        ResourceModel = require("bi/repository/model/RepositoryResourceModel"),
         DialogWithModelInputValidation = require("common/component/dialog/DialogWithModelInputValidation"),
-		jrsConfigs = require('jrs.configs'),
-		treeFactory = require("bi/repo/dialog/RepositoryChooserDialog/RepositoryFolderTreeFactory"),
-		tooltipTemplate = require("text!bi/repo/dialog/RepositoryChooserDialog/template/repositoryFolderChooserDialogTooltipTemplate.htm"),
-		baseSaveDialogTemplate = require('text!dataSource/saveDialog/template/baseSaveDialogTemplate.htm');
+        RepositoryFolderTree = require("bi/repository/repositoryFolderTree/RepositoryFolderTree"),
+        baseSaveDialogTemplate = require('text!dataSource/saveDialog/template/baseSaveDialogTemplate.htm');
 
     return DialogWithModelInputValidation.extend({
 
-		theDialogIsOpen: false,
-		autoUpdateResourceID: true,
+        theDialogIsOpen: false,
+        autoUpdateResourceID: true,
         saveDialogTemplate: baseSaveDialogTemplate,
 
-	    events: _.extend({
-		    "resize": "_onDialogResize"
-	    }, DialogWithModelInputValidation.prototype.events),
+        events: _.extend({
+            "resize": "_onDialogResize"
+        }, DialogWithModelInputValidation.prototype.events),
 
-	    constructor: function(options) {
+        constructor: function (options) {
             options || (options = {});
-			this.options = options;
+            this.options = options;
 
-			var model = this.extendModel(this.options.model);
+            var model = this.extendModel(this.options.model);
 
             var saveButtonLabel = this._getLabelForSaveButton(model);
             var cancelButtonLabel = "resource.datasource.saveDialog.cancel";
@@ -80,8 +77,8 @@ define(function (require){
                     isEditMode: this.options.isEditMode
                 }),
                 buttons: [
-                    { label: i18n[saveButtonLabel], action: "save", primary: true },
-                    { label: i18n[cancelButtonLabel], action: "cancel", primary: false }
+                    {label: i18n[saveButtonLabel], action: "save", primary: true},
+                    {label: i18n[cancelButtonLabel], action: "cancel", primary: false}
                 ]
             });
 
@@ -89,7 +86,7 @@ define(function (require){
             this.on('button:cancel', _.bind(this._onSaveDialogCancelButtonClick, this));
         },
 
-        initialize: function(options) {
+        initialize: function (options) {
 
             DialogWithModelInputValidation.prototype.initialize.apply(this, arguments);
 
@@ -97,16 +94,16 @@ define(function (require){
             if (_.isUndefined(this.preSelectedFolder) || !this.preSelectedFolder) {
                 this.preSelectedFolder = "/";
             }
-            if (!options.skipLocation){
+            if (!options.skipLocation) {
                 this.initializeTree();
             }
 
             this.listenTo(this.model, "change:label", this._onDataSourceNameChange);
-			this.$contentContainer.find("[name=name]").change(_.bind(this._onResourceIDInputChange, this));
+            this.$contentContainer.find("[name=name]").change(_.bind(this._onResourceIDInputChange, this));
         },
 
-        restoreModel: function(){
-            if(this.originalModelValidation) {
+        restoreModel: function () {
+            if (this.originalModelValidation) {
                 this.model.validation = this.originalModelValidation;
             }
         },
@@ -150,7 +147,7 @@ define(function (require){
                 ],
                 parentFolderUri: [
                     {
-                        fn: function(value){
+                        fn: function (value) {
                             if (!this.options.skipLocation) {
                                 if (_.isNull(value) || _.isUndefined(value) || (_.isString(value) && value === '')) {
                                     return i18n["resource.datasource.saveDialog.validation.not.empty.parentFolderIsEmpty"];
@@ -169,139 +166,136 @@ define(function (require){
 
         initializeTree: function () {
 
-			this.foldersTree = treeFactory({
-				contextPath: jrsConfigs.contextPath,
-				tooltipContentTemplate: tooltipTemplate
-			});
+            this.foldersTree = RepositoryFolderTree();
 
-			this.listenTo(this.foldersTree, "selection:change", function(selection){
-				var parentFolderUri;
+            this.listenTo(this.foldersTree, "selection:change", function (selection) {
+                var parentFolderUri;
 
-				if (selection && _.isArray(selection) && selection[0] && selection[0].uri) {
-					parentFolderUri = selection[0].uri;
-				}
-				if (!parentFolderUri) {
-					return;
-				}
+                if (selection && _.isArray(selection) && selection[0] && selection[0].uri) {
+                    parentFolderUri = selection[0].uri;
+                }
+                if (!parentFolderUri) {
+                    return;
+                }
 
-				this.model.set("parentFolderUri", parentFolderUri);
-			});
+                this.model.set("parentFolderUri", parentFolderUri);
+            });
 
-			this.$el.find(".treeBox .folders").append(this.foldersTree.render().el);
+            this.$el.find(".treeBox .folders").append(this.foldersTree.render().el);
 
-	        var $scrollContainer = this.foldersTree.$el.parent().parent().parent();
-	        this.foldersTree._selectTreeNode(this.preSelectedFolder, $scrollContainer);
+            var $scrollContainer = this.foldersTree.$el.parent().parent().parent();
+            this.foldersTree._selectTreeNode(this.preSelectedFolder, $scrollContainer);
         },
 
-		startSaveDialog: function() {
+        startSaveDialog: function () {
 
-			this._openDialog();
+            this._openDialog();
         },
 
-		_openDialog: function() {
+        _openDialog: function () {
 
-			if (this.theDialogIsOpen) {
-				return;
-			}
+            if (this.theDialogIsOpen) {
+                return;
+            }
 
-			this.bindValidation();
+            this.bindValidation();
 
-			DialogWithModelInputValidation.prototype.open.apply(this, arguments);
+            DialogWithModelInputValidation.prototype.open.apply(this, arguments);
 
-			this.$contentContainer.find("[name=label]").focus();
+            this.$contentContainer.find("[name=label]").focus();
 
-			this.theDialogIsOpen = true;
+            this.theDialogIsOpen = true;
 
-			// set the initial size of the internal components of the dialog by calling function which
-			// reacts on resizing at a first time
-			var onDialogResize = _.bind(this._onDialogResize, this);
-			if (browserDetection.isIE8() || browserDetection.isIE9()) {
-				setTimeout(onDialogResize, 1);
-			} else {
-				onDialogResize();
-			}
-		},
+            // set the initial size of the internal components of the dialog by calling function which
+            // reacts on resizing at a first time
+            var onDialogResize = _.bind(this._onDialogResize, this);
+            if (browserDetection.isIE8() || browserDetection.isIE9()) {
+                setTimeout(onDialogResize, 1);
+            } else {
+                onDialogResize();
+            }
+        },
 
-		_closeDialog: function() {
+        _closeDialog: function () {
 
-			if (!this.theDialogIsOpen) {
-				return;
-			}
+            if (!this.theDialogIsOpen) {
+                return;
+            }
 
-			this.unbindValidation();
-			this.clearValidationErrors();
+            this.unbindValidation();
+            this.clearValidationErrors();
 
-			DialogWithModelInputValidation.prototype.close.apply(this, arguments);
+            DialogWithModelInputValidation.prototype.close.apply(this, arguments);
 
-			this.theDialogIsOpen = false;
-		},
+            this.theDialogIsOpen = false;
+        },
 
-		_getLabelForSaveButton: function() {
+        _getLabelForSaveButton: function () {
 
-			return "resource.datasource.saveDialog.save";
-		},
+            return "resource.datasource.saveDialog.save";
+        },
 
-	    /*
-	     Because under IE it's very hard to maintain auto-resizable area by height (IE8 doesn't support
-	     calc() css property), we need to do resizing manually, each time reacting on resizing.
-	     Dirty, ugly hack, but it is what it is.
-	     */
-	    _onDialogResize: function() {
+        /*
+         Because under IE it's very hard to maintain auto-resizable area by height (IE8 doesn't support
+         calc() css property), we need to do resizing manually, each time reacting on resizing.
+         Dirty, ugly hack, but it is what it is.
+         */
+        _onDialogResize: function () {
             var self = this;
             var shiftHeight = 73;
-		    var dialogSavingArea = this.$contentContainer.find(".control.groupBox.treeBox");
-		    var wholeDialog = this.$contentContainer.parent();
+            var dialogSavingArea = this.$contentContainer.find(".control.groupBox.treeBox");
+            var wholeDialog = this.$contentContainer.parent();
 
             this.$contentContainer
                 .children()
                 .not(".control.groupBox.treeBox")
-                .each(function() {
+                .each(function () {
                     shiftHeight += self.$(this).outerHeight(true);
                 });
             shiftHeight += this.$contentContainer.innerHeight() - this.$contentContainer.height();
 
-		    dialogSavingArea.height(wholeDialog.outerHeight(true) - shiftHeight);
-	    },
+            dialogSavingArea.height(wholeDialog.outerHeight(true) - shiftHeight);
+        },
 
-	    _onDataSourceNameChange: function() {
-			if (this.autoUpdateResourceID) {
-				var resourceId = ResourceModel.generateResourceName(this.model.get("label"));
-				this.model.set("name", resourceId);
-				this.$("input[name='name']").val(resourceId);
-			}
-		},
+        _onDataSourceNameChange: function () {
+            if (this.autoUpdateResourceID) {
+                var resourceId = ResourceModel.generateResourceName(this.model.get("label"));
+                this.model.set("name", resourceId);
+                this.$("input[name='name']").val(resourceId);
+            }
+        },
 
-		_onResourceIDInputChange: function() {
-			this.autoUpdateResourceID = false;
-		},
+        _onResourceIDInputChange: function () {
+            this.autoUpdateResourceID = false;
+        },
 
-        _onSaveDialogCancelButtonClick: function() {
+        _onSaveDialogCancelButtonClick: function () {
             this.restoreModel();
             this._closeDialog();
         },
 
-        _onSaveDialogSaveButtonClick: function() {
+        _onSaveDialogSaveButtonClick: function () {
             var self = this;
             this._onDialogResize();
-			if (!this.model.isValid(true)) {
-				return;
-			}
+            if (!this.model.isValid(true)) {
+                return;
+            }
 
-			this.performSave();
+            this.performSave();
         },
 
-		performSave: function() {
+        performSave: function () {
 
-			if (this.options.saveFn) {
-				this.options.saveFn(this.model.attributes, this.model);
-				return;
-			}
+            if (this.options.saveFn) {
+                this.options.saveFn(this.model.attributes, this.model);
+                return;
+            }
 
-			this.model.save({}, {
-				success: _.bind(this._saveSuccessCallback, this),
-				error: _.bind(this._saveErrorCallback, this)
-			});
-		},
+            this.model.save({}, {
+                success: _.bind(this._saveSuccessCallback, this),
+                error: _.bind(this._saveErrorCallback, this)
+            });
+        },
 
         _saveSuccessCallback: function (model, data) {
             this._closeDialog();
@@ -311,75 +305,78 @@ define(function (require){
             }
         },
 
-		_saveErrorCallback: function(model, xhr, options) {
+        _saveErrorCallback: function (model, xhr, options) {
 
-			var self = this, errors = false, msg;
-			var handled = false;
+            var self = this, errors = false, msg;
+            var handled = false;
 
-			try { errors = JSON.parse(xhr.responseText); } catch(e) {}
+            try {
+                errors = JSON.parse(xhr.responseText);
+            } catch (e) {
+            }
 
-			if (!_.isArray(errors)) {
-				errors = [errors];
-			}
+            if (!_.isArray(errors)) {
+                errors = [errors];
+            }
 
-			_.each(errors, function(error) {
+            _.each(errors, function (error) {
 
-				var field = false, msg = false;
+                var field = false, msg = false;
 
-				if (!error) {
-					return;
-				}
+                if (!error) {
+                    return;
+                }
 
-				// in case of opened dialog, we can highlight some fields with error
-				if (self.theDialogIsOpen) {
+                // in case of opened dialog, we can highlight some fields with error
+                if (self.theDialogIsOpen) {
 
-					// check if we faced Conflict issue, it's when we are trying to save DS under existing resourceID
-					if (error.errorCode === "version.not.match") {
-						field = "name";
-						msg = i18n["resource.dataSource.resource.alreadyInUse"];
-					}
+                    // check if we faced Conflict issue, it's when we are trying to save DS under existing resourceID
+                    if (error.errorCode === "version.not.match") {
+                        field = "name";
+                        msg = i18n["resource.dataSource.resource.alreadyInUse"];
+                    }
 
-					else if (error.errorCode === "mandatory.parameter.error") {
-						if (error.parameters && error.parameters[0]) {
-							msg = i18n["resource.datasource.saveDialog.parameterIsMissing"];
-							field = error.parameters[0].substr(error.parameters[0].indexOf(".") + 1);
-						}
-					}
+                    else if (error.errorCode === "mandatory.parameter.error") {
+                        if (error.parameters && error.parameters[0]) {
+                            msg = i18n["resource.datasource.saveDialog.parameterIsMissing"];
+                            field = error.parameters[0].substr(error.parameters[0].indexOf(".") + 1);
+                        }
+                    }
 
-					else if (error.errorCode === "illegal.parameter.value.error") {
-						if (error.parameters && error.parameters[0]) {
-							field = error.parameters[0].substr(error.parameters[0].indexOf(".") + 1);
-							msg = i18n["resource.datasource.saveDialog.parameterIsWrong"];
-						}
-					}
+                    else if (error.errorCode === "illegal.parameter.value.error") {
+                        if (error.parameters && error.parameters[0]) {
+                            field = error.parameters[0].substr(error.parameters[0].indexOf(".") + 1);
+                            msg = i18n["resource.datasource.saveDialog.parameterIsWrong"];
+                        }
+                    }
 
-					else if (error.errorCode === "folder.not.found") {
-						field = "parentFolderUri";
-						msg = i18n["ReportDataSourceValidator.error.folder.not.found"].replace("{0}", error.parameters[0]);
-					}
+                    else if (error.errorCode === "folder.not.found") {
+                        field = "parentFolderUri";
+                        msg = i18n["ReportDataSourceValidator.error.folder.not.found"].replace("{0}", error.parameters[0]);
+                    }
 
-					else if (error.errorCode === "access.denied") {
-						field = "parentFolderUri";
-						msg = i18n["jsp.accessDenied.errorMsg"];
-					}
-				}
+                    else if (error.errorCode === "access.denied") {
+                        field = "parentFolderUri";
+                        msg = i18n["jsp.accessDenied.errorMsg"];
+                    }
+                }
 
-				if (msg && field && ["label", "name", "description", "parentFolderUri"].indexOf(field) !== -1) {
-					self.invalidField(
-						"[name=" + field + "]",
-						msg
-					);
-					handled = true;
-				}
-			});
+                if (msg && field && ["label", "name", "description", "parentFolderUri"].indexOf(field) !== -1) {
+                    self.invalidField(
+                        "[name=" + field + "]",
+                        msg
+                    );
+                    handled = true;
+                }
+            });
 
 
-			// otherwise, pass this error to DataSourceController
-			if (handled === false) {
-				if (_.isFunction(this.options.error)) {
-					this.options.error(model, xhr, options);
-				}
-			}
+            // otherwise, pass this error to DataSourceController
+            if (handled === false) {
+                if (_.isFunction(this.options.error)) {
+                    this.options.error(model, xhr, options);
+                }
+            }
         }
     });
 });

@@ -21,21 +21,20 @@
 
 package com.jaspersoft.jasperserver.api.engine.jasperreports.util;
 
+import net.sf.jasperreports.engine.JRDataSource;
+import net.sf.jasperreports.engine.JRField;
+import net.sf.jasperreports.engine.design.JRDesignField;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import net.sf.jasperreports.engine.JRDataSource;
-import net.sf.jasperreports.engine.JRField;
-import net.sf.jasperreports.engine.design.JRDesignField;
-
-import org.apache.commons.lang3.math.NumberUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * Created by IntelliJ IDEA.
@@ -71,16 +70,20 @@ public abstract class AbstractTextDataSourceDefinition extends DataAdapterDefini
 
     public static Map<String, String> getDefaultFieldMapping(List<String> fieldNames) {
         Map<String, String> fieldMapping = new HashMap<String, String>();
-        for (int i = 0; i < fieldNames.size(); i++) {
-            fieldMapping.put(fieldNames.get(i), ("FIELD " + (i+1)));
+        if(fieldNames != null) {
+            for (int i = 0; i < fieldNames.size(); i++) {
+                fieldMapping.put(fieldNames.get(i), ("FIELD " + (i + 1)));
+            }
         }
         return fieldMapping;
     }
 
     public static Map<String, String> getFieldMapping(List<String> fieldNames) {
         Map<String, String> fieldMapping = new HashMap<String, String>();
-        for (String fieldName: fieldNames) {
-            fieldMapping.put(fieldName, fieldName);
+        if(fieldNames != null) {
+            for (String fieldName : fieldNames) {
+                fieldMapping.put(fieldName, fieldName);
+            }
         }
         return fieldMapping;
     }

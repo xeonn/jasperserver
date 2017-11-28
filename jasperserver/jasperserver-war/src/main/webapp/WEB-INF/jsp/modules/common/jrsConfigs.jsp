@@ -24,6 +24,7 @@
 <%@ taglib uri="/spring" prefix="spring"%>
 <%@ taglib uri="http://www.springframework.org/security/tags" prefix="authz"%>
 <%@ page import="com.jaspersoft.jasperserver.war.webHelp.WebHelpLookup" %>
+<%@ page import="com.jaspersoft.jasperserver.api.common.util.TimeZoneContextHolder" %>
 
 <%--Global JRS State/Config object --%>
 
@@ -84,6 +85,7 @@
     __jrsConfigs__.isProVersion = "${isProVersion}" === "true" ? true : false;
 
     __jrsConfigs__.userLocale = "${userLocale}";
+    __jrsConfigs__.userTimezone = "<%= TimeZoneContextHolder.getTimeZone().getID() %>";
 
     __jrsConfigs__.isFreeOrLimitedEdition = false;
 

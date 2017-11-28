@@ -20,12 +20,14 @@
 */
 package com.jaspersoft.jasperserver.remote.connection;
 
+import java.util.Map;
+
 /**
  * <p></p>
  *
  * @author yaroslav.kovalchyk
- * @version $Id: ConnectionMetadataBuilder.java 49286 2014-09-23 13:32:25Z ykovalchyk $
+ * @version $Id: ConnectionMetadataBuilder.java 62954 2016-05-01 09:49:23Z ykovalch $
  */
 public interface ConnectionMetadataBuilder<ConnectionType> {
-    Object build(ConnectionType connection);
+    Object build(ConnectionType connection, Map<String, String[]> options);
 }

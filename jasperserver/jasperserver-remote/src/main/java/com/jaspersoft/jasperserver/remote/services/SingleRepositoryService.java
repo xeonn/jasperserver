@@ -38,7 +38,7 @@ import java.io.InputStream;
  * <p>Performs  operations with single resources in transaction</p>
  *
  * @author Zakhar.Tomchenco
- * @version $Id: SingleRepositoryService.java 51276 2014-11-09 17:44:57Z ktsaregradskyi $
+ * @version $Id: SingleRepositoryService.java 63380 2016-05-26 20:56:46Z mchan $
  */
 public interface SingleRepositoryService {
     Resource getResource(String uri);
@@ -53,9 +53,9 @@ public interface SingleRepositoryService {
 
     void deleteResource(String uri) throws IllegalParameterValueException, AccessDeniedException;
 
-    String copyResource(String sourceUri, String destinationUri, boolean createFolders, boolean overwrite) throws ResourceNotFoundException, AccessDeniedException, ResourceAlreadyExistsException, IllegalParameterValueException;
+    String copyResource(String sourceUri, String destinationUri, boolean createFolders, boolean overwrite, String renameTo) throws ResourceNotFoundException, AccessDeniedException, ResourceAlreadyExistsException, IllegalParameterValueException;
 
-    String moveResource(String sourceUri, String destinationUri, boolean createFolders, boolean overwrite) throws ResourceNotFoundException, AccessDeniedException, ResourceAlreadyExistsException, IllegalParameterValueException;
+    String moveResource(String sourceUri, String destinationUri, boolean createFolders, boolean overwrite, String renameTo) throws ResourceNotFoundException, AccessDeniedException, ResourceAlreadyExistsException, IllegalParameterValueException;
 
     Resource createFileResource(InputStream stream, String parentUri, String name, String label, String description, String type, boolean createFolders) throws RemoteException;
 
@@ -63,5 +63,5 @@ public interface SingleRepositoryService {
 
     String getUniqueName(String parenUri, String name) throws MandatoryParameterNotFoundException;
 
-    ClientResource saveOrUpdate(ClientResource clientResource, boolean overwrite, boolean createFolders) throws RemoteException;
+    ClientResource saveOrUpdate(ClientResource clientResource, boolean overwrite, boolean createFolders, String clientType) throws RemoteException;
 }

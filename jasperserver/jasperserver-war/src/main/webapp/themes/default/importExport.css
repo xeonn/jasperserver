@@ -34,10 +34,6 @@
     min-width: 169px;
 }
 
-.export-view .section.file-name > .group {
-    float: left;
-}
-
 .export-view .section.everything {
     margin: 14px 20px;
 }
@@ -162,6 +158,10 @@
     width: 100%;
 }
 
+.repository-export-dialog .section.resources p {
+    margin-bottom: 8px;
+}
+
 .tenant-export-dialog .export-view {
     padding: 23px 13px 15px;
 }
@@ -244,9 +244,9 @@
 }
 
 .repository-export-dialog {
+    height: 250px;
     min-width: 245px;
-    width: 245px;
-    height: 230px;
+    width: 350px !important;
 }
 
 .repository-export-dialog .m-Dialog-body {

@@ -20,23 +20,22 @@
  */
 package com.jaspersoft.jasperserver.api.engine.scheduling.hibernate;
 
-import com.jaspersoft.jasperserver.api.engine.scheduling.domain.FTPInfo;
 import com.jaspersoft.jasperserver.api.engine.scheduling.domain.reportjobmodel.FTPInfoModel;
 import com.jaspersoft.jasperserver.api.engine.scheduling.domain.reportjobmodel.ReportJobRepositoryDestinationModel;
 import com.jaspersoft.jasperserver.api.engine.scheduling.domain.ReportJob;
 import com.jaspersoft.jasperserver.api.engine.scheduling.domain.ReportJobRepositoryDestination;
+import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.HibernateRepositoryService;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.ProfileAttribute;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.impl.hibernate.RepoUser;
 import com.jaspersoft.jasperserver.api.metadata.user.service.ProfileAttributeService;
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
-import org.springframework.orm.hibernate3.HibernateTemplate;
 
 import java.util.Iterator;
 import java.util.List;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: PersistentReportJobRepositoryDestination.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: PersistentReportJobRepositoryDestination.java 62483 2016-04-12 17:26:07Z akasych $
  */
 public class PersistentReportJobRepositoryDestination {
 	
@@ -130,7 +129,7 @@ public class PersistentReportJobRepositoryDestination {
     }
 
 	public void copyFrom(ReportJobRepositoryDestination repositoryDestination, List unusedEntities, ProfileAttributeService profileAttributeService,
-                         RepoUser user, ExecutionContext context) {
+                         RepoUser user, ExecutionContext context, HibernateRepositoryService referenceResolver) {
 		setFolderURI(repositoryDestination.getFolderURI());
 		setSequentialFilenames(repositoryDestination.isSequentialFilenames());
 		setOverwriteFiles(repositoryDestination.isOverwriteFiles());
@@ -141,12 +140,12 @@ public class PersistentReportJobRepositoryDestination {
             setDefaultScheduledReportOutputFolderURI(repositoryDestination.getDefaultReportOutputFolderURI(), profileAttributeService, user, context);
         setUsingDefaultReportOutputFolderURI(repositoryDestination.isUsingDefaultReportOutputFolderURI());
         setOutputLocalFolder(repositoryDestination.getOutputLocalFolder());
-        copyFTPInfo(repositoryDestination);
+        copyFTPInfo(repositoryDestination, referenceResolver);
 
 	}
 
     public void copyFrom(ReportJobRepositoryDestinationModel repositoryDestination, List unusedEntities, ProfileAttributeService profileAttributeService,
-                         RepoUser user, ExecutionContext context) {
+                         RepoUser user, ExecutionContext context, HibernateRepositoryService referenceResolver) {
 		if (repositoryDestination.isFolderURIModified()) setFolderURI(repositoryDestination.getFolderURI());
 		if (repositoryDestination.isSequentialFilenames()) setSequentialFilenames(repositoryDestination.isSequentialFilenames());
 		if (repositoryDestination.isOverwriteFilesModified()) setOverwriteFiles(repositoryDestination.isOverwriteFiles());
@@ -158,7 +157,7 @@ public class PersistentReportJobRepositoryDestination {
         if (repositoryDestination.isUsingDefaultReportOutputFolderURIModified())
             setUsingDefaultReportOutputFolderURI(repositoryDestination.isUsingDefaultReportOutputFolderURI());
         if (repositoryDestination.isOutputLocalFolderModified()) setOutputLocalFolder(repositoryDestination.getOutputLocalFolder());
-        if (repositoryDestination.isOutputFTPInfoModified()) copyFTPInfo(repositoryDestination.getOutputFTPInfoModel());
+        if (repositoryDestination.isOutputFTPInfoModified()) copyFTPInfo(repositoryDestination.getOutputFTPInfoModel(), referenceResolver);
 	}
 
 	public ReportJobRepositoryDestination toClient(ProfileAttributeService profileAttributeService, RepoUser user, ExecutionContext context) {
@@ -201,16 +200,16 @@ public class PersistentReportJobRepositoryDestination {
         profileAttributeService.putProfileAttribute(context, attr);
     }
 
-	protected void copyFTPInfo(ReportJobRepositoryDestination destination) {
+	protected void copyFTPInfo(ReportJobRepositoryDestination destination, HibernateRepositoryService referenceResolver) {
 		if (getOutputFTPInfo() == null) {
             setOutputFTPInfo(new PersistentFTPInfo());
             if (destination.getOutputFTPInfo() == null) return;
         }
-        if (destination.getOutputFTPInfo() != null) getOutputFTPInfo().copyFrom(destination.getOutputFTPInfo());
+        if (destination.getOutputFTPInfo() != null) getOutputFTPInfo().copyFrom(destination.getOutputFTPInfo(), referenceResolver);
         else  setOutputFTPInfo(new PersistentFTPInfo());
 	}
 
-    protected void copyFTPInfo(FTPInfoModel jobFTPInfo) {
+    protected void copyFTPInfo(FTPInfoModel jobFTPInfo, HibernateRepositoryService referenceResolver) {
         if (getOutputFTPInfo()== null) {
             setOutputFTPInfo(new PersistentFTPInfo());
             if (jobFTPInfo == null) return;

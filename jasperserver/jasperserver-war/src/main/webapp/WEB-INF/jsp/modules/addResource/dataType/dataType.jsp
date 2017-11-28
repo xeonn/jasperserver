@@ -33,7 +33,7 @@
     </t:putAttribute>
     <t:putAttribute name="bodyID" value="addResource_dataType"/>
     <t:putAttribute name="bodyClass" value="oneColumn flow wizard oneStep"/>
-    <t:putAttribute name="moduleName" value="addDataType.page"/>
+    <t:putAttribute name="moduleName" value="addResource/dataType/addDataTypeMain"/>
     <t:putAttribute name="headerContent">
         <jsp:include page="dataTypeState.jsp"/>
     </t:putAttribute>
@@ -216,7 +216,7 @@
                                                                     <c:set var="time" value="true"/>
                                                                 </c:otherwise>
                                                             </c:choose>
-                                                            
+
                                                             <js:out javaScriptEscape="true">
                                                             <script type="text/javascript">
                                                                 __jrsConfigs__.addDataType.maxValueText = {

@@ -22,7 +22,7 @@
 
 /**
  * @author: Zakhar Tomchenko
- * @version: $Id: TreeLevel.js 1760 2015-10-27 18:45:31Z yplakosh $
+ * @version: $Id: TreeLevel.js 2605 2016-04-12 12:25:50Z akasych $
  */
 
 define(function (require) {
@@ -51,6 +51,7 @@ define(function (require) {
         initialize: function(options) {
             options || (options = {});
 
+            this._isReady = false;
             this.item = options.item || {};
             this.id = this.item.id;
             this.owner = options.owner;
@@ -184,7 +185,9 @@ define(function (require) {
 
         getLevel: function(levelId) {
             return _(this.items)
-                .reduce(function(memo, item) { return memo || (item.id === levelId ? item : item.getLevel(levelId))}, false);
+                .reduce(function(memo, item) {
+                    return memo || (item.id === levelId ? item : item.getLevel(levelId))
+                }, false);
         },
 
         refresh: function(options){
@@ -266,6 +269,10 @@ define(function (require) {
             }
 
             Panel.prototype.remove.apply(this, arguments);
+        },
+
+        isReady: function() {
+            return this._isReady;
         }
     });
 
@@ -284,6 +291,7 @@ define(function (require) {
 
         this.list._calcViewPortHeight();
 
+        this._isReady = true;
         this.trigger("ready", this);
     }
 

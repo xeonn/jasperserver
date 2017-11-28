@@ -28,21 +28,33 @@
 	<t:putAttribute name="pageTitle"><spring:message code="report.scheduling.list.title"/></t:putAttribute>
 	<t:putAttribute name="bodyID" value="scheduler_jobSummary"/>
 	<t:putAttribute name="bodyClass" value="oneColumn scheduler_jobSummary"/>
-	<t:putAttribute name="moduleName" value="scheduler/SchedulerController"/>
+
+	<c:choose>
+		<c:when test="${isPro}">
+			<t:putAttribute name="moduleName" value="schedulerPro/schedulerMain"/>
+		</c:when>
+		<c:otherwise>
+			<t:putAttribute name="moduleName" value="scheduler/schedulerMain"/>
+		</c:otherwise>
+	</c:choose>
 
 	<t:putAttribute name="headerContent">
 
 		<jsp:include page="../inputControls/commonInputControlsImports.jsp" />
 
+		<js:out javaScriptEscape="true">
 		<script type="text/javascript">
 			__jrsConfigs__.usersTimeZone = "${timezone}";
 			__jrsConfigs__.enableSaveToHostFS = "${enableSaveToHostFS}";
+			__jrsConfigs__.reportJobEditorDefaults = JSON.parse('${reportJobDefaults}');
+			__jrsConfigs__.VALUE_SUBSTITUTION = "<spring:message code="input.password.substitution"/>";
 
 			__jrsConfigs__.timeZones = [];
             <c:forEach items="${userTimezones}" var="timezone">
                 __jrsConfigs__.timeZones.push({value: "${timezone.code}", title: "<spring:message code="timezone.option" arguments='${timezone.code},${timezone.description}'/>"});
             </c:forEach>
 		</script>
+		</js:out>
 	</t:putAttribute>
 
 	<t:putAttribute name="bodyContent" >

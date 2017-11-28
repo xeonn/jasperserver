@@ -9,10 +9,10 @@
     <parent>
         <groupId>com.jaspersoft.jasperserver</groupId>
         <artifactId>server</artifactId>
-        <version>6.2.1</version>
+        <version>6.3.0</version>
     </parent>
     <profiles>
-        <!-- enable handling between internal and external builds -->    
+        <!-- enable handling between internal and external builds -->
         <profile>
             <id>jaspersoft-dev-fafj</id>
             <activation>
@@ -26,7 +26,7 @@
                 <dependency>
                     <groupId>com.jaspersoft</groupId>
                     <artifactId>jrs-ui</artifactId>
-                    <version>1.5.10</version>
+                    <version>1.6.4</version>
                     <type>zip</type>
                 </dependency>
             </dependencies>
@@ -60,8 +60,8 @@
                                 </overlay>
                             </overlays>
                         </configuration>
-                    </plugin>                
-                </plugins>                
+                    </plugin>
+                </plugins>
             </build>
         </profile>
         <profile>
@@ -98,8 +98,8 @@
                                 </overlay>
                             </overlays>
                         </configuration>
-                    </plugin>                
-                </plugins>                
+                    </plugin>
+                </plugins>
             </build>
         </profile>
     </profiles>
@@ -107,7 +107,7 @@
         <dependency>
             <groupId>com.jaspersoft.jasperreports</groupId>
             <artifactId>jasperreports-customvisualization</artifactId>
-            <version>6.2.1</version>
+            <version>6.3.0</version>
             <exclusions>
                 <exclusion>
                     <groupId>net.sf.jasperreports</groupId>
@@ -277,14 +277,14 @@
         <dependency>
             <groupId>com.jaspersoft.jasperserver</groupId>
             <artifactId>jasperserver-hive-connector</artifactId>
-            <version>6.2.1</version>
+            <version>6.3.0</version>
         </dependency>
         <dependency>
             <groupId>com.jaspersoft.jasperserver</groupId>
             <artifactId>jasperserver-cassandra-connector</artifactId>
-            <version>6.2.1</version>
+            <version>6.3.0</version>
             <exclusions>
-                <exclusion>
+               <exclusion>
                     <groupId>antlr</groupId>
                     <artifactId>antlr</artifactId>
                 </exclusion>
@@ -538,84 +538,64 @@
         <dependency>
             <groupId>net.sf.jasperreports</groupId>
             <artifactId>jasperreports-chart-themes</artifactId>
-            <version>6.2.1</version>
+            <version>6.3.0</version>
         </dependency>
         <dependency>
             <groupId>net.sf.jasperreports</groupId>
             <artifactId>jasperreports-functions</artifactId>
-            <version>6.2.1</version>
+            <version>6.3.0</version>
         </dependency>
         <!-- bug 32641: fix for installation to JBoss 7. Because we have use deployment module to precisely    -->
         <!--            control batik jar dependencies used by jboss 7, we need to make sure the same jars are -->
         <!--            in place for ce and pro (so they can share the same deployment configuration). So,     -->
         <!--            we are explicitly declaring dependencies for the batik jars. Under CE, it is the fop   -->
         <!--            jar which include the batik jars via the maven transitive dependency functionality.    -->
-        <!--            For pro, it is the jasperreports-fusion.pom file.                                      --> 
+        <!--            For pro, it is the jasperreports-fusion.pom file.                                      -->
         <!-- START: batik dependencies -->
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>batik-anim</artifactId>
-            <version>1.7</version>
+            <version>1.8</version>
         </dependency>
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>batik-awt-util</artifactId>
-            <version>1.7</version>
+            <version>1.8</version>
         </dependency>
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>batik-bridge</artifactId>
-            <version>1.7</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.xmlgraphics</groupId>
-            <artifactId>batik-codec</artifactId>
-            <version>1.7</version>
+            <version>1.8</version>
         </dependency>
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>batik-css</artifactId>
-            <version>1.7</version>
+            <version>1.8</version>
         </dependency>
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>batik-dom</artifactId>
-            <version>1.7</version>
+            <version>1.8</version>
         </dependency>
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>batik-ext</artifactId>
-            <version>1.7</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.xmlgraphics</groupId>
-            <artifactId>batik-extension</artifactId>
-            <version>1.7</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.xmlgraphics</groupId>
-            <artifactId>batik-gui-util</artifactId>
-            <version>1.7</version>
+            <version>1.8</version>
         </dependency>
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>batik-gvt</artifactId>
-            <version>1.7</version>
+            <version>1.8</version>
         </dependency>
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>batik-parser</artifactId>
-            <version>1.7</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.xmlgraphics</groupId>
-            <artifactId>batik-rasterizer</artifactId>
-            <version>1.7</version>
+            <version>1.8</version>
         </dependency>
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>batik-script</artifactId>
-            <version>1.7</version>
+            <version>1.8</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.apache.xmlgraphics</groupId>
@@ -625,43 +605,28 @@
         </dependency>
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
-            <artifactId>batik-squiggle</artifactId>
-            <version>1.7</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>batik-svg-dom</artifactId>
-            <version>1.7</version>
+            <version>1.8</version>
         </dependency>
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>batik-svggen</artifactId>
-            <version>1.7</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.xmlgraphics</groupId>
-            <artifactId>batik-svgpp</artifactId>
-            <version>1.7</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.xmlgraphics</groupId>
-            <artifactId>batik-swing</artifactId>
-            <version>1.7</version>
+            <version>1.8</version>
         </dependency>
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>batik-transcoder</artifactId>
-            <version>1.7</version>
+            <version>1.8</version>
         </dependency>
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>batik-util</artifactId>
-            <version>1.7</version>
+            <version>1.8</version>
         </dependency>
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>batik-xml</artifactId>
-            <version>1.7</version>
+            <version>1.8</version>
         </dependency>
         <!-- END: batik dependencies -->
         <dependency>
@@ -710,7 +675,7 @@
             <version>2.4</version>
             <exclusions>
                 <exclusion>
-                    <groupId>commons-pool</groupId>                
+                    <groupId>commons-pool</groupId>
                     <artifactId>commons-pool</artifactId>
                 </exclusion>
             </exclusions>
@@ -720,7 +685,7 @@
             <artifactId>js-mongodb-datasource</artifactId>
 	    <exclusions>
                 <exclusion>
-                    <groupId>commons-pool</groupId>                
+                    <groupId>commons-pool</groupId>
                     <artifactId>commons-pool</artifactId>
                 </exclusion>
             </exclusions>
@@ -732,7 +697,7 @@
         <dependency>
             <groupId>com.jaspersoft.jasperserver</groupId>
             <artifactId>jrs-mongodb-datasource</artifactId>
-            <version>6.2.1</version>
+            <version>6.3.0</version>
         </dependency>
 
         <!-- big data connector components END -->

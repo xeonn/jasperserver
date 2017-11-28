@@ -22,7 +22,7 @@
 
 /**
  * @author: Yuriy Plakosh
- * @version: $Id: components.dialogs.js 9909 2016-02-25 19:56:31Z dgorbenk $
+ * @version: $Id: components.dialogs.js 10130 2016-05-06 21:42:35Z dlitvak $
  */
 
 /**
@@ -41,19 +41,37 @@ var dialogs = {};
 dialogs.systemConfirm = {
     container: null,
     message: null,
-    show: function(message, duration) {
+    show: function(message, duration, isWarning) {
 
         if(window.isEmbeddedDesigner){
+            if (isWarning) {
+                message = '<span class="warning">' + message + '</span>';
+            }
+
             jQuery(document).trigger("adhocDesigner:notification", [message, duration]);
         }else{
             this.container = this.container || jQuery('#systemMessageConsole').on('mouseup touchend', function() {
                 dialogs.systemConfirm.container.slideUp();
             });
+
             this.message = this.message || document.getElementById('systemMessage');
+            if (!this.message) {//unable to find DOM elem to output the system message
+                console.warn(message);
+                return;
+            }
+
             if (!this.closeText){
                 this.closeText = this.message.innerHTML.toLowerCase();
             }
-            this.message.innerHTML = xssUtil.escape(message) + ' <span>| <a href="#">'+ xssUtil.escape(this.closeText) +'</a></span>';
+
+            message = xssUtil.escape(message) + ' <span>| <a href="#">'+ xssUtil.escape(this.closeText) +'</a></span>';
+            if (isWarning) {
+                this.message.innerHTML = '<span class="warning">' + message + '</span>';
+            }
+            else {
+                this.message.innerHTML = message;
+            }
+
             dialogs.systemConfirm.container.slideDown();
             setTimeout('dialogs.systemConfirm.hide()', duration ? duration : 2000);
         }
@@ -62,8 +80,7 @@ dialogs.systemConfirm = {
     },
 
     showWarning: function(message, duration) {
-        message = '<span class="warning">' + message + '</span>';
-        this.show(message, duration);
+        this.show(message, duration, true);
     },
 
     hide: function() {
@@ -72,6 +89,10 @@ dialogs.systemConfirm = {
         }
     }
 };
+
+jQuery(document).on('systemDialogWarn', function(event, message, duration) {
+    dialogs.systemConfirm.showWarning(message, duration);
+});
 
 //////////////////////////////////////////////
 // Ajax Error Popup Dialog object and methods

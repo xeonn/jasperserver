@@ -15,22 +15,24 @@
     the web service handler classes, not Spring. However, we can do the context integration
     filter, which associates a security context with the http session, and call
     into the Acegi beans from the service handler
+
+    NOTE: This filter chain is ONLY for authentication and authorization.  Other filters should go into web.xml or another filter proxy chain.
     -->
-    <bean id="filterChainProxy" class="org.springframework.security.web.FilterChainProxy">
+    <bean id="authenticationAuthoirizationFilterChainProxy" class="org.springframework.security.web.FilterChainProxy">
         <security:filter-chain-map path-type="ant" request-matcher="ant">
             <security:filter-chain pattern="/xmla" filters="httpSessionContextIntegrationFilter,${bean.loggingFilter},${bean.basicProcessingFilter},JIAuthenticationSynchronizer,${bean.diagnosticLoggingFilter},anonymousProcessingFilter,basicAuthExceptionTranslationFilter,filterInvocationInterceptor"/>
             <security:filter-chain pattern="/services/**" filters="httpSessionContextIntegrationFilter,${bean.loggingFilter},delegatingCASSingleSignOutFilter,delegatingPreAuthenticatedFilter,${bean.portletAuthenticationProcessingFilter},delegatingBasicProcessingFilter,${bean.passwordExpirationProcessingFilter},JIAuthenticationSynchronizer,${bean.diagnosticLoggingFilter},anonymousProcessingFilter,wsBasicAuthExceptionTranslationFilter,filterInvocationInterceptor"/>
             <security:filter-chain pattern="/rest/login" filters="httpSessionContextIntegrationFilter,${bean.loggingFilter}, encryptionFilter,delegatingCASSingleSignOutFilter,delegatingPreAuthenticatedFilter,delegatingAuthenticationRestProcessingFilter,JIAuthenticationSynchronizer,${bean.diagnosticLoggingFilter},anonymousProcessingFilter,filterInvocationInterceptor"/>
             <security:filter-chain pattern="/rest/**" filters="httpSessionContextIntegrationFilter,${bean.loggingFilter},delegatingCASSingleSignOutFilter,delegatingPreAuthenticatedFilter,${bean.portletAuthenticationProcessingFilter},delegatingBasicProcessingFilter,${bean.passwordExpirationProcessingFilter},JIAuthenticationSynchronizer,${bean.diagnosticLoggingFilter},anonymousProcessingFilter,wsBasicAuthExceptionTranslationFilter,filterInvocationInterceptor"/>
-            <security:filter-chain pattern="/rest_v2/**" filters="httpSessionContextIntegrationFilter,encryptionFilter,delegatingCASSingleSignOutFilter,textOnlyResponseWebAppSecurityFilter,jsCsrfGuardFilter,${bean.loggingFilter},${bean.userPreferencesFilter},delegatingPreAuthenticatedFilter,${bean.authenticationProcessingFilter},${bean.userPreferencesFilter},delegatingBasicProcessingFilter,delegatingRequestParameterAuthenticationFilter,JIAuthenticationSynchronizer,${bean.diagnosticLoggingFilter},anonymousProcessingFilter,restExceptionTranslationFilter,filterInvocationInterceptor"/>
-            <security:filter-chain pattern="/**" filters="httpSessionContextIntegrationFilter,encryptionFilter,delegatingCASSingleSignOutFilter,multipartRequestWrapperFilter,webAppSecurityFilter,jsCsrfGuardFilter,${bean.loggingFilter},${bean.userPreferencesFilter},delegatingPreAuthenticatedFilter,delegatingAuthenticationProcessingFilter,${bean.userPreferencesFilter},delegatingBasicProcessingFilter,delegatingRequestParameterAuthenticationFilter,JIAuthenticationSynchronizer,${bean.diagnosticLoggingFilter},anonymousProcessingFilter,delegatingExceptionTranslationFilter,filterInvocationInterceptor,switchUserProcessingFilter,iPadSupportFilter"/>
+            <security:filter-chain pattern="/rest_v2/**" filters="httpSessionContextIntegrationFilter,encryptionFilter,delegatingCASSingleSignOutFilter,textOnlyResponseWebAppSecurityFilter,${bean.loggingFilter},${bean.userPreferencesFilter},delegatingPreAuthenticatedFilter,${bean.authenticationProcessingFilter},${bean.userPreferencesFilter},delegatingBasicProcessingFilter,delegatingRequestParameterAuthenticationFilter,JIAuthenticationSynchronizer,${bean.diagnosticLoggingFilter},anonymousProcessingFilter,restExceptionTranslationFilter,filterInvocationInterceptor"/>
+            <security:filter-chain pattern="/**" filters="httpSessionContextIntegrationFilter,encryptionFilter,delegatingCASSingleSignOutFilter,multipartRequestWrapperFilter,webAppSecurityFilter,${bean.loggingFilter},${bean.userPreferencesFilter},delegatingPreAuthenticatedFilter,delegatingAuthenticationProcessingFilter,${bean.userPreferencesFilter},delegatingBasicProcessingFilter,delegatingRequestParameterAuthenticationFilter,JIAuthenticationSynchronizer,${bean.diagnosticLoggingFilter},anonymousProcessingFilter,delegatingExceptionTranslationFilter,filterInvocationInterceptor,switchUserProcessingFilter,iPadSupportFilter"/>
         </security:filter-chain-map>
     </bean>
 
     <!-- updater bean to insert a filter -->
     <bean id="insertFilter" class="com.jaspersoft.jasperserver.api.common.util.spring.GenericBeanUpdaterDefinition">
         <property name="order" value="10"/>
-        <property name="beanName" value="filterChainProxy"/>
+        <property name="beanName" value="authenticationAuthoirizationFilterChainProxy"/>
         <property name="propertyName" value="filterChainMap"/>
         <property name="operation" value="insert"/>
     </bean>
@@ -56,6 +58,7 @@
         <property name="userService">
             <ref bean="${bean.internalUserAuthorityService}"/>
         </property>
+        <property name="configuration" ref="configurationBean"/>
     </bean>
 
     <!-- Basic Authentication -->
@@ -169,7 +172,7 @@
     <bean id="failureHandler" class="org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler" >
         <property name="defaultFailureUrl" value="/login.html?error=1" />
     </bean>
-    <bean id="sas" class="org.springframework.security.web.authentication.session.SessionFixationProtectionStrategy">
+    <bean id="sas" class="com.jaspersoft.jasperserver.api.security.JSSessionFixationProtectionStrategy">
         <property name="migrateSessionAttributes" value="true" />
     </bean>
 
@@ -226,8 +229,6 @@
     </bean>
 
     <bean id="textOnlyResponseWebAppSecurityFilter" class="com.jaspersoft.jasperserver.api.security.TextOnlyResponseWebAppSecurityFilter" parent="webAppSecurityFilter"/>
-
-    <bean id="jsCsrfGuardFilter" class="com.jaspersoft.jasperserver.api.security.JSCsrfGuardFilter"/>
 
     <bean id="encryptionFilter" class="com.jaspersoft.jasperserver.api.security.encryption.EncryptionFilter">
         <property name="messages" ref="messageSource"/>
@@ -334,6 +335,8 @@
                 <security:intercept-url pattern="/rest_v2/application.wadl/xsd0.xsd" access="ROLE_ANONYMOUS,ROLE_USER,ROLE_ADMINISTRATOR" />
                 <security:intercept-url pattern="/rest_v2/bundles/**" access="ROLE_ANONYMOUS,ROLE_USER,ROLE_ADMINISTRATOR" />
                 <security:intercept-url pattern="/rest_v2/settings/**" access="ROLE_ANONYMOUS,ROLE_USER,ROLE_ADMINISTRATOR" />
+                <security:intercept-url pattern="/rest_v2/customDataSources" access="ROLE_USER,ROLE_ADMINISTRATOR" />
+                <security:intercept-url pattern="/rest_v2/jdbcDrivers" method="GET" access="ROLE_USER,ROLE_ADMINISTRATOR" />
                 <security:intercept-url pattern="/404.html" access="ROLE_ANONYMOUS,ROLE_USER,ROLE_ADMINISTRATOR" />
                 <security:intercept-url pattern="/500.html" access="ROLE_ANONYMOUS,ROLE_USER,ROLE_ADMINISTRATOR" />
                 <security:intercept-url pattern="/reportgenerator.html" access="ROLE_USER,ROLE_ADMINISTRATOR" />

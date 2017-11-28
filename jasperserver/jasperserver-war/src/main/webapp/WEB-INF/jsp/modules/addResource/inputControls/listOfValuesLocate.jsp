@@ -28,7 +28,7 @@
 
     <t:putAttribute name="bodyClass" value="oneColumn flow wizard"/>
 
-    <t:putAttribute name="moduleName" value="listOfValuesLocate.page"/>
+    <t:putAttribute name="moduleName" value="addResource/inputControls/listOfValuesLocateMain"/>
 
     <t:putAttribute name="headerContent">
         <jsp:include page="listOfValuesLocateState.jsp"/>
@@ -68,7 +68,7 @@
                                                     <div class="control radio">
                                                         <label class="wrap" for="LOCAL" title="<spring:message code='addResources.analysisClient.defineDataSource'/>">
                                                             <spring:message code='addResources.listOfValuesLocate.defineListOfValues' javaScriptEscape='true'/>
-                                                        </label>                                              
+                                                        </label>
                                                         <input class="" id="LOCAL" type="radio" name="${status.expression}"
                                                                value="LOCAL" <c:if test='${status.value=="LOCAL"}'>checked="true"</c:if>/>
                                                     </div>

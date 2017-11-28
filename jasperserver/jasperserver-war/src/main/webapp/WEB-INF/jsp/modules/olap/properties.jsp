@@ -28,7 +28,7 @@
     <t:putAttribute name="pageTitle"><spring:message code="menu.mondrian.properties"/></t:putAttribute>
     <t:putAttribute name="bodyID" value="analysisOptions"/>
     <t:putAttribute name="bodyClass" value="twoColumn"/>
-    <t:putAttribute name="moduleName" value="admin.options.page"/>
+    <t:putAttribute name="moduleName" value="administer/administerAnalysisOptionsMain"/>
     <t:putAttribute name="headerContent">
         <%@ include file="propertiesState.jsp" %>
     </t:putAttribute>

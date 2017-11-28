@@ -34,7 +34,7 @@ import java.util.Set;
  * accessed by security validators and filters.
  *
  * @author Anton Fomin
- * @version $Id: SecurityConfiguration.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: SecurityConfiguration.java 63046 2016-05-07 00:16:08Z dlitvak $
  */
 public final class SecurityConfiguration {
     /* Logger */
@@ -48,7 +48,6 @@ public final class SecurityConfiguration {
 
     /* Property names */
     private static final String INPUT_FILTER_SWITCH = "security.validation.input.on";
-    private static final String CSRF_FILTER_SWITCH = "security.validation.csrf.on";
     private static final String SQL_FILTER_SWITCH = "security.validation.sql.on";
     public static final String SQL_COMMENTS_REGEXP = "security.validation.sql.comments.regexp";
     private static final String ENCRYPTION_FILTER_SWITCH = "encryption.on";
@@ -68,7 +67,7 @@ public final class SecurityConfiguration {
     private static final String KEYSTORE_KEY_ALIAS = "keystore.key.alias";
 
     private static final String INPUT_VALIDATION = "INPUT-VALIDATION";
-    private static final String CSRF = "CSRF";
+
     private static final String SQL_INJECTION = "SQL-INJECTION";
     private static final String ENCRYPTION = "ENCRYPTION";
 
@@ -128,10 +127,6 @@ public final class SecurityConfiguration {
             logSecuritySetting(INPUT_VALIDATION);
         }
 
-        if (!isCSRFValidationOn()) {
-            logSecuritySetting(CSRF);
-        }
-
         if (!isSQLValidationOn()) {
             logSecuritySetting(SQL_INJECTION);
         }
@@ -156,14 +151,6 @@ public final class SecurityConfiguration {
     public static boolean isInputValidationOn() {
         final String inputValidationOn = getProperty(INPUT_FILTER_SWITCH);
         return inputValidationOn != null && inputValidationOn.equalsIgnoreCase("false") ? false : true;
-    }
-
-    /**
-     * @return true only if config is true
-     */
-    public static boolean isCSRFValidationOn() {
-        final String csrfValidationOn = getProperty(CSRF_FILTER_SWITCH);
-        return csrfValidationOn != null && csrfValidationOn.equalsIgnoreCase("false") ? false : true;
     }
 
     /**

@@ -12,7 +12,7 @@
     <t:putAttribute name="pageTitle"><spring:message code="menu.aws.settings"/></t:putAttribute>
     <t:putAttribute name="bodyID" value="awsOptions"/>
     <t:putAttribute name="bodyClass" value="twoColumn"/>
-    <t:putAttribute name="moduleName" value="admin.options.page"/>
+    <t:putAttribute name="moduleName" value="administer/administerAnalysisOptionsMain"/>
 
     <t:putAttribute name="headerContent">
 
@@ -32,11 +32,10 @@
                 <ol class="list settings">
                     <li class="node">
                         <div class="wrap">
-                            <h2 class="title settingsGroup"><spring:message code="aws.db.security.group.settings.title"/></h2>
+                            <h2 class="title settingsGroup"><spring:message code="cloud.settings.general"/></h2>
                         </div>
-                        <p class="description"><spring:message code="aws.db.security.group.settings.title.description"/></p>
+                        <p class="description"><spring:message code="cloud.settings.general.description"/></p>
                         <ol class="list settings">
-                            <%@include file="awsConfigurationInclude.jsp"%>
 
                             <%
                                 request.setAttribute("oName", "aws.db.security.group.changes.enabled");
@@ -66,6 +65,19 @@
                                 request.setAttribute("oValue", request.getAttribute("aws.db.security.group.ingressPublicIp"));
                             %>
                             <jsp:include page="templateInputText.jsp" flush="true" />
+
+                        </ol>
+                    </li>
+                </ol>
+                <ol class="list settings">
+                    <li class="node">
+                        <div class="wrap">
+                            <h2 class="title settingsGroup"><spring:message code="aws.db.security.group.settings.title"/></h2>
+                        </div>
+                        <p class="description"><spring:message code="aws.db.security.group.settings.title.description"/></p>
+                        <ol class="list settings">
+
+                            <%@include file="awsConfigurationInclude.jsp"%>
 
                             <%
                                 request.setAttribute("oName", "aws.db.security.group.suppressEc2CredentialsWarnings");

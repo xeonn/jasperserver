@@ -36,7 +36,7 @@ import org.springframework.stereotype.Service;
  * @version $Id$
  */
 @Service
-public class RoleConverter implements ToServerConverter<ClientRole, Role>, ToClientConverter<Role, ClientRole> {
+public class RoleConverter implements ToServerConverter<ClientRole, Role, ToServerConversionOptions>, ToClientConverter<Role, ClientRole, ToClientConversionOptions> {
     @Override
     public ClientRole toClient(Role serverObject, ToClientConversionOptions options) {
         ClientRole clientRole = new ClientRole();

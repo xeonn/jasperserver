@@ -22,11 +22,7 @@
 package com.jaspersoft.jasperserver.remote.services.impl;
 
 import com.jaspersoft.jasperserver.api.JSExceptionWrapper;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.ContentResource;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.FileResource;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.Folder;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceLookup;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.*;
 import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
 import com.jaspersoft.jasperserver.api.metadata.user.domain.User;
 import com.jaspersoft.jasperserver.api.search.SearchCriteriaFactory;
@@ -51,16 +47,12 @@ import com.jaspersoft.jasperserver.search.service.RepositorySearchResult;
 import com.jaspersoft.jasperserver.search.service.RepositorySearchService;
 import com.jaspersoft.jasperserver.search.service.impl.RepositorySearchAccumulator;
 import com.jaspersoft.jasperserver.search.service.impl.RepositorySearchCriteriaImpl;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
@@ -73,7 +65,16 @@ public class BatchRepositoryServiceImpl implements BatchRepositoryService {
 
     protected static final Log log = LogFactory.getLog(BatchRepositoryServiceImpl.class);
     protected static final Pattern ILLEGAL_URI_SYMBOL_PATTERN = Pattern.compile("[~!#\\$%^|\\s`&*()\\-+={}\\[\\]:;\"',?\\|\\\\]");
+    protected static final Set<String> FILE_TYPES;
 
+    static {
+        Set<String> fileTypes = new HashSet<String>();
+        for (ClientFile.FileType fileType : ClientFile.FileType.values()) {
+            fileTypes.add(fileType.toString());
+        }
+
+        FILE_TYPES = Collections.unmodifiableSet(fileTypes);
+    }
 
     @javax.annotation.Resource(name = "concreteRepository")
     private RepositoryService service;
@@ -217,16 +218,28 @@ public class BatchRepositoryServiceImpl implements BatchRepositoryService {
                     serverTypes.add(ContentResource.class.getName());
                 }
 
+                // TODO: implement generic solution handling any fileType of FileResource
+                if (types.remove(FileResource.TYPE_SECURE_FILE)) {
+                    serverTypes.add(FileResource.TYPE_SECURE_FILE);
+                    serverTypes.add(FileResource.class.getName());
+                }
+
+                List<String> fileTypes = new ArrayList<String>();
                 for (String type : types) {
                     try {
-                        serverTypes.add(resourceConverterProvider.getToServerConverter(type).getServerResourceType());
+                        if (FILE_TYPES.contains(type)){
+                            fileTypes.add(type);
+                        } else {
+                            serverTypes.add(resourceConverterProvider.getToServerConverter(type).getServerResourceType());
+                        }
                     } catch (IllegalParameterValueException e) {
                         // ignore wrong or unknown types
                     }
                 }
                 searchCriteria.setResourceTypes(serverTypes);
+                searchCriteria.setFileResourceTypes(fileTypes);
                 // if all types incorrect - we should not search anything
-                searchSuitable = !serverTypes.isEmpty();
+                searchSuitable = !serverTypes.isEmpty() || !fileTypes.isEmpty();
 
                 if (searchCriteria.getContainerResourceTypes() != null){
                     List<String> containerServerTypes = new ArrayList<String>();

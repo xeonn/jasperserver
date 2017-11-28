@@ -22,7 +22,7 @@
 
 /**
  * @author: Dima Gorbenko
- * @version: $Id: BaseDataSourceModel.js 9599 2015-10-27 19:38:56Z yplakosh $
+ * @version: $Id: BaseDataSourceModel.js 10166 2016-05-26 22:39:40Z gbacon $
  */
 
 /* global ajax, dialogs, AjaxRequester */
@@ -31,7 +31,7 @@ define(function (require) {
     "use strict";
 
     var
-		ResourceModel = require("bi/repo/model/RepositoryResourceModel"),
+		ResourceModel = require("bi/repository/model/RepositoryResourceModel"),
         _ = require("underscore"),
         $ = require("jquery"),
         Backbone = require("backbone"),
@@ -51,6 +51,8 @@ define(function (require) {
         validation: {},
 
         initialize: function(attributes, options) {
+			options = _.defaults(options || {}, {contextPath: jrsConfigs.contextPath});
+
             this.options = options;
 
 			if (this.isNew()) {
@@ -66,7 +68,7 @@ define(function (require) {
                 this.set("uri", ResourceModel.constructUri(parentFolderUri, attributes.name), { silent: true });
             }
 
-			ResourceModel.prototype.initialize.apply(this, arguments);
+			ResourceModel.prototype.initialize.call(this, attributes, options);
         },
         
 		testConnection: function() {

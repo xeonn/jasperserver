@@ -21,6 +21,7 @@
 
 define({
     AWS: "application/repository.awsDataSource+json",
+    AZURE_SQL: "application/repository.azureSqlDataSource+json",
     BEAN: "application/repository.beanDataSource+json",
     JDBC: "application/repository.jdbcDataSource+json",
     JNDI: "application/repository.jndiJdbcDataSource+json",

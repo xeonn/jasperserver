@@ -26,7 +26,7 @@ import java.util.List;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ModuleRegister.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: ModuleRegister.java 63380 2016-05-26 20:56:46Z mchan $
  */
 public interface ModuleRegister {
 	
@@ -35,5 +35,7 @@ public interface ModuleRegister {
 	List getImporterModules();
 
 	ImporterModule getImporterModule(String id);
-	
+
+	ExporterModule getExporterModule(String id);
+
 }

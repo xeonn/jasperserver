@@ -22,7 +22,7 @@
 
 /**
  * @author: Dima Gorbenko
- * @version: $Id: DataSourceController.js 9614 2015-11-09 16:51:06Z dgorbenk $
+ * @version: $Id: DataSourceController.js 9936 2016-03-09 05:21:23Z yplakosh $
  */
 
 /* global dialogs, redirectToUrl */
@@ -125,6 +125,7 @@ define(function (require) {
         renderDataSourceContainer: function() {
             // key in dataSourceLabelSuffixes should be equal to corresponding key in dataSourceResourceTypes
             var dataSourceLabelSuffixes = {
+                    AZURE_SQL: "AzureSql",
                     AWS: "Aws",
                     BEAN: "Bean",
                     JDBC: "JDBC",

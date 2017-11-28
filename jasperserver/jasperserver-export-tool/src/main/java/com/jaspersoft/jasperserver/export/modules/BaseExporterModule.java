@@ -47,7 +47,7 @@ import com.jaspersoft.jasperserver.export.util.CommandOut;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: BaseExporterModule.java 58265 2015-10-05 16:13:56Z vzavadsk $
+ * @version $Id: BaseExporterModule.java 63380 2016-05-26 20:56:46Z mchan $
  */
 public abstract class BaseExporterModule extends BasicExporterImporterModule implements ExporterModule {
 
@@ -121,7 +121,7 @@ public abstract class BaseExporterModule extends BasicExporterImporterModule imp
 		return exportParams.getParameterValues(name);
 	}
 
-	protected Element getIndexElement() {
+	public Element getIndexElement() {
 		return exportContext.getModuleIndexElement();
 	}
 	

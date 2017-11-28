@@ -48,8 +48,8 @@ import java.util.List;
 public class TenantImporter extends BaseImporterModule
 {
 	protected static final Log log = LogFactory.getLog(TenantImporter.class);
-	
-	private TenantModuleConfiguration moduleConfiguration;
+
+    protected TenantModuleConfiguration moduleConfiguration;
     protected ResourceModuleConfiguration resourceModuleConfiguration;
     private String updateArg;
     private String includeServerSettings;

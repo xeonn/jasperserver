@@ -29,7 +29,7 @@ import com.jaspersoft.jasperserver.war.cascade.InputControlValidationException;
 
 /**
  * @author Yaroslav.Kovalchyk
- * @version $Id: DataConverterService.java 58870 2015-10-27 22:30:55Z esytnik $
+ * @version $Id: DataConverterService.java 62954 2016-05-01 09:49:23Z ykovalch $
  */
 public interface DataConverterService extends GlobalDefaultValueProvider {
 
@@ -40,6 +40,8 @@ public interface DataConverterService extends GlobalDefaultValueProvider {
             throws CascadeResourceNotFoundException, InputControlValidationException;
 
     String formatSingleValue(Object typedValue, DataType dataType, Class<?> valueClass);
+
+    String formatSingleValue(Object typedValue);
 
     Object convertSingleValue(String rawValue, DataType dataType, Class<?> valueClass)
             throws InputControlValidationException;

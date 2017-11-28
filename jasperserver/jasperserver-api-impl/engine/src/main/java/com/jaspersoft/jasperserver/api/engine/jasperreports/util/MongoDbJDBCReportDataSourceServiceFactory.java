@@ -21,6 +21,7 @@
 package com.jaspersoft.jasperserver.api.engine.jasperreports.util;
 
 import com.jaspersoft.jasperserver.api.JSException;
+import com.jaspersoft.jasperserver.api.common.domain.impl.ExecutionContextImpl;
 import com.jaspersoft.jasperserver.api.metadata.common.domain.client.FileResourceImpl;
 import com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.CustomJdbcReportDataSourceProvider;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.service.impl.JdbcDataSourceService;
@@ -38,12 +39,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import javax.sql.DataSource;
-import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -65,6 +64,14 @@ public class MongoDbJDBCReportDataSourceServiceFactory extends JdbcReportDataSou
     private String schemaDefinitionDirectory;
     private PooledObjectCache jdbcSchemaCache = new PooledObjectCache();
     private int mongoDBJDBCSchemaDefinitionTimeoutInMinute;
+
+
+    public MongoDbJDBCReportDataSourceServiceFactory() {
+        super();
+        // JRS-8857:  clean up progress JDBC schema in temp folder after re-starting tomcat
+        cleanup("cass_", System.getProperty("java.io.tmpdir"));
+
+    }
 
     public void setCustomDataSourceDefinition(CustomDataSourceDefinition dsDef) {
         // do nothing
@@ -99,6 +106,7 @@ public class MongoDbJDBCReportDataSourceServiceFactory extends JdbcReportDataSou
         String database = ((String) customReportDataSource.getPropertyMap().get("database"));
         String connectionOptions = ((String) customReportDataSource.getPropertyMap().get("connectionOptions"));
         String schemaDefinition = null;
+        boolean isTestConnection = isTestConnection();
 
         // read resource from repo
         if ((customReportDataSource.getResources() != null) && (customReportDataSource.getResources().size() >= 1)) {
@@ -116,12 +124,20 @@ public class MongoDbJDBCReportDataSourceServiceFactory extends JdbcReportDataSou
             if (resourceReference != null) {
                 debug("REPO RESOURCE = " + resourceReference.getReferenceURI());
                 debug("MongoDB JDBC directory = " + schemaDefinitionDirectory);
-                schemaDefinition = saveResourceToDisk(resourceReference);
-
+                // write mongodb schema resource from repo to disk, therefore, mongodb driver will be able to find and execute the file
+                schemaDefinition = saveResourceToDisk(resourceReference, isTestConnection);
             }
         }
         boolean uploadSchemaToRepo = false;
-        if (schemaDefinition == null) {
+
+        String createDB = null;
+        if (customReportDataSource.getPropertyMap().get(MongoDbJDBCDataSourceDefinition.FILE_NAME_PROP) != null) {
+            // do not create schema definition if auto generate schema is off
+            createDB = "no";
+        }
+
+        // always generate new tmp schema file for test connection if auto schema auto generation is ON
+        if ((schemaDefinition == null) || (isTestConnection  && (createDB == null))) {
             schemaDefinition = ((String) customReportDataSource.getPropertyMap().get(MongoDbJDBCDataSourceDefinition.FILE_NAME_PROP));
             // reset schemaDefinition for testing
             // schemaDefinition = null;
@@ -129,19 +145,28 @@ public class MongoDbJDBCReportDataSourceServiceFactory extends JdbcReportDataSou
             if ((schemaDefinition == null) || schemaDefinition.equals("")) {
                 String schemaKey = customReportDataSource.getURIString() + "_" + customReportDataSource.getCreationDate() + "_" + customReportDataSource.getUpdateDate();
                 debug("Create MongoDB JBDC Key = " + schemaKey);
-                String schemaPrefix = "mongodbJDBC-" + schemaKey.hashCode() + ".";
-                File outputLocation = new File(schemaDefinitionDirectory, schemaPrefix + "config");
+                String schemaPrefix = "mongodbJDBC-" + schemaKey.hashCode();
+
+
+                if (isTestConnection) {
+                    // always generate new schema name for test connection
+                    schemaPrefix = schemaPrefix + "_" + System.currentTimeMillis();
+                }
+                File outputLocation = new File(schemaDefinitionDirectory, schemaPrefix + ".config");
                 schemaDefinition = outputLocation.getAbsolutePath();
                 debug("New schema definition location = " + schemaDefinition);
                 // bug 44062, upload the mapping file only if it's datasource already in the repo
                 uploadSchemaToRepo = isDatasourceInRepo(customReportDataSource);
             }
         }
+
         debug("Schema Definition on disk = " + schemaDefinition);
         if (userName != null && password != null) url = url + ";User=" + userName + ";Password=" + password;
         if (database != null) url = url + ";DatabaseName=" + database;
         if (schemaDefinition != null) url = url + ";SchemaDefinition=" + schemaDefinition;
+        if (createDB != null) url = url + ";CreateDB=" + createDB;
         if (connectionOptions != null) url = url + ";" + connectionOptions;
+
 
         debug("CONNECT URL = " + url);
         JdbcReportDataSourceImpl jdbcReportDataSource = new JdbcReportDataSourceImpl();
@@ -151,7 +176,7 @@ public class MongoDbJDBCReportDataSourceServiceFactory extends JdbcReportDataSou
         jdbcReportDataSource.setUsername(userName);
         jdbcReportDataSource.setName(customReportDataSource.getName());
 
-        if (uploadSchemaToRepo) {
+        if (uploadSchemaToRepo && !isTestConnection) {
             createAndUploadSchemaToRepo(customReportDataSource, jdbcReportDataSource);
         }
 
@@ -179,6 +204,7 @@ public class MongoDbJDBCReportDataSourceServiceFactory extends JdbcReportDataSou
 
     private void saveFileToResource(CustomReportDataSource customReportDataSource, JdbcReportDataSource jdbcReportDataSource) {
         if ((customReportDataSource.getResources() != null) && (customReportDataSource.getResources().size() >= 1)) return;
+
         debug("SAVE FILE TO RESOURCE...");
         String diskFile = getPropertyValue(jdbcReportDataSource.getConnectionUrl(), "SchemaDefinition");
         FileResourceImpl fileResourceImpl = new FileResourceImpl();
@@ -207,17 +233,35 @@ public class MongoDbJDBCReportDataSourceServiceFactory extends JdbcReportDataSou
             ResourceReference resourceReference = new ResourceReference(fileResourceImpl);
             HashMap<String, ResourceReference> resources = new HashMap<String, ResourceReference>();
             resources.put(MongoDbJDBCDataSourceDefinition.DATA_FILE_RESOURCE_ALIAS, resourceReference);
+
+
+            // Bug 44486
+            // If the datasource uses profile attributes then they get expanded before we get here.
+            // When we update the datasource here the expanded values get saved as well.
+            // To prevent that we take an original version from repository and update it with the resource.
+
+
+                CustomReportDataSource dsFromRepo = (CustomReportDataSource) repositoryService.getResource(null, customReportDataSource.getURI());
+                if (dsFromRepo != null) {
+                    customReportDataSource = replaceProperties(dsFromRepo, customReportDataSource);
+                }
             customReportDataSource.setResources(resources);
 
-            repositoryService.saveResource(null, customReportDataSource);
-            debug("Custom DS IS SAVED...");
+
+            ExecutionContextImpl context = new ExecutionContextImpl();
+            List attr = new ArrayList();
+            attr.add(RepositoryService.IS_OVERWRITING);
+            context.setAttributes(attr);
+
+            repositoryService.saveResource(context, customReportDataSource);
+
         } catch (IOException e) {
             e.printStackTrace();
         }
 
     }
 
-    private String saveResourceToDisk(ResourceReference resourceReference) {
+    private String saveResourceToDisk(ResourceReference resourceReference, boolean isTestConnection) {
         long now = System.currentTimeMillis();
         try {
             String absoluteFileLocation = null;
@@ -234,9 +278,14 @@ public class MongoDbJDBCReportDataSourceServiceFactory extends JdbcReportDataSou
             }
             String schemaKey = fileResource.getURIString() + "_" + fileResource.getCreationDate() + "_" + fileResource.getUpdateDate();
             debug("Create MongoDB JBDC Key = " + schemaKey);
-            String schemaPrefix = "mongodbJDBC-" + schemaKey.hashCode() + ".";
+            String schemaPrefix = "mongodbJDBC-" + schemaKey.hashCode();
 
-            File outputLocation = new File(schemaDefinitionDirectory, schemaPrefix + "config");
+            if (isTestConnection) {
+                // test connection
+                schemaPrefix = schemaPrefix + "_" + System.currentTimeMillis();
+            }
+
+            File outputLocation = new File(schemaDefinitionDirectory, schemaPrefix + ".config");
 
 
             // mark virtual data source is in used
@@ -340,15 +389,7 @@ public class MongoDbJDBCReportDataSourceServiceFactory extends JdbcReportDataSou
         }
 
         public void release() throws Exception {
-            File schemaDirectory = new File(schemaDefinitionDirectory);
-            File[] deleteFileList = schemaDirectory.listFiles(new FileNameFilterImpl(schemaPrefix));
-            for (File deleteFile : deleteFileList) {
-                try {
-                    deleteFile.delete();
-                } catch (Exception ex) {
-                    debug("Fail to delete Mongodb JDBC schema: " + deleteFile.getAbsolutePath(), ex);
-                }
-            }
+            cleanup(schemaPrefix, schemaDefinitionDirectory);
         }
     }
 
@@ -397,6 +438,21 @@ public class MongoDbJDBCReportDataSourceServiceFactory extends JdbcReportDataSou
                 }
             }
         }
+
+
+    }
+
+    public void cleanup(String filePrefix, String schemaDefinitionDirectory) {
+        File schemaDirectory = new File(schemaDefinitionDirectory);
+        File[] deleteFileList = schemaDirectory.listFiles(new FileNameFilterImpl(filePrefix));
+        if (deleteFileList == null) return;
+        for (File deleteFile : deleteFileList) {
+            try {
+                deleteFile.delete();
+            } catch (Exception ex) {
+                debug("Fail to delete Mongodb JDBC schema: " + deleteFile.getAbsolutePath(), ex);
+            }
+        }
     }
 
     private String getPropertyValue(String url, String propertyKey) {
@@ -409,6 +465,30 @@ public class MongoDbJDBCReportDataSourceServiceFactory extends JdbcReportDataSou
             }
         }
         return null;
+    }
+
+    private CustomReportDataSource replaceProperties(CustomReportDataSource originalDS, CustomReportDataSource currentDS) {
+        Iterator it = currentDS.getPropertyMap().entrySet().iterator();
+        boolean isUpdated = false;
+        while (it.hasNext()) {
+            Map.Entry pair = (Map.Entry) it.next();
+            Object orgValue = originalDS.getPropertyMap().get(pair.getKey());
+            if (orgValue != null && !(orgValue.equals(currentDS.getPropertyMap().get(pair.getKey())))) {
+                currentDS.getPropertyMap().put(pair.getKey(), orgValue);
+                isUpdated = true;
+            }
+        }
+        return currentDS;
+
+    }
+
+    private boolean isTestConnection() {
+       StackTraceElement[] stackTraceElements  = new Exception().getStackTrace();
+        for (StackTraceElement stackTraceElement : stackTraceElements) {
+            if (stackTraceElement.getClassName().equals("com.jaspersoft.jasperserver.jaxrs.connection.ConnectionsJaxrsService") && stackTraceElement.getMethodName().equals("createConnection"))
+                return true;
+        }
+        return false;
     }
 
 }

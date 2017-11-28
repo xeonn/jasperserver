@@ -1,6 +1,4 @@
 
-    DROP INDEX idx23_olapClientConnection_idx ON JIOlapUnit;
-
     DROP INDEX idx33_resource_id_idx ON JIReportUnitResource;
 
     DROP INDEX idx32_report_unit_id_idx ON JIReportUnitResource;
@@ -15,15 +13,7 @@
 
     DROP INDEX JIReportUnit_mainReport_index ON JIReportUnit;
 
-    DROP INDEX JIFileResource_reference_index ON JIFileResource;
-
-    DROP INDEX idx17_reportDataSource_idx ON JIMondrianConnection;
-
-    DROP INDEX idx16_mondrianSchema_idx ON JIMondrianConnection;
-
-    DROP INDEX idxA1_resource_id_idx on JICustomDatasourceResource;
-
-    DROP INDEX JIQuery_dataSource_index ON JIQuery;
+    DROP INDEX idx20_mondrianConnection_idx ON JIMondrianXMLADefinition;
 
     DROP INDEX idx15_input_ctrl_id_idx ON JIInputControlQueryColumn;
 
@@ -33,7 +23,17 @@
 
     DROP INDEX JIInputControl_data_type_index ON JIInputControl;
 
-    DROP INDEX idx20_mondrianConnection_idx ON JIMondrianXMLADefinition;
+    DROP INDEX idxA1_resource_id_idx on JICustomDatasourceResource;
+
+    DROP INDEX JIFileResource_reference_index ON JIFileResource;
+
+    DROP INDEX idx17_reportDataSource_idx ON JIMondrianConnection;
+
+    DROP INDEX idx16_mondrianSchema_idx ON JIMondrianConnection;
+
+    DROP INDEX JIQuery_dataSource_index ON JIQuery;
+
+    DROP INDEX idx23_olapClientConnection_idx ON JIOlapUnit;
 
     DROP INDEX JIUser_tenantId_index ON JIUser;
 
@@ -91,6 +91,12 @@
 
     alter table JIAwsDatasource 
         drop constraint FK6085542387E4472B;
+
+    alter table JIAzureSqlDatasource 
+        drop constraint FKAFE22203C001BAEA;
+
+    alter table JIAzureSqlDatasource 
+        drop constraint FKAFE2220387E4472B;
 
     alter table JIBeanDatasource 
         drop constraint FK674BF34A8BF376D;
@@ -218,6 +224,9 @@
     alter table JIReportJobParameter 
         drop constraint FKEAC52B5F2EC643D;
 
+    alter table JIReportJobRepoDest 
+        drop constraint FKEA477EBE3C5B87D0;
+
     alter table JIReportJobSimpleTrigger 
         drop constraint FKB9337C5CD2B2EB53;
 
@@ -293,6 +302,8 @@
     drop table JIAccessEvent;
 
     drop table JIAwsDatasource;
+
+    drop table JIAzureSqlDatasource;
 
     drop table JIBeanDatasource;
 

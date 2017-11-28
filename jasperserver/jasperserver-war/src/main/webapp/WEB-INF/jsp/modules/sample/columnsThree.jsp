@@ -28,9 +28,9 @@
     <t:putAttribute name="bodyID" value="columnsThree"/>
     <t:putAttribute name="bodyClass" value="threeColumn"/>
     <t:putAttribute name="moduleName" value="commons.main"/>
-	
+
 		<t:putAttribute name="bodyContent" >
-		
+
 			<t:insertTemplate template="/WEB-INF/jsp/templates/container.jsp">
 		    	<t:putAttribute name="containerClass" value="column decorated primary"/>
 			    <t:putAttribute name="containerTitle"><spring:message code="JIF.titleprimary"/></t:putAttribute>
@@ -40,7 +40,7 @@
 					[REQUIRED]
 			    </t:putAttribute>
 			</t:insertTemplate>
-			
+
 			<t:insertTemplate template="/WEB-INF/jsp/templates/container.jsp">
 		    	<t:putAttribute name="containerClass" value="column decorated secondary sizeable"/>
 		    	<t:putAttribute name="containerElements">
@@ -52,7 +52,7 @@
 					[REQUIRED]
 			    </t:putAttribute>
 			</t:insertTemplate>
-			
+
 			<t:insertTemplate template="/WEB-INF/jsp/templates/container.jsp">
 		    	<t:putAttribute name="containerClass" value="column decorated tertiary sizeable"/>
 		    	<t:putAttribute name="containerElements">
@@ -64,7 +64,7 @@
 					[REQUIRED]
 			    </t:putAttribute>
 			</t:insertTemplate>
-			
+
 	    </t:putAttribute>
 
 </t:insertTemplate>

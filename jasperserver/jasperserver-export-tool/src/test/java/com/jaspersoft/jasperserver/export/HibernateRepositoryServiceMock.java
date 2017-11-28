@@ -3,9 +3,12 @@ package com.jaspersoft.jasperserver.export;
 import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
 import com.jaspersoft.jasperserver.api.common.domain.ValidationErrorFilter;
 import com.jaspersoft.jasperserver.api.common.domain.ValidationErrors;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.*;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.DataContainer;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.FileResourceData;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.Folder;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.Resource;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.ResourceLookup;
 import com.jaspersoft.jasperserver.api.metadata.common.service.JSResourceNotFoundException;
-import com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService;
 import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.HibernateRepositoryService;
 import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.persistent.RepoFolder;
 import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.persistent.RepoResource;
@@ -47,6 +50,11 @@ public class HibernateRepositoryServiceMock implements HibernateRepositoryServic
     @Override
     public FileResourceData getContentResourceData(ExecutionContext context, String uri) throws JSResourceNotFoundException {
         return null; 
+    }
+
+    @Override
+    public Resource copyRenameResource(ExecutionContext context, String sourceURI, String destinationURI, String label) {
+        return null;
     }
 
     @Override
@@ -247,6 +255,11 @@ public class HibernateRepositoryServiceMock implements HibernateRepositoryServic
     @Override
     public Folder copyFolder(ExecutionContext context, String sourceURI, String destinationURI) {
         return null; 
+    }
+
+    @Override
+    public Folder copyRenameFolder(ExecutionContext context, String sourceURI, String destinationURI, String label) {
+        return null;
     }
 
     @Override

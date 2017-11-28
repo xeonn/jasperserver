@@ -36,13 +36,13 @@
 		</style>
     </t:putAttribute>
     <t:putAttribute name="bodyContent" >
-	
+
 		<t:insertTemplate template="/WEB-INF/jsp/templates/container.jsp">
 		    <t:putAttribute name="containerClass" value="column decorated primary"/>
 		    <t:putAttribute name="containerTitle"><spring:message code="JIF.titlebuttons"/></t:putAttribute>
 		    <t:putAttribute name="bodyClass" value="oneColumn"/>
 		    <t:putAttribute name="bodyContent">
-	        
+
 			<table id="sampleGrid" class="">
 				<thead>
 				<tr>
@@ -55,13 +55,13 @@
 					<th>.up.over</th>
 					<th>.up.pressed</th>
 					<th>.disabled</th>
-					<th>.down</th>		        			
+					<th>.down</th>
 					<th>.down.over</th>
 					<th>.down.pressed</th>
 				</tr>
 				</thead>
-		
-		
+
+
 		<tbody>
 				<tr>
 					<th class="rowHeader">.action</th>
@@ -93,7 +93,7 @@
 					<td></td>
 					<td></td>
 				</tr>
-				</tbody>				
+				</tbody>
 				<tbody>
 				<tr>
 					<th class="rowHeader">.action.primary.jumbo</th>
@@ -109,7 +109,7 @@
 					<td></td>
 					<td></td>
 				</tr>
-				</tbody>				
+				</tbody>
 				<tbody>
 				<tr>
 					<th class="rowHeader">.action.square</th>
@@ -126,7 +126,7 @@
 					<td></td>
 				</tr>
 				</tbody>
-				
+
 				<tbody>
 				<tr>
 					<th class="rowHeader">.action.square.small</th>
@@ -140,7 +140,7 @@
 							<span class="wrap">
 								<span class="icon"></span>
 							</span>
-						</button>					
+						</button>
 					</td>
 					<td>
 						<!-- up over -->
@@ -217,7 +217,7 @@
 					<td><div class="toolbar"><button class="button capsule text down pressed"><span class="wrap"><spring:message code="JIF.label"/></span></div></button></td>
 				</tr>
 				</tbody>
-		
+
 				<tbody>
 				<tr>
 					<th class="rowHeader">.buttonSet.capsule</th>
@@ -226,7 +226,7 @@
 				<tr class="toolbarContainer">
 					<td class="rowHeader"></td>
 					<td colspan="7">
-						<div class="toolbar">		        					
+						<div class="toolbar">
 							<ul class="list buttonSet">
 		    					<li class="leaf"><button class="button capsule text up first"><span class="wrap"><spring:message code="JIF.labelup"/></span><span class="icon"></span></button></li>
 		    					<li class="leaf"><button class="button capsule text up over middle"><span class="wrap"><spring:message code="JIF.labelupover"/></span><span class="icon"></span></button></li>
@@ -235,15 +235,15 @@
 		    					<li class="leaf"><button class="button capsule text down over middle"><span class="wrap"><spring:message code="JIF.labeldownover"/></span><span class="icon"></span></button></li>
 		    					<li class="leaf"><button class="button capsule text down pressed middle"><span class="wrap"><spring:message code="JIF.labeldownpressed"/></span><span class="icon"></span></button></li>
 		    					<li class="leaf"><button class="button capsule text down last"><span class="wrap"><spring:message code="JIF.labeldown"/></span><span class="icon"></span></button></li>
-		    				</ul>		        					
+		    				</ul>
 							<ul class="list buttonSet">
 		    					<li class="leaf"><button class="button capsule text down first"><span class="wrap"><spring:message code="JIF.labeldown"/></span><span class="icon"></span></button></li>
 		    					<li class="leaf"><button class="button capsule text down disabled middle"><span class="wrap"><spring:message code="JIF.labeldowndisabled"/></span><span class="icon"></span></button></li>
 		    					<li class="leaf"><button class="button capsule text up last"><span class="wrap"><spring:message code="JIF.labelup"/></span><span class="icon"></span></button></li>
-		    				</ul>		        					
+		    				</ul>
 							<ul class="list buttonSet">
 								<li class="leaf"><button class="button capsule text down"><span class="wrap"><spring:message code="JIF.labeldown"/></span><span class="icon"></span></button></li>
-							</ul>		
+							</ul>
 						</div>
 					</td>
 				</tr>
@@ -449,15 +449,15 @@
 					<td></td>
 				</tr>
 				</tbody>
-		
+
 			</table>
-	        
+
 			</t:putAttribute>
 		    <t:putAttribute name="footerContent">
 		    	<!-- custom content here; remove this comment -->
 		    </t:putAttribute>
-		</t:insertTemplate>		
-		
+		</t:insertTemplate>
+
 		<t:insertTemplate template="/WEB-INF/jsp/modules/sample/sampleIndex.jsp"/>
 
     </t:putAttribute>

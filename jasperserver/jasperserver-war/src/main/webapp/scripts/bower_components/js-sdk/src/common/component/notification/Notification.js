@@ -21,7 +21,7 @@
 
 /**
  * @author: Olesya Bobruyko
- * @version: $Id: Notification.js 1658 2015-10-05 16:13:24Z obobruyk $
+ * @version: $Id: Notification.js 2402 2016-03-14 12:38:21Z ztomchen $
  */
 
 define(function(require) {
@@ -31,7 +31,8 @@ define(function(require) {
         $ = require('jquery'),
         Backbone = require('backbone'),
         i18n = require("bundle!js-sdk/CommonBundle"),
-        notificationTemplate = require('text!./template/notificationTemplate.htm');
+        notificationTemplate = require('text!./template/notificationTemplate.htm'),
+        instance, Notification;
 
     require("css!notifications");
 
@@ -44,7 +45,7 @@ define(function(require) {
 
     notificationTypeToCssClassMap[NOTIFICATION_TYPES.WARNING] = NOTIFICATION_TYPES.WARNING;
 
-    return Backbone.View.extend(/** @lends Notification.prototype */{
+    Notification = Backbone.View.extend(/** @lends Notification.prototype */{
         template: _.template(notificationTemplate),
 
         events: {
@@ -120,5 +121,17 @@ define(function(require) {
         remove: function() {
             Backbone.View.prototype.remove.apply(this, arguments);
         }
+    }, {
+        show: function(){
+            instance || (instance = new Notification());
+            return instance.show.apply(instance, arguments);
+        },
+
+        hide: function(){
+            instance || (instance = new Notification());
+            return instance.hide.apply(instance, arguments);
+        }
     });
+
+    return Notification;
 });

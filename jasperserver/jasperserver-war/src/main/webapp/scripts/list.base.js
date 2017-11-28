@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: list.base.js 9944 2016-03-11 00:47:48Z kpenn $
+ * @version: $Id: list.base.js 10166 2016-05-26 22:39:40Z gbacon $
  */
 
 /* global layoutModule, buttonManager, isNotNullORUndefined, matchAny, deepClone, Mustache, JSTooltip, _,
@@ -1804,10 +1804,18 @@ dynamicList.List.addMethod('getItemByEvent', function (event) {
 
         while (element && element.readAttribute && element.readAttribute('id') !== this.getId()) {
             var item = element.listItem;
-            //            if (item && item.getList() != null && item.getList().getId() == this.getId()) {
+
             if (item && item.getList() != null) {
-                item._label = xssUtil.unescape(item._label);
-                return item;
+                var itemList = item.getList(),
+                    idsAreEqual = itemList.getId() == this.getId(),
+                    parentListContainsChild = this._getElement().contains(itemList._getElement());
+
+                if (idsAreEqual || parentListContainsChild) {
+                    item._label = xssUtil.unescape(item._label);
+                    return item;
+                } else {
+                    break;
+                }
             } else {
                 element = $(element.parentNode);
             }

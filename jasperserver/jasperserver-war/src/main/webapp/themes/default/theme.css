@@ -1,7 +1,7 @@
 /*
  * From: theme.css
  */
- 
+
 * {
 	-moz-box-sizing: border-box; 	/* NEW */
 	-webkit-box-sizing: border-box;	/* NEW */
@@ -37,8 +37,8 @@ body.dashboardViewFrame, body.noDecoration {
 	min-width:0;
 }
 
-/* 
- * Headings 
+/*
+ * Headings
  * ------------------------------------------------ */
 /* NOTE: Do NOT use H-tags just for visual reasons!  You will mess things up
  * for screen readers.  Specifically, do NOT use H tags in every single list
@@ -46,7 +46,7 @@ body.dashboardViewFrame, body.noDecoration {
  * for doing so!
  */
 h1, h2, h3, h4, h5, h6 {
-	font-weight: bold; 
+	font-weight: bold;
 	clear:both;
 }
 
@@ -71,12 +71,12 @@ p {
 }
 
 a {
-	color: inherit; 
-	text-decoration: none; 
+	color: inherit;
+	text-decoration: none;
 	cursor: pointer;
 }
 
-a:focus, 
+a:focus,
 a:hover,
 a:active {
 	text-decoration:underline;
@@ -91,7 +91,7 @@ a.disabled.pressed {
 	text-decoration: none;
 }
 
-.selected a:focus, 
+.selected a:focus,
 .selected a:hover,
 .selected a.over,
 .selected a:active,
@@ -100,23 +100,23 @@ a.disabled.pressed {
 }
 
 address	{
-	margin: 0 0 1.5em; 
+	margin: 0 0 1.5em;
 	font-style: italic;
 }
-	
+
 del {
 	color:#666;
 }
 
 pre {
-	margin: 1.5em 0; 
+	margin: 1.5em 0;
 	white-space: pre;
 }
 
 pre,
 code,
 tt {
-	font: 1em 'andale mono', 'lucida console', monospace; 
+	font: 1em 'andale mono', 'lucida console', monospace;
 	line-height: 1.5;
 }
 
@@ -144,7 +144,7 @@ textarea,
 .body,
 .title>.path,
 input,
-select { 
+select {
 	font-size: 11px;
 	line-height:1.182em; /* 11 x 1.182 = 13 */
 	font-family: Verdana, Arial, Helvetica, sans-serif;
@@ -179,7 +179,7 @@ ul.decorated {
 
 .default,body,
 .message,
-.message.warning { 
+.message.warning {
 	font-size: 11px;
 	line-height:1.182em; /* 11 x 1.182 = 13 */
 	font-family: Verdana, Arial, Helvetica, sans-serif;
@@ -240,7 +240,7 @@ button,
 /* Ensure links in lists receive underlines when the cursor is over them. */
 .list.resources .cursor p.resourceName a {
     text-decoration:underline;
-} 
+}
 
 #reportContainer .inputControls a {
     font-weight: normal;
@@ -314,7 +314,7 @@ button,
 .disabled,
 .button.disabled,
 [disabled],
-.button[disabled], 
+.button[disabled],
 .button.primary[disabled] {
 	color:#aaa;
 }
@@ -399,8 +399,8 @@ body,
 .button.action.primary.jumbo.disabled,
 .button.action.primary[disabled],
 .button.action.primary.jumbo[disabled],
-.tabSet.buttons.vertical [disabled] { 
-	color:#43B9F9; 
+.tabSet.buttons.vertical [disabled] {
+	color:#43B9F9;
 }
 
 /* .sky */
@@ -557,14 +557,14 @@ palette18,
 /*
  * From: jif.css
  */
-/*____________________________________________________________ 
+/*____________________________________________________________
 
- JIF SCRIPTING CLASSES 
-______________________________________________________________ 
+ JIF SCRIPTING CLASSES
+______________________________________________________________
 
 Scripting classes represent a kind of API for the JIF interactive and layout logic.
 
-Some of the selectors in this group are used as flags for the framework interactive logic to embue 
+Some of the selectors in this group are used as flags for the framework interactive logic to embue
 objects with specific behavior or layout.
 
 Others are the selectors that are assigned to objects automatically.
@@ -572,40 +572,40 @@ Others are the selectors that are assigned to objects automatically.
 */
 
 .centered_horz {
-	/* note: any object assigned this class will 
+	/* note: any object assigned this class will
 	automatically be assigned margin-left: -(this.width/2)
 	*/
 	position: absolute;
 }
 
 .centered_vert {
-	/* note: any object assigned this class will 
+	/* note: any object assigned this class will
 	automatically be assigned margin-top: -(this.height/2)
 	*/
 	position: absolute;
 }
 
 .sizer {
-	/* an object with this class can be dragged to size its parent, if, 
+	/* an object with this class can be dragged to size its parent, if,
 	   and only if, the parent has class .sizeable
 	*/
 }
 
 .sizeable {
-	/* an object with this class can be resized, if, 
+	/* an object with this class can be resized, if,
 	   and only if, it contains a child with class .sizer
 	*/
 }
 
 .mover {
-	/* an object with this class can be dragged to move its parent, if, 
+	/* an object with this class can be dragged to move its parent, if,
 	   and only if, the parent has class .moveable
 	*/
 	cursor: move;
 }
 
 .moveable {
-	/* an object with this class can be dragged, if, 
+	/* an object with this class can be dragged, if,
 	   and only if, it has a child with class .moveable upon which a mouseMove event occurs
 	*/
 }
@@ -684,18 +684,18 @@ Others are the selectors that are assigned to objects automatically.
 }
 
 .up {
-	/* assigned automatically to .button.toggle 
+	/* assigned automatically to .button.toggle
 	*/
 }
 
 .down {
-	/* assigned automatically to .button.toggle 
+	/* assigned automatically to .button.toggle
 	*/
 }
 
 .button.minimize {
 	/* a special button understood to toggle the visible state of its parent container
-	   from a regular size to a .minimized state 
+	   from a regular size to a .minimized state
 	*/
 }
 
@@ -797,9 +797,8 @@ Others are the selectors that are assigned to objects automatically.
 /*	Meta Links */
 /* ----------- */
 #metaLinks {
-	height: 32px;
-	margin-left: 5px;
-	margin-right: 5px;
+	height: 30px;
+	margin-right: 210px;
 }
 
 #metaLinks li {
@@ -809,7 +808,7 @@ Others are the selectors that are assigned to objects automatically.
 	font-size: 12px;
 	margin: 0;
 	padding: 0 8px 2px 7px;
-	line-height: 28px;
+	line-height: 30px;
 }
 
 #metaLinks > li#help {
@@ -821,6 +820,13 @@ Others are the selectors that are assigned to objects automatically.
 	border-right: none;
 }
 
+#userID {
+    max-width: 270px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 /* iPads (portrait and landscape) */
 @media only screen
 and (min-device-width : 768px)
@@ -829,7 +835,7 @@ and (orientation:portrait) {
 	#metaLinks #userID,
 	#metaLinks #help {
 		display: none;
-		
+
 	}
 }
 

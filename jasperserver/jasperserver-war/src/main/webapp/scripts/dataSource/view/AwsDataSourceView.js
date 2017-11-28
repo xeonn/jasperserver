@@ -114,7 +114,12 @@ define(function(require) {
                 self = this;
 
             _.each(_.intersection(changedAttributes, inputsToUpdate), function(attr) {
-                self.$("[name='" + attr + "']").val(self.model.get(attr));
+                var
+                    newValue = self.model.get(attr),
+                    currValue = self.$("[name='" + attr + "']").val();
+                if (currValue !== newValue) {
+                    self.$("[name='" + attr + "']").val(newValue);
+                }
             });
         },
 
@@ -205,13 +210,18 @@ define(function(require) {
 	            // some requests came with 500 error code, some with 200, so let's just check error test
 	            var alertDialog, error = false;
 
-                if (ajaxAgent.responseText.indexOf("AWS Access Key is invalid") !== -1) {
+                if (ajaxAgent.responseText.indexOf("AWS Access Key is invalid") !== -1 ||
+                    ajaxAgent.responseText.indexOf("The security token included in the request is invalid") !== -1) {
 	                error = i18n["error.aws.key.is.invalid"];
                 }
-                if (ajaxAgent.responseText.indexOf("AWS Secret Key is invalid") !== -1) {
+                if (error === false && (ajaxAgent.responseText.indexOf("AWS Secret Key is invalid") !== -1 ||
+                    ajaxAgent.responseText.indexOf("The request signature we calculated does not match the signature you provided. Check your AWS Secret Access Key and signing method") !== -1)) {
                     error = i18n["error.aws.secret.key.is.invalid"];
                 }
-                if (ajaxAgent.responseText.indexOf("The security token included in the request is invalid") !== -1) {
+                if (error === false && ajaxAgent.responseText.indexOf("is not authorized to perform") !== -1) {
+                    error = i18n["error.aws.arn.is.invalid"];
+                }
+                if (error === false && ajaxAgent.responseText.indexOf("The security token included in the request is invalid") !== -1) {
 	                error = i18n["error.security.token.is.invalid"];
                 }
 

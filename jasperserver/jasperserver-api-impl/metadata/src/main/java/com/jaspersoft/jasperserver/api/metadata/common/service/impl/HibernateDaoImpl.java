@@ -20,8 +20,8 @@
  */
 package com.jaspersoft.jasperserver.api.metadata.common.service.impl;
 
-import java.util.Collection;
 import java.util.Date;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -39,18 +39,20 @@ import com.jaspersoft.jasperserver.api.metadata.common.domain.ContentResource;
 
 /**
  * @author swood
- * @version $Id: HibernateDaoImpl.java 55164 2015-05-06 20:54:37Z mchan $
+ * @version $Id: HibernateDaoImpl.java 63380 2016-05-26 20:56:46Z mchan $
  */
 public class HibernateDaoImpl extends HibernateDaoSupport {
-	
+
     	
 	private static final Log log = LogFactory.getLog(HibernateDaoImpl.class);
 	
-	private final ThreadLocal operationDate;
+	private final ThreadLocal<Date> operationDate;
+    private Set<String> millisSecondUnsupportedSchemaSet;
+    private Boolean isMillsSecondUnsupportedInSchema;
 	
 	public HibernateDaoImpl()
 	{
-		operationDate = new ThreadLocal();
+		operationDate = new ThreadLocal<Date>();
 	}
 
 	protected static interface DaoCallback {
@@ -120,9 +122,38 @@ public class HibernateDaoImpl extends HibernateDaoSupport {
 	}
 
 	protected void startOperation() {
-		operationDate.set(new Date());
+        if (isMillsSecondUnsupportedInSchema == null) {
+            try {
+                // removing "jdbc:" from url
+                String url = getHibernateTemplate().getSessionFactory().getCurrentSession().connection().getMetaData().getURL().substring(5).toLowerCase();
+                if (millisSecondUnsupportedSchemaSet != null) {
+                    for (String dbName : millisSecondUnsupportedSchemaSet) {
+                        if (url.startsWith(dbName)) {
+                            isMillsSecondUnsupportedInSchema = true;
+                            log.debug("Turncate millissecond from resource's updatetime for database " + dbName);
+                            break;
+                        }
+                    }
+                }
+                if (isMillsSecondUnsupportedInSchema == null) isMillsSecondUnsupportedInSchema = false;
+            } catch (Exception ex) {
+                log.debug("Unable to retrieve database type at this moment.");
+            }
+        }
+        if (isMillsSecondUnsupportedInSchema != null && isMillsSecondUnsupportedInSchema) {
+            // http://jira.jaspersoft.com/browse/JRS-9112
+            // Hibernate maps java.util.Date to datetime(0) (zero precision) in MySQL.
+            // When persisting a date value into a datetime(0) column MySQL rounds up value to a nearest second.
+            // So value like '2016-04-29 14:55:32.589' becomes '2016-04-29 14:55:33.000'.
+            // Truncate milliseconds.
+            operationDate.set(new Date(1000 * (System.currentTimeMillis() / 1000)));
+        } else {
+            operationDate.set(new Date(System.currentTimeMillis()));
+        }
 	}
-	
+
+
+
 	protected Date getOperationTimestamp() {
 		return (Date) operationDate.get();
 	}
@@ -152,6 +183,10 @@ public class HibernateDaoImpl extends HibernateDaoSupport {
 		}
 		return handle;
 	}
+
+    public void setMillisSecondUnsupportedSchemaSet(Set<String> millisSecondUnsupportedSchemaSet) {
+        this.millisSecondUnsupportedSchemaSet = millisSecondUnsupportedSchemaSet;
+    }
 }
 
 interface HibernateDaoFlushModeHandle {
@@ -202,5 +237,5 @@ class HibernateTemplateFlushModeHandle implements HibernateDaoFlushModeHandle {
 	public void revert() {
 		template.setFlushMode(origFlushMode);
 	}
-	
+
 }

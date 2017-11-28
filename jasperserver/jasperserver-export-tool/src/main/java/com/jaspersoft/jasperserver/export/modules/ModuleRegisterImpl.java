@@ -32,16 +32,18 @@ import org.apache.commons.collections.list.UnmodifiableList;
 
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: ModuleRegisterImpl.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: ModuleRegisterImpl.java 63380 2016-05-26 20:56:46Z mchan $
  */
 public class ModuleRegisterImpl implements ModuleRegister {
 
 	private List exporterModules;
 	private List importerModules;
 	private Map importerModulesMap;
-	
+	private Map exporterModulesMap;
+
 	public void setExporterModules(List modules) {
 		this.exporterModules = modules;
+		refreshExporterMap();
 	}
 
 	public List getExporterModules() {
@@ -65,8 +67,20 @@ public class ModuleRegisterImpl implements ModuleRegister {
 		}
 	}
 
+	protected void refreshExporterMap() {
+		exporterModulesMap = new HashMap();
+		for (Iterator it = exporterModules.iterator(); it.hasNext();) {
+			ExporterModule module = (ExporterModule) it.next();
+			exporterModulesMap.put(module.getId(), module);
+		}
+	}
+
 	public ImporterModule getImporterModule(String id) {
 		return (ImporterModule) importerModulesMap.get(id);
+	}
+
+	public ExporterModule getExporterModule(String id) {
+		return (ExporterModule) exporterModulesMap.get(id);
 	}
 
 }

@@ -21,12 +21,13 @@
 
 
 /**
- * @version: $Id: components.heartbeat.js 8179 2015-01-27 12:34:21Z psavushchik $
+ * @version: $Id: components.heartbeat.js 10166 2016-05-26 22:39:40Z gbacon $
  */
 
 /* global layoutModule, ajaxNonReturningUpdate, baseErrorHandler, dialogs, appendPostData */
 
 var heartbeat = {
+    init: false,
     DOM_ID: "heartbeatOptin",
     PERMIT_CHECKBOX_ID: "heartbeatCheck",
 
@@ -36,10 +37,14 @@ var heartbeat = {
         this._sendClientInfo = options.sendClientInfo;
 
         this._dom = $(this.DOM_ID);
+        if (!this._dom) {
+            return;
+        }
         this._permit = $(this.PERMIT_CHECKBOX_ID);
         this._okButton = this._dom.select(layoutModule.BUTTON_PATTERN)[0];
 
         this._okButton.observe("click", this._okHandler.bind(this));
+        this.init = true;
     },
 
     _okHandler: function() {
@@ -51,6 +56,10 @@ var heartbeat = {
     },
 
     start: function() {
+        if (this.init === false) {
+            return;
+        }
+
         if (this._showDialog) {
             dialogs.popup.show(this._dom);
 

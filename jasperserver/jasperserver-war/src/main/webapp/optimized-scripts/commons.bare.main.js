@@ -1,1 +1,1 @@
-define(["require","prototype","!domReady"],function(e){"use strict";e("prototype"),e("!domReady")});
+define(["require","components.dialogs","prototype","!domReady"],function(o){"use strict";o("components.dialogs"),o("prototype"),o("!domReady")});

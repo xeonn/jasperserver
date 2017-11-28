@@ -20,29 +20,26 @@
  */
 package com.jaspersoft.jasperserver.api.engine.jasperreports.util;
 
+import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.ContentResource;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.FileResource;
+import com.jaspersoft.jasperserver.api.metadata.common.domain.FileResourceData;
+import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.util.RepositoryUtils;
+import net.sf.jasperreports.repo.PersistenceService;
+import net.sf.jasperreports.repo.Resource;
+import net.sf.jasperreports.repo.StreamRepositoryService;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Map;
 
-import net.sf.jasperreports.repo.PersistenceService;
-import net.sf.jasperreports.repo.RepositoryService;
-import net.sf.jasperreports.repo.Resource;
-import net.sf.jasperreports.repo.StreamRepositoryService;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import com.jaspersoft.jasperserver.api.common.domain.ExecutionContext;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.FileResource;
-import com.jaspersoft.jasperserver.api.metadata.common.domain.FileResourceData;
-import com.jaspersoft.jasperserver.api.metadata.common.service.JSResourceNotFoundException;
-import com.jaspersoft.jasperserver.api.metadata.common.service.impl.hibernate.util.RepositoryUtils;
-
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
- * @version $Id: RepoRepositoryService.java 47331 2014-07-18 09:13:06Z kklein $
+ * @version $Id: RepoRepositoryService.java 62954 2016-05-01 09:49:23Z ykovalch $
  */
-public class RepoRepositoryService implements RepositoryService, StreamRepositoryService {
+public class RepoRepositoryService implements StreamRepositoryService {
 
 	private static final Log log = LogFactory.getLog(RepoRepositoryService.class);
 	
@@ -59,74 +56,76 @@ public class RepoRepositoryService implements RepositoryService, StreamRepositor
 	}
 
 	@Override
-	public InputStream getInputStream(String uri) {
-		RepositoryContext repositoryContext = RepositoryUtil.getThreadRepositoryContext();
-		if (repositoryContext == null || !isReportContext(repositoryContext)) {
-			if (log.isDebugEnabled()) {
-				log.debug("No repository context for resource " + uri);
-			}
-			return null;
-		}
-		
-		// filtering cases when the uri is (almost) obviously not a repository path.
-		// we could use the repository resource names patters as validation but I'm not sure 
-		// that the validation is enforced everywhere.
-		if (uri.startsWith("repo:")// for now we are not handling repo: URLs here, at some point we might want to get rid of RepositoryConnection. 
-				|| uri.startsWith("file:") || uri.startsWith("http:") || uri.startsWith("https:")) {
-			return null;
-		}
+    public InputStream getInputStream(String uri) {
+        InputStream data = null;
+        RepositoryContext repositoryContext = RepositoryUtil.getThreadRepositoryContext();
+        if (repositoryContext == null || !isReportContext(repositoryContext)) {
+            if (log.isDebugEnabled()) {
+                log.debug("No repository context for resource " + uri);
+            }
+            return null;
+        }
 
-		//FIXME should we look at repositoryContext.getReportUnit()?  it seems to be no longer used.
-		String path = RepositoryUtils.resolveRelativePath(repositoryContext.getContextURI(), uri);
-		ExecutionContext executionContext = repositoryContext.getExecutionContext();
-		com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService repository = 
-				repositoryContext.getRepository();
-		
-		if (log.isDebugEnabled()) {
-			log.debug("loading repository resource " + path 
-					+ ", context path " + repositoryContext.getContextURI()
-					+ ", uri " + uri);
-		}
-		
-		FileResource resource = (FileResource) repository.getResource(executionContext, 
-				path, FileResource.class);
-		while (resource != null && resource.isReference()) {
-			if (log.isDebugEnabled()) {
-				log.debug("loading repository resource " + resource.getReferenceURI());
-			}
-			
-			resource = (FileResource) repository.getResource( executionContext, 
-					resource.getReferenceURI(), FileResource.class);
-		}
-			
-		if (resource == null) {
-    		if (log.isDebugEnabled()) {
-				log.debug("Resource \"" + path + "\" not found in the repository");
-			}
-			return null;
-		}
-		
-		if (log.isDebugEnabled()) {
-			log.debug("loaded resource of type " + resource.getFileType());
-		}
-			
-       	InputStream data;
-		if (resource.getFileType().equals(FileResource.TYPE_JRXML)) {
-			// this would conceptually belong to the persistence service, but we don't have the context there
-			data = repositoryContext.getCompiledReportProvider().getCompiledReport(executionContext, path);
-		} else {
-			try {
-				FileResourceData resourceData = repository.getResourceData(executionContext, path);
-				data = resourceData.getDataStream();
-			} catch (JSResourceNotFoundException e) {
-				throw e;
-			}
-		}
+        // filtering cases when the uri is (almost) obviously not a repository path.
+        // we could use the repository resource names patters as validation but I'm not sure
+        // that the validation is enforced everywhere.
+        if (uri.startsWith("repo:")// for now we are not handling repo: URLs here, at some point we might want to get rid of RepositoryConnection.
+                || uri.startsWith("file:") || uri.startsWith("http:") || uri.startsWith("https:")) {
+            return null;
+        }
 
-   		return data;
-	}
-	
-	protected boolean isReportContext(RepositoryContext repositoryContext) {
+        //FIXME should we look at repositoryContext.getReportUnit()?  it seems to be no longer used.
+        String path = RepositoryUtils.resolveRelativePath(repositoryContext.getContextURI(), uri);
+        ExecutionContext executionContext = repositoryContext.getExecutionContext();
+        com.jaspersoft.jasperserver.api.metadata.common.service.RepositoryService repository =
+                repositoryContext.getRepository();
+
+        if (log.isDebugEnabled()) {
+            log.debug("loading repository resource " + path
+                    + ", context path " + repositoryContext.getContextURI()
+                    + ", uri " + uri);
+        }
+
+        final com.jaspersoft.jasperserver.api.metadata.common.domain.Resource resource =
+                repository.getResource(executionContext, path);
+        if (resource == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Resource \"" + path + "\" not found in the repository");
+            }
+            return null;
+        }
+
+        if (resource instanceof FileResource) {
+            FileResource fileResource = (FileResource) resource;
+            while (fileResource != null && fileResource.isReference()) {
+                if (log.isDebugEnabled()) {
+                    log.debug("loading repository resource " + fileResource.getReferenceURI());
+                }
+
+                fileResource = (FileResource) repository.getResource(executionContext,
+                        fileResource.getReferenceURI(), FileResource.class);
+            }
+            if (fileResource != null) {
+                if (fileResource.getFileType().equals(FileResource.TYPE_JRXML)) {
+                    // this would conceptually belong to the persistence service, but we don't have the context there
+                    data = repositoryContext.getCompiledReportProvider().getCompiledReport(executionContext, path);
+                } else {
+                    FileResourceData resourceData = repository.getResourceData(executionContext, path);
+                    data = resourceData.getDataStream();
+                }
+
+                if (log.isDebugEnabled()) {
+                    log.debug("loaded resource of type " + fileResource.getFileType());
+                }
+            }
+
+        } else if (resource instanceof ContentResource) {
+            data = repository.getContentResourceData(executionContext, path).getDataStream();
+        }
+        return data;
+    }
+
+    protected boolean isReportContext(RepositoryContext repositoryContext) {
 		// some places (e.g. MessageSourceLoader.setupThreadRepositoryContext()) 
 		// set a thread repository context with no context URI, and do not clear the thread.
 		// we can only use reports related repository contexts (as created by 

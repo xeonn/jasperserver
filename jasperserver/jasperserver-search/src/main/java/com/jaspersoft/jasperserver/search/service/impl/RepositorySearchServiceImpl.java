@@ -68,7 +68,7 @@ import java.util.Set;
  * Implementation of {@link RepositorySearchService}.
  *
  * @author Yuriy Plakosh
- * @version $Id: RepositorySearchServiceImpl.java 61510 2016-03-03 09:36:22Z ykovalch $
+ * @version $Id: RepositorySearchServiceImpl.java 62344 2016-04-05 21:19:17Z mchan $
  */
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 public class RepositorySearchServiceImpl implements RepositorySearchService, Diagnostic {

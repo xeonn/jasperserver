@@ -1,4 +1,14 @@
 
+    DROP INDEX JIQuery_dataSource_index ON JIQuery;
+
+    DROP INDEX idxA1_resource_id_idx on JICustomDatasourceResource;
+
+    DROP INDEX idx20_mondrianConnection_idx ON JIMondrianXMLADefinition;
+
+    DROP INDEX idx23_olapClientConnection_idx ON JIOlapUnit;
+
+    DROP INDEX JIFileResource_reference_index ON JIFileResource;
+
     DROP INDEX idx15_input_ctrl_id_idx ON JIInputControlQueryColumn;
 
     DROP INDEX JIInputControl_list_query_idx ON JIInputControl;
@@ -10,16 +20,6 @@
     DROP INDEX idx17_reportDataSource_idx ON JIMondrianConnection;
 
     DROP INDEX idx16_mondrianSchema_idx ON JIMondrianConnection;
-
-    DROP INDEX JIQuery_dataSource_index ON JIQuery;
-
-    DROP INDEX idxA1_resource_id_idx on JICustomDatasourceResource;
-
-    DROP INDEX idx23_olapClientConnection_idx ON JIOlapUnit;
-
-    DROP INDEX JIFileResource_reference_index ON JIFileResource;
-
-    DROP INDEX idx20_mondrianConnection_idx ON JIMondrianXMLADefinition;
 
     DROP INDEX idx33_resource_id_idx ON JIReportUnitResource;
 
@@ -94,6 +94,14 @@
     alter table JIAwsDatasource 
         drop 
         foreign key FK6085542387E4472B;
+
+    alter table JIAzureSqlDatasource 
+        drop 
+        foreign key FKAFE22203C001BAEA;
+
+    alter table JIAzureSqlDatasource 
+        drop 
+        foreign key FKAFE2220387E4472B;
 
     alter table JIBeanDatasource 
         drop 
@@ -263,6 +271,10 @@
         drop 
         foreign key FKEAC52B5F2EC643D;
 
+    alter table JIReportJobRepoDest 
+        drop 
+        foreign key FKEA477EBE3C5B87D0;
+
     alter table JIReportJobSimpleTrigger 
         drop 
         foreign key FKB9337C5CD2B2EB53;
@@ -362,6 +374,8 @@
     drop table if exists JIAccessEvent;
 
     drop table if exists JIAwsDatasource;
+
+    drop table if exists JIAzureSqlDatasource;
 
     drop table if exists JIBeanDatasource;
 

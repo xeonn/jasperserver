@@ -28,15 +28,6 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JasperPrint;
-import net.sf.jasperreports.engine.JasperReportsContext;
-import net.sf.jasperreports.engine.export.JRHyperlinkProducerFactory;
-import net.sf.jasperreports.engine.export.JRXml4SwfExporter;
-import net.sf.jasperreports.export.SimpleExporterInput;
-import net.sf.jasperreports.export.SimpleReportExportConfiguration;
-import net.sf.jasperreports.export.SimpleWriterExporterOutput;
-
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.mvc.Controller;
@@ -46,6 +37,15 @@ import com.jaspersoft.jasperserver.api.JSException;
 import com.jaspersoft.jasperserver.api.engine.jasperreports.domain.impl.ReportUnitResult;
 import com.jaspersoft.jasperserver.war.action.hyperlinks.HyperlinkProducerFactoryFlowFactory;
 import com.jaspersoft.jasperserver.war.util.SessionObjectSerieAccessor;
+
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReportsContext;
+import net.sf.jasperreports.engine.export.JRHyperlinkProducerFactory;
+import net.sf.jasperreports.engine.export.JRXml4SwfExporter;
+import net.sf.jasperreports.export.SimpleExporterInput;
+import net.sf.jasperreports.export.SimpleReportExportConfiguration;
+import net.sf.jasperreports.export.SimpleXmlExporterOutput;
 
 /**
  * @author Teodor Danciu (teodord@users.sourceforge.net)
@@ -98,7 +98,7 @@ public class XmlExportController  implements Controller
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		JRXml4SwfExporter exporter = new JRXml4SwfExporter(getJasperReportsContext());
 		exporter.setExporterInput(new SimpleExporterInput(jasperPrint));
-		exporter.setExporterOutput(new SimpleWriterExporterOutput(baos, "UTF-8"));
+		exporter.setExporterOutput(new SimpleXmlExporterOutput(baos, "UTF-8"));
 
 		SimpleReportExportConfiguration xmlReportConfig = new SimpleReportExportConfiguration();
 		

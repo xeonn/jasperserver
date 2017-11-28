@@ -21,7 +21,7 @@
 
 
 /**
- * @version: $Id: jobEditorView.js 9608 2015-11-04 19:32:56Z dgorbenk $
+ * @version: $Id: jobEditorView.js 10166 2016-05-26 22:39:40Z gbacon $
  */
 
 /* global dialogs */
@@ -33,7 +33,6 @@ define(function(require){
     var $ = require('jquery'),
 	    _ = require('underscore'),
         Backbone = require('backbone'),
-        jobModel = require('scheduler/model/jobModel'),
         i18n = require('bundle!all'),
 	    AlertDialog = require("common/component/dialog/AlertDialog"),
 	    SaveDialogView = require("scheduler/saveDialog/SaveDialogView"),
@@ -60,10 +59,8 @@ define(function(require){
         // initialize view
         initialize: function(options) {
 
-	        this.options = _.extend({}, options);
-
-            // prepare model
-            this.model = new jobModel();
+            this.options = _.extend({}, options);
+            this.tabs = {};
 
             // model is valid, show success messages
 	        this.listenTo(this.model, "valid", this.validModelListener);
@@ -79,23 +76,26 @@ define(function(require){
 
 	        this.listenTo(this.model, "failedToGet_IC", this.InputControlsNotLoaded);
 
-	        // create views for each tab
-	        this.tabs = {};
-	        var tabParams = {
-		        model: this.model,
-		        reportUri: this.options.reportUri,
-		        parentReportURI: this.options.parentReportURI
-	        };
-	        this.tabs.scheduleTab = new editorScheduleTabView(tabParams);
-	        this.tabs.parametersTab = new editorParametersTabView(tabParams);
-	        this.tabs.outputTab = new editorOutputTabView(tabParams);
-	        this.tabs.notificationsTab = new editorNotificationsTabView(tabParams);
+			this._initializeTabs(options);
 
 	        this.listenTo(this.tabs.parametersTab, "IC_Displayed", this.InputControlsLoaded);
 	        this.listenTo(this.tabs.parametersTab, "failedToGet_IC", this.InputControlsNotLoaded);
         },
 
-	    remove: function() {
+		_initializeTabs: function (options) {
+			var tabParams = {
+				model: this.model,
+				reportUri: options.reportUri,
+				parentReportURI: options.parentReportURI
+			};
+			this.tabs.scheduleTab = new editorScheduleTabView(tabParams);
+			this.tabs.parametersTab = new editorParametersTabView(tabParams);
+			this.tabs.outputTab = new editorOutputTabView(tabParams);
+			this.tabs.notificationsTab = new editorNotificationsTabView(tabParams);
+		},
+
+
+		remove: function() {
 		    this.tabs.scheduleTab.remove();
 		    this.tabs.parametersTab.remove();
 		    this.tabs.outputTab.remove();
@@ -107,27 +107,38 @@ define(function(require){
 	    // ==================================================================================================
 	    // Event listeners methods
 
-	    tabChangeClickEvent: function(event) {
-		    var tabElement = $(event.currentTarget);
+		tabChangeClickEvent: function (event) {
+			var tabElement = $(event.currentTarget);
+			var tabName = tabElement.attr("data-tab");
 
-		    // don't change if clicked tab is disabled
-		    if (tabElement.hasClass('disabled')) {
-			    return;
-		    }
-
-		    this.model.isValid();
-
-		     // search for errors on current tab and don't switch tab if one has error(s)
-		     var errors = this.$el.find('[name=tabHolder]').find(".error");
-		     if (errors.length) {
-		        this.changeActiveTab('error');
+			// don't change if clicked tab is disabled
+			if (tabElement.hasClass('disabled')) {
 				return;
-		     }
+			}
 
-		    var tabName = tabElement.attr("data-tab");
+			// stop if tab already selected
+			if (this.currentActiveTabName === tabName) {
+				return;
+			}
 
-		    this.changeActiveTab(tabName);
-	    },
+			var self = this;
+			this.model.validateAll(this.editMode).always(function() {
+
+				// search for error(s) on current tab if there are any
+				var errors = self.$el.find("[name=" + self.currentActiveTabName + "]").find(".error");
+
+				// don't switch current tab if one has error(s)
+				if (errors.length) {
+					return;
+				}
+
+				self.changeActiveTab(tabName);
+
+				// clear errors on the tab if any
+				self.clearAllValidationErrors();
+			});
+
+		},
 
 	    openSaveDialogClick: function () {
 		    this.startSavingProcess();
@@ -201,13 +212,19 @@ define(function(require){
 
 			this.prepareSaveOrSubmitButton();
 
-		    // fetch model from server
-		    this.model.fetch({
-			    success: function(){
-				    // set proper title
-				    self.setTitle(self.model.get('label'));
-			    }
-		    });
+			if (this.model._fetched) {
+				this.model.set(this.model.parse(this.model._fetched));
+				this.setTitle(this.model.get('label'));
+				this.model._fetched = undefined;
+			} else {
+				// fetch model from server
+				this.model.fetch({
+					success: function(){
+						// set proper title
+						self.setTitle(self.model.get('label'));
+					}
+				});
+			}
 	    },
 
 		prepareSaveOrSubmitButton: function() {
@@ -259,7 +276,9 @@ define(function(require){
 			    this.$el.find("li[data-tab=scheduleTab]").addClass("disabled");
 		    }
 
-		    this.tabs.scheduleTab.render();
+			this.tabs.outputTab.options.editMode = this.editMode;
+
+			this.tabs.scheduleTab.render();
 		    this.tabs.parametersTab.render();
 		    this.tabs.outputTab.render();
 		    this.tabs.notificationsTab.render();
@@ -297,7 +316,8 @@ define(function(require){
 		    // and change the active tab which is visible
 		    this.$el.find("[name=tabHolder] > div").addClass("hidden").filter("[name=" + tabName + "]").removeClass("hidden");
 
-		    this.currentActiveTabName = tabName;
+			this.currentActiveTabName = tabName;
+
 	    },
 
         // set tab state
@@ -355,6 +375,7 @@ define(function(require){
 		    var self = this;
 		    this.saveDialog = new SaveDialogView(_.extend({}, this.options, {
 			    model: this.model,
+				isEditMode: this.editMode,
 			    onSaveDone: _.bind(this._onSaveDone, this),
 			    onSaveFail: _.bind(this._onSaveFail, this)
 		    }));
@@ -368,15 +389,14 @@ define(function(require){
 	    },
 
 	    startSavingProcess: function() {
-
-		    if (!this.model.isValid(this.editMode)) {
-			    this.changeActiveTab('error');
-			    return;
-		    }
-
-		    this._prepareSaveDialog();
-		    this.saveDialog.startSaveDialog();
-	    },
+			var self = this;
+			this.model.validateAll(this.editMode).done(function() {
+				self._prepareSaveDialog();
+				self.saveDialog.startSaveDialog();
+			}).fail(function() {
+				self.changeActiveTab('error');
+			});
+		},
 
 	    _onSaveDone: function() {
 		    // the dialog is already closed himself, so don't worry
@@ -413,19 +433,6 @@ define(function(require){
 					    field = error.parameters[0].substr(error.parameters[0].indexOf(".") + 1);
 				    }
 			    }
-
-			    // TODO
-			    // THEM ARE NOT USED AND SHOULD BE REMOVED -- REMOVE IT IF YOU DEVELOPING CODE AFTER "JADE 1" RELEASE
-			    /*
-			    if (error.errorCode === "folder.not.found") {
-				    field = "parentFolderUri";
-				    message = i18n["ReportDataSourceValidator.error.folder.not.found"].replace("{0}", error.parameters[0]);
-			    }
-			    if (error.errorCode === "access.denied") {
-				    field = "parentFolderUri";
-				    message = i18n["jsp.accessDenied.errorMsg"];
-			    }
-			    */
 
 			    if (error.errorCode === "error.duplicate.report.job.output.filename") {
 				    field = "baseOutputFilename";

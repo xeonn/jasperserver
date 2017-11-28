@@ -208,6 +208,12 @@
     width: 25px;
 }
 
+.dashboardCanvas .dashlet > .dashletContent > .dashletToolbar.toolbar .buttons .exportDashletButton .icon {
+    background: url("../images/dashboard_toolbar_buttons_sprite.png") no-repeat 3px -302px;
+    height: 25px;
+    width: 25px;
+}
+
 .dashboardCanvas .dashlet > .dashletContent > .dashletToolbar.toolbar .buttons .maximizeDashletButton.minimizeDashlet .icon{
     background-position: 4px -55px;
 }

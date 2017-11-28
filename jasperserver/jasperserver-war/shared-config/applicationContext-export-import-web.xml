@@ -150,6 +150,7 @@
                 <value>classpath:com/jaspersoft/jasperserver/export/mapping/repository/JdbcDataSource.xml</value>
                 <value>classpath:com/jaspersoft/jasperserver/export/mapping/repository/JndiJdbcDataSource.xml</value>
                 <value>classpath:com/jaspersoft/jasperserver/export/mapping/repository/AwsDataSource.xml</value>
+                <value>classpath:com/jaspersoft/jasperserver/export/mapping/repository/AzureSqlDataSource.xml</value>
                 <value>classpath:com/jaspersoft/jasperserver/export/mapping/repository/VirtualDataSource.xml</value>
                 <value>classpath:com/jaspersoft/jasperserver/export/mapping/repository/BeanDataSource.xml</value>
                 <value>classpath:com/jaspersoft/jasperserver/export/mapping/repository/CustomDataSource.xml</value>
@@ -195,6 +196,8 @@
                        value="com.jaspersoft.jasperserver.export.modules.repository.beans.JndiJdbcDataSourceBean"/>
                 <entry key="com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.AwsReportDataSource"
                        value="com.jaspersoft.jasperserver.export.modules.repository.beans.AwsDataSourceBean"/>
+                <entry key="com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.AzureSqlReportDataSource"
+                       value="com.jaspersoft.jasperserver.export.modules.repository.beans.AzureSqlDataSourceBean"/>
                 <entry key="com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.VirtualReportDataSource"
                        value="com.jaspersoft.jasperserver.export.modules.repository.beans.VirtualDataSourceBean"/>
                 <entry key="com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.BeanReportDataSource"
@@ -339,6 +342,7 @@
         <property name="configuration" ref="reportJobsConfiguration"/>
         <property name="reportJobsArg" value="report-jobs"/>
         <property name="urisArg" value="uris"/>
+        <property name="resourceExporterId"><util:property-path path="resourceExporterModule.id"/></property>
     </bean>
 
     <bean id="reportJobsImporterModule" class="com.jaspersoft.jasperserver.export.modules.scheduling.ReportJobsImporter" scope="prototype">
@@ -488,32 +492,7 @@
     <alias name="${bean.exporterPrototype}" alias="concreteExporterPrototype"/>
     <alias name="${bean.importerPrototype}" alias="concreteImporterPrototype"/>
 
-    <bean id="diagnosticDataCipherer" class="com.jaspersoft.jasperserver.api.common.crypto.DiagnosticDataCipherer" parent="importExportCipher">
-        <property name="keyInPlainText" value="false"/>
-        <property name="encryptedFileExtension" value="jsEncrypted"/>
-        <property name="allowEncryption" value="true"/>
-    </bean>
-
     <bean id="basicTaskManager" class="com.jaspersoft.jasperserver.remote.services.async.BasicTasksManager"/>
 
-    <bean id="importExportPrivilegeRolesCe" class="java.util.ArrayList">
-        <constructor-arg  index="0" type="java.util.Collection">
-            <list merge="true" value-type="java.lang.String">
-                <ref bean="roleAdministrator"/>
-            </list>
-        </constructor-arg>
-    </bean>
-
-    <alias name="${bean.importExportPrivilegeRoles}" alias="importExportPrivilegeRoles"/>
-
-    <bean id="exportPrivilegeOptionsCe" class="java.util.HashSet">
-        <constructor-arg index="0" type="java.util.Collection">
-            <set merge="true">
-                <value>include-access-events</value>
-            </set>
-        </constructor-arg>
-    </bean>
-
-    <alias name="${bean.exportPrivilegeOptions}" alias="exportPrivilegeOptions"/>
 
 </beans>

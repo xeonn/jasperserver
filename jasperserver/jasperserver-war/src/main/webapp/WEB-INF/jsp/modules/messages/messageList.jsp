@@ -27,7 +27,7 @@
     <t:putAttribute name="pageTitle"><spring:message code="messages.messageList.page.title"/></t:putAttribute>
     <t:putAttribute name="bodyID" value="messages"/>
     <t:putAttribute name="bodyClass" value="oneColumn"/>
-    <t:putAttribute name="moduleName" value="messages/list/messageList.page"/>
+    <t:putAttribute name="moduleName" value="messages/list/messageListMain"/>
 
     <t:putAttribute name="headerContent" >
 

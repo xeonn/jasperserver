@@ -28,7 +28,7 @@
   <t:putAttribute name="pageTitle"><spring:message code="menu.server.attributes"/></t:putAttribute>
   <t:putAttribute name="bodyID" value="serverAttributes"/>
   <t:putAttribute name="bodyClass" value="twoColumn"/>
-  <t:putAttribute name="moduleName" value="adminCustomAttributesPage"/>
+  <t:putAttribute name="moduleName" value="administer/administerCustomAttributesMain"/>
 
   <t:putAttribute name="headerContent">
     <%@ include file="../common/jsEdition.jsp" %>

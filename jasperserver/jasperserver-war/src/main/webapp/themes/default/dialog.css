@@ -119,3 +119,9 @@
 .panel.dialog.overlay.ui-resizable .subcontainer .treeBox > .content {
 	height: 100%;
 }
+
+.reportChooserDialog .control.searchLockup .wrap input[type=text] {
+    padding-right: 50px;
+    width: 100%;
+    margin-right: 0;
+}

@@ -109,7 +109,7 @@ public class GetHttpHeaderFilterTest extends BaseGetHttpHeaderFilterTest {
                 )
         );
 
-        whenFilter(GET, "/optimized-scripts/bower_components/jrs-ui/src/login.page.js", "");
+        whenFilter(GET, "/optimized-scripts/bower_components/jrs-ui/src/login/loginMain.js", "");
 
         thenHeader("Cache-Control", "max-age=86400,public");
         thenHeader("Pragma", "");

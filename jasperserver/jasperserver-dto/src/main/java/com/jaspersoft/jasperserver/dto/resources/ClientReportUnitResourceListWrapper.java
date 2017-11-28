@@ -29,7 +29,7 @@ import java.util.List;
  * <p></p>
  *
  * @author Yaroslav.Kovalchyk
- * @version $Id$
+ * @version $Id: ClientReportUnitResourceListWrapper.java 62954 2016-05-01 09:49:23Z ykovalch $
  */
 @XmlType(name = "resources")
 public class ClientReportUnitResourceListWrapper {

@@ -23,7 +23,7 @@
 
 /**
  * @author: Dima Gorbenko
- * @version: $Id: SimpleDomainModel.js 9400 2015-09-23 21:10:46Z inestere $
+ * @version: $Id: SimpleDomainModel.js 10092 2016-04-22 21:17:02Z inestere $
  */
 
 define(function (require){
@@ -35,7 +35,7 @@ define(function (require){
         _ = require('underscore'),
         request = require("request"),
         jrsConfigs = require("jrs.configs"),
-        ResourceModel = require("bi/repo/model/RepositoryResourceModel");
+        ResourceModel = require("bi/repository/model/RepositoryResourceModel");
 
     return ResourceModel.extend({
 

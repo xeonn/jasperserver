@@ -22,14 +22,13 @@
 
 /**
  * @author: Kostiantyn Tsaregradskyi
- * @version: $Id: RequestBiComponentError.js 1495 2015-08-20 18:58:48Z yplakosh $
+ * @version: $Id: RequestBiComponentError.js 2690 2016-04-22 19:37:31Z inestere $
  */
 
 define(function (require) {
     "use strict";
 
     var BiComponentError = require("./BiComponentError"),
-        json3 = require("json3"),
         errorCodes = require("./enum/biComponentErrorCodes"),
         messages = require("./enum/biComponentErrorMessages");
 
@@ -55,7 +54,7 @@ define(function (require) {
             }
             msg = messages[errorCode];
             try {
-                responseJson = json3.parse(xhr.responseText);
+                responseJson = JSON.parse(xhr.responseText);
             } catch(ex) {}
 
             if (responseJson) {
